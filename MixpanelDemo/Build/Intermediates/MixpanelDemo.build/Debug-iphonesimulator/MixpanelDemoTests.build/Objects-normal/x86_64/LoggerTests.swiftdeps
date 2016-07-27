@@ -1,0 +1,280 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "LoggerTests"
+- "CounterLogging"
+provides-nominal:
+- "C17MixpanelDemoTests11LoggerTests"
+- "C17MixpanelDemoTests14CounterLogging"
+provides-member:
+- ["C17MixpanelDemoTests11LoggerTests", ""]
+- ["C17MixpanelDemoTests14CounterLogging", ""]
+provides-dynamic-lookup:
+- "setUp"
+- "testEnableWarning"
+- "testDisabledLogging"
+- "testEnableDebug"
+- "testEnableError"
+- "testEnableInfo"
+depends-top-level:
+- "Logging"
+- "CounterLogging"
+- !private "XCTAssertEqual"
+- "XCTestCase"
+- !private "StringLiteralType"
+- "LoggerTests"
+- "LogMessage"
+- !private "+"
+- !private "Logger"
+depends-member:
+- !private ["Ps9AnyObject", "CounterLogging"]
+- !private ["Ps9AnyObject", "Logger"]
+- !private ["Ps9AnyObject", "XCTAssertEqual"]
+- !private ["Ps9AnyObject", "addLogging"]
+- ["Ps9AnyObject", "addMessage"]
+- !private ["Ps9AnyObject", "count"]
+- ["Ps9AnyObject", "counter"]
+- !private ["Ps9AnyObject", "debug"]
+- !private ["Ps9AnyObject", "disableLevel"]
+- !private ["Ps9AnyObject", "enableLevel"]
+- !private ["Ps9AnyObject", "error"]
+- !private ["Ps9AnyObject", "info"]
+- ["Ps9AnyObject", "init"]
+- ["Ps9AnyObject", "setUp"]
+- ["Ps9AnyObject", "testDisabledLogging"]
+- ["Ps9AnyObject", "testEnableDebug"]
+- ["Ps9AnyObject", "testEnableError"]
+- ["Ps9AnyObject", "testEnableInfo"]
+- ["Ps9AnyObject", "testEnableWarning"]
+- !private ["Ps9AnyObject", "warn"]
+- ["Ps9AnyObject", ""]
+- !private ["Ps11CVarArgType", "CounterLogging"]
+- !private ["Ps11CVarArgType", "Logger"]
+- !private ["Ps11CVarArgType", "XCTAssertEqual"]
+- ["Ps11CVarArgType", "counter"]
+- ["Ps11CVarArgType", "init"]
+- ["Ps11CVarArgType", "setUp"]
+- ["Ps11CVarArgType", "testDisabledLogging"]
+- ["Ps11CVarArgType", "testEnableDebug"]
+- ["Ps11CVarArgType", "testEnableError"]
+- ["Ps11CVarArgType", "testEnableInfo"]
+- ["Ps11CVarArgType", "testEnableWarning"]
+- ["Ps11CVarArgType", ""]
+- ["C17MixpanelDemoTests14CounterLogging", "LogMessage"]
+- ["C17MixpanelDemoTests14CounterLogging", "addMessage"]
+- ["C17MixpanelDemoTests14CounterLogging", "count"]
+- ["C17MixpanelDemoTests14CounterLogging", "deinit"]
+- ["C17MixpanelDemoTests14CounterLogging", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "CounterLogging"]
+- !private ["Ps28CustomDebugStringConvertible", "Logger"]
+- !private ["Ps28CustomDebugStringConvertible", "XCTAssertEqual"]
+- ["Ps28CustomDebugStringConvertible", "counter"]
+- ["Ps28CustomDebugStringConvertible", "init"]
+- ["Ps28CustomDebugStringConvertible", "setUp"]
+- ["Ps28CustomDebugStringConvertible", "testDisabledLogging"]
+- ["Ps28CustomDebugStringConvertible", "testEnableDebug"]
+- ["Ps28CustomDebugStringConvertible", "testEnableError"]
+- ["Ps28CustomDebugStringConvertible", "testEnableInfo"]
+- ["Ps28CustomDebugStringConvertible", "testEnableWarning"]
+- ["Ps28CustomDebugStringConvertible", ""]
+- !private ["Ps23CustomStringConvertible", "CounterLogging"]
+- !private ["Ps23CustomStringConvertible", "Logger"]
+- !private ["Ps23CustomStringConvertible", "XCTAssertEqual"]
+- ["Ps23CustomStringConvertible", "counter"]
+- ["Ps23CustomStringConvertible", "init"]
+- ["Ps23CustomStringConvertible", "setUp"]
+- ["Ps23CustomStringConvertible", "testDisabledLogging"]
+- ["Ps23CustomStringConvertible", "testEnableDebug"]
+- ["Ps23CustomStringConvertible", "testEnableError"]
+- ["Ps23CustomStringConvertible", "testEnableInfo"]
+- ["Ps23CustomStringConvertible", "testEnableWarning"]
+- ["Ps23CustomStringConvertible", ""]
+- !private ["Ps9Equatable", "CounterLogging"]
+- !private ["Ps9Equatable", "Debug"]
+- !private ["Ps9Equatable", "Error"]
+- !private ["Ps9Equatable", "Info"]
+- !private ["Ps9Equatable", "Logger"]
+- !private ["Ps9Equatable", "Warning"]
+- !private ["Ps9Equatable", "XCTAssertEqual"]
+- ["Ps9Equatable", "counter"]
+- ["Ps9Equatable", "init"]
+- ["Ps9Equatable", "setUp"]
+- ["Ps9Equatable", "testDisabledLogging"]
+- ["Ps9Equatable", "testEnableDebug"]
+- ["Ps9Equatable", "testEnableError"]
+- ["Ps9Equatable", "testEnableInfo"]
+- ["Ps9Equatable", "testEnableWarning"]
+- ["Ps9Equatable", ""]
+- !private ["Ps8Hashable", "CounterLogging"]
+- !private ["Ps8Hashable", "Debug"]
+- !private ["Ps8Hashable", "Error"]
+- !private ["Ps8Hashable", "Info"]
+- !private ["Ps8Hashable", "Logger"]
+- !private ["Ps8Hashable", "Warning"]
+- !private ["Ps8Hashable", "XCTAssertEqual"]
+- ["Ps8Hashable", "counter"]
+- ["Ps8Hashable", "init"]
+- ["Ps8Hashable", "setUp"]
+- ["Ps8Hashable", "testDisabledLogging"]
+- ["Ps8Hashable", "testEnableDebug"]
+- ["Ps8Hashable", "testEnableError"]
+- ["Ps8Hashable", "testEnableInfo"]
+- ["Ps8Hashable", "testEnableWarning"]
+- ["Ps8Hashable", ""]
+- !private ["SQ", "deinit"]
+- !private ["O8Mixpanel8LogLevel", "Debug"]
+- !private ["O8Mixpanel8LogLevel", "Error"]
+- !private ["O8Mixpanel8LogLevel", "Info"]
+- !private ["O8Mixpanel8LogLevel", "Warning"]
+- !private ["C8Mixpanel6Logger", "addLogging"]
+- !private ["C8Mixpanel6Logger", "debug"]
+- !private ["C8Mixpanel6Logger", "disableLevel"]
+- !private ["C8Mixpanel6Logger", "enableLevel"]
+- !private ["C8Mixpanel6Logger", "error"]
+- !private ["C8Mixpanel6Logger", "info"]
+- !private ["C8Mixpanel6Logger", "warn"]
+- ["C17MixpanelDemoTests11LoggerTests", "CounterLogging"]
+- !private ["C17MixpanelDemoTests11LoggerTests", "Logger"]
+- !private ["C17MixpanelDemoTests11LoggerTests", "XCTAssertEqual"]
+- ["C17MixpanelDemoTests11LoggerTests", "counter"]
+- ["C17MixpanelDemoTests11LoggerTests", "deinit"]
+- ["C17MixpanelDemoTests11LoggerTests", "init"]
+- ["C17MixpanelDemoTests11LoggerTests", "setUp"]
+- ["C17MixpanelDemoTests11LoggerTests", "testDisabledLogging"]
+- ["C17MixpanelDemoTests11LoggerTests", "testEnableDebug"]
+- ["C17MixpanelDemoTests11LoggerTests", "testEnableError"]
+- ["C17MixpanelDemoTests11LoggerTests", "testEnableInfo"]
+- ["C17MixpanelDemoTests11LoggerTests", "testEnableWarning"]
+- ["P8Mixpanel7Logging", "addMessage"]
+- !private ["P8Mixpanel7Logging", "count"]
+- !private ["P8Mixpanel7Logging", "init"]
+- ["P8Mixpanel7Logging", ""]
+- ["CSo8NSObject", "CounterLogging"]
+- !private ["CSo8NSObject", "Logger"]
+- !private ["CSo8NSObject", "XCTAssertEqual"]
+- ["CSo8NSObject", "counter"]
+- ["CSo8NSObject", "init"]
+- ["CSo8NSObject", "setUp"]
+- ["CSo8NSObject", "testDisabledLogging"]
+- ["CSo8NSObject", "testEnableDebug"]
+- ["CSo8NSObject", "testEnableError"]
+- ["CSo8NSObject", "testEnableInfo"]
+- ["CSo8NSObject", "testEnableWarning"]
+- !private ["PSo16NSObjectProtocol", "CounterLogging"]
+- !private ["PSo16NSObjectProtocol", "Logger"]
+- !private ["PSo16NSObjectProtocol", "XCTAssertEqual"]
+- ["PSo16NSObjectProtocol", "counter"]
+- ["PSo16NSObjectProtocol", "init"]
+- ["PSo16NSObjectProtocol", "setUp"]
+- ["PSo16NSObjectProtocol", "testDisabledLogging"]
+- ["PSo16NSObjectProtocol", "testEnableDebug"]
+- ["PSo16NSObjectProtocol", "testEnableError"]
+- ["PSo16NSObjectProtocol", "testEnableInfo"]
+- ["PSo16NSObjectProtocol", "testEnableWarning"]
+- ["PSo16NSObjectProtocol", ""]
+- !private ["Sq", "deinit"]
+- !private ["Ps16RawRepresentable", "Debug"]
+- !private ["Ps16RawRepresentable", "Error"]
+- !private ["Ps16RawRepresentable", "Info"]
+- !private ["Ps16RawRepresentable", "Warning"]
+- !private ["Vs12StaticString", "deinit"]
+- ["CSo6XCTest", "CounterLogging"]
+- !private ["CSo6XCTest", "Logger"]
+- !private ["CSo6XCTest", "XCTAssertEqual"]
+- ["CSo6XCTest", "counter"]
+- ["CSo6XCTest", "init"]
+- ["CSo6XCTest", "setUp"]
+- ["CSo6XCTest", "testDisabledLogging"]
+- ["CSo6XCTest", "testEnableDebug"]
+- ["CSo6XCTest", "testEnableError"]
+- ["CSo6XCTest", "testEnableInfo"]
+- ["CSo6XCTest", "testEnableWarning"]
+- ["CSo10XCTestCase", "CounterLogging"]
+- !private ["CSo10XCTestCase", "Logger"]
+- !private ["CSo10XCTestCase", "XCTAssertEqual"]
+- ["CSo10XCTestCase", "counter"]
+- ["CSo10XCTestCase", "init"]
+- ["CSo10XCTestCase", "setUp"]
+- ["CSo10XCTestCase", "testDisabledLogging"]
+- ["CSo10XCTestCase", "testEnableDebug"]
+- ["CSo10XCTestCase", "testEnableError"]
+- ["CSo10XCTestCase", "testEnableInfo"]
+- ["CSo10XCTestCase", "testEnableWarning"]
+- ["CSo10XCTestCase", ""]
+depends-nominal:
+- "Ps9AnyObject"
+- "Ps11CVarArgType"
+- "C17MixpanelDemoTests14CounterLogging"
+- "Ps28CustomDebugStringConvertible"
+- "Ps23CustomStringConvertible"
+- "Ps9Equatable"
+- "Ps8Hashable"
+- !private "SQ"
+- !private "O8Mixpanel8LogLevel"
+- !private "C8Mixpanel6Logger"
+- "C17MixpanelDemoTests11LoggerTests"
+- "P8Mixpanel7Logging"
+- "CSo8NSObject"
+- "PSo16NSObjectProtocol"
+- !private "Sq"
+- !private "Ps16RawRepresentable"
+- !private "Vs12StaticString"
+- "CSo6XCTest"
+- "CSo10XCTestCase"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/Foundation.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/XCTest.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIRemote.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIKeyboardKeys.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementQuery.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUICoordinate.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIDevice.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementTypeQueryProvider.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementTypes.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementAttributes.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElement.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIApplication.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestSuiteRun.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestSuite.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestProbe.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObservation.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObservationCenter.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObserver.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestLog.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestRun.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCaseRun.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCase+AsynchronousTesting.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCase.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestAssertionsImpl.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestAssertions.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCAbstractTest.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestErrors.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestDefines.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTest.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Modules/module.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/UIKit.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/CoreImage.swiftmodule"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Mixpanel.framework/Modules/Mixpanel.swiftmodule/x86_64.swiftmodule"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Mixpanel.framework/Headers/Mixpanel-Swift.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Mixpanel.framework/Headers/Mixpanel.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Mixpanel.framework/Modules/module.modulemap"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/Nocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/LSNocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/LSStubResponseDSL.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/NSData+Matcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/NSRegularExpression+Matcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/LSMatcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/NSString+Matcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/LSStubRequestDSL.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/NSString+Nocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/LSHTTPBody.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/NSData+Nocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/Nocilla-umbrella.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Modules/module.modulemap"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/MixpanelDemo.swiftmodule/x86_64.swiftmodule"
+interface-hash: "bf89d691408427b6f517fd5f4d251c1a"

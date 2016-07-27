@@ -1,0 +1,19 @@
+version: "Apple Swift version 2.2 (swiftlang-703.0.18.8 clang-703.0.31)"
+options: "6c1a2d7e5742f26d153fca7d38393d3a"
+build_time: [522805437, 744011000]
+inputs:
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/MixpanelInstance.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/Constants.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/Flush.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/Persistence.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/PrintLogging.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/Network.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/FileLogging.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/People.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/Track.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/JSONHandler.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/AutomaticProperties.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/Logger.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/Error.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/FlushRequest.swift": [9223372036854775807, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/Mixpanel.swift": [9223372036854775807, 0]

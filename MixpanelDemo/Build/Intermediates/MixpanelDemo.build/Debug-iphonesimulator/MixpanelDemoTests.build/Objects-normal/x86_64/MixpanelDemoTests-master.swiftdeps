@@ -1,0 +1,9 @@
+version: "Apple Swift version 2.2 (swiftlang-703.0.18.8 clang-703.0.31)"
+options: "5ba2353be9ab1bf6aac47631e48a7ece"
+build_time: [522881563, 784101000]
+inputs:
+  "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/MixpanelDemoTests/LoggerTests.swift": [522872641, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/MixpanelDemoTests/MixpanelPeopleTests.swift": [522872641, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/MixpanelDemoTests/TestConstants.swift": [522872641, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/MixpanelDemoTests/MixpanelBaseTests.swift": [522872641, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/MixpanelDemoTests/MixpanelDemoTests.swift": [522872641, 0]

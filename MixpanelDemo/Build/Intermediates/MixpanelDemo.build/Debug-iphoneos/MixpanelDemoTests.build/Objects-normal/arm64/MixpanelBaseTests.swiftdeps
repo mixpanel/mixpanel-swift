@@ -1,0 +1,598 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "MixpanelBaseTests"
+provides-nominal:
+- "C17MixpanelDemoTests17MixpanelBaseTests"
+provides-member:
+- ["C17MixpanelDemoTests17MixpanelBaseTests", ""]
+provides-dynamic-lookup:
+- "flushAndWaitForSerialQueue"
+- "requestCount"
+- "setUp"
+- "waitForSerialQueue"
+- "tearDown"
+- "assertDefaultPeopleProperties"
+- "allPropertyTypes"
+depends-top-level:
+- !private "kTestToken"
+- "AnyObject"
+- !private "StringLiteralType"
+- !private "stubTrack"
+- "MixpanelDelegate"
+- !private "URL"
+- !private "Array"
+- !private "Mixpanel"
+- !private "UnicodeScalarType"
+- !private "DateFormatter"
+- !private "NSLog"
+- !private "BooleanLiteralType"
+- "Bool"
+- !private "LSNocilla"
+- !private "NSNull"
+- "MixpanelInstance"
+- "String"
+- !private "XCTAssertNotNil"
+- "MixpanelBaseTests"
+- "XCTestCase"
+- !private "Dictionary"
+depends-member:
+- !private ["Ps9AnyObject", "DateFormatter"]
+- !private ["Ps9AnyObject", "Element"]
+- !private ["Ps9AnyObject", "LSNocilla"]
+- !private ["Ps9AnyObject", "Mixpanel"]
+- !private ["Ps9AnyObject", "NSLog"]
+- !private ["Ps9AnyObject", "NSNull"]
+- !private ["Ps9AnyObject", "URL"]
+- !private ["Ps9AnyObject", "Value"]
+- !private ["Ps9AnyObject", "XCTAssertNotNil"]
+- ["Ps9AnyObject", "allPropertyTypes"]
+- ["Ps9AnyObject", "assertDefaultPeopleProperties"]
+- !private ["Ps9AnyObject", "clearStubs"]
+- !private ["Ps9AnyObject", "date"]
+- !private ["Ps9AnyObject", "dateFormat"]
+- !private ["Ps9AnyObject", "deinit"]
+- !private ["Ps9AnyObject", "flush"]
+- ["Ps9AnyObject", "flushAndWaitForSerialQueue"]
+- !private ["Ps9AnyObject", "init"]
+- !private ["Ps9AnyObject", "initialize"]
+- !private ["Ps9AnyObject", "kTestToken"]
+- ["Ps9AnyObject", "mixpanel"]
+- ["Ps9AnyObject", "mixpanelWillFlush"]
+- ["Ps9AnyObject", "requestCount"]
+- !private ["Ps9AnyObject", "reset"]
+- !private ["Ps9AnyObject", "serialQueue"]
+- ["Ps9AnyObject", "setUp"]
+- !private ["Ps9AnyObject", "sharedInstance"]
+- !private ["Ps9AnyObject", "start"]
+- !private ["Ps9AnyObject", "stop"]
+- !private ["Ps9AnyObject", "stubTrack"]
+- !private ["Ps9AnyObject", "sync"]
+- ["Ps9AnyObject", "tearDown"]
+- ["Ps9AnyObject", "waitForSerialQueue"]
+- ["Ps9AnyObject", ""]
+- !private ["Sa", "Element"]
+- !private ["Sa", "deinit"]
+- !private ["Ps23ArrayLiteralConvertible", "Element"]
+- !private ["Ps23BidirectionalCollection", "Element"]
+- !private ["Ps22BidirectionalIndexable", "Element"]
+- !private ["PSo8CAAction", "init"]
+- !private ["Ps7CVarArg", "DateFormatter"]
+- !private ["Ps7CVarArg", "LSNocilla"]
+- !private ["Ps7CVarArg", "Mixpanel"]
+- !private ["Ps7CVarArg", "NSLog"]
+- !private ["Ps7CVarArg", "NSNull"]
+- !private ["Ps7CVarArg", "URL"]
+- !private ["Ps7CVarArg", "XCTAssertNotNil"]
+- ["Ps7CVarArg", "allPropertyTypes"]
+- ["Ps7CVarArg", "assertDefaultPeopleProperties"]
+- !private ["Ps7CVarArg", "clearStubs"]
+- !private ["Ps7CVarArg", "date"]
+- !private ["Ps7CVarArg", "dateFormat"]
+- ["Ps7CVarArg", "flushAndWaitForSerialQueue"]
+- !private ["Ps7CVarArg", "init"]
+- !private ["Ps7CVarArg", "kTestToken"]
+- ["Ps7CVarArg", "mixpanel"]
+- ["Ps7CVarArg", "mixpanelWillFlush"]
+- ["Ps7CVarArg", "requestCount"]
+- ["Ps7CVarArg", "setUp"]
+- !private ["Ps7CVarArg", "sharedInstance"]
+- !private ["Ps7CVarArg", "start"]
+- !private ["Ps7CVarArg", "stop"]
+- !private ["Ps7CVarArg", "stubTrack"]
+- !private ["Ps7CVarArg", "sync"]
+- ["Ps7CVarArg", "tearDown"]
+- ["Ps7CVarArg", "waitForSerialQueue"]
+- ["Ps7CVarArg", ""]
+- !private ["Ps10Collection", "Element"]
+- !private ["Ps10Collection", "Index"]
+- !private ["Ps10Collection", "Iterator"]
+- !private ["Ps10Collection", "Key"]
+- !private ["Ps10Collection", "SubSequence"]
+- !private ["Ps10Collection", "Value"]
+- !private ["Ps10Collection", "_Element"]
+- !private ["Ps10Collection", "subscript"]
+- !private ["Ps28CustomDebugStringConvertible", "DateFormatter"]
+- !private ["Ps28CustomDebugStringConvertible", "Element"]
+- !private ["Ps28CustomDebugStringConvertible", "Index"]
+- !private ["Ps28CustomDebugStringConvertible", "Key"]
+- !private ["Ps28CustomDebugStringConvertible", "LSNocilla"]
+- !private ["Ps28CustomDebugStringConvertible", "Mixpanel"]
+- !private ["Ps28CustomDebugStringConvertible", "NSLog"]
+- !private ["Ps28CustomDebugStringConvertible", "NSNull"]
+- !private ["Ps28CustomDebugStringConvertible", "SubSequence"]
+- !private ["Ps28CustomDebugStringConvertible", "URL"]
+- !private ["Ps28CustomDebugStringConvertible", "Value"]
+- !private ["Ps28CustomDebugStringConvertible", "XCTAssertNotNil"]
+- ["Ps28CustomDebugStringConvertible", "allPropertyTypes"]
+- ["Ps28CustomDebugStringConvertible", "assertDefaultPeopleProperties"]
+- !private ["Ps28CustomDebugStringConvertible", "clearStubs"]
+- !private ["Ps28CustomDebugStringConvertible", "date"]
+- !private ["Ps28CustomDebugStringConvertible", "dateFormat"]
+- !private ["Ps28CustomDebugStringConvertible", "flush"]
+- ["Ps28CustomDebugStringConvertible", "flushAndWaitForSerialQueue"]
+- !private ["Ps28CustomDebugStringConvertible", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "kTestToken"]
+- ["Ps28CustomDebugStringConvertible", "mixpanel"]
+- ["Ps28CustomDebugStringConvertible", "mixpanelWillFlush"]
+- ["Ps28CustomDebugStringConvertible", "requestCount"]
+- !private ["Ps28CustomDebugStringConvertible", "reset"]
+- !private ["Ps28CustomDebugStringConvertible", "serialQueue"]
+- ["Ps28CustomDebugStringConvertible", "setUp"]
+- !private ["Ps28CustomDebugStringConvertible", "sharedInstance"]
+- !private ["Ps28CustomDebugStringConvertible", "start"]
+- !private ["Ps28CustomDebugStringConvertible", "stop"]
+- !private ["Ps28CustomDebugStringConvertible", "stubTrack"]
+- !private ["Ps28CustomDebugStringConvertible", "subscript"]
+- !private ["Ps28CustomDebugStringConvertible", "sync"]
+- ["Ps28CustomDebugStringConvertible", "tearDown"]
+- ["Ps28CustomDebugStringConvertible", "waitForSerialQueue"]
+- ["Ps28CustomDebugStringConvertible", ""]
+- !private ["Ps29CustomPlaygroundQuickLookable", "init"]
+- !private ["Ps17CustomReflectable", "Element"]
+- !private ["Ps17CustomReflectable", "Index"]
+- !private ["Ps17CustomReflectable", "Key"]
+- !private ["Ps17CustomReflectable", "SubSequence"]
+- !private ["Ps17CustomReflectable", "Value"]
+- !private ["Ps17CustomReflectable", "subscript"]
+- !private ["Ps23CustomStringConvertible", "DateFormatter"]
+- !private ["Ps23CustomStringConvertible", "Element"]
+- !private ["Ps23CustomStringConvertible", "Index"]
+- !private ["Ps23CustomStringConvertible", "Key"]
+- !private ["Ps23CustomStringConvertible", "LSNocilla"]
+- !private ["Ps23CustomStringConvertible", "Mixpanel"]
+- !private ["Ps23CustomStringConvertible", "NSLog"]
+- !private ["Ps23CustomStringConvertible", "NSNull"]
+- !private ["Ps23CustomStringConvertible", "SubSequence"]
+- !private ["Ps23CustomStringConvertible", "URL"]
+- !private ["Ps23CustomStringConvertible", "Value"]
+- !private ["Ps23CustomStringConvertible", "XCTAssertNotNil"]
+- ["Ps23CustomStringConvertible", "allPropertyTypes"]
+- ["Ps23CustomStringConvertible", "assertDefaultPeopleProperties"]
+- !private ["Ps23CustomStringConvertible", "clearStubs"]
+- !private ["Ps23CustomStringConvertible", "date"]
+- !private ["Ps23CustomStringConvertible", "dateFormat"]
+- ["Ps23CustomStringConvertible", "flushAndWaitForSerialQueue"]
+- !private ["Ps23CustomStringConvertible", "init"]
+- !private ["Ps23CustomStringConvertible", "kTestToken"]
+- ["Ps23CustomStringConvertible", "mixpanel"]
+- ["Ps23CustomStringConvertible", "mixpanelWillFlush"]
+- ["Ps23CustomStringConvertible", "requestCount"]
+- ["Ps23CustomStringConvertible", "setUp"]
+- !private ["Ps23CustomStringConvertible", "sharedInstance"]
+- !private ["Ps23CustomStringConvertible", "start"]
+- !private ["Ps23CustomStringConvertible", "stop"]
+- !private ["Ps23CustomStringConvertible", "stubTrack"]
+- !private ["Ps23CustomStringConvertible", "subscript"]
+- !private ["Ps23CustomStringConvertible", "sync"]
+- ["Ps23CustomStringConvertible", "tearDown"]
+- ["Ps23CustomStringConvertible", "waitForSerialQueue"]
+- ["Ps23CustomStringConvertible", ""]
+- !private ["V10Foundation4Date", "deinit"]
+- !private ["CSo13DateFormatter", "date"]
+- !private ["CSo13DateFormatter", "dateFormat"]
+- !private ["CSo13DateFormatter", "init"]
+- !private ["Vs10Dictionary", "Index"]
+- !private ["Vs10Dictionary", "Key"]
+- !private ["Vs10Dictionary", "SubSequence"]
+- !private ["Vs10Dictionary", "Value"]
+- !private ["Vs10Dictionary", "deinit"]
+- !private ["Vs10Dictionary", "subscript"]
+- !private ["Ps28DictionaryLiteralConvertible", "Index"]
+- !private ["Ps28DictionaryLiteralConvertible", "Key"]
+- !private ["Ps28DictionaryLiteralConvertible", "SubSequence"]
+- !private ["Ps28DictionaryLiteralConvertible", "Value"]
+- !private ["Ps28DictionaryLiteralConvertible", "subscript"]
+- !private ["CSo14DispatchObject", "sync"]
+- !private ["CSo13DispatchQueue", "sync"]
+- !private ["Sd", "deinit"]
+- !private ["Ps9Equatable", "DateFormatter"]
+- !private ["Ps9Equatable", "LSNocilla"]
+- !private ["Ps9Equatable", "Mixpanel"]
+- !private ["Ps9Equatable", "NSLog"]
+- !private ["Ps9Equatable", "NSNull"]
+- !private ["Ps9Equatable", "URL"]
+- !private ["Ps9Equatable", "XCTAssertNotNil"]
+- ["Ps9Equatable", "allPropertyTypes"]
+- ["Ps9Equatable", "assertDefaultPeopleProperties"]
+- !private ["Ps9Equatable", "clearStubs"]
+- !private ["Ps9Equatable", "date"]
+- !private ["Ps9Equatable", "dateFormat"]
+- ["Ps9Equatable", "flushAndWaitForSerialQueue"]
+- !private ["Ps9Equatable", "init"]
+- !private ["Ps9Equatable", "kTestToken"]
+- ["Ps9Equatable", "mixpanel"]
+- ["Ps9Equatable", "mixpanelWillFlush"]
+- ["Ps9Equatable", "requestCount"]
+- ["Ps9Equatable", "setUp"]
+- !private ["Ps9Equatable", "sharedInstance"]
+- !private ["Ps9Equatable", "start"]
+- !private ["Ps9Equatable", "stop"]
+- !private ["Ps9Equatable", "stubTrack"]
+- !private ["Ps9Equatable", "sync"]
+- ["Ps9Equatable", "tearDown"]
+- ["Ps9Equatable", "waitForSerialQueue"]
+- ["Ps9Equatable", ""]
+- !private ["P8Mixpanel13FlushDelegate", "flush"]
+- !private ["P8Mixpanel13FlushDelegate", "reset"]
+- !private ["P8Mixpanel13FlushDelegate", "serialQueue"]
+- !private ["CSo9Formatter", "date"]
+- !private ["CSo9Formatter", "dateFormat"]
+- !private ["CSo9Formatter", "init"]
+- !private ["Ps8Hashable", "DateFormatter"]
+- !private ["Ps8Hashable", "LSNocilla"]
+- !private ["Ps8Hashable", "Mixpanel"]
+- !private ["Ps8Hashable", "NSLog"]
+- !private ["Ps8Hashable", "NSNull"]
+- !private ["Ps8Hashable", "URL"]
+- !private ["Ps8Hashable", "XCTAssertNotNil"]
+- ["Ps8Hashable", "allPropertyTypes"]
+- ["Ps8Hashable", "assertDefaultPeopleProperties"]
+- !private ["Ps8Hashable", "clearStubs"]
+- !private ["Ps8Hashable", "date"]
+- !private ["Ps8Hashable", "dateFormat"]
+- ["Ps8Hashable", "flushAndWaitForSerialQueue"]
+- !private ["Ps8Hashable", "init"]
+- !private ["Ps8Hashable", "kTestToken"]
+- ["Ps8Hashable", "mixpanel"]
+- ["Ps8Hashable", "mixpanelWillFlush"]
+- ["Ps8Hashable", "requestCount"]
+- ["Ps8Hashable", "setUp"]
+- !private ["Ps8Hashable", "sharedInstance"]
+- !private ["Ps8Hashable", "start"]
+- !private ["Ps8Hashable", "stop"]
+- !private ["Ps8Hashable", "stubTrack"]
+- !private ["Ps8Hashable", "sync"]
+- ["Ps8Hashable", "tearDown"]
+- ["Ps8Hashable", "waitForSerialQueue"]
+- ["Ps8Hashable", ""]
+- !private ["SQ", "deinit"]
+- !private ["Ps9Indexable", "Element"]
+- !private ["Ps9Indexable", "Index"]
+- !private ["Ps9Indexable", "Iterator"]
+- !private ["Ps9Indexable", "Key"]
+- !private ["Ps9Indexable", "SubSequence"]
+- !private ["Ps9Indexable", "Value"]
+- !private ["Ps9Indexable", "_Element"]
+- !private ["Ps9Indexable", "subscript"]
+- !private ["Ps13IndexableBase", "Element"]
+- !private ["Ps13IndexableBase", "Index"]
+- !private ["Ps13IndexableBase", "Iterator"]
+- !private ["Ps13IndexableBase", "Key"]
+- !private ["Ps13IndexableBase", "SubSequence"]
+- !private ["Ps13IndexableBase", "Value"]
+- !private ["Ps13IndexableBase", "_Element"]
+- !private ["Ps13IndexableBase", "subscript"]
+- !private ["Vs16IndexingIterator", "Element"]
+- !private ["Si", "deinit"]
+- !private ["Ps16IteratorProtocol", "Element"]
+- !private ["CSo9LSNocilla", "clearStubs"]
+- !private ["CSo9LSNocilla", "sharedInstance"]
+- !private ["CSo9LSNocilla", "start"]
+- !private ["CSo9LSNocilla", "stop"]
+- !private ["C8Mixpanel8Mixpanel", "initialize"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "AnyObject"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "Bool"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "DateFormatter"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "LSNocilla"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "Mixpanel"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "MixpanelInstance"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "NSLog"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "NSNull"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "String"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "URL"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "XCTAssertNotNil"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "allPropertyTypes"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "assertDefaultPeopleProperties"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "deinit"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "flushAndWaitForSerialQueue"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "init"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "kTestToken"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "mixpanel"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "mixpanelWillFlush"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "requestCount"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "setUp"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "stubTrack"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "tearDown"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "waitForSerialQueue"]
+- !private ["P8Mixpanel16MixpanelDelegate", "DateFormatter"]
+- !private ["P8Mixpanel16MixpanelDelegate", "LSNocilla"]
+- !private ["P8Mixpanel16MixpanelDelegate", "Mixpanel"]
+- !private ["P8Mixpanel16MixpanelDelegate", "NSLog"]
+- !private ["P8Mixpanel16MixpanelDelegate", "NSNull"]
+- !private ["P8Mixpanel16MixpanelDelegate", "URL"]
+- !private ["P8Mixpanel16MixpanelDelegate", "XCTAssertNotNil"]
+- !private ["P8Mixpanel16MixpanelDelegate", "kTestToken"]
+- !private ["P8Mixpanel16MixpanelDelegate", "mixpanel"]
+- ["P8Mixpanel16MixpanelDelegate", "mixpanelWillFlush"]
+- !private ["P8Mixpanel16MixpanelDelegate", "stubTrack"]
+- !private ["P8Mixpanel16MixpanelDelegate", "waitForSerialQueue"]
+- ["P8Mixpanel16MixpanelDelegate", ""]
+- !private ["C8Mixpanel16MixpanelInstance", "flush"]
+- !private ["C8Mixpanel16MixpanelInstance", "reset"]
+- !private ["C8Mixpanel16MixpanelInstance", "serialQueue"]
+- !private ["Ps17MutableCollection", "Element"]
+- !private ["Ps16MutableIndexable", "Element"]
+- !private ["PSo8NSCoding", "date"]
+- !private ["PSo8NSCoding", "dateFormat"]
+- !private ["PSo8NSCoding", "init"]
+- !private ["PSo9NSCopying", "date"]
+- !private ["PSo9NSCopying", "dateFormat"]
+- !private ["PSo9NSCopying", "init"]
+- !private ["CSo6NSNull", "init"]
+- ["CSo8NSObject", "AnyObject"]
+- ["CSo8NSObject", "Bool"]
+- !private ["CSo8NSObject", "DateFormatter"]
+- !private ["CSo8NSObject", "LSNocilla"]
+- !private ["CSo8NSObject", "Mixpanel"]
+- ["CSo8NSObject", "MixpanelInstance"]
+- !private ["CSo8NSObject", "NSLog"]
+- !private ["CSo8NSObject", "NSNull"]
+- ["CSo8NSObject", "String"]
+- !private ["CSo8NSObject", "URL"]
+- !private ["CSo8NSObject", "XCTAssertNotNil"]
+- ["CSo8NSObject", "allPropertyTypes"]
+- ["CSo8NSObject", "assertDefaultPeopleProperties"]
+- !private ["CSo8NSObject", "clearStubs"]
+- !private ["CSo8NSObject", "date"]
+- !private ["CSo8NSObject", "dateFormat"]
+- ["CSo8NSObject", "flushAndWaitForSerialQueue"]
+- ["CSo8NSObject", "init"]
+- !private ["CSo8NSObject", "kTestToken"]
+- ["CSo8NSObject", "mixpanel"]
+- ["CSo8NSObject", "mixpanelWillFlush"]
+- ["CSo8NSObject", "requestCount"]
+- ["CSo8NSObject", "setUp"]
+- !private ["CSo8NSObject", "sharedInstance"]
+- !private ["CSo8NSObject", "start"]
+- !private ["CSo8NSObject", "stop"]
+- !private ["CSo8NSObject", "stubTrack"]
+- !private ["CSo8NSObject", "sync"]
+- ["CSo8NSObject", "tearDown"]
+- ["CSo8NSObject", "waitForSerialQueue"]
+- !private ["PSo16NSObjectProtocol", "DateFormatter"]
+- !private ["PSo16NSObjectProtocol", "LSNocilla"]
+- !private ["PSo16NSObjectProtocol", "Mixpanel"]
+- !private ["PSo16NSObjectProtocol", "NSLog"]
+- !private ["PSo16NSObjectProtocol", "NSNull"]
+- !private ["PSo16NSObjectProtocol", "URL"]
+- !private ["PSo16NSObjectProtocol", "XCTAssertNotNil"]
+- ["PSo16NSObjectProtocol", "allPropertyTypes"]
+- ["PSo16NSObjectProtocol", "assertDefaultPeopleProperties"]
+- !private ["PSo16NSObjectProtocol", "clearStubs"]
+- !private ["PSo16NSObjectProtocol", "date"]
+- !private ["PSo16NSObjectProtocol", "dateFormat"]
+- ["PSo16NSObjectProtocol", "flushAndWaitForSerialQueue"]
+- !private ["PSo16NSObjectProtocol", "init"]
+- !private ["PSo16NSObjectProtocol", "kTestToken"]
+- ["PSo16NSObjectProtocol", "mixpanel"]
+- ["PSo16NSObjectProtocol", "mixpanelWillFlush"]
+- ["PSo16NSObjectProtocol", "requestCount"]
+- ["PSo16NSObjectProtocol", "setUp"]
+- !private ["PSo16NSObjectProtocol", "sharedInstance"]
+- !private ["PSo16NSObjectProtocol", "start"]
+- !private ["PSo16NSObjectProtocol", "stop"]
+- !private ["PSo16NSObjectProtocol", "stubTrack"]
+- !private ["PSo16NSObjectProtocol", "sync"]
+- ["PSo16NSObjectProtocol", "tearDown"]
+- ["PSo16NSObjectProtocol", "waitForSerialQueue"]
+- ["PSo16NSObjectProtocol", ""]
+- !private ["PSo14NSSecureCoding", "init"]
+- !private ["CSo9OS_object", "sync"]
+- !private ["Ps22RandomAccessCollection", "Element"]
+- !private ["Ps21RandomAccessIndexable", "Element"]
+- !private ["Ps26RangeReplaceableCollection", "Element"]
+- !private ["Ps25RangeReplaceableIndexable", "Element"]
+- !private ["P10Foundation20ReferenceConvertible", "init"]
+- !private ["Ps8Sequence", "Element"]
+- !private ["Ps8Sequence", "Index"]
+- !private ["Ps8Sequence", "Iterator"]
+- !private ["Ps8Sequence", "Key"]
+- !private ["Ps8Sequence", "SubSequence"]
+- !private ["Ps8Sequence", "Value"]
+- !private ["Ps8Sequence", "_Element"]
+- !private ["Ps8Sequence", "subscript"]
+- !private ["Vs5Slice", "Index"]
+- !private ["Vs5Slice", "Iterator"]
+- !private ["Vs5Slice", "SubSequence"]
+- !private ["Vs5Slice", "_Element"]
+- !private ["Vs12StaticString", "deinit"]
+- !private ["SS", "deinit"]
+- !private ["V10Foundation3URL", "deinit"]
+- !private ["V10Foundation3URL", "init"]
+- ["CSo6XCTest", "AnyObject"]
+- ["CSo6XCTest", "Bool"]
+- !private ["CSo6XCTest", "DateFormatter"]
+- !private ["CSo6XCTest", "LSNocilla"]
+- !private ["CSo6XCTest", "Mixpanel"]
+- ["CSo6XCTest", "MixpanelInstance"]
+- !private ["CSo6XCTest", "NSLog"]
+- !private ["CSo6XCTest", "NSNull"]
+- ["CSo6XCTest", "String"]
+- !private ["CSo6XCTest", "URL"]
+- !private ["CSo6XCTest", "XCTAssertNotNil"]
+- ["CSo6XCTest", "allPropertyTypes"]
+- ["CSo6XCTest", "assertDefaultPeopleProperties"]
+- ["CSo6XCTest", "flushAndWaitForSerialQueue"]
+- ["CSo6XCTest", "init"]
+- !private ["CSo6XCTest", "kTestToken"]
+- ["CSo6XCTest", "mixpanel"]
+- ["CSo6XCTest", "mixpanelWillFlush"]
+- ["CSo6XCTest", "requestCount"]
+- ["CSo6XCTest", "setUp"]
+- !private ["CSo6XCTest", "stubTrack"]
+- ["CSo6XCTest", "tearDown"]
+- ["CSo6XCTest", "waitForSerialQueue"]
+- ["CSo10XCTestCase", "AnyObject"]
+- ["CSo10XCTestCase", "Bool"]
+- !private ["CSo10XCTestCase", "DateFormatter"]
+- !private ["CSo10XCTestCase", "LSNocilla"]
+- !private ["CSo10XCTestCase", "Mixpanel"]
+- ["CSo10XCTestCase", "MixpanelInstance"]
+- !private ["CSo10XCTestCase", "NSLog"]
+- !private ["CSo10XCTestCase", "NSNull"]
+- ["CSo10XCTestCase", "String"]
+- !private ["CSo10XCTestCase", "URL"]
+- !private ["CSo10XCTestCase", "XCTAssertNotNil"]
+- ["CSo10XCTestCase", "allPropertyTypes"]
+- ["CSo10XCTestCase", "assertDefaultPeopleProperties"]
+- ["CSo10XCTestCase", "flushAndWaitForSerialQueue"]
+- ["CSo10XCTestCase", "init"]
+- !private ["CSo10XCTestCase", "kTestToken"]
+- ["CSo10XCTestCase", "mixpanel"]
+- ["CSo10XCTestCase", "mixpanelWillFlush"]
+- ["CSo10XCTestCase", "requestCount"]
+- ["CSo10XCTestCase", "setUp"]
+- !private ["CSo10XCTestCase", "stubTrack"]
+- ["CSo10XCTestCase", "tearDown"]
+- ["CSo10XCTestCase", "waitForSerialQueue"]
+- ["CSo10XCTestCase", ""]
+- !private ["Ps14_ArrayProtocol", "Element"]
+- !private ["Ps24_DestructorSafeContainer", "Element"]
+- !private ["Ps32_FileReferenceLiteralConvertible", "init"]
+- !private ["Ps21_ObjectiveCBridgeable", "Element"]
+- !private ["Ps21_ObjectiveCBridgeable", "Index"]
+- !private ["Ps21_ObjectiveCBridgeable", "Key"]
+- !private ["Ps21_ObjectiveCBridgeable", "SubSequence"]
+- !private ["Ps21_ObjectiveCBridgeable", "Value"]
+- !private ["Ps21_ObjectiveCBridgeable", "init"]
+- !private ["Ps21_ObjectiveCBridgeable", "subscript"]
+depends-nominal:
+- "Ps9AnyObject"
+- !private "Sa"
+- !private "Ps23ArrayLiteralConvertible"
+- !private "Ps23BidirectionalCollection"
+- !private "Ps22BidirectionalIndexable"
+- !private "PSo8CAAction"
+- "Ps7CVarArg"
+- !private "Ps10Collection"
+- "Ps28CustomDebugStringConvertible"
+- !private "Ps29CustomPlaygroundQuickLookable"
+- !private "Ps17CustomReflectable"
+- "Ps23CustomStringConvertible"
+- !private "V10Foundation4Date"
+- !private "CSo13DateFormatter"
+- !private "Vs10Dictionary"
+- !private "Ps28DictionaryLiteralConvertible"
+- !private "CSo14DispatchObject"
+- !private "CSo13DispatchQueue"
+- !private "Sd"
+- "Ps9Equatable"
+- !private "P8Mixpanel13FlushDelegate"
+- !private "CSo9Formatter"
+- "Ps8Hashable"
+- !private "SQ"
+- !private "Ps9Indexable"
+- !private "Ps13IndexableBase"
+- !private "Vs16IndexingIterator"
+- !private "Si"
+- !private "Ps16IteratorProtocol"
+- !private "CSo9LSNocilla"
+- !private "C8Mixpanel8Mixpanel"
+- "C17MixpanelDemoTests17MixpanelBaseTests"
+- "P8Mixpanel16MixpanelDelegate"
+- !private "C8Mixpanel16MixpanelInstance"
+- !private "Ps17MutableCollection"
+- !private "Ps16MutableIndexable"
+- !private "PSo8NSCoding"
+- !private "PSo9NSCopying"
+- !private "CSo6NSNull"
+- "CSo8NSObject"
+- "PSo16NSObjectProtocol"
+- !private "PSo14NSSecureCoding"
+- !private "CSo9OS_object"
+- !private "Ps22RandomAccessCollection"
+- !private "Ps21RandomAccessIndexable"
+- !private "Ps26RangeReplaceableCollection"
+- !private "Ps25RangeReplaceableIndexable"
+- !private "P10Foundation20ReferenceConvertible"
+- !private "Ps8Sequence"
+- !private "Vs5Slice"
+- !private "Vs12StaticString"
+- !private "SS"
+- !private "V10Foundation3URL"
+- "CSo6XCTest"
+- "CSo10XCTestCase"
+- !private "Ps14_ArrayProtocol"
+- !private "Ps24_DestructorSafeContainer"
+- !private "Ps32_FileReferenceLiteralConvertible"
+- !private "Ps21_ObjectiveCBridgeable"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/arm64/Swift.swiftmodule"
+- "/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/arm64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/arm64/Foundation.swiftmodule"
+- "/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/arm64/Darwin.swiftmodule"
+- "/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/arm64/Dispatch.swiftmodule"
+- "/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/arm64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/arm64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/arm64/XCTest.swiftmodule"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIRemote.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIKeyboardKeys.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementQuery.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUICoordinate.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIDevice.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementTypeQueryProvider.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementTypes.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementAttributes.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElement.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIApplication.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestSuiteRun.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestSuite.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestProbe.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObservation.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObservationCenter.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObserver.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestLog.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestExpectation.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestRun.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCaseRun.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCase+AsynchronousTesting.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCase.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestAssertionsImpl.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestAssertions.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCAbstractTest.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestErrors.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestDefines.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTest.h"
+- "/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework/Modules/module.modulemap"
+- "/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/arm64/UIKit.swiftmodule"
+- "/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/arm64/CoreImage.swiftmodule"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Mixpanel.framework/Modules/Mixpanel.swiftmodule/arm64.swiftmodule"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Mixpanel.framework/Headers/Mixpanel-Swift.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Mixpanel.framework/Headers/Mixpanel.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Mixpanel.framework/Modules/module.modulemap"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/Nocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/LSNocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/LSStubResponseDSL.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/NSData+Matcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/NSRegularExpression+Matcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/LSMatcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/NSString+Matcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/LSStubRequestDSL.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/NSString+Nocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/LSHTTPBody.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/NSData+Nocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Headers/Nocilla-umbrella.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/Nocilla/Nocilla.framework/Modules/module.modulemap"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphoneos/MixpanelDemo.swiftmodule/arm64.swiftmodule"
+interface-hash: "49b3ea544a4befb0f3285e011d449117"

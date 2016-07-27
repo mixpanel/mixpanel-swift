@@ -1,0 +1,1 @@
+ const unsigned char Pods_MixpanelDemoTestsVersionString[] __attribute__ ((used)) = "@(#)PROGRAM:Pods_MixpanelDemoTests  PROJECT:Pods-1" "\n"; const double Pods_MixpanelDemoTestsVersionNumber __attribute__ ((used)) = (double)1.;

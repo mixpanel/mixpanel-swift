@@ -1,0 +1,10 @@
+framework module Mixpanel {
+  umbrella header "Mixpanel.h"
+
+  export *
+  module * { export * }
+}
+
+module Mixpanel.__Swift {
+    exclude header "Mixpanel-Swift.h"
+}

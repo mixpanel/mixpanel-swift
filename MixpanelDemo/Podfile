@@ -1,0 +1,5 @@
+use_frameworks!
+
+target 'MixpanelDemoTests' do
+    pod 'Nocilla'
+end

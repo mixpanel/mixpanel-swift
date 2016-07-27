@@ -1,0 +1,998 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "MixpanelPeopleTests"
+provides-nominal:
+- "C17MixpanelDemoTests19MixpanelPeopleTests"
+provides-member:
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", ""]
+provides-dynamic-lookup:
+- "testPeopleTrackCharge"
+- "testPeopleTrackChargeWithTime"
+- "testPeopleSet"
+- "testPeopleSetTo"
+- "testPeopleTrackChargeDecimal"
+- "testPeopleIncrementBy"
+- "testDropUnidentifiedPeopleRecords"
+- "testPeopleTrackChargeWithProperties"
+- "testPeopleSetReservedProperty"
+- "testPeopleDeleteUser"
+- "testPeopleClearCharges"
+- "testPeopleAddPushDeviceToken"
+- "testPeopleAssertPropertyTypes"
+- "testPeopleTrackChargeZero"
+- "testPeopleSetOnce"
+- "testPeopleIncrement"
+- "testDropPeopleRecords"
+depends-top-level:
+- "MixpanelBaseTests"
+- !private "..<"
+- !private "Double"
+- !private "UnicodeScalarType"
+- !private "QueueConstants"
+- "MixpanelPeopleTests"
+- !private "=="
+- !private "XCTAssertEqual"
+- !private "NSDate"
+- !private "Dictionary"
+- !private "NSData"
+- !private "Array"
+- !private "Int"
+- !private "Properties"
+- !private "NSUTF8StringEncoding"
+- !private "XCTAssertNotNil"
+- !private "StringLiteralType"
+- !private "String"
+- !private "AnyObject"
+- !private "XCTAssertTrue"
+depends-member:
+- !private ["Ps9AnyObject", "Element"]
+- !private ["Ps9AnyObject", "NSData"]
+- !private ["Ps9AnyObject", "NSUTF8StringEncoding"]
+- !private ["Ps9AnyObject", "QueueConstants"]
+- !private ["Ps9AnyObject", "XCTAssertEqual"]
+- !private ["Ps9AnyObject", "XCTAssertNotNil"]
+- !private ["Ps9AnyObject", "XCTAssertTrue"]
+- !private ["Ps9AnyObject", "XCTExpectAssert"]
+- !private ["Ps9AnyObject", "addPushDeviceToken"]
+- !private ["Ps9AnyObject", "allPropertyTypes"]
+- !private ["Ps9AnyObject", "assertDefaultPeopleProperties"]
+- !private ["Ps9AnyObject", "clearCharges"]
+- !private ["Ps9AnyObject", "dataUsingEncoding"]
+- !private ["Ps9AnyObject", "deinit"]
+- !private ["Ps9AnyObject", "deleteUser"]
+- !private ["Ps9AnyObject", "identify"]
+- !private ["Ps9AnyObject", "increment"]
+- ["Ps9AnyObject", "init"]
+- !private ["Ps9AnyObject", "mixpanel"]
+- !private ["Ps9AnyObject", "people"]
+- !private ["Ps9AnyObject", "peopleQueue"]
+- !private ["Ps9AnyObject", "set"]
+- !private ["Ps9AnyObject", "setOnce"]
+- !private ["Ps9AnyObject", "subscript"]
+- ["Ps9AnyObject", "testDropPeopleRecords"]
+- ["Ps9AnyObject", "testDropUnidentifiedPeopleRecords"]
+- ["Ps9AnyObject", "testPeopleAddPushDeviceToken"]
+- ["Ps9AnyObject", "testPeopleAssertPropertyTypes"]
+- ["Ps9AnyObject", "testPeopleClearCharges"]
+- ["Ps9AnyObject", "testPeopleDeleteUser"]
+- ["Ps9AnyObject", "testPeopleIncrement"]
+- ["Ps9AnyObject", "testPeopleIncrementBy"]
+- ["Ps9AnyObject", "testPeopleSet"]
+- ["Ps9AnyObject", "testPeopleSetOnce"]
+- ["Ps9AnyObject", "testPeopleSetReservedProperty"]
+- ["Ps9AnyObject", "testPeopleSetTo"]
+- ["Ps9AnyObject", "testPeopleTrackCharge"]
+- ["Ps9AnyObject", "testPeopleTrackChargeDecimal"]
+- ["Ps9AnyObject", "testPeopleTrackChargeWithProperties"]
+- ["Ps9AnyObject", "testPeopleTrackChargeWithTime"]
+- ["Ps9AnyObject", "testPeopleTrackChargeZero"]
+- !private ["Ps9AnyObject", "trackCharge"]
+- !private ["Ps9AnyObject", "unidentifiedQueue"]
+- !private ["Ps9AnyObject", "waitForSerialQueue"]
+- ["Ps9AnyObject", ""]
+- !private ["Sa", "Element"]
+- !private ["Sa", "Generator"]
+- !private ["Sa", "Index"]
+- !private ["Sa", "SubSequence"]
+- !private ["Sa", "_Element"]
+- !private ["Sa", "count"]
+- !private ["Sa", "first"]
+- !private ["Sa", "last"]
+- !private ["Ps23ArrayLiteralConvertible", "Element"]
+- !private ["Ps23ArrayLiteralConvertible", "Generator"]
+- !private ["Ps23ArrayLiteralConvertible", "Index"]
+- !private ["Ps23ArrayLiteralConvertible", "SubSequence"]
+- !private ["Ps23ArrayLiteralConvertible", "_Element"]
+- !private ["Ps23ArrayLiteralConvertible", "count"]
+- !private ["Ps23ArrayLiteralConvertible", "first"]
+- !private ["Ps23ArrayLiteralConvertible", "last"]
+- !private ["Vs10ArraySlice", "Generator"]
+- !private ["Vs10ArraySlice", "Index"]
+- !private ["Ps22BidirectionalIndexType", "Distance"]
+- !private ["Ps22BidirectionalIndexType", "IntegerLiteralType"]
+- !private ["Ps22BidirectionalIndexType", "_DisabledRangeIndex"]
+- !private ["Ps21BitwiseOperationsType", "Distance"]
+- !private ["Ps21BitwiseOperationsType", "IntegerLiteralType"]
+- !private ["Ps21BitwiseOperationsType", "_DisabledRangeIndex"]
+- !private ["Sb", "deinit"]
+- !private ["Ps11CVarArgType", "Distance"]
+- !private ["Ps11CVarArgType", "Element"]
+- !private ["Ps11CVarArgType", "IntegerLiteralType"]
+- !private ["Ps11CVarArgType", "NSData"]
+- !private ["Ps11CVarArgType", "NSUTF8StringEncoding"]
+- !private ["Ps11CVarArgType", "QueueConstants"]
+- !private ["Ps11CVarArgType", "XCTAssertEqual"]
+- !private ["Ps11CVarArgType", "XCTAssertNotNil"]
+- !private ["Ps11CVarArgType", "XCTAssertTrue"]
+- !private ["Ps11CVarArgType", "XCTExpectAssert"]
+- !private ["Ps11CVarArgType", "_DisabledRangeIndex"]
+- !private ["Ps11CVarArgType", "allPropertyTypes"]
+- !private ["Ps11CVarArgType", "assertDefaultPeopleProperties"]
+- !private ["Ps11CVarArgType", "dataUsingEncoding"]
+- ["Ps11CVarArgType", "init"]
+- !private ["Ps11CVarArgType", "mixpanel"]
+- ["Ps11CVarArgType", "testDropPeopleRecords"]
+- ["Ps11CVarArgType", "testDropUnidentifiedPeopleRecords"]
+- ["Ps11CVarArgType", "testPeopleAddPushDeviceToken"]
+- ["Ps11CVarArgType", "testPeopleAssertPropertyTypes"]
+- ["Ps11CVarArgType", "testPeopleClearCharges"]
+- ["Ps11CVarArgType", "testPeopleDeleteUser"]
+- ["Ps11CVarArgType", "testPeopleIncrement"]
+- ["Ps11CVarArgType", "testPeopleIncrementBy"]
+- ["Ps11CVarArgType", "testPeopleSet"]
+- ["Ps11CVarArgType", "testPeopleSetOnce"]
+- ["Ps11CVarArgType", "testPeopleSetReservedProperty"]
+- ["Ps11CVarArgType", "testPeopleSetTo"]
+- ["Ps11CVarArgType", "testPeopleTrackCharge"]
+- ["Ps11CVarArgType", "testPeopleTrackChargeDecimal"]
+- ["Ps11CVarArgType", "testPeopleTrackChargeWithProperties"]
+- ["Ps11CVarArgType", "testPeopleTrackChargeWithTime"]
+- ["Ps11CVarArgType", "testPeopleTrackChargeZero"]
+- !private ["Ps11CVarArgType", "waitForSerialQueue"]
+- ["Ps11CVarArgType", ""]
+- !private ["Vs9Character", "deinit"]
+- !private ["Ps14CollectionType", "Element"]
+- !private ["Ps14CollectionType", "Generator"]
+- !private ["Ps14CollectionType", "Index"]
+- !private ["Ps14CollectionType", "Key"]
+- !private ["Ps14CollectionType", "SubSequence"]
+- !private ["Ps14CollectionType", "Value"]
+- !private ["Ps14CollectionType", "_Element"]
+- !private ["Ps14CollectionType", "count"]
+- !private ["Ps14CollectionType", "first"]
+- !private ["Ps14CollectionType", "isEmpty"]
+- !private ["Ps14CollectionType", "last"]
+- !private ["Ps14CollectionType", "subscript"]
+- !private ["Ps10Comparable", "Distance"]
+- !private ["Ps10Comparable", "IntegerLiteralType"]
+- !private ["Ps10Comparable", "_DisabledRangeIndex"]
+- !private ["Ps10Comparable", "dataUsingEncoding"]
+- !private ["Ps10Comparable", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "Element"]
+- !private ["Ps28CustomDebugStringConvertible", "Generator"]
+- !private ["Ps28CustomDebugStringConvertible", "Index"]
+- !private ["Ps28CustomDebugStringConvertible", "Key"]
+- !private ["Ps28CustomDebugStringConvertible", "NSData"]
+- !private ["Ps28CustomDebugStringConvertible", "NSUTF8StringEncoding"]
+- !private ["Ps28CustomDebugStringConvertible", "QueueConstants"]
+- !private ["Ps28CustomDebugStringConvertible", "SubSequence"]
+- !private ["Ps28CustomDebugStringConvertible", "Value"]
+- !private ["Ps28CustomDebugStringConvertible", "XCTAssertEqual"]
+- !private ["Ps28CustomDebugStringConvertible", "XCTAssertNotNil"]
+- !private ["Ps28CustomDebugStringConvertible", "XCTAssertTrue"]
+- !private ["Ps28CustomDebugStringConvertible", "XCTExpectAssert"]
+- !private ["Ps28CustomDebugStringConvertible", "_Element"]
+- !private ["Ps28CustomDebugStringConvertible", "allPropertyTypes"]
+- !private ["Ps28CustomDebugStringConvertible", "assertDefaultPeopleProperties"]
+- !private ["Ps28CustomDebugStringConvertible", "count"]
+- !private ["Ps28CustomDebugStringConvertible", "dataUsingEncoding"]
+- !private ["Ps28CustomDebugStringConvertible", "first"]
+- !private ["Ps28CustomDebugStringConvertible", "identify"]
+- ["Ps28CustomDebugStringConvertible", "init"]
+- !private ["Ps28CustomDebugStringConvertible", "isEmpty"]
+- !private ["Ps28CustomDebugStringConvertible", "last"]
+- !private ["Ps28CustomDebugStringConvertible", "mixpanel"]
+- !private ["Ps28CustomDebugStringConvertible", "people"]
+- !private ["Ps28CustomDebugStringConvertible", "subscript"]
+- ["Ps28CustomDebugStringConvertible", "testDropPeopleRecords"]
+- ["Ps28CustomDebugStringConvertible", "testDropUnidentifiedPeopleRecords"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleAddPushDeviceToken"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleAssertPropertyTypes"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleClearCharges"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleDeleteUser"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleIncrement"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleIncrementBy"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleSet"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleSetOnce"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleSetReservedProperty"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleSetTo"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleTrackCharge"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleTrackChargeDecimal"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleTrackChargeWithProperties"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleTrackChargeWithTime"]
+- ["Ps28CustomDebugStringConvertible", "testPeopleTrackChargeZero"]
+- !private ["Ps28CustomDebugStringConvertible", "waitForSerialQueue"]
+- ["Ps28CustomDebugStringConvertible", ""]
+- !private ["Ps23CustomStringConvertible", "Distance"]
+- !private ["Ps23CustomStringConvertible", "Element"]
+- !private ["Ps23CustomStringConvertible", "Generator"]
+- !private ["Ps23CustomStringConvertible", "Index"]
+- !private ["Ps23CustomStringConvertible", "IntegerLiteralType"]
+- !private ["Ps23CustomStringConvertible", "Key"]
+- !private ["Ps23CustomStringConvertible", "NSData"]
+- !private ["Ps23CustomStringConvertible", "NSUTF8StringEncoding"]
+- !private ["Ps23CustomStringConvertible", "QueueConstants"]
+- !private ["Ps23CustomStringConvertible", "SubSequence"]
+- !private ["Ps23CustomStringConvertible", "Value"]
+- !private ["Ps23CustomStringConvertible", "XCTAssertEqual"]
+- !private ["Ps23CustomStringConvertible", "XCTAssertNotNil"]
+- !private ["Ps23CustomStringConvertible", "XCTAssertTrue"]
+- !private ["Ps23CustomStringConvertible", "XCTExpectAssert"]
+- !private ["Ps23CustomStringConvertible", "_DisabledRangeIndex"]
+- !private ["Ps23CustomStringConvertible", "_Element"]
+- !private ["Ps23CustomStringConvertible", "allPropertyTypes"]
+- !private ["Ps23CustomStringConvertible", "assertDefaultPeopleProperties"]
+- !private ["Ps23CustomStringConvertible", "count"]
+- !private ["Ps23CustomStringConvertible", "dataUsingEncoding"]
+- !private ["Ps23CustomStringConvertible", "first"]
+- ["Ps23CustomStringConvertible", "init"]
+- !private ["Ps23CustomStringConvertible", "isEmpty"]
+- !private ["Ps23CustomStringConvertible", "last"]
+- !private ["Ps23CustomStringConvertible", "mixpanel"]
+- !private ["Ps23CustomStringConvertible", "subscript"]
+- ["Ps23CustomStringConvertible", "testDropPeopleRecords"]
+- ["Ps23CustomStringConvertible", "testDropUnidentifiedPeopleRecords"]
+- ["Ps23CustomStringConvertible", "testPeopleAddPushDeviceToken"]
+- ["Ps23CustomStringConvertible", "testPeopleAssertPropertyTypes"]
+- ["Ps23CustomStringConvertible", "testPeopleClearCharges"]
+- ["Ps23CustomStringConvertible", "testPeopleDeleteUser"]
+- ["Ps23CustomStringConvertible", "testPeopleIncrement"]
+- ["Ps23CustomStringConvertible", "testPeopleIncrementBy"]
+- ["Ps23CustomStringConvertible", "testPeopleSet"]
+- ["Ps23CustomStringConvertible", "testPeopleSetOnce"]
+- ["Ps23CustomStringConvertible", "testPeopleSetReservedProperty"]
+- ["Ps23CustomStringConvertible", "testPeopleSetTo"]
+- ["Ps23CustomStringConvertible", "testPeopleTrackCharge"]
+- ["Ps23CustomStringConvertible", "testPeopleTrackChargeDecimal"]
+- ["Ps23CustomStringConvertible", "testPeopleTrackChargeWithProperties"]
+- ["Ps23CustomStringConvertible", "testPeopleTrackChargeWithTime"]
+- ["Ps23CustomStringConvertible", "testPeopleTrackChargeZero"]
+- !private ["Ps23CustomStringConvertible", "waitForSerialQueue"]
+- ["Ps23CustomStringConvertible", ""]
+- !private ["Vs10Dictionary", "Generator"]
+- !private ["Vs10Dictionary", "Index"]
+- !private ["Vs10Dictionary", "Key"]
+- !private ["Vs10Dictionary", "SubSequence"]
+- !private ["Vs10Dictionary", "Value"]
+- !private ["Vs10Dictionary", "_Element"]
+- !private ["Vs10Dictionary", "count"]
+- !private ["Vs10Dictionary", "deinit"]
+- !private ["Vs10Dictionary", "isEmpty"]
+- !private ["Vs10Dictionary", "subscript"]
+- !private ["Vs15DictionaryIndex", "Distance"]
+- !private ["Vs15DictionaryIndex", "_DisabledRangeIndex"]
+- !private ["Vs15DictionaryIndex", "deinit"]
+- !private ["Ps28DictionaryLiteralConvertible", "Generator"]
+- !private ["Ps28DictionaryLiteralConvertible", "Index"]
+- !private ["Ps28DictionaryLiteralConvertible", "Key"]
+- !private ["Ps28DictionaryLiteralConvertible", "SubSequence"]
+- !private ["Ps28DictionaryLiteralConvertible", "Value"]
+- !private ["Ps28DictionaryLiteralConvertible", "_Element"]
+- !private ["Ps28DictionaryLiteralConvertible", "count"]
+- !private ["Ps28DictionaryLiteralConvertible", "isEmpty"]
+- !private ["Ps28DictionaryLiteralConvertible", "subscript"]
+- !private ["Sd", "deinit"]
+- !private ["Ps9Equatable", "Distance"]
+- !private ["Ps9Equatable", "Element"]
+- !private ["Ps9Equatable", "Generator"]
+- !private ["Ps9Equatable", "IntegerLiteralType"]
+- !private ["Ps9Equatable", "NSData"]
+- !private ["Ps9Equatable", "NSUTF8StringEncoding"]
+- !private ["Ps9Equatable", "QueueConstants"]
+- !private ["Ps9Equatable", "XCTAssertEqual"]
+- !private ["Ps9Equatable", "XCTAssertNotNil"]
+- !private ["Ps9Equatable", "XCTAssertTrue"]
+- !private ["Ps9Equatable", "XCTExpectAssert"]
+- !private ["Ps9Equatable", "_DisabledRangeIndex"]
+- !private ["Ps9Equatable", "allPropertyTypes"]
+- !private ["Ps9Equatable", "assertDefaultPeopleProperties"]
+- !private ["Ps9Equatable", "dataUsingEncoding"]
+- ["Ps9Equatable", "init"]
+- !private ["Ps9Equatable", "mixpanel"]
+- ["Ps9Equatable", "testDropPeopleRecords"]
+- ["Ps9Equatable", "testDropUnidentifiedPeopleRecords"]
+- ["Ps9Equatable", "testPeopleAddPushDeviceToken"]
+- ["Ps9Equatable", "testPeopleAssertPropertyTypes"]
+- ["Ps9Equatable", "testPeopleClearCharges"]
+- ["Ps9Equatable", "testPeopleDeleteUser"]
+- ["Ps9Equatable", "testPeopleIncrement"]
+- ["Ps9Equatable", "testPeopleIncrementBy"]
+- ["Ps9Equatable", "testPeopleSet"]
+- ["Ps9Equatable", "testPeopleSetOnce"]
+- ["Ps9Equatable", "testPeopleSetReservedProperty"]
+- ["Ps9Equatable", "testPeopleSetTo"]
+- ["Ps9Equatable", "testPeopleTrackCharge"]
+- ["Ps9Equatable", "testPeopleTrackChargeDecimal"]
+- ["Ps9Equatable", "testPeopleTrackChargeWithProperties"]
+- ["Ps9Equatable", "testPeopleTrackChargeWithTime"]
+- ["Ps9Equatable", "testPeopleTrackChargeZero"]
+- !private ["Ps9Equatable", "waitForSerialQueue"]
+- ["Ps9Equatable", ""]
+- !private ["Ps41ExtendedGraphemeClusterLiteralConvertible", "dataUsingEncoding"]
+- !private ["Ps41ExtendedGraphemeClusterLiteralConvertible", "init"]
+- !private ["Sf", "deinit"]
+- !private ["P8Mixpanel13FlushDelegate", "identify"]
+- !private ["P8Mixpanel13FlushDelegate", "people"]
+- !private ["Ps16ForwardIndexType", "Distance"]
+- !private ["Ps16ForwardIndexType", "IntegerLiteralType"]
+- !private ["Ps16ForwardIndexType", "_DisabledRangeIndex"]
+- !private ["Ps13GeneratorType", "Element"]
+- !private ["Vs16HalfOpenInterval", "deinit"]
+- !private ["Ps8Hashable", "Distance"]
+- !private ["Ps8Hashable", "Element"]
+- !private ["Ps8Hashable", "IntegerLiteralType"]
+- !private ["Ps8Hashable", "NSData"]
+- !private ["Ps8Hashable", "NSUTF8StringEncoding"]
+- !private ["Ps8Hashable", "QueueConstants"]
+- !private ["Ps8Hashable", "XCTAssertEqual"]
+- !private ["Ps8Hashable", "XCTAssertNotNil"]
+- !private ["Ps8Hashable", "XCTAssertTrue"]
+- !private ["Ps8Hashable", "XCTExpectAssert"]
+- !private ["Ps8Hashable", "_DisabledRangeIndex"]
+- !private ["Ps8Hashable", "allPropertyTypes"]
+- !private ["Ps8Hashable", "assertDefaultPeopleProperties"]
+- !private ["Ps8Hashable", "dataUsingEncoding"]
+- ["Ps8Hashable", "init"]
+- !private ["Ps8Hashable", "mixpanel"]
+- ["Ps8Hashable", "testDropPeopleRecords"]
+- ["Ps8Hashable", "testDropUnidentifiedPeopleRecords"]
+- ["Ps8Hashable", "testPeopleAddPushDeviceToken"]
+- ["Ps8Hashable", "testPeopleAssertPropertyTypes"]
+- ["Ps8Hashable", "testPeopleClearCharges"]
+- ["Ps8Hashable", "testPeopleDeleteUser"]
+- ["Ps8Hashable", "testPeopleIncrement"]
+- ["Ps8Hashable", "testPeopleIncrementBy"]
+- ["Ps8Hashable", "testPeopleSet"]
+- ["Ps8Hashable", "testPeopleSetOnce"]
+- ["Ps8Hashable", "testPeopleSetReservedProperty"]
+- ["Ps8Hashable", "testPeopleSetTo"]
+- ["Ps8Hashable", "testPeopleTrackCharge"]
+- ["Ps8Hashable", "testPeopleTrackChargeDecimal"]
+- ["Ps8Hashable", "testPeopleTrackChargeWithProperties"]
+- ["Ps8Hashable", "testPeopleTrackChargeWithTime"]
+- ["Ps8Hashable", "testPeopleTrackChargeZero"]
+- !private ["Ps8Hashable", "waitForSerialQueue"]
+- ["Ps8Hashable", ""]
+- !private ["SQ", "deinit"]
+- !private ["Ps9Indexable", "Element"]
+- !private ["Ps9Indexable", "Generator"]
+- !private ["Ps9Indexable", "Index"]
+- !private ["Ps9Indexable", "Key"]
+- !private ["Ps9Indexable", "SubSequence"]
+- !private ["Ps9Indexable", "Value"]
+- !private ["Ps9Indexable", "_Element"]
+- !private ["Ps9Indexable", "count"]
+- !private ["Ps9Indexable", "first"]
+- !private ["Ps9Indexable", "isEmpty"]
+- !private ["Ps9Indexable", "last"]
+- !private ["Ps9Indexable", "subscript"]
+- !private ["Vs17IndexingGenerator", "Element"]
+- !private ["Si", "Distance"]
+- !private ["Si", "IntegerLiteralType"]
+- !private ["Si", "_DisabledRangeIndex"]
+- !private ["Si", "deinit"]
+- !private ["Vs5Int16", "deinit"]
+- !private ["Vs5Int32", "deinit"]
+- !private ["Vs5Int64", "deinit"]
+- !private ["Vs4Int8", "deinit"]
+- !private ["Ps21IntegerArithmeticType", "Distance"]
+- !private ["Ps21IntegerArithmeticType", "IntegerLiteralType"]
+- !private ["Ps21IntegerArithmeticType", "_DisabledRangeIndex"]
+- !private ["Ps25IntegerLiteralConvertible", "Distance"]
+- !private ["Ps25IntegerLiteralConvertible", "IntegerLiteralType"]
+- !private ["Ps25IntegerLiteralConvertible", "_DisabledRangeIndex"]
+- !private ["Ps11IntegerType", "Distance"]
+- !private ["Ps11IntegerType", "IntegerLiteralType"]
+- !private ["Ps11IntegerType", "_DisabledRangeIndex"]
+- !private ["PSo10LSHTTPBody", "dataUsingEncoding"]
+- !private ["PSo10LSHTTPBody", "init"]
+- !private ["PSo12LSMatcheable", "dataUsingEncoding"]
+- !private ["PSo12LSMatcheable", "init"]
+- !private ["Ps14MirrorPathType", "Distance"]
+- !private ["Ps14MirrorPathType", "IntegerLiteralType"]
+- !private ["Ps14MirrorPathType", "_DisabledRangeIndex"]
+- !private ["Ps14MirrorPathType", "dataUsingEncoding"]
+- !private ["Ps14MirrorPathType", "init"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "AnyObject"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "Double"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "Int"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "NSData"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "NSDate"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "NSUTF8StringEncoding"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "Properties"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "QueueConstants"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "String"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "XCTAssertEqual"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "XCTAssertNotNil"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "XCTAssertTrue"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "XCTExpectAssert"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "allPropertyTypes"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "assertDefaultPeopleProperties"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "init"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "mixpanel"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testDropPeopleRecords"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testDropUnidentifiedPeopleRecords"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleAddPushDeviceToken"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleAssertPropertyTypes"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleClearCharges"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleDeleteUser"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleIncrement"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleIncrementBy"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleSet"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleSetOnce"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleSetReservedProperty"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleSetTo"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleTrackCharge"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleTrackChargeDecimal"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleTrackChargeWithProperties"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleTrackChargeWithTime"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", "testPeopleTrackChargeZero"]
+- !private ["C17MixpanelDemoTests17MixpanelBaseTests", "waitForSerialQueue"]
+- ["C17MixpanelDemoTests17MixpanelBaseTests", ""]
+- !private ["P8Mixpanel16MixpanelDelegate", "NSData"]
+- !private ["P8Mixpanel16MixpanelDelegate", "NSUTF8StringEncoding"]
+- !private ["P8Mixpanel16MixpanelDelegate", "QueueConstants"]
+- !private ["P8Mixpanel16MixpanelDelegate", "XCTAssertEqual"]
+- !private ["P8Mixpanel16MixpanelDelegate", "XCTAssertNotNil"]
+- !private ["P8Mixpanel16MixpanelDelegate", "XCTAssertTrue"]
+- !private ["P8Mixpanel16MixpanelDelegate", "XCTExpectAssert"]
+- !private ["P8Mixpanel16MixpanelDelegate", "allPropertyTypes"]
+- !private ["P8Mixpanel16MixpanelDelegate", "assertDefaultPeopleProperties"]
+- ["P8Mixpanel16MixpanelDelegate", "init"]
+- !private ["P8Mixpanel16MixpanelDelegate", "mixpanel"]
+- ["P8Mixpanel16MixpanelDelegate", "testDropPeopleRecords"]
+- ["P8Mixpanel16MixpanelDelegate", "testDropUnidentifiedPeopleRecords"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleAddPushDeviceToken"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleAssertPropertyTypes"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleClearCharges"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleDeleteUser"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleIncrement"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleIncrementBy"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleSet"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleSetOnce"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleSetReservedProperty"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleSetTo"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleTrackCharge"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleTrackChargeDecimal"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleTrackChargeWithProperties"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleTrackChargeWithTime"]
+- ["P8Mixpanel16MixpanelDelegate", "testPeopleTrackChargeZero"]
+- !private ["P8Mixpanel16MixpanelDelegate", "waitForSerialQueue"]
+- ["P8Mixpanel16MixpanelDelegate", ""]
+- !private ["C8Mixpanel16MixpanelInstance", "identify"]
+- !private ["C8Mixpanel16MixpanelInstance", "people"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "AnyObject"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "Double"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "Int"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "NSData"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "NSDate"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "NSUTF8StringEncoding"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "Properties"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "QueueConstants"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "String"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "XCTAssertEqual"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "XCTAssertNotNil"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "XCTAssertTrue"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "XCTExpectAssert"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "allPropertyTypes"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "assertDefaultPeopleProperties"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "deinit"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "init"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "mixpanel"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testDropPeopleRecords"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testDropUnidentifiedPeopleRecords"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleAddPushDeviceToken"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleAssertPropertyTypes"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleClearCharges"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleDeleteUser"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleIncrement"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleIncrementBy"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleSet"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleSetOnce"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleSetReservedProperty"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleSetTo"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleTrackCharge"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleTrackChargeDecimal"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleTrackChargeWithProperties"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleTrackChargeWithTime"]
+- ["C17MixpanelDemoTests19MixpanelPeopleTests", "testPeopleTrackChargeZero"]
+- !private ["C17MixpanelDemoTests19MixpanelPeopleTests", "waitForSerialQueue"]
+- !private ["Ps21MutableCollectionType", "Element"]
+- !private ["Ps21MutableCollectionType", "Generator"]
+- !private ["Ps21MutableCollectionType", "Index"]
+- !private ["Ps21MutableCollectionType", "SubSequence"]
+- !private ["Ps21MutableCollectionType", "_Element"]
+- !private ["Ps21MutableCollectionType", "count"]
+- !private ["Ps21MutableCollectionType", "first"]
+- !private ["Ps21MutableCollectionType", "last"]
+- !private ["Ps16MutableIndexable", "Element"]
+- !private ["Ps16MutableIndexable", "Generator"]
+- !private ["Ps16MutableIndexable", "Index"]
+- !private ["Ps16MutableIndexable", "SubSequence"]
+- !private ["Ps16MutableIndexable", "_Element"]
+- !private ["Ps16MutableIndexable", "count"]
+- !private ["Ps16MutableIndexable", "first"]
+- !private ["Ps16MutableIndexable", "last"]
+- !private ["Ps16MutableSliceable", "Element"]
+- !private ["Ps16MutableSliceable", "Generator"]
+- !private ["Ps16MutableSliceable", "Index"]
+- !private ["Ps16MutableSliceable", "SubSequence"]
+- !private ["Ps16MutableSliceable", "_Element"]
+- !private ["Ps16MutableSliceable", "count"]
+- !private ["Ps16MutableSliceable", "first"]
+- !private ["Ps16MutableSliceable", "last"]
+- !private ["CSo7NSArray", "Element"]
+- !private ["PSo8NSCoding", "Element"]
+- !private ["PSo8NSCoding", "dataUsingEncoding"]
+- !private ["PSo8NSCoding", "init"]
+- !private ["PSo9NSCopying", "Element"]
+- !private ["PSo9NSCopying", "dataUsingEncoding"]
+- !private ["PSo9NSCopying", "init"]
+- !private ["CSo6NSData", "init"]
+- !private ["PSo17NSFastEnumeration", "Element"]
+- !private ["PSo16NSMutableCopying", "Element"]
+- !private ["PSo16NSMutableCopying", "dataUsingEncoding"]
+- !private ["PSo16NSMutableCopying", "init"]
+- !private ["CSo8NSObject", "AnyObject"]
+- !private ["CSo8NSObject", "Double"]
+- !private ["CSo8NSObject", "Element"]
+- !private ["CSo8NSObject", "Int"]
+- !private ["CSo8NSObject", "NSData"]
+- !private ["CSo8NSObject", "NSDate"]
+- !private ["CSo8NSObject", "NSUTF8StringEncoding"]
+- !private ["CSo8NSObject", "Properties"]
+- !private ["CSo8NSObject", "QueueConstants"]
+- !private ["CSo8NSObject", "String"]
+- !private ["CSo8NSObject", "XCTAssertEqual"]
+- !private ["CSo8NSObject", "XCTAssertNotNil"]
+- !private ["CSo8NSObject", "XCTAssertTrue"]
+- !private ["CSo8NSObject", "XCTExpectAssert"]
+- !private ["CSo8NSObject", "allPropertyTypes"]
+- !private ["CSo8NSObject", "assertDefaultPeopleProperties"]
+- !private ["CSo8NSObject", "dataUsingEncoding"]
+- !private ["CSo8NSObject", "deinit"]
+- ["CSo8NSObject", "init"]
+- !private ["CSo8NSObject", "mixpanel"]
+- ["CSo8NSObject", "testDropPeopleRecords"]
+- ["CSo8NSObject", "testDropUnidentifiedPeopleRecords"]
+- ["CSo8NSObject", "testPeopleAddPushDeviceToken"]
+- ["CSo8NSObject", "testPeopleAssertPropertyTypes"]
+- ["CSo8NSObject", "testPeopleClearCharges"]
+- ["CSo8NSObject", "testPeopleDeleteUser"]
+- ["CSo8NSObject", "testPeopleIncrement"]
+- ["CSo8NSObject", "testPeopleIncrementBy"]
+- ["CSo8NSObject", "testPeopleSet"]
+- ["CSo8NSObject", "testPeopleSetOnce"]
+- ["CSo8NSObject", "testPeopleSetReservedProperty"]
+- ["CSo8NSObject", "testPeopleSetTo"]
+- ["CSo8NSObject", "testPeopleTrackCharge"]
+- ["CSo8NSObject", "testPeopleTrackChargeDecimal"]
+- ["CSo8NSObject", "testPeopleTrackChargeWithProperties"]
+- ["CSo8NSObject", "testPeopleTrackChargeWithTime"]
+- ["CSo8NSObject", "testPeopleTrackChargeZero"]
+- !private ["CSo8NSObject", "waitForSerialQueue"]
+- !private ["PSo16NSObjectProtocol", "Element"]
+- !private ["PSo16NSObjectProtocol", "NSData"]
+- !private ["PSo16NSObjectProtocol", "NSUTF8StringEncoding"]
+- !private ["PSo16NSObjectProtocol", "QueueConstants"]
+- !private ["PSo16NSObjectProtocol", "XCTAssertEqual"]
+- !private ["PSo16NSObjectProtocol", "XCTAssertNotNil"]
+- !private ["PSo16NSObjectProtocol", "XCTAssertTrue"]
+- !private ["PSo16NSObjectProtocol", "XCTExpectAssert"]
+- !private ["PSo16NSObjectProtocol", "allPropertyTypes"]
+- !private ["PSo16NSObjectProtocol", "assertDefaultPeopleProperties"]
+- !private ["PSo16NSObjectProtocol", "dataUsingEncoding"]
+- ["PSo16NSObjectProtocol", "init"]
+- !private ["PSo16NSObjectProtocol", "mixpanel"]
+- ["PSo16NSObjectProtocol", "testDropPeopleRecords"]
+- ["PSo16NSObjectProtocol", "testDropUnidentifiedPeopleRecords"]
+- ["PSo16NSObjectProtocol", "testPeopleAddPushDeviceToken"]
+- ["PSo16NSObjectProtocol", "testPeopleAssertPropertyTypes"]
+- ["PSo16NSObjectProtocol", "testPeopleClearCharges"]
+- ["PSo16NSObjectProtocol", "testPeopleDeleteUser"]
+- ["PSo16NSObjectProtocol", "testPeopleIncrement"]
+- ["PSo16NSObjectProtocol", "testPeopleIncrementBy"]
+- ["PSo16NSObjectProtocol", "testPeopleSet"]
+- ["PSo16NSObjectProtocol", "testPeopleSetOnce"]
+- ["PSo16NSObjectProtocol", "testPeopleSetReservedProperty"]
+- ["PSo16NSObjectProtocol", "testPeopleSetTo"]
+- ["PSo16NSObjectProtocol", "testPeopleTrackCharge"]
+- ["PSo16NSObjectProtocol", "testPeopleTrackChargeDecimal"]
+- ["PSo16NSObjectProtocol", "testPeopleTrackChargeWithProperties"]
+- ["PSo16NSObjectProtocol", "testPeopleTrackChargeWithTime"]
+- ["PSo16NSObjectProtocol", "testPeopleTrackChargeZero"]
+- !private ["PSo16NSObjectProtocol", "waitForSerialQueue"]
+- ["PSo16NSObjectProtocol", ""]
+- !private ["PSo14NSSecureCoding", "Element"]
+- !private ["PSo14NSSecureCoding", "dataUsingEncoding"]
+- !private ["PSo14NSSecureCoding", "init"]
+- !private ["CSo8NSString", "dataUsingEncoding"]
+- !private ["CSo8NSString", "init"]
+- !private ["Ps21NilLiteralConvertible", "Element"]
+- !private ["Sq", "Element"]
+- !private ["Sq", "deinit"]
+- !private ["Ps16OutputStreamType", "dataUsingEncoding"]
+- !private ["Ps16OutputStreamType", "init"]
+- !private ["C8Mixpanel6People", "addPushDeviceToken"]
+- !private ["C8Mixpanel6People", "clearCharges"]
+- !private ["C8Mixpanel6People", "deleteUser"]
+- !private ["C8Mixpanel6People", "increment"]
+- !private ["C8Mixpanel6People", "peopleQueue"]
+- !private ["C8Mixpanel6People", "set"]
+- !private ["C8Mixpanel6People", "setOnce"]
+- !private ["C8Mixpanel6People", "trackCharge"]
+- !private ["C8Mixpanel6People", "unidentifiedQueue"]
+- !private ["V8Mixpanel14QueueConstants", "queueSize"]
+- !private ["Ps21RandomAccessIndexType", "Distance"]
+- !private ["Ps21RandomAccessIndexType", "IntegerLiteralType"]
+- !private ["Ps21RandomAccessIndexType", "_DisabledRangeIndex"]
+- !private ["Vs5Range", "Generator"]
+- !private ["Vs5Range", "deinit"]
+- !private ["Vs14RangeGenerator", "Element"]
+- !private ["Ps30RangeReplaceableCollectionType", "Element"]
+- !private ["Ps30RangeReplaceableCollectionType", "Generator"]
+- !private ["Ps30RangeReplaceableCollectionType", "Index"]
+- !private ["Ps30RangeReplaceableCollectionType", "SubSequence"]
+- !private ["Ps30RangeReplaceableCollectionType", "_Element"]
+- !private ["Ps30RangeReplaceableCollectionType", "count"]
+- !private ["Ps30RangeReplaceableCollectionType", "first"]
+- !private ["Ps30RangeReplaceableCollectionType", "last"]
+- !private ["Ps12SequenceType", "Element"]
+- !private ["Ps12SequenceType", "Generator"]
+- !private ["Ps12SequenceType", "Index"]
+- !private ["Ps12SequenceType", "Key"]
+- !private ["Ps12SequenceType", "SubSequence"]
+- !private ["Ps12SequenceType", "Value"]
+- !private ["Ps12SequenceType", "_Element"]
+- !private ["Ps12SequenceType", "count"]
+- !private ["Ps12SequenceType", "first"]
+- !private ["Ps12SequenceType", "isEmpty"]
+- !private ["Ps12SequenceType", "last"]
+- !private ["Ps12SequenceType", "subscript"]
+- !private ["Ps17SignedIntegerType", "Distance"]
+- !private ["Ps17SignedIntegerType", "IntegerLiteralType"]
+- !private ["Ps17SignedIntegerType", "_DisabledRangeIndex"]
+- !private ["Ps16SignedNumberType", "Distance"]
+- !private ["Ps16SignedNumberType", "IntegerLiteralType"]
+- !private ["Ps16SignedNumberType", "_DisabledRangeIndex"]
+- !private ["Vs5Slice", "Generator"]
+- !private ["Vs5Slice", "Index"]
+- !private ["Vs5Slice", "SubSequence"]
+- !private ["Vs5Slice", "_Element"]
+- !private ["Vs12StaticString", "deinit"]
+- !private ["Ps10Streamable", "dataUsingEncoding"]
+- !private ["Ps10Streamable", "init"]
+- !private ["Ps10Strideable", "Distance"]
+- !private ["Ps10Strideable", "IntegerLiteralType"]
+- !private ["Ps10Strideable", "_DisabledRangeIndex"]
+- !private ["SS", "dataUsingEncoding"]
+- !private ["SS", "deinit"]
+- !private ["SS", "init"]
+- !private ["Ps30StringInterpolationConvertible", "dataUsingEncoding"]
+- !private ["Ps30StringInterpolationConvertible", "init"]
+- !private ["Ps24StringLiteralConvertible", "dataUsingEncoding"]
+- !private ["Ps24StringLiteralConvertible", "init"]
+- !private ["Su", "deinit"]
+- !private ["Vs6UInt16", "deinit"]
+- !private ["Vs6UInt32", "deinit"]
+- !private ["Vs6UInt64", "deinit"]
+- !private ["Vs5UInt8", "deinit"]
+- !private ["Sc", "deinit"]
+- !private ["Ps31UnicodeScalarLiteralConvertible", "dataUsingEncoding"]
+- !private ["Ps31UnicodeScalarLiteralConvertible", "init"]
+- !private ["CSo6XCTest", "AnyObject"]
+- !private ["CSo6XCTest", "Double"]
+- !private ["CSo6XCTest", "Int"]
+- !private ["CSo6XCTest", "NSData"]
+- !private ["CSo6XCTest", "NSDate"]
+- !private ["CSo6XCTest", "NSUTF8StringEncoding"]
+- !private ["CSo6XCTest", "Properties"]
+- !private ["CSo6XCTest", "QueueConstants"]
+- !private ["CSo6XCTest", "String"]
+- !private ["CSo6XCTest", "XCTAssertEqual"]
+- !private ["CSo6XCTest", "XCTAssertNotNil"]
+- !private ["CSo6XCTest", "XCTAssertTrue"]
+- !private ["CSo6XCTest", "XCTExpectAssert"]
+- !private ["CSo6XCTest", "allPropertyTypes"]
+- !private ["CSo6XCTest", "assertDefaultPeopleProperties"]
+- ["CSo6XCTest", "init"]
+- !private ["CSo6XCTest", "mixpanel"]
+- ["CSo6XCTest", "testDropPeopleRecords"]
+- ["CSo6XCTest", "testDropUnidentifiedPeopleRecords"]
+- ["CSo6XCTest", "testPeopleAddPushDeviceToken"]
+- ["CSo6XCTest", "testPeopleAssertPropertyTypes"]
+- ["CSo6XCTest", "testPeopleClearCharges"]
+- ["CSo6XCTest", "testPeopleDeleteUser"]
+- ["CSo6XCTest", "testPeopleIncrement"]
+- ["CSo6XCTest", "testPeopleIncrementBy"]
+- ["CSo6XCTest", "testPeopleSet"]
+- ["CSo6XCTest", "testPeopleSetOnce"]
+- ["CSo6XCTest", "testPeopleSetReservedProperty"]
+- ["CSo6XCTest", "testPeopleSetTo"]
+- ["CSo6XCTest", "testPeopleTrackCharge"]
+- ["CSo6XCTest", "testPeopleTrackChargeDecimal"]
+- ["CSo6XCTest", "testPeopleTrackChargeWithProperties"]
+- ["CSo6XCTest", "testPeopleTrackChargeWithTime"]
+- ["CSo6XCTest", "testPeopleTrackChargeZero"]
+- !private ["CSo6XCTest", "waitForSerialQueue"]
+- !private ["CSo10XCTestCase", "AnyObject"]
+- !private ["CSo10XCTestCase", "Double"]
+- !private ["CSo10XCTestCase", "Int"]
+- !private ["CSo10XCTestCase", "NSData"]
+- !private ["CSo10XCTestCase", "NSDate"]
+- !private ["CSo10XCTestCase", "NSUTF8StringEncoding"]
+- !private ["CSo10XCTestCase", "Properties"]
+- !private ["CSo10XCTestCase", "QueueConstants"]
+- !private ["CSo10XCTestCase", "String"]
+- !private ["CSo10XCTestCase", "XCTAssertEqual"]
+- !private ["CSo10XCTestCase", "XCTAssertNotNil"]
+- !private ["CSo10XCTestCase", "XCTAssertTrue"]
+- !private ["CSo10XCTestCase", "XCTExpectAssert"]
+- !private ["CSo10XCTestCase", "allPropertyTypes"]
+- !private ["CSo10XCTestCase", "assertDefaultPeopleProperties"]
+- ["CSo10XCTestCase", "init"]
+- !private ["CSo10XCTestCase", "mixpanel"]
+- ["CSo10XCTestCase", "testDropPeopleRecords"]
+- ["CSo10XCTestCase", "testDropUnidentifiedPeopleRecords"]
+- ["CSo10XCTestCase", "testPeopleAddPushDeviceToken"]
+- ["CSo10XCTestCase", "testPeopleAssertPropertyTypes"]
+- ["CSo10XCTestCase", "testPeopleClearCharges"]
+- ["CSo10XCTestCase", "testPeopleDeleteUser"]
+- ["CSo10XCTestCase", "testPeopleIncrement"]
+- ["CSo10XCTestCase", "testPeopleIncrementBy"]
+- ["CSo10XCTestCase", "testPeopleSet"]
+- ["CSo10XCTestCase", "testPeopleSetOnce"]
+- ["CSo10XCTestCase", "testPeopleSetReservedProperty"]
+- ["CSo10XCTestCase", "testPeopleSetTo"]
+- ["CSo10XCTestCase", "testPeopleTrackCharge"]
+- ["CSo10XCTestCase", "testPeopleTrackChargeDecimal"]
+- ["CSo10XCTestCase", "testPeopleTrackChargeWithProperties"]
+- ["CSo10XCTestCase", "testPeopleTrackChargeWithTime"]
+- ["CSo10XCTestCase", "testPeopleTrackChargeZero"]
+- !private ["CSo10XCTestCase", "waitForSerialQueue"]
+- !private ["CSo11XCUIElement", "deinit"]
+- !private ["Ps10_ArrayType", "Element"]
+- !private ["Ps10_ArrayType", "Generator"]
+- !private ["Ps10_ArrayType", "Index"]
+- !private ["Ps10_ArrayType", "SubSequence"]
+- !private ["Ps10_ArrayType", "_Element"]
+- !private ["Ps10_ArrayType", "count"]
+- !private ["Ps10_ArrayType", "first"]
+- !private ["Ps10_ArrayType", "last"]
+- !private ["Ps49_BuiltinExtendedGraphemeClusterLiteralConvertible", "dataUsingEncoding"]
+- !private ["Ps49_BuiltinExtendedGraphemeClusterLiteralConvertible", "init"]
+- !private ["Ps33_BuiltinIntegerLiteralConvertible", "Distance"]
+- !private ["Ps33_BuiltinIntegerLiteralConvertible", "IntegerLiteralType"]
+- !private ["Ps33_BuiltinIntegerLiteralConvertible", "_DisabledRangeIndex"]
+- !private ["Ps32_BuiltinStringLiteralConvertible", "dataUsingEncoding"]
+- !private ["Ps32_BuiltinStringLiteralConvertible", "init"]
+- !private ["Ps37_BuiltinUTF16StringLiteralConvertible", "dataUsingEncoding"]
+- !private ["Ps37_BuiltinUTF16StringLiteralConvertible", "init"]
+- !private ["Ps39_BuiltinUnicodeScalarLiteralConvertible", "dataUsingEncoding"]
+- !private ["Ps39_BuiltinUnicodeScalarLiteralConvertible", "init"]
+- !private ["Ps24_DestructorSafeContainer", "Element"]
+- !private ["Ps24_DestructorSafeContainer", "Generator"]
+- !private ["Ps24_DestructorSafeContainer", "Index"]
+- !private ["Ps24_DestructorSafeContainer", "SubSequence"]
+- !private ["Ps24_DestructorSafeContainer", "_Element"]
+- !private ["Ps24_DestructorSafeContainer", "count"]
+- !private ["Ps24_DestructorSafeContainer", "first"]
+- !private ["Ps24_DestructorSafeContainer", "last"]
+- !private ["Ps14_Incrementable", "Distance"]
+- !private ["Ps14_Incrementable", "IntegerLiteralType"]
+- !private ["Ps14_Incrementable", "_DisabledRangeIndex"]
+- !private ["Ps22_IntegerArithmeticType", "Distance"]
+- !private ["Ps22_IntegerArithmeticType", "IntegerLiteralType"]
+- !private ["Ps22_IntegerArithmeticType", "_DisabledRangeIndex"]
+- !private ["Ps12_IntegerType", "Distance"]
+- !private ["Ps12_IntegerType", "IntegerLiteralType"]
+- !private ["Ps12_IntegerType", "_DisabledRangeIndex"]
+- !private ["Ps21_ObjectiveCBridgeable", "Distance"]
+- !private ["Ps21_ObjectiveCBridgeable", "Element"]
+- !private ["Ps21_ObjectiveCBridgeable", "Generator"]
+- !private ["Ps21_ObjectiveCBridgeable", "Index"]
+- !private ["Ps21_ObjectiveCBridgeable", "IntegerLiteralType"]
+- !private ["Ps21_ObjectiveCBridgeable", "Key"]
+- !private ["Ps21_ObjectiveCBridgeable", "SubSequence"]
+- !private ["Ps21_ObjectiveCBridgeable", "Value"]
+- !private ["Ps21_ObjectiveCBridgeable", "_DisabledRangeIndex"]
+- !private ["Ps21_ObjectiveCBridgeable", "_Element"]
+- !private ["Ps21_ObjectiveCBridgeable", "count"]
+- !private ["Ps21_ObjectiveCBridgeable", "dataUsingEncoding"]
+- !private ["Ps21_ObjectiveCBridgeable", "first"]
+- !private ["Ps21_ObjectiveCBridgeable", "init"]
+- !private ["Ps21_ObjectiveCBridgeable", "isEmpty"]
+- !private ["Ps21_ObjectiveCBridgeable", "last"]
+- !private ["Ps21_ObjectiveCBridgeable", "subscript"]
+- !private ["Ps22_RandomAccessAmbiguity", "Distance"]
+- !private ["Ps22_RandomAccessAmbiguity", "IntegerLiteralType"]
+- !private ["Ps22_RandomAccessAmbiguity", "_DisabledRangeIndex"]
+- !private ["Ps12_Reflectable", "Distance"]
+- !private ["Ps12_Reflectable", "Element"]
+- !private ["Ps12_Reflectable", "Generator"]
+- !private ["Ps12_Reflectable", "Index"]
+- !private ["Ps12_Reflectable", "IntegerLiteralType"]
+- !private ["Ps12_Reflectable", "Key"]
+- !private ["Ps12_Reflectable", "SubSequence"]
+- !private ["Ps12_Reflectable", "Value"]
+- !private ["Ps12_Reflectable", "_DisabledRangeIndex"]
+- !private ["Ps12_Reflectable", "_Element"]
+- !private ["Ps12_Reflectable", "count"]
+- !private ["Ps12_Reflectable", "dataUsingEncoding"]
+- !private ["Ps12_Reflectable", "first"]
+- !private ["Ps12_Reflectable", "init"]
+- !private ["Ps12_Reflectable", "isEmpty"]
+- !private ["Ps12_Reflectable", "last"]
+- !private ["Ps12_Reflectable", "subscript"]
+- !private ["Ps18_SignedIntegerType", "Distance"]
+- !private ["Ps18_SignedIntegerType", "IntegerLiteralType"]
+- !private ["Ps18_SignedIntegerType", "_DisabledRangeIndex"]
+depends-nominal:
+- "Ps9AnyObject"
+- !private "Sa"
+- !private "Ps23ArrayLiteralConvertible"
+- !private "Vs10ArraySlice"
+- !private "Ps22BidirectionalIndexType"
+- !private "Ps21BitwiseOperationsType"
+- !private "Sb"
+- "Ps11CVarArgType"
+- !private "Vs9Character"
+- !private "Ps14CollectionType"
+- !private "Ps10Comparable"
+- "Ps28CustomDebugStringConvertible"
+- "Ps23CustomStringConvertible"
+- !private "Vs10Dictionary"
+- !private "Vs15DictionaryIndex"
+- !private "Ps28DictionaryLiteralConvertible"
+- !private "Sd"
+- "Ps9Equatable"
+- !private "Ps41ExtendedGraphemeClusterLiteralConvertible"
+- !private "Sf"
+- !private "P8Mixpanel13FlushDelegate"
+- !private "Ps16ForwardIndexType"
+- !private "Ps13GeneratorType"
+- !private "Vs16HalfOpenInterval"
+- "Ps8Hashable"
+- !private "SQ"
+- !private "Ps9Indexable"
+- !private "Vs17IndexingGenerator"
+- !private "Si"
+- !private "Vs5Int16"
+- !private "Vs5Int32"
+- !private "Vs5Int64"
+- !private "Vs4Int8"
+- !private "Ps21IntegerArithmeticType"
+- !private "Ps25IntegerLiteralConvertible"
+- !private "Ps11IntegerType"
+- !private "PSo10LSHTTPBody"
+- !private "PSo12LSMatcheable"
+- !private "Ps14MirrorPathType"
+- "C17MixpanelDemoTests17MixpanelBaseTests"
+- "P8Mixpanel16MixpanelDelegate"
+- !private "C8Mixpanel16MixpanelInstance"
+- "C17MixpanelDemoTests19MixpanelPeopleTests"
+- !private "Ps21MutableCollectionType"
+- !private "Ps16MutableIndexable"
+- !private "Ps16MutableSliceable"
+- !private "CSo7NSArray"
+- !private "PSo8NSCoding"
+- !private "PSo9NSCopying"
+- !private "CSo6NSData"
+- !private "PSo17NSFastEnumeration"
+- !private "PSo16NSMutableCopying"
+- "CSo8NSObject"
+- "PSo16NSObjectProtocol"
+- !private "PSo14NSSecureCoding"
+- !private "CSo8NSString"
+- !private "Ps21NilLiteralConvertible"
+- !private "Sq"
+- !private "Ps16OutputStreamType"
+- !private "C8Mixpanel6People"
+- !private "V8Mixpanel14QueueConstants"
+- !private "Ps21RandomAccessIndexType"
+- !private "Vs5Range"
+- !private "Vs14RangeGenerator"
+- !private "Ps30RangeReplaceableCollectionType"
+- !private "Ps12SequenceType"
+- !private "Ps17SignedIntegerType"
+- !private "Ps16SignedNumberType"
+- !private "Vs5Slice"
+- !private "Vs12StaticString"
+- !private "Ps10Streamable"
+- !private "Ps10Strideable"
+- !private "SS"
+- !private "Ps30StringInterpolationConvertible"
+- !private "Ps24StringLiteralConvertible"
+- !private "Su"
+- !private "Vs6UInt16"
+- !private "Vs6UInt32"
+- !private "Vs6UInt64"
+- !private "Vs5UInt8"
+- !private "Sc"
+- !private "Ps31UnicodeScalarLiteralConvertible"
+- "CSo6XCTest"
+- "CSo10XCTestCase"
+- !private "CSo11XCUIElement"
+- !private "Ps10_ArrayType"
+- !private "Ps49_BuiltinExtendedGraphemeClusterLiteralConvertible"
+- !private "Ps33_BuiltinIntegerLiteralConvertible"
+- !private "Ps32_BuiltinStringLiteralConvertible"
+- !private "Ps37_BuiltinUTF16StringLiteralConvertible"
+- !private "Ps39_BuiltinUnicodeScalarLiteralConvertible"
+- !private "Ps24_DestructorSafeContainer"
+- !private "Ps14_Incrementable"
+- !private "Ps22_IntegerArithmeticType"
+- !private "Ps12_IntegerType"
+- !private "Ps21_ObjectiveCBridgeable"
+- !private "Ps22_RandomAccessAmbiguity"
+- !private "Ps12_Reflectable"
+- !private "Ps18_SignedIntegerType"
+depends-dynamic-lookup:
+- !private "subscript"
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/Foundation.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/XCTest.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIRemote.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIKeyboardKeys.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementQuery.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUICoordinate.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIDevice.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementTypeQueryProvider.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementTypes.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElementAttributes.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIElement.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCUIApplication.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestSuiteRun.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestSuite.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestProbe.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObservation.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObservationCenter.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestObserver.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestLog.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestRun.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCaseRun.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCase+AsynchronousTesting.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestCase.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestAssertionsImpl.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestAssertions.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCAbstractTest.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestErrors.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTestDefines.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTest.h"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework/Modules/module.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/UIKit.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/x86_64/CoreImage.swiftmodule"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Mixpanel.framework/Modules/Mixpanel.swiftmodule/x86_64.swiftmodule"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Mixpanel.framework/Headers/Mixpanel-Swift.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Mixpanel.framework/Headers/Mixpanel.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Mixpanel.framework/Modules/module.modulemap"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/Nocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/LSNocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/LSStubResponseDSL.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/NSData+Matcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/NSRegularExpression+Matcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/LSMatcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/NSString+Matcheable.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/LSStubRequestDSL.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/NSString+Nocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/LSHTTPBody.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/NSData+Nocilla.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Headers/Nocilla-umbrella.h"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/Nocilla/Nocilla.framework/Modules/module.modulemap"
+- "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/Build/Products/Debug-iphonesimulator/MixpanelDemo.swiftmodule/x86_64.swiftmodule"
+interface-hash: "7391d90ae6b1649d47456cf2add29d70"

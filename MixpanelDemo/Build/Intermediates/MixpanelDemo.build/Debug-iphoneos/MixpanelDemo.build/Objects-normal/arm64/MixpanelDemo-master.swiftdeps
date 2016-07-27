@@ -1,0 +1,9 @@
+version: "Apple Swift version 2.2 (swiftlang-703.0.18.8 clang-703.0.31)"
+options: "0027ae1a01a04863c9b4439fc1e04acf"
+build_time: [522805032, 795761000]
+inputs:
+  "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/MixpanelDemo/AppDelegate.swift": [522804981, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/MixpanelDemo/UtilityViewController.swift": [522804981, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/MixpanelDemo/TrackingViewController.swift": [522804981, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/MixpanelDemo/PeopleViewController.swift": [522804981, 0]
+  "/Users/yardeneitan/Development/mixpanel-swift/MixpanelDemo/MixpanelDemo/ActionCompleteViewController.swift": [522804981, 0]

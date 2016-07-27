@@ -1,0 +1,15 @@
+line_length: 140
+file_length: 1000
+type_body_length: 500
+function_parameter_count: 7
+opt_in_rules:
+  - empty_count
+disabled_rules:
+  - cyclomatic_complexity
+  - conditional_binding_cascade
+  - force_cast
+  - force_try
+  - function_body_length
+  - todo
+  - type_body_length
+  - variable_name

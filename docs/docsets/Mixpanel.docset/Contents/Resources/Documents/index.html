@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Mixpanel  Reference</title>
+    <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="js/jquery.min.js" defer></script>
+    <script src="js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+    <a title="Mixpanel  Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="index.html">Mixpanel Docs</a> (100% documented)</p>
+        <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="img/gh.png"/>View on GitHub</a></p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="index.html">Mixpanel Reference</a>
+        <img id="carat" src="img/carat.png" />
+        Mixpanel  Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Classes/Mixpanel.html">Mixpanel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/MixpanelInstance.html">MixpanelInstance</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/People.html">People</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Protocols/MixpanelDelegate.html">MixpanelDelegate</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            
+            <p align="center">
+  <img src="https://github.com/mixpanel/mixpanel-swift/blob/assets/mixpanelswift.png?raw=true" alt="Mixpanel Swift Library" height="200"/>
+</p>
+
+<p><a href="https://travis-ci.org/mixpanel/mixpanel-swift"><img src="https://travis-ci.org/mixpanel/mixpanel-swift.svg" alt="Build Status"></a>
+<a href="https://mixpanel.com"><img src="http://img.shields.io/cocoapods/v/Mixpanel.svg?style=flat" alt="CocoaPods Version"></a>
+<a href="https://github.com/Carthage/Carthage"><img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat" alt="Carthage compatible"></a>
+<a href="https://mixpanel.com"><img src="http://img.shields.io/cocoapods/l/Mixpanel.svg?style=flat" alt="Apache License"></a></p>
+<a href='#introduction' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='introduction'>Introduction</h1>
+
+<p>Welcome to the official Mixpanel Swift Library</p>
+
+<p>The Mixpanel Swift library for iOS is an open source project, and we&rsquo;d love to see your contributions! 
+We&rsquo;d also love for you to come and work with us! Check out <strong><a href="http://boards.greenhouse.io/mixpanel/jobs/25226#.U_4JXEhORKU">Jobs</a></strong> for details.</p>
+
+<p>If you are using Objective-C, we recommend using our <strong><a href="https://github.com/mixpanel/mixpanel-iphone">Objective-C Library</a></strong></p>
+<a href='#current-supported-features' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='current-supported-features'>Current supported features</h2>
+
+<ul>
+<li>Tracking API</li>
+<li>Mixpanel People API</li>
+<li>Swift2.3 and latest <a href="https://github.com/mixpanel/mixpanel-swift/tree/swift3">Swift3</a></li>
+<li><a href="https://mixpanel.github.io/mixpanel-swift/">Full Documentation</a></li>
+</ul>
+<a href='#installation' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='installation'>Installation</h1>
+<a href='#cocoapods' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='cocoapods'>CocoaPods</h2>
+
+<p>Mixpanel supports <code>CocoaPods</code> for easy installation.
+To Install, see our <strong><a href="https://mixpanel.com/help/reference/swift">swift integration guide »</a></strong></p>
+
+<p><code>pod &#39;Mixpanel-swift&#39;</code></p>
+<a href='#carthage' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='carthage'>Carthage</h2>
+
+<p>Mixpanel also supports <code>Carthage</code> to package your dependencies as a framework. Include the following dependency in your Cartfile:</p>
+
+<p><code>github &quot;mixpanel/mixpanel-swift&quot;</code></p>
+
+<p>Check out the <strong><a href="https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos">Carthage docs »</a></strong> for more info. </p>
+<a href='#manual-installation' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='manual-installation'>Manual Installation</h2>
+
+<p>To help users stay up to date with the latests version of our Swift SDK, we always recommend integrating our SDK via CocoaPods, which simplifies version updates and dependency management. However, there are cases where users can&rsquo;t use CocoaPods. Not to worry, just follow these manual installation steps and you&rsquo;ll be all set.</p>
+<a href='#step-1-add-as-a-submodule' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='step-1-add-as-a-submodule'>Step 1: Add as a Submodule</h3>
+
+<p>Add Mixpanel as a submodule to your local git repo like so:</p>
+<pre class="highlight plaintext"><code>git submodule add git@github.com:mixpanel/mixpanel-swift.git
+</code></pre>
+
+<p>Now the Mixpanel project and its files should be in your project folder! </p>
+<a href='#step-2-drag-mixpanel-to-your-project' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='step-2-drag-mixpanel-to-your-project'>Step 2: Drag Mixpanel to your project</h3>
+
+<p>Drag the Mixpanel.xcodeproj inside your sample project under the main sample project file:</p>
+
+<p><img src="http://images.mxpnl.com/docs/2016-07-19%2023:34:02.724663-Screen%20Shot%202016-07-19%20at%204.33.34%20PM.png" alt="alt text"></p>
+<a href='#step-3-embed-the-framework' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='step-3-embed-the-framework'>Step 3: Embed the framework</h3>
+
+<p>Select your app .xcodeproj file. Under <q>General</q>, add the Mixpanel framework as an embedded binary:</p>
+
+<p><img src="http://images.mxpnl.com/docs/2016-07-19%2023:31:29.237158-add_framework.png" alt="alt text"></p>
+<a href='#step-4-integrate' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='step-4-integrate'>Step 4: Integrate!</h3>
+
+<p>Import Mixpanel into AppDelegate.swift, and initialize Mixpanel within <code>application:didFinishLaunchingWithOptions:</code>
+<img src="http://images.mxpnl.com/docs/2016-07-19%2023:27:03.724972-Screen%20Shot%202016-07-18%20at%207.16.51%20PM.png" alt="alt text"></p>
+<pre class="highlight plaintext"><code>func application(_ application: UIApplication,
+                 didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -&gt; Bool {
+    Mixpanel.initialize(token: "MIXPANEL_TOKEN")
+}
+</code></pre>
+<a href='#initializing-and-usage' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='initializing-and-usage'>Initializing and Usage</h1>
+
+<p>By calling:
+<code>
+let mixpanel = Mixpanel.initialize(token: &quot;MIXPANEL_TOKEN&quot;)
+</code></p>
+
+<p>You initialize your mixpanel instance with the token provided to you on mixpanel.com.
+To interact with the instance and start tracking, you can either use the mixpanel instance given when initializing:
+<code>
+mixpanel.track(event: &quot;Tracked Event!&quot;)
+</code>
+or you can directly fetch the instance and use it from the Mixpanel object:
+<code>
+Mixpanel.mainInstance().track(event: &quot;Tracked Event!&quot;)
+</code></p>
+<a href='#start-tracking' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='start-tracking'>Start tracking</h2>
+
+<p>You&rsquo;re done! You&rsquo;ve successfully integrated the Mixpanel Swift SDK into your app. To stay up to speed on important SDK releases and updates, star or watch our repository on <a href="https://github.com/mixpanel/mixpanel-swift">Github</a>.</p>
+
+<p>Have any questions? Reach out to <a href="mailto:support@mixpanel.com">support@mixpanel.com</a> to speak to someone smart, quickly.</p>
+
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2016 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2016-07-28)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

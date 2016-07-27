@@ -45,7 +45,7 @@ Check out the **[Carthage docs »](https://github.com/Carthage/Carthage#if-youre
 
 ## Manual Installation
 
-To help users stay up to date with the latests version of our iOS SDK, we always recommend integrating our SDK via CocoaPods, which simplifies version updates and dependency management. However, there are cases where users can't use CocoaPods. Not to worry, just follow these manual installation steps and you'll be all set.
+To help users stay up to date with the latests version of our Swift SDK, we always recommend integrating our SDK via CocoaPods, which simplifies version updates and dependency management. However, there are cases where users can't use CocoaPods. Not to worry, just follow these manual installation steps and you'll be all set.
 
 ### Step 1: Add as a Submodule
 
@@ -100,6 +100,6 @@ Mixpanel.mainInstance().track(event: "Tracked Event!")
 
 ## Start tracking
 
-You're done! You've successfully integrated the Mixpanel SDK into your app. To stay up to speed on important SDK releases and updates, star or watch our repository on [Github](https://github.com/mixpanel/mixpanel-swift).
+You're done! You've successfully integrated the Mixpanel Swift SDK into your app. To stay up to speed on important SDK releases and updates, star or watch our repository on [Github](https://github.com/mixpanel/mixpanel-swift).
 
 Have any questions? Reach out to [support@mixpanel.com](mailto:support@mixpanel.com) to speak to someone smart, quickly.

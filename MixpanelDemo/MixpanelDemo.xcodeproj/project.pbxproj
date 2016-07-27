@@ -1,0 +1,601 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		021F142821B8EA1313088AB6 /* Pods_MixpanelDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37433CF0620BC6A0A5EFC541 /* Pods_MixpanelDemoTests.framework */; };
+		E110704B1D3854DC008532ED /* LoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E110704A1D3854DC008532ED /* LoggerTests.swift */; };
+		E12406201D249B2500383635 /* MixpanelBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E124061F1D249B2500383635 /* MixpanelBaseTests.swift */; };
+		E15FF7D71D0461130076CDE3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7D61D0461130076CDE3 /* AppDelegate.swift */; };
+		E15FF7DE1D0461130076CDE3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E15FF7DD1D0461130076CDE3 /* Assets.xcassets */; };
+		E15FF7E11D0461130076CDE3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E15FF7DF1D0461130076CDE3 /* LaunchScreen.storyboard */; };
+		E15FF7EC1D0461130076CDE3 /* MixpanelDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7EB1D0461130076CDE3 /* MixpanelDemoTests.swift */; };
+		E15FF7FC1D0461D70076CDE3 /* Mixpanel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */; };
+		E15FF7FD1D0461D70076CDE3 /* Mixpanel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E1C61EBA1D22F6470056C56C /* MixpanelPeopleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */; };
+		E1C61EBE1D22F9F60056C56C /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EBD1D22F9F60056C56C /* TestConstants.swift */; };
+		E1DE1A1A1D40009D00C22621 /* MixpanelDemo.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = E1DE1A191D40009D00C22621 /* MixpanelDemo.entitlements */; };
+		E1DE1A201D4000C400C22621 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E1DE1A1B1D4000C400C22621 /* Main.storyboard */; };
+		E1DE1A211D4000C400C22621 /* TrackingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DE1A1C1D4000C400C22621 /* TrackingViewController.swift */; };
+		E1DE1A221D4000C400C22621 /* PeopleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DE1A1D1D4000C400C22621 /* PeopleViewController.swift */; };
+		E1DE1A231D4000C400C22621 /* UtilityViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DE1A1E1D4000C400C22621 /* UtilityViewController.swift */; };
+		E1DE1A241D4000C400C22621 /* ActionCompleteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DE1A1F1D4000C400C22621 /* ActionCompleteViewController.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E15FF7E81D0461130076CDE3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15FF7CB1D0461130076CDE3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E15FF7D21D0461130076CDE3;
+			remoteInfo = MixpanelDemo;
+		};
+		E15FF7FA1D0461BC0076CDE3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E115947D1CFF1491007F8B4F;
+			remoteInfo = Mixpanel;
+		};
+		E15FF7FE1D0461D70076CDE3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = E115947C1CFF1491007F8B4F;
+			remoteInfo = Mixpanel;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E15FF8001D0461D70076CDE3 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E15FF7FD1D0461D70076CDE3 /* Mixpanel.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		37433CF0620BC6A0A5EFC541 /* Pods_MixpanelDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MixpanelDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5609994314AFCE2B8FF1705B /* Pods-MixpanelDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MixpanelDemoTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests.release.xcconfig"; sourceTree = "<group>"; };
+		9233A000BB35A654EEC9A9D6 /* Pods-MixpanelDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MixpanelDemoTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
+		E110704A1D3854DC008532ED /* LoggerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoggerTests.swift; sourceTree = "<group>"; };
+		E124061F1D249B2500383635 /* MixpanelBaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelBaseTests.swift; sourceTree = "<group>"; };
+		E15FF7D31D0461130076CDE3 /* MixpanelDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MixpanelDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E15FF7D61D0461130076CDE3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E15FF7DD1D0461130076CDE3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E15FF7E01D0461130076CDE3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		E15FF7E21D0461130076CDE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E15FF7E71D0461130076CDE3 /* MixpanelDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MixpanelDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E15FF7EB1D0461130076CDE3 /* MixpanelDemoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelDemoTests.swift; sourceTree = "<group>"; };
+		E15FF7ED1D0461130076CDE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Mixpanel.xcodeproj; path = ../Mixpanel.xcodeproj; sourceTree = "<group>"; };
+		E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelPeopleTests.swift; sourceTree = "<group>"; };
+		E1C61EBD1D22F9F60056C56C /* TestConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstants.swift; sourceTree = "<group>"; };
+		E1DE1A191D40009D00C22621 /* MixpanelDemo.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = MixpanelDemo.entitlements; sourceTree = "<group>"; };
+		E1DE1A1B1D4000C400C22621 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		E1DE1A1C1D4000C400C22621 /* TrackingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewController.swift; sourceTree = "<group>"; };
+		E1DE1A1D1D4000C400C22621 /* PeopleViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeopleViewController.swift; sourceTree = "<group>"; };
+		E1DE1A1E1D4000C400C22621 /* UtilityViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UtilityViewController.swift; sourceTree = "<group>"; };
+		E1DE1A1F1D4000C400C22621 /* ActionCompleteViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionCompleteViewController.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E15FF7D01D0461130076CDE3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E15FF7FC1D0461D70076CDE3 /* Mixpanel.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E15FF7E41D0461130076CDE3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				021F142821B8EA1313088AB6 /* Pods_MixpanelDemoTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		28127E0746D6CC818BA7B834 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				9233A000BB35A654EEC9A9D6 /* Pods-MixpanelDemoTests.debug.xcconfig */,
+				5609994314AFCE2B8FF1705B /* Pods-MixpanelDemoTests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		773080F90ECB3A0D67A6E636 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				37433CF0620BC6A0A5EFC541 /* Pods_MixpanelDemoTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E15FF7CA1D0461130076CDE3 = {
+			isa = PBXGroup;
+			children = (
+				E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */,
+				E15FF7D51D0461130076CDE3 /* MixpanelDemo */,
+				E15FF7EA1D0461130076CDE3 /* MixpanelDemoTests */,
+				E15FF7D41D0461130076CDE3 /* Products */,
+				28127E0746D6CC818BA7B834 /* Pods */,
+				773080F90ECB3A0D67A6E636 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		E15FF7D41D0461130076CDE3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E15FF7D31D0461130076CDE3 /* MixpanelDemo.app */,
+				E15FF7E71D0461130076CDE3 /* MixpanelDemoTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E15FF7D51D0461130076CDE3 /* MixpanelDemo */ = {
+			isa = PBXGroup;
+			children = (
+				E15FF7D61D0461130076CDE3 /* AppDelegate.swift */,
+				E1DE1A1B1D4000C400C22621 /* Main.storyboard */,
+				E1DE1A1C1D4000C400C22621 /* TrackingViewController.swift */,
+				E1DE1A1D1D4000C400C22621 /* PeopleViewController.swift */,
+				E1DE1A1E1D4000C400C22621 /* UtilityViewController.swift */,
+				E1DE1A1F1D4000C400C22621 /* ActionCompleteViewController.swift */,
+				E15FF7DD1D0461130076CDE3 /* Assets.xcassets */,
+				E15FF7DF1D0461130076CDE3 /* LaunchScreen.storyboard */,
+				E1DE1A191D40009D00C22621 /* MixpanelDemo.entitlements */,
+				E15FF7E21D0461130076CDE3 /* Info.plist */,
+			);
+			path = MixpanelDemo;
+			sourceTree = "<group>";
+		};
+		E15FF7EA1D0461130076CDE3 /* MixpanelDemoTests */ = {
+			isa = PBXGroup;
+			children = (
+				E110704A1D3854DC008532ED /* LoggerTests.swift */,
+				E15FF7EB1D0461130076CDE3 /* MixpanelDemoTests.swift */,
+				E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */,
+				E15FF7ED1D0461130076CDE3 /* Info.plist */,
+				E124061F1D249B2500383635 /* MixpanelBaseTests.swift */,
+				E1C61EBD1D22F9F60056C56C /* TestConstants.swift */,
+			);
+			path = MixpanelDemoTests;
+			sourceTree = "<group>";
+		};
+		E15FF7F71D0461BC0076CDE3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E15FF7D21D0461130076CDE3 /* MixpanelDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E15FF7F01D0461130076CDE3 /* Build configuration list for PBXNativeTarget "MixpanelDemo" */;
+			buildPhases = (
+				E15FF7CF1D0461130076CDE3 /* Sources */,
+				E15FF7D01D0461130076CDE3 /* Frameworks */,
+				E15FF7D11D0461130076CDE3 /* Resources */,
+				E15FF8001D0461D70076CDE3 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E15FF7FF1D0461D70076CDE3 /* PBXTargetDependency */,
+			);
+			name = MixpanelDemo;
+			productName = MixpanelDemo;
+			productReference = E15FF7D31D0461130076CDE3 /* MixpanelDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E15FF7E61D0461130076CDE3 /* MixpanelDemoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E15FF7F31D0461130076CDE3 /* Build configuration list for PBXNativeTarget "MixpanelDemoTests" */;
+			buildPhases = (
+				122455B428AF758CAE10EE5F /* [CP] Check Pods Manifest.lock */,
+				E15FF7E31D0461130076CDE3 /* Sources */,
+				E15FF7E41D0461130076CDE3 /* Frameworks */,
+				E15FF7E51D0461130076CDE3 /* Resources */,
+				23A073632FB9DC26C9B98ABF /* [CP] Embed Pods Frameworks */,
+				14A6BFB53FD8FB99E2B3D2F6 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E15FF7E91D0461130076CDE3 /* PBXTargetDependency */,
+			);
+			name = MixpanelDemoTests;
+			productName = MixpanelDemoTests;
+			productReference = E15FF7E71D0461130076CDE3 /* MixpanelDemoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E15FF7CB1D0461130076CDE3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0730;
+				LastUpgradeCheck = 0800;
+				ORGANIZATIONNAME = Mixpanel;
+				TargetAttributes = {
+					E15FF7D21D0461130076CDE3 = {
+						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = E8FVX7QLET;
+						DevelopmentTeamName = "Mixpanel, Inc.";
+						LastSwiftMigration = 0800;
+					};
+					E15FF7E61D0461130076CDE3 = {
+						CreatedOnToolsVersion = 7.3.1;
+						LastSwiftMigration = 0800;
+						TestTargetID = E15FF7D21D0461130076CDE3;
+					};
+				};
+			};
+			buildConfigurationList = E15FF7CE1D0461130076CDE3 /* Build configuration list for PBXProject "MixpanelDemo" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E15FF7CA1D0461130076CDE3;
+			productRefGroup = E15FF7D41D0461130076CDE3 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = E15FF7F71D0461BC0076CDE3 /* Products */;
+					ProjectRef = E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				E15FF7D21D0461130076CDE3 /* MixpanelDemo */,
+				E15FF7E61D0461130076CDE3 /* MixpanelDemoTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Mixpanel.framework;
+			remoteRef = E15FF7FA1D0461BC0076CDE3 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E15FF7D11D0461130076CDE3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E15FF7E11D0461130076CDE3 /* LaunchScreen.storyboard in Resources */,
+				E15FF7DE1D0461130076CDE3 /* Assets.xcassets in Resources */,
+				E1DE1A1A1D40009D00C22621 /* MixpanelDemo.entitlements in Resources */,
+				E1DE1A201D4000C400C22621 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E15FF7E51D0461130076CDE3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		122455B428AF758CAE10EE5F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		14A6BFB53FD8FB99E2B3D2F6 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		23A073632FB9DC26C9B98ABF /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E15FF7CF1D0461130076CDE3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E15FF7D71D0461130076CDE3 /* AppDelegate.swift in Sources */,
+				E1DE1A231D4000C400C22621 /* UtilityViewController.swift in Sources */,
+				E1DE1A211D4000C400C22621 /* TrackingViewController.swift in Sources */,
+				E1DE1A221D4000C400C22621 /* PeopleViewController.swift in Sources */,
+				E1DE1A241D4000C400C22621 /* ActionCompleteViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E15FF7E31D0461130076CDE3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E110704B1D3854DC008532ED /* LoggerTests.swift in Sources */,
+				E1C61EBA1D22F6470056C56C /* MixpanelPeopleTests.swift in Sources */,
+				E1C61EBE1D22F9F60056C56C /* TestConstants.swift in Sources */,
+				E12406201D249B2500383635 /* MixpanelBaseTests.swift in Sources */,
+				E15FF7EC1D0461130076CDE3 /* MixpanelDemoTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E15FF7E91D0461130076CDE3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E15FF7D21D0461130076CDE3 /* MixpanelDemo */;
+			targetProxy = E15FF7E81D0461130076CDE3 /* PBXContainerItemProxy */;
+		};
+		E15FF7FF1D0461D70076CDE3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Mixpanel;
+			targetProxy = E15FF7FE1D0461D70076CDE3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		E15FF7DF1D0461130076CDE3 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E15FF7E01D0461130076CDE3 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		E15FF7EE1D0461130076CDE3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E15FF7EF1D0461130076CDE3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E15FF7F11D0461130076CDE3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEFINES_MODULE = YES;
+				INFOPLIST_FILE = MixpanelDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Mixpanel";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.MixpanelDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		E15FF7F21D0461130076CDE3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEFINES_MODULE = YES;
+				INFOPLIST_FILE = MixpanelDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Mixpanel";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.MixpanelDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		E15FF7F41D0461130076CDE3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9233A000BB35A654EEC9A9D6 /* Pods-MixpanelDemoTests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				INFOPLIST_FILE = MixpanelDemoTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Mixpanel";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.MixpanelDemoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MixpanelDemo.app/MixpanelDemo";
+			};
+			name = Debug;
+		};
+		E15FF7F51D0461130076CDE3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5609994314AFCE2B8FF1705B /* Pods-MixpanelDemoTests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				INFOPLIST_FILE = MixpanelDemoTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Mixpanel";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.MixpanelDemoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MixpanelDemo.app/MixpanelDemo";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E15FF7CE1D0461130076CDE3 /* Build configuration list for PBXProject "MixpanelDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E15FF7EE1D0461130076CDE3 /* Debug */,
+				E15FF7EF1D0461130076CDE3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E15FF7F01D0461130076CDE3 /* Build configuration list for PBXNativeTarget "MixpanelDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E15FF7F11D0461130076CDE3 /* Debug */,
+				E15FF7F21D0461130076CDE3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E15FF7F31D0461130076CDE3 /* Build configuration list for PBXNativeTarget "MixpanelDemoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E15FF7F41D0461130076CDE3 /* Debug */,
+				E15FF7F51D0461130076CDE3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E15FF7CB1D0461130076CDE3 /* Project object */;
+}

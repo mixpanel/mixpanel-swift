@@ -31,9 +31,10 @@ class Persistence {
     class private func filePathFor(_ archiveType: String, token: String) -> String? {
         let filename = "mixpanel-\(token)-\(archiveType)"
         let manager = FileManager.default
-        let url = manager.urlsForDirectory(.libraryDirectory, inDomains: .userDomainMask).last
 
-        guard let urlUnwrapped = try? url?.appendingPathComponent(filename).path else {
+        let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
+
+        guard let urlUnwrapped = url?.appendingPathComponent(filename).path else {
             return nil
         }
 

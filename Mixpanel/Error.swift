@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum PropertyError: ErrorProtocol {
+enum PropertyError: Error {
     case InvalidType(type: AnyObject)
 }
 
@@ -34,7 +34,7 @@ class ErrorHandler {
         }
     }
 
-    class func logError(_ error: ErrorProtocol) {
+    class func logError(_ error: Error) {
         let stackSymbols = Thread.callStackSymbols
         Logger.error(message: "Error: \(error) \n Stack Symbols: \(stackSymbols)")
     }

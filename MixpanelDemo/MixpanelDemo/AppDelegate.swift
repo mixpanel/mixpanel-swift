@@ -23,8 +23,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Mixpanel.mainInstance().flushInterval = 5
 
         let settings = UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
-        UIApplication.shared().registerUserNotificationSettings(settings)
-        UIApplication.shared().registerForRemoteNotifications()
+        UIApplication.shared.registerUserNotificationSettings(settings)
+        UIApplication.shared.registerForRemoteNotifications()
 
         Mixpanel.mainInstance().identify(
             distinctId: Mixpanel.mainInstance().distinctId)
@@ -46,7 +46,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Mixpanel.mainInstance().people.addPushDeviceToken(deviceToken)
     }
 
-    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         debugPrint(error)
     }
 

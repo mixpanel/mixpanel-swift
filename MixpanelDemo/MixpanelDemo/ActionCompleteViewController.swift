@@ -29,7 +29,7 @@ class ActionCompleteViewController: UIViewController {
     }
 
     override func viewDidAppear(_ animated: Bool) {
-        DispatchQueue.main.after(when: .now() + 5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             self.dismiss(animated: true, completion: nil)
         }
     }

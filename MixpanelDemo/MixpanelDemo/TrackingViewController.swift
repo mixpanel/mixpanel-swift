@@ -54,7 +54,7 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
         case 2:
             let ev = "Timed Event"
             Mixpanel.mainInstance().time(event: ev)
-            DispatchQueue.main.after(when: .now() + 5) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                 Mixpanel.mainInstance().track(event: ev)
             }
             descStr = "Timed Event: \"\(ev)\""

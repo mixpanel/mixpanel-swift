@@ -67,11 +67,11 @@ class JSONHandler {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-            dateFormatter.locale = Locale(localeIdentifier: "en_US_POSIX")
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
             return dateFormatter.string(from: obj)
 
         case let obj as URL:
-            return obj.absoluteString!
+            return obj.absoluteString
 
         default:
             Logger.info(message: "enforcing string on object")

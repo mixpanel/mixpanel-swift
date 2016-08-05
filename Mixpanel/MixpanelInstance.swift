@@ -140,7 +140,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         trackInstance = Track(apiToken: self.apiToken)
         flushInstance.delegate = self
         let label = "com.mixpanel.\(self.apiToken)"
-        serialQueue = DispatchQueue(label: label, attributes: DispatchQueueAttributes.serial)
+        serialQueue = DispatchQueue(label: label)
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
                         serialQueue: serialQueue)
@@ -204,7 +204,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     }
 
     @objc private func applicationDidEnterBackground(_ notification: Notification) {
-        let sharedApplication = UIApplication.shared()
+        let sharedApplication = UIApplication.shared
 
         taskId = sharedApplication.beginBackgroundTask() {
             self.taskId = UIBackgroundTaskInvalid
@@ -228,7 +228,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     @objc private func applicationWillEnterForeground(_ notification: Notification) {
         serialQueue.async() {
             if self.taskId != UIBackgroundTaskInvalid {
-                UIApplication.shared().endBackgroundTask(self.taskId)
+                UIApplication.shared.endBackgroundTask(self.taskId)
                 self.taskId = UIBackgroundTaskInvalid
                 self.updateNetworkActivityIndicator(false)
             }
@@ -257,7 +257,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     func defaultDistinctId() -> String {
         var distinctId: String?
         if NSClassFromString("UIDevice") != nil {
-            distinctId = UIDevice.current().identifierForVendor?.uuidString
+            distinctId = UIDevice.current.identifierForVendor?.uuidString
         }
 
         guard let distId = distinctId else {
@@ -269,7 +269,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
     func updateNetworkActivityIndicator(_ on: Bool) {
         if showNetworkActivityIndicator {
-            UIApplication.shared().isNetworkActivityIndicatorVisible = on
+            UIApplication.shared.isNetworkActivityIndicatorVisible = on
         }
     }
 

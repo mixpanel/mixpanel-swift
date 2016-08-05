@@ -13,15 +13,11 @@ struct BasePath {
     static var MixpanelAPI = "https://api.mixpanel.com"
 
     static func buildURL(base: String, path: String) -> URL? {
-        guard let url = try? URL(string: base)?.appendingPathComponent(path) else {
+        guard let url = URL(string: base)?.appendingPathComponent(path) else {
             return nil
         }
 
-        guard let urlUnwrapped = url else {
-            return nil
-        }
-
-        return urlUnwrapped
+        return url
     }
 
 }

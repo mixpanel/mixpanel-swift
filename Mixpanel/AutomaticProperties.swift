@@ -15,7 +15,7 @@ class AutomaticProperties {
 
     static var properties: Properties = {
         var p = Properties()
-        let size = UIScreen.main().bounds.size
+        let size = UIScreen.main.bounds.size
         let infoDict = Bundle.main.infoDictionary
         if let infoDict = infoDict {
             p["$app_build_number"]     = infoDict["CFBundleVersion"]
@@ -25,8 +25,8 @@ class AutomaticProperties {
         p["mp_lib"]             = "swift"
         p["$lib_version"]       = AutomaticProperties.libVersion()
         p["$manufacturer"]      = "Apple"
-        p["$os"]                = UIDevice.current().systemName
-        p["$os_version"]        = UIDevice.current().systemVersion
+        p["$os"]                = UIDevice.current.systemName
+        p["$os_version"]        = UIDevice.current.systemVersion
         p["$model"]             = AutomaticProperties.deviceModel()
         p["$screen_height"]     = Int(size.height)
         p["$screen_width"]      = Int(size.width)
@@ -41,7 +41,7 @@ class AutomaticProperties {
             p["$ios_app_release"] = infoDict["CFBundleShortVersionString"]
         }
         p["$ios_device_model"]  = AutomaticProperties.deviceModel()
-        p["$ios_version"]       = UIDevice.current().systemVersion
+        p["$ios_version"]       = UIDevice.current.systemVersion
         p["$ios_lib_version"]   = AutomaticProperties.libVersion()
 
         return p

@@ -15,17 +15,27 @@ class DecideRequest: Network {
     var networkRequestsAllowedAfterTime = 0.0
     var networkConsecutiveFailures = 0
 
-    func buildQueryItems(distinctId: String,
-                         token: String) -> [URLQueryItem] {
-        let itemVersion = URLQueryItem(name: "version", value: "1")
-        let itemLib = URLQueryItem(name: "lib", value: "iphone")
-        let itemToken = URLQueryItem(name: "token", value: token)
-        let itemDistinctId = URLQueryItem(name: "distinct_id", value: distinctId)
+    struct DecideQueryItems {
+        let version: URLQueryItem
+        let lib: URLQueryItem
+        let token: URLQueryItem
+        let distinctId: URLQueryItem
+        let properties: URLQueryItem
 
-        let propertiesData = try! JSONSerialization.data(withJSONObject: AutomaticProperties.peopleProperties)
-        let propertiesString = String(data: propertiesData, encoding: String.Encoding.utf8)
-        let itemProperties = URLQueryItem(name: "properties", value: propertiesString)
-        return [itemVersion, itemLib, itemToken, itemDistinctId, itemProperties]
+        init(distinctId: String, token: String) {
+            self.version = URLQueryItem(name: "version", value: "1")
+            self.lib = URLQueryItem(name: "lib", value: "iphone")
+            self.token = URLQueryItem(name: "token", value: token)
+            self.distinctId = URLQueryItem(name: "distinct_id", value: distinctId)
+
+            let propertiesData = try! JSONSerialization.data(withJSONObject: AutomaticProperties.peopleProperties)
+            let propertiesString = String(data: propertiesData, encoding: String.Encoding.utf8)
+            self.properties = URLQueryItem(name: "properties", value: propertiesString)
+        }
+
+        func toArray() -> [URLQueryItem] {
+            return [version, lib, token, distinctId, properties]
+        }
     }
 
     func sendRequest(distinctId: String,
@@ -42,10 +52,10 @@ class DecideRequest: Network {
             return response as? DecideResult
         }
 
-        let queryItems = buildQueryItems(distinctId: distinctId, token: token)
+        let queryItems = DecideQueryItems(distinctId: distinctId, token: token)
         let resource = Network.buildResource(path: decidePath,
                                              method: Method.GET,
-                                             queryItems: queryItems,
+                                             queryItems: queryItems.toArray(),
                                              headers: ["Accept-Encoding": "gzip"],
                                              parse: responseParser)
 
@@ -56,11 +66,9 @@ class DecideRequest: Network {
         })
     }
 
-
     private func decideRequestHandler(_ base: String,
                                       resource: Resource<DecideResult>,
                                       completion: (DecideResult?) -> Void) {
-
         Network.apiRequest(base: base,
                            resource: resource,
                            failure: { (reason, data, response) in

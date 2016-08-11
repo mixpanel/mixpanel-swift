@@ -44,10 +44,10 @@ class MiniNotificationViewController: UIViewController {
         }
 
         if notification.style == Style.Light.rawValue {
-            view.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
-            bodyLabel.textColor = #colorLiteral(red: 0.4823529412, green: 0.5725490196, blue: 0.6392156863, alpha: 1)
+            view.backgroundColor = InAppNotificationsConstants.miniLightBGColor
+            bodyLabel.textColor = InAppNotificationsConstants.miniLightTextColor
             imageView.image = imageView.image?.withRenderingMode(.alwaysTemplate)
-            imageView.tintColor = #colorLiteral(red: 0.4823529412, green: 0.5725490196, blue: 0.6392156863, alpha: 1)
+            imageView.tintColor = InAppNotificationsConstants.miniLightTextColor
         }
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(gesture:)))
@@ -80,7 +80,7 @@ class MiniNotificationViewController: UIViewController {
             window.rootViewController = self
             window.layer.cornerRadius = 6
             if notification.style == Style.Light.rawValue {
-                window.layer.borderColor = #colorLiteral(red: 0.8549019608, green: 0.8745098039, blue: 0.9098039216, alpha: 1).cgColor
+                window.layer.borderColor = InAppNotificationsConstants.miniLightBGColor.cgColor
                 window.layer.borderWidth = 1
             }
             window.isHidden = false

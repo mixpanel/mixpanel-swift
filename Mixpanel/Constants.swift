@@ -18,3 +18,13 @@ struct APIConstants {
     static let maxRetryBackoff = 600.0
     static let failuresTillBackoff = 2
 }
+
+struct BundleConstants {
+    static let ID = "com.mixpanel.Mixpanel"
+}
+
+struct InAppNotificationsConstants {
+    static let miniInAppHeight: CGFloat = 65
+    static let miniBottomPadding: CGFloat = 10
+    static let miniSidePadding: CGFloat = 15
+}

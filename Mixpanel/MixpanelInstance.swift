@@ -122,6 +122,30 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             }
         }
     }
+    public var checkForNotificationOnActive: Bool {
+        set {
+            decideInstance.notificationsInstance.checkForNotificationOnActive = newValue
+        }
+        get {
+            return decideInstance.notificationsInstance.checkForNotificationOnActive
+        }
+    }
+    public var showNotificationOnActive: Bool {
+        set {
+            decideInstance.notificationsInstance.showNotificationOnActive = newValue
+        }
+        get {
+            return decideInstance.notificationsInstance.showNotificationOnActive
+        }
+    }
+    public var miniNotificationPresentationTime: Double {
+        set {
+            decideInstance.notificationsInstance.miniNotificationPresentationTime = newValue
+        }
+        get {
+            return decideInstance.notificationsInstance.miniNotificationPresentationTime
+        }
+    }
 
     var apiToken = ""
     var superProperties = Properties()
@@ -131,6 +155,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     var taskId = UIBackgroundTaskInvalid
     let flushInstance = Flush()
     let trackInstance: Track
+    let decideInstance = Decide()
 
     init(apiToken: String?, launchOptions: [NSObject: AnyObject]?, flushInterval: Double) {
         if let apiToken = apiToken, !apiToken.isEmpty {
@@ -197,6 +222,14 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
     @objc private func applicationDidBecomeActive(_ notification: Notification) {
         flushInstance.applicationDidBecomeActive()
+
+        checkDecide { decideResponse in
+            if let decideResponse = decideResponse {
+                if self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
+                    self.decideInstance.notificationsInstance.showNotification(decideResponse.unshownInAppNotifications.first!)
+                }
+            }
+        }
     }
 
     @objc private func applicationWillResignActive(_ notification: Notification) {
@@ -404,7 +437,8 @@ extension MixpanelInstance {
                                             timedEvents: timedEvents,
                                             distinctId: distinctId,
                                             peopleDistinctId: people.distinctId,
-                                            peopleUnidentifiedQueue: people.unidentifiedQueue)
+                                            peopleUnidentifiedQueue: people.unidentifiedQueue,
+                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications)
         Persistence.archive(eventsQueue,
                             peopleQueue: people.peopleQueue,
                             properties: properties,
@@ -418,7 +452,8 @@ extension MixpanelInstance {
          timedEvents,
          distinctId,
          people.distinctId,
-         people.unidentifiedQueue) = Persistence.unarchive(token: self.apiToken)
+         people.unidentifiedQueue,
+         decideInstance.notificationsInstance.shownNotifications) = Persistence.unarchive(token: self.apiToken)
 
         if distinctId == "" {
             distinctId = defaultDistinctId()
@@ -430,7 +465,8 @@ extension MixpanelInstance {
                                             timedEvents: timedEvents,
                                             distinctId: distinctId,
                                             peopleDistinctId: people.distinctId,
-                                            peopleUnidentifiedQueue: people.unidentifiedQueue)
+                                            peopleUnidentifiedQueue: people.unidentifiedQueue,
+                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications)
         Persistence.archiveProperties(properties, token: self.apiToken)
     }
 
@@ -656,4 +692,82 @@ extension MixpanelInstance {
             self.archiveProperties()
         }
     }
+}
+
+// MARK: - Decide
+extension MixpanelInstance: InAppNotificationsDelegate {
+
+    func checkDecide(forceFetch: Bool = false, completion: ((response: DecideResponse?) -> Void)) {
+        guard let distinctId = self.people.distinctId else {
+            Logger.info(message: "Can't fetch from Decide without identifying first")
+            return
+        }
+        serialQueue.async {
+            self.decideInstance.checkDecide(forceFetch: forceFetch,
+                                            distinctId: distinctId,
+                                            token: self.apiToken,
+                                            completion: completion)
+        }
+    }
+
+    // MARK: - In App Notifications
+    public func showNotification() {
+        checkForNotifications { (notifications) in
+            if let notifications = notifications, !notifications.isEmpty {
+                self.decideInstance.notificationsInstance.showNotification(notifications.first!)
+            }
+        }
+    }
+
+    public func showNotification(type: String) {
+        checkForNotifications { (notifications) in
+            if let notifications = notifications {
+                for notification in notifications {
+                    if type == notification.type {
+                        self.decideInstance.notificationsInstance.showNotification(notification)
+                    }
+                }
+            }
+        }
+    }
+
+    public func showNotification(ID: Int) {
+        checkForNotifications { (notifications) in
+            if let notifications = notifications {
+                for notification in notifications {
+                    if ID == notification.ID {
+                        self.decideInstance.notificationsInstance.showNotification(notification)
+                    }
+                }
+            }
+        }
+    }
+
+    func checkForNotifications(completion: (notifications: [InAppNotification]?) -> Void) {
+        checkDecide { response in
+            completion(notifications: response?.unshownInAppNotifications)
+        }
+    }
+
+    func markNotification(_ notification: InAppNotification) {
+        let properties: Properties = ["$campaigns": notification.ID,
+                          "$notifications": [
+                            "campaign_id": notification.ID,
+                            "message_id": notification.messageID,
+                            "type": "inapp",
+                            "time": Date()]]
+        people.append(properties: properties)
+        trackNotification(notification, event: "$campaign_delivery")
+    }
+
+    func trackNotification(_ notification: InAppNotification, event: String) {
+        let properties: Properties = ["campaign_id": notification.ID,
+                                      "message_id": notification.messageID,
+                                      "message_type": "inapp",
+                                      "message_subtype": notification.type]
+        track(event: event, properties: properties)
+    }
+
+
+
 }

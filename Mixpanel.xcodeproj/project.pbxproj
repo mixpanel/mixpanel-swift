@@ -20,6 +20,12 @@
 		E11594A11D01C597007F8B4F /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594A01D01C597007F8B4F /* Track.swift */; };
 		E15FF7C61D02C9E10076CDE3 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7C51D02C9E10076CDE3 /* CoreTelephony.framework */; };
 		E15FF7C81D0435670076CDE3 /* People.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7C71D0435670076CDE3 /* People.swift */; };
+		E189D8F61D54ECBF007F3F29 /* Decide.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F51D54ECBF007F3F29 /* Decide.swift */; };
+		E189D8F81D552324007F3F29 /* DecideRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F71D552324007F3F29 /* DecideRequest.swift */; };
+		E189D8FD1D5A6985007F3F29 /* InAppNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */; };
+		E19312671D5A7848007CE1E9 /* InAppNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312661D5A7848007CE1E9 /* InAppNotification.swift */; };
+		E193126B1D5B9D1E007CE1E9 /* MiniNotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */; };
+		E193126C1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E193126A1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib */; };
 		E1982BFF1D0AC2E2006B7330 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1982BFE1D0AC2E2006B7330 /* Error.swift */; };
 		E1D335CC1D303A0D00E68E12 /* FlushRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CB1D303A0D00E68E12 /* FlushRequest.swift */; };
 		E1D335CE1D30578E00E68E12 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CD1D30578E00E68E12 /* Constants.swift */; };
@@ -42,6 +48,12 @@
 		E11594A01D01C597007F8B4F /* Track.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
 		E15FF7C51D02C9E10076CDE3 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		E15FF7C71D0435670076CDE3 /* People.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = People.swift; sourceTree = "<group>"; };
+		E189D8F51D54ECBF007F3F29 /* Decide.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Decide.swift; sourceTree = "<group>"; };
+		E189D8F71D552324007F3F29 /* DecideRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DecideRequest.swift; sourceTree = "<group>"; };
+		E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppNotifications.swift; sourceTree = "<group>"; };
+		E19312661D5A7848007CE1E9 /* InAppNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppNotification.swift; sourceTree = "<group>"; };
+		E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MiniNotificationViewController.swift; sourceTree = "<group>"; };
+		E193126A1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MiniNotificationViewController.xib; sourceTree = "<group>"; };
 		E1982BFE1D0AC2E2006B7330 /* Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
 		E1D335CB1D303A0D00E68E12 /* FlushRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlushRequest.swift; sourceTree = "<group>"; };
 		E1D335CD1D30578E00E68E12 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -107,19 +119,16 @@
 		E11594881CFF14D3007F8B4F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				E189D8FB1D5A6943007F3F29 /* Networking */,
+				E189D8F91D5A6908007F3F29 /* Decide */,
 				51DD56771D306B620045D3DB /* Log */,
+				E189D8FA1D5A692A007F3F29 /* Utilities */,
 				E115948A1CFF1538007F8B4F /* Mixpanel.swift */,
 				E115948D1D000709007F8B4F /* MixpanelInstance.swift */,
 				E11594921D0036E1007F8B4F /* Persistence.swift */,
-				E11594961D006022007F8B4F /* Network.swift */,
-				E11594981D01689F007F8B4F /* JSONHandler.swift */,
 				E115949E1D01BE14007F8B4F /* Flush.swift */,
-				E1D335CB1D303A0D00E68E12 /* FlushRequest.swift */,
 				E11594A01D01C597007F8B4F /* Track.swift */,
 				E15FF7C71D0435670076CDE3 /* People.swift */,
-				E1982BFE1D0AC2E2006B7330 /* Error.swift */,
-				E1D335CD1D30578E00E68E12 /* Constants.swift */,
-				E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -139,6 +148,47 @@
 				E15FF7C51D02C9E10076CDE3 /* CoreTelephony.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E189D8F91D5A6908007F3F29 /* Decide */ = {
+			isa = PBXGroup;
+			children = (
+				E189D8F51D54ECBF007F3F29 /* Decide.swift */,
+				E19312681D5B9CE2007CE1E9 /* InAppNotifications */,
+			);
+			name = Decide;
+			sourceTree = "<group>";
+		};
+		E189D8FA1D5A692A007F3F29 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				E11594981D01689F007F8B4F /* JSONHandler.swift */,
+				E1982BFE1D0AC2E2006B7330 /* Error.swift */,
+				E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */,
+				E1D335CD1D30578E00E68E12 /* Constants.swift */,
+			);
+			name = Utilities;
+			sourceTree = "<group>";
+		};
+		E189D8FB1D5A6943007F3F29 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				E11594961D006022007F8B4F /* Network.swift */,
+				E1D335CB1D303A0D00E68E12 /* FlushRequest.swift */,
+				E189D8F71D552324007F3F29 /* DecideRequest.swift */,
+			);
+			name = Networking;
+			sourceTree = "<group>";
+		};
+		E19312681D5B9CE2007CE1E9 /* InAppNotifications */ = {
+			isa = PBXGroup;
+			children = (
+				E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */,
+				E19312661D5A7848007CE1E9 /* InAppNotification.swift */,
+				E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */,
+				E193126A1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib */,
+			);
+			name = InAppNotifications;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -213,6 +263,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E193126C1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -244,16 +295,21 @@
 				E1D335CE1D30578E00E68E12 /* Constants.swift in Sources */,
 				E115949F1D01BE14007F8B4F /* Flush.swift in Sources */,
 				E11594931D0036E1007F8B4F /* Persistence.swift in Sources */,
+				E189D8F61D54ECBF007F3F29 /* Decide.swift in Sources */,
 				E11594971D006022007F8B4F /* Network.swift in Sources */,
 				E15FF7C81D0435670076CDE3 /* People.swift in Sources */,
 				E11594A11D01C597007F8B4F /* Track.swift in Sources */,
 				E11594991D01689F007F8B4F /* JSONHandler.swift in Sources */,
 				E1D335D01D3059A800E68E12 /* AutomaticProperties.swift in Sources */,
 				51DD567C1D306B740045D3DB /* Logger.swift in Sources */,
+				E19312671D5A7848007CE1E9 /* InAppNotification.swift in Sources */,
+				E189D8FD1D5A6985007F3F29 /* InAppNotifications.swift in Sources */,
+				E193126B1D5B9D1E007CE1E9 /* MiniNotificationViewController.swift in Sources */,
 				E1982BFF1D0AC2E2006B7330 /* Error.swift in Sources */,
 				51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */,
 				E1D335CC1D303A0D00E68E12 /* FlushRequest.swift in Sources */,
 				E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */,
+				E189D8F81D552324007F3F29 /* DecideRequest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,8 +330,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -324,8 +382,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -357,6 +417,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -377,6 +438,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;

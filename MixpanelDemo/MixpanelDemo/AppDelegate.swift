@@ -17,8 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
 
-        var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
-        Mixpanel.initialize(token: "MIXPANEL_TOKEN")
+        var _: String
+        Mixpanel.initialize(token: "b60d07d9c8603513d48726e5ddada02e")
         Mixpanel.mainInstance().loggingEnabled = true
         Mixpanel.mainInstance().flushInterval = 5
 
@@ -57,7 +57,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
             window?.rootViewController?.present(alert, animated: true, completion: nil)
         }
-
         Mixpanel.mainInstance().trackPushNotification(userInfo)
     }
 

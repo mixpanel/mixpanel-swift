@@ -14,6 +14,7 @@ struct ArchivedProperties {
     let distinctId: String
     let peopleDistinctId: String?
     let peopleUnidentifiedQueue: Queue
+    let shownNotifications: Set<Int>
 }
 
 class Persistence {
@@ -65,6 +66,7 @@ class Persistence {
         p["peopleDistinctId"] = properties.peopleDistinctId
         p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
         p["timedEvents"] = properties.timedEvents
+        p["shownNotifications"] = properties.shownNotifications
         archiveToFile(.Properties, object: p, token: token)
     }
 
@@ -87,7 +89,8 @@ class Persistence {
         timedEvents: Properties,
         distinctId: String,
         peopleDistinctId: String?,
-        peopleUnidentifiedQueue: Queue) {
+        peopleUnidentifiedQueue: Queue,
+        shownNotifications: Set<Int>) {
         let eventsQueue = unarchiveEvents(token: token)
         let peopleQueue = unarchivePeople(token: token)
 
@@ -95,7 +98,8 @@ class Persistence {
             timedEvents,
             distinctId,
             peopleDistinctId,
-            peopleUnidentifiedQueue) = unarchiveProperties(token: token)
+            peopleUnidentifiedQueue,
+            shownNotifications) = unarchiveProperties(token: token)
 
         return (eventsQueue,
                 peopleQueue,
@@ -103,7 +107,8 @@ class Persistence {
                 timedEvents,
                 distinctId,
                 peopleDistinctId,
-                peopleUnidentifiedQueue)
+                peopleUnidentifiedQueue,
+                shownNotifications)
     }
 
     class private func unarchiveWithFilePath(_ filePath: String) -> AnyObject? {
@@ -127,7 +132,7 @@ class Persistence {
         return unarchiveWithType(.People, token: token) as? Queue ?? []
     }
 
-    class private func unarchiveProperties(token: String) -> (Properties, Properties, String, String?, Queue) {
+    class private func unarchiveProperties(token: String) -> (Properties, Properties, String, String?, Queue, Set<Int>) {
         let properties = unarchiveWithType(.Properties, token: token) as? Properties
         let superProperties =
             properties?["superProperties"] as? Properties ?? Properties()
@@ -139,12 +144,15 @@ class Persistence {
             properties?["peopleDistinctId"] as? String ?? nil
         let peopleUnidentifiedQueue =
             properties?["peopleUnidentifiedQueue"] as? Queue ?? Queue()
+        let shownNotifications =
+            properties?["shownNotifications"] as? Set<Int> ?? Set<Int>()
 
         return (superProperties,
                 timedEvents,
                 distinctId,
                 peopleDistinctId,
-                peopleUnidentifiedQueue)
+                peopleUnidentifiedQueue,
+                shownNotifications)
     }
 
     class private func unarchiveWithType(_ type: ArchiveType, token: String) -> AnyObject? {

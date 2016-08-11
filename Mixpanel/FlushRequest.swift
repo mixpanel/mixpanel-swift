@@ -56,6 +56,7 @@ class FlushRequest: Network {
                            failure: { (reason, data, response) in
                             self.networkConsecutiveFailures += 1
                             self.updateRetryDelay(response)
+                            Logger.warn(message: "API request to \(resource.path) has failed with reason \(reason)")
                             completion(false)
             },
                            success: { (result, response) in

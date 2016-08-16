@@ -122,6 +122,10 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             }
         }
     }
+
+    /// Controls whether to automatically check for notifications for the
+    /// currently identified user when the application becomes active.
+    /// Defaults to true.
     public var checkForNotificationOnActive: Bool {
         set {
             decideInstance.notificationsInstance.checkForNotificationOnActive = newValue
@@ -130,6 +134,10 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             return decideInstance.notificationsInstance.checkForNotificationOnActive
         }
     }
+
+    /// Controls whether to automatically check for and show in-app notifications
+    /// for the currently identified user when the application becomes active.
+    /// Defaults to true.
     public var showNotificationOnActive: Bool {
         set {
             decideInstance.notificationsInstance.showNotificationOnActive = newValue
@@ -138,6 +146,10 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             return decideInstance.notificationsInstance.showNotificationOnActive
         }
     }
+
+    /// Determines the time, in seconds, that a mini notification will remain on
+    /// the screen before automatically hiding itself.
+    /// Defaults to 6 (seconds).
     public var miniNotificationPresentationTime: Double {
         set {
             decideInstance.notificationsInstance.miniNotificationPresentationTime = newValue
@@ -711,6 +723,12 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     }
 
     // MARK: - In App Notifications
+
+    /**
+     Shows a notification if one is available.
+ 
+     - note: You do not need to call this method on the main thread.
+    */
     public func showNotification() {
         checkForNotifications { (notifications) in
             if let notifications = notifications, !notifications.isEmpty {
@@ -719,6 +737,13 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         }
     }
 
+    /**
+     Shows a notification with the given type if one is available.
+
+     - note: You do not need to call this method on the main thread.
+     
+     - parameter type: The type of notification to show, either "mini" or "takeover"
+    */
     public func showNotification(type: String) {
         checkForNotifications { (notifications) in
             if let notifications = notifications {
@@ -731,6 +756,13 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         }
     }
 
+    /**
+     Shows a notification with the given ID
+
+     - note: You do not need to call this method on the main thread.
+
+     - parameter ID: The notification ID you want to present
+     */
     public func showNotification(ID: Int) {
         checkForNotifications { (notifications) in
             if let notifications = notifications {

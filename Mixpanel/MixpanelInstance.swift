@@ -708,7 +708,7 @@ extension MixpanelInstance {
 
 extension MixpanelInstance: InAppNotificationsDelegate {
     // MARK: - Decide
-    
+
     func checkDecide(forceFetch: Bool = false, completion: ((response: DecideResponse?) -> Void)) {
         guard let distinctId = people.distinctId else {
             Logger.info(message: "Can't fetch from Decide without identifying first")

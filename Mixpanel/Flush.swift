@@ -55,7 +55,7 @@ class Flush: AppLifecycle {
 
     func startFlushTimer() {
         stopFlushTimer()
-        if self.flushInterval > 0 {
+        if flushInterval > 0 {
             DispatchQueue.main.async() {
                 self.timer = Timer.scheduledTimer(timeInterval: self.flushInterval,
                                                   target: self,
@@ -71,7 +71,7 @@ class Flush: AppLifecycle {
     }
 
     func stopFlushTimer() {
-        if let timer = self.timer {
+        if let timer = timer {
             DispatchQueue.main.async() {
                 timer.invalidate()
                 self.timer = nil

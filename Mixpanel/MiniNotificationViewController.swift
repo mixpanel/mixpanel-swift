@@ -25,7 +25,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
 
         bodyLabel.text = notification.body
         if let image = notification.image {
-            self.imageView.image = UIImage(data: image)
+            imageView.image = UIImage(data: image)
         }
 
         if notification.style == Style.Light.rawValue {
@@ -98,7 +98,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
 
     func didTap(gesture: UITapGestureRecognizer) {
         if !isDismissing && gesture.state == UIGestureRecognizerState.ended {
-            self.delegate?.dismissNotification(controller: self, status: true)
+            delegate?.dismissNotification(controller: self, status: true)
         }
     }
 
@@ -110,10 +110,10 @@ class MiniNotificationViewController: BaseNotificationViewController {
             case UIGestureRecognizerState.changed:
                 var position = gesture.location(in: UIApplication.shared.keyWindow)
                 let diffY = position.y - panStartPoint.y
-                position.y = max(self.position.y, self.position.y + diffY)
+                position.y = max(position.y, position.y + diffY)
                 window.layer.position = CGPoint(x: window.layer.position.x, y: position.y)
             case UIGestureRecognizerState.ended, UIGestureRecognizerState.cancelled:
-                if window.layer.position.y > self.position.y + (InAppNotificationsConstants.miniInAppHeight / 2) {
+                if window.layer.position.y > position.y + (InAppNotificationsConstants.miniInAppHeight / 2) {
                     delegate?.dismissNotification(controller: self, status: false)
                 } else {
                     UIView.animate(withDuration: 0.2, animations: {

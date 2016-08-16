@@ -154,6 +154,6 @@ class FadingView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        gradientMask.frame = self.bounds
+        gradientMask.frame = bounds
     }
 }

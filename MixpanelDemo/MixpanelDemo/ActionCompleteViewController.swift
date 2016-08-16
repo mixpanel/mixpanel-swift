@@ -35,7 +35,7 @@ class ActionCompleteViewController: UIViewController {
     }
 
     func handleTap(gesture: UITapGestureRecognizer) {
-        self.dismiss(animated: true, completion: nil)
+        dismiss(animated: true, completion: nil)
     }
 
 }

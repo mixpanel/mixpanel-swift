@@ -55,7 +55,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
     func markNotificationShown(notification: InAppNotification) {
         Logger.info(message: "marking notification as seen: \(notification.ID)")
 
-        self.currentlyShowingNotification = notification
+        currentlyShowingNotification = notification
         shownNotifications.insert(notification.ID)
         delegate?.markNotification(notification)
     }

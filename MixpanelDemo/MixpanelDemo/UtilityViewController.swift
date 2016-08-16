@@ -52,12 +52,12 @@ class UtilityViewController: UIViewController, UITableViewDelegate, UITableViewD
             break
         }
 
-        let vc = self.storyboard!.instantiateViewController(withIdentifier: "ActionCompleteViewController") as! ActionCompleteViewController
+        let vc = storyboard!.instantiateViewController(withIdentifier: "ActionCompleteViewController") as! ActionCompleteViewController
         vc.actionStr = actionStr
         vc.descStr = descStr
         vc.modalTransitionStyle = UIModalTransitionStyle.crossDissolve
         vc.modalPresentationStyle = UIModalPresentationStyle.overFullScreen
-        self.present(vc, animated: true, completion: nil)
+        present(vc, animated: true, completion: nil)
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

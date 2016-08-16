@@ -79,8 +79,7 @@ class FlushRequest: Network {
 
         if networkConsecutiveFailures >= APIConstants.failuresTillBackoff {
             retryTime = max(retryTime,
-                            retryBackOffTimeWithConsecutiveFailures(
-                                self.networkConsecutiveFailures))
+                            retryBackOffTimeWithConsecutiveFailures(networkConsecutiveFailures))
         }
         let retryDate = Date(timeIntervalSinceNow: retryTime)
         networkRequestsAllowedAfterTime = retryDate.timeIntervalSince1970

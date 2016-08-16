@@ -62,13 +62,13 @@ class Decide {
             Logger.info(message: "decide cache found, skipping network request")
         }
 
-        decideResponse.unshownInAppNotifications = self.notificationsInstance.inAppNotifications.filter {
+        decideResponse.unshownInAppNotifications = notificationsInstance.inAppNotifications.filter {
             !notificationsInstance.shownNotifications.contains($0.ID)
         }
 
         Logger.info(message: "decide check found \(decideResponse.unshownInAppNotifications.count) " +
             "available notifications out of " +
-            "\(self.notificationsInstance.inAppNotifications.count) total")
+            "\(notificationsInstance.inAppNotifications.count) total")
 
         completion(response: decideResponse)
     }

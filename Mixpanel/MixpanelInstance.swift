@@ -442,7 +442,7 @@ extension MixpanelInstance {
         Persistence.archive(eventsQueue,
                             peopleQueue: people.peopleQueue,
                             properties: properties,
-                            token: self.apiToken)
+                            token: apiToken)
     }
 
     func unarchive() {
@@ -453,7 +453,7 @@ extension MixpanelInstance {
          distinctId,
          people.distinctId,
          people.unidentifiedQueue,
-         decideInstance.notificationsInstance.shownNotifications) = Persistence.unarchive(token: self.apiToken)
+         decideInstance.notificationsInstance.shownNotifications) = Persistence.unarchive(token: apiToken)
 
         if distinctId == "" {
             distinctId = defaultDistinctId()
@@ -467,7 +467,7 @@ extension MixpanelInstance {
                                             peopleDistinctId: people.distinctId,
                                             peopleUnidentifiedQueue: people.unidentifiedQueue,
                                             shownNotifications: decideInstance.notificationsInstance.shownNotifications)
-        Persistence.archiveProperties(properties, token: self.apiToken)
+        Persistence.archiveProperties(properties, token: apiToken)
     }
 
     func trackIntegration() {
@@ -564,8 +564,8 @@ extension MixpanelInstance {
                 let properties = ["campaign_id": c,
                                   "message_id": m,
                                   "message_type": "push"]
-                self.track(event: event,
-                           properties: properties)
+                track(event: event,
+                      properties: properties)
             } else {
                 Logger.info(message: "malformed mixpanel push payload")
             }
@@ -698,7 +698,7 @@ extension MixpanelInstance {
 extension MixpanelInstance: InAppNotificationsDelegate {
 
     func checkDecide(forceFetch: Bool = false, completion: ((response: DecideResponse?) -> Void)) {
-        guard let distinctId = self.people.distinctId else {
+        guard let distinctId = people.distinctId else {
             Logger.info(message: "Can't fetch from Decide without identifying first")
             return
         }

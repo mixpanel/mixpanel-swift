@@ -125,7 +125,7 @@ class MixpanelNotificationTests: MixpanelBaseTests {
                 XCTAssertTrue(false, "Couldn't find InApp Notification to dismiss")
             }
         }
-        self.waitForExpectations(timeout: self.mixpanel.miniNotificationPresentationTime * 2, handler: nil)
+        waitForExpectations(timeout: mixpanel.miniNotificationPresentationTime * 2, handler: nil)
     }
 
     func isNotificationShowing() -> BaseNotificationViewController? {

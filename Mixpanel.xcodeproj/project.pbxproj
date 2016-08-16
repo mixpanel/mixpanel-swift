@@ -18,8 +18,14 @@
 		E11594991D01689F007F8B4F /* JSONHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594981D01689F007F8B4F /* JSONHandler.swift */; };
 		E115949F1D01BE14007F8B4F /* Flush.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115949E1D01BE14007F8B4F /* Flush.swift */; };
 		E11594A11D01C597007F8B4F /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594A01D01C597007F8B4F /* Track.swift */; };
+		E11619DB1D5D52F900610404 /* BaseNotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11619DA1D5D52F900610404 /* BaseNotificationViewController.swift */; };
 		E158C6E71D5D32DD00651465 /* TakeoverNotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E158C6E51D5D32DD00651465 /* TakeoverNotificationViewController.swift */; };
-		E158C6E81D5D32DD00651465 /* TakeoverNotificationViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController.xib */; };
+		E158C6E81D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */; };
+		E158C6F11D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */; };
+		E158C6F21D5D39A100651465 /* TakeoverNotificationViewController~iphoneportrait.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6F01D5D39A100651465 /* TakeoverNotificationViewController~iphoneportrait.xib */; };
+		E158C6F71D5D3AAE00651465 /* MPCloseButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E158C6F41D5D3AAE00651465 /* MPCloseButton.png */; };
+		E158C6F81D5D3AAE00651465 /* MPCloseButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E158C6F51D5D3AAE00651465 /* MPCloseButton@2x.png */; };
+		E158C6F91D5D3AAE00651465 /* MPCloseButton@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = E158C6F61D5D3AAE00651465 /* MPCloseButton@3x.png */; };
 		E15FF7C61D02C9E10076CDE3 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7C51D02C9E10076CDE3 /* CoreTelephony.framework */; };
 		E15FF7C81D0435670076CDE3 /* People.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7C71D0435670076CDE3 /* People.swift */; };
 		E189D8F61D54ECBF007F3F29 /* Decide.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F51D54ECBF007F3F29 /* Decide.swift */; };
@@ -48,8 +54,14 @@
 		E11594981D01689F007F8B4F /* JSONHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONHandler.swift; sourceTree = "<group>"; };
 		E115949E1D01BE14007F8B4F /* Flush.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Flush.swift; sourceTree = "<group>"; };
 		E11594A01D01C597007F8B4F /* Track.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
+		E11619DA1D5D52F900610404 /* BaseNotificationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseNotificationViewController.swift; sourceTree = "<group>"; };
 		E158C6E51D5D32DD00651465 /* TakeoverNotificationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TakeoverNotificationViewController.swift; sourceTree = "<group>"; };
-		E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TakeoverNotificationViewController.xib; sourceTree = "<group>"; };
+		E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~ipad.xib"; sourceTree = "<group>"; };
+		E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~iphonelandscape.xib"; sourceTree = "<group>"; };
+		E158C6F01D5D39A100651465 /* TakeoverNotificationViewController~iphoneportrait.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~iphoneportrait.xib"; sourceTree = "<group>"; };
+		E158C6F41D5D3AAE00651465 /* MPCloseButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MPCloseButton.png; sourceTree = "<group>"; };
+		E158C6F51D5D3AAE00651465 /* MPCloseButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MPCloseButton@2x.png"; sourceTree = "<group>"; };
+		E158C6F61D5D3AAE00651465 /* MPCloseButton@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MPCloseButton@3x.png"; sourceTree = "<group>"; };
 		E15FF7C51D02C9E10076CDE3 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		E15FF7C71D0435670076CDE3 /* People.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = People.swift; sourceTree = "<group>"; };
 		E189D8F51D54ECBF007F3F29 /* Decide.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Decide.swift; sourceTree = "<group>"; };
@@ -140,10 +152,21 @@
 		E11594891CFF14DF007F8B4F /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				E158C6F31D5D3A8200651465 /* Images */,
 				E11594801CFF1491007F8B4F /* Mixpanel.h */,
 				E11594821CFF1491007F8B4F /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E158C6F31D5D3A8200651465 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				E158C6F41D5D3AAE00651465 /* MPCloseButton.png */,
+				E158C6F51D5D3AAE00651465 /* MPCloseButton@2x.png */,
+				E158C6F61D5D3AAE00651465 /* MPCloseButton@3x.png */,
+			);
+			name = Images;
 			sourceTree = "<group>";
 		};
 		E15FF8021D0461F60076CDE3 /* Frameworks */ = {
@@ -189,10 +212,13 @@
 			children = (
 				E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */,
 				E19312661D5A7848007CE1E9 /* InAppNotification.swift */,
+				E11619DA1D5D52F900610404 /* BaseNotificationViewController.swift */,
 				E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */,
 				E193126A1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib */,
 				E158C6E51D5D32DD00651465 /* TakeoverNotificationViewController.swift */,
-				E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController.xib */,
+				E158C6F01D5D39A100651465 /* TakeoverNotificationViewController~iphoneportrait.xib */,
+				E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */,
+				E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */,
 			);
 			name = InAppNotifications;
 			sourceTree = "<group>";
@@ -269,7 +295,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E158C6E81D5D32DD00651465 /* TakeoverNotificationViewController.xib in Resources */,
+				E158C6F71D5D3AAE00651465 /* MPCloseButton.png in Resources */,
+				E158C6F91D5D3AAE00651465 /* MPCloseButton@3x.png in Resources */,
+				E158C6F11D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib in Resources */,
+				E158C6F21D5D39A100651465 /* TakeoverNotificationViewController~iphoneportrait.xib in Resources */,
+				E158C6E81D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib in Resources */,
+				E158C6F81D5D3AAE00651465 /* MPCloseButton@2x.png in Resources */,
 				E193126C1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -311,6 +342,7 @@
 				51DD567C1D306B740045D3DB /* Logger.swift in Sources */,
 				E19312671D5A7848007CE1E9 /* InAppNotification.swift in Sources */,
 				E189D8FD1D5A6985007F3F29 /* InAppNotifications.swift in Sources */,
+				E11619DB1D5D52F900610404 /* BaseNotificationViewController.swift in Sources */,
 				E193126B1D5B9D1E007CE1E9 /* MiniNotificationViewController.swift in Sources */,
 				E1982BFF1D0AC2E2006B7330 /* Error.swift in Sources */,
 				51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */,

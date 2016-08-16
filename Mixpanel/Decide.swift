@@ -21,6 +21,14 @@ class Decide {
     var decideRequest = DecideRequest()
     var decideFetched = false
     var notificationsInstance = InAppNotifications()
+    var inAppDelegate: InAppNotificationsDelegate? {
+        set {
+            notificationsInstance.delegate = newValue
+        }
+        get {
+            return notificationsInstance.delegate
+        }
+    }
 
     func checkDecide(forceFetch: Bool = false, distinctId: String, token: String, completion: ((response: DecideResponse?) -> Void)) {
         var decideResponse = DecideResponse()

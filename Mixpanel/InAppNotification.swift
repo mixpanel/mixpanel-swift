@@ -29,6 +29,23 @@ struct InAppNotification {
     let callToActionURL: URL?
 }
 
+extension String {
+    func appendSuffixBeforeExtension(suffix: String) -> String {
+        var newString = suffix
+        do {
+            let regex = try NSRegularExpression(pattern: "(\\.\\w+$)", options: [])
+            newString = regex.stringByReplacingMatches(in: self,
+                                                       options: [],
+                                                       range: NSRange(location: 0,
+                                                                      length: self.characters.count),
+                                                       withTemplate: "\(suffix)$1")
+        } catch {
+            Logger.error(message: "cannot add suffix to URL string")
+        }
+        return newString
+    }
+}
+
 extension InAppNotification {
     init?(JSONObject: [String: AnyObject]?) {
         guard let object = JSONObject else {
@@ -46,7 +63,7 @@ extension InAppNotification {
             return nil
         }
 
-        guard let type = object["type"] as? String else { //todo check if its right types
+        guard let type = object["type"] as? String else { // todo check if its right types
             Logger.error(message: "invalid notification type")
             return nil
         }
@@ -79,19 +96,14 @@ extension InAppNotification {
         guard let imageURLString = object["image_url"] as? String,
             let escapedImageURLString = imageURLString
                 .addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed),
-            let imageURL = URL(string: escapedImageURLString) else {
+            var imageURLComponents = URLComponents(string: escapedImageURLString) else {
             Logger.error(message: "invalid notification image url")
             return nil
         }
 
-        var imagePath = imageURL.path
-        if type == "takeover" {
-            imagePath = "\(imageURL.deletingPathExtension())@2x.\(imageURL.pathExtension)"
+        if type == InAppType.Takeover.rawValue {
+            imageURLComponents.path = imageURLComponents.path.appendSuffixBeforeExtension(suffix: "@2x")
         }
-        var imageURLComponents = URLComponents()
-        imageURLComponents.scheme = imageURL.scheme
-        imageURLComponents.host = imageURL.host
-        imageURLComponents.path = imagePath
 
         guard let imageURLParsed = imageURLComponents.url else {
             Logger.error(message: "invalid notification image url")

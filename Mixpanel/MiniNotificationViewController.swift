@@ -8,35 +8,20 @@
 
 import UIKit
 
-protocol NotificationViewControllerDelegate {
-    func dismissNotification(controller: MiniNotificationViewController, status: Bool)
-}
-
-class MiniNotificationViewController: UIViewController {
+class MiniNotificationViewController: BaseNotificationViewController {
 
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var bodyLabel: UILabel!
-    var notification: InAppNotification!
-    var window: UIWindow?
     var isDismissing = false
     var canPan = true
-    var panStartPoint: CGPoint!
     var position: CGPoint!
-    var delegate: NotificationViewControllerDelegate?
-
-    enum Style: String {
-        case Dark = "dark"
-        case Light = "light"
-    }
 
     convenience init(notification: InAppNotification) {
-        self.init(nibName: "MiniNotificationViewController", bundle: Bundle(identifier: BundleConstants.ID))
-        self.notification = notification
+        self.init(notification: notification, nameOfClass: String(MiniNotificationViewController.self))
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
 
         bodyLabel.text = notification.body
         if let image = notification.image {
@@ -58,7 +43,7 @@ class MiniNotificationViewController: UIViewController {
         window?.addGestureRecognizer(panGesture)
     }
 
-    func show(animated: Bool) {
+    override func show(animated: Bool) {
         canPan = false
         let frame: CGRect
         if UIInterfaceOrientationIsPortrait(UIApplication.shared.statusBarOrientation)
@@ -67,7 +52,7 @@ class MiniNotificationViewController: UIViewController {
                            y: UIScreen.main.bounds.size.height,
                            width: UIScreen.main.bounds.size.width - (InAppNotificationsConstants.miniSidePadding * 2),
                            height: InAppNotificationsConstants.miniInAppHeight)
-        } else { //Is iPad or Landscape mode
+        } else { // Is iPad or Landscape mode
             frame = CGRect(x: UIScreen.main.bounds.size.width / 4,
                            y: UIScreen.main.bounds.size.height,
                            width: UIScreen.main.bounds.size.width / 2,
@@ -80,7 +65,7 @@ class MiniNotificationViewController: UIViewController {
             window.rootViewController = self
             window.layer.cornerRadius = 6
             if notification.style == Style.Light.rawValue {
-                window.layer.borderColor = InAppNotificationsConstants.miniLightBGColor.cgColor
+                window.layer.borderColor = InAppNotificationsConstants.miniLightBorderColor.cgColor
                 window.layer.borderWidth = 1
             }
             window.isHidden = false
@@ -95,7 +80,7 @@ class MiniNotificationViewController: UIViewController {
         })
     }
 
-    func hide(animated: Bool, completion: () -> Void) {
+    override func hide(animated: Bool, completion: () -> Void) {
         if !isDismissing {
             canPan = false
             isDismissing = true
@@ -141,14 +126,6 @@ class MiniNotificationViewController: UIViewController {
         }
     }
 
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return .all
-    }
-
-    override var shouldAutorotate: Bool {
-        return true
-    }
-
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: { (ctx) in
@@ -161,7 +138,7 @@ class MiniNotificationViewController: UIViewController {
                                width: UIScreen.main.bounds.size.width -
                                 (InAppNotificationsConstants.miniSidePadding * 2),
                                height: InAppNotificationsConstants.miniInAppHeight)
-            } else { //Is iPad or Landscape mode
+            } else { // Is iPad or Landscape mode
                 frame = CGRect(x: UIScreen.main.bounds.size.width / 4,
                                y: UIScreen.main.bounds.size.height -
                                 (InAppNotificationsConstants.miniInAppHeight + InAppNotificationsConstants.miniBottomPadding),

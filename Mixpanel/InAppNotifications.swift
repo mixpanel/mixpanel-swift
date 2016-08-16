@@ -43,7 +43,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
                     }
 
                     if shownNotification {
-                        //self.markNotificationShown(notification: notification)
+                        self.markNotificationShown(notification: notification)
                     }
                 }
             }
@@ -65,18 +65,20 @@ class InAppNotifications: NotificationViewControllerDelegate {
         miniNotificationVC.delegate = self
         miniNotificationVC.show(animated: true)
 
-        //DispatchQueue.main.asyncAfter(deadline: .now() + miniNotificationPresentationTime) {
-        //    self.dismissNotification(controller: miniNotificationVC, status: false)
-        //}
+        DispatchQueue.main.asyncAfter(deadline: .now() + miniNotificationPresentationTime) {
+            self.dismissNotification(controller: miniNotificationVC, status: false)
+        }
         return true
     }
 
     func showTakeoverNotification(_ notification: InAppNotification) -> Bool {
-
+        let takeoverNotificationVC = TakeoverNotificationViewController(notification: notification)
+        takeoverNotificationVC.delegate = self
+        takeoverNotificationVC.show(animated: true)
         return true
     }
 
-    func dismissNotification(controller: MiniNotificationViewController, status: Bool) {
+    func dismissNotification(controller: BaseNotificationViewController, status: Bool) {
         if currentlyShowingNotification?.ID != controller.notification.ID {
             return
         }

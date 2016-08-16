@@ -49,6 +49,18 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         }
     }
 
+    func waitForAsyncTasks() {
+        var hasCompletedTask = false
+        DispatchQueue.main.async {
+            hasCompletedTask = true
+        }
+
+        let loopUntil = Date(timeIntervalSinceNow: 10)
+        while !hasCompletedTask && loopUntil.timeIntervalSinceNow > 0 {
+            RunLoop.current.run(mode: RunLoopMode.defaultRunLoopMode, before: loopUntil)
+        }
+    }
+
     func flushAndWaitForSerialQueue() {
         mixpanel.flush()
         waitForSerialQueue()

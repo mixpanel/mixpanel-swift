@@ -170,7 +170,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         people = People(apiToken: self.apiToken,
                         serialQueue: serialQueue)
         flushInstance._flushInterval = flushInterval
-
+        decideInstance.inAppDelegate = self
         setupListeners()
         unarchive()
 
@@ -767,7 +767,5 @@ extension MixpanelInstance: InAppNotificationsDelegate {
                                       "message_subtype": notification.type]
         track(event: event, properties: properties)
     }
-
-
 
 }

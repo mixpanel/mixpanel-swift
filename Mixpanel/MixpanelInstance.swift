@@ -726,7 +726,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
 
     /**
      Shows a notification if one is available.
- 
+
      - note: You do not need to call this method on the main thread.
     */
     public func showNotification() {
@@ -741,7 +741,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
      Shows a notification with the given type if one is available.
 
      - note: You do not need to call this method on the main thread.
-     
+
      - parameter type: The type of notification to show, either "mini" or "takeover"
     */
     public func showNotification(type: String) {

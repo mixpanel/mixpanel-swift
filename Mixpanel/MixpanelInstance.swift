@@ -327,8 +327,8 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
 }
 
-// MARK: - Identity
 extension MixpanelInstance {
+    // MARK: - Identity
 
     /**
      Sets the distinct ID of the current user.
@@ -430,8 +430,8 @@ extension MixpanelInstance {
     }
 }
 
-// MARK: - Persistence
 extension MixpanelInstance {
+    // MARK: - Persistence
 
     /**
      Writes current project info including the distinct Id, super properties,
@@ -498,8 +498,8 @@ extension MixpanelInstance {
     }
 }
 
-// MARK: - Flush
 extension MixpanelInstance {
+    // MARK: - Flush
 
     /**
      Uploads queued data to the Mixpanel server.
@@ -528,8 +528,8 @@ extension MixpanelInstance {
     }
 }
 
-// MARK: - Track
 extension MixpanelInstance {
+    // MARK: - Track
 
     /**
      Tracks an event with properties.
@@ -706,9 +706,9 @@ extension MixpanelInstance {
     }
 }
 
-// MARK: - Decide
 extension MixpanelInstance: InAppNotificationsDelegate {
-
+    // MARK: - Decide
+    
     func checkDecide(forceFetch: Bool = false, completion: ((response: DecideResponse?) -> Void)) {
         guard let distinctId = people.distinctId else {
             Logger.info(message: "Can't fetch from Decide without identifying first")

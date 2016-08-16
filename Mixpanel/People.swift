@@ -89,7 +89,7 @@ public class People {
         return tokenString
     }
 
-    // MARK: - People Public API
+    // MARK: - People
 
     /**
      Register the given device to receive push notifications.

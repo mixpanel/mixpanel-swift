@@ -18,6 +18,21 @@
 		E11594991D01689F007F8B4F /* JSONHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594981D01689F007F8B4F /* JSONHandler.swift */; };
 		E115949F1D01BE14007F8B4F /* Flush.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115949E1D01BE14007F8B4F /* Flush.swift */; };
 		E11594A11D01C597007F8B4F /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594A01D01C597007F8B4F /* Track.swift */; };
+		E12782BB1D4AB5CB0025FB05 /* PrintLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56801D306B7B0045D3DB /* PrintLogging.swift */; };
+		E12782BC1D4AB5CB0025FB05 /* FileLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56811D306B7B0045D3DB /* FileLogging.swift */; };
+		E12782BD1D4AB5CB0025FB05 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56791D306B740045D3DB /* Logger.swift */; };
+		E12782BE1D4AB5CB0025FB05 /* Mixpanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115948A1CFF1538007F8B4F /* Mixpanel.swift */; };
+		E12782BF1D4AB5CB0025FB05 /* MixpanelInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115948D1D000709007F8B4F /* MixpanelInstance.swift */; };
+		E12782C01D4AB5CB0025FB05 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594921D0036E1007F8B4F /* Persistence.swift */; };
+		E12782C11D4AB5CB0025FB05 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594961D006022007F8B4F /* Network.swift */; };
+		E12782C21D4AB5CB0025FB05 /* JSONHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594981D01689F007F8B4F /* JSONHandler.swift */; };
+		E12782C31D4AB5CB0025FB05 /* Flush.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115949E1D01BE14007F8B4F /* Flush.swift */; };
+		E12782C41D4AB5CB0025FB05 /* FlushRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CB1D303A0D00E68E12 /* FlushRequest.swift */; };
+		E12782C51D4AB5CB0025FB05 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594A01D01C597007F8B4F /* Track.swift */; };
+		E12782C61D4AB5CB0025FB05 /* People.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7C71D0435670076CDE3 /* People.swift */; };
+		E12782C71D4AB5CB0025FB05 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1982BFE1D0AC2E2006B7330 /* Error.swift */; };
+		E12782C81D4AB5CB0025FB05 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CD1D30578E00E68E12 /* Constants.swift */; };
+		E12782C91D4AB5CB0025FB05 /* AutomaticProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */; };
 		E15FF7C61D02C9E10076CDE3 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7C51D02C9E10076CDE3 /* CoreTelephony.framework */; };
 		E15FF7C81D0435670076CDE3 /* People.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7C71D0435670076CDE3 /* People.swift */; };
 		E1982BFF1D0AC2E2006B7330 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1982BFE1D0AC2E2006B7330 /* Error.swift */; };
@@ -40,6 +55,8 @@
 		E11594981D01689F007F8B4F /* JSONHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONHandler.swift; sourceTree = "<group>"; };
 		E115949E1D01BE14007F8B4F /* Flush.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Flush.swift; sourceTree = "<group>"; };
 		E11594A01D01C597007F8B4F /* Track.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
+		E12782B31D4AB4B30025FB05 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E12782CA1D4AB9BE0025FB05 /* Info-tvOS.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Info-tvOS.plist"; sourceTree = "<group>"; };
 		E15FF7C51D02C9E10076CDE3 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		E15FF7C71D0435670076CDE3 /* People.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = People.swift; sourceTree = "<group>"; };
 		E1982BFE1D0AC2E2006B7330 /* Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
@@ -54,6 +71,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				E15FF7C61D02C9E10076CDE3 /* CoreTelephony.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E12782AF1D4AB4B30025FB05 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +114,7 @@
 			isa = PBXGroup;
 			children = (
 				E115947D1CFF1491007F8B4F /* Mixpanel.framework */,
+				E12782B31D4AB4B30025FB05 /* Mixpanel.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -129,6 +154,7 @@
 			children = (
 				E11594801CFF1491007F8B4F /* Mixpanel.h */,
 				E11594821CFF1491007F8B4F /* Info.plist */,
+				E12782CA1D4AB9BE0025FB05 /* Info-tvOS.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -149,6 +175,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				E11594811CFF1491007F8B4F /* Mixpanel.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E12782B01D4AB4B30025FB05 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,6 +207,24 @@
 			productReference = E115947D1CFF1491007F8B4F /* Mixpanel.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		E12782B21D4AB4B30025FB05 /* Mixpanel_tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E12782BA1D4AB4B30025FB05 /* Build configuration list for PBXNativeTarget "Mixpanel_tvOS" */;
+			buildPhases = (
+				E12782AE1D4AB4B30025FB05 /* Sources */,
+				E12782AF1D4AB4B30025FB05 /* Frameworks */,
+				E12782B01D4AB4B30025FB05 /* Headers */,
+				E12782B11D4AB4B30025FB05 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Mixpanel_tvOS;
+			productName = Mixpanel_tvOS;
+			productReference = E12782B31D4AB4B30025FB05 /* Mixpanel.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -188,6 +239,12 @@
 						DevelopmentTeam = E8FVX7QLET;
 						DevelopmentTeamName = "Mixpanel, Inc.";
 						LastSwiftMigration = 0800;
+					};
+					E12782B21D4AB4B30025FB05 = {
+						CreatedOnToolsVersion = 8.0;
+						DevelopmentTeam = AUY9XL9M5E;
+						DevelopmentTeamName = "Mixpanel, Inc.";
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -204,12 +261,20 @@
 			projectRoot = "";
 			targets = (
 				E115947C1CFF1491007F8B4F /* Mixpanel */,
+				E12782B21D4AB4B30025FB05 /* Mixpanel_tvOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E115947B1CFF1491007F8B4F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E12782B11D4AB4B30025FB05 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -254,6 +319,28 @@
 				51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */,
 				E1D335CC1D303A0D00E68E12 /* FlushRequest.swift in Sources */,
 				E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E12782AE1D4AB4B30025FB05 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E12782BB1D4AB5CB0025FB05 /* PrintLogging.swift in Sources */,
+				E12782BC1D4AB5CB0025FB05 /* FileLogging.swift in Sources */,
+				E12782BD1D4AB5CB0025FB05 /* Logger.swift in Sources */,
+				E12782BE1D4AB5CB0025FB05 /* Mixpanel.swift in Sources */,
+				E12782BF1D4AB5CB0025FB05 /* MixpanelInstance.swift in Sources */,
+				E12782C01D4AB5CB0025FB05 /* Persistence.swift in Sources */,
+				E12782C11D4AB5CB0025FB05 /* Network.swift in Sources */,
+				E12782C21D4AB5CB0025FB05 /* JSONHandler.swift in Sources */,
+				E12782C31D4AB5CB0025FB05 /* Flush.swift in Sources */,
+				E12782C41D4AB5CB0025FB05 /* FlushRequest.swift in Sources */,
+				E12782C51D4AB5CB0025FB05 /* Track.swift in Sources */,
+				E12782C61D4AB5CB0025FB05 /* People.swift in Sources */,
+				E12782C71D4AB5CB0025FB05 /* Error.swift in Sources */,
+				E12782C81D4AB5CB0025FB05 /* Constants.swift in Sources */,
+				E12782C91D4AB5CB0025FB05 /* AutomaticProperties.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -393,6 +480,56 @@
 			};
 			name = Release;
 		};
+		E12782B81D4AB4B30025FB05 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "";
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Mixpanel/Info-tvOS.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
+				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
+				PRODUCT_NAME = Mixpanel;
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = Mixpanel.h;
+				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+			};
+			name = Debug;
+		};
+		E12782B91D4AB4B30025FB05 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "";
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Mixpanel/Info-tvOS.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
+				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
+				PRODUCT_NAME = Mixpanel;
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = Mixpanel.h;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -410,6 +547,15 @@
 			buildConfigurations = (
 				E11594861CFF1491007F8B4F /* Debug */,
 				E11594871CFF1491007F8B4F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E12782BA1D4AB4B30025FB05 /* Build configuration list for PBXNativeTarget "Mixpanel_tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E12782B81D4AB4B30025FB05 /* Debug */,
+				E12782B91D4AB4B30025FB05 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -17,11 +17,11 @@ let kDefaultServerTrackString = "https://api.mixpanel.com/track/"
 let kDefaultServerEngageString = "https://api.mixpanel.com/engage/"
 
 @discardableResult func stubEngage() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerEngageString).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("POST", kDefaultServerEngageString as LSMatcheable!).withHeader("Accept-Encoding", "gzip")!
 }
 
 @discardableResult func stubTrack() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerTrackString).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("POST", kDefaultServerTrackString as LSMatcheable!).withHeader("Accept-Encoding", "gzip")!
 }
 
 

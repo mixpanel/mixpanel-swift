@@ -9,6 +9,7 @@
 import UIKit
 
 protocol NotificationViewControllerDelegate {
+    @discardableResult
     func notificationShouldDismiss(controller: BaseNotificationViewController, status: Bool) -> Bool
 }
 

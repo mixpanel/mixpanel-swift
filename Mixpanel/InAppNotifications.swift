@@ -66,7 +66,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
         miniNotificationVC.show(animated: true)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + miniNotificationPresentationTime) {
-            _ = self.notificationShouldDismiss(controller: miniNotificationVC, status: false)
+            self.notificationShouldDismiss(controller: miniNotificationVC, status: false)
         }
         return true
     }
@@ -78,6 +78,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
         return true
     }
 
+    @discardableResult
     func notificationShouldDismiss(controller: BaseNotificationViewController, status: Bool) -> Bool {
         if currentlyShowingNotification?.ID != controller.notification.ID {
             return false

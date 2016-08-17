@@ -9,7 +9,7 @@
 import UIKit
 
 protocol NotificationViewControllerDelegate {
-    func notificationShouldDismiss(controller: BaseNotificationViewController, status: Bool)
+    func notificationShouldDismiss(controller: BaseNotificationViewController, status: Bool) -> Bool
 }
 
 class BaseNotificationViewController: UIViewController {

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
@@ -149,21 +150,25 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         setupListeners()
         unarchive()
 
-        if let notification =
-            launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification as NSObject] as? Properties {
-            trackPushNotification(notification as [NSObject : AnyObject], event: "$app_open")
-        }
+        #if os(iOS)
+            if let notification =
+                launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification as NSObject] as? Properties {
+                trackPushNotification(notification as [NSObject : AnyObject], event: "$app_open")
+            }
+        #endif
     }
 
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
 
         trackIntegration()
-        setCurrentRadio()
-        notificationCenter.addObserver(self,
-                                       selector: #selector(setCurrentRadio),
-                                       name: .CTRadioAccessTechnologyDidChange,
-                                       object: nil)
+        #if os(iOS)
+            setCurrentRadio()
+            notificationCenter.addObserver(self,
+                                           selector: #selector(setCurrentRadio),
+                                           name: .CTRadioAccessTechnologyDidChange,
+                                           object: nil)
+        #endif
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillTerminate(_:)),
                                        name: .UIApplicationWillTerminate,
@@ -230,7 +235,9 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             if self.taskId != UIBackgroundTaskInvalid {
                 UIApplication.shared.endBackgroundTask(self.taskId)
                 self.taskId = UIBackgroundTaskInvalid
-                self.updateNetworkActivityIndicator(false)
+                #if os(iOS)
+                    self.updateNetworkActivityIndicator(false)
+                #endif
             }
         }
     }
@@ -267,6 +274,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         return distId
     }
 
+    #if os(iOS)
     func updateNetworkActivityIndicator(_ on: Bool) {
         if showNetworkActivityIndicator {
             UIApplication.shared.isNetworkActivityIndicatorVisible = on
@@ -279,6 +287,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             AutomaticProperties.properties["$radio"] = currentRadio as AnyObject
         }
     }
+    #endif
 
 }
 

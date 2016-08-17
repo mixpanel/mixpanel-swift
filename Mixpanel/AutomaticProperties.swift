@@ -7,11 +7,15 @@
 //
 
 import Foundation
-import CoreTelephony
+import UIKit
+#if os(iOS)
+    import CoreTelephony
+#endif
 
 class AutomaticProperties {
-
+    #if os(iOS)
     static let telephonyInfo = CTTelephonyNetworkInfo()
+    #endif
 
     static var properties: Properties = {
         var p = Properties()
@@ -21,7 +25,9 @@ class AutomaticProperties {
             p["$app_build_number"]     = infoDict["CFBundleVersion"] as AnyObject
             p["$app_version_string"]   = infoDict["CFBundleShortVersionString"] as AnyObject
         }
-        p["$carrier"]           = AutomaticProperties.telephonyInfo.subscriberCellularProvider?.carrierName as AnyObject
+        #if os(iOS)
+            p["$carrier"]           = AutomaticProperties.telephonyInfo.subscriberCellularProvider?.carrierName as AnyObject
+        #endif
         p["mp_lib"]             = "swift" as AnyObject
         p["$lib_version"]       = AutomaticProperties.libVersion() as AnyObject
         p["$manufacturer"]      = "Apple" as AnyObject
@@ -47,6 +53,7 @@ class AutomaticProperties {
         return p
     }()
 
+    #if os(iOS)
     class func getCurrentRadio() -> String? {
         var radio = telephonyInfo.currentRadioAccessTechnology
         let prefix = "CTRadioAccessTechnology"
@@ -57,6 +64,7 @@ class AutomaticProperties {
         }
         return radio
     }
+    #endif
 
     class func deviceModel() -> String {
         var systemInfo = utsname()

@@ -16,7 +16,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
 
     func testPeopleSet() {
         mixpanel.identify(distinctId: "d1")
-        var p: Properties = ["p1": "a"]
+        var p: Properties = ["p1": "a" as AnyObject]
         mixpanel.people.set(properties: p)
         waitForSerialQueue()
         p = mixpanel.people.peopleQueue.last!["$set"] as! Properties
@@ -26,7 +26,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
 
     func testPeopleSetOnce() {
         mixpanel.identify(distinctId: "d1")
-        var p: Properties = ["p1": "a"]
+        var p: Properties = ["p1": "a" as AnyObject]
         mixpanel.people.setOnce(properties: p)
         waitForSerialQueue()
         p = mixpanel.people.peopleQueue.last!["$set_once"] as! Properties
@@ -36,7 +36,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
 
     func testPeopleSetReservedProperty() {
         mixpanel.identify(distinctId: "d1")
-        var p: Properties = ["$ios_app_version": "override"]
+        var p: Properties = ["$ios_app_version": "override" as AnyObject]
         mixpanel.people.set(properties: p)
         waitForSerialQueue()
         p = mixpanel.people.peopleQueue.last!["$set"] as! Properties
@@ -48,7 +48,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
 
     func testPeopleSetTo() {
         mixpanel.identify(distinctId: "d1")
-        mixpanel.people.set(property: "p1", to: "a")
+        mixpanel.people.set(property: "p1", to: "a" as AnyObject)
         waitForSerialQueue()
         var p: Properties = mixpanel.people.peopleQueue.last!["$set"] as! Properties
         XCTAssertEqual(p["p1"] as? String, "a", "custom people property not queued")
@@ -58,7 +58,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
     func testDropUnidentifiedPeopleRecords() {
         QueueConstants.queueSize = 500
         for i in 0..<505 {
-            mixpanel.people.set(property: "i", to: i)
+            mixpanel.people.set(property: "i", to: i as AnyObject)
         }
         waitForSerialQueue()
         XCTAssertTrue(mixpanel.people.unidentifiedQueue.count == 500)
@@ -72,7 +72,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         QueueConstants.queueSize = 500
         mixpanel.identify(distinctId: "d1")
         for i in 0..<505 {
-            mixpanel.people.set(property: "i", to: i)
+            mixpanel.people.set(property: "i", to: i as AnyObject)
         }
         waitForSerialQueue()
         XCTAssertTrue(mixpanel.people.peopleQueue.count == 500)
@@ -83,14 +83,14 @@ class MixpanelPeopleTests: MixpanelBaseTests {
     }
 
     func testPeopleAssertPropertyTypes() {
-        var p: Properties = ["URL": Data()]
+        var p: Properties = ["URL": Data() as AnyObject]
         XCTExpectAssert("unsupported property type was allowed") {
             mixpanel.people.set(properties: p)
         }
         XCTExpectAssert("unsupported property type was allowed") {
-            mixpanel.people.set(property: "p1", to: Data())
+            mixpanel.people.set(property: "p1", to: Data() as AnyObject)
         }
-        p = ["p1": "a"]
+        p = ["p1": "a" as AnyObject]
         // increment should require a number
         XCTExpectAssert("unsupported property type was allowed") {
             mixpanel.people.increment(properties: p)
@@ -114,7 +114,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
 
     func testPeopleIncrement() {
         mixpanel.identify(distinctId: "d1")
-        var p: Properties = ["p1": 3]
+        var p: Properties = ["p1": 3 as AnyObject]
         mixpanel.people.increment(properties: p)
         waitForSerialQueue()
         p = mixpanel.people.peopleQueue.last!["$add"] as! Properties
@@ -175,7 +175,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
 
     func testPeopleTrackChargeWithProperties() {
         mixpanel.identify(distinctId: "d1")
-        mixpanel.people.trackCharge(amount: 25, properties: ["p1": "a"])
+        mixpanel.people.trackCharge(amount: 25, properties: ["p1": "a" as AnyObject])
         waitForSerialQueue()
         var r: Properties = mixpanel.people.peopleQueue.last!
         let prop = ((r["$append"] as? Properties)?["$transactions"] as? Properties)?["$amount"] as? Double

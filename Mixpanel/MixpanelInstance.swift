@@ -152,8 +152,8 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
         #if os(iOS)
             if let notification =
-                launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? Properties {
-                trackPushNotification(notification, event: "$app_open")
+                launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification as NSObject] as? Properties {
+                trackPushNotification(notification as [NSObject : AnyObject], event: "$app_open")
             }
         #endif
     }
@@ -284,7 +284,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     @objc func setCurrentRadio() {
         let currentRadio = AutomaticProperties.getCurrentRadio()
         serialQueue.async() {
-            AutomaticProperties.properties["$radio"] = currentRadio
+            AutomaticProperties.properties["$radio"] = currentRadio as AnyObject
         }
     }
     #endif
@@ -328,7 +328,7 @@ extension MixpanelInstance {
             self.people.distinctId = distinctId
             if !self.people.unidentifiedQueue.isEmpty {
                 for var r in self.people.unidentifiedQueue {
-                    r["$distinct_id"] = distinctId
+                    r["$distinct_id"] = distinctId as AnyObject
                     self.people.peopleQueue.append(r)
                 }
                 self.people.unidentifiedQueue.removeAll()
@@ -372,7 +372,7 @@ extension MixpanelInstance {
 
         let properties = ["distinct_id": distinctId, "alias": alias]
         track(event: "$create_alias",
-              properties: properties)
+              properties: properties as Properties?)
         flush()
     }
 
@@ -532,13 +532,13 @@ extension MixpanelInstance {
      */
     public func trackPushNotification(_ userInfo: [NSObject: AnyObject],
                                       event: String = "$campaign_received") {
-        if let mpPayload = userInfo["mp"] as? Properties {
+        if let mpPayload = userInfo["mp" as NSObject] as? Properties {
             if let m = mpPayload["m"], let c = mpPayload["c"] {
                 let properties = ["campaign_id": c,
                                   "message_id": m,
-                                  "message_type": "push"]
+                                  "message_type": "push"] as [String : Any]
                 self.track(event: event,
-                           properties: properties)
+                           properties: properties as Properties?)
             } else {
                 Logger.info(message: "malformed mixpanel push payload")
             }
@@ -659,7 +659,7 @@ extension MixpanelInstance {
         }
     }
 
-    func dispatchAndTrack(closure: () -> ()) {
+    func dispatchAndTrack(closure: @escaping () -> ()) {
         serialQueue.async() {
             closure()
             self.archiveProperties()

@@ -25,7 +25,7 @@ func MPAssert(_ condition: @autoclosure() -> Bool,
 }
 
 class ErrorHandler {
-    class func wrap<ReturnType>(_ f: @noescape() throws -> ReturnType?) -> ReturnType? {
+    class func wrap<ReturnType>(_ f: () throws -> ReturnType?) -> ReturnType? {
         do {
             return try f()
         } catch let error {

@@ -46,8 +46,8 @@ class Network {
 
     class func apiRequest<A>(base: String,
                           resource: Resource<A>,
-                          failure: (Reason, Data?, URLResponse?) -> (),
-                          success: (A, URLResponse?) -> ()) {
+                          failure: @escaping (Reason, Data?, URLResponse?) -> (),
+                          success: @escaping (A, URLResponse?) -> ()) {
         guard let request = buildURLRequest(base, resource: resource) else {
             return
         }
@@ -55,7 +55,7 @@ class Network {
         let session = URLSession.shared
         session.dataTask(with: request) { (data, response, error) -> Void in
             guard let httpResponse = response as? HTTPURLResponse else {
-                failure(Reason.Other(error!), data, response)
+                failure(Reason.Other(error! as NSError), data, response)
                 return
             }
             guard httpResponse.statusCode == 200 else {
@@ -94,16 +94,16 @@ class Network {
                              method: Method,
                              requestBody: Data?,
                              headers: [String: String],
-                             parse: (Data) -> A?) -> Resource<A> {
+                             parse: @escaping (Data) -> A?) -> Resource<A> {
         return Resource(path: path, method: method, requestBody: requestBody, headers: headers, parse: parse)
     }
 
-    class func trackIntegration(apiToken: String, completion: (Bool) -> ()) {
+    class func trackIntegration(apiToken: String, completion: @escaping (Bool) -> ()) {
         let requestData = JSONHandler.encodeAPIData([["event": "Integration",
                                                       "properties": ["token": "85053bf24bba75239b16a601d9387e17",
                                                                      "mp_lib": "swift",
                                                                      "version": "3.0",
-                                                                     "distinct_id": apiToken]]])
+                                                                     "distinct_id": apiToken]]] as AnyObject)
 
         let responseParser: (Data) -> Int? = { data in
             let response = String(data: data, encoding: String.Encoding.utf8)

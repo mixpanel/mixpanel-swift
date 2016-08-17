@@ -45,20 +45,20 @@ class PeopleViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
         switch indexPath.item {
         case 0:
-            let p: Properties = ["a": 1,
-                                 "b": 2.3,
-                                 "c": ["4", 5],
-                                 "d": URL(string:"https://mixpanel.com")!,
+            let p: Properties = ["a": 1 as AnyObject,
+                                 "b": 2.3 as AnyObject,
+                                 "c": ["4", 5] as AnyObject,
+                                 "d": URL(string:"https://mixpanel.com")! as AnyObject,
                                  "e": NSNull(),
-                                 "f": Date()]
+                                 "f": Date() as AnyObject]
             Mixpanel.mainInstance().people.set(properties: p)
             descStr = "Properties: \(p)"
         case 1:
-            Mixpanel.mainInstance().people.set(property: "g", to: "yo")
+            Mixpanel.mainInstance().people.set(property: "g", to: "yo" as AnyObject)
             descStr = "Property key: g, value: yo"
         case 2:
             let p = ["h": "just once"]
-            Mixpanel.mainInstance().people.setOnce(properties: p)
+            Mixpanel.mainInstance().people.setOnce(properties: p as Properties)
             descStr = "Properties: \(p)"
         case 3:
             let p = ["b", "h"]
@@ -66,25 +66,25 @@ class PeopleViewController: UIViewController, UITableViewDelegate, UITableViewDa
             descStr = "Unset Properties: \(p)"
         case 4:
             let p = ["a": 1.2, "b": 3]
-            Mixpanel.mainInstance().people.increment(properties: p)
+            Mixpanel.mainInstance().people.increment(properties: p as Properties)
             descStr = "Properties: \(p)"
         case 5:
             Mixpanel.mainInstance().people.increment(property: "b", by: 2.3)
             descStr = "Property key: b, value increment: 2.3"
         case 6:
             let p = ["c": "hello", "d": "goodbye"]
-            Mixpanel.mainInstance().people.append(properties: p)
+            Mixpanel.mainInstance().people.append(properties: p as Properties)
             descStr = "Properties: \(p)"
         case 7:
             let p = ["c": ["goodbye", "hi"], "d": ["hello"]]
-            Mixpanel.mainInstance().people.union(properties: p)
+            Mixpanel.mainInstance().people.union(properties: p as Properties)
             descStr = "Properties: \(p)"
         case 8:
             Mixpanel.mainInstance().people.trackCharge(amount: 20.5)
             descStr = "Amount: 20.5"
         case 9:
             let p = ["sandwich": 1]
-            Mixpanel.mainInstance().people.trackCharge(amount: 12.8, properties: p)
+            Mixpanel.mainInstance().people.trackCharge(amount: 12.8, properties: p as Properties?)
             descStr = "Amount: 12.8, Properties: \(p)"
         case 10:
             Mixpanel.mainInstance().people.clearCharges()

@@ -22,20 +22,20 @@ class AutomaticProperties {
         let size = UIScreen.main.bounds.size
         let infoDict = Bundle.main.infoDictionary
         if let infoDict = infoDict {
-            p["$app_build_number"]     = infoDict["CFBundleVersion"]
-            p["$app_version_string"]   = infoDict["CFBundleShortVersionString"]
+            p["$app_build_number"]     = infoDict["CFBundleVersion"] as AnyObject
+            p["$app_version_string"]   = infoDict["CFBundleShortVersionString"] as AnyObject
         }
         #if os(iOS)
-            p["$carrier"]           = AutomaticProperties.telephonyInfo.subscriberCellularProvider?.carrierName
+            p["$carrier"]           = AutomaticProperties.telephonyInfo.subscriberCellularProvider?.carrierName as AnyObject
         #endif
-        p["mp_lib"]             = "swift"
-        p["$lib_version"]       = AutomaticProperties.libVersion()
-        p["$manufacturer"]      = "Apple"
-        p["$os"]                = UIDevice.current.systemName
-        p["$os_version"]        = UIDevice.current.systemVersion
-        p["$model"]             = AutomaticProperties.deviceModel()
-        p["$screen_height"]     = Int(size.height)
-        p["$screen_width"]      = Int(size.width)
+        p["mp_lib"]             = "swift" as AnyObject
+        p["$lib_version"]       = AutomaticProperties.libVersion() as AnyObject
+        p["$manufacturer"]      = "Apple" as AnyObject
+        p["$os"]                = UIDevice.current.systemName as AnyObject
+        p["$os_version"]        = UIDevice.current.systemVersion as AnyObject
+        p["$model"]             = AutomaticProperties.deviceModel() as AnyObject
+        p["$screen_height"]     = Int(size.height) as AnyObject
+        p["$screen_width"]      = Int(size.width) as AnyObject
         return p
     }()
 
@@ -43,12 +43,12 @@ class AutomaticProperties {
         var p = Properties()
         let infoDict = Bundle.main.infoDictionary
         if let infoDict = infoDict {
-            p["$ios_app_version"] = infoDict["CFBundleVersion"]
-            p["$ios_app_release"] = infoDict["CFBundleShortVersionString"]
+            p["$ios_app_version"] = infoDict["CFBundleVersion"] as AnyObject
+            p["$ios_app_release"] = infoDict["CFBundleShortVersionString"] as AnyObject
         }
-        p["$ios_device_model"]  = AutomaticProperties.deviceModel()
-        p["$ios_version"]       = UIDevice.current.systemVersion
-        p["$ios_lib_version"]   = AutomaticProperties.libVersion()
+        p["$ios_device_model"]  = AutomaticProperties.deviceModel() as AnyObject
+        p["$ios_version"]       = UIDevice.current.systemVersion as AnyObject
+        p["$ios_lib_version"]   = AutomaticProperties.libVersion() as AnyObject
 
         return p
     }()
@@ -69,8 +69,11 @@ class AutomaticProperties {
     class func deviceModel() -> String {
         var systemInfo = utsname()
         uname(&systemInfo)
-        let modelCode = withUnsafeMutablePointer(&systemInfo.machine) {
-            ptr in String(cString: UnsafePointer<CChar>(ptr))
+        let size = MemoryLayout<CChar>.size
+        let modelCode = withUnsafePointer(to: &systemInfo.machine) {
+          $0.withMemoryRebound(to: CChar.self, capacity: size) {
+            String(cString:  UnsafePointer<CChar>($0))
+          }
         }
         if let model = String(validatingUTF8: modelCode) {
             return model

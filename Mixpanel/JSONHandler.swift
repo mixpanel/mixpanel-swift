@@ -54,28 +54,28 @@ class JSONHandler {
             return obj
 
         case let obj as Array<AnyObject>:
-            return obj.map() { makeObjectSerializable($0) }
+            return obj.map() { makeObjectSerializable($0)} as MPObjectToParse
 
         case let obj as Properties:
             var serializedDict = Properties()
             _ = obj.map() { (k, v) in
                 serializedDict[k] =
                     makeObjectSerializable(v) }
-            return serializedDict
+            return serializedDict as MPObjectToParse
 
         case let obj as Date:
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
             dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
             dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-            return dateFormatter.string(from: obj)
+            return dateFormatter.string(from: obj) as MPObjectToParse
 
         case let obj as URL:
-            return obj.absoluteString
+            return obj.absoluteString as MPObjectToParse
 
         default:
             Logger.info(message: "enforcing string on object")
-            return obj.description
+            return obj.description as MPObjectToParse
         }
     }
 

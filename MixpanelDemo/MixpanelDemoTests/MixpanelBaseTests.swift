@@ -67,15 +67,15 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss zzz"
         let date = dateFormatter.date(from: "2012-09-28 19:14:36 PDT")
         let nested = ["p1": ["p2": ["p3": ["bottom"]]]]
-        return ["string": "yello",
-                "number": 3,
-                "date": date!,
-                "dictionary": ["k": "v"],
-                "array": ["1"],
+        return ["string": "yello" as AnyObject,
+                "number": 3 as AnyObject,
+                "date": date! as AnyObject,
+                "dictionary": ["k": "v"] as AnyObject,
+                "array": ["1"] as AnyObject,
                 "null": NSNull(),
-                "nested": nested,
-                "url": URL(string: "https://mixpanel.com/")!,
-                "float": 1.3]
+                "nested": nested as AnyObject,
+                "url": URL(string: "https://mixpanel.com/")! as AnyObject,
+                "float": 1.3 as AnyObject]
     }
 
 }

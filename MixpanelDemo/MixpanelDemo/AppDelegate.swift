@@ -13,10 +13,8 @@ import Mixpanel
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions
+      launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
         Mixpanel.initialize(token: "MIXPANEL_TOKEN")
         Mixpanel.mainInstance().loggingEnabled = true
@@ -27,8 +25,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UIApplication.shared.registerForRemoteNotifications()
 
         Mixpanel.mainInstance().identify(
-            distinctId: Mixpanel.mainInstance().distinctId)
-        Mixpanel.mainInstance().people.set(properties: ["$name": "Max Panelle"])
+          distinctId: Mixpanel.mainInstance().distinctId)
+        Mixpanel.mainInstance().people.set(properties: ["$name": "Max Panelle" as AnyObject])
 
         return true
     }
@@ -49,16 +47,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         debugPrint(error)
     }
-
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
-        debugPrint("did receive remote notificaiton")
-        if let message = userInfo["aps"]?["alert"] as? String {
-            let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
-            window?.rootViewController?.present(alert, animated: true, completion: nil)
-        }
-
-        Mixpanel.mainInstance().trackPushNotification(userInfo)
+  func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+    debugPrint("did receive remote notificaiton")
+    if let message = (userInfo["aps"] as AnyObject)["alert"] as? String {
+      let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
+      alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+      window?.rootViewController?.present(alert, animated: true, completion: nil)
     }
 
+    Mixpanel.mainInstance().trackPushNotification(userInfo as [NSObject : AnyObject])
+  }
 }

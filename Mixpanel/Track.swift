@@ -35,7 +35,7 @@ class Track {
                     v is Date ||
                     v is URL ||
                     v is NSNull,
-                "Property values must be of valid type. Got \(v.dynamicType)")
+                "Property values must be of valid type. Got \(type(of: v))")
             }
         }
     }
@@ -58,19 +58,19 @@ class Track {
         let eventStartTime = timedEvents[ev!] as? Double
         var p = Properties()
         p += AutomaticProperties.properties
-        p["token"] = apiToken
-        p["time"] = epochSeconds
+        p["token"] = apiToken as AnyObject
+        p["time"] = epochSeconds as AnyObject
         if let eventStartTime = eventStartTime {
             timedEvents.removeValue(forKey: ev!)
-            p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
+            p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime)) as AnyObject
         }
-        p["distinct_id"] = distinctId
+        p["distinct_id"] = distinctId as AnyObject
         p += superProperties
         if let properties = properties {
             p += properties
         }
 
-        let trackEvent: Properties = ["event": ev!, "properties": p]
+        let trackEvent: Properties = ["event": ev! as AnyObject, "properties": p as AnyObject]
         eventsQueue.append(trackEvent)
 
         if eventsQueue.count > QueueConstants.queueSize {
@@ -109,7 +109,7 @@ class Track {
             Logger.error(message: "mixpanel cannot time an empty event")
             return
         }
-        timedEvents[event] = startTime
+        timedEvents[event] = startTime as AnyObject
     }
 
     func clearTimedEvents(_ timedEvents: inout Properties) {

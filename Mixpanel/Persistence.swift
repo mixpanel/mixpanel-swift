@@ -51,21 +51,21 @@ class Persistence {
     }
 
     class func archiveEvents(_ eventsQueue: Queue, token: String) {
-        archiveToFile(.Events, object: eventsQueue, token: token)
+        archiveToFile(.Events, object: eventsQueue as AnyObject, token: token)
     }
 
     class func archivePeople(_ peopleQueue: Queue, token: String) {
-        archiveToFile(.People, object: peopleQueue, token: token)
+        archiveToFile(.People, object: peopleQueue as AnyObject, token: token)
     }
 
     class func archiveProperties(_ properties: ArchivedProperties, token: String) {
         var p: Properties = Properties()
-        p["distinctId"] = properties.distinctId
-        p["superProperties"] = properties.superProperties
-        p["peopleDistinctId"] = properties.peopleDistinctId
-        p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
-        p["timedEvents"] = properties.timedEvents
-        archiveToFile(.Properties, object: p, token: token)
+        p["distinctId"] = properties.distinctId as AnyObject
+        p["superProperties"] = properties.superProperties as AnyObject
+        p["peopleDistinctId"] = properties.peopleDistinctId as AnyObject
+        p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue as AnyObject
+        p["timedEvents"] = properties.timedEvents as AnyObject
+        archiveToFile(.Properties, object: p as AnyObject, token: token)
     }
 
     class private func archiveToFile(_ type: ArchiveType, object: AnyObject, token: String) {
@@ -107,7 +107,7 @@ class Persistence {
     }
 
     class private func unarchiveWithFilePath(_ filePath: String) -> AnyObject? {
-        let unarchivedData: AnyObject? = NSKeyedUnarchiver.unarchiveObject(withFile: filePath)
+        let unarchivedData: AnyObject? = NSKeyedUnarchiver.unarchiveObject(withFile: filePath) as AnyObject
         if unarchivedData == nil {
             do {
                 try FileManager.default.removeItem(atPath: filePath)

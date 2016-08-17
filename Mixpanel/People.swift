@@ -37,10 +37,10 @@ public class People {
         serialQueue.async() {
             var r = Properties()
             var p = Properties()
-            r["$token"] = self.apiToken
-            r["$time"] = epochMilliseconds
+            r["$token"] = self.apiToken as AnyObject
+            r["$time"] = epochMilliseconds as AnyObject
             if ignoreTimeCopy {
-                r["$ignore_time"] = Int(ignoreTimeCopy)
+                r["$ignore_time"] = 1 as AnyObject
             }
             if action == "$unset" {
                 // $unset takes an array of property names which is supplied to this method
@@ -51,11 +51,11 @@ public class People {
                     p += AutomaticProperties.peopleProperties
                 }
                 p += properties
-                r[action] = p
+                r[action] = p as AnyObject
             }
 
             if let distinctId = self.distinctId {
-                r["$distinct_id"] = distinctId
+                r["$distinct_id"] = distinctId as AnyObject
                 self.addPeopleObject(r)
             } else {
                 self.unidentifiedQueue.append(r)
@@ -79,7 +79,7 @@ public class People {
     }
 
     private func deviceTokenDataToString(_ deviceToken: Data) -> String {
-        let tokenChars = UnsafePointer<CChar>((deviceToken as NSData).bytes)
+        let tokenChars = unsafeBitCast((deviceToken as NSData).bytes, to: UnsafePointer<CChar>.self)
         var tokenString = ""
 
         for i in 0..<deviceToken.count {
@@ -105,7 +105,7 @@ public class People {
      */
     public func addPushDeviceToken(_ deviceToken: Data) {
         let properties = ["$ios_devices": [deviceTokenDataToString(deviceToken)]]
-        addPeopleRecordToQueueWithAction("$union", properties: properties)
+        addPeopleRecordToQueueWithAction("$union", properties: properties as Properties)
     }
 
     /**
@@ -119,7 +119,7 @@ public class People {
      */
     public func removePushDeviceToken(_ deviceToken: Data) {
         let properties = ["$ios_devices": [deviceTokenDataToString(deviceToken)]]
-        addPeopleRecordToQueueWithAction("$remove", properties: properties)
+        addPeopleRecordToQueueWithAction("$remove", properties: properties as Properties)
     }
 
     /**
@@ -181,7 +181,7 @@ public class People {
      - parameter properties: properties array
      */
     public func unset(properties: [String]) {
-        addPeopleRecordToQueueWithAction("$unset", properties: ["$properties":properties])
+        addPeopleRecordToQueueWithAction("$unset", properties: ["$properties":properties as AnyObject])
     }
 
     /**
@@ -210,7 +210,7 @@ public class People {
      - parameter by:       amount to increment by
      */
     public func increment(property: String, by: Double) {
-        increment(properties: [property: by])
+        increment(properties: [property: by as AnyObject])
     }
 
     /**
@@ -268,18 +268,18 @@ public class People {
      - parameter properties: Optional. properties dictionary
      */
     public func trackCharge(amount: Double, properties: Properties? = nil) {
-        var transaction: Properties = ["$amount": amount, "$time": Date()]
+        var transaction: Properties = ["$amount": amount as AnyObject, "$time": Date() as AnyObject]
         if let properties = properties {
             transaction += properties
         }
-        append(properties: ["$transactions": transaction])
+        append(properties: ["$transactions": transaction as AnyObject])
     }
 
     /**
      Delete current user's revenue history.
      */
     public func clearCharges() {
-        set(properties: ["$transactions": []])
+        set(properties: ["$transactions": [] as AnyObject])
     }
 
     /**

@@ -21,7 +21,7 @@ class FlushRequest: Network {
     func sendRequest(_ requestData: String,
                      type: FlushType,
                      useIP: Bool,
-                     completion: (Bool) -> Void) {
+                     completion: @escaping (Bool) -> Void) {
 
         let responseParser: (Data) -> Int? = { data in
             let response = String(data: data, encoding: String.Encoding.utf8)
@@ -30,8 +30,8 @@ class FlushRequest: Network {
             }
             return nil
         }
-
-        let requestBody = "ip=\(Int(useIP))&data=\(requestData)"
+        let ip = useIP ? 1 : 0
+        let requestBody = "ip=\(ip)&data=\(requestData)"
             .data(using: String.Encoding.utf8)
 
         let resource = Network.buildResource(path: type.rawValue,
@@ -49,7 +49,7 @@ class FlushRequest: Network {
 
     private func flushRequestHandler(_ base: String,
                                      resource: Resource<Int>,
-                                     completion: (Bool) -> Void) {
+                                     completion: @escaping (Bool) -> Void) {
 
         Network.apiRequest(base: base,
                            resource: resource,

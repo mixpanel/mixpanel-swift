@@ -107,11 +107,11 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
     }
 
     @IBAction func tappedOk(_ sender: AnyObject) {
-        delegate?.dismissNotification(controller: self, status: true)
+        delegate?.notificationShouldDismiss(controller: self, status: true)
     }
 
     @IBAction func tappedClose(_ sender: AnyObject) {
-        delegate?.dismissNotification(controller: self, status: false)
+        delegate?.notificationShouldDismiss(controller: self, status: false)
     }
 
     override var shouldAutorotate: Bool {

@@ -781,7 +781,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         }
     }
 
-    func markNotification(_ notification: InAppNotification) {
+    func notificationDidShow(_ notification: InAppNotification) {
         let properties: Properties = ["$campaigns": notification.ID,
                           "$notifications": [
                             "campaign_id": notification.ID,
@@ -790,6 +790,10 @@ extension MixpanelInstance: InAppNotificationsDelegate {
                             "time": Date()]]
         people.append(properties: properties)
         trackNotification(notification, event: "$campaign_delivery")
+    }
+
+    func notificationDidCTA(_ notification: InAppNotification, event: String) {
+        trackNotification(notification, event: event)
     }
 
     func trackNotification(_ notification: InAppNotification, event: String) {

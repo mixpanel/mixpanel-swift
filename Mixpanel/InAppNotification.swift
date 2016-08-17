@@ -121,7 +121,4 @@ extension InAppNotification {
                   callToAction: callToAction,
                   callToActionURL: callToActionURL)
     }
-
-
-
 }

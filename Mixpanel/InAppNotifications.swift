@@ -9,8 +9,8 @@
 import Foundation
 
 protocol InAppNotificationsDelegate {
-    func markNotification(_ notification: InAppNotification)
-    func trackNotification(_ notification: InAppNotification, event: String)
+    func notificationDidShow(_ notification: InAppNotification)
+    func notificationDidCTA(_ notification: InAppNotification, event: String)
 }
 
 enum InAppType: String {
@@ -44,6 +44,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
 
                     if shownNotification {
                         self.markNotificationShown(notification: notification)
+                        self.delegate?.notificationDidShow(notification)
                     }
                 }
             }
@@ -57,7 +58,6 @@ class InAppNotifications: NotificationViewControllerDelegate {
 
         currentlyShowingNotification = notification
         shownNotifications.insert(notification.ID)
-        delegate?.markNotification(notification)
     }
 
     func showMiniNotification(_ notification: InAppNotification) -> Bool {
@@ -66,7 +66,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
         miniNotificationVC.show(animated: true)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + miniNotificationPresentationTime) {
-            self.dismissNotification(controller: miniNotificationVC, status: false)
+            self.notificationShouldDismiss(controller: miniNotificationVC, status: false)
         }
         return true
     }
@@ -78,7 +78,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
         return true
     }
 
-    func dismissNotification(controller: BaseNotificationViewController, status: Bool) {
+    func notificationShouldDismiss(controller: BaseNotificationViewController, status: Bool) {
         if currentlyShowingNotification?.ID != controller.notification.ID {
             return
         }
@@ -90,14 +90,12 @@ class InAppNotifications: NotificationViewControllerDelegate {
         if status, let URL = controller.notification.callToActionURL {
             controller.hide(animated: true) {
                 Logger.info(message: "opening CTA URL: \(URL)")
-
                 if !UIApplication.shared.openURL(URL) {
                     Logger.error(message: "Mixpanel failed to open given URL: \(URL)")
                 }
 
-                self.delegate?.trackNotification(controller.notification, event: "$campaign_open")
+                self.delegate?.notificationDidCTA(controller.notification, event: "$campaign_open")
                 completionBlock()
-
             }
         } else {
             controller.hide(animated: true, completion: completionBlock)

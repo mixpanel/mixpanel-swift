@@ -51,22 +51,20 @@ class FlushRequest: Network {
                                      resource: Resource<Int>,
                                      completion: (Bool) -> Void) {
 
-        Network.apiRequest(base: base,
-                           resource: resource,
-                           failure: { (reason, data, response) in
-                            self.networkConsecutiveFailures += 1
-                            self.updateRetryDelay(response)
-                            completion(false)
-            },
-                           success: { (result, response) in
-                            self.networkConsecutiveFailures = 0
-                            self.updateRetryDelay(response)
-                            if result == 0 {
-                                Logger.info(message: "\(base) api rejected some items")
-                            }
-                            completion(true)
-            }
-        )
+        Network.apiRequest(base: base, resource: resource,
+            failure: { (reason, data, response) in
+                self.networkConsecutiveFailures += 1
+                self.updateRetryDelay(response)
+                Logger.warn(message: "API request to \(resource.path) has failed with reason \(reason)")
+                completion(false)
+            }, success: { (result, response) in
+                self.networkConsecutiveFailures = 0
+                self.updateRetryDelay(response)
+                if result == 0 {
+                    Logger.info(message: "\(base) api rejected some items")
+                }
+                completion(true)
+            })
     }
 
     private func updateRetryDelay(_ response: URLResponse?) {
@@ -78,8 +76,7 @@ class FlushRequest: Network {
 
         if networkConsecutiveFailures >= APIConstants.failuresTillBackoff {
             retryTime = max(retryTime,
-                            retryBackOffTimeWithConsecutiveFailures(
-                                self.networkConsecutiveFailures))
+                            retryBackOffTimeWithConsecutiveFailures(networkConsecutiveFailures))
         }
         let retryDate = Date(timeIntervalSinceNow: retryTime)
         networkRequestsAllowedAfterTime = retryDate.timeIntervalSince1970

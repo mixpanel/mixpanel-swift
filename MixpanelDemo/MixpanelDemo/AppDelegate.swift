@@ -57,7 +57,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
             window?.rootViewController?.present(alert, animated: true, completion: nil)
         }
-
         Mixpanel.mainInstance().trackPushNotification(userInfo)
     }
 

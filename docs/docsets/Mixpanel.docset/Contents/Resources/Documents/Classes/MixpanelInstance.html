@@ -349,9 +349,103 @@ Useful if you need to proxy Mixpanel requests. Defaults to
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC8Mixpanel16MixpanelInstance28checkForNotificationOnActiveSb"></a>
+                    <a name="//apple_ref/swift/Property/checkForNotificationOnActive" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC8Mixpanel16MixpanelInstance28checkForNotificationOnActiveSb">checkForNotificationOnActive</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Controls whether to automatically check for notifications for the
+currently identified user when the application becomes active.
+Defaults to true.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">checkForNotificationOnActive</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC8Mixpanel16MixpanelInstance24showNotificationOnActiveSb"></a>
+                    <a name="//apple_ref/swift/Property/showNotificationOnActive" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC8Mixpanel16MixpanelInstance24showNotificationOnActiveSb">showNotificationOnActive</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Controls whether to automatically check for and show in-app notifications
+for the currently identified user when the application becomes active.
+Defaults to true.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">showNotificationOnActive</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC8Mixpanel16MixpanelInstance32miniNotificationPresentationTimeSd"></a>
+                    <a name="//apple_ref/swift/Property/miniNotificationPresentationTime" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC8Mixpanel16MixpanelInstance32miniNotificationPresentationTimeSd">miniNotificationPresentationTime</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Determines the time, in seconds, that a mini notification will remain on
+the screen before automatically hiding itself.
+Defaults to 6 (seconds).</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">miniNotificationPresentationTime</span><span class="p">:</span> <span class="kt">Double</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
             <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Identity"></a>
+                <a name="//apple_ref/swift/Section/Identity" class="dashAnchor"></a>
+                <a href="#/Identity">
+                  <h3 class="section-name">Identity</h3>
+                </a>
+              </div>
               <ul>
                 <li class="item">
                   <div>
@@ -527,6 +621,13 @@ Useful if your app&rsquo;s user logs out.</p>
               </ul>
             </div>
             <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Persistence"></a>
+                <a name="//apple_ref/swift/Section/Persistence" class="dashAnchor"></a>
+                <a href="#/Persistence">
+                  <h3 class="section-name">Persistence</h3>
+                </a>
+              </div>
               <ul>
                 <li class="item">
                   <div>
@@ -570,6 +671,13 @@ persisting data as needed.</p>
               </ul>
             </div>
             <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Flush"></a>
+                <a name="//apple_ref/swift/Section/Flush" class="dashAnchor"></a>
+                <a href="#/Flush">
+                  <h3 class="section-name">Flush</h3>
+                </a>
+              </div>
               <ul>
                 <li class="item">
                   <div>
@@ -626,6 +734,13 @@ method manually if you want to force a flush at a particular moment.</p>
               </ul>
             </div>
             <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Track"></a>
+                <a name="//apple_ref/swift/Section/Track" class="dashAnchor"></a>
+                <a href="#/Track">
+                  <h3 class="section-name">Track</h3>
+                </a>
+              </div>
               <ul>
                 <li class="item">
                   <div>
@@ -1085,10 +1200,160 @@ registered.</p>
                 </li>
               </ul>
             </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/In%20App%20Notifications"></a>
+                <a name="//apple_ref/swift/Section/In App Notifications" class="dashAnchor"></a>
+                <a href="#/In%20App%20Notifications">
+                  <h3 class="section-name">In App Notifications</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance16showNotificationFT_T_"></a>
+                    <a name="//apple_ref/swift/Method/showNotification()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT_T_">showNotification()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Shows a notification if one is available.</p>
+
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    You do not need to call this method on the main thread.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance16showNotificationFT4typeSS_T_"></a>
+                    <a name="//apple_ref/swift/Method/showNotification(type:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT4typeSS_T_">showNotification(type:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Shows a notification with the given type if one is available.</p>
+
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    <p>You do not need to call this method on the main thread.</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">(</span><span class="nv">type</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>type</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The type of notification to show, either “mini” or “takeover”</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance16showNotificationFT2IDSi_T_"></a>
+                    <a name="//apple_ref/swift/Method/showNotification(ID:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT2IDSi_T_">showNotification(ID:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Shows a notification with the given ID</p>
+
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    <p>You do not need to call this method on the main thread.</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">(</span><span class="kt">ID</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>ID</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The notification ID you want to present</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2016 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2016-07-28)</p>
+          <p>&copy; 2016 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2016-08-16)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

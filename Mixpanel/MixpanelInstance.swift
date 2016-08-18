@@ -124,6 +124,42 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
 
+    /// Controls whether to automatically check for notifications for the
+    /// currently identified user when the application becomes active.
+    /// Defaults to true.
+    public var checkForNotificationOnActive: Bool {
+        set {
+            decideInstance.notificationsInstance.checkForNotificationOnActive = newValue
+        }
+        get {
+            return decideInstance.notificationsInstance.checkForNotificationOnActive
+        }
+    }
+
+    /// Controls whether to automatically check for and show in-app notifications
+    /// for the currently identified user when the application becomes active.
+    /// Defaults to true.
+    public var showNotificationOnActive: Bool {
+        set {
+            decideInstance.notificationsInstance.showNotificationOnActive = newValue
+        }
+        get {
+            return decideInstance.notificationsInstance.showNotificationOnActive
+        }
+    }
+
+    /// Determines the time, in seconds, that a mini notification will remain on
+    /// the screen before automatically hiding itself.
+    /// Defaults to 6 (seconds).
+    public var miniNotificationPresentationTime: Double {
+        set {
+            decideInstance.notificationsInstance.miniNotificationPresentationTime = newValue
+        }
+        get {
+            return decideInstance.notificationsInstance.miniNotificationPresentationTime
+        }
+    }
+
     var apiToken = ""
     var superProperties = Properties()
     var eventsQueue = Queue()
@@ -132,6 +168,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     var taskId = UIBackgroundTaskInvalid
     let flushInstance = Flush()
     let trackInstance: Track
+    let decideInstance = Decide()
 
     init(apiToken: String?, launchOptions: [NSObject: AnyObject]?, flushInterval: Double) {
         if let apiToken = apiToken, !apiToken.isEmpty {
@@ -146,7 +183,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         people = People(apiToken: self.apiToken,
                         serialQueue: serialQueue)
         flushInstance._flushInterval = flushInterval
-
+        decideInstance.inAppDelegate = self
         setupListeners()
         unarchive()
 
@@ -202,6 +239,14 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
     @objc private func applicationDidBecomeActive(_ notification: Notification) {
         flushInstance.applicationDidBecomeActive()
+
+        checkDecide { decideResponse in
+            if let decideResponse = decideResponse {
+                if self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
+                    self.decideInstance.notificationsInstance.showNotification(decideResponse.unshownInAppNotifications.first!)
+                }
+            }
+        }
     }
 
     @objc private func applicationWillResignActive(_ notification: Notification) {
@@ -291,8 +336,8 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
 }
 
-// MARK: - Identity
 extension MixpanelInstance {
+    // MARK: - Identity
 
     /**
      Sets the distinct ID of the current user.
@@ -394,8 +439,8 @@ extension MixpanelInstance {
     }
 }
 
-// MARK: - Persistence
 extension MixpanelInstance {
+    // MARK: - Persistence
 
     /**
      Writes current project info including the distinct Id, super properties,
@@ -413,11 +458,12 @@ extension MixpanelInstance {
                                             timedEvents: timedEvents,
                                             distinctId: distinctId,
                                             peopleDistinctId: people.distinctId,
-                                            peopleUnidentifiedQueue: people.unidentifiedQueue)
+                                            peopleUnidentifiedQueue: people.unidentifiedQueue,
+                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications)
         Persistence.archive(eventsQueue,
                             peopleQueue: people.peopleQueue,
                             properties: properties,
-                            token: self.apiToken)
+                            token: apiToken)
     }
 
     func unarchive() {
@@ -427,7 +473,8 @@ extension MixpanelInstance {
          timedEvents,
          distinctId,
          people.distinctId,
-         people.unidentifiedQueue) = Persistence.unarchive(token: self.apiToken)
+         people.unidentifiedQueue,
+         decideInstance.notificationsInstance.shownNotifications) = Persistence.unarchive(token: apiToken)
 
         if distinctId == "" {
             distinctId = defaultDistinctId()
@@ -439,8 +486,9 @@ extension MixpanelInstance {
                                             timedEvents: timedEvents,
                                             distinctId: distinctId,
                                             peopleDistinctId: people.distinctId,
-                                            peopleUnidentifiedQueue: people.unidentifiedQueue)
-        Persistence.archiveProperties(properties, token: self.apiToken)
+                                            peopleUnidentifiedQueue: people.unidentifiedQueue,
+                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications)
+        Persistence.archiveProperties(properties, token: apiToken)
     }
 
     func trackIntegration() {
@@ -459,8 +507,8 @@ extension MixpanelInstance {
     }
 }
 
-// MARK: - Flush
 extension MixpanelInstance {
+    // MARK: - Flush
 
     /**
      Uploads queued data to the Mixpanel server.
@@ -489,8 +537,8 @@ extension MixpanelInstance {
     }
 }
 
-// MARK: - Track
 extension MixpanelInstance {
+    // MARK: - Track
 
     /**
      Tracks an event with properties.
@@ -537,8 +585,8 @@ extension MixpanelInstance {
                 let properties = ["campaign_id": c,
                                   "message_id": m,
                                   "message_type": "push"]
-                self.track(event: event,
-                           properties: properties)
+                track(event: event,
+                      properties: properties)
             } else {
                 Logger.info(message: "malformed mixpanel push payload")
             }
@@ -665,4 +713,104 @@ extension MixpanelInstance {
             self.archiveProperties()
         }
     }
+}
+
+extension MixpanelInstance: InAppNotificationsDelegate {
+    // MARK: - Decide
+
+    func checkDecide(forceFetch: Bool = false, completion: ((response: DecideResponse?) -> Void)) {
+        guard let distinctId = people.distinctId else {
+            Logger.info(message: "Can't fetch from Decide without identifying first")
+            return
+        }
+        serialQueue.async {
+            self.decideInstance.checkDecide(forceFetch: forceFetch,
+                                            distinctId: distinctId,
+                                            token: self.apiToken,
+                                            completion: completion)
+        }
+    }
+
+    // MARK: - In App Notifications
+
+    /**
+     Shows a notification if one is available.
+
+     - note: You do not need to call this method on the main thread.
+    */
+    public func showNotification() {
+        checkForNotifications { (notifications) in
+            if let notifications = notifications, !notifications.isEmpty {
+                self.decideInstance.notificationsInstance.showNotification(notifications.first!)
+            }
+        }
+    }
+
+    /**
+     Shows a notification with the given type if one is available.
+
+     - note: You do not need to call this method on the main thread.
+
+     - parameter type: The type of notification to show, either "mini" or "takeover"
+    */
+    public func showNotification(type: String) {
+        checkForNotifications { (notifications) in
+            if let notifications = notifications {
+                for notification in notifications {
+                    if type == notification.type {
+                        self.decideInstance.notificationsInstance.showNotification(notification)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     Shows a notification with the given ID
+
+     - note: You do not need to call this method on the main thread.
+
+     - parameter ID: The notification ID you want to present
+     */
+    public func showNotification(ID: Int) {
+        checkForNotifications { (notifications) in
+            if let notifications = notifications {
+                for notification in notifications {
+                    if ID == notification.ID {
+                        self.decideInstance.notificationsInstance.showNotification(notification)
+                    }
+                }
+            }
+        }
+    }
+
+    func checkForNotifications(completion: (notifications: [InAppNotification]?) -> Void) {
+        checkDecide { response in
+            completion(notifications: response?.unshownInAppNotifications)
+        }
+    }
+
+    func notificationDidShow(_ notification: InAppNotification) {
+        let properties: Properties = ["$campaigns": notification.ID,
+                          "$notifications": [
+                            "campaign_id": notification.ID,
+                            "message_id": notification.messageID,
+                            "type": "inapp",
+                            "time": Date()]]
+        people.append(properties: properties)
+        trackNotification(notification, event: "$campaign_delivery")
+    }
+
+    func notificationDidCTA(_ notification: InAppNotification, event: String) {
+        trackNotification(notification, event: event)
+    }
+
+    func trackNotification(_ notification: InAppNotification, event: String) {
+        let properties: Properties = ["campaign_id": notification.ID,
+                                      "message_id": notification.messageID,
+                                      "message_type": "inapp",
+                                      "message_subtype": notification.type]
+        track(event: event, properties: properties)
+    }
+
 }

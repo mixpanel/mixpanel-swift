@@ -39,6 +39,6 @@ class BaseNotificationViewController: UIViewController {
     }
 
     func show(animated: Bool) {}
-    func hide(animated: Bool, completion: () -> Void) {}
+    func hide(animated: Bool, completion: @escaping () -> Void) {}
 
 }

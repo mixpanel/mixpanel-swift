@@ -30,7 +30,7 @@ class Decide {
         }
     }
 
-    func checkDecide(forceFetch: Bool = false, distinctId: String, token: String, completion: ((response: DecideResponse?) -> Void)) {
+    func checkDecide(forceFetch: Bool = false, distinctId: String, token: String, completion: ((_ response: DecideResponse?) -> Void)) {
         var decideResponse = DecideResponse()
 
         if !decideFetched || forceFetch {
@@ -38,12 +38,12 @@ class Decide {
             decideRequest.sendRequest(distinctId: distinctId, token: token) { decideResult in
                 guard let result = decideResult else {
                     semaphore.signal()
-                    completion(response: nil)
+                    completion(nil)
                     return
                 }
 
                 var parsedNotifications = [InAppNotification]()
-                if let rawNotifications = result["notifications"] as? [[String: AnyObject]] {
+                if let rawNotifications = result["notifications"] as? [[String: Any]] {
                     for rawNotif in rawNotifications {
                         if let notification = InAppNotification(JSONObject: rawNotif) {
                             parsedNotifications.append(notification)
@@ -70,7 +70,7 @@ class Decide {
             "available notifications out of " +
             "\(notificationsInstance.inAppNotifications.count) total")
 
-        completion(response: decideResponse)
+        completion(decideResponse)
     }
 
 }

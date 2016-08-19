@@ -68,11 +68,11 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
             Mixpanel.mainInstance().clearSuperProperties()
             descStr = "Cleared Super Properties"
         case 6:
-            let p = ["Super Property 1": 1,
+            let p: Properties = ["Super Property 1": 1,
                      "Super Property 2": "p2",
-                     "Super Property 3": NSDate(),
+                     "Super Property 3": Date(),
                      "Super Property 4": ["a":"b"],
-                     "Super Property 5": [3, "a", NSDate()],
+                     "Super Property 5": [3, "a", Date()],
                      "Super Property 6":
                         URL(string: "https://mixpanel.com")!,
                      "Super Property 7": NSNull()]

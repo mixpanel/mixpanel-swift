@@ -66,7 +66,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         waitForSerialQueue()
     }
 
-    func assertDefaultPeopleProperties(_ properties: Properties) {
+    func assertDefaultPeopleProperties(_ properties: InternalProperties) {
         XCTAssertNotNil(properties["$ios_device_model"], "missing $ios_device_model property")
         XCTAssertNotNil(properties["$ios_lib_version"], "missing $ios_lib_version property")
         XCTAssertNotNil(properties["$ios_version"], "missing $ios_version property")

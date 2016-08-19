@@ -17,8 +17,8 @@ class AutomaticProperties {
     static let telephonyInfo = CTTelephonyNetworkInfo()
     #endif
 
-    static var properties: Properties = {
-        var p = Properties()
+    static var properties: InternalProperties = {
+        var p = InternalProperties()
         let size = UIScreen.main.bounds.size
         let infoDict = Bundle.main.infoDictionary
         if let infoDict = infoDict {
@@ -26,7 +26,7 @@ class AutomaticProperties {
             p["$app_version_string"]   = infoDict["CFBundleShortVersionString"]
         }
         #if os(iOS)
-            p["$carrier"]           = AutomaticProperties.telephonyInfo.subscriberCellularProvider?.carrierName
+            p["$carrier"] = AutomaticProperties.telephonyInfo.subscriberCellularProvider?.carrierName
         #endif
         p["mp_lib"]             = "swift"
         p["$lib_version"]       = AutomaticProperties.libVersion()
@@ -39,8 +39,8 @@ class AutomaticProperties {
         return p
     }()
 
-    static var peopleProperties: Properties = {
-        var p = Properties()
+    static var peopleProperties: InternalProperties = {
+        var p = InternalProperties()
         let infoDict = Bundle.main.infoDictionary
         if let infoDict = infoDict {
             p["$ios_app_version"] = infoDict["CFBundleVersion"]
@@ -69,8 +69,11 @@ class AutomaticProperties {
     class func deviceModel() -> String {
         var systemInfo = utsname()
         uname(&systemInfo)
-        let modelCode = withUnsafeMutablePointer(&systemInfo.machine) {
-            ptr in String(cString: UnsafePointer<CChar>(ptr))
+        let size = MemoryLayout<CChar>.size
+        let modelCode = withUnsafePointer(to: &systemInfo.machine) {
+            $0.withMemoryRebound(to: CChar.self, capacity: size) {
+                String(cString:  UnsafePointer<CChar>($0))
+            }
         }
         if let model = String(validatingUTF8: modelCode) {
             return model

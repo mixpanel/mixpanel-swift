@@ -10,7 +10,7 @@ import Foundation
 
 class JSONHandler {
 
-    typealias MPObjectToParse = AnyObject
+    typealias MPObjectToParse = Any
 
     class func encodeAPIData(_ obj: MPObjectToParse) -> String? {
         let data: Data? = serializeJSONObject(obj)
@@ -53,11 +53,11 @@ class JSONHandler {
         case is String, is Int, is UInt, is Double, is Float:
             return obj
 
-        case let obj as Array<AnyObject>:
+        case let obj as Array<Any>:
             return obj.map() { makeObjectSerializable($0) }
 
-        case let obj as Properties:
-            var serializedDict = Properties()
+        case let obj as InternalProperties:
+            var serializedDict = InternalProperties()
             _ = obj.map() { (k, v) in
                 serializedDict[k] =
                     makeObjectSerializable(v) }
@@ -75,7 +75,7 @@ class JSONHandler {
 
         default:
             Logger.info(message: "enforcing string on object")
-            return obj.description
+            return String(describing: obj)
         }
     }
 

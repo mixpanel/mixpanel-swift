@@ -15,8 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-
+                     didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
         Mixpanel.initialize(token: "MIXPANEL_TOKEN")
         Mixpanel.mainInstance().loggingEnabled = true
@@ -29,7 +28,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Mixpanel.mainInstance().identify(
             distinctId: Mixpanel.mainInstance().distinctId)
         Mixpanel.mainInstance().people.set(properties: ["$name": "Max Panelle"])
-
         return true
     }
 
@@ -50,9 +48,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         debugPrint(error)
     }
 
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
         debugPrint("did receive remote notificaiton")
-        if let message = userInfo["aps"]?["alert"] as? String {
+        if let message = (userInfo["aps"] as? [String: Any])?["alert"] as? String {
             let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
             window?.rootViewController?.present(alert, animated: true, completion: nil)

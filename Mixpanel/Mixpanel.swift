@@ -58,7 +58,13 @@ public class Mixpanel {
      - returns: returns the main Mixpanel instance
      */
     public class func mainInstance() -> MixpanelInstance {
-        return MixpanelManager.sharedInstance.getMainInstance()!
+        let instance = MixpanelManager.sharedInstance.getMainInstance()
+        if instance == nil {
+            fatalError("You have to call initialize(token:) before calling the main instance, " +
+                "or define a new main instance if removing the main one")
+        }
+
+        return instance!
     }
 
     /**

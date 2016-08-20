@@ -151,7 +151,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         unarchive()
 
         if let notification =
-            launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? Properties {
+            launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? [NSObject : AnyObject] {
             trackPushNotification(notification, event: "$app_open")
         }
     }

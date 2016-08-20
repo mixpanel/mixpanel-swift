@@ -19,10 +19,13 @@ If you are using Objective-C, we recommend using our **[Objective-C Library](htt
 
 ## Current supported features
 
-* Tracking API
-* Mixpanel People API
-* Swift2.3 and latest [Swift3](https://github.com/mixpanel/mixpanel-swift/tree/swift3)
-* [Full Documentation](https://mixpanel.github.io/mixpanel-swift)
+| Feature      | Swift 2.3     | [Swift 3 Beta 5](https://github.com/mixpanel/mixpanel-swift/tree/swift3) |
+| -------      | ------------- | -------------                                                            |
+| Tracking API |       ✔       |       ✔       |
+| People API   |       ✔       |       ✔       |
+| [Documentation](https://mixpanel.github.io/mixpanel-swift)|       ✔       |        ✔       |
+| tvOS Support |               |       ✔       |
+| In-app Notifications |               |       ✔       |
 
 # Installation
 

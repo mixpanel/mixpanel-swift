@@ -72,7 +72,7 @@ class AutomaticProperties {
         let size = MemoryLayout<CChar>.size
         let modelCode = withUnsafePointer(to: &systemInfo.machine) {
             $0.withMemoryRebound(to: CChar.self, capacity: size) {
-                String(cString:  UnsafePointer<CChar>($0))
+                String(cString: UnsafePointer<CChar>($0))
             }
         }
         if let model = String(validatingUTF8: modelCode) {

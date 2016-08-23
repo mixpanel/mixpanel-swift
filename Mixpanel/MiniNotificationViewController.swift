@@ -17,7 +17,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
     var position: CGPoint!
 
     convenience init(notification: InAppNotification) {
-        self.init(notification: notification, nameOfClass: String(MiniNotificationViewController.self))
+        self.init(notification: notification, nameOfClass: String(describing: MiniNotificationViewController.self))
     }
 
     override func viewDidLoad() {
@@ -80,7 +80,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
         })
     }
 
-    override func hide(animated: Bool, completion: () -> Void) {
+    override func hide(animated: Bool, completion: @escaping () -> Void) {
         if !isDismissing {
             canPan = false
             isDismissing = true

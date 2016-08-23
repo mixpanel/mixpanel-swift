@@ -10,7 +10,7 @@ import Foundation
 
 class DecideRequest: Network {
 
-    typealias DecideResult = [String: AnyObject]
+    typealias DecideResult = [String: Any]
     let decidePath = "/decide"
     var networkRequestsAllowedAfterTime = 0.0
     var networkConsecutiveFailures = 0
@@ -40,10 +40,10 @@ class DecideRequest: Network {
 
     func sendRequest(distinctId: String,
                      token: String,
-                     completion: (DecideResult?) -> Void) {
+                     completion: @escaping (DecideResult?) -> Void) {
 
         let responseParser: (Data) -> DecideResult? = { data in
-            var response: AnyObject? = nil
+            var response: Any? = nil
             do {
                 response = try JSONSerialization.jsonObject(with: data, options: [])
             } catch {
@@ -68,7 +68,7 @@ class DecideRequest: Network {
 
     private func decideRequestHandler(_ base: String,
                                       resource: Resource<DecideResult>,
-                                      completion: (DecideResult?) -> Void) {
+                                      completion: @escaping (DecideResult?) -> Void) {
         Network.apiRequest(base: base, resource: resource,
             failure: { (reason, data, response) in
                 Logger.warn(message: "API request to \(resource.path) has failed with reason \(reason)")

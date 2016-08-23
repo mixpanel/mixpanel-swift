@@ -10,14 +10,14 @@ import Foundation
 
 /// Access to the Mixpanel People API, available as an accessible variable from
 /// the main Mixpanel instance.
-public class People {
+open class People {
 
     /// controls the $ignore_time property in any subsequent MixpanelPeople operation.
     /// If the $ignore_time property is present and true in your request,
     /// Mixpanel will not automatically update the "Last Seen" property of the profile.
     /// Otherwise, Mixpanel will add a "Last Seen" property associated with the
     /// current time for all $set, $append, and $add operations
-    public var ignoreTime = false
+    open var ignoreTime = false
 
     let apiToken: String
     let serialQueue: DispatchQueue
@@ -30,17 +30,17 @@ public class People {
         self.serialQueue = serialQueue
     }
 
-    func addPeopleRecordToQueueWithAction(_ action: String, properties: Properties) {
+    func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
         let ignoreTimeCopy = ignoreTime
 
         serialQueue.async() {
-            var r = Properties()
-            var p = Properties()
+            var r = InternalProperties()
+            var p = InternalProperties()
             r["$token"] = self.apiToken
             r["$time"] = epochMilliseconds
             if ignoreTimeCopy {
-                r["$ignore_time"] = Int(ignoreTimeCopy)
+                r["$ignore_time"] = ignoreTimeCopy ? 1 : 0
             }
             if action == "$unset" {
                 // $unset takes an array of property names which is supplied to this method
@@ -67,19 +67,19 @@ public class People {
         }
     }
 
-    func addPeopleObject(_ r: Properties) {
+    func addPeopleObject(_ r: InternalProperties) {
         peopleQueue.append(r)
         if peopleQueue.count > QueueConstants.queueSize {
             peopleQueue.remove(at: 0)
         }
     }
 
-    func merge(properties: Properties) {
+    func merge(properties: InternalProperties) {
         addPeopleRecordToQueueWithAction("$merge", properties: properties)
     }
 
     private func deviceTokenDataToString(_ deviceToken: Data) -> String {
-        let tokenChars = UnsafePointer<CChar>((deviceToken as NSData).bytes)
+        let tokenChars = unsafeBitCast((deviceToken as NSData).bytes, to: UnsafePointer<CChar>.self)
         var tokenString = ""
 
         for i in 0..<deviceToken.count {
@@ -103,7 +103,7 @@ public class People {
      - parameter deviceToken: device token as returned from
      `application:didRegisterForRemoteNotificationsWithDeviceToken:`
      */
-    public func addPushDeviceToken(_ deviceToken: Data) {
+    open func addPushDeviceToken(_ deviceToken: Data) {
         let properties = ["$ios_devices": [deviceTokenDataToString(deviceToken)]]
         addPeopleRecordToQueueWithAction("$union", properties: properties)
     }
@@ -117,7 +117,7 @@ public class People {
      - parameter deviceToken: device token as returned from
      `application:didRegisterForRemoteNotificationsWithDeviceToken:`
      */
-    public func removePushDeviceToken(_ deviceToken: Data) {
+    open func removePushDeviceToken(_ deviceToken: Data) {
         let properties = ["$ios_devices": [deviceTokenDataToString(deviceToken)]]
         addPeopleRecordToQueueWithAction("$remove", properties: properties)
     }
@@ -125,9 +125,9 @@ public class People {
     /**
      Set properties on the current user in Mixpanel People.
 
-     The properties will be set on the current user. The property keys must be String
-     objects and the supported property value types are:
-     String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.
+     The properties will be set on the current user.
+     Property keys must be String objects and the supported value types need to conform to MixpanelType.
+     MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
      You can override the current project token and distinct Id by
      including the special properties: $token and $distinct_id. If the existing
      user record on the server already has a value for a given property, the old
@@ -137,21 +137,21 @@ public class People {
 
      - parameter properties: properties dictionary
      */
-    public func set(properties: Properties) {
-        Track.assertPropertyTypes(properties)
+    open func set(properties: Properties) {
+        assertPropertyTypes(properties)
         addPeopleRecordToQueueWithAction("$set", properties: properties)
     }
 
     /**
      Convenience method for setting a single property in Mixpanel People.
 
-     The property keys must be String objects and the supported property value types are:
-     String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.
+     Property keys must be String objects and the supported value types need to conform to MixpanelType.
+     MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
 
      - parameter property: property name
      - parameter to:       property value
      */
-    public func set(property: String, to: AnyObject) {
+    open func set(property: String, to: MixpanelType) {
         set(properties: [property: to])
     }
 
@@ -166,8 +166,8 @@ public class People {
 
      - parameter properties: properties dictionary
      */
-    public func setOnce(properties: Properties) {
-        Track.assertPropertyTypes(properties)
+    open func setOnce(properties: Properties) {
+        assertPropertyTypes(properties)
         addPeopleRecordToQueueWithAction("$set_once", properties: properties)
     }
 
@@ -180,7 +180,7 @@ public class People {
 
      - parameter properties: properties array
      */
-    public func unset(properties: [String]) {
+    open func unset(properties: [String]) {
         addPeopleRecordToQueueWithAction("$unset", properties: ["$properties":properties])
     }
 
@@ -193,7 +193,7 @@ public class People {
 
      - parameter properties: properties array
      */
-    public func increment(properties: Properties) {
+    open func increment(properties: Properties) {
         let filtered = properties.values.filter() {
             !($0 is Int || $0 is UInt || $0 is Double || $0 is Float) }
         if !filtered.isEmpty {
@@ -209,33 +209,33 @@ public class People {
      - parameter property: property name
      - parameter by:       amount to increment by
      */
-    public func increment(property: String, by: Double) {
+    open func increment(property: String, by: Double) {
         increment(properties: [property: by])
     }
 
     /**
      Append values to list properties.
 
-     The property keys must be String objects and the supported property value types are:
-     String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.
+     Property keys must be String objects and the supported value types need to conform to MixpanelType.
+     MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
 
      - parameter properties: mapping of list property names to values to append
      */
-    public func append(properties: Properties) {
-        Track.assertPropertyTypes(properties)
+    open func append(properties: Properties) {
+        assertPropertyTypes(properties)
         addPeopleRecordToQueueWithAction("$append", properties: properties)
     }
 
     /**
      Removes list properties.
 
-     The property keys must be String objects and the supported property value types are:
-     String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.
+     Property keys must be String objects and the supported value types need to conform to MixpanelType.
+     MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
 
      - parameter properties: mapping of list property names to values to remove
      */
-    public func remove(properties: Properties) {
-        Track.assertPropertyTypes(properties)
+    open func remove(properties: Properties) {
+        assertPropertyTypes(properties)
         addPeopleRecordToQueueWithAction("$remove", properties: properties)
     }
 
@@ -246,9 +246,9 @@ public class People {
 
      - parameter properties: mapping of list property names to lists to union
      */
-    public func union(properties: Properties) {
+    open func union(properties: Properties) {
         let filtered = properties.values.filter() {
-            !($0 is [AnyObject])
+            !($0 is [MixpanelType])
         }
         if !filtered.isEmpty {
             MPAssert(false, "union property values should be an array")
@@ -267,8 +267,8 @@ public class People {
      - parameter amount:     amount of revenue received
      - parameter properties: Optional. properties dictionary
      */
-    public func trackCharge(amount: Double, properties: Properties? = nil) {
-        var transaction: Properties = ["$amount": amount, "$time": Date()]
+    open func trackCharge(amount: Double, properties: Properties? = nil) {
+        var transaction: InternalProperties = ["$amount": amount, "$time": Date()]
         if let properties = properties {
             transaction += properties
         }
@@ -278,14 +278,14 @@ public class People {
     /**
      Delete current user's revenue history.
      */
-    public func clearCharges() {
+    open func clearCharges() {
         set(properties: ["$transactions": []])
     }
 
     /**
      Delete current user's record from Mixpanel People.
      */
-    public func deleteUser() {
+    open func deleteUser() {
         addPeopleRecordToQueueWithAction("$delete", properties: [:])
     }
 }

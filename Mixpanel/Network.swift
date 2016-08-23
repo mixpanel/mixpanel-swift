@@ -41,15 +41,15 @@ enum Reason {
     case ParseError
     case NoData
     case NotOKStatusCode(statusCode: Int)
-    case Other(NSError)
+    case Other(Error)
 }
 
 class Network {
 
     class func apiRequest<A>(base: String,
                           resource: Resource<A>,
-                          failure: (Reason, Data?, URLResponse?) -> (),
-                          success: (A, URLResponse?) -> ()) {
+                          failure: @escaping (Reason, Data?, URLResponse?) -> (),
+                          success: @escaping (A, URLResponse?) -> ()) {
         guard let request = buildURLRequest(base, resource: resource) else {
             return
         }
@@ -99,7 +99,7 @@ class Network {
                              requestBody: Data? = nil,
                              queryItems: [URLQueryItem]? = nil,
                              headers: [String: String],
-                             parse: (Data) -> A?) -> Resource<A> {
+                             parse: @escaping (Data) -> A?) -> Resource<A> {
         return Resource(path: path,
                         method: method,
                         requestBody: requestBody,
@@ -108,7 +108,7 @@ class Network {
                         parse: parse)
     }
 
-    class func trackIntegration(apiToken: String, completion: (Bool) -> ()) {
+    class func trackIntegration(apiToken: String, completion: @escaping (Bool) -> ()) {
         let requestData = JSONHandler.encodeAPIData([["event": "Integration",
                                                       "properties": ["token": "85053bf24bba75239b16a601d9387e17",
                                                                      "mp_lib": "swift",

@@ -24,7 +24,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
     }
 
     static func notificationXibToLoad() -> String {
-        var xibName = String(TakeoverNotificationViewController.self)
+        var xibName = String(describing: TakeoverNotificationViewController.self)
 
         if UIDevice.current.userInterfaceIdiom == UIUserInterfaceIdiom.phone {
             let isLandscape = UIInterfaceOrientationIsLandscape(UIApplication.shared.statusBarOrientation)
@@ -94,7 +94,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         })
     }
 
-    override func hide(animated: Bool, completion: () -> Void) {
+    override func hide(animated: Bool, completion: @escaping () -> Void) {
         let duration = animated ? 0.5 : 0
         UIView.animate(withDuration: duration, animations: {
             self.window?.frame.origin.y += UIScreen.main.bounds.size.height

@@ -15,40 +15,40 @@ import Nocilla
 class MixpanelNotificationTests: MixpanelBaseTests {
 
     func testMalformedImageURL() {
-        let info = ["id": 3,
-                    "message_id": 1,
-                    "title": "title",
-                    "type": "takeover",
-                    "style": "dark",
-                    "body": "body",
-                    "cta": "cta",
-                    "cta_url": "maps://",
-                    "image_url": "1466606494290.684919.uwp5.png"]
+        let info: Properties = ["id": 3,
+                                "message_id": 1,
+                                "title": "title",
+                                "type": "takeover",
+                                "style": "dark",
+                                "body": "body",
+                                "cta": "cta",
+                                "cta_url": "maps://",
+                                "image_url": "1466606494290.684919.uwp5.png"]
         let notification = InAppNotification(JSONObject: info)
         XCTAssertEqual(notification?.imageURL.absoluteString, "1466606494290.684919.uwp5@2x.png")
     }
 
     func testParseNotification() {
         // invalid bad title
-        let invalid = ["id": 3,
-                       "title": 5,
-                       "type": "takeover",
-                       "style": "dark",
-                       "body": "Hi!",
-                       "cta_url": "blah blah blah",
-                       "cta": NSNull(),
-                       "image_url": []]
+        let invalid: Properties = ["id": 3,
+                                   "title": 5,
+                                   "type": "takeover",
+                                   "style": "dark",
+                                   "body": "Hi!",
+                                   "cta_url": "blah blah blah",
+                                   "cta": NSNull(),
+                                   "image_url": []]
         XCTAssertNil(InAppNotification(JSONObject: invalid))
         // valid
-        let notifDict = ["id": 3,
-                         "message_id": 1,
-                         "title": "title",
-                         "type": "takeover",
-                         "style": "dark",
-                         "body": "body",
-                         "cta": "cta",
-                         "cta_url": "maps://",
-                         "image_url": "http://mixpanel.com/coolimage.png"]
+        let notifDict: Properties = ["id": 3,
+                                     "message_id": 1,
+                                     "title": "title",
+                                     "type": "takeover",
+                                     "style": "dark",
+                                     "body": "body",
+                                     "cta": "cta",
+                                     "cta_url": "maps://",
+                                     "image_url": "http://mixpanel.com/coolimage.png"]
         XCTAssertNotNil(InAppNotification(JSONObject: notifDict))
         // nil
         XCTAssertNil(InAppNotification(JSONObject: nil))
@@ -57,7 +57,7 @@ class MixpanelNotificationTests: MixpanelBaseTests {
         // garbage keys
         let testingInApp = InAppNotification(JSONObject: ["gar": "bage"])
         XCTAssertNil(testingInApp)
-        var testDict: [String: AnyObject]!
+        var testDict: [String: Any]!
         // invalid id
         testDict = notifDict
         testDict["id"] = false
@@ -90,15 +90,15 @@ class MixpanelNotificationTests: MixpanelBaseTests {
 
     func testNoDoubleShowNotification() {
         LSNocilla.sharedInstance().stop()
-        let notifDict = ["id": 3,
-                         "message_id": 1,
-                         "title": "title",
-                         "type": "takeover",
-                         "style": "light",
-                         "body": "body",
-                         "cta": "cta",
-                         "cta_url": "maps://",
-                         "image_url": "https://cdn.mxpnl.com/site_media/images/engage/inapp_messages/mini/icon_coin.png"]
+        let notifDict: Properties = ["id": 3,
+                                     "message_id": 1,
+                                     "title": "title",
+                                     "type": "takeover",
+                                     "style": "light",
+                                     "body": "body",
+                                     "cta": "cta",
+                                     "cta_url": "maps://",
+                                     "image_url": "https://cdn.mxpnl.com/site_media/images/engage/inapp_messages/mini/icon_coin.png"]
         let notif = InAppNotification(JSONObject: notifDict)
         mixpanel.decideInstance.notificationsInstance.showNotification(notif!)
         mixpanel.decideInstance.notificationsInstance.showNotification(notif!)

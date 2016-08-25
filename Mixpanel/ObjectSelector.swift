@@ -30,8 +30,9 @@ class ObjectSelector: NSObject {
         predicateEndChar = CharacterSet(charactersIn: "]")
         flagStartChar = CharacterSet(charactersIn: "(")
         flagEndChar = CharacterSet(charactersIn: ")")
-
         filters = [ObjectFilter]()
+        super.init()
+
         while let filter = nextFilter() {
             filters.append(filter)
         }

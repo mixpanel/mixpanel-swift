@@ -268,6 +268,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
         serialQueue.async() {
             self.archive()
+            self.decideInstance.decideFetched = false
 
             if self.taskId != UIBackgroundTaskInvalid {
                 sharedApplication.endBackgroundTask(self.taskId)
@@ -435,6 +436,9 @@ extension MixpanelInstance {
             self.people.distinctId = nil
             self.people.peopleQueue = Queue()
             self.people.unidentifiedQueue = Queue()
+            self.decideInstance.notificationsInstance.shownNotifications = Set()
+            self.decideInstance.decideFetched = false
+            self.decideInstance.codelessInstance.codelessBindings = Set()
             self.archive()
         }
     }
@@ -464,6 +468,7 @@ extension MixpanelInstance {
         Persistence.archive(eventsQueue: eventsQueue,
                             peopleQueue: people.peopleQueue,
                             properties: properties,
+                            codelessBindings: decideInstance.codelessInstance.codelessBindings,
                             token: apiToken)
     }
 
@@ -475,7 +480,8 @@ extension MixpanelInstance {
          distinctId,
          people.distinctId,
          people.unidentifiedQueue,
-         decideInstance.notificationsInstance.shownNotifications) = Persistence.unarchive(token: apiToken)
+         decideInstance.notificationsInstance.shownNotifications,
+         decideInstance.codelessInstance.codelessBindings) = Persistence.unarchive(token: apiToken)
 
         if distinctId == "" {
             distinctId = defaultDistinctId()

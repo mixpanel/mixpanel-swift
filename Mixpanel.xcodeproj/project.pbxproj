@@ -39,6 +39,7 @@
 		E154220E1D6E19A7009421A0 /* UITableViewBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = E154220D1D6E19A7009421A0 /* UITableViewBinding.swift */; };
 		E15422111D6E5835009421A0 /* ObjectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422101D6E5835009421A0 /* ObjectSelector.swift */; };
 		E15422131D6E5A9F009421A0 /* ObjectFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422121D6E5A9F009421A0 /* ObjectFilter.swift */; };
+		E15422151D6F9F44009421A0 /* Codeless.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422141D6F9F44009421A0 /* Codeless.swift */; };
 		E158C6E71D5D32DD00651465 /* TakeoverNotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E158C6E51D5D32DD00651465 /* TakeoverNotificationViewController.swift */; };
 		E158C6E81D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */; };
 		E158C6F11D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */; };
@@ -84,6 +85,7 @@
 		E154220D1D6E19A7009421A0 /* UITableViewBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITableViewBinding.swift; sourceTree = "<group>"; };
 		E15422101D6E5835009421A0 /* ObjectSelector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectSelector.swift; sourceTree = "<group>"; };
 		E15422121D6E5A9F009421A0 /* ObjectFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectFilter.swift; sourceTree = "<group>"; };
+		E15422141D6F9F44009421A0 /* Codeless.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Codeless.swift; sourceTree = "<group>"; };
 		E158C6E51D5D32DD00651465 /* TakeoverNotificationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TakeoverNotificationViewController.swift; sourceTree = "<group>"; };
 		E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~ipad.xib"; sourceTree = "<group>"; };
 		E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~iphonelandscape.xib"; sourceTree = "<group>"; };
@@ -201,6 +203,7 @@
 		E1497EEF1D6B8D8400B2B65C /* Codeless */ = {
 			isa = PBXGroup;
 			children = (
+				E15422141D6F9F44009421A0 /* Codeless.swift */,
 				E154220F1D6E5766009421A0 /* Serialization */,
 				E1497EF01D6B8DB500B2B65C /* Bindings */,
 			);
@@ -459,6 +462,7 @@
 				E1982BFF1D0AC2E2006B7330 /* Error.swift in Sources */,
 				51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */,
 				E1D335CC1D303A0D00E68E12 /* FlushRequest.swift in Sources */,
+				E15422151D6F9F44009421A0 /* Codeless.swift in Sources */,
 				E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */,
 				E1497EF21D6B8DC900B2B65C /* CodelessBinding.swift in Sources */,
 				E15422111D6E5835009421A0 /* ObjectSelector.swift in Sources */,

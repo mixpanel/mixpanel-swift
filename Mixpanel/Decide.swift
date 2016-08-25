@@ -10,9 +10,11 @@ import Foundation
 
 struct DecideResponse {
     var unshownInAppNotifications: [InAppNotification]
+    var newCodelessBindings: Set<CodelessBinding>
 
     init() {
         unshownInAppNotifications = []
+        newCodelessBindings = Set()
     }
 }
 
@@ -21,6 +23,8 @@ class Decide {
     var decideRequest = DecideRequest()
     var decideFetched = false
     var notificationsInstance = InAppNotifications()
+    var codelessInstance = Codeless()
+
     var inAppDelegate: InAppNotificationsDelegate? {
         set {
             notificationsInstance.delegate = newValue
@@ -54,18 +58,26 @@ class Decide {
                 }
                 self.notificationsInstance.inAppNotifications = parsedNotifications
 
-                var parsedCodelessBindings = [Any]()
+                var parsedCodelessBindings = Set<CodelessBinding>()
                 if let rawCodelessBindings = result["event_bindings"] as? [[String: Any]] {
                     for rawBinding in rawCodelessBindings {
-                  //      if let binder = Any() {
-                     //       parsedCodelessBindings.append(binder)
-                    //    }
+                        if let binding = Codeless.createBinding(object: rawBinding) {
+                            parsedCodelessBindings.insert(binding)
+                        }
                     }
+                } else {
+                    Logger.debug(message: "codeless event bindings check response format error")
                 }
-                //let finishedCodelessBindings =
-                //let newCodelessBindings
-                //let allCodelessBindings
 
+                let finishedCodelessBindings = self.codelessInstance.codelessBindings.subtracting(parsedCodelessBindings)
+                //stop finishedCodelessBindings
+
+                let newCodelessBindings = parsedCodelessBindings.subtracting(self.codelessInstance.codelessBindings)
+                decideResponse.newCodelessBindings = newCodelessBindings
+
+                self.codelessInstance.codelessBindings.formUnion(newCodelessBindings)
+
+                self.decideFetched = true
                 semaphore.signal()
             }
             _ = semaphore.wait(timeout: DispatchTime.distantFuture)

@@ -58,4 +58,20 @@ class UITableViewBinding: CodelessBinding {
     override var description: String {
         return "UITableView Codeless Binding: \(eventName) for \(path)"
     }
+
+    override func isEqual(_ object: Any?) -> Bool {
+        guard let object = object as? UITableViewBinding else {
+            return false
+        }
+
+        if object === self {
+            return true
+        } else {
+            return super.isEqual(object)
+        }
+    }
+
+    override var hash: Int {
+        return super.hash
+    }
 }

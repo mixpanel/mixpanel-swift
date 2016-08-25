@@ -91,14 +91,14 @@ class ObjectFilter: CustomStringConvertible {
      its parent's subviews. The view's parent must be of type UIView
      */
     func isSibling(view: AnyObject, at index: Int) -> Bool {
-        return isSibling(view: view, at: index, of: -1)
+        return isSibling(view: view, at: index, of: nil)
     }
 
     func isSibling(view: AnyObject, of count: Int) -> Bool {
-        return isSibling(view: view, at: -1, of: count)
+        return isSibling(view: view, at: nil, of: count)
     }
 
-    func isSibling(view: AnyObject, at index: Int, of count: Int) -> Bool {
+    func isSibling(view: AnyObject, at index: Int?, of count: Int?) -> Bool {
         guard let name = name else {
             return false
         }
@@ -107,7 +107,7 @@ class ObjectFilter: CustomStringConvertible {
         for parent in parents {
             if let parent = parent as? UIView {
                 let siblings = getChildren(object: parent, searchClass: NSClassFromString(name))
-                if index < 0 || (index < siblings.count && siblings[index] === view) && (count < 0 || siblings.count == count) {
+                if index == nil || (index! < siblings.count && siblings[index!] === view) && (count == nil || siblings.count == count!) {
                     return true
                 }
             }

@@ -52,8 +52,20 @@ class Decide {
                 } else {
                     Logger.error(message: "in-app notifications check response format error")
                 }
-
                 self.notificationsInstance.inAppNotifications = parsedNotifications
+
+                var parsedCodelessBindings = [Any]()
+                if let rawCodelessBindings = result["event_bindings"] as? [[String: Any]] {
+                    for rawBinding in rawCodelessBindings {
+                  //      if let binder = Any() {
+                     //       parsedCodelessBindings.append(binder)
+                    //    }
+                    }
+                }
+                //let finishedCodelessBindings =
+                //let newCodelessBindings
+                //let allCodelessBindings
+
                 semaphore.signal()
             }
             _ = semaphore.wait(timeout: DispatchTime.distantFuture)

@@ -232,6 +232,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                                        name: NSNotification.Name("com.parse.bolts.measurement_event"),
                                        object: nil)
 
+        initializeGestureRecognizer()
     }
 
     deinit {
@@ -245,6 +246,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             if let decideResponse = decideResponse {
                 if self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
                     self.decideInstance.notificationsInstance.showNotification(decideResponse.unshownInAppNotifications.first!)
+                }
+
+                //TODO: why main queue
+                DispatchQueue.main.sync {
+                    for binding in decideResponse.newCodelessBindings {
+                        //execute
+                    }
                 }
             }
         }
@@ -335,6 +343,30 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
     #endif
+
+    func initializeGestureRecognizer() {
+        DispatchQueue.main.async {
+            let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.connectGestureRecognized(gesture:)))
+            gestureRecognizer.minimumPressDuration = 3
+            gestureRecognizer.cancelsTouchesInView = false
+            #if IOS_SIMULATOR
+                gestureRecognizer.numberOfTouchesRequired = 2
+            #else
+                gestureRecognizer.numberOfTouchesRequired = 4
+            #endif
+            UIApplication.shared.keyWindow?.addGestureRecognizer(gestureRecognizer)
+        }
+    }
+
+    @objc func connectGestureRecognized(gesture: UILongPressGestureRecognizer) {
+        if gesture.state == UIGestureRecognizerState.began {
+            connectToWebSocket()
+        }
+    }
+
+    func connectToWebSocket(reconnect: Bool = false) {
+        
+    }
 
 }
 

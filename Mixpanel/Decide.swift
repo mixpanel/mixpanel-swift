@@ -93,6 +93,8 @@ class Decide {
         Logger.info(message: "decide check found \(decideResponse.unshownInAppNotifications.count) " +
             "available notifications out of " +
             "\(notificationsInstance.inAppNotifications.count) total")
+        Logger.info(message: "decide check found \(decideResponse.newCodelessBindings.count) " +
+            "new codeless bindings our of \(codelessInstance.codelessBindings)")
 
         completion(decideResponse)
     }

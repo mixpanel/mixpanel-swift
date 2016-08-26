@@ -40,6 +40,11 @@
 		E15422111D6E5835009421A0 /* ObjectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422101D6E5835009421A0 /* ObjectSelector.swift */; };
 		E15422131D6E5A9F009421A0 /* ObjectFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422121D6E5A9F009421A0 /* ObjectFilter.swift */; };
 		E15422151D6F9F44009421A0 /* Codeless.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422141D6F9F44009421A0 /* Codeless.swift */; };
+		E15422171D6FBA97009421A0 /* Swizzle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422161D6FBA97009421A0 /* Swizzle.swift */; };
+		E15422191D6FBFA6009421A0 /* WebSocketWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422181D6FBFA6009421A0 /* WebSocketWrapper.swift */; };
+		E154221D1D70BF33009421A0 /* BaseWebSocketMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E154221C1D70BF33009421A0 /* BaseWebSocketMessage.swift */; };
+		E154221F1D70DB09009421A0 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = E154221E1D70DB09009421A0 /* WebSocket.swift */; };
+		E15422211D70DBB3009421A0 /* SSLSecurity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422201D70DBB3009421A0 /* SSLSecurity.swift */; };
 		E158C6E71D5D32DD00651465 /* TakeoverNotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E158C6E51D5D32DD00651465 /* TakeoverNotificationViewController.swift */; };
 		E158C6E81D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */; };
 		E158C6F11D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */; };
@@ -86,6 +91,11 @@
 		E15422101D6E5835009421A0 /* ObjectSelector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectSelector.swift; sourceTree = "<group>"; };
 		E15422121D6E5A9F009421A0 /* ObjectFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectFilter.swift; sourceTree = "<group>"; };
 		E15422141D6F9F44009421A0 /* Codeless.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Codeless.swift; sourceTree = "<group>"; };
+		E15422161D6FBA97009421A0 /* Swizzle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Swizzle.swift; sourceTree = "<group>"; };
+		E15422181D6FBFA6009421A0 /* WebSocketWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocketWrapper.swift; sourceTree = "<group>"; };
+		E154221C1D70BF33009421A0 /* BaseWebSocketMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseWebSocketMessage.swift; sourceTree = "<group>"; };
+		E154221E1D70DB09009421A0 /* WebSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
+		E15422201D70DBB3009421A0 /* SSLSecurity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SSLSecurity.swift; sourceTree = "<group>"; };
 		E158C6E51D5D32DD00651465 /* TakeoverNotificationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TakeoverNotificationViewController.swift; sourceTree = "<group>"; };
 		E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~ipad.xib"; sourceTree = "<group>"; };
 		E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~iphonelandscape.xib"; sourceTree = "<group>"; };
@@ -229,6 +239,25 @@
 			name = Serialization;
 			sourceTree = "<group>";
 		};
+		E154221A1D70BEF0009421A0 /* Web Socket */ = {
+			isa = PBXGroup;
+			children = (
+				E154221B1D70BF06009421A0 /* Messages */,
+				E15422181D6FBFA6009421A0 /* WebSocketWrapper.swift */,
+				E154221E1D70DB09009421A0 /* WebSocket.swift */,
+				E15422201D70DBB3009421A0 /* SSLSecurity.swift */,
+			);
+			name = "Web Socket";
+			sourceTree = "<group>";
+		};
+		E154221B1D70BF06009421A0 /* Messages */ = {
+			isa = PBXGroup;
+			children = (
+				E154221C1D70BF33009421A0 /* BaseWebSocketMessage.swift */,
+			);
+			name = Messages;
+			sourceTree = "<group>";
+		};
 		E158C6F31D5D3A8200651465 /* Images */ = {
 			isa = PBXGroup;
 			children = (
@@ -251,6 +280,8 @@
 			isa = PBXGroup;
 			children = (
 				E189D8F51D54ECBF007F3F29 /* Decide.swift */,
+				E15422161D6FBA97009421A0 /* Swizzle.swift */,
+				E154221A1D70BEF0009421A0 /* Web Socket */,
 				E1497EEF1D6B8D8400B2B65C /* Codeless */,
 				E19312681D5B9CE2007CE1E9 /* InAppNotifications */,
 			);
@@ -441,9 +472,11 @@
 			files = (
 				51DD56831D306B7B0045D3DB /* PrintLogging.swift in Sources */,
 				E115948E1D000709007F8B4F /* MixpanelInstance.swift in Sources */,
+				E15422191D6FBFA6009421A0 /* WebSocketWrapper.swift in Sources */,
 				E1D335CE1D30578E00E68E12 /* Constants.swift in Sources */,
 				E115949F1D01BE14007F8B4F /* Flush.swift in Sources */,
 				E11594931D0036E1007F8B4F /* Persistence.swift in Sources */,
+				E15422211D70DBB3009421A0 /* SSLSecurity.swift in Sources */,
 				E189D8F61D54ECBF007F3F29 /* Decide.swift in Sources */,
 				E15422131D6E5A9F009421A0 /* ObjectFilter.swift in Sources */,
 				E11594971D006022007F8B4F /* Network.swift in Sources */,
@@ -451,6 +484,7 @@
 				E15FF7C81D0435670076CDE3 /* People.swift in Sources */,
 				E11594A11D01C597007F8B4F /* Track.swift in Sources */,
 				E11594991D01689F007F8B4F /* JSONHandler.swift in Sources */,
+				E15422171D6FBA97009421A0 /* Swizzle.swift in Sources */,
 				E1D335D01D3059A800E68E12 /* AutomaticProperties.swift in Sources */,
 				51DD567C1D306B740045D3DB /* Logger.swift in Sources */,
 				E165228F1D6781DF000D5949 /* MixpanelType.swift in Sources */,
@@ -462,9 +496,11 @@
 				E1982BFF1D0AC2E2006B7330 /* Error.swift in Sources */,
 				51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */,
 				E1D335CC1D303A0D00E68E12 /* FlushRequest.swift in Sources */,
+				E154221F1D70DB09009421A0 /* WebSocket.swift in Sources */,
 				E15422151D6F9F44009421A0 /* Codeless.swift in Sources */,
 				E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */,
 				E1497EF21D6B8DC900B2B65C /* CodelessBinding.swift in Sources */,
+				E154221D1D70BF33009421A0 /* BaseWebSocketMessage.swift in Sources */,
 				E15422111D6E5835009421A0 /* ObjectSelector.swift in Sources */,
 				E189D8F81D552324007F3F29 /* DecideRequest.swift in Sources */,
 				E158C6E71D5D32DD00651465 /* TakeoverNotificationViewController.swift in Sources */,
@@ -607,6 +643,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				"OTHER_SWIFT_FLAGS[sdk=iphonesimulator*]" = "-D IOS_SIMULATOR";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

@@ -28,11 +28,7 @@ class Codeless {
             return UIControlBinding(object: object)
         case .tableViewBinding:
             return UITableViewBinding(object: object)
-        default: break
         }
-
-        return UIControlBinding(object: object)
-
     }
 
 }

@@ -364,10 +364,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
 
-    func connectToWebSocket(reconnect: Bool = false) {
-        
-    }
-
 }
 
 extension MixpanelInstance {
@@ -770,6 +766,13 @@ extension MixpanelInstance: InAppNotificationsDelegate {
                                             completion: completion)
         }
     }
+
+    // MARK: - WebSocket
+
+    func connectToWebSocket() {
+        decideInstance.connectToWebSocket(token: apiToken, mixpanelInstance: self)
+    }
+
 
     // MARK: - In App Notifications
 

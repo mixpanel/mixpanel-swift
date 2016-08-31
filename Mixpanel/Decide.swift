@@ -24,6 +24,7 @@ class Decide {
     var decideFetched = false
     var notificationsInstance = InAppNotifications()
     var codelessInstance = Codeless()
+    var webSocketWrapper: WebSocketWrapper?
 
     var inAppDelegate: InAppNotificationsDelegate? {
         set {
@@ -33,6 +34,8 @@ class Decide {
             return notificationsInstance.delegate
         }
     }
+
+    let switchboardURL = "wss://switchboard.mixpanel.com"
 
     func checkDecide(forceFetch: Bool = false, distinctId: String, token: String, completion: ((_ response: DecideResponse?) -> Void)) {
         var decideResponse = DecideResponse()
@@ -98,5 +101,53 @@ class Decide {
 
         completion(decideResponse)
     }
+
+    func connectToWebSocket(token: String, mixpanelInstance: MixpanelInstance, reconnect: Bool = false) {
+        var oldInterval = 0.0
+        let webSocketURL = "\(switchboardURL)/connect?key=\(token)&type=device"
+        guard let url = URL(string: webSocketURL) else {
+            Logger.error(message: "bad URL to connect to websocket \(webSocketURL)")
+            return
+        }
+        let connectCallback = { [weak mixpanelInstance] in
+            guard let mixpanelInstance = mixpanelInstance else {
+                return
+            }
+            oldInterval = mixpanelInstance.flushInterval
+            mixpanelInstance.flushInterval = 1
+            UIApplication.shared.isIdleTimerDisabled = true
+
+            for binding in self.codelessInstance.codelessBindings {
+                //binding.stop()
+            }
+            //let connection = webSocketWrapper
+            //swizzle
+        }
+
+        let disconnectCallback = { [weak mixpanelInstance] in
+            guard let mixpanelInstance = mixpanelInstance else {
+                return
+            }
+            mixpanelInstance.flushInterval = oldInterval
+            UIApplication.shared.isIdleTimerDisabled = false
+
+            for binding in self.codelessInstance.codelessBindings {
+                //binding.execute()
+            }
+            //unswizzle
+        }
+
+        webSocketWrapper = WebSocketWrapper(url: url,
+                                            keepTrying: reconnect,
+                                            connectCallback: connectCallback,
+                                            disconnectCallback: disconnectCallback)
+    }
+
+
+
+
+
+
+
 
 }

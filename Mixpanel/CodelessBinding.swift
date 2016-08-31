@@ -16,12 +16,11 @@ class CodelessBinding: NSObject, NSCoding {
     //let swizzleClass: Any
     var running: Bool
 
-   // convenience init(object: [String: Any]) {
-   //     if let bindingType = object["event_type"] as? String {
-   //         return subclassFromString(bindingType: bindingType)
-   //     }
-
-   // }
+    //convenience init(object: [String: Any]) {
+    //    if let bindingType = object["event_type"] as? String {
+    //        return subclassFromString(bindingType: bindingType)
+    //    }
+    //}
 
    // func subclassFromString(bindingType: String) -> CodelessBinding {
    //     if let bindingTypeEnum = BindingType.init(rawValue: bindingType) {

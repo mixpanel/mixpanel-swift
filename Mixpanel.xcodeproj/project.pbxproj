@@ -34,6 +34,8 @@
 		E12782C71D4AB5CB0025FB05 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1982BFE1D0AC2E2006B7330 /* Error.swift */; };
 		E12782C81D4AB5CB0025FB05 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CD1D30578E00E68E12 /* Constants.swift */; };
 		E12782C91D4AB5CB0025FB05 /* AutomaticProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */; };
+		E142DBD11D75F86300F34C12 /* ObjectSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E142DBD01D75F86300F34C12 /* ObjectSerializer.swift */; };
+		E142DBD31D76263600F34C12 /* ObjectSerializerContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E142DBD21D76263600F34C12 /* ObjectSerializerContext.swift */; };
 		E1497EF21D6B8DC900B2B65C /* CodelessBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1497EF11D6B8DC900B2B65C /* CodelessBinding.swift */; };
 		E154220C1D6E199B009421A0 /* UIControlBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = E154220B1D6E199B009421A0 /* UIControlBinding.swift */; };
 		E154220E1D6E19A7009421A0 /* UITableViewBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = E154220D1D6E19A7009421A0 /* UITableViewBinding.swift */; };
@@ -45,6 +47,13 @@
 		E154221D1D70BF33009421A0 /* BaseWebSocketMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E154221C1D70BF33009421A0 /* BaseWebSocketMessage.swift */; };
 		E154221F1D70DB09009421A0 /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = E154221E1D70DB09009421A0 /* WebSocket.swift */; };
 		E15422211D70DBB3009421A0 /* SSLSecurity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422201D70DBB3009421A0 /* SSLSecurity.swift */; };
+		E15422251D71056C009421A0 /* DeviceInfoMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422241D71056C009421A0 /* DeviceInfoMessage.swift */; };
+		E15422291D710587009421A0 /* SnapshotMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422281D710587009421A0 /* SnapshotMessage.swift */; };
+		E154222D1D71059D009421A0 /* BindingMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E154222C1D71059D009421A0 /* BindingMessage.swift */; };
+		E15422311D7105D3009421A0 /* DisconnectMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422301D7105D3009421A0 /* DisconnectMessage.swift */; };
+		E15422331D74CB2B009421A0 /* ObjectSerializerConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422321D74CB2B009421A0 /* ObjectSerializerConfig.swift */; };
+		E15422351D751015009421A0 /* ObjectIdentityProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422341D751015009421A0 /* ObjectIdentityProvider.swift */; };
+		E15422371D751053009421A0 /* ApplicationStateSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422361D751053009421A0 /* ApplicationStateSerializer.swift */; };
 		E158C6E71D5D32DD00651465 /* TakeoverNotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E158C6E51D5D32DD00651465 /* TakeoverNotificationViewController.swift */; };
 		E158C6E81D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */; };
 		E158C6F11D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */; };
@@ -85,6 +94,8 @@
 		E11619DA1D5D52F900610404 /* BaseNotificationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseNotificationViewController.swift; sourceTree = "<group>"; };
 		E12782B31D4AB4B30025FB05 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E12782CA1D4AB9BE0025FB05 /* Info-tvOS.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Info-tvOS.plist"; sourceTree = "<group>"; };
+		E142DBD01D75F86300F34C12 /* ObjectSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectSerializer.swift; sourceTree = "<group>"; };
+		E142DBD21D76263600F34C12 /* ObjectSerializerContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectSerializerContext.swift; sourceTree = "<group>"; };
 		E1497EF11D6B8DC900B2B65C /* CodelessBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodelessBinding.swift; sourceTree = "<group>"; };
 		E154220B1D6E199B009421A0 /* UIControlBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIControlBinding.swift; sourceTree = "<group>"; };
 		E154220D1D6E19A7009421A0 /* UITableViewBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITableViewBinding.swift; sourceTree = "<group>"; };
@@ -96,6 +107,13 @@
 		E154221C1D70BF33009421A0 /* BaseWebSocketMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseWebSocketMessage.swift; sourceTree = "<group>"; };
 		E154221E1D70DB09009421A0 /* WebSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
 		E15422201D70DBB3009421A0 /* SSLSecurity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SSLSecurity.swift; sourceTree = "<group>"; };
+		E15422241D71056C009421A0 /* DeviceInfoMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceInfoMessage.swift; sourceTree = "<group>"; };
+		E15422281D710587009421A0 /* SnapshotMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SnapshotMessage.swift; sourceTree = "<group>"; };
+		E154222C1D71059D009421A0 /* BindingMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BindingMessage.swift; sourceTree = "<group>"; };
+		E15422301D7105D3009421A0 /* DisconnectMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DisconnectMessage.swift; sourceTree = "<group>"; };
+		E15422321D74CB2B009421A0 /* ObjectSerializerConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectSerializerConfig.swift; sourceTree = "<group>"; };
+		E15422341D751015009421A0 /* ObjectIdentityProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectIdentityProvider.swift; sourceTree = "<group>"; };
+		E15422361D751053009421A0 /* ApplicationStateSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApplicationStateSerializer.swift; sourceTree = "<group>"; };
 		E158C6E51D5D32DD00651465 /* TakeoverNotificationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TakeoverNotificationViewController.swift; sourceTree = "<group>"; };
 		E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~ipad.xib"; sourceTree = "<group>"; };
 		E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~iphonelandscape.xib"; sourceTree = "<group>"; };
@@ -235,6 +253,11 @@
 			children = (
 				E15422101D6E5835009421A0 /* ObjectSelector.swift */,
 				E15422121D6E5A9F009421A0 /* ObjectFilter.swift */,
+				E142DBD01D75F86300F34C12 /* ObjectSerializer.swift */,
+				E15422321D74CB2B009421A0 /* ObjectSerializerConfig.swift */,
+				E15422341D751015009421A0 /* ObjectIdentityProvider.swift */,
+				E15422361D751053009421A0 /* ApplicationStateSerializer.swift */,
+				E142DBD21D76263600F34C12 /* ObjectSerializerContext.swift */,
 			);
 			name = Serialization;
 			sourceTree = "<group>";
@@ -254,6 +277,10 @@
 			isa = PBXGroup;
 			children = (
 				E154221C1D70BF33009421A0 /* BaseWebSocketMessage.swift */,
+				E15422241D71056C009421A0 /* DeviceInfoMessage.swift */,
+				E15422281D710587009421A0 /* SnapshotMessage.swift */,
+				E154222C1D71059D009421A0 /* BindingMessage.swift */,
+				E15422301D7105D3009421A0 /* DisconnectMessage.swift */,
 			);
 			name = Messages;
 			sourceTree = "<group>";
@@ -471,19 +498,27 @@
 			buildActionMask = 2147483647;
 			files = (
 				51DD56831D306B7B0045D3DB /* PrintLogging.swift in Sources */,
+				E15422251D71056C009421A0 /* DeviceInfoMessage.swift in Sources */,
+				E142DBD11D75F86300F34C12 /* ObjectSerializer.swift in Sources */,
 				E115948E1D000709007F8B4F /* MixpanelInstance.swift in Sources */,
 				E15422191D6FBFA6009421A0 /* WebSocketWrapper.swift in Sources */,
+				E154222D1D71059D009421A0 /* BindingMessage.swift in Sources */,
+				E15422291D710587009421A0 /* SnapshotMessage.swift in Sources */,
 				E1D335CE1D30578E00E68E12 /* Constants.swift in Sources */,
 				E115949F1D01BE14007F8B4F /* Flush.swift in Sources */,
+				E142DBD31D76263600F34C12 /* ObjectSerializerContext.swift in Sources */,
 				E11594931D0036E1007F8B4F /* Persistence.swift in Sources */,
 				E15422211D70DBB3009421A0 /* SSLSecurity.swift in Sources */,
 				E189D8F61D54ECBF007F3F29 /* Decide.swift in Sources */,
+				E15422331D74CB2B009421A0 /* ObjectSerializerConfig.swift in Sources */,
 				E15422131D6E5A9F009421A0 /* ObjectFilter.swift in Sources */,
 				E11594971D006022007F8B4F /* Network.swift in Sources */,
 				E154220C1D6E199B009421A0 /* UIControlBinding.swift in Sources */,
 				E15FF7C81D0435670076CDE3 /* People.swift in Sources */,
+				E15422371D751053009421A0 /* ApplicationStateSerializer.swift in Sources */,
 				E11594A11D01C597007F8B4F /* Track.swift in Sources */,
 				E11594991D01689F007F8B4F /* JSONHandler.swift in Sources */,
+				E15422351D751015009421A0 /* ObjectIdentityProvider.swift in Sources */,
 				E15422171D6FBA97009421A0 /* Swizzle.swift in Sources */,
 				E1D335D01D3059A800E68E12 /* AutomaticProperties.swift in Sources */,
 				51DD567C1D306B740045D3DB /* Logger.swift in Sources */,
@@ -503,6 +538,7 @@
 				E154221D1D70BF33009421A0 /* BaseWebSocketMessage.swift in Sources */,
 				E15422111D6E5835009421A0 /* ObjectSelector.swift in Sources */,
 				E189D8F81D552324007F3F29 /* DecideRequest.swift in Sources */,
+				E15422311D7105D3009421A0 /* DisconnectMessage.swift in Sources */,
 				E158C6E71D5D32DD00651465 /* TakeoverNotificationViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

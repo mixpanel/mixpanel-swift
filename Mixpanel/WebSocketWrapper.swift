@@ -16,7 +16,7 @@ class WebSocketWrapper: WebSocketDelegate {
     var connected: Bool
     //let sessionEnded: Bool
     let url: URL
-    let session: [String]
+    var session: [String: Any]
     //let typeToMessageClassMap: Dictionary
     let webSocket: WebSocket
     let commandQueue: OperationQueue
@@ -39,7 +39,7 @@ class WebSocketWrapper: WebSocketDelegate {
         open = false
         connected = false
         //sessionEnded = false
-        session = [String]()
+        session = [String: Any]()
         self.url = url
         self.connectCallback = connectCallback
         self.disconnectCallback = disconnectCallback
@@ -56,6 +56,20 @@ class WebSocketWrapper: WebSocketDelegate {
         } else {
             open(initiate: true)
         }
+    }
+
+    func setSessionObjectSynchronized(value: Any, key: String) {
+        objc_sync_enter(self)
+        defer { objc_sync_exit(self) }
+
+        session[key] = value
+    }
+
+    func getSessionObjectSynchronized(key: String) -> Any? {
+        objc_sync_enter(self)
+        defer { objc_sync_exit(self) }
+
+        return session[key]
     }
 
  //   convenience init(url: URL) {
@@ -99,10 +113,10 @@ class WebSocketWrapper: WebSocketDelegate {
         close()
     }
 
-    func sendMessage(message: BaseWebSocketMessage) {
+    func sendMessage(message: BaseWebSocketMessage?) {
         if connected {
             Logger.debug(message: "Sending message: \(message.debugDescription)")
-            if let jsonString = String(data: message.JSONData(), encoding: String.Encoding.utf8) {
+            if let data = message?.JSONData(), let jsonString = String(data: data, encoding: String.Encoding.utf8) {
                 webSocket.write(string: jsonString)
             }
         }

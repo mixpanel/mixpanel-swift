@@ -23,14 +23,14 @@ struct BasePath {
     }
 }
 
-enum Method: String {
+enum RequestMethod: String {
     case GET
     case POST
 }
 
 struct Resource<A> {
     let path: String
-    let method: Method
+    let method: RequestMethod
     let requestBody: Data?
     let queryItems: [URLQueryItem]?
     let headers: [String:String]
@@ -95,7 +95,7 @@ class Network {
     }
 
     class func buildResource<A>(path: String,
-                             method: Method,
+                             method: RequestMethod,
                              requestBody: Data? = nil,
                              queryItems: [URLQueryItem]? = nil,
                              headers: [String: String],
@@ -128,7 +128,7 @@ class Network {
                 .data(using: String.Encoding.utf8)
 
             let resource = Network.buildResource(path: FlushType.Events.rawValue,
-                                                 method: Method.POST,
+                                                 method: RequestMethod.POST,
                                                  requestBody: requestBody,
                                                  headers: ["Accept-Encoding": "gzip"],
                                                  parse: responseParser)

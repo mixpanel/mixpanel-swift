@@ -49,7 +49,7 @@ class CodelessBinding: NSObject, NSCoding {
             let eventName = aDecoder.decodeObject(forKey: "eventName") as? String else {
                 return nil
         }
-        
+
         self.eventName = eventName
         self.path = ObjectSelector(string: path)
         self.name = name
@@ -78,6 +78,17 @@ class CodelessBinding: NSObject, NSCoding {
 
     override var hash: Int {
         return eventName.hash ^ path.hash
+    }
+
+    func execute() {}
+
+    func stop() {}
+
+    func track(event: String, properties: Properties) {
+        var bindingProperties = properties
+        bindingProperties["$from_binding"] = true
+        //TODO: not call mainInstance from inside the lib?
+        Mixpanel.mainInstance().track(event: event, properties: bindingProperties)
     }
 
 

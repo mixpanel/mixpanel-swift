@@ -54,7 +54,7 @@ class DecideRequest: Network {
 
         let queryItems = DecideQueryItems(distinctId: distinctId, token: token)
         let resource = Network.buildResource(path: decidePath,
-                                             method: Method.GET,
+                                             method: RequestMethod.GET,
                                              queryItems: queryItems.toArray(),
                                              headers: ["Accept-Encoding": "gzip"],
                                              parse: responseParser)

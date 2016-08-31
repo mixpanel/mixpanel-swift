@@ -43,12 +43,33 @@ class UITableViewBinding: CodelessBinding {
     }
 
 
-    func execute() {
+    override func execute() {
+        if !running {
+            let executeBlock = { (view: UITableView?, command: Selector, tableView: UITableView?, indexPath: IndexPath) in
+                if let root = UIApplication.shared.keyWindow?.rootViewController {
+                    // select targets based off path
+                    if let tableView = tableView, self.path.isLeafSelected(leaf: tableView, root: root) {
+                        var label = ""
+                        if let cellText = tableView.cellForRow(at: indexPath)?.textLabel?.text {
+                            label = cellText
+                        }
+                        self.track(event: self.eventName, properties: ["Cell Index": "\(indexPath.row)",
+                                                                       "Cell Section": "\(indexPath.section)",
+                                                                       "Cell Label": label])
+                    }
+                }
+            }
 
+            //swizzle
+            running = true
+        }
     }
 
-    func stop() {
-
+    override func stop() {
+        if running {
+            //swizzle
+            running = false
+        }
     }
 
     func parentTableView(cell: UIView) -> UITableView {

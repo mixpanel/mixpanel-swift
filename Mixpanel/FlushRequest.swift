@@ -35,7 +35,7 @@ class FlushRequest: Network {
             .data(using: String.Encoding.utf8)
 
         let resource = Network.buildResource(path: type.rawValue,
-                                             method: Method.POST,
+                                             method: RequestMethod.POST,
                                              requestBody: requestBody,
                                              headers: ["Accept-Encoding": "gzip"],
                                              parse: responseParser)

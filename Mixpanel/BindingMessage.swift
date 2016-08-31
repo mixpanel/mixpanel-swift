@@ -72,7 +72,7 @@ class CodelessBindingCollection {
         }
         bindings = newBindings
         for newBinding in bindings {
-            newBindings.execute()
+            newBinding.execute()
         }
     }
 

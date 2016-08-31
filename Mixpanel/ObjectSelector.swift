@@ -110,6 +110,25 @@ class ObjectSelector: NSObject {
         return filter
     }
 
+    func fuzzySelectFrom(root: AnyObject?) -> [AnyObject] {
+        return selectFrom(root: root, evaluateFinalPredicate: false)
+    }
+
+    func selectFrom(root: AnyObject?, evaluateFinalPredicate: Bool = true) -> [AnyObject] {
+        var views = [AnyObject]()
+        if let root = root {
+            views = [root]
+            for i in 0..<filters.count {
+                filters[i].nameOnly = (i == filters.count - 1) && !evaluateFinalPredicate
+                views = filters[i].apply(views: views)
+                if views.isEmpty {
+                    break
+                }
+            }
+        }
+        return views
+    }
+
     override func isEqual(_ object: Any?) -> Bool {
         guard let object = object as? ObjectSelector else {
             return false

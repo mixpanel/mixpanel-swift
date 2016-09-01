@@ -15,7 +15,7 @@ Welcome to the official Mixpanel Swift Library
 The Mixpanel Swift library for iOS is an open source project, and we'd love to see your contributions! 
 We'd also love for you to come and work with us! Check out **[Jobs](http://boards.greenhouse.io/mixpanel/jobs/25226#.U_4JXEhORKU)** for details.
 
-If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**
+If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
 
 ## Current supported features
 
@@ -26,6 +26,9 @@ If you are using Objective-C, we recommend using our **[Objective-C Library](htt
 | [Documentation](https://mixpanel.github.io/mixpanel-swift)|       ✔       |        ✔       |
 | tvOS Support |               |       ✔       |
 | In-app Notifications |               |       ✔       |
+| Autotrack |               |              |
+
+If you'd like to use Autotrack please use our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
 
 # Installation
 

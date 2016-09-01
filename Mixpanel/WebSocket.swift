@@ -550,7 +550,7 @@ public class WebSocket: NSObject, StreamDelegate {
         }
     }
 
-    /// Process one message at the start of `buffer`. 
+    /// Process one message at the start of `buffer`.
     /// Return another buffer (sharing storage) that contains the leftover contents of `buffer` that I didn't process.
 
     private func processOneRawMessage(inBuffer buffer: UnsafeBufferPointer<UInt8>) -> UnsafeBufferPointer<UInt8> {

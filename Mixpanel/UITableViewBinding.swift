@@ -12,8 +12,8 @@ class UITableViewBinding: CodelessBinding {
 
 
     init(eventName: String, path: String, delegate: AnyClass) {
-        //setSwizzleClass
         super.init(eventName: eventName, path: path)
+        self.swizzleClass = UITableView.self
     }
 
     convenience init?(object: [String: Any]) {

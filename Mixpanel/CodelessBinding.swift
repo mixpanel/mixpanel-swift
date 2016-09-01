@@ -13,7 +13,7 @@ class CodelessBinding: NSObject, NSCoding {
     var name: String
     var path: ObjectSelector
     var eventName: String
-    //let swizzleClass: Any
+    var swizzleClass: AnyClass!
     var running: Bool
 
     //convenience init(object: [String: Any]) {
@@ -40,13 +40,16 @@ class CodelessBinding: NSObject, NSCoding {
         self.path = ObjectSelector(string: path)
         self.name = UUID().uuidString
         self.running = false
+        self.swizzleClass = nil
         super.init()
     }
 
     required init?(coder aDecoder: NSCoder) {
         guard let name = aDecoder.decodeObject(forKey: "name") as? String,
             let path = aDecoder.decodeObject(forKey: "path") as? String,
-            let eventName = aDecoder.decodeObject(forKey: "eventName") as? String else {
+            let eventName = aDecoder.decodeObject(forKey: "eventName") as? String,
+            let swizzleString = aDecoder.decodeObject(forKey: "swizzleClass") as? String,
+            let swizzleClass = NSClassFromString(swizzleString) else {
                 return nil
         }
 
@@ -54,14 +57,14 @@ class CodelessBinding: NSObject, NSCoding {
         self.path = ObjectSelector(string: path)
         self.name = name
         self.running = false
-        //self.swizzleClass =
+        self.swizzleClass = swizzleClass
     }
 
     func encode(with aCoder: NSCoder) {
         aCoder.encode(name, forKey: "name")
         aCoder.encode(path.string, forKey: "path")
         aCoder.encode(eventName, forKey: "eventName")
-        //aCoder.encode(swizzleClass, forKey: "swizzleClass")
+        aCoder.encode(NSStringFromClass(swizzleClass), forKey: "swizzleClass")
     }
 
     override func isEqual(_ object: Any?) -> Bool {

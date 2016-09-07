@@ -83,14 +83,14 @@ class WebSocketWrapper: WebSocketDelegate {
             + "retries: \(retries), maxRetries: \(maxRetries), "
             + "maxInterval: \(maxInterval), connected: \(connected)")
 
-        if connected || retries >= maxRetries {
+        if connected || retries > maxRetries {
             // exit retry loop if any of the conditions are met
             retries = 0
         } else if initiate || retries > 0 {
             if !open {
                 Logger.debug(message: "Attempting to open WebSocket to \(url), try \(retries) out of \(maxRetries)")
                 open = true
-                //websocket stuff
+                webSocket.connect()
             }
         }
         if retries < maxRetries {
@@ -124,23 +124,28 @@ class WebSocketWrapper: WebSocketDelegate {
 
     class func getMessageType(message: Data) -> BaseWebSocketMessage? {
         Logger.info(message: "raw message \(message)")
-        let webSocketMessage: BaseWebSocketMessage? = nil
+        var webSocketMessage: BaseWebSocketMessage? = nil
 
         do {
             let jsonObject = try JSONSerialization.jsonObject(with: message, options: [])
             if let messageDict = jsonObject as? [String: Any] {
                 guard let type = messageDict["type"] as? String,
-                    let payload = messageDict["payload"] as? [String: Any],
                     let typeEnum = MessageType.init(rawValue: type) else {
                         return nil
                 }
+                let payload = messageDict["payload"] as? [String: AnyObject]
 
                 switch typeEnum {
-                case .snapshot: break
-                case .changeRequest: break
-                case .deviceInfo: break
-                case .disconnect: break
-                case .binding: break
+                case .snapshot:
+                    webSocketMessage = SnapshotRequest(payload: payload)
+                case .changeRequest:
+                    break
+                case .deviceInfo:
+                    webSocketMessage = DeviceInfoRequest()
+                case .disconnect:
+                    webSocketMessage = DisconnectMessage()
+                case .binding:
+                    webSocketMessage = BindingRequest(payload: payload)
                 }
             } else {
                 Logger.warn(message: "Badly formed socket message, expected JSON dictionary.")

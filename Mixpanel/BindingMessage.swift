@@ -9,8 +9,11 @@
 import Foundation
 
 class BindingRequest: BaseWebSocketMessage {
-    init() {
-        super.init(type: "event_binding_request")
+    init?(payload: [String: AnyObject]?) {
+        guard let payload = payload else {
+            return nil
+        }
+        super.init(type: "event_binding_request", payload: payload)
     }
 
     override func responseCommand(connection: WebSocketWrapper) -> Operation? {
@@ -42,9 +45,9 @@ class BindingRequest: BaseWebSocketMessage {
 
 class BindingResponse: BaseWebSocketMessage {
 
-    var status: String? {
+    var status: String {
         get {
-            return payload["status"] as? String
+            return payload["status"] as! String
         }
         set {
             payload["status"] = newValue as AnyObject

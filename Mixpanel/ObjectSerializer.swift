@@ -40,7 +40,7 @@ class ObjectSerializer {
         var delegateMethods = [AnyObject]()
 
         if let classDescription = getClassDescription(object: object) {
-            for propertyDescription in classDescription.propertyDescriptions {
+            for propertyDescription in classDescription.getAllPropertyDescriptions() {
                 if propertyDescription.shouldReadPropertyValue(object: object), let name = propertyDescription.name {
                     let propertyValue = getPropertyValue(object: &object, propertyDescription: propertyDescription, context: context)
                     propertyValues[name] = propertyValue as AnyObject
@@ -136,7 +136,7 @@ class ObjectSerializer {
    // func getInvocation(object: AnyObject, selectorDescription: PropertySelectorDescription) -> NSInvocation {
    // }
 
-    func getTransformedValue(propertyValue: Any?, propertyDescription: PropertyDescription, context: ObjectSerializerContext) -> Any {
+    func getTransformedValue(propertyValue: Any?, propertyDescription: PropertyDescription, context: ObjectSerializerContext) -> Any? {
         if let propertyValue = propertyValue {
             if context.hasVisitedObject(propertyValue as AnyObject) {
                 return objectIdentityProvider.getIdentifier(object: propertyValue as AnyObject)
@@ -155,9 +155,11 @@ class ObjectSerializer {
                     }
                     arrayOfIdentifiers.append(objectIdentityProvider.getIdentifier(object: value as AnyObject))
                 }
+                print(arrayOfIdentifiers)
                 return propertyDescription.getValueTransformer()!.transformedValue(arrayOfIdentifiers)
             }
         }
+        print(propertyValue)
         return propertyDescription.getValueTransformer()!.transformedValue(propertyValue)
     }
 
@@ -167,12 +169,26 @@ class ObjectSerializer {
         if propertyDescription.useKeyValueCoding {
             // the "fast" path is to use KVC
             let valueForKey = object.value(forKey: selectorDescription.selectorName!)
-            let value = getTransformedValue(propertyValue: valueForKey, propertyDescription: propertyDescription, context: context)
-            values.append(["value": value])
+            if let value = getTransformedValue(propertyValue: valueForKey, propertyDescription: propertyDescription, context: context) {
+                print("type of transformed Value: \(type(of: value))")
+                do {
+                    let data = try JSONSerialization.data(withJSONObject: ["value": value])
+                } catch {
+
+                }
+                values.append(["value": value])
+            }
         } else if let useInstanceVariableAccess = propertyDescription.useInstanceVariableAccess, useInstanceVariableAccess {
             let valueForIvar = getInstanceVariableValue(object: &object, propertyDescription: propertyDescription)
-            let value = getTransformedValue(propertyValue: valueForIvar, propertyDescription: propertyDescription, context: context)
-            values.append(["value": value])
+            if let value = getTransformedValue(propertyValue: valueForIvar, propertyDescription: propertyDescription, context: context) {
+                print("type of transformed Value: \(type(of: value))")
+                do {
+                    let data = try JSONSerialization.data(withJSONObject: ["value": value])
+                } catch {
+
+                }
+                values.append(["value": value])
+            }
         } else {
             // the "slow" NSInvocation path. Required in order to invoke methods that take parameters.
         }

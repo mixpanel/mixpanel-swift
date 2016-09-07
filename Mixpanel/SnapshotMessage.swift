@@ -10,8 +10,11 @@ import Foundation
 
 class SnapshotRequest: BaseWebSocketMessage {
 
-    init() {
-        super.init(type: "snapshot_request")
+    init?(payload: [String: AnyObject]?) {
+        guard let payload = payload else {
+            return nil
+        }
+        super.init(type: "snapshot_request", payload: payload)
     }
 
     var configurarion: ObjectSerializerConfig? {
@@ -56,7 +59,7 @@ class SnapshotRequest: BaseWebSocketMessage {
 
             let response = SnapshotResponse()
             var screenshot: UIImage? = nil
-            var serializedObjects: [String: AnyObject]? = nil
+            var serializedObjects: [String: AnyObject]!
 
             DispatchQueue.main.sync {
                 screenshot = serializer.getScreenshotForWindow(index: 0)
@@ -64,7 +67,7 @@ class SnapshotRequest: BaseWebSocketMessage {
             response.screenshot = screenshot
 
             if imageHash == response.imageHash {
-                serializedObjects = connection.getSessionObjectSynchronized(key: "snapshot_hierarchy") as? [String: AnyObject]
+                serializedObjects = connection.getSessionObjectSynchronized(key: "snapshot_hierarchy") as! [String: AnyObject]
             } else {
                 DispatchQueue.main.sync {
                     serializedObjects = serializer.getObjectHierarchyForWindow(index: 0)
@@ -99,29 +102,34 @@ class SnapshotResponse: BaseWebSocketMessage {
             }
         }
     }
-    var serializedObjects: [String: AnyObject]? {
+    var serializedObjects: [String: AnyObject] {
         get {
-            return payload["serialized_objects"] as? [String: AnyObject]
+            return payload["serialized_objects"] as! [String: AnyObject]
         }
         set {
             payload["serialized_objects"] = newValue as AnyObject
         }
     }
-    var imageHash: String? = nil
+    var imageHash: String!
 
     init() {
         super.init(type: "snapshot_response")
     }
 
     func getImageHash(imageData: Data) -> String {
-        let array = imageData.withUnsafeBytes {
-            [UInt8](UnsafeBufferPointer(start: $0, count: imageData.count))
-        }
-        let hash = NSMutableString()
-        for i in 0..<16 {
-            hash.appendFormat("%02X", array[i])
-        }
-        return hash as String
+        let imageHash = imageData.md5().toHexString()
+        print(imageHash)
+        return imageHash
+        //let array = imageData.withUnsafeBytes {
+        //    [UInt8](UnsafeBufferPointer(start: $0, count: imageData.count))
+        //}
+
+        //let hash = NSMutableString()
+        //for i in 0..<16 {
+        //    hash.appendFormat("%02X", array[i])
+        //}
+
+        //return hash as String
     }
 
 }

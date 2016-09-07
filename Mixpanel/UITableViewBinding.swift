@@ -45,10 +45,13 @@ class UITableViewBinding: CodelessBinding {
 
     override func execute() {
         if !running {
-            let executeBlock = { (view: UITableView?, command: Selector, tableView: UITableView?, indexPath: IndexPath) in
+            let executeBlock = { (view: AnyObject?, command: Selector, tableView: AnyObject?, indexPath: AnyObject?) in
+                guard let tableView = tableView as? UITableView, let indexPath = indexPath as? IndexPath else {
+                    return
+                }
                 if let root = UIApplication.shared.keyWindow?.rootViewController {
                     // select targets based off path
-                    if let tableView = tableView, self.path.isLeafSelected(leaf: tableView, root: root) {
+                    if self.path.isLeafSelected(leaf: tableView, root: root) {
                         var label = ""
                         if let cellText = tableView.cellForRow(at: indexPath)?.textLabel?.text {
                             label = cellText
@@ -61,13 +64,21 @@ class UITableViewBinding: CodelessBinding {
             }
 
             //swizzle
+            Swizzler.swizzleSelector(selector: NSSelectorFromString("tableView:didSelectRowAtIndexPath:"),
+                                     aClass: swizzleClass,
+                                     block: executeBlock,
+                                     name: name)
+
             running = true
         }
     }
 
     override func stop() {
         if running {
-            //swizzle
+            //unswizzle
+            Swizzler.unswizzleSelector(selector: NSSelectorFromString("tableView:didSelectRowAtIndexPath:"),
+                aClass: swizzleClass,
+                name: name)
             running = false
         }
     }

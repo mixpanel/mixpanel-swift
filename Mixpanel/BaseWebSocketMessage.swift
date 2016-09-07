@@ -41,11 +41,10 @@ class BaseWebSocketMessage: WebSocketMessageProtocol {
         var data: Data? = nil
 
         do {
-            data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
+            data = try JSONSerialization.data(withJSONObject: jsonObject)
         } catch {
             Logger.error(message: "Failed to serialize websocket message")
         }
-
         return data
     }
 
@@ -56,7 +55,5 @@ class BaseWebSocketMessage: WebSocketMessageProtocol {
     //func setPayload(object: AnyObject, key: String) {
     //    payload[key] = object
     //}
-
-
 
 }

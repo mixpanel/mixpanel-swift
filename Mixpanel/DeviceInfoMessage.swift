@@ -32,7 +32,7 @@ class DeviceInfoRequest: BaseWebSocketMessage {
                                               deviceModel: currentDevice.model,
                                               libVersion: AutomaticProperties.libVersion(),
                                               availableFontFamilies: self.availableFontFamilies(),
-                                              mainBundleIdentifier: Bundle.main.bundleIdentifier!)
+                                              mainBundleIdentifier: Bundle.main.bundleIdentifier)
             }
             connection.sendMessage(message: response)
         }
@@ -40,14 +40,14 @@ class DeviceInfoRequest: BaseWebSocketMessage {
         return operation
     }
 
-    func availableFontFamilies() -> [[String: Any]] {
-        var fontFamilies = [[String: Any]]()
+    func availableFontFamilies() -> [[String: AnyObject]] {
+        var fontFamilies = [[String: AnyObject]]()
         let systemFonts = [UIFont.systemFont(ofSize: 17), UIFont.boldSystemFont(ofSize: 17), UIFont.italicSystemFont(ofSize: 17)]
         var foundSystemFamily = false
 
         for familyName in UIFont.familyNames {
             var fontNames = UIFont.fontNames(forFamilyName: familyName)
-            if familyName == systemFonts.first?.familyName {
+            if familyName == systemFonts.first!.familyName {
                 for systemFont in systemFonts {
                     if !fontNames.contains(systemFont.fontName) {
                         fontNames.append(systemFont.fontName)
@@ -55,11 +55,13 @@ class DeviceInfoRequest: BaseWebSocketMessage {
                 }
                 foundSystemFamily = true
             }
-            fontFamilies.append(["family": familyName, "font_names": UIFont.fontNames(forFamilyName: familyName)])
+            fontFamilies.append(["family": familyName as AnyObject,
+                                 "font_names": UIFont.fontNames(forFamilyName: familyName) as AnyObject])
         }
 
         if !foundSystemFamily {
-            fontFamilies.append(["family": systemFonts.first?.familyName, "font_names": systemFonts.map { $0.fontName }])
+            fontFamilies.append(["family": systemFonts.first!.familyName as AnyObject,
+                                 "font_names": systemFonts.map { $0.fontName } as AnyObject])
         }
 
         return fontFamilies
@@ -75,16 +77,26 @@ class DeviceInfoResponse: BaseWebSocketMessage {
          deviceModel: String,
          libVersion: String?,
          availableFontFamilies: [[String: Any]],
-         mainBundleIdentifier: String) {
+         mainBundleIdentifier: String?) {
         var payload = [String: AnyObject]()
         payload["system_name"] = systemName as AnyObject
-        payload["app_version"] = appVersion as AnyObject
-        payload["app_release"] = appRelease as AnyObject
         payload["device_name"] = deviceName as AnyObject
         payload["device_model"] = deviceModel as AnyObject
-        payload["lib_version"] = libVersion as AnyObject
         payload["available_font_families"] = availableFontFamilies as AnyObject
-        payload["main_bundle_identifier"] = mainBundleIdentifier as AnyObject
+
+        if let appVersion = appVersion {
+            payload["app_version"] = appVersion as AnyObject
+        }
+        if let appRelease = appRelease {
+            payload["app_release"] = appRelease as AnyObject
+        }
+        if let libVersion = libVersion {
+            payload["lib_version"] = libVersion as AnyObject
+        }
+        if let mainBundleIdentifier = mainBundleIdentifier {
+            payload["main_bundle_identifier"] = mainBundleIdentifier as AnyObject
+        }
+
         super.init(type: "device_info_response", payload: payload)
     }
 }

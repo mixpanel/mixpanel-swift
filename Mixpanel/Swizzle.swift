@@ -55,7 +55,8 @@ class Swizzler {
 
     class func swizzleSelector(selector: Selector,
                                aClass: AnyClass,
-                               block: ((_ view: AnyObject?, _ command: Selector) -> Void), name: String) {
+                               block: ((_ view: AnyObject?, _ command: Selector, _ param1: AnyObject?, _ param2: AnyObject?) -> Void),
+                               name: String) {
         if let originalMethod = class_getInstanceMethod(aClass, selector) {
             let numArgs = method_getNumberOfArguments(originalMethod) - 2
             if numArgs >= 0 && numArgs <= 2 {
@@ -121,7 +122,7 @@ class Swizzler {
             //if let enumerator = swizzle.blocks.objectEnumerator() {
             //while let block = enumerator.nextObject() as? (() -> Void) {
             for (_, block) in swizzle.blocks {
-                block(owner, selector)
+                block(owner, selector, nil, nil)
             }
             //}
         }
@@ -142,7 +143,7 @@ class Swizzler {
             //if let enumerator = swizzle.blocks.objectEnumerator() {
                 //while let block = enumerator.nextObject() as? (() -> Void) {
                 for (_, block) in swizzle.blocks {
-                    block(owner, selector)
+                    block(owner, selector, param1, nil)
                 }
             //}
         }
@@ -163,7 +164,7 @@ class Swizzler {
             //if let enumerator = swizzle.blocks.objectEnumerator() {
                 //while let block = enumerator.nextObject() as? (() -> Void) {
                 for (_, block) in swizzle.blocks {
-                    block(owner, selector)
+                    block(owner, selector, param1, param2)
                 }
             //}
         }
@@ -193,9 +194,9 @@ class Swizzle: CustomStringConvertible {
     let numArgs: Int
     //let blocks = NSMapTable<NSString, AnyObject>(keyOptions: [.strongMemory, .objectPersonality],
     //                                              valueOptions: [.strongMemory, .objectPointerPersonality])
-    var blocks = [String: ((view: AnyObject?, command: Selector) -> Void)]()
+    var blocks = [String: ((view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) -> Void)]()
 
-    init(block: ((_ view: AnyObject?, _ command: Selector) -> Void),
+    init(block: ((_ view: AnyObject?, _ command: Selector, _ param1: AnyObject?, _ param2: AnyObject?) -> Void),
          name: String,
          aClass: AnyClass,
          selector: Selector,

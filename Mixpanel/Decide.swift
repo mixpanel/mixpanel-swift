@@ -118,10 +118,15 @@ class Decide {
             UIApplication.shared.isIdleTimerDisabled = true
 
             for binding in self.codelessInstance.codelessBindings {
-                //binding.stop()
+                binding.stop()
             }
-            //let connection = webSocketWrapper
-            //swizzle
+            //let connection = mixpanelInstance.decideInstance.webSocketWrapper
+            //let block = { (view: AnyObject?, selector: Selector, param1: AnyObject?, param2: AnyObject?) in
+            //    let message = DesignerTrackMessage(["event_name":event_name])
+            //    connection?.sendMessage(message: message)
+            //}
+
+            //Swizzler.swizzleSelector(selector: Selector("track:properties:"), aClass: MixpanelInstance.self, block: block, name: "track_properties")
         }
 
         let disconnectCallback = { [weak mixpanelInstance] in
@@ -132,9 +137,10 @@ class Decide {
             UIApplication.shared.isIdleTimerDisabled = false
 
             for binding in self.codelessInstance.codelessBindings {
-                //binding.execute()
+                binding.execute()
             }
             //unswizzle
+            //Swizzler.unswizzleSelector(selector: Selector("track:properties:"), aClass: MixpanelInstance.self, name: "track_properties")
         }
 
         webSocketWrapper = WebSocketWrapper(url: url,
@@ -142,12 +148,5 @@ class Decide {
                                             connectCallback: connectCallback,
                                             disconnectCallback: disconnectCallback)
     }
-
-
-
-
-
-
-
 
 }

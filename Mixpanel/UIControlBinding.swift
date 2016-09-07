@@ -102,7 +102,7 @@ class UIControlBinding: CodelessBinding {
     override func execute() {
 
         if !self.running {
-            let executeBlock = { (view: AnyObject?, command: Selector) in
+            let executeBlock = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
                 if let root = UIApplication.shared.keyWindow?.rootViewController {
                     if let view = view as? UIControl, self.appliedTo.contains(view) {
                         if !self.path.fuzzyIsLeafSelected(leaf: view, root: root) {
@@ -132,9 +132,8 @@ class UIControlBinding: CodelessBinding {
                     }
                 }
             }
-            executeBlock(nil, #function)
+            executeBlock(nil, #function, nil, nil)
 
-            //executeBlock(nil, _cmd);
             Swizzler.swizzleSelector(selector: NSSelectorFromString("didMoveToWindow"),
                                      aClass: swizzleClass,
                                      block: executeBlock,
@@ -151,6 +150,12 @@ class UIControlBinding: CodelessBinding {
     override func stop() {
         if running {
             // remove what has been swizzled
+            Swizzler.unswizzleSelector(selector: NSSelectorFromString("didMoveToWindow"),
+                                       aClass: swizzleClass,
+                                       name: name)
+            Swizzler.unswizzleSelector(selector: NSSelectorFromString("didMoveToSuperview"),
+                                       aClass: swizzleClass,
+                                       name: name)
 
             // remove target-action pairs
             for control in appliedTo.allObjects {

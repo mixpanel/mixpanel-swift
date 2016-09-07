@@ -121,6 +121,22 @@ class ClassDescription: TypeDescription {
 
         super.init(dict: dict)
     }
+
+    func getAllPropertyDescriptions() -> [PropertyDescription] {
+        var allPropertyDescriptions = [String: PropertyDescription]()
+        var description: ClassDescription? = self
+        while let desc = description {
+            for propertyDescription in desc.propertyDescriptions {
+                if let key = propertyDescription.name {
+                    if allPropertyDescriptions[key] == nil {
+                        allPropertyDescriptions[key] = propertyDescription
+                    }
+                }
+            }
+            description = desc.superclassDescription
+        }
+        return Array(allPropertyDescriptions.values)
+    }
 }
 
 class DelegateInfo {
@@ -194,20 +210,23 @@ class PropertyDescription {
 
     class func valueTransformerForType(typeName: String) -> ValueTransformer? {
         //YAR: TODO, SWIFT TYPES??
+        print("type name!!?: \(typeName)")
         for toTypeName in ["NSDictionary", "NSNumber", "NSString"] {
-            let toTransformerName = NSValueTransformerName(rawValue: "MP\(typeName)To\(toTypeName)ValueTransformer")
+            let toTransformerName = NSValueTransformerName(rawValue: "\(typeName)To\(toTypeName)Transformer")
             if let toTransformer = ValueTransformer(forName: toTransformerName) {
                 return toTransformer
             }
         }
-        return ValueTransformer(forName: NSValueTransformerName("MPPassThroughValueTransformer"))
+        let valueTransformerName = NSValueTransformerName("IdentityTransformer")
+        return ValueTransformer(forName: valueTransformerName)
     }
 
     func getValueTransformer() -> ValueTransformer? {
         guard let type = type else {
             return nil
         }
-        return PropertyDescription.valueTransformerForType(typeName: type)
+        let transformedValue = PropertyDescription.valueTransformerForType(typeName: type)
+        return transformedValue
     }
 
     func shouldReadPropertyValue(object: AnyObject) -> Bool {

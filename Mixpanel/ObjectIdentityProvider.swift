@@ -10,6 +10,7 @@ import Foundation
 
 class ObjectIdentityProvider {
     let objectToIdentifierMap: NSMapTable<AnyObject, NSString>
+    let sequenceGenerator = SequenceGenerator()
 
     init() {
         objectToIdentifierMap = NSMapTable(keyOptions: .weakMemory, valueOptions: .strongMemory)
@@ -22,8 +23,22 @@ class ObjectIdentityProvider {
         if let identifier = objectToIdentifierMap.object(forKey: object) {
             return identifier as String
         } else {
-            return UUID().uuidString
+            let identifier = "$\(sequenceGenerator.next())" as NSString
+            objectToIdentifierMap.setObject(identifier, forKey: object)
+            return identifier as String
         }
     }
 
+}
+
+class SequenceGenerator {
+    var value: Int32 = 0
+
+    init() {
+        value = 0
+    }
+
+    func next() -> Int32 {
+        return OSAtomicAdd32(1, &value)
+    }
 }

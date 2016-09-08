@@ -30,7 +30,9 @@ class Decide {
         }
     }
 
-    func checkDecide(forceFetch: Bool = false, distinctId: String, token: String, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
+    func checkDecide(forceFetch: Bool = false,
+                     distinctId: String, token: String,
+                     completion: @escaping ((_ response: DecideResponse?) -> Void)) {
         var decideResponse = DecideResponse()
 
         if !decideFetched || forceFetch {

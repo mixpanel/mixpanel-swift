@@ -82,14 +82,14 @@ extension UIView {
         }
 
         if let originalImage = originalImage, let imageData = UIImageJPEGRepresentation(originalImage, 0.5) {
-            let array = imageData.withUnsafeBytes {
-                [UInt8](UnsafeBufferPointer(start: $0, count: imageData.count))
-            }
-            let hash = NSMutableString()
-            for i in 0..<16 {
-                hash.appendFormat("%02X", array[i])
-            }
-            result = hash as String
+            //let array = imageData.withUnsafeBytes {
+            //    [UInt8](UnsafeBufferPointer(start: $0, count: imageData.count))
+            //}
+            //let hash = NSMutableString()
+            //for i in 0..<16 {
+            //    hash.appendFormat("%02X", array[i])
+            //}
+            result = imageData.md5().toHexString()
         }
         return result
     }

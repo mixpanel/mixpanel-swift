@@ -53,6 +53,7 @@ class ObjectSerializer {
                 typealias MyCFunction = @convention(c) (AnyObject, Selector) -> AnyObject
                 let curriedImplementation = unsafeBitCast(imp, to: MyCFunction.self)
                 delegate = curriedImplementation(object, delegateSelector)
+                getMethods(object: delegate!)
                 for delegateInfo in classDescription.delegateInfos {
                     if let selectorName = delegateInfo.selectorName,
                        let respondsToDelegate = delegate?.responds(to: NSSelectorFromString(selectorName)), respondsToDelegate {
@@ -70,6 +71,20 @@ class ObjectSerializer {
                                ] as [String : Any]
 
         context.addSerializedObject(serializedObject)
+    }
+
+    func getMethods(object: AnyObject) {
+        var mc: CUnsignedInt = 0
+        var mlist: UnsafeMutablePointer<Method?> = class_copyMethodList(type(of: object), &mc)
+        let olist = mlist
+        print("\(mc) methods")
+
+        for i: CUnsignedInt in 0..<mc {
+            print("Method #\(i): \(method_getName(mlist.pointee))")
+
+            mlist = mlist.successor()
+        }
+        free(olist)
     }
 
     func getClassHierarchyArray(object: AnyObject) -> [String] {

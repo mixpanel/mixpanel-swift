@@ -76,6 +76,12 @@ class SnapshotRequest: BaseWebSocketMessage {
             }
 
             response.serializedObjects = serializedObjects
+
+            for (k, v) in serializedObjects {
+                print("serialized object:")
+                print("key \(k), value \(v)")
+            }
+
             connection.sendMessage(message: response)
         }
 

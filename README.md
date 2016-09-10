@@ -26,9 +26,9 @@ If you are using Objective-C, we recommend using our **[Objective-C Library](htt
 | [Documentation](https://mixpanel.github.io/mixpanel-swift)|       ✔       |        ✔       |
 | tvOS Support |               |       ✔       |
 | In-app Notifications |               |       ✔       |
-| Autotrack |               |              |
+| Codeless Tracking |               |              |
 
-If you'd like to use Autotrack please use our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
+If you'd like to use Codeless Tracking (with the visual editor) please use our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
 
 # Installation
 

@@ -53,7 +53,7 @@ class ObjectSerializer {
                 typealias MyCFunction = @convention(c) (AnyObject, Selector) -> AnyObject
                 let curriedImplementation = unsafeBitCast(imp, to: MyCFunction.self)
                 delegate = curriedImplementation(object, delegateSelector)
-                getMethods(object: delegate!)
+                //getMethods(object: delegate!)
                 for delegateInfo in classDescription.delegateInfos {
                     if let selectorName = delegateInfo.selectorName,
                        let respondsToDelegate = delegate?.responds(to: NSSelectorFromString(selectorName)), respondsToDelegate {
@@ -105,10 +105,10 @@ class ObjectSerializer {
         return []
     }
 
-    func getParameterVariations(propertySelectorDescription: PropertySelectorDescription) -> [Any] {
-        var variations = [Any]()
+    func getParameterVariations(propertySelectorDescription: PropertySelectorDescription) -> [[Any]] {
+        var variations = [[Any]]()
         if let parameterDescription = propertySelectorDescription.parameters.first, let typeName = parameterDescription.type {
-            variations = getAllValues(typeName: typeName)
+            variations = getAllValues(typeName: typeName).map { [$0] }
         } else {
             // An empty array of parameters (for methods that have no parameters).
             variations.append([])
@@ -170,11 +170,9 @@ class ObjectSerializer {
                     }
                     arrayOfIdentifiers.append(objectIdentityProvider.getIdentifier(object: value as AnyObject))
                 }
-                print(arrayOfIdentifiers)
                 return propertyDescription.getValueTransformer()!.transformedValue(arrayOfIdentifiers)
             }
         }
-        print(propertyValue)
         return propertyDescription.getValueTransformer()!.transformedValue(propertyValue)
     }
 
@@ -184,30 +182,36 @@ class ObjectSerializer {
         if propertyDescription.useKeyValueCoding {
             // the "fast" path is to use KVC
             let valueForKey = object.value(forKey: selectorDescription.selectorName!)
-            if let value = getTransformedValue(propertyValue: valueForKey, propertyDescription: propertyDescription, context: context) {
-                print("type of transformed Value: \(type(of: value))")
-                do {
-                    let data = try JSONSerialization.data(withJSONObject: ["value": value])
-                } catch {
-
-                }
-                values.append(["value": value])
-            }
-        } else if let useInstanceVariableAccess = propertyDescription.useInstanceVariableAccess, useInstanceVariableAccess {
-            let valueForIvar = getInstanceVariableValue(object: &object, propertyDescription: propertyDescription)
-            if let value = getTransformedValue(propertyValue: valueForIvar, propertyDescription: propertyDescription, context: context) {
-                print("type of transformed Value: \(type(of: value))")
-                do {
-                    let data = try JSONSerialization.data(withJSONObject: ["value": value])
-                } catch {
-
-                }
+            if let value = getTransformedValue(propertyValue: valueForKey,
+                                               propertyDescription: propertyDescription,
+                                               context: context) {
                 values.append(["value": value])
             }
         } else {
-            // the "slow" NSInvocation path. Required in order to invoke methods that take parameters.
-        }
+            // for methods that need to be invoked to get the return value with all possible parameters
+            let parameterVariations = getParameterVariations(propertySelectorDescription: selectorDescription)
+            assert(selectorDescription.parameters.count <= 1)
+            for parameters in parameterVariations {
+                if let selector = selectorDescription.selectorName {
 
+                    var returnValue: AnyObject? = nil
+                    if parameters.isEmpty {
+                        returnValue = object.perform(Selector(selector))?.takeUnretainedValue()
+                    } else if parameters.count == 1 {
+                        returnValue = object.perform(Selector(selector), with: parameters.first!)?.takeUnretainedValue()
+                    } else {
+                        assertionFailure("Currently only allowing 1 parameter or less")
+                    }
+
+                    if let value = getTransformedValue(propertyValue: returnValue,
+                                                       propertyDescription: propertyDescription,
+                                                       context: context) {
+                        values.append(["where": ["parameters": parameters],
+                                       "value": value])
+                    }
+                }
+            }
+        }
         return ["values": values]
     }
 

@@ -187,6 +187,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         decideInstance.inAppDelegate = self
         setupListeners()
         unarchive()
+        executeCachedCodelessBindings()
 
         #if os(iOS)
             if let notification =
@@ -251,7 +252,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                 //TODO: why main queue
                 DispatchQueue.main.sync {
                     for binding in decideResponse.newCodelessBindings {
-                        //execute
+                        binding.execute()
                     }
                 }
             }
@@ -752,9 +753,9 @@ extension MixpanelInstance {
 }
 
 extension MixpanelInstance: InAppNotificationsDelegate {
-    // MARK: - Decide
 
-    func checkDecide(forceFetch: Bool = false, completion: ((_ response: DecideResponse?) -> Void)) {
+    // MARK: - Decide
+    func checkDecide(forceFetch: Bool = false, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
         guard let distinctId = people.distinctId else {
             Logger.info(message: "Can't fetch from Decide without identifying first")
             return
@@ -768,9 +769,15 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     }
 
     // MARK: - WebSocket
-
     func connectToWebSocket() {
         decideInstance.connectToWebSocket(token: apiToken, mixpanelInstance: self)
+    }
+
+    // MARK: - Codeless
+    func executeCachedCodelessBindings() {
+        for binding in decideInstance.codelessInstance.codelessBindings {
+            binding.execute()
+        }
     }
 
 

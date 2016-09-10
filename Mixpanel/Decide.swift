@@ -37,7 +37,10 @@ class Decide {
 
     let switchboardURL = "wss://switchboard.mixpanel.com"
 
-    func checkDecide(forceFetch: Bool = false, distinctId: String, token: String, completion: ((_ response: DecideResponse?) -> Void)) {
+    func checkDecide(forceFetch: Bool = false,
+                     distinctId: String,
+                     token: String,
+                     completion: @escaping ((_ response: DecideResponse?) -> Void)) {
         var decideResponse = DecideResponse()
 
         if !decideFetched || forceFetch {
@@ -73,7 +76,9 @@ class Decide {
                 }
 
                 let finishedCodelessBindings = self.codelessInstance.codelessBindings.subtracting(parsedCodelessBindings)
-                //stop finishedCodelessBindings
+                for finishedBinding in finishedCodelessBindings {
+                    finishedBinding.stop()
+                }
 
                 let newCodelessBindings = parsedCodelessBindings.subtracting(self.codelessInstance.codelessBindings)
                 decideResponse.newCodelessBindings = newCodelessBindings

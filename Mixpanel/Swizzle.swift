@@ -23,7 +23,7 @@ public extension DispatchQueue {
 
 class Swizzler {
     //static var swizzles: NSMapTable<AnyObject, Swizzle>?
-    static var swizzles = [Method: Swizzle]()
+    static var swizzles = [IMP: Swizzle]()
     //class func load() {
     //    swizzles = NSMapTable(keyOptions: [.opaqueMemory, .opaquePersonality], valueOptions: [.strongMemory, .objectPointerPersonality])
     //}
@@ -48,14 +48,17 @@ class Swizzler {
         swizzles.removeValue(forKey: method)
     }
 
-    class func setSwizzle(swizzle: Swizzle, method: Method) {
+    class func setSwizzle(swizzle: Swizzle, method: IMP) {
         //swizzles?.setObject(swizzle, forKey: method as AnyObject)
         swizzles[method] = swizzle
     }
 
     class func swizzleSelector(selector: Selector,
                                aClass: AnyClass,
-                               block: ((_ view: AnyObject?, _ command: Selector, _ param1: AnyObject?, _ param2: AnyObject?) -> Void),
+                               block: @escaping ((_ view: AnyObject?,
+                                                  _ command: Selector,
+                                                  _ param1: AnyObject?,
+                                                  _ param2: AnyObject?) -> Void),
                                name: String) {
         if let originalMethod = class_getInstanceMethod(aClass, selector) {
             let numArgs = method_getNumberOfArguments(originalMethod) - 2
@@ -68,9 +71,10 @@ class Swizzler {
                     swizzledSelector = #selector(self.swizzledMethodOneParam)
                 case 2:
                     swizzledSelector = #selector(self.swizzledMethodTwoParams)
-                default: break
+                    default: break
                 }
-                let swizzledMethod = class_getInstanceMethod(self, swizzledSelector)
+                //let swizzledSelector = #selector(UITableView.newDidSelectRowAtIndexPath(tableView:indexPath:))
+                let swizzledMethod = class_getClassMethod(Swizzler.self, swizzledSelector)
                 let originalMethodImplementation = method_getImplementation(originalMethod)
                 var swizzle = getSwizzle(method: originalMethod)
                 if swizzle == nil {
@@ -79,8 +83,8 @@ class Swizzler {
                                       aClass: aClass,
                                       selector: selector,
                                       originalMethod: originalMethodImplementation!,
-                                      numArgs: Int(numArgs))
-                    setSwizzle(swizzle: swizzle!, method: originalMethod)
+                                      numArgs: Int(numArgs) + 2)
+                    setSwizzle(swizzle: swizzle!, method: originalMethodImplementation!)
                 } else {
                     swizzle?.blocks[name] = block
                     //swizzle?.blocks.setObject(block as AnyObject, forKey: name as NSString)
@@ -111,7 +115,7 @@ class Swizzler {
         let swizzledSelector = #selector(self.swizzledMethodNoParams)
 
         //if let swizzle = swizzles?.object(forKey: swizzleMethod as AnyObject) {
-        if let swizzleMethod = class_getInstanceMethod(self, swizzledSelector),
+        if let swizzleMethod = class_getClassMethod(self, swizzledSelector),
             let swizzle = swizzles[swizzleMethod] {
             // run original method
             let implementation = method_getImplementation(swizzleMethod)
@@ -132,7 +136,7 @@ class Swizzler {
         let swizzledSelector = #selector(self.swizzledMethodOneParam)
         //let swizzleMethod = class_getInstanceMethod(self, swizzledSelector)
         //if let swizzle = swizzles?.object(forKey: swizzleMethod as AnyObject) {
-        if let swizzleMethod = class_getInstanceMethod(self, swizzledSelector),
+        if let swizzleMethod = class_getClassMethod(self, swizzledSelector),
             let swizzle = swizzles[swizzleMethod] {
             // run original method
             let implementation = method_getImplementation(swizzleMethod)
@@ -149,25 +153,38 @@ class Swizzler {
         }
     }
 
-    @objc class func swizzledMethodTwoParams(owner: AnyObject, selector: Selector, param1: AnyObject, param2: AnyObject) {
+    @objc class func swizzledMethodTwoParams(param1: AnyObject, param2: AnyObject) {
         let swizzledSelector = #selector(self.swizzledMethodTwoParams)
-        //let swizzleMethod = class_getInstanceMethod(self, swizzledSelector)
-        //if let swizzle = swizzles?.object(forKey: swizzleMethod as AnyObject) {
-        if let swizzleMethod = class_getInstanceMethod(self, swizzledSelector),
-            let swizzle = swizzles[swizzleMethod] {
-            // run original method
-            let implementation = method_getImplementation(swizzleMethod)
-            typealias Function = @convention(c) (AnyObject, Selector, AnyObject, AnyObject) -> Void
-            let function = unsafeBitCast(implementation, to: Function.self)
-            function(owner, selector, param1, param2)
+        let thisMethod = class_getClassMethod(Swizzler.self, swizzledSelector)
+        if let implementation = method_getImplementation(thisMethod),
+            let swizzle = swizzles[implementation] {
+            let newDidSelectMethod = class_getInstanceMethod(UITableView.self, #selector(UITableView.newDidSelectRowAtIndexPath(tableView:indexPath:)))
+            let newDidSelect = method_getImplementation(newDidSelectMethod)
+            typealias MyCFunction = @convention(c) (AnyObject, Selector, AnyObject, AnyObject) -> AnyObject
+            let curriedImplementation = unsafeBitCast(newDidSelect, to: MyCFunction.self)
+            curriedImplementation(swizzle.aClass, swizzle.selector, param1, param2)
+            for (_, block) in swizzle.blocks {
+                print(block)
+                //block(param1, param2, nil)
+            }
+        }
+        //self.swizzledMethodTwoParams(param1: param1, param2: param2)
+        //if let swizzleMethod = class_getInstanceMethod(self, selector) {
+        //    if let swizzle = swizzles[swizzleMethod] {
+        //    // run original method
+        //    let implementation = method_getImplementation(swizzleMethod)
+        //    typealias Function = @convention(c) (AnyObject, Selector, AnyObject, AnyObject) -> Void
+        //    let function = unsafeBitCast(implementation, to: Function.self)
+        //    function(owner, selector, param1, param2)
 
             //if let enumerator = swizzle.blocks.objectEnumerator() {
                 //while let block = enumerator.nextObject() as? (() -> Void) {
-                for (_, block) in swizzle.blocks {
-                    block(owner, selector, param1, param2)
-                }
+       //         for (_, block) in swizzle.blocks {
+       //             block(owner, selector, param1, param2)
+       //         }
             //}
-        }
+       //     }
+      //  }
     }
 
     class func unswizzleSelector(selector: Selector, aClass: AnyClass, name: String? = nil) {
@@ -196,7 +213,7 @@ class Swizzle: CustomStringConvertible {
     //                                              valueOptions: [.strongMemory, .objectPointerPersonality])
     var blocks = [String: ((view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) -> Void)]()
 
-    init(block: ((_ view: AnyObject?, _ command: Selector, _ param1: AnyObject?, _ param2: AnyObject?) -> Void),
+    init(block: @escaping ((_ view: AnyObject?, _ command: Selector, _ param1: AnyObject?, _ param2: AnyObject?) -> Void),
          name: String,
          aClass: AnyClass,
          selector: Selector,

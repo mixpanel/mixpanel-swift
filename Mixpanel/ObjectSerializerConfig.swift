@@ -156,7 +156,6 @@ class PropertyDescription {
     let readOnly: Bool?
     let noFollow: Bool?
     let useKeyValueCoding: Bool
-    let useInstanceVariableAccess: Bool?
     let name: String?
     let getSelectorDescription: PropertySelectorDescription
     let setSelectorDescription: PropertySelectorDescription?
@@ -164,7 +163,6 @@ class PropertyDescription {
 
     init(dict: [String: Any]) {
         let name = dict["name"] as? String
-        useInstanceVariableAccess = Bool(dict["use_ivar"] as? Int)
         readOnly = Bool(dict["readonly"] as? Int)
         noFollow = Bool(dict["nofollow"] as? Int)
 
@@ -191,12 +189,9 @@ class PropertyDescription {
             setSelectorDescription = PropertySelectorDescription(dict: setDict)
         }
 
-        var useKVC = false
-        if let useKVCBool = Bool(dict["use_kvc"] as? Int),
-           let useInstanceVariableAccess = useInstanceVariableAccess {
-            useKVC = useKVCBool && !useInstanceVariableAccess
-        } else {
-            useKVC = true
+        var useKVC = true
+        if let useKVCBool = Bool(dict["use_kvc"] as? Int) {
+            useKVC = useKVCBool
         }
 
         useKeyValueCoding = useKVC && getSelectorDescription.parameters.isEmpty &&
@@ -210,7 +205,7 @@ class PropertyDescription {
 
     class func valueTransformerForType(typeName: String) -> ValueTransformer? {
         //YAR: TODO, SWIFT TYPES??
-        print("type name!!?: \(typeName)")
+        //print("type name!!?: \(typeName)")
         for toTypeName in ["NSDictionary", "NSNumber", "NSString"] {
             let toTransformerName = NSValueTransformerName(rawValue: "\(typeName)To\(toTypeName)Transformer")
             if let toTransformer = ValueTransformer(forName: toTransformerName) {

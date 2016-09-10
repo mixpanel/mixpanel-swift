@@ -38,7 +38,7 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
-        let actionStr = tableViewItems[indexPath.item]
+        let actionStr = self.tableViewItems[indexPath.item]
         var descStr = ""
 
         switch indexPath.item {

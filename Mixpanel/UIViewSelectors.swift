@@ -9,38 +9,38 @@
 import Foundation
 
 extension UIView {
-    func mp_fingerprintVersion() -> Int {
-        return 1
+    func mp_fingerprintVersion() -> NSNumber {
+        return NSNumber(value: 1)
     }
 
-    func mp_varA() -> String? {
+    func mp_varA() -> NSString? {
         return mp_encryptHelper(input: mp_viewId())
     }
 
-    func mp_varB() -> String? {
+    func mp_varB() -> NSString? {
         return mp_encryptHelper(input: mp_controllerVariable())
     }
 
-    func mp_varC() -> String? {
+    func mp_varC() -> NSString? {
         return mp_encryptHelper(input: mp_imageFingerprint())
     }
 
-    func mp_varSetD() -> [String] {
+    func mp_varSetD() -> NSArray {
         let targetActions = mp_targetActions()
         return targetActions.map {
             mp_encryptHelper(input: $0)!
-        }
+        } as NSArray
     }
 
-    func mp_varE() -> String? {
+    func mp_varE() -> NSString? {
         return mp_encryptHelper(input: mp_text())
     }
 
-    func mp_encryptHelper(input: String?) -> String? {
+    func mp_encryptHelper(input: String?) -> NSString? {
         let SALT = "1l0v3c4a8s4n018cl3d93kxled3kcle3j19384jdo2dk3"
         //var encryptedStuff: String? = nil
         if let input = input {
-            return input + SALT
+            return (input + SALT) as NSString
         }
         return nil
     }

@@ -80,6 +80,7 @@ class DeviceInfoResponse: BaseWebSocketMessage {
          mainBundleIdentifier: String?) {
         var payload = [String: AnyObject]()
         payload["system_name"] = systemName as AnyObject
+        payload["system_version"] = systemVersion as AnyObject
         payload["device_name"] = deviceName as AnyObject
         payload["device_model"] = deviceModel as AnyObject
         payload["available_font_families"] = availableFontFamilies as AnyObject

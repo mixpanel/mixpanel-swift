@@ -92,7 +92,7 @@ class ObjectSelector: NSObject {
             }
         }
 
-        if scanner.scanUpToCharacters(from: predicateStartChar, into: nil) {
+        if scanner.scanCharacters(from: predicateStartChar, into: nil) {
             var predicateFormat: NSString? = nil
             var index = 0
 

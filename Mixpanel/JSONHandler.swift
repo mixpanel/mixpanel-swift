@@ -71,7 +71,7 @@ class JSONHandler {
             return dateFormatter.stringFromDate(obj)
 
         case let obj as NSURL:
-            return obj.absoluteString
+            return obj.absoluteString!
 
         default:
             Logger.info(message: "enforcing string on object")

@@ -33,7 +33,7 @@ class Persistence {
         let manager = NSFileManager.defaultManager()
         let url = manager.URLsForDirectory(NSSearchPathDirectory.LibraryDirectory, inDomains: NSSearchPathDomainMask.UserDomainMask).last
 
-        guard let urlUnwrapped = url?.URLByAppendingPathComponent(filename).path else {
+        guard let urlUnwrapped = url?.URLByAppendingPathComponent(filename)?.path else {
             return nil
         }
 

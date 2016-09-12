@@ -21,6 +21,7 @@
 		E15FF7EC1D0461130076CDE3 /* MixpanelDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7EB1D0461130076CDE3 /* MixpanelDemoTests.swift */; };
 		E15FF7FC1D0461D70076CDE3 /* Mixpanel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */; };
 		E15FF7FD1D0461D70076CDE3 /* Mixpanel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E16C35E11D872044003500AC /* CodelessPlaygroundViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16C35E01D872044003500AC /* CodelessPlaygroundViewController.swift */; };
 		E1C61EBA1D22F6470056C56C /* MixpanelPeopleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */; };
 		E1C61EBE1D22F9F60056C56C /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EBD1D22F9F60056C56C /* TestConstants.swift */; };
 		E1E8F8B01D626BE80081295D /* MixpanelNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E8F8AF1D626BE80081295D /* MixpanelNotificationTests.swift */; };
@@ -47,6 +48,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = E115947C1CFF1491007F8B4F;
 			remoteInfo = Mixpanel;
+		};
+		E16C35E31D872045003500AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E12782B31D4AB4B30025FB05;
+			remoteInfo = Mixpanel_tvOS;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -85,6 +93,7 @@
 		E15FF7ED1D0461130076CDE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Mixpanel.xcodeproj; path = ../Mixpanel.xcodeproj; sourceTree = "<group>"; };
 		E16BAEB41D3DB4FC00C442CE /* MixpanelDemo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = MixpanelDemo.entitlements; sourceTree = "<group>"; };
+		E16C35E01D872044003500AC /* CodelessPlaygroundViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodelessPlaygroundViewController.swift; sourceTree = "<group>"; };
 		E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelPeopleTests.swift; sourceTree = "<group>"; };
 		E1C61EBD1D22F9F60056C56C /* TestConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstants.swift; sourceTree = "<group>"; };
 		E1E8F8AF1D626BE80081295D /* MixpanelNotificationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelNotificationTests.swift; sourceTree = "<group>"; };
@@ -168,6 +177,7 @@
 				E146F1951D398D1600D75B49 /* PeopleViewController.swift */,
 				E146F1991D399AF300D75B49 /* UtilityViewController.swift */,
 				E1016E351D3D46DF00075BB7 /* ActionCompleteViewController.swift */,
+				E16C35E01D872044003500AC /* CodelessPlaygroundViewController.swift */,
 				E146F1971D398D2D00D75B49 /* Supporting Files */,
 			);
 			path = MixpanelDemo;
@@ -191,6 +201,7 @@
 			isa = PBXGroup;
 			children = (
 				E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */,
+				E16C35E41D872045003500AC /* Mixpanel.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -300,6 +311,13 @@
 			remoteRef = E15FF7FA1D0461BC0076CDE3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		E16C35E41D872045003500AC /* Mixpanel.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Mixpanel.framework;
+			remoteRef = E16C35E31D872045003500AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -380,6 +398,7 @@
 				E146F19A1D399AF300D75B49 /* UtilityViewController.swift in Sources */,
 				E15FF7D71D0461130076CDE3 /* AppDelegate.swift in Sources */,
 				E1016E361D3D46DF00075BB7 /* ActionCompleteViewController.swift in Sources */,
+				E16C35E11D872044003500AC /* CodelessPlaygroundViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -60,16 +60,16 @@ class UIControlBinding: CodelessBinding {
     }
 
     required init?(coder aDecoder: NSCoder) {
-        controlEvent = aDecoder.decodeObject(forKey: "controlEvent") as! UIControlEvents
-        verifyEvent = aDecoder.decodeObject(forKey: "verifyEvent") as! UIControlEvents
+        controlEvent = UIControlEvents(rawValue: aDecoder.decodeObject(forKey: "controlEvent") as! UInt)
+        verifyEvent = UIControlEvents(rawValue: aDecoder.decodeObject(forKey: "verifyEvent") as! UInt)
         verified = NSHashTable(options: [NSHashTableWeakMemory, NSHashTableObjectPointerPersonality])
         appliedTo = NSHashTable(options: [NSHashTableWeakMemory, NSHashTableObjectPointerPersonality])
         super.init(coder: aDecoder)
     }
 
     override func encode(with aCoder: NSCoder) {
-        aCoder.encode(controlEvent, forKey: "controlEvent")
-        aCoder.encode(verifyEvent, forKey: "verifyEvent")
+        aCoder.encode(controlEvent.rawValue, forKey: "controlEvent")
+        aCoder.encode(verifyEvent.rawValue, forKey: "verifyEvent")
         super.encode(with: aCoder)
     }
 
@@ -135,14 +135,15 @@ class UIControlBinding: CodelessBinding {
             executeBlock(nil, #function, nil, nil)
 
             Swizzler.swizzleSelector(selector: NSSelectorFromString("didMoveToWindow"),
+                                     toSwizzle: #selector(UIView.newDidMoveToWindow),
                                      aClass: swizzleClass,
                                      block: executeBlock,
                                      name: name)
             Swizzler.swizzleSelector(selector: NSSelectorFromString("didMoveToSuperview"),
+                                     toSwizzle: #selector(UIView.newDidMoveToSuperview),
                                      aClass: swizzleClass,
                                      block: executeBlock,
                                      name: name)
-
             running = true
         }
     }
@@ -200,5 +201,35 @@ class UIControlBinding: CodelessBinding {
         }
     }
 
+}
+
+extension UIView {
+    @objc func newDidMoveToWindow() {
+        let originalSelector = NSSelectorFromString("didMoveToWindow")
+        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
+            let swizzle = Swizzler.swizzles[originalMethod] {
+            typealias MyCFunction = @convention(c) (AnyObject, Selector) -> Void
+            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
+            curriedImplementation(self, originalSelector)
+
+            for (_, block) in swizzle.blocks {
+                block(self, swizzle.selector, nil, nil)
+            }
+        }
+    }
+
+    @objc func newDidMoveToSuperview() {
+        let originalSelector = NSSelectorFromString("didMoveToSuperview")
+        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
+            let swizzle = Swizzler.swizzles[originalMethod] {
+            typealias MyCFunction = @convention(c) (AnyObject, Selector) -> Void
+            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
+            curriedImplementation(self, originalSelector)
+
+            for (_, block) in swizzle.blocks {
+                block(self, swizzle.selector, nil, nil)
+            }
+        }
+    }
 
 }

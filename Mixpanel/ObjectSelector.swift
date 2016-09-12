@@ -53,7 +53,7 @@ class ObjectSelector: NSObject {
     func isLeafSelected(leaf: AnyObject, root: AnyObject, finalPredicate: Bool) -> Bool {
         var isSelected = true
         var views = [leaf]
-        for i in stride(from: filters.count - 1, to: 0, by: -1) {
+        for i in stride(from: filters.count - 1, to: -1, by: -1) {
             let filter = filters[i]
             filter.nameOnly = i == filters.count - 1 && !finalPredicate
             if !filter.appliesToAny(views: views) {

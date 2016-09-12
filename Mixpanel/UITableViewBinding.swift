@@ -65,17 +65,12 @@ class UITableViewBinding: CodelessBinding {
             }
 
             //swizzle
-            //Swizzler.swizzleSelector(selector: NSSelectorFromString("tableView:didSelectRowAtIndexPath:"),
-            //                         aClass: swizzleClass,
-            //                         block: executeBlock,
-            //                         name: name)
-            let castedBlock: AnyObject = unsafeBitCast(executeBlock as @convention(executeBlock) (AnyObject, Selector, AnyObject, AnyObject) -> (), to: AnyObject.self)
-            let originalSelector = NSSelectorFromString("tableView:didSelectRowAtIndexPath:")
-            let impBlock = imp_implementationWithBlock(unsafeBitCast(executeBlock, to: AnyObject.self))
-            let originalMethod = class_getInstanceMethod(swizzleClass, originalSelector)
-            let swizzledMethod = class_getInstanceMethod(swizzleClass, swizzledSelector)
-            method_setImplementation(originalMethod, impBlock)
-
+            Swizzler.swizzleSelector(selector: NSSelectorFromString("tableView:didSelectRowAtIndexPath:"),
+                                     toSwizzle:
+                                        #selector(UIViewController.newDidSelectRowAtIndexPath(tableView:indexPath:)),
+                                     aClass: swizzleClass,
+                                     block: executeBlock,
+                                     name: name)
 
             running = true
         }
@@ -116,11 +111,20 @@ class UITableViewBinding: CodelessBinding {
     }
 }
 
-extension UITableView {
+extension UIViewController {
 
     @objc func newDidSelectRowAtIndexPath(tableView: UITableView, indexPath: IndexPath) {
-        self.newDidSelectRowAtIndexPath(tableView: tableView, indexPath: indexPath)
+        let originalSelector = NSSelectorFromString("tableView:didSelectRowAtIndexPath:")
+        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
+            let swizzle = Swizzler.swizzles[originalMethod] {
+            typealias MyCFunction = @convention(c) (AnyObject, Selector, UITableView, IndexPath) -> Void
+            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
+            curriedImplementation(self, originalSelector, tableView, indexPath)
 
+            for (_, block) in swizzle.blocks {
+                block(self, swizzle.selector, tableView, indexPath as AnyObject?)
+            }
+        }
     }
 
 }

@@ -132,18 +132,20 @@ class UIControlBinding: CodelessBinding {
                     }
                 }
             }
+
+            // Execute once in case the view to be tracked is already on the screen
             executeBlock(nil, #function, nil, nil)
 
             Swizzler.swizzleSelector(selector: NSSelectorFromString("didMoveToWindow"),
                                      toSwizzle: #selector(UIView.newDidMoveToWindow),
                                      aClass: swizzleClass,
-                                     block: executeBlock,
-                                     name: name)
+                                     name: name,
+                                     block: executeBlock)
             Swizzler.swizzleSelector(selector: NSSelectorFromString("didMoveToSuperview"),
                                      toSwizzle: #selector(UIView.newDidMoveToSuperview),
                                      aClass: swizzleClass,
-                                     block: executeBlock,
-                                     name: name)
+                                     name: name,
+                                     block: executeBlock)
             running = true
         }
     }

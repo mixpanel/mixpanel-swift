@@ -73,22 +73,16 @@ extension UIView {
     func mp_imageFingerprint() -> String? {
         var result: String? = nil
         var originalImage: UIImage? = nil
+        let imageSelector = Selector("image")
 
         if let button = self as? UIButton {
             originalImage = button.image(for: UIControlState.normal)
         } else if let superviewUnwrapped = self.superview,
-            NSStringFromClass(type(of: superviewUnwrapped)) == "UITabBarButton" && self.responds(to: Selector("image")) {
-            originalImage = self.perform(Selector("image")).takeRetainedValue() as? UIImage
+            NSStringFromClass(type(of: superviewUnwrapped)) == "UITabBarButton" && self.responds(to: imageSelector) {
+            originalImage = self.perform(imageSelector).takeRetainedValue() as? UIImage
         }
 
         if let originalImage = originalImage, let imageData = UIImageJPEGRepresentation(originalImage, 0.5) {
-            //let array = imageData.withUnsafeBytes {
-            //    [UInt8](UnsafeBufferPointer(start: $0, count: imageData.count))
-            //}
-            //let hash = NSMutableString()
-            //for i in 0..<16 {
-            //    hash.appendFormat("%02X", array[i])
-            //}
             result = imageData.md5().toHexString()
         }
         return result

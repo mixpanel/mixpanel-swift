@@ -1,5 +1,5 @@
 //
-//  CGPointToNSDictionaryTransformer.swift
+//  CGRectToNSDictionary.swift
 //  Mixpanel
 //
 //  Created by Yarden Eitan on 9/6/16.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-@objc(CGPointToNSDictionaryTransformer) class CGPointToNSDictionaryTransformer: ValueTransformer {
+@objc(CGRectToNSDictionary) class CGRectToNSDictionary: ValueTransformer {
     override class func transformedValueClass() -> AnyClass {
         return NSDictionary.self
     }
@@ -18,19 +18,19 @@ import Foundation
     }
 
     override func transformedValue(_ value: Any?) -> Any? {
-        guard let value = value as? NSValue, value.responds(to: #selector(getter: NSValue.cgPointValue)) else {
+        guard let value = value as? NSValue, value.responds(to: #selector(getter: NSValue.cgRectValue)) else {
             return nil
         }
 
-        return value.cgPointValue.dictionaryRepresentation as NSDictionary
+        return value.cgRectValue.dictionaryRepresentation as NSDictionary
     }
 
     override func reverseTransformedValue(_ value: Any?) -> Any? {
         let dict = value as! CFDictionary
-        if let point = CGPoint(dictionaryRepresentation: dict) {
-            return NSValue(cgPoint: point)
+        if let rect = CGRect(dictionaryRepresentation: dict) {
+            return NSValue(cgRect: rect)
         }
 
-        return NSValue(cgPoint: .zero)
+        return NSValue(cgRect: .zero)
     }
 }

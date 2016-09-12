@@ -11,8 +11,6 @@ import Foundation
 protocol WebSocketMessageProtocol: CustomDebugStringConvertible {
     var type: String { get set }
     var payload: [String: AnyObject] { get set }
-    //func setPayload(object: AnyObject, key: String)
-    //func payloadObject(key: String) -> AnyObject?
     func JSONData() -> Data?
     func responseCommand(connection: WebSocketWrapper) -> Operation?
 
@@ -47,13 +45,5 @@ class BaseWebSocketMessage: WebSocketMessageProtocol {
         }
         return data
     }
-
-    //func payloadObject(key: String) -> AnyObject? {
-    //    return payload[key]
-    //}
-
-    //func setPayload(object: AnyObject, key: String) {
-    //    payload[key] = object
-    //}
 
 }

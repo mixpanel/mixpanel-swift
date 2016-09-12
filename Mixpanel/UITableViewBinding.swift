@@ -69,8 +69,8 @@ class UITableViewBinding: CodelessBinding {
                                      toSwizzle:
                                         #selector(UIViewController.newDidSelectRowAtIndexPath(tableView:indexPath:)),
                                      aClass: swizzleClass,
-                                     block: executeBlock,
-                                     name: name)
+                                     name: name,
+                                     block: executeBlock)
 
             running = true
         }

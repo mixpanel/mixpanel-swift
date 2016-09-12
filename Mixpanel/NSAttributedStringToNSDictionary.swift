@@ -1,5 +1,5 @@
 //
-//  NSAttributedStringToNSDictionaryTransformer.swift
+//  NSAttributedStringToNSDictionary.swift
 //  Mixpanel
 //
 //  Created by Yarden Eitan on 9/6/16.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-@objc(NSAttributedStringToNSDictionaryTransformer) class NSAttributedStringToNSDictionaryTransformer: ValueTransformer {
+@objc(NSAttributedStringToNSDictionary) class NSAttributedStringToNSDictionary: ValueTransformer {
     override class func transformedValueClass() -> AnyClass {
         return NSDictionary.self
     }

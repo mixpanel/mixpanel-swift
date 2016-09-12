@@ -1,5 +1,5 @@
 //
-//  CGSizeToDictionaryTransformer.swift
+//  CGPointToNSDictionary.swift
 //  Mixpanel
 //
 //  Created by Yarden Eitan on 9/6/16.
@@ -8,8 +8,7 @@
 
 import Foundation
 
-@objc(CGSizeToNSDictionaryTransformer) class CGSizeToNSDictionaryTransformer: ValueTransformer {
-
+@objc(CGPointToNSDictionary) class CGPointToNSDictionary: ValueTransformer {
     override class func transformedValueClass() -> AnyClass {
         return NSDictionary.self
     }
@@ -19,19 +18,19 @@ import Foundation
     }
 
     override func transformedValue(_ value: Any?) -> Any? {
-        guard let value = value as? NSValue, value.responds(to: #selector(getter: NSValue.cgSizeValue)) else {
+        guard let value = value as? NSValue, value.responds(to: #selector(getter: NSValue.cgPointValue)) else {
             return nil
         }
 
-        return value.cgSizeValue.dictionaryRepresentation as NSDictionary
+        return value.cgPointValue.dictionaryRepresentation as NSDictionary
     }
 
     override func reverseTransformedValue(_ value: Any?) -> Any? {
         let dict = value as! CFDictionary
-        if let size = CGSize(dictionaryRepresentation: dict) {
-            return NSValue(cgSize: size)
+        if let point = CGPoint(dictionaryRepresentation: dict) {
+            return NSValue(cgPoint: point)
         }
 
-        return NSValue(cgSize: .zero)
+        return NSValue(cgPoint: .zero)
     }
 }

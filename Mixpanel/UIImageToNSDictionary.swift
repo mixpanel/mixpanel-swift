@@ -1,5 +1,5 @@
 //
-//  UIImageToDictionaryTransformer.swift
+//  UIImageToDictionary.swift
 //  Mixpanel
 //
 //  Created by Yarden Eitan on 9/2/16.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-@objc(UIImageToNSDictionaryTransformer) class UIImageToNSDictionaryTransformer: ValueTransformer {
+@objc(UIImageToNSDictionary) class UIImageToNSDictionary: ValueTransformer {
 
     static var imageCache = [String: UIImage]()
 
@@ -26,13 +26,13 @@ import Foundation
         }
         let sizeValue = NSValue(cgSize: image.size)
         guard let sizeTransformer = ValueTransformer(forName:
-            NSValueTransformerName(rawValue: NSStringFromClass(CGSizeToNSDictionaryTransformer.self))),
+            NSValueTransformerName(rawValue: NSStringFromClass(CGSizeToNSDictionary.self))),
             let size = sizeTransformer.transformedValue(sizeValue) as? NSDictionary else {
                 return NSDictionary()
         }
         let capInsetsValue = NSValue(uiEdgeInsets: image.capInsets)
         guard let insetsTransformer = ValueTransformer(forName:
-            NSValueTransformerName(rawValue: NSStringFromClass(UIEdgeInsetsToNSDictionaryTransformer.self))),
+            NSValueTransformerName(rawValue: NSStringFromClass(UIEdgeInsetsToNSDictionary.self))),
             let capInsets = insetsTransformer.transformedValue(capInsetsValue) as? NSDictionary else {
                 return NSDictionary()
         }
@@ -67,7 +67,7 @@ import Foundation
     override func reverseTransformedValue(_ value: Any?) -> Any? {
         if let dictionaryValue = value as? NSDictionary {
             let insetsTransformer = ValueTransformer(forName:
-                NSValueTransformerName(rawValue: NSStringFromClass(UIEdgeInsetsToNSDictionaryTransformer.self)))
+                NSValueTransformerName(rawValue: NSStringFromClass(UIEdgeInsetsToNSDictionary.self)))
             let capInsets = insetsTransformer?.reverseTransformedValue(dictionaryValue["capInsets"]) as? UIEdgeInsets
 
             var images = [UIImage]()
@@ -76,14 +76,14 @@ import Foundation
                     let scale = imageDictionary["scale"] as? CGFloat
                     var image: UIImage? = nil
                     if let imageStr = imageDictionary["url"] as? String {
-                        image = UIImageToNSDictionaryTransformer.imageCache[imageStr]
+                        image = UIImageToNSDictionary.imageCache[imageStr]
                         if image == nil {
                             if let imageURL = URL(string: imageStr) {
                                 do {
                                     let imageData = try Data(contentsOf: imageURL)
                                     image = UIImage(data: imageData, scale: min(1.0, scale!))
                                     if let image = image {
-                                        UIImageToNSDictionaryTransformer.imageCache[imageStr] = image
+                                        UIImageToNSDictionary.imageCache[imageStr] = image
                                     }
                                 } catch {
                                     Logger.debug(message: "couldn't transform imageURL to Data")

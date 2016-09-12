@@ -1,5 +1,5 @@
 //
-//  UIColorToNSStringTransformer.swift
+//  UIColorToNSString.swift
 //  Mixpanel
 //
 //  Created by Yarden Eitan on 9/6/16.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-@objc(UIColorToNSStringTransformer) class UIColorToNSStringTransformer: ValueTransformer {
+@objc(UIColorToNSString) class UIColorToNSString: ValueTransformer {
 
     override class func transformedValueClass() -> AnyClass {
         return NSString.self

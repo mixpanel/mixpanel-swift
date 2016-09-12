@@ -1,5 +1,5 @@
 //
-//  CGAffineTransformToNSDictionaryTransformer.swift
+//  CGAffineTransformToNSDictionary.swift
 //  Mixpanel
 //
 //  Created by Yarden Eitan on 9/6/16.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-@objc(CGAffineTransformToNSDictionaryTransformer) class CGAffineTransformToNSDictionaryTransformer: ValueTransformer {
+@objc(CGAffineTransformToNSDictionary) class CGAffineTransformToNSDictionary: ValueTransformer {
 
     override class func transformedValueClass() -> AnyClass {
         return NSDictionary.self

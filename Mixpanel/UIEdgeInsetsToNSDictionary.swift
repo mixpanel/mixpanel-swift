@@ -1,5 +1,5 @@
 //
-//  UIEdgeInsetsToDictionaryTransformer.swift
+//  UIEdgeInsetsToDictionary.swift
 //  Mixpanel
 //
 //  Created by Yarden Eitan on 9/6/16.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-@objc(UIEdgeInsetsToNSDictionaryTransformer) class UIEdgeInsetsToNSDictionaryTransformer: ValueTransformer {
+@objc(UIEdgeInsetsToNSDictionary) class UIEdgeInsetsToNSDictionary: ValueTransformer {
 
     override class func transformedValueClass() -> AnyClass {
         return NSDictionary.self

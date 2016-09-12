@@ -24,15 +24,16 @@ class DeviceInfoRequest: BaseWebSocketMessage {
 
             DispatchQueue.main.sync {
                 let currentDevice = UIDevice.current
-                response = DeviceInfoResponse(systemName: currentDevice.systemName,
-                                              systemVersion: currentDevice.systemVersion,
-                                              appVersion: Bundle.main.infoDictionary?["CFBundleVersion"] as? String,
-                                              appRelease: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
-                                              deviceName: currentDevice.name,
-                                              deviceModel: currentDevice.model,
-                                              libVersion: AutomaticProperties.libVersion(),
-                                              availableFontFamilies: self.availableFontFamilies(),
-                                              mainBundleIdentifier: Bundle.main.bundleIdentifier)
+                let infoResponseInput = InfoResponseInput(systemName: currentDevice.systemName,
+                                                          systemVersion: currentDevice.systemVersion,
+                                                          appVersion: Bundle.main.infoDictionary?["CFBundleVersion"] as? String,
+                                                          appRelease: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+                                                          deviceName: currentDevice.name,
+                                                          deviceModel: currentDevice.model,
+                                                          libVersion: AutomaticProperties.libVersion(),
+                                                          availableFontFamilies: self.availableFontFamilies(),
+                                                          mainBundleIdentifier: Bundle.main.bundleIdentifier)
+                response = DeviceInfoResponse(infoResponseInput)
             }
             connection.sendMessage(message: response)
         }
@@ -68,33 +69,37 @@ class DeviceInfoRequest: BaseWebSocketMessage {
     }
 }
 
-class DeviceInfoResponse: BaseWebSocketMessage {
-    init(systemName: String,
-         systemVersion: String,
-         appVersion: String?,
-         appRelease: String?,
-         deviceName: String,
-         deviceModel: String,
-         libVersion: String?,
-         availableFontFamilies: [[String: Any]],
-         mainBundleIdentifier: String?) {
-        var payload = [String: AnyObject]()
-        payload["system_name"] = systemName as AnyObject
-        payload["system_version"] = systemVersion as AnyObject
-        payload["device_name"] = deviceName as AnyObject
-        payload["device_model"] = deviceModel as AnyObject
-        payload["available_font_families"] = availableFontFamilies as AnyObject
+struct InfoResponseInput {
+    let systemName: String
+    let systemVersion: String
+    let appVersion: String?
+    let appRelease: String?
+    let deviceName: String
+    let deviceModel: String
+    let libVersion: String?
+    let availableFontFamilies: [[String: Any]]
+    let mainBundleIdentifier: String?
+}
 
-        if let appVersion = appVersion {
+class DeviceInfoResponse: BaseWebSocketMessage {
+    init(_ infoResponse: InfoResponseInput) {
+        var payload = [String: AnyObject]()
+        payload["system_name"] = infoResponse.systemName as AnyObject
+        payload["system_version"] = infoResponse.systemVersion as AnyObject
+        payload["device_name"] = infoResponse.deviceName as AnyObject
+        payload["device_model"] = infoResponse.deviceModel as AnyObject
+        payload["available_font_families"] = infoResponse.availableFontFamilies as AnyObject
+
+        if let appVersion = infoResponse.appVersion {
             payload["app_version"] = appVersion as AnyObject
         }
-        if let appRelease = appRelease {
+        if let appRelease = infoResponse.appRelease {
             payload["app_release"] = appRelease as AnyObject
         }
-        if let libVersion = libVersion {
+        if let libVersion = infoResponse.libVersion {
             payload["lib_version"] = libVersion as AnyObject
         }
-        if let mainBundleIdentifier = mainBundleIdentifier {
+        if let mainBundleIdentifier = infoResponse.mainBundleIdentifier {
             payload["main_bundle_identifier"] = mainBundleIdentifier as AnyObject
         }
 

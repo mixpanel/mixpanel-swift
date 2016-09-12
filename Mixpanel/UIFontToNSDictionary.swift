@@ -1,5 +1,5 @@
 //
-//  UIFontToNSDictionaryTransformer.swift
+//  UIFontToNSDictionary.swift
 //  Mixpanel
 //
 //  Created by Yarden Eitan on 9/6/16.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-@objc(UIFontToNSDictionaryTransformer) class UIFontToNSDictionaryTransformer: ValueTransformer {
+@objc(UIFontToNSDictionary) class UIFontToNSDictionary: ValueTransformer {
     override class func transformedValueClass() -> AnyClass {
         return NSDictionary.self
     }

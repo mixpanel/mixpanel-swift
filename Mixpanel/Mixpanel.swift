@@ -9,7 +9,7 @@
 import Foundation
 
 /// The primary class for integrating Mixpanel with your app.
-public class Mixpanel {
+open class Mixpanel {
 
     /**
      Initializes an instance of the API with the given project token.
@@ -29,10 +29,10 @@ public class Mixpanel {
      - returns: returns a mixpanel instance if needed to keep throughout the project.
      You can always get the instance by calling getInstance(name)
      */
-    public class func initialize(token apiToken: String,
-                                 launchOptions: [NSObject: AnyObject]? = nil,
+    open class func initialize(token apiToken: String,
+                                 launchOptions: [AnyHashable: Any]? = nil,
                                  flushInterval: Double = 60,
-                                 instanceName: String = NSUUID().UUIDString) -> MixpanelInstance {
+                                 instanceName: String = UUID().uuidString) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token:         apiToken,
                                                          launchOptions: launchOptions,
                                                          flushInterval: flushInterval,
@@ -46,7 +46,7 @@ public class Mixpanel {
 
      - returns: returns the mixpanel instance
      */
-    public class func getInstance(name name: String) -> MixpanelInstance? {
+    open class func getInstance(name: String) -> MixpanelInstance? {
         return MixpanelManager.sharedInstance.getInstance(name: name)
     }
 
@@ -57,7 +57,7 @@ public class Mixpanel {
 
      - returns: returns the main Mixpanel instance
      */
-    public class func mainInstance() -> MixpanelInstance {
+    open class func mainInstance() -> MixpanelInstance {
         let instance = MixpanelManager.sharedInstance.getMainInstance()
         if instance == nil {
             fatalError("You have to call initialize(token:) before calling the main instance, " +
@@ -72,7 +72,7 @@ public class Mixpanel {
 
      - parameter name: the instance name
      */
-    public class func setMainInstance(name name: String) {
+    open class func setMainInstance(name: String) {
         MixpanelManager.sharedInstance.setMainInstance(name: name)
     }
 
@@ -81,7 +81,7 @@ public class Mixpanel {
 
      - parameter name: the instance name
      */
-    public class func removeInstance(name name: String) {
+    open class func removeInstance(name: String) {
         MixpanelManager.sharedInstance.removeInstance(name: name)
     }
 
@@ -90,8 +90,8 @@ public class Mixpanel {
 class MixpanelManager {
 
     static let sharedInstance = MixpanelManager()
-    private var instances: [String: MixpanelInstance]
-    private var mainInstance: MixpanelInstance?
+    fileprivate var instances: [String: MixpanelInstance]
+    fileprivate var mainInstance: MixpanelInstance?
 
     init() {
         instances = [String: MixpanelInstance]()
@@ -99,11 +99,11 @@ class MixpanelManager {
     }
 
     func initialize(token apiToken: String,
-                    launchOptions: [NSObject: AnyObject]?,
+                    launchOptions: [AnyHashable: Any]?,
                     flushInterval: Double,
                     instanceName: String) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
-                                        launchOptions: launchOptions,
+                                        launchOptions: launchOptions as [NSObject : Any]?,
                                         flushInterval: flushInterval)
         mainInstance = instance
         instances[instanceName] = instance

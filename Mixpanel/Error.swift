@@ -8,8 +8,8 @@
 
 import Foundation
 
-enum PropertyError: ErrorType {
-    case InvalidType(type: AnyObject)
+enum PropertyError: Error {
+    case invalidType(type: Any)
 }
 
 class Assertions {
@@ -17,7 +17,7 @@ class Assertions {
     static let swiftAssertClosure = { Swift.assert($0, $1, file: $2, line: $3) }
 }
 
-func MPAssert(condition: Bool,
+func MPAssert(_ condition: Bool,
               message: String = "",
               file: StaticString = #file,
               line: UInt = #line) {
@@ -25,7 +25,7 @@ func MPAssert(condition: Bool,
 }
 
 class ErrorHandler {
-    class func wrap<ReturnType>(f: () throws -> ReturnType?) -> ReturnType? {
+    class func wrap<ReturnType>(_ f: () throws -> ReturnType?) -> ReturnType? {
         do {
             return try f()
         } catch let error {
@@ -34,8 +34,8 @@ class ErrorHandler {
         }
     }
 
-    class func logError(error: ErrorType) {
-        let stackSymbols = NSThread.callStackSymbols
+    class func logError(_ error: Error) {
+        let stackSymbols = Thread.callStackSymbols
         Logger.error(message: "Error: \(error) \n Stack Symbols: \(stackSymbols)")
     }
 

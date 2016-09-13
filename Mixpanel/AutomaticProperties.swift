@@ -15,8 +15,8 @@ class AutomaticProperties {
 
     static var properties: Properties = {
         var p = Properties()
-        let size = UIScreen.mainScreen().bounds.size
-        let infoDict = NSBundle.mainBundle().infoDictionary
+        let size = UIScreen.main.bounds.size
+        let infoDict = Bundle.main.infoDictionary
         if let infoDict = infoDict {
             p["$app_build_number"]     = infoDict["CFBundleVersion"]
             p["$app_version_string"]   = infoDict["CFBundleShortVersionString"]
@@ -25,8 +25,8 @@ class AutomaticProperties {
         p["mp_lib"]             = "swift"
         p["$lib_version"]       = AutomaticProperties.libVersion()
         p["$manufacturer"]      = "Apple"
-        p["$os"]                = UIDevice.currentDevice().systemName
-        p["$os_version"]        = UIDevice.currentDevice().systemVersion
+        p["$os"]                = UIDevice.current.systemName
+        p["$os_version"]        = UIDevice.current.systemVersion
         p["$model"]             = AutomaticProperties.deviceModel()
         p["$screen_height"]     = Int(size.height)
         p["$screen_width"]      = Int(size.width)
@@ -35,13 +35,13 @@ class AutomaticProperties {
 
     static var peopleProperties: Properties = {
         var p = Properties()
-        let infoDict = NSBundle.mainBundle().infoDictionary
+        let infoDict = Bundle.main.infoDictionary
         if let infoDict = infoDict {
             p["$ios_app_version"] = infoDict["CFBundleVersion"]
             p["$ios_app_release"] = infoDict["CFBundleShortVersionString"]
         }
         p["$ios_device_model"]  = AutomaticProperties.deviceModel()
-        p["$ios_version"]       = UIDevice.currentDevice().systemVersion
+        p["$ios_version"]       = UIDevice.current.systemVersion
         p["$ios_lib_version"]   = AutomaticProperties.libVersion()
 
         return p
@@ -53,7 +53,7 @@ class AutomaticProperties {
         if radio == nil {
             radio = "None"
         } else if radio!.hasPrefix(prefix) {
-            radio = (radio! as NSString).substringFromIndex(prefix.characters.count)
+            radio = (radio! as NSString).substring(from: prefix.characters.count)
         }
         return radio
     }
@@ -61,17 +61,14 @@ class AutomaticProperties {
     class func deviceModel() -> String {
         var systemInfo = utsname()
         uname(&systemInfo)
-        let modelCode = withUnsafeMutablePointer(&systemInfo.machine) {
-            ptr in String.fromCString(UnsafePointer<CChar>(ptr))
+        let modelCode = withUnsafeMutablePointer(to: &systemInfo.machine) {
+            ptr in String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
         }
-        if let model = modelCode {
-            return model
-        }
-        return ""
+        return modelCode
     }
 
     class func libVersion() -> String? {
-        return NSBundle(forClass: self).infoDictionary?["CFBundleShortVersionString"] as? String
+        return Bundle(for: self).infoDictionary?["CFBundleShortVersionString"] as? String
     }
 
 }

@@ -19,7 +19,7 @@ If you are using Objective-C, we recommend using our **[Objective-C Library](htt
 
 ## Current supported features
 
-| Feature      | Swift 2.3     | [Swift 3 Beta 6](https://github.com/mixpanel/mixpanel-swift/tree/swift3) |
+| Feature      | Swift 2.3     | [Swift 3](https://github.com/mixpanel/mixpanel-swift/tree/swift3) |
 | -------      | ------------- | -------------                                                            |
 | Tracking API |       ✔       |       ✔       |
 | People API   |       ✔       |       ✔       |

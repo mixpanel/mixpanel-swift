@@ -29,7 +29,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
     var delegate: InAppNotificationsDelegate?
 
     func showNotification( _ notification: InAppNotification) {
-        var notification = notification
+        let notification = notification
         if notification.image != nil {
             DispatchQueue.main.async {
                 if self.currentlyShowingNotification != nil {

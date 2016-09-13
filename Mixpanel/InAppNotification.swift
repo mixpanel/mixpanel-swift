@@ -14,15 +14,17 @@ struct InAppNotification {
     let type: String
     let style: String
     let imageURL: URL
-    lazy var image: Data? = {
-        var data: Data?
-        do {
-            data = try Data(contentsOf: self.imageURL, options: [.mappedIfSafe])
-        } catch {
-            Logger.error(message: "image failed to load from url \(self.imageURL)")
+    var image: Data? {
+        get {
+            var data: Data?
+            do {
+                data = try Data(contentsOf: self.imageURL, options: [.mappedIfSafe])
+            } catch {
+                Logger.error(message: "image failed to load from url \(self.imageURL)")
+            }
+            return data
         }
-        return data
-    }()
+    }
     let title: String
     let body: String
     let callToAction: String
@@ -115,7 +117,6 @@ extension InAppNotification {
                   type: type,
                   style: style,
                   imageURL: imageURLParsed,
-                  image: nil,
                   title: title,
                   body: body,
                   callToAction: callToAction,

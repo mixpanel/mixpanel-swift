@@ -40,7 +40,7 @@ struct LogMessage {
     let level: LogLevel
 
     init(path: String, function: String, text: String, level: LogLevel) {
-        if let file = path.componentsSeparatedByString("/").last {
+        if let file = path.components(separatedBy: "/").last {
             self.file = file
         } else {
             self.file = path
@@ -53,23 +53,23 @@ struct LogMessage {
 
 /// Any object that conforms to this protocol may log messages
 protocol Logging {
-    func addMessage(message message: LogMessage)
+    func addMessage(message: LogMessage)
 }
 
 class Logger {
 
-    private static var loggers = [Logging]()
-    private static var enabledLevels = Set<LogLevel>()
+    fileprivate static var loggers = [Logging]()
+    fileprivate static var enabledLevels = Set<LogLevel>()
 
-    class func addLogging(logging: Logging) {
+    class func addLogging(_ logging: Logging) {
         loggers.append(logging)
     }
 
-    class func enableLevel(level: LogLevel) {
+    class func enableLevel(_ level: LogLevel) {
         enabledLevels.insert(level)
     }
 
-    class func disableLevel(level: LogLevel) {
+    class func disableLevel(_ level: LogLevel) {
         enabledLevels.remove(level)
     }
 
@@ -81,7 +81,7 @@ class Logger {
      - parameter path:     file path
      - parameter function: function
      */
-    class func debug(@autoclosure message message: () -> Any, _ path: String = #file, _ function: String = #function) {
+    class func debug(message: @autoclosure () -> Any, _ path: String = #file, _ function: String = #function) {
         guard enabledLevels.contains(.Debug) else { return }
         forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
                                               level: .Debug))
@@ -94,7 +94,7 @@ class Logger {
      - parameter path:     file path
      - parameter function: function
      */
-    class func info(@autoclosure message message: () -> Any, _ path: String = #file, _ function: String = #function) {
+    class func info(  _ message: @autoclosure () -> Any, _ path: String = #file, _ function: String = #function) {
         guard enabledLevels.contains(.Info) else { return }
         forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
                                               level: .Info))
@@ -107,7 +107,7 @@ class Logger {
      - parameter path:     file path
      - parameter function: function
      */
-    class func warn(@autoclosure message message: () -> Any, _ path: String = #file, _ function: String = #function) {
+    class func warn(message: @autoclosure () -> Any, _ path: String = #file, _ function: String = #function) {
         guard enabledLevels.contains(.Warning) else { return }
         forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
                                               level: .Warning))
@@ -120,13 +120,13 @@ class Logger {
      - parameter path:     file path
      - parameter function: function
      */
-    class func error(@autoclosure message message: () -> Any, _ path: String = #file, _ function: String = #function) {
+    class func error(message: @autoclosure () -> Any, _ path: String = #file, _ function: String = #function) {
         guard enabledLevels.contains(.Error) else { return }
         forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
                                                level: .Error))
     }
 
-    class private func forwardLogMessage(message: LogMessage) {
+    class fileprivate func forwardLogMessage(_ message: LogMessage) {
         loggers.forEach() { $0.addMessage(message: message) }
     }
 }

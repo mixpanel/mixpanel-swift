@@ -20,10 +20,10 @@ public protocol MixpanelDelegate {
 
      - returns: return true to upload now or false to defer until later
      */
-    func mixpanelWillFlush(mixpanel: MixpanelInstance) -> Bool
+    func mixpanelWillFlush(_ mixpanel: MixpanelInstance) -> Bool
 }
 
-public typealias Properties = [String: AnyObject]
+public typealias Properties = [String: Any]
 public typealias Queue = [Properties]
 
 protocol AppLifecycle {
@@ -32,24 +32,24 @@ protocol AppLifecycle {
 }
 
 /// The class that represents the Mixpanel Instance
-public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
+open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
     /// The a MixpanelDelegate object that gives control over Mixpanel network activity.
-    public var delegate: MixpanelDelegate?
+    open var delegate: MixpanelDelegate?
 
     /// distinctId string that uniquely identifies the current user.
-    public var distinctId = ""
+    open var distinctId = ""
 
     /// Accessor to the Mixpanel People API object.
-    public var people: People!
+    open var people: People!
 
     /// Controls whether to show spinning network activity indicator when flushing
     /// data to the Mixpanel servers. Defaults to true.
-    public var showNetworkActivityIndicator = true
+    open var showNetworkActivityIndicator = true
 
     /// Flush timer's interval.
     /// Setting a flush interval of 0 will turn off the flush timer.
-    public var flushInterval: Double {
+    open var flushInterval: Double {
         set {
             flushInstance.flushInterval = newValue
         }
@@ -60,7 +60,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
     /// Control whether the library should flush data to Mixpanel when the app
     /// enters the background. Defaults to true.
-    public var flushOnBackground: Bool {
+    open var flushOnBackground: Bool {
         set {
             flushInstance.flushOnBackground = newValue
         }
@@ -72,7 +72,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     /// Controls whether to automatically send the client IP Address as part of
     /// event tracking. With an IP address, the Mixpanel Dashboard will show you the users' city.
     /// Defaults to true.
-    public var useIPAddressForGeoLocation: Bool {
+    open var useIPAddressForGeoLocation: Bool {
         set {
             flushInstance.useIPAddressForGeoLocation = newValue
         }
@@ -84,7 +84,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     /// The base URL used for Mixpanel API requests.
     /// Useful if you need to proxy Mixpanel requests. Defaults to
     /// https://api.mixpanel.com.
-    public var serverURL: String {
+    open var serverURL: String {
         set {
             BasePath.MixpanelAPI = newValue
         }
@@ -96,7 +96,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     /// This allows enabling or disabling of all Mixpanel logs at run time.
     /// - note: All logging is disabled by default. Usually, this is only required
     ///         if you are running in to issues with the SDK and you need support.
-    public var loggingEnabled: Bool = false {
+    open var loggingEnabled: Bool = false {
         didSet {
             if loggingEnabled {
                 Logger.enableLevel(.Debug)
@@ -104,9 +104,9 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                 Logger.enableLevel(.Warning)
                 Logger.enableLevel(.Error)
 
-                Logger.info(message: "Logging Enabled")
+                Logger.info("Logging Enabled")
             } else {
-                Logger.info(message: "Logging Disabled")
+                Logger.info("Logging Disabled")
 
                 Logger.disableLevel(.Debug)
                 Logger.disableLevel(.Info)
@@ -117,7 +117,7 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     }
 
     /// A textual representation of MixpanelInstance, suitable for debugging
-    public var debugDescription: String {
+    open var debugDescription: String {
         return "Mixpanel(\n"
         + "    Token: \(apiToken),\n"
         + "    Events Queue Count: \(eventsQueue.count),\n"
@@ -129,19 +129,19 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     var superProperties = Properties()
     var eventsQueue = Queue()
     var timedEvents = Properties()
-    var serialQueue: dispatch_queue_t!
+    var serialQueue: DispatchQueue!
     var taskId = UIBackgroundTaskInvalid
     let flushInstance = Flush()
     let trackInstance: Track
 
-    init(apiToken: String?, launchOptions: [NSObject: AnyObject]?, flushInterval: Double) {
-        if let apiToken = apiToken where !apiToken.isEmpty {
+    init(apiToken: String?, launchOptions: [AnyHashable: Any]?, flushInterval: Double) {
+        if let apiToken = apiToken , !apiToken.isEmpty {
             self.apiToken = apiToken
         }
         trackInstance = Track(apiToken: self.apiToken)
         flushInstance.delegate = self
         let label = "com.mixpanel.\(self.apiToken)"
-        serialQueue = dispatch_queue_create(label, DISPATCH_QUEUE_SERIAL)
+        serialQueue = DispatchQueue(label: label, attributes: [])
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
                         serialQueue: serialQueue)
@@ -151,71 +151,70 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         unarchive()
 
         if let notification =
-            launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? [NSObject : AnyObject] {
+            launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
             trackPushNotification(notification, event: "$app_open")
         }
     }
 
-    private func setupListeners() {
-        let notificationCenter = NSNotificationCenter.defaultCenter()
+    fileprivate func setupListeners() {
+        let notificationCenter = NotificationCenter.default
 
         trackIntegration()
         setCurrentRadio()
         notificationCenter.addObserver(self,
                                        selector: #selector(setCurrentRadio),
-                                       name: CTRadioAccessTechnologyDidChangeNotification,
+                                       name: NSNotification.Name.CTRadioAccessTechnologyDidChange,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillTerminate(_:)),
-                                       name: UIApplicationWillTerminateNotification,
+                                       name: NSNotification.Name.UIApplicationWillTerminate,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillResignActive(_:)),
-                                       name: UIApplicationWillResignActiveNotification,
+                                       name: NSNotification.Name.UIApplicationWillResignActive,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationDidBecomeActive(_:)),
-                                       name: UIApplicationDidBecomeActiveNotification,
+                                       name: NSNotification.Name.UIApplicationDidBecomeActive,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationDidEnterBackground(_:)),
-                                       name: UIApplicationDidEnterBackgroundNotification,
+                                       name: NSNotification.Name.UIApplicationDidEnterBackground,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillEnterForeground(_:)),
-                                       name: UIApplicationWillEnterForegroundNotification,
+                                       name: NSNotification.Name.UIApplicationWillEnterForeground,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(appLinksNotificationRaised(_:)),
-                                       name: "com.parse.bolts.measurement_event",
+                                       name: NSNotification.Name(rawValue: "com.parse.bolts.measurement_event"),
                                        object: nil)
     }
 
     deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
 
-    @objc private func applicationDidBecomeActive(notification: NSNotification) {
+    @objc fileprivate func applicationDidBecomeActive(_ notification: Notification) {
         flushInstance.applicationDidBecomeActive()
     }
 
-    @objc private func applicationWillResignActive(notification: NSNotification) {
+    @objc fileprivate func applicationWillResignActive(_ notification: Notification) {
         flushInstance.applicationWillResignActive()
     }
 
-    @objc private func applicationDidEnterBackground(notification: NSNotification) {
-        let sharedApplication = UIApplication.sharedApplication()
+    @objc fileprivate func applicationDidEnterBackground(_ notification: Notification) {
+        let sharedApplication = UIApplication.shared
 
-        taskId = sharedApplication.beginBackgroundTaskWithExpirationHandler() {
+        taskId = sharedApplication.beginBackgroundTask {
             self.taskId = UIBackgroundTaskInvalid
         }
-
 
         if flushOnBackground {
             flush()
         }
 
-        dispatch_async(serialQueue) {
+        serialQueue.async {
             self.archive()
 
             if self.taskId != UIBackgroundTaskInvalid {
@@ -225,31 +224,31 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
 
-    @objc private func applicationWillEnterForeground(notification: NSNotification) {
-        dispatch_async(serialQueue) {
+    @objc fileprivate func applicationWillEnterForeground(_ notification: Notification) {
+        serialQueue.async {
             if self.taskId != UIBackgroundTaskInvalid {
-                UIApplication.sharedApplication().endBackgroundTask(self.taskId)
+                UIApplication.shared.endBackgroundTask(self.taskId)
                 self.taskId = UIBackgroundTaskInvalid
                 self.updateNetworkActivityIndicator(false)
             }
         }
     }
 
-    @objc private func applicationWillTerminate(notification: NSNotification) {
-        dispatch_async(serialQueue) {
+    @objc fileprivate func applicationWillTerminate(_ notification: Notification) {
+        serialQueue.async {
             self.archive()
         }
     }
 
-    @objc private func appLinksNotificationRaised(notification: NSNotification) {
+    @objc fileprivate func appLinksNotificationRaised(_ notification: Notification) {
         let eventMap = ["al_nav_out": "$al_nav_out",
                         "al_nav_in": "$al_nav_in",
                         "al_ref_back_out": "$al_ref_back_out"]
-        let userInfo = notification.userInfo
+        let userInfo = (notification as NSNotification).userInfo
 
         if let eventName = userInfo?["event_name"] as? String,
-            eventArgs = userInfo?["event_args"] as? Properties,
-            eventNameMap = eventMap[eventName] {
+            let eventArgs = userInfo?["event_args"] as? Properties,
+            let eventNameMap = eventMap[eventName] {
             track(event: eventNameMap, properties:eventArgs)
         }
     }
@@ -257,25 +256,25 @@ public class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     func defaultDistinctId() -> String {
         var distinctId: String?
         if NSClassFromString("UIDevice") != nil {
-            distinctId = UIDevice.currentDevice().identifierForVendor?.UUIDString
+            distinctId = UIDevice.current.identifierForVendor?.uuidString
         }
 
         guard let distId = distinctId else {
-            return NSUUID().UUIDString
+            return UUID().uuidString
         }
 
         return distId
     }
 
-    func updateNetworkActivityIndicator(on: Bool) {
+    func updateNetworkActivityIndicator(_ on: Bool) {
         if showNetworkActivityIndicator {
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = on
+            UIApplication.shared.isNetworkActivityIndicatorVisible = on
         }
     }
 
     @objc func setCurrentRadio() {
         let currentRadio = AutomaticProperties.getCurrentRadio()
-        dispatch_async(serialQueue) {
+        serialQueue.async {
             AutomaticProperties.properties["$radio"] = currentRadio
         }
     }
@@ -308,13 +307,13 @@ extension MixpanelInstance {
 
      - parameter distinctId: string that uniquely identifies the current user
      */
-    public func identify(distinctId distinctId: String) {
+    public func identify(distinctId: String) {
         if distinctId.isEmpty {
             Logger.error(message: "\(self) cannot identify blank distinct id")
             return
         }
 
-        dispatch_async(serialQueue) {
+        serialQueue.async {
             self.distinctId = distinctId
             self.people.distinctId = distinctId
             if !self.people.unidentifiedQueue.isEmpty {
@@ -350,7 +349,7 @@ extension MixpanelInstance {
      - parameter alias:      the new distinct id that should represent the original
      - parameter distinctId: the old distinct id that alias will be mapped to
      */
-    public func createAlias(alias: String, distinctId: String) {
+    public func createAlias(_ alias: String, distinctId: String) {
         if distinctId.isEmpty {
             Logger.error(message: "\(self) cannot identify blank distinct id")
             return
@@ -363,7 +362,7 @@ extension MixpanelInstance {
 
         let properties = ["distinct_id": distinctId, "alias": alias]
         track(event: "$create_alias",
-              properties: properties)
+              properties: properties as Properties?)
         flush()
     }
 
@@ -372,7 +371,7 @@ extension MixpanelInstance {
      Useful if your app's user logs out.
      */
     public func reset() {
-        dispatch_async(serialQueue) {
+        serialQueue.async {
             self.distinctId = self.defaultDistinctId()
             self.superProperties = Properties()
             self.eventsQueue = Queue()
@@ -437,13 +436,13 @@ extension MixpanelInstance {
 
     func trackIntegration() {
         let defaultsKey = "trackedKey"
-        if !NSUserDefaults.standardUserDefaults().boolForKey(defaultsKey) {
-            dispatch_async(serialQueue) {
+        if !UserDefaults.standard.bool(forKey: defaultsKey) {
+            serialQueue.async {
                 Network.trackIntegration(apiToken: self.apiToken) {
                     (success) in
                     if success {
-                        NSUserDefaults.standardUserDefaults().setBool(true, forKey: defaultsKey)
-                        NSUserDefaults.standardUserDefaults().synchronize()
+                        UserDefaults.standard.set(true, forKey: defaultsKey)
+                        UserDefaults.standard.synchronize()
                     }
                 }
             }
@@ -464,9 +463,9 @@ extension MixpanelInstance {
 
      - parameter completion: an optional completion handler for when the flush has completed.
      */
-    public func flush(completion completion: (() -> Void)? = nil) {
-        dispatch_async(serialQueue) {
-            if let shouldFlush = self.delegate?.mixpanelWillFlush(self) where !shouldFlush {
+    public func flush(completion: (() -> Void)? = nil) {
+        serialQueue.async {
+            if let shouldFlush = self.delegate?.mixpanelWillFlush(self) , !shouldFlush {
                 return
             }
 
@@ -475,7 +474,7 @@ extension MixpanelInstance {
             self.archive()
 
             if let completion = completion {
-                dispatch_async(dispatch_get_main_queue(), completion)
+                DispatchQueue.main.async(execute: completion)
             }
         }
     }
@@ -490,15 +489,15 @@ extension MixpanelInstance {
 
      Properties will allow you to segment your events in your Mixpanel reports.
      Property keys must be String objects and the supported value types are:
-     String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.
+     String, Int, UInt, Double, Float, [Any], [String: Any], Date, URL, and NSNull.
      If the event is being timed, the timer will stop and be added as a property.
 
      - parameter event:      event name
      - parameter properties: properties dictionary
      */
-    public func track(event event: String?, properties: Properties? = nil) {
-        let epochInterval = NSDate().timeIntervalSince1970
-        dispatch_async(serialQueue) {
+    public func track(event: String?, properties: Properties? = nil) {
+        let epochInterval = Date().timeIntervalSince1970
+        serialQueue.async {
             self.trackInstance.track(event: event,
                                      properties: properties,
                                      eventsQueue: &self.eventsQueue,
@@ -522,15 +521,15 @@ extension MixpanelInstance {
      - parameter event:    optional, and usually shouldn't be used,
      unless the results is needed to be tracked elsewhere.
      */
-    public func trackPushNotification(userInfo: [NSObject: AnyObject],
+    public func trackPushNotification(_ userInfo: [AnyHashable: Any],
                                       event: String = "$campaign_received") {
         if let mpPayload = userInfo["mp"] as? Properties {
-            if let m = mpPayload["m"], c = mpPayload["c"] {
+            if let m = mpPayload["m"], let c = mpPayload["c"] {
                 let properties = ["campaign_id": c,
                                   "message_id": m,
-                                  "message_type": "push"]
+                                  "message_type": "push"] as [String : Any]
                 self.track(event: event,
-                           properties: properties)
+                           properties: properties as Properties?)
             } else {
                 Logger.error(message: "malformed mixpanel push payload")
             }
@@ -559,9 +558,9 @@ extension MixpanelInstance {
      - parameter event: the event name to be timed
 
      */
-    public func time(event event: String) {
-        let startTime = NSDate().timeIntervalSince1970
-        dispatch_async(serialQueue) {
+    public func time(event: String) {
+        let startTime = Date().timeIntervalSince1970
+        (serialQueue).async {
             self.trackInstance.time(event: event,
                                     timedEvents: &self.timedEvents,
                                     startTime: startTime)
@@ -572,7 +571,7 @@ extension MixpanelInstance {
      Clears all current event timers.
      */
     public func clearTimedEvents() {
-        dispatch_async(serialQueue) {
+        (serialQueue).async {
             self.trackInstance.clearTimedEvents(&self.timedEvents)
         }
     }
@@ -602,11 +601,11 @@ extension MixpanelInstance {
      all event tracking calls. They save you having to maintain and add a common
      set of properties to your events.
      Property keys must be String objects and the supported value types are:
-     String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.
+     String, Int, UInt, Double, Float, [Any], [String: Any], Date, URL, and NSNull.
 
      - parameter properties: properties dictionary
      */
-    public func registerSuperProperties(properties: Properties) {
+    public func registerSuperProperties(_ properties: Properties) {
         dispatchAndTrack() {
             self.trackInstance.registerSuperProperties(properties,
                                                        superProperties: &self.superProperties)
@@ -618,13 +617,13 @@ extension MixpanelInstance {
      unless the existing value is equal to defaultValue. defaultValue is optional.
 
      Property keys must be String objects and the supported value types are:
-     String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.
+     String, Int, UInt, Double, Float, [Any], [String: Any], Date, URL, and NSNull.
 
      - parameter properties:   properties dictionary
      - parameter defaultValue: Optional. overwrite existing properties that have this value
      */
-    public func registerSuperPropertiesOnce(properties: Properties,
-                                            defaultValue: AnyObject? = nil) {
+    public func registerSuperPropertiesOnce(_ properties: Properties,
+                                            defaultValue: Any? = nil) {
         dispatchAndTrack() {
             self.trackInstance.registerSuperPropertiesOnce(properties,
                                                            superProperties: &self.superProperties,
@@ -646,15 +645,15 @@ extension MixpanelInstance {
 
      - parameter propertyName: array of property name strings to remove
      */
-    public func unregisterSuperProperty(propertyName: String) {
+    public func unregisterSuperProperty(_ propertyName: String) {
         dispatchAndTrack() {
             self.trackInstance.unregisterSuperProperty(propertyName,
                                                        superProperties: &self.superProperties)
         }
     }
 
-    func dispatchAndTrack(closure: () -> ()) {
-        dispatch_async(serialQueue) {
+    func dispatchAndTrack(_ closure: @escaping () -> ()) {
+        serialQueue.async {
             closure()
             self.archiveProperties()
         }

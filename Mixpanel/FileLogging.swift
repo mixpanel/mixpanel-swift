@@ -10,13 +10,13 @@ import Foundation
 
 /// Logs all messages to a file
 class FileLogging: Logging {
-    private let fileHandle: NSFileHandle
+    fileprivate let fileHandle: FileHandle
 
     init(path: String) {
-        if let handle = NSFileHandle(forWritingAtPath: path) {
+        if let handle = FileHandle(forWritingAtPath: path) {
             fileHandle = handle
         } else {
-            fileHandle = .fileHandleWithStandardError()
+            fileHandle = .standardError
         }
 
         // Move to the end of the file so we can append messages
@@ -28,12 +28,12 @@ class FileLogging: Logging {
         fileHandle.closeFile()
     }
 
-    func addMessage(message message: LogMessage) {
+    func addMessage(message: LogMessage) {
         let string = "File: \(message.file) - Func: \(message.function) - " +
                      "Level: \(message.level.rawValue) - Message: \(message.text)"
-        if let data = string.dataUsingEncoding(NSUTF8StringEncoding) {
+        if let data = string.data(using: String.Encoding.utf8) {
             // Write the message as data to the file
-            fileHandle.writeData(data)
+            fileHandle.write(data)
         }
     }
 }

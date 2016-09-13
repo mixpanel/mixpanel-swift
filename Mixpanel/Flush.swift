@@ -9,13 +9,13 @@
 import Foundation
 
 protocol FlushDelegate {
-    func flush(completion completion: (() -> Void)?)
-    func updateNetworkActivityIndicator(on: Bool)
+    func flush(completion: (() -> Void)?)
+    func updateNetworkActivityIndicator(_ on: Bool)
 }
 
 class Flush: AppLifecycle {
 
-    var timer: NSTimer?
+    var timer: Timer?
     var delegate: FlushDelegate?
     var useIPAddressForGeoLocation = true
     var flushRequest = FlushRequest()
@@ -38,15 +38,15 @@ class Flush: AppLifecycle {
         }
     }
 
-    func flushEventsQueue(inout eventsQueue: Queue) {
+    func flushEventsQueue(_ eventsQueue: inout Queue) {
         flushQueue(type: .Events, queue: &eventsQueue)
     }
 
-    func flushPeopleQueue(inout peopleQueue: Queue) {
+    func flushPeopleQueue(_ peopleQueue: inout Queue) {
         flushQueue(type: .People, queue: &peopleQueue)
     }
 
-    func flushQueue(type type: FlushType, inout queue: Queue) {
+    func flushQueue(type: FlushType, queue: inout Queue) {
         if flushRequest.requestNotAllowed() {
             return
         }
@@ -56,8 +56,8 @@ class Flush: AppLifecycle {
     func startFlushTimer() {
         stopFlushTimer()
         if self.flushInterval > 0 {
-            dispatch_async(dispatch_get_main_queue()) {
-                self.timer = NSTimer.scheduledTimerWithTimeInterval(self.flushInterval,
+            DispatchQueue.main.async {
+                self.timer = Timer.scheduledTimer(timeInterval: self.flushInterval,
                                                   target: self,
                                                   selector: #selector(self.flushSelector),
                                                   userInfo: nil,
@@ -72,22 +72,22 @@ class Flush: AppLifecycle {
 
     func stopFlushTimer() {
         if let timer = self.timer {
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 timer.invalidate()
                 self.timer = nil
             }
         }
     }
 
-    func flushQueueInBatches(inout queue: Queue, type: FlushType) {
+    func flushQueueInBatches(_ queue: inout Queue, type: FlushType) {
         while !queue.isEmpty {
             var shouldContinue = false
             let batchSize = min(queue.count, APIConstants.batchSize)
             let range = 0..<batchSize
             let batch = Array(queue[range])
-            let requestData = JSONHandler.encodeAPIData(batch)
+            let requestData = JSONHandler.encodeAPIData(batch as JSONHandler.MPObjectToParse)
             if let requestData = requestData {
-                let semaphore = dispatch_semaphore_create(0)
+                let semaphore = DispatchSemaphore(value: 0)
                 delegate?.updateNetworkActivityIndicator(true)
                 var shadowQueue = queue
                 flushRequest.sendRequest(requestData,
@@ -96,12 +96,12 @@ class Flush: AppLifecycle {
                                          completion: { success in
                                             self.delegate?.updateNetworkActivityIndicator(false)
                                             if success {
-                                                shadowQueue.removeRange(range)
+                                                shadowQueue.removeSubrange(range)
                                             }
                                             shouldContinue = success
-                                            dispatch_semaphore_signal(semaphore)
+                                            semaphore.signal()
                 })
-                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                let _ = semaphore.wait(timeout: DispatchTime(uptimeNanoseconds: DispatchTime.distantFuture.uptimeNanoseconds))
                 queue = shadowQueue
             }
 

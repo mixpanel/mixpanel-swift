@@ -38,7 +38,6 @@ extension UIView {
 
     func mp_encryptHelper(input: String?) -> NSString? {
         let SALT = "1l0v3c4a8s4n018cl3d93kxled3kcle3j19384jdo2dk3"
-        //var encryptedStuff: String? = nil
         if let input = input {
             return (input + SALT) as NSString
         }
@@ -60,7 +59,7 @@ extension UIView {
 
                 for (_, attr) in mirrored_object.children.enumerated() {
                     if let property_name = attr.label {
-                        if let value = attr.value as? UIView, value == self { //TODO:value type??
+                        if let value = attr.value as? UIView, value == self {
                             return property_name
                         }
                     }

@@ -14,10 +14,8 @@ class WebSocketWrapper: WebSocketDelegate {
     static let finishLoadingAnimationKey = "connectivtyBarFinished"
     var open: Bool
     var connected: Bool
-    //let sessionEnded: Bool
     let url: URL
     var session: [String: Any]
-    //let typeToMessageClassMap: Dictionary
     let webSocket: WebSocket
     let commandQueue: OperationQueue
     var recordingView: UIView? = nil
@@ -38,7 +36,6 @@ class WebSocketWrapper: WebSocketDelegate {
     init(url: URL, keepTrying: Bool, connectCallback: (() -> Void)?, disconnectCallback: (() -> Void)?) {
         open = false
         connected = false
-        //sessionEnded = false
         session = [String: Any]()
         self.url = url
         self.connectCallback = connectCallback
@@ -72,10 +69,6 @@ class WebSocketWrapper: WebSocketDelegate {
         return session[key]
     }
 
- //   convenience init(url: URL) {
- //       self.init(url: url, keepTrying: false, connectCallback: nil, disconnectCallback: nil)
- //   }
-
     func open(initiate: Bool, maxInterval: Int = 0, maxRetries: Int = 0) {
         var retries = 0
 
@@ -103,14 +96,6 @@ class WebSocketWrapper: WebSocketDelegate {
 
     func close() {
         webSocket.disconnect()
-    //    for value in session {
-    //        value
-    //    }
-    }
-
-    func dealloc() {
-        webSocket.delegate = nil
-        close()
     }
 
     func sendMessage(message: BaseWebSocketMessage?) {

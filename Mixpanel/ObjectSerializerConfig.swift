@@ -204,8 +204,6 @@ class PropertyDescription {
     }
 
     class func valueTransformerForType(typeName: String) -> ValueTransformer? {
-        //YAR: TODO, SWIFT TYPES??
-        //print("type name!!?: \(typeName)")
         for toTypeName in ["NSDictionary", "NSNumber", "NSString"] {
             let toTransformerName = NSValueTransformerName(rawValue: "\(typeName)To\(toTypeName)")
             if let toTransformer = ValueTransformer(forName: toTransformerName) {

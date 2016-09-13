@@ -53,7 +53,6 @@ class ObjectSerializer {
                 typealias MyCFunction = @convention(c) (AnyObject, Selector) -> AnyObject
                 let curriedImplementation = unsafeBitCast(imp, to: MyCFunction.self)
                 delegate = curriedImplementation(object, delegateSelector)
-                //getMethods(object: delegate!)
                 for delegateInfo in classDescription.delegateInfos {
                     if let selectorName = delegateInfo.selectorName,
                        let respondsToDelegate = delegate?.responds(to: NSSelectorFromString(selectorName)), respondsToDelegate {
@@ -71,20 +70,6 @@ class ObjectSerializer {
                                ] as [String : Any]
 
         context.addSerializedObject(serializedObject)
-    }
-
-    func getMethods(object: AnyObject) {
-        var mc: CUnsignedInt = 0
-        var mlist: UnsafeMutablePointer<Method?> = class_copyMethodList(type(of: object), &mc)
-        let olist = mlist
-        print("\(mc) methods")
-
-        for i: CUnsignedInt in 0..<mc {
-            print("Method #\(i): \(method_getName(mlist.pointee))")
-
-            mlist = mlist.successor()
-        }
-        free(olist)
     }
 
     func getClassHierarchyArray(object: AnyObject) -> [String] {
@@ -115,41 +100,6 @@ class ObjectSerializer {
         }
         return variations
     }
-
-    func getInstanceVariableValue(object: inout AnyObject, propertyDescription: PropertyDescription) -> Any? {
-        if let propertyDescName = propertyDescription.name,
-            let ivar = class_getInstanceVariable(type(of: object), propertyDescName) {
-            let objCType = String(cString: ivar_getTypeEncoding(ivar))
-            let ivarOffset = ivar_getOffset(ivar)
-            let objectBaseAddress = withUnsafePointer(to: &object) {
-                return $0
-            }
-            let ivarAddress = objectBaseAddress + ivarOffset
-
-            switch objCType {
-            case "@": return object_getIvar(object, ivar)
-            case "c": return ivarAddress
-            case "C": return ivarAddress
-            case "s": return ivarAddress
-            case "S": return ivarAddress
-            case "i": return ivarAddress
-            case "I": return ivarAddress
-            case "l": return ivarAddress
-            case "L": return ivarAddress
-            case "q": return ivarAddress
-            case "Q": return ivarAddress
-            case "f": return ivarAddress
-            case "d": return ivarAddress
-            case "B": return ivarAddress
-            case ":": return ivarAddress
-            default: return nil
-            }
-        }
-        return nil
-    }
-
-   // func getInvocation(object: AnyObject, selectorDescription: PropertySelectorDescription) -> NSInvocation {
-   // }
 
     func getTransformedValue(propertyValue: Any?, propertyDescription: PropertyDescription, context: ObjectSerializerContext) -> Any? {
         if let propertyValue = propertyValue {

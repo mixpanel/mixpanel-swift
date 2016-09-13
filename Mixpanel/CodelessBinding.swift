@@ -16,25 +16,6 @@ class CodelessBinding: NSObject, NSCoding {
     var swizzleClass: AnyClass!
     var running: Bool
 
-    //convenience init(object: [String: Any]) {
-    //    if let bindingType = object["event_type"] as? String {
-    //        return subclassFromString(bindingType: bindingType)
-    //    }
-    //}
-
-   // func subclassFromString(bindingType: String) -> CodelessBinding {
-   //     if let bindingTypeEnum = BindingType.init(rawValue: bindingType) {
-   //         switch bindingTypeEnum {
-   //         case .controlBinding:
-   //             return UIControlBinding()
-   //         case .tableViewBinding:
-   //             return UITableViewBinding()
-   //         default: break
-    //        }
-   //     }
-   //     return UIControlBinding()
-   // }
-
     init(eventName: String, path: String) {
         self.eventName = eventName
         self.path = ObjectSelector(string: path)
@@ -90,7 +71,6 @@ class CodelessBinding: NSObject, NSCoding {
     func track(event: String, properties: Properties) {
         var bindingProperties = properties
         bindingProperties["$from_binding"] = true
-        //TODO: not call mainInstance from inside the lib?
         Mixpanel.mainInstance().track(event: event, properties: bindingProperties)
     }
 

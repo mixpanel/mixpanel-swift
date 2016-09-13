@@ -117,18 +117,7 @@ class SnapshotResponse: BaseWebSocketMessage {
     }
 
     func getImageHash(imageData: Data) -> String {
-        let imageHash = imageData.md5().toHexString()
-        return imageHash
-        //let array = imageData.withUnsafeBytes {
-        //    [UInt8](UnsafeBufferPointer(start: $0, count: imageData.count))
-        //}
-
-        //let hash = NSMutableString()
-        //for i in 0..<16 {
-        //    hash.appendFormat("%02X", array[i])
-        //}
-
-        //return hash as String
+        return imageData.md5().toHexString()
     }
 
 }

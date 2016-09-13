@@ -9,8 +9,8 @@
 import Foundation
 
 enum FlushType: String {
-    case Events = "/track/"
-    case People = "/engage/"
+    case events = "/track/"
+    case people = "/engage/"
 }
 
 class FlushRequest: Network {
@@ -35,7 +35,7 @@ class FlushRequest: Network {
             .data(using: String.Encoding.utf8)
 
         let resource = Network.buildResource(path: type.rawValue,
-                                             method: RequestMethod.POST,
+                                             method: .post,
                                              requestBody: requestBody,
                                              headers: ["Accept-Encoding": "gzip"],
                                              parse: responseParser)

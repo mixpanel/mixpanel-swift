@@ -20,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Mixpanel.initialize(token: "268525e44755e92cdd3e2ee0b4337f4a")
         Mixpanel.mainInstance().loggingEnabled = true
         Mixpanel.mainInstance().flushInterval = 5
+        //Mixpanel.mainInstance().enableVisualEditorForCodeless = false
 
         let settings = UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
         UIApplication.shared.registerUserNotificationSettings(settings)

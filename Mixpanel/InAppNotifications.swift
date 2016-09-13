@@ -14,8 +14,8 @@ protocol InAppNotificationsDelegate {
 }
 
 enum InAppType: String {
-    case Mini = "mini"
-    case Takeover = "takeover"
+    case mini = "mini"
+    case takeover = "takeover"
 }
 
 class InAppNotifications: NotificationViewControllerDelegate {
@@ -36,7 +36,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
                     Logger.warn(message: "already showing an in-app notification")
                 } else {
                     var shownNotification = false
-                    if notification.type == InAppType.Mini.rawValue {
+                    if notification.type == InAppType.mini.rawValue {
                         shownNotification = self.showMiniNotification(notification)
                     } else {
                         shownNotification = self.showTakeoverNotification(notification)

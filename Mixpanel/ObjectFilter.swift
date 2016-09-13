@@ -26,13 +26,13 @@ class ObjectFilter: CustomStringConvertible {
     }
 
 
-    func apply(views: [AnyObject]) -> [AnyObject] {
+    func apply(on views: [AnyObject]) -> [AnyObject] {
         var result = [AnyObject]()
 
         let currentClass: AnyClass? = NSClassFromString(name!)
         if currentClass != nil || name == "*" {
             for view in views {
-                var children = getChildren(object: view, searchClass: currentClass)
+                var children = getChildren(of: view, searchClass: currentClass)
                 if let index = index, index < children.count {
                     if view.isKind(of: UIView.self) {
                         children = [children[index]]
@@ -52,11 +52,11 @@ class ObjectFilter: CustomStringConvertible {
      matches this filter's class / predicate pattern, return
      its parents.
      */
-    func applyReverse(views: [AnyObject]) -> [AnyObject] {
+    func applyReverse(on views: [AnyObject]) -> [AnyObject] {
         var result = [AnyObject]()
         for view in views {
-            if appliesTo(view: view) {
-                result += getParents(object: view)
+            if doesApply(on: view) {
+                result += getParents(of: view)
             }
         }
         return result
@@ -65,11 +65,11 @@ class ObjectFilter: CustomStringConvertible {
     /*
      Returns whether the given view would pass this filter.
      */
-    func appliesTo(view: AnyObject) -> Bool {
+    func doesApply(on view: AnyObject) -> Bool {
         let typeValidation = name == "*" || (name != nil && view.isKind(of: NSClassFromString(name!)!))
         let predicateValidation = predicate == nil || predicate!.evaluate(with: view)
-        let indexValidation = index == nil || isSibling(view: view, at: index!)
-        let uniqueValidation = !unique || isSibling(view: view, of: 1)
+        let indexValidation = index == nil || isSibling(view, at: index!)
+        let uniqueValidation = !unique || isSibling(view, of: 1)
 
         return typeValidation && (nameOnly || (predicateValidation && indexValidation && uniqueValidation))
     }
@@ -77,9 +77,9 @@ class ObjectFilter: CustomStringConvertible {
     /*
      Returns whether any of the given views would pass this filter
      */
-    func appliesToAny(views: [AnyObject]) -> Bool {
+    func doesApply(on views: [AnyObject]) -> Bool {
         for view in views {
-            if appliesTo(view: view) {
+            if doesApply(on: view) {
                 return true
             }
         }
@@ -90,23 +90,23 @@ class ObjectFilter: CustomStringConvertible {
      Returns true if the given view is at the index given by number in
      its parent's subviews. The view's parent must be of type UIView
      */
-    func isSibling(view: AnyObject, at index: Int) -> Bool {
-        return isSibling(view: view, at: index, of: nil)
+    func isSibling(_ view: AnyObject, at index: Int) -> Bool {
+        return isSibling(view, at: index, of: nil)
     }
 
-    func isSibling(view: AnyObject, of count: Int) -> Bool {
-        return isSibling(view: view, at: nil, of: count)
+    func isSibling(_ view: AnyObject, of count: Int) -> Bool {
+        return isSibling(view, at: nil, of: count)
     }
 
-    func isSibling(view: AnyObject, at index: Int?, of count: Int?) -> Bool {
+    func isSibling(_ view: AnyObject, at index: Int?, of count: Int?) -> Bool {
         guard let name = name else {
             return false
         }
 
-        let parents = self.getParents(object: view)
+        let parents = self.getParents(of: view)
         for parent in parents {
             if let parent = parent as? UIView {
-                let siblings = getChildren(object: parent, searchClass: NSClassFromString(name))
+                let siblings = getChildren(of: parent, searchClass: NSClassFromString(name))
                 if index == nil || (index! < siblings.count && siblings[index!] === view) && (count == nil || siblings.count == count!) {
                     return true
                 }
@@ -115,7 +115,7 @@ class ObjectFilter: CustomStringConvertible {
         return false
     }
 
-    func getParents(object: AnyObject) -> [AnyObject] {
+    func getParents(of object: AnyObject) -> [AnyObject] {
         var result = [AnyObject]()
 
         if let object = object as? UIView {
@@ -142,7 +142,7 @@ class ObjectFilter: CustomStringConvertible {
         return result
     }
 
-    func getChildren(object: AnyObject, searchClass: AnyClass?) -> [AnyObject] {
+    func getChildren(of object: AnyObject, searchClass: AnyClass?) -> [AnyObject] {
         var children = [AnyObject]()
 
         if let window = object as? UIWindow,

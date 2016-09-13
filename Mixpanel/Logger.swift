@@ -12,16 +12,16 @@ import Foundation
 /// showing different logging levels at run time depending on the environment
 enum LogLevel: String {
     /// Logging displays *all* logs and additional debug information that may be useful to a developer
-    case Debug
+    case debug
 
     /// Logging displays *all* logs (**except** debug)
-    case Info
+    case info
 
     /// Logging displays *only* warnings and above
-    case Warning
+    case warning
 
     /// Logging displays *only* errors and above
-    case Error
+    case error
 }
 
 /// This holds all the data for each log message, since the formatting is up to each
@@ -78,33 +78,33 @@ class Logger {
     /// debug: Adds a debug message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
     class func debug(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
-        guard enabledLevels.contains(.Debug) else { return }
+        guard enabledLevels.contains(.debug) else { return }
         forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
-                                              level: .Debug))
+                                              level: .debug))
     }
 
     /// info: Adds an informational message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
     class func info(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
-        guard enabledLevels.contains(.Info) else { return }
+        guard enabledLevels.contains(.info) else { return }
         forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
-                                              level: .Info))
+                                              level: .info))
     }
 
     /// warn: Adds a warning message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
     class func warn(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
-        guard enabledLevels.contains(.Warning) else { return }
+        guard enabledLevels.contains(.warning) else { return }
         forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
-                                              level: .Warning))
+                                              level: .warning))
     }
 
     /// error: Adds an error message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
     class func error(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
-        guard enabledLevels.contains(.Error) else { return }
+        guard enabledLevels.contains(.error) else { return }
         forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
-                                               level: .Error))
+                                               level: .error))
     }
 
     /// This forwards a `LogMessage` to each logger that has been added

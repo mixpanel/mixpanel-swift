@@ -13,7 +13,7 @@ class BindingRequest: BaseWebSocketMessage {
         guard let payload = payload else {
             return nil
         }
-        super.init(type: "event_binding_request", payload: payload)
+        super.init(type: MessageType.bindingRequest.rawValue, payload: payload)
     }
 
     override func responseCommand(connection: WebSocketWrapper) -> Operation? {
@@ -23,10 +23,10 @@ class BindingRequest: BaseWebSocketMessage {
             }
 
             DispatchQueue.main.sync {
-                var bindingCollection = connection.getSessionObjectSynchronized(key: "event_bindings") as? CodelessBindingCollection
+                var bindingCollection = connection.getSessionObjectSynchronized(for: "event_bindings") as? CodelessBindingCollection
                 if bindingCollection == nil {
                     bindingCollection = CodelessBindingCollection()
-                    connection.setSessionObjectSynchronized(value: bindingCollection, key: "event_bindings")
+                    connection.setSessionObjectSynchronized(with: bindingCollection, for: "event_bindings")
                 }
 
                 if let payload = self.payload["events"] as? [[String: Any]] {
@@ -37,7 +37,7 @@ class BindingRequest: BaseWebSocketMessage {
 
             let response = BindingResponse()
             response.status = "OK"
-            connection.sendMessage(message: response)
+            connection.send(message: response)
         }
         return operation
     }
@@ -55,7 +55,7 @@ class BindingResponse: BaseWebSocketMessage {
     }
 
     init() {
-        super.init(type: "event_binding_response")
+        super.init(type: MessageType.bindingResponse.rawValue)
     }
 }
 

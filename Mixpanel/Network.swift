@@ -24,8 +24,8 @@ struct BasePath {
 }
 
 enum RequestMethod: String {
-    case GET
-    case POST
+    case get
+    case post
 }
 
 struct Resource<A> {
@@ -38,10 +38,10 @@ struct Resource<A> {
 }
 
 enum Reason {
-    case ParseError
-    case NoData
-    case NotOKStatusCode(statusCode: Int)
-    case Other(Error)
+    case parseError
+    case noData
+    case notOKStatusCode(statusCode: Int)
+    case other(Error)
 }
 
 class Network {
@@ -57,19 +57,19 @@ class Network {
         let session = URLSession.shared
         session.dataTask(with: request) { (data, response, error) -> Void in
             guard let httpResponse = response as? HTTPURLResponse else {
-                failure(Reason.Other(error!), data, response)
+                failure(.other(error!), data, response)
                 return
             }
             guard httpResponse.statusCode == 200 else {
-                failure(Reason.NotOKStatusCode(statusCode: httpResponse.statusCode), data, response)
+                failure(.notOKStatusCode(statusCode: httpResponse.statusCode), data, response)
                 return
             }
             guard let responseData = data else {
-                failure(Reason.NoData, data, response)
+                failure(.noData, data, response)
                 return
             }
             guard let result = resource.parse(responseData) else {
-                failure(Reason.ParseError, data, response)
+                failure(.parseError, data, response)
                 return
             }
 
@@ -127,8 +127,8 @@ class Network {
             let requestBody = "ip=1&data=\(requestData)"
                 .data(using: String.Encoding.utf8)
 
-            let resource = Network.buildResource(path: FlushType.Events.rawValue,
-                                                 method: RequestMethod.POST,
+            let resource = Network.buildResource(path: FlushType.events.rawValue,
+                                                 method: .post,
                                                  requestBody: requestBody,
                                                  headers: ["Accept-Encoding": "gzip"],
                                                  parse: responseParser)

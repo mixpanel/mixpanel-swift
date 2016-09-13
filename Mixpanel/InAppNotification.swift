@@ -101,7 +101,7 @@ extension InAppNotification {
             return nil
         }
 
-        if type == InAppType.Takeover.rawValue {
+        if type == InAppType.takeover.rawValue {
             imageURLComponents.path = imageURLComponents.path.appendSuffixBeforeExtension(suffix: "@2x")
         }
 

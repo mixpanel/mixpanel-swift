@@ -82,6 +82,20 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
 
+    /// Controls whether to enable the visual editor for codeless on mixpanel.com
+    /// You will be unable to edit codeless events with this disabled, however previously
+    /// created codeless events will still be delivered.
+    open var enableVisualEditorForCodeless: Bool {
+        set {
+            decideInstance.enableVisualEditorForCodeless = newValue
+            if !newValue {
+                decideInstance.webSocketWrapper?.close()
+            }
+        }
+        get {
+            return decideInstance.enableVisualEditorForCodeless
+        }
+    }
     /// The base URL used for Mixpanel API requests.
     /// Useful if you need to proxy Mixpanel requests. Defaults to
     /// https://api.mixpanel.com.
@@ -93,6 +107,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             return BasePath.MixpanelAPI
         }
     }
+
     open var debugDescription: String {
         return "Mixpanel(\n"
         + "    Token: \(apiToken),\n"
@@ -108,19 +123,19 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     open var loggingEnabled: Bool = false {
         didSet {
             if loggingEnabled {
-                Logger.enableLevel(.Debug)
-                Logger.enableLevel(.Info)
-                Logger.enableLevel(.Warning)
-                Logger.enableLevel(.Error)
+                Logger.enableLevel(.debug)
+                Logger.enableLevel(.info)
+                Logger.enableLevel(.warning)
+                Logger.enableLevel(.error)
 
                 Logger.info(message: "Logging Enabled")
             } else {
                 Logger.info(message: "Logging Disabled")
 
-                Logger.disableLevel(.Debug)
-                Logger.disableLevel(.Info)
-                Logger.disableLevel(.Warning)
-                Logger.disableLevel(.Error)
+                Logger.disableLevel(.debug)
+                Logger.disableLevel(.info)
+                Logger.disableLevel(.warning)
+                Logger.disableLevel(.error)
             }
         }
     }
@@ -360,7 +375,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     }
 
     @objc func connectGestureRecognized(gesture: UILongPressGestureRecognizer) {
-        if gesture.state == UIGestureRecognizerState.began {
+        if gesture.state == UIGestureRecognizerState.began && enableVisualEditorForCodeless {
             connectToWebSocket()
         }
     }

@@ -42,12 +42,8 @@ class ObjectSelector: NSObject {
      Starting at a leaf node, determine if it would be selected
      by this selector starting from the root object given.
     */
-    func isLeafSelected(leaf: AnyObject, root: AnyObject) -> Bool {
-        return isLeafSelected(leaf: leaf, root: root, finalPredicate: true)
-    }
-
-    func fuzzyIsLeafSelected(leaf: AnyObject, root: AnyObject) -> Bool {
-        return isLeafSelected(leaf: leaf, root: root, finalPredicate: false)
+    func isSelected(leaf: AnyObject, from root: AnyObject, isFuzzy: Bool = false) -> Bool {
+        return isLeafSelected(leaf: leaf, root: root, finalPredicate: !isFuzzy)
     }
 
     func isLeafSelected(leaf: AnyObject, root: AnyObject, finalPredicate: Bool) -> Bool {
@@ -56,11 +52,11 @@ class ObjectSelector: NSObject {
         for i in stride(from: filters.count - 1, to: -1, by: -1) {
             let filter = filters[i]
             filter.nameOnly = i == filters.count - 1 && !finalPredicate
-            if !filter.appliesToAny(views: views) {
+            if !filter.doesApply(on: views) {
                 isSelected = false
                 break
             }
-            views = filter.applyReverse(views: views)
+            views = filter.applyReverse(on: views)
             if views.isEmpty {
                 break
             }
@@ -110,17 +106,13 @@ class ObjectSelector: NSObject {
         return filter
     }
 
-    func fuzzySelectFrom(root: AnyObject?) -> [AnyObject] {
-        return selectFrom(root: root, evaluateFinalPredicate: false)
-    }
-
     func selectFrom(root: AnyObject?, evaluateFinalPredicate: Bool = true) -> [AnyObject] {
         var views = [AnyObject]()
         if let root = root {
             views = [root]
             for i in 0..<filters.count {
                 filters[i].nameOnly = (i == filters.count - 1) && !evaluateFinalPredicate
-                views = filters[i].apply(views: views)
+                views = filters[i].apply(on: views)
                 if views.isEmpty {
                     break
                 }

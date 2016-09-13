@@ -11,7 +11,7 @@ import Foundation
 class DisconnectMessage: BaseWebSocketMessage {
 
     init() {
-        super.init(type: "disconnect")
+        super.init(type: MessageType.disconnect.rawValue)
     }
 
     override func responseCommand(connection: WebSocketWrapper) -> Operation? {

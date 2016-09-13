@@ -11,7 +11,7 @@ import Foundation
 class DeviceInfoRequest: BaseWebSocketMessage {
 
     init() {
-        super.init(type: "device_info_request")
+        super.init(type: MessageType.deviceInfoRequest.rawValue)
     }
 
     override func responseCommand(connection: WebSocketWrapper) -> Operation? {
@@ -35,7 +35,7 @@ class DeviceInfoRequest: BaseWebSocketMessage {
                                                           mainBundleIdentifier: Bundle.main.bundleIdentifier)
                 response = DeviceInfoResponse(infoResponseInput)
             }
-            connection.sendMessage(message: response)
+            connection.send(message: response)
         }
 
         return operation
@@ -103,6 +103,6 @@ class DeviceInfoResponse: BaseWebSocketMessage {
             payload["main_bundle_identifier"] = mainBundleIdentifier as AnyObject
         }
 
-        super.init(type: "device_info_response", payload: payload)
+        super.init(type: MessageType.deviceInfoResponse.rawValue, payload: payload)
     }
 }

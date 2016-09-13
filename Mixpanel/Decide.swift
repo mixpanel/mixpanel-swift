@@ -34,6 +34,7 @@ class Decide {
             return notificationsInstance.delegate
         }
     }
+    var enableVisualEditorForCodeless = true
 
     let switchboardURL = "wss://switchboard.mixpanel.com"
 

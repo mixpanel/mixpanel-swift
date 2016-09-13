@@ -14,7 +14,7 @@ class SnapshotRequest: BaseWebSocketMessage {
         guard let payload = payload else {
             return nil
         }
-        super.init(type: "snapshot_request", payload: payload)
+        super.init(type: MessageType.snapshotRequest.rawValue, payload: payload)
     }
 
     var configurarion: ObjectSerializerConfig? {
@@ -37,8 +37,8 @@ class SnapshotRequest: BaseWebSocketMessage {
 
             // Update the class descriptions in the connection session if provided as part of the message.
             if serializerConfig != nil {
-                connection.setSessionObjectSynchronized(value: serializerConfig!, key: "snapshot_class_descriptions")
-            } else if let sessionObject = connection.getSessionObjectSynchronized(key: "snapshot_class_descriptions") {
+                connection.setSessionObjectSynchronized(with: serializerConfig!, for: "snapshot_class_descriptions")
+            } else if let sessionObject = connection.getSessionObjectSynchronized(for: "snapshot_class_descriptions") {
                 // Get the class descriptions from the connection session store.
                 serializerConfig = sessionObject as? ObjectSerializerConfig
             } else {
@@ -47,10 +47,10 @@ class SnapshotRequest: BaseWebSocketMessage {
             }
 
             // Get the object identity provider from the connection's session store or create one if there is none already.
-            var objectIdentityProvider = connection.getSessionObjectSynchronized(key: "object_identity_provider")
+            var objectIdentityProvider = connection.getSessionObjectSynchronized(for: "object_identity_provider")
             if objectIdentityProvider == nil {
                 objectIdentityProvider = ObjectIdentityProvider()
-                connection.setSessionObjectSynchronized(value: objectIdentityProvider, key: "object_identity_provider")
+                connection.setSessionObjectSynchronized(with: objectIdentityProvider, for: "object_identity_provider")
             }
 
             let serializer = ApplicationStateSerializer(application: UIApplication.shared,
@@ -62,21 +62,21 @@ class SnapshotRequest: BaseWebSocketMessage {
             var serializedObjects: [String: AnyObject]!
 
             DispatchQueue.main.sync {
-                screenshot = serializer.getScreenshotForWindow(index: 0)
+                screenshot = serializer.getScreenshotForWindow(at: 0)
             }
             response.screenshot = screenshot
 
             if imageHash == response.imageHash {
-                serializedObjects = connection.getSessionObjectSynchronized(key: "snapshot_hierarchy") as! [String: AnyObject]
+                serializedObjects = connection.getSessionObjectSynchronized(for: "snapshot_hierarchy") as! [String: AnyObject]
             } else {
                 DispatchQueue.main.sync {
-                    serializedObjects = serializer.getObjectHierarchyForWindow(index: 0)
+                    serializedObjects = serializer.getObjectHierarchyForWindow(at: 0)
                 }
-                connection.setSessionObjectSynchronized(value: serializedObjects, key: "snapshot_hierarchy")
+                connection.setSessionObjectSynchronized(with: serializedObjects, for: "snapshot_hierarchy")
             }
 
             response.serializedObjects = serializedObjects
-            connection.sendMessage(message: response)
+            connection.send(message: response)
         }
 
         return operation
@@ -113,7 +113,7 @@ class SnapshotResponse: BaseWebSocketMessage {
     var imageHash: String!
 
     init() {
-        super.init(type: "snapshot_response")
+        super.init(type: MessageType.snapshotResponse.rawValue)
     }
 
     func getImageHash(imageData: Data) -> String {

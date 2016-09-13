@@ -18,10 +18,10 @@ class ApplicationStateSerializer {
         self.serializer = ObjectSerializer(configuration: configuration, objectIdentityProvider: objectIdentityProvider)
     }
 
-    func getScreenshotForWindow(index: Int) -> UIImage? {
+    func getScreenshotForWindow(at index: Int) -> UIImage? {
         var image: UIImage? = nil
 
-        if let window = getWindow(index: index), !window.frame.equalTo(CGRect.zero) {
+        if let window = getWindow(at: index), !window.frame.equalTo(CGRect.zero) {
             UIGraphicsBeginImageContextWithOptions(window.bounds.size, true, window.screen.scale)
             if !window.drawHierarchy(in: window.bounds, afterScreenUpdates: false) {
                 Logger.error(message: "Unable to get a screenshot for window at index \(index)")
@@ -32,12 +32,12 @@ class ApplicationStateSerializer {
         return image
     }
 
-    func getWindow(index: Int) -> UIWindow? {
+    func getWindow(at index: Int) -> UIWindow? {
         return application.windows[index]
     }
 
-    func getObjectHierarchyForWindow(index: Int) -> [String: AnyObject] {
-        if let window = getWindow(index: index) {
+    func getObjectHierarchyForWindow(at index: Int) -> [String: AnyObject] {
+        if let window = getWindow(at: index) {
             return serializer.getSerializedObjects(rootObject: window)
         }
 

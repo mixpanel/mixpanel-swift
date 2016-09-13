@@ -28,7 +28,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
             imageView.image = UIImage(data: image)
         }
 
-        if notification.style == Style.Light.rawValue {
+        if notification.style == Style.light.rawValue {
             view.backgroundColor = InAppNotificationsConstants.miniLightBGColor
             bodyLabel.textColor = InAppNotificationsConstants.miniLightTextColor
             imageView.image = imageView.image?.withRenderingMode(.alwaysTemplate)
@@ -64,7 +64,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
             window.clipsToBounds = true
             window.rootViewController = self
             window.layer.cornerRadius = 6
-            if notification.style == Style.Light.rawValue {
+            if notification.style == Style.light.rawValue {
                 window.layer.borderColor = InAppNotificationsConstants.miniLightBorderColor.cgColor
                 window.layer.borderWidth = 1
             }

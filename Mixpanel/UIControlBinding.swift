@@ -105,21 +105,21 @@ class UIControlBinding: CodelessBinding {
             let executeBlock = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
                 if let root = UIApplication.shared.keyWindow?.rootViewController {
                     if let view = view as? UIControl, self.appliedTo.contains(view) {
-                        if !self.path.fuzzyIsLeafSelected(leaf: view, root: root) {
-                            self.stopOnView(view: view)
+                        if !self.path.isSelected(leaf: view, from: root, isFuzzy: true) {
+                            self.stopOn(view: view)
                             self.appliedTo.remove(view)
                         }
                     } else {
                         var objects: [UIControl]
                         // select targets based off path
                         if let view = view as? UIControl {
-                            if self.path.fuzzyIsLeafSelected(leaf: view, root: root) {
+                            if self.path.isSelected(leaf: view, from: root, isFuzzy: true) {
                                 objects = [view]
                             } else {
                                 objects = []
                             }
                         } else {
-                            objects = self.path.fuzzySelectFrom(root: root) as! [UIControl]
+                            objects = self.path.selectFrom(root: root, evaluateFinalPredicate: false) as! [UIControl]
                         }
 
                         for control in objects {
@@ -136,14 +136,14 @@ class UIControlBinding: CodelessBinding {
             // Execute once in case the view to be tracked is already on the screen
             executeBlock(nil, #function, nil, nil)
 
-            Swizzler.swizzleSelector(selector: NSSelectorFromString("didMoveToWindow"),
-                                     toSwizzle: #selector(UIView.newDidMoveToWindow),
-                                     aClass: swizzleClass,
+            Swizzler.swizzleSelector(NSSelectorFromString("didMoveToWindow"),
+                                     withSelector: #selector(UIView.newDidMoveToWindow),
+                                     for: swizzleClass,
                                      name: name,
                                      block: executeBlock)
-            Swizzler.swizzleSelector(selector: NSSelectorFromString("didMoveToSuperview"),
-                                     toSwizzle: #selector(UIView.newDidMoveToSuperview),
-                                     aClass: swizzleClass,
+            Swizzler.swizzleSelector(NSSelectorFromString("didMoveToSuperview"),
+                                     withSelector: #selector(UIView.newDidMoveToSuperview),
+                                     for: swizzleClass,
                                      name: name,
                                      block: executeBlock)
             running = true
@@ -153,38 +153,38 @@ class UIControlBinding: CodelessBinding {
     override func stop() {
         if running {
             // remove what has been swizzled
-            Swizzler.unswizzleSelector(selector: NSSelectorFromString("didMoveToWindow"),
+            Swizzler.unswizzleSelector(NSSelectorFromString("didMoveToWindow"),
                                        aClass: swizzleClass,
                                        name: name)
-            Swizzler.unswizzleSelector(selector: NSSelectorFromString("didMoveToSuperview"),
+            Swizzler.unswizzleSelector(NSSelectorFromString("didMoveToSuperview"),
                                        aClass: swizzleClass,
                                        name: name)
 
             // remove target-action pairs
             for control in appliedTo.allObjects {
-                stopOnView(view: control)
+                stopOn(view: control)
             }
             resetUIControlStore()
             running = false
         }
     }
 
-    func stopOnView(view: UIControl) {
+    func stopOn(view: UIControl) {
         if verifyEvent != UIControlEvents(rawValue: 0) && verifyEvent != controlEvent {
             view.removeTarget(self, action: #selector(self.preVerify(sender:event:)), for: verifyEvent)
         }
         view.removeTarget(self, action: #selector(self.execute(sender:event:)), for: controlEvent)
     }
 
-    func verifyControlMatchesPath(control: AnyObject) -> Bool {
+    func verifyControlMatchesPath(_ control: AnyObject) -> Bool {
         if let root = UIApplication.shared.keyWindow?.rootViewController {
-            return path.isLeafSelected(leaf: control, root: root)
+            return path.isSelected(leaf: control, from: root)
         }
         return false
     }
 
     func preVerify(sender: UIControl, event: UIEvent) {
-        if verifyControlMatchesPath(control: sender) {
+        if verifyControlMatchesPath(sender) {
             verified.add(sender)
         } else {
             verified.remove(sender)
@@ -196,7 +196,7 @@ class UIControlBinding: CodelessBinding {
         if verifyEvent != UIControlEvents(rawValue: 0) && verifyEvent != controlEvent {
             shouldTrack = verified.contains(sender)
         } else {
-            shouldTrack = verifyControlMatchesPath(control: sender)
+            shouldTrack = verifyControlMatchesPath(sender)
         }
         if shouldTrack {
             self.track(event: eventName, properties: [:])

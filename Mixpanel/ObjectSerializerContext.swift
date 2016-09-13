@@ -24,7 +24,7 @@ class ObjectSerializerContext {
         return !unvisitedObjects.isEmpty
     }
 
-    func enqueueUnvisitedObject(object: AnyObject) {
+    func enqueueUnvisitedObject(_ object: AnyObject) {
         unvisitedObjects.insert(object as! AnyHashable)
     }
 

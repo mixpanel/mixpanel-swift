@@ -16,7 +16,7 @@ class ObjectIdentityProvider {
         objectToIdentifierMap = NSMapTable(keyOptions: .weakMemory, valueOptions: .strongMemory)
     }
 
-    func getIdentifier(object: AnyObject) -> String {
+    func getIdentifier(for object: AnyObject) -> String {
         if let object = object as? String {
             return object
         }

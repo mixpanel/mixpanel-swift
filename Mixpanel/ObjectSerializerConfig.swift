@@ -51,7 +51,7 @@ class ObjectSerializerConfig {
         }
     }
 
-    func getType(name: String) -> TypeDescription? {
+    func getType(_ name: String) -> TypeDescription? {
         if let enumDescription = enums[name] {
             return enumDescription
         }
@@ -203,7 +203,7 @@ class PropertyDescription {
         self.predicate = predicate
     }
 
-    class func valueTransformerForType(typeName: String) -> ValueTransformer? {
+    class func valueTransformer(for typeName: String) -> ValueTransformer? {
         for toTypeName in ["NSDictionary", "NSNumber", "NSString"] {
             let toTransformerName = NSValueTransformerName(rawValue: "\(typeName)To\(toTypeName)")
             if let toTransformer = ValueTransformer(forName: toTransformerName) {
@@ -218,11 +218,11 @@ class PropertyDescription {
         guard let type = type else {
             return nil
         }
-        let transformedValue = PropertyDescription.valueTransformerForType(typeName: type)
+        let transformedValue = PropertyDescription.valueTransformer(for: type)
         return transformedValue
     }
 
-    func shouldReadPropertyValue(object: AnyObject) -> Bool {
+    func shouldReadPropertyValue(of object: AnyObject) -> Bool {
         if let noFollow = noFollow, noFollow {
             return false
         } else if let predicate = predicate {

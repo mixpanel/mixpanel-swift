@@ -8,6 +8,16 @@
 
 import Foundation
 
+enum MessageType: String {
+    case bindingRequest = "event_binding_request"
+    case bindingResponse = "event_binding_response"
+    case deviceInfoRequest = "device_info_request"
+    case deviceInfoResponse = "device_info_response"
+    case disconnect = "disconnect"
+    case snapshotRequest = "snapshot_request"
+    case snapshotResponse = "snapshot_response"
+}
+
 class WebSocketWrapper: WebSocketDelegate {
     static let sessionVariantKey = "session_variant"
     static let startLoadingAnimationKey = "connectivityBarLoading"
@@ -23,15 +33,6 @@ class WebSocketWrapper: WebSocketDelegate {
     var connectivityIndiciatorWindow: UIWindow? = nil
     let connectCallback: (() -> Void)?
     let disconnectCallback: (() -> Void)?
-
-    enum MessageType: String {
-        case snapshot = "snapshot_request"
-        case changeRequest = "change_request"
-        case deviceInfo = "device_info_request"
-        case disconnect = "disconnect"
-        case binding = "event_binding_request"
-    }
-
 
     init(url: URL, keepTrying: Bool, connectCallback: (() -> Void)?, disconnectCallback: (() -> Void)?) {
         open = false
@@ -55,14 +56,14 @@ class WebSocketWrapper: WebSocketDelegate {
         }
     }
 
-    func setSessionObjectSynchronized(value: Any, key: String) {
+    func setSessionObjectSynchronized(with value: Any, for key: String) {
         objc_sync_enter(self)
         defer { objc_sync_exit(self) }
 
         session[key] = value
     }
 
-    func getSessionObjectSynchronized(key: String) -> Any? {
+    func getSessionObjectSynchronized(for key: String) -> Any? {
         objc_sync_enter(self)
         defer { objc_sync_exit(self) }
 
@@ -98,7 +99,7 @@ class WebSocketWrapper: WebSocketDelegate {
         webSocket.disconnect()
     }
 
-    func sendMessage(message: BaseWebSocketMessage?) {
+    func send(message: BaseWebSocketMessage?) {
         if connected {
             Logger.debug(message: "Sending message: \(message.debugDescription)")
             if let data = message?.JSONData(), let jsonString = String(data: data, encoding: String.Encoding.utf8) {
@@ -107,7 +108,7 @@ class WebSocketWrapper: WebSocketDelegate {
         }
     }
 
-    class func getMessageType(message: Data) -> BaseWebSocketMessage? {
+    class func getMessageType(for message: Data) -> BaseWebSocketMessage? {
         Logger.info(message: "raw message \(message)")
         var webSocketMessage: BaseWebSocketMessage? = nil
 
@@ -121,16 +122,15 @@ class WebSocketWrapper: WebSocketDelegate {
                 let payload = messageDict["payload"] as? [String: AnyObject]
 
                 switch typeEnum {
-                case .snapshot:
+                case .snapshotRequest:
                     webSocketMessage = SnapshotRequest(payload: payload)
-                case .changeRequest:
-                    break
-                case .deviceInfo:
+                case .deviceInfoRequest:
                     webSocketMessage = DeviceInfoRequest()
                 case .disconnect:
                     webSocketMessage = DisconnectMessage()
-                case .binding:
+                case .bindingRequest:
                     webSocketMessage = BindingRequest(payload: payload)
+                default: break
                 }
             } else {
                 Logger.warn(message: "Badly formed socket message, expected JSON dictionary.")
@@ -208,7 +208,7 @@ class WebSocketWrapper: WebSocketDelegate {
             }
         }
         if let messageData = text.data(using: String.Encoding.utf8) {
-            let message = WebSocketWrapper.getMessageType(message: messageData)
+            let message = WebSocketWrapper.getMessageType(for: messageData)
             Logger.info(message: "WebSocket received message: \(message.debugDescription)")
             if let commandOperation = message?.responseCommand(connection: self) {
                 commandQueue.addOperation(commandOperation)
@@ -225,7 +225,7 @@ class WebSocketWrapper: WebSocketDelegate {
             }
         }
 
-        let message = WebSocketWrapper.getMessageType(message: data)
+        let message = WebSocketWrapper.getMessageType(for: data)
         Logger.info(message: "WebSocket received message: \(message.debugDescription)")
         if let commandOperation = message?.responseCommand(connection: self) {
             commandQueue.addOperation(commandOperation)
@@ -254,7 +254,4 @@ class WebSocketWrapper: WebSocketDelegate {
             }
         }
     }
-
-
-
 }

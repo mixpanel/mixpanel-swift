@@ -41,11 +41,11 @@ class Flush: AppLifecycle {
     }
 
     func flushEventsQueue(_ eventsQueue: inout Queue) {
-        flushQueue(type: .Events, queue: &eventsQueue)
+        flushQueue(type: .events, queue: &eventsQueue)
     }
 
     func flushPeopleQueue(_ peopleQueue: inout Queue) {
-        flushQueue(type: .People, queue: &peopleQueue)
+        flushQueue(type: .people, queue: &peopleQueue)
     }
 
     func flushQueue(type: FlushType, queue: inout Queue) {

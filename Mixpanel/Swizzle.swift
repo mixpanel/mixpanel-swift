@@ -30,66 +30,69 @@ class Swizzler {
         }
     }
 
-    class func getSwizzle(method: Method) -> Swizzle? {
+    class func getSwizzle(for method: Method) -> Swizzle? {
         return swizzles[method]
     }
 
-    class func removeSwizzle(method: Method) {
+    class func removeSwizzle(for method: Method) {
         swizzles.removeValue(forKey: method)
     }
 
-    class func setSwizzle(swizzle: Swizzle, method: Method) {
+    class func setSwizzle(_ swizzle: Swizzle, for method: Method) {
         swizzles[method] = swizzle
     }
 
-    class func swizzleSelector(selector: Selector,
-                               toSwizzle: Selector,
-                               aClass: AnyClass,
+    class func swizzleSelector(_ originalSelector: Selector,
+                               withSelector newSelector: Selector,
+                               for aClass: AnyClass,
                                name: String,
                                block: @escaping ((_ view: AnyObject?,
                                                   _ command: Selector,
                                                   _ param1: AnyObject?,
                                                   _ param2: AnyObject?) -> Void)) {
 
-        if let originalMethod = class_getInstanceMethod(aClass, selector),
-            let swizzledMethod = class_getInstanceMethod(aClass, toSwizzle),
+        if let originalMethod = class_getInstanceMethod(aClass, originalSelector),
+            let swizzledMethod = class_getInstanceMethod(aClass, newSelector),
             let swizzledMethodImplementation = method_getImplementation(swizzledMethod),
             let originalMethodImplementation = method_getImplementation(originalMethod) {
 
-            var swizzle = getSwizzle(method: originalMethod)
+            var swizzle = getSwizzle(for: originalMethod)
             if swizzle == nil {
                 swizzle = Swizzle(block: block,
                                   name: name,
                                   aClass: aClass,
-                                  selector: selector,
+                                  selector: originalSelector,
                                   originalMethod: originalMethodImplementation)
-                setSwizzle(swizzle: swizzle!, method: originalMethod)
+                setSwizzle(swizzle!, for: originalMethod)
             } else {
                 swizzle?.blocks[name] = block
             }
 
-            let didAddMethod = class_addMethod(aClass, selector, swizzledMethodImplementation, method_getTypeEncoding(swizzledMethod))
+            let didAddMethod = class_addMethod(aClass,
+                                               originalSelector,
+                                               swizzledMethodImplementation,
+                                               method_getTypeEncoding(swizzledMethod))
             if didAddMethod {
-                setSwizzle(swizzle: swizzle!, method: class_getInstanceMethod(aClass, selector))
+                setSwizzle(swizzle!, for: class_getInstanceMethod(aClass, originalSelector))
             } else {
                 method_setImplementation(originalMethod, swizzledMethodImplementation)
             }
         } else {
             Logger.error(message: "Swizzling error: Cannot find method for "
-                + "\(NSStringFromSelector(selector)) on \(NSStringFromClass(aClass))")
+                + "\(NSStringFromSelector(originalSelector)) on \(NSStringFromClass(aClass))")
         }
     }
 
-    class func unswizzleSelector(selector: Selector, aClass: AnyClass, name: String? = nil) {
+    class func unswizzleSelector(_ selector: Selector, aClass: AnyClass, name: String? = nil) {
         if let method = class_getInstanceMethod(aClass, selector),
-            let swizzle = getSwizzle(method: method) {
+            let swizzle = getSwizzle(for: method) {
             if let name = name {
                 swizzle.blocks.removeValue(forKey: name)
             }
 
             if name == nil || swizzle.blocks.count < 1 {
                 method_setImplementation(method, swizzle.originalMethod)
-                removeSwizzle(method: method)
+                removeSwizzle(for: method)
             }
         }
     }

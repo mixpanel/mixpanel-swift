@@ -27,26 +27,7 @@ struct InAppNotification {
     let body: String
     let callToAction: String
     let callToActionURL: URL?
-}
 
-extension String {
-    func appendSuffixBeforeExtension(suffix: String) -> String {
-        var newString = suffix
-        do {
-            let regex = try NSRegularExpression(pattern: "(\\.\\w+$)", options: [])
-            newString = regex.stringByReplacingMatches(in: self,
-                                                       options: [],
-                                                       range: NSRange(location: 0,
-                                                                      length: self.characters.count),
-                                                       withTemplate: "\(suffix)$1")
-        } catch {
-            Logger.error(message: "cannot add suffix to URL string")
-        }
-        return newString
-    }
-}
-
-extension InAppNotification {
     init?(JSONObject: [String: Any]?) {
         guard let object = JSONObject else {
             Logger.error(message: "notification json object should not be nil")
@@ -97,8 +78,8 @@ extension InAppNotification {
             let escapedImageURLString = imageURLString
                 .addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed),
             var imageURLComponents = URLComponents(string: escapedImageURLString) else {
-            Logger.error(message: "invalid notification image url")
-            return nil
+                Logger.error(message: "invalid notification image url")
+                return nil
         }
 
         if type == InAppType.Takeover.rawValue {
@@ -110,15 +91,31 @@ extension InAppNotification {
             return nil
         }
 
-        self.init(ID: ID,
-                  messageID: messageID,
-                  type: type,
-                  style: style,
-                  imageURL: imageURLParsed,
-                  image: nil,
-                  title: title,
-                  body: body,
-                  callToAction: callToAction,
-                  callToActionURL: callToActionURL)
+        self.ID                 = ID
+        self.messageID          = messageID
+        self.type               = type
+        self.style              = style
+        self.imageURL           = imageURLParsed
+        self.title              = title
+        self.body               = body
+        self.callToAction       = callToAction
+        self.callToActionURL    = callToActionURL
+    }
+}
+
+extension String {
+    func appendSuffixBeforeExtension(suffix: String) -> String {
+        var newString = suffix
+        do {
+            let regex = try NSRegularExpression(pattern: "(\\.\\w+$)", options: [])
+            newString = regex.stringByReplacingMatches(in: self,
+                                                       options: [],
+                                                       range: NSRange(location: 0,
+                                                                      length: self.characters.count),
+                                                       withTemplate: "\(suffix)$1")
+        } catch {
+            Logger.error(message: "cannot add suffix to URL string")
+        }
+        return newString
     }
 }

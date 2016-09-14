@@ -116,7 +116,7 @@ public class People {
      `application:didRegisterForRemoteNotificationsWithDeviceToken:`
      */
     public func removePushDeviceToken(deviceToken: NSData) {
-        let properties = ["$ios_devices": [deviceTokenDataToString(deviceToken)]]
+        let properties = ["$ios_devices": deviceTokenDataToString(deviceToken)]
         addPeopleRecordToQueueWithAction("$remove", properties: properties)
     }
 

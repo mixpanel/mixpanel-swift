@@ -42,7 +42,6 @@ class UITableViewBinding: CodelessBinding {
         super.init(coder: aDecoder)
     }
 
-
     override func execute() {
         if !running {
             let executeBlock = { (view: AnyObject?, command: Selector, tableView: AnyObject?, indexPath: AnyObject?) in

@@ -28,6 +28,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         mixpanel.reset()
         waitForSerialQueue()
         LSNocilla.sharedInstance().clearStubs()
+        stubDecide()
         NSLog("finished test setup")
     }
 

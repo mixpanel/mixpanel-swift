@@ -99,12 +99,13 @@ class MixpanelNotificationTests: MixpanelBaseTests {
                                      "cta": "cta",
                                      "cta_url": "maps://",
                                      "image_url": "https://cdn.mxpnl.com/site_media/images/engage/inapp_messages/mini/icon_coin.png"]
+        let numberOfWindows = UIApplication.shared.windows.count
         let notif = InAppNotification(JSONObject: notifDict)
         mixpanel.decideInstance.notificationsInstance.showNotification(notif!)
         mixpanel.decideInstance.notificationsInstance.showNotification(notif!)
         //wait for notifs to be shown from main queue
         waitForAsyncTasks()
-        XCTAssertTrue(UIApplication.shared.windows.count == 2, "Notification was not presented")
+        XCTAssertTrue(UIApplication.shared.windows.count == numberOfWindows + 1, "Notification was not presented")
         XCTAssertTrue(mixpanel.eventsQueue.count == 1, "should only show same notification once (and track 1 notif shown event)")
         XCTAssertEqual(mixpanel.eventsQueue.last?["event"] as? String, "$campaign_delivery", "last event should be campaign delivery")
         let expectation = self.expectation(description: "notification closed")

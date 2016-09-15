@@ -437,13 +437,13 @@ class MixpanelDemoTests: MixpanelBaseTests {
                        "timedEvents archive failed")
         let fileManager = FileManager.default
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.Events, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.events, token: kTestToken)!),
                       "events archive file not removed")
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.People, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.people, token: kTestToken)!),
                       "people archive file not removed")
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.Properties, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
                       "properties archive file not removed")
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
         XCTAssertEqual(mixpanel.distinctId, "d1", "expecting d1 as distinct id as initialised")
@@ -460,25 +460,25 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let garbage = "garbage".data(using: String.Encoding.utf8)!
         do {
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.Events, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.events, token: kTestToken)!),
                               options: [])
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.People, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.people, token: kTestToken)!),
                               options: [])
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.Properties, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
                               options: [])
         } catch {
             print("couldn't write data")
         }
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.Events, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.events, token: kTestToken)!),
                       "events archive file not removed")
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.People, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.people, token: kTestToken)!),
                       "people archive file not removed")
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.Properties, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
                       "properties archive file not removed")
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
         waitForSerialQueue()

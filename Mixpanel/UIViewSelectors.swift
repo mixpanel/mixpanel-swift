@@ -14,34 +14,23 @@ extension UIView {
     }
 
     func mp_varA() -> NSString? {
-        return mp_encryptHelper(input: mp_viewId())
+        return mp_viewId() as NSString?
     }
 
     func mp_varB() -> NSString? {
-        return mp_encryptHelper(input: mp_controllerVariable())
+        return mp_controllerVariable() as NSString?
     }
 
     func mp_varC() -> NSString? {
-        return mp_encryptHelper(input: mp_imageFingerprint())
+        return mp_imageFingerprint() as NSString?
     }
 
     func mp_varSetD() -> NSArray {
-        let targetActions = mp_targetActions()
-        return targetActions.map {
-            mp_encryptHelper(input: $0)!
-        } as NSArray
+        return mp_targetActions() as NSArray
     }
 
     func mp_varE() -> NSString? {
-        return mp_encryptHelper(input: mp_text())
-    }
-
-    func mp_encryptHelper(input: String?) -> NSString? {
-        let SALT = "1l0v3c4a8s4n018cl3d93kxled3kcle3j19384jdo2dk3"
-        if let input = input {
-            return (input + SALT) as NSString
-        }
-        return nil
+        return mp_text() as NSString?
     }
 
     func mp_viewId() -> String? {

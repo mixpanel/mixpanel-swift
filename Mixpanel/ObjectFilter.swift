@@ -39,8 +39,8 @@ class ObjectFilter: CustomStringConvertible {
                     } else {
                         children = []
                     }
-                    result += children
                 }
+                result += children
             }
         }
 

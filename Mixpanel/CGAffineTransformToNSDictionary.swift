@@ -19,9 +19,11 @@ import Foundation
     }
 
     override func transformedValue(_ value: Any?) -> Any? {
-        guard let affineTransform = value as? CGAffineTransform else {
+        guard let affineTransformVal = value as? NSValue else {
             return nil
         }
+
+        let affineTransform = affineTransformVal.cgAffineTransformValue
 
         return ["a": affineTransform.a,
                 "b": affineTransform.b,

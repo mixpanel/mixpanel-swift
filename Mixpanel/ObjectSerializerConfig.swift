@@ -75,16 +75,16 @@ class TypeDescription {
 class EnumDescription: TypeDescription {
     let flagSet: Bool?
     let baseType: String?
-    var values: [String: Any]
+    var values: [Int: Any]
 
     override init(dict: [String: Any]) {
         flagSet = dict["flag_set"] as? Bool
         baseType = dict["base_type"] as? String
-        values = [String: Any]()
+        values = [Int: Any]()
 
         if let dictValues = dict["values"] as? [[String: Any]] {
             for value in dictValues {
-                if let key = value["value"] as? String {
+                if let key = value["value"] as? Int {
                     values[key] = value["display_name"]
                 }
             }

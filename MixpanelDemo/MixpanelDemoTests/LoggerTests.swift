@@ -21,47 +21,47 @@ class LoggerTests: XCTestCase {
     }
 
     func testEnableDebug() {
-        Logger.enableLevel(.Debug)
+        Logger.enableLevel(.debug)
 
         Logger.debug(message: "logged")
         XCTAssertEqual(1, counter.count)
     }
 
     func testEnableInfo() {
-        Logger.enableLevel(.Info)
+        Logger.enableLevel(.info)
 
         Logger.info(message: "logged")
         XCTAssertEqual(1, counter.count)
     }
 
     func testEnableWarning() {
-        Logger.enableLevel(.Warning)
+        Logger.enableLevel(.warning)
 
         Logger.warn(message: "logged")
         XCTAssertEqual(1, counter.count)
     }
 
     func testEnableError() {
-        Logger.enableLevel(.Error)
+        Logger.enableLevel(.error)
 
         Logger.error(message: "logged")
         XCTAssertEqual(1, counter.count)
     }
 
     func testDisabledLogging() {
-        Logger.disableLevel(.Debug)
+        Logger.disableLevel(.debug)
         Logger.debug(message: "not logged")
         XCTAssertEqual(0, counter.count)
 
-        Logger.disableLevel(.Error)
+        Logger.disableLevel(.error)
         Logger.error(message: "not logged")
         XCTAssertEqual(0, counter.count)
 
-        Logger.disableLevel(.Info)
+        Logger.disableLevel(.info)
         Logger.info(message: "not logged")
         XCTAssertEqual(0, counter.count)
 
-        Logger.disableLevel(.Warning)
+        Logger.disableLevel(.warning)
         Logger.warn(message: "not logged")
         XCTAssertEqual(0, counter.count)
     }

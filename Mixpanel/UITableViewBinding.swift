@@ -46,7 +46,6 @@ class UITableViewBinding: CodelessBinding {
     override func execute() {
         if !running {
             let executeBlock = { (view: AnyObject?, command: Selector, tableView: AnyObject?, indexPath: AnyObject?) in
-                //view?.perform(command)
                 guard let tableView = tableView as? UITableView, let indexPath = indexPath as? IndexPath else {
                     return
                 }

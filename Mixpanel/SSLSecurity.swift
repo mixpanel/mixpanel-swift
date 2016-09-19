@@ -90,14 +90,6 @@ public class SSLSecurity {
         }
     }
 
-    /**
-     Valid the trust and domain name.
-
-     - parameter trust: is the serverTrust to validate
-     - parameter domain: is the CN domain to validate
-
-     - returns: if the key was successfully validated
-     */
     public func isValid(_ trust: SecTrust, domain: String?) -> Bool {
 
         var tries = 0
@@ -153,13 +145,6 @@ public class SSLSecurity {
         return false
     }
 
-    /**
-     Get the public key from a certificate data
-
-     - parameter data: is the certificate to pull the public key from
-
-     - returns: a public key
-     */
     func extractPublicKey(_ data: Data) -> SecKey? {
         guard let cert = SecCertificateCreateWithData(nil, data as CFData) else { return nil }
 
@@ -177,13 +162,6 @@ public class SSLSecurity {
         return SecTrustCopyPublicKey(trust)
     }
 
-    /**
-     Get the certificate chain for the trust
-
-     - parameter trust: is the trust to lookup the certificate chain for
-
-     - returns: the certificate chain for the trust
-     */
     func certificateChain(_ trust: SecTrust) -> [Data] {
         let certificates = (0..<SecTrustGetCertificateCount(trust)).reduce([Data]()) { (certificates: [Data], index: Int) -> [Data] in
             var certificates = certificates
@@ -195,13 +173,6 @@ public class SSLSecurity {
         return certificates
     }
 
-    /**
-     Get the public key chain for the trust
-
-     - parameter trust: is the trust to lookup the certificate chain and extract the public keys
-
-     - returns: the public keys from the certifcate chain for the trust
-     */
     func publicKeyChain(_ trust: SecTrust) -> [SecKey] {
         let policy = SecPolicyCreateBasicX509()
         let keys = (0..<SecTrustGetCertificateCount(trust)).reduce([SecKey]()) { (keys: [SecKey], index: Int) -> [SecKey] in

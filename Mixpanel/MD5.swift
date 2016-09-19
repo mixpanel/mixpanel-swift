@@ -48,7 +48,6 @@ final class MD5 {
     }
 
 
-    // mutating currentHash in place is way faster than returning new result
     fileprivate func process<C: Collection>(block chunk: C,
                              currentHash: inout Array<UInt32>) where C.Iterator.Element == UInt8, C.Index == Int {
 
@@ -239,7 +238,6 @@ extension Collection where Self.Iterator.Element == UInt8, Self.Index == Int {
         return result
     }
 
-    /// Initialize integer from array of bytes. Caution: may be slow!
     func toInteger<T: Integer>() -> T where T: ByteConvertible, T: BitshiftOperationsType {
         if self.isEmpty {
             return 0

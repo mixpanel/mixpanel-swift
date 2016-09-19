@@ -150,7 +150,7 @@ public protocol Updatable {
     /// - parameter bytes: Bytes to process
     /// - parameter isLast: (Optional) Given chunk is the last one. No more updates after this call.
     /// - returns: Processed data or empty array.
-    mutating func update<T: Sequence>(withBytes bytes:T, isLast: Bool) throws -> Array<UInt8> where T.Iterator.Element == UInt8
+    mutating func update<T: Sequence>(withBytes bytes: T, isLast: Bool) throws -> Array<UInt8> where T.Iterator.Element == UInt8
 
     /// Update given bytes in chunks.
     ///
@@ -165,17 +165,17 @@ public protocol Updatable {
     /// Finish updates. This may apply padding.
     /// - parameter bytes: Bytes to process
     /// - returns: Processed data.
-    mutating func finish<T: Sequence>(withBytes bytes:T) throws -> Array<UInt8> where T.Iterator.Element == UInt8
+    mutating func finish<T: Sequence>(withBytes bytes: T) throws -> Array<UInt8> where T.Iterator.Element == UInt8
 
     /// Finish updates. This may apply padding.
     /// - parameter bytes: Bytes to process
     /// - parameter output: Resulting data
     /// - returns: Processed data.
-    mutating func finish<T: Sequence>(withBytes bytes:T, output: (Array<UInt8>) -> Void) throws where T.Iterator.Element == UInt8
+    mutating func finish<T: Sequence>(withBytes bytes: T, output: (Array<UInt8>) -> Void) throws where T.Iterator.Element == UInt8
 }
 
 extension Updatable {
-    mutating public func update<T: Sequence>(withBytes bytes:T,
+    mutating public func update<T: Sequence>(withBytes bytes: T,
                                 isLast: Bool = false,
                                 output: (Array<UInt8>) -> Void) throws where T.Iterator.Element == UInt8 {
         let processed = try self.update(withBytes: bytes, isLast: isLast)
@@ -184,7 +184,7 @@ extension Updatable {
         }
     }
 
-    mutating public func finish<T: Sequence>(withBytes bytes:T) throws -> Array<UInt8> where T.Iterator.Element == UInt8 {
+    mutating public func finish<T: Sequence>(withBytes bytes: T) throws -> Array<UInt8> where T.Iterator.Element == UInt8 {
         return try self.update(withBytes: bytes, isLast: true)
     }
 
@@ -192,7 +192,7 @@ extension Updatable {
         return try self.update(withBytes: [], isLast: true)
     }
 
-    mutating public func finish<T: Sequence>(withBytes bytes:T, output: (Array<UInt8>) -> Void) throws where T.Iterator.Element == UInt8 {
+    mutating public func finish<T: Sequence>(withBytes bytes: T, output: (Array<UInt8>) -> Void) throws where T.Iterator.Element == UInt8 {
         let processed = try self.update(withBytes: bytes, isLast: true)
         if !processed.isEmpty {
             output(processed)
@@ -265,14 +265,6 @@ extension Collection where Self.Iterator.Element == UInt8, Self.Index == Int {
     }
 }
 
-/**
- ISO/IEC 9797-1 Padding method 2.
- Add a single bit with value 1 to the end of the data.
- If necessary add bits with value 0 to the end of the data until the padded data is a multiple of blockSize.
- - parameters:
- - blockSize: Padding size in bytes.
- - allowance: Excluded trailing number of bytes.
- */
 func bitPadding(to data: Array<UInt8>, blockSize: Int, allowance: Int = 0) -> Array<UInt8> {
     var tmp = data
 

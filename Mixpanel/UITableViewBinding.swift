@@ -52,8 +52,17 @@ class UITableViewBinding: CodelessBinding {
                     // select targets based off path
                     if self.path.isSelected(leaf: tableView, from: root) {
                         var label = ""
-                        if let cellText = tableView.cellForRow(at: indexPath)?.textLabel?.text {
-                            label = cellText
+                        if let cell = tableView.cellForRow(at: indexPath) {
+                            if let cellText = cell.textLabel?.text {
+                                label = cellText
+                            } else {
+                                for subview in cell.contentView.subviews {
+                                    if let lbl = subview as? UILabel, let text = lbl.text {
+                                        label = text
+                                        break
+                                    }
+                                }
+                            }
                         }
                         self.track(event: self.eventName, properties: ["Cell Index": "\(indexPath.row)",
                                                                        "Cell Section": "\(indexPath.section)",

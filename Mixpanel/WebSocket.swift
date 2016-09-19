@@ -713,7 +713,6 @@ public class WebSocket: NSObject, StreamDelegate {
         }
     }
 
-    /// Process all messages in the buffer if possible.
     private func processRawMessagesInBuffer(_ pointer: UnsafePointer<UInt8>, bufferLen: Int) {
         var buffer = UnsafeBufferPointer(start: pointer, count: bufferLen)
         repeat {
@@ -724,7 +723,6 @@ public class WebSocket: NSObject, StreamDelegate {
         }
     }
 
-    /// Process the finished response of a buffer.
     private func processResponse(_ response: WSResponse) -> Bool {
         if response.isFin && response.bytesLeft <= 0 {
             if response.code == .ping {
@@ -759,7 +757,6 @@ public class WebSocket: NSObject, StreamDelegate {
         return false
     }
 
-    /// Create an error
     private func errorWithDetail(_ detail: String, code: UInt16) -> NSError {
         var details = [String: String]()
         details[NSLocalizedDescriptionKey] =  detail
@@ -774,7 +771,6 @@ public class WebSocket: NSObject, StreamDelegate {
         dequeueWrite(Data(bytes: buffer, count: MemoryLayout<UInt16>.size), code: .connectionClose)
     }
 
-    /// Used to write things to the stream
     private func dequeueWrite(_ data: Data, code: OpCode, writeCompletion: (() -> ())? = nil) {
         writeQueue.addOperation { [weak self] in
             //stream isn't ready, let's wait

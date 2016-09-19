@@ -66,7 +66,7 @@ class ObjectFilter: CustomStringConvertible {
      Returns whether the given view would pass this filter.
      */
     func doesApply(on view: AnyObject) -> Bool {
-        let typeValidation = name == "*" || (name != nil && view.isKind(of: NSClassFromString(name!)!))
+        let typeValidation = name == "*" || (name != nil && NSClassFromString(name!) != nil && view.isKind(of: NSClassFromString(name!)!))
         let predicateValidation = predicate == nil || predicate!.evaluate(with: view)
         let indexValidation = index == nil || isSibling(view, at: index!)
         let uniqueValidation = !unique || isSibling(view, of: 1)

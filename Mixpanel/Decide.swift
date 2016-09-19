@@ -85,6 +85,7 @@ class Decide {
                 decideResponse.newCodelessBindings = newCodelessBindings
 
                 self.codelessInstance.codelessBindings.formUnion(newCodelessBindings)
+                self.codelessInstance.codelessBindings.subtract(finishedCodelessBindings)
 
                 self.decideFetched = true
                 semaphore.signal()

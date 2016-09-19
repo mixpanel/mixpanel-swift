@@ -97,6 +97,16 @@ class WebSocketWrapper: WebSocketDelegate {
 
     func close() {
         webSocket.disconnect()
+        for value in session.values {
+            if let value = value as? CodelessBindingCollection {
+                value.cleanup()
+            }
+        }
+    }
+
+    deinit {
+        webSocket.delegate = nil
+        close()
     }
 
     func send(message: BaseWebSocketMessage?) {

@@ -14,11 +14,9 @@ class CodelessPlaygroundViewController: UIViewController, UITableViewDelegate, U
     @IBOutlet weak var button1: UIButton!
     @IBOutlet weak var button2: UIButton!
     @IBOutlet weak var datePicker: UIDatePicker!
-    @IBOutlet weak var pageControl: UIPageControl!
     @IBOutlet weak var segmentedControl: UISegmentedControl!
     @IBOutlet weak var slider: UISlider!
     @IBOutlet weak var switchControl: UISwitch!
-    @IBOutlet weak var textField: UITextField!
 
 
     override func viewDidLoad() {
@@ -36,7 +34,7 @@ class CodelessPlaygroundViewController: UIViewController, UITableViewDelegate, U
             return UITableViewCell()
         }
 
-        for subview in cell.subviews {
+        for subview in cell.contentView.subviews {
             if let label = subview as? UILabel {
                 label.text = "Cell #\(indexPath.item)"
             }

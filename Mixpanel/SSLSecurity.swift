@@ -27,24 +27,10 @@ public class SSLCert {
     var certData: Data?
     var key: SecKey?
 
-    /**
-     Designated init for certificates
-
-     - parameter data: is the binary data of the certificate
-
-     - returns: a representation security object to be used with
-     */
     public init(data: Data) {
         self.certData = data
     }
 
-    /**
-     Designated init for public keys
-
-     - parameter key: is the public key to be used
-
-     - returns: a representation security object to be used with
-     */
     public init(key: SecKey) {
         self.key = key
     }
@@ -58,13 +44,6 @@ public class SSLSecurity {
     var pubKeys: [SecKey]? //the public keys
     var usePublicKeys = false //use public keys or certificate validation?
 
-    /**
-     Use certs from main app bundle
-
-     - parameter usePublicKeys: is to specific if the publicKeys or certificates should be used for SSL pinning validation
-
-     - returns: a representation security object to be used with
-     */
     public convenience init(usePublicKeys: Bool = false) {
         let paths = Bundle.main.paths(forResourcesOfType: "cer", inDirectory: ".")
 
@@ -79,14 +58,6 @@ public class SSLSecurity {
         self.init(certs: certs, usePublicKeys: usePublicKeys)
     }
 
-    /**
-     Designated init
-
-     - parameter keys: is the certificates or public keys to use
-     - parameter usePublicKeys: is to specific if the publicKeys or certificates should be used for SSL pinning validation
-
-     - returns: a representation security object to be used with
-     */
     public init(certs: [SSLCert], usePublicKeys: Bool) {
         self.usePublicKeys = usePublicKeys
 
@@ -195,13 +166,6 @@ public class SSLSecurity {
         return extractPublicKey(cert, policy: SecPolicyCreateBasicX509())
     }
 
-    /**
-     Get the public key from a certificate
-
-     - parameter data: is the certificate to pull the public key from
-
-     - returns: a public key
-     */
     func extractPublicKey(_ cert: SecCertificate, policy: SecPolicy) -> SecKey? {
         var possibleTrust: SecTrust?
         SecTrustCreateWithCertificates(cert, policy, &possibleTrust)

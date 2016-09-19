@@ -264,7 +264,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                     self.decideInstance.notificationsInstance.showNotification(decideResponse.unshownInAppNotifications.first!)
                 }
 
-                //TODO: why main queue
                 DispatchQueue.main.sync {
                     for binding in decideResponse.newCodelessBindings {
                         binding.execute()

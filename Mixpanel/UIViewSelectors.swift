@@ -92,7 +92,7 @@ extension UIView {
             let space = CGColorSpaceCreateDeviceRGB()
             let data32 = UnsafeMutablePointer<UInt32>.allocate(capacity: 64)
             let data4 = UnsafeMutablePointer<UInt8>.allocate(capacity: 32)
-            let bitmapInfo = CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
+            let bitmapInfo = CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
             let context = CGContext(data: data32,
                                     width: 8,
                                     height: 8,

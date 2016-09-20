@@ -41,6 +41,7 @@
 		E12782C71D4AB5CB0025FB05 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1982BFE1D0AC2E2006B7330 /* Error.swift */; };
 		E12782C81D4AB5CB0025FB05 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CD1D30578E00E68E12 /* Constants.swift */; };
 		E12782C91D4AB5CB0025FB05 /* AutomaticProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */; };
+		E12BD38D1D91EBE2008989C9 /* SHA256.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12BD38C1D91EBE2008989C9 /* SHA256.swift */; };
 		E142DBD11D75F86300F34C12 /* ObjectSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E142DBD01D75F86300F34C12 /* ObjectSerializer.swift */; };
 		E142DBD31D76263600F34C12 /* ObjectSerializerContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E142DBD21D76263600F34C12 /* ObjectSerializerContext.swift */; };
 		E1497EF21D6B8DC900B2B65C /* CodelessBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1497EF11D6B8DC900B2B65C /* CodelessBinding.swift */; };
@@ -113,6 +114,7 @@
 		E11801AF1D7F92F10006DD2B /* UIFontToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIFontToNSDictionary.swift; sourceTree = "<group>"; };
 		E12782B31D4AB4B30025FB05 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E12782CA1D4AB9BE0025FB05 /* Info-tvOS.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Info-tvOS.plist"; sourceTree = "<group>"; };
+		E12BD38C1D91EBE2008989C9 /* SHA256.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SHA256.swift; sourceTree = "<group>"; };
 		E142DBD01D75F86300F34C12 /* ObjectSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectSerializer.swift; sourceTree = "<group>"; };
 		E142DBD21D76263600F34C12 /* ObjectSerializerContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectSerializerContext.swift; sourceTree = "<group>"; };
 		E1497EF11D6B8DC900B2B65C /* CodelessBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodelessBinding.swift; sourceTree = "<group>"; };
@@ -367,6 +369,7 @@
 				E1D335CD1D30578E00E68E12 /* Constants.swift */,
 				E165228E1D6781DF000D5949 /* MixpanelType.swift */,
 				E16C0EB21D80BF290051EF35 /* MD5.swift */,
+				E12BD38C1D91EBE2008989C9 /* SHA256.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -549,6 +552,7 @@
 				E154222D1D71059D009421A0 /* BindingMessage.swift in Sources */,
 				E11801AE1D7F86320006DD2B /* NSAttributedStringToNSDictionary.swift in Sources */,
 				E15422291D710587009421A0 /* SnapshotMessage.swift in Sources */,
+				E12BD38D1D91EBE2008989C9 /* SHA256.swift in Sources */,
 				E1D335CE1D30578E00E68E12 /* Constants.swift in Sources */,
 				E115949F1D01BE14007F8B4F /* Flush.swift in Sources */,
 				E142DBD31D76263600F34C12 /* ObjectSerializerContext.swift in Sources */,

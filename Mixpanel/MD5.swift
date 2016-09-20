@@ -282,20 +282,8 @@ func bitPadding(to data: Array<UInt8>, blockSize: Int, allowance: Int = 0) -> Ar
     return tmp
 }
 
-func rotateLeft(_ value: UInt8, by: UInt8) -> UInt8 {
-    return ((value << by) & 0xFF) | (value >> (8 - by))
-}
-
-func rotateLeft(_ value: UInt16, by: UInt16) -> UInt16 {
-    return ((value << by) & 0xFFFF) | (value >> (16 - by))
-}
-
 func rotateLeft(_ value: UInt32, by: UInt32) -> UInt32 {
     return ((value << by) & 0xFFFFFFFF) | (value >> (32 - by))
-}
-
-func rotateLeft(_ value: UInt64, by: UInt64) -> UInt64 {
-    return (value << by) | (value >> (64 - by))
 }
 
 func arrayOfBytes<T>(value: T, length: Int? = nil) -> Array<UInt8> {

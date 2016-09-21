@@ -170,6 +170,10 @@ class WebSocketWrapper: WebSocketDelegate {
             recordingView?.layer.addSublayer(indeterminateLayer!)
             connectivityIndiciatorWindow?.addSubview(recordingView!)
             connectivityIndiciatorWindow?.bringSubview(toFront: recordingView!)
+
+            UIView.animate(withDuration: 0.3) {
+                self.connectivityIndiciatorWindow?.alpha = 1
+            }
         }
         animateConnecting(loading: loading)
     }
@@ -212,7 +216,7 @@ class WebSocketWrapper: WebSocketDelegate {
     func websocketDidReceiveMessage(_ socket: WebSocket, text: String) {
         if !connected {
             connected = true
-            showConnectedView(loading: false)
+            showConnectedView(loading: true)
             if let callback = connectCallback {
                 callback()
             }
@@ -229,7 +233,7 @@ class WebSocketWrapper: WebSocketDelegate {
     func websocketDidReceiveData(_ socket: WebSocket, data: Data) {
         if !connected {
             connected = true
-            showConnectedView(loading: false)
+            showConnectedView(loading: true)
             if let callback = connectCallback {
                 callback()
             }
@@ -246,7 +250,7 @@ class WebSocketWrapper: WebSocketDelegate {
     func websocketDidConnect(_ socket: WebSocket) {
         Logger.info(message: "WebSocket \(socket) did open")
         commandQueue.isSuspended = false
-        showConnectedView(loading: true)
+        showConnectedView(loading: false)
     }
 
     func websocketDidDisconnect(_ socket: WebSocket, error: NSError?) {

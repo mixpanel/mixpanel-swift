@@ -23,28 +23,28 @@
 import Foundation
 import Security
 
-public class SSLCert {
+class SSLCert {
     var certData: Data?
     var key: SecKey?
 
-    public init(data: Data) {
+    init(data: Data) {
         self.certData = data
     }
 
-    public init(key: SecKey) {
+    init(key: SecKey) {
         self.key = key
     }
 }
 
-public class SSLSecurity {
-    public var validatedDN = true //should the domain name be validated?
+class SSLSecurity {
+    var validatedDN = true //should the domain name be validated?
 
     var isReady = false //is the key processing done?
     var certificates: [Data]? //the certificates
     var pubKeys: [SecKey]? //the public keys
     var usePublicKeys = false //use public keys or certificate validation?
 
-    public convenience init(usePublicKeys: Bool = false) {
+    convenience init(usePublicKeys: Bool = false) {
         let paths = Bundle.main.paths(forResourcesOfType: "cer", inDirectory: ".")
 
         let certs = paths.reduce([SSLCert]()) { (certs: [SSLCert], path: String) -> [SSLCert] in
@@ -58,7 +58,7 @@ public class SSLSecurity {
         self.init(certs: certs, usePublicKeys: usePublicKeys)
     }
 
-    public init(certs: [SSLCert], usePublicKeys: Bool) {
+    init(certs: [SSLCert], usePublicKeys: Bool) {
         self.usePublicKeys = usePublicKeys
 
         if self.usePublicKeys {
@@ -90,7 +90,7 @@ public class SSLSecurity {
         }
     }
 
-    public func isValid(_ trust: SecTrust, domain: String?) -> Bool {
+    func isValid(_ trust: SecTrust, domain: String?) -> Bool {
 
         var tries = 0
         while !self.isReady {

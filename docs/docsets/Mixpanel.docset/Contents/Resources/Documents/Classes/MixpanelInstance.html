@@ -43,10 +43,51 @@
             </ul>
           </li>
           <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/Array.html">Array</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Bool.html">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Date.html">Date</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Dictionary.html">Dictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Double.html">Double</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Float.html">Float</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Int.html">Int</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/NSNull.html">NSNull</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/String.html">String</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UInt.html">UInt</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/URL.html">URL</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
             <a href="../Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="../Protocols/MixpanelDelegate.html">MixpanelDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelType.html">MixpanelType</a>
               </li>
             </ul>
           </li>
@@ -58,7 +99,7 @@
             <h1>MixpanelInstance</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">MixpanelInstance</span><span class="p">:</span> <span class="kt">CustomDebugStringConvertible</span><span class="p">,</span> <span class="kt">FlushDelegate</span></code></pre>
+                  <pre class="highlight"><code><span class="n">open</span> <span class="kd">class</span> <span class="kt">MixpanelInstance</span><span class="p">:</span> <span class="kt">CustomDebugStringConvertible</span><span class="p">,</span> <span class="kt">FlushDelegate</span></code></pre>
 
                 </div>
               </div>
@@ -88,7 +129,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelDelegate.html">MixpanelDelegate</a></span><span class="p">?</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelDelegate.html">MixpanelDelegate</a></span><span class="p">?</span></code></pre>
 
                         </div>
                       </div>
@@ -115,7 +156,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">distinctId</span> <span class="o">=</span> <span class="s">""</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">distinctId</span> <span class="o">=</span> <span class="s">""</span></code></pre>
 
                         </div>
                       </div>
@@ -142,7 +183,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">people</span><span class="p">:</span> <span class="kt"><a href="../Classes/People.html">People</a></span><span class="o">!</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">people</span><span class="p">:</span> <span class="kt"><a href="../Classes/People.html">People</a></span><span class="o">!</span></code></pre>
 
                         </div>
                       </div>
@@ -170,7 +211,7 @@ data to the Mixpanel servers. Defaults to true.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">showNetworkActivityIndicator</span> <span class="o">=</span> <span class="kc">true</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">showNetworkActivityIndicator</span> <span class="o">=</span> <span class="kc">true</span></code></pre>
 
                         </div>
                       </div>
@@ -198,7 +239,7 @@ Setting a flush interval of 0 will turn off the flush timer.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">flushInterval</span><span class="p">:</span> <span class="kt">Double</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">flushInterval</span><span class="p">:</span> <span class="kt">Double</span></code></pre>
 
                         </div>
                       </div>
@@ -226,7 +267,7 @@ enters the background. Defaults to true.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">flushOnBackground</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">flushOnBackground</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -255,7 +296,36 @@ Defaults to true.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">useIPAddressForGeoLocation</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">useIPAddressForGeoLocation</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC8Mixpanel16MixpanelInstance29enableVisualEditorForCodelessSb"></a>
+                    <a name="//apple_ref/swift/Property/enableVisualEditorForCodeless" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC8Mixpanel16MixpanelInstance29enableVisualEditorForCodelessSb">enableVisualEditorForCodeless</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Controls whether to enable the visual editor for codeless on mixpanel.com
+You will be unable to edit codeless events with this disabled, however previously
+created codeless events will still be delivered.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">enableVisualEditorForCodeless</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -284,7 +354,7 @@ Useful if you need to proxy Mixpanel requests. Defaults to
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">serverURL</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">serverURL</span><span class="p">:</span> <span class="kt">String</span></code></pre>
 
                         </div>
                       </div>
@@ -313,7 +383,7 @@ Useful if you need to proxy Mixpanel requests. Defaults to
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">debugDescription</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">debugDescription</span><span class="p">:</span> <span class="kt">String</span></code></pre>
 
                         </div>
                       </div>
@@ -342,7 +412,7 @@ Useful if you need to proxy Mixpanel requests. Defaults to
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">loggingEnabled</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">loggingEnabled</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span></code></pre>
 
                         </div>
                       </div>
@@ -371,7 +441,7 @@ Defaults to true.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">checkForNotificationOnActive</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">checkForNotificationOnActive</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -400,7 +470,7 @@ Defaults to true.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">showNotificationOnActive</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">showNotificationOnActive</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -429,7 +499,7 @@ Defaults to 6 (seconds).</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">miniNotificationPresentationTime</span><span class="p">:</span> <span class="kt">Double</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">miniNotificationPresentationTime</span><span class="p">:</span> <span class="kt">Double</span></code></pre>
 
                         </div>
                       </div>
@@ -485,7 +555,7 @@ flushed once <code>identify:</code> is called.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">identify</span><span class="p">(</span><span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">identify</span><span class="p">(</span><span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -550,7 +620,7 @@ mixpanelInstance.createAlias(<q>Alias</q>, mixpanelInstance.distinctId)</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">createAlias</span><span class="p">(</span><span class="n">_</span> <span class="nv">alias</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">createAlias</span><span class="p">(</span><span class="n">_</span> <span class="nv">alias</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -611,7 +681,7 @@ Useful if your app&rsquo;s user logs out.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">reset</span><span class="p">()</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">reset</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>
@@ -661,7 +731,7 @@ persisting data as needed.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">archive</span><span class="p">()</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">archive</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>
@@ -704,7 +774,7 @@ method manually if you want to force a flush at a particular moment.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">flush</span><span class="p">(</span><span class="nv">completion</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">flush</span><span class="p">(</span><span class="nv">completion</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -745,9 +815,9 @@ method manually if you want to force a flush at a particular moment.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel16MixpanelInstance5trackFT5eventGSqSS_10propertiesGSqGVs10DictionarySSPs9AnyObject____T_"></a>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance5trackFT5eventGSqSS_10propertiesGSqGVs10DictionarySSPS_12MixpanelType____T_"></a>
                     <a name="//apple_ref/swift/Method/track(event:properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance5trackFT5eventGSqSS_10propertiesGSqGVs10DictionarySSPs9AnyObject____T_">track(event:properties:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance5trackFT5eventGSqSS_10propertiesGSqGVs10DictionarySSPS_12MixpanelType____T_">track(event:properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -759,8 +829,8 @@ method manually if you want to force a flush at a particular moment.</p>
 Properties are optional and can be added only if needed.</p>
 
 <p>Properties will allow you to segment your events in your Mixpanel reports.
-Property keys must be String objects and the supported value types are:
-String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.
+Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
 If the event is being timed, the timer will stop and be added as a property.</p>
 
                       </div>
@@ -768,7 +838,7 @@ If the event is being timed, the timer will stop and be added as a property.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">track</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">?,</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">track</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">?,</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -811,9 +881,9 @@ If the event is being timed, the timer will stop and be added as a property.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel16MixpanelInstance21trackPushNotificationFTGVs10DictionaryCSo8NSObjectPs9AnyObject__5eventSS_T_"></a>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance21trackPushNotificationFTGVs10DictionaryVs11AnyHashableP__5eventSS_T_"></a>
                     <a name="//apple_ref/swift/Method/trackPushNotification(_:event:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance21trackPushNotificationFTGVs10DictionaryCSo8NSObjectPs9AnyObject__5eventSS_T_">trackPushNotification(_:event:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance21trackPushNotificationFTGVs10DictionaryVs11AnyHashableP__5eventSS_T_">trackPushNotification(_:event:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -832,7 +902,7 @@ This method parses the standard payload and queues a track call using this infor
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">trackPushNotification</span><span class="p">(</span><span class="n">_</span> <span class="nv">userInfo</span><span class="p">:</span> <span class="p">[</span><span class="kt">NSObject</span><span class="p">:</span> <span class="kt">AnyObject</span><span class="p">],</span>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">trackPushNotification</span><span class="p">(</span><span class="n">_</span> <span class="nv">userInfo</span><span class="p">:</span> <span class="p">[</span><span class="kt">AnyHashable</span><span class="p">:</span> <span class="kt">Any</span><span class="p">],</span>
                                       <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"$campaign_received"</span><span class="p">)</span></code></pre>
 
                         </div>
@@ -912,7 +982,7 @@ mixpanelInstance.track(<q>Image Upload</q>)
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">time</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">time</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -959,7 +1029,7 @@ mixpanelInstance.track(<q>Image Upload</q>)
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">clearTimedEvents</span><span class="p">()</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">clearTimedEvents</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>
@@ -969,9 +1039,9 @@ mixpanelInstance.track(<q>Image Upload</q>)
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel16MixpanelInstance22currentSuperPropertiesFT_GVs10DictionarySSPs9AnyObject__"></a>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance22currentSuperPropertiesFT_GVs10DictionarySSP__"></a>
                     <a name="//apple_ref/swift/Method/currentSuperProperties()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance22currentSuperPropertiesFT_GVs10DictionarySSPs9AnyObject__">currentSuperProperties()</a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance22currentSuperPropertiesFT_GVs10DictionarySSP__">currentSuperProperties()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -986,7 +1056,7 @@ mixpanelInstance.track(<q>Image Upload</q>)
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">currentSuperProperties</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Properties</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">currentSuperProperties</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">Any</span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
@@ -1018,7 +1088,7 @@ mixpanelInstance.track(<q>Image Upload</q>)
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">clearSuperProperties</span><span class="p">()</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">clearSuperProperties</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>
@@ -1028,9 +1098,9 @@ mixpanelInstance.track(<q>Image Upload</q>)
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel16MixpanelInstance23registerSuperPropertiesFGVs10DictionarySSPs9AnyObject__T_"></a>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance23registerSuperPropertiesFGVs10DictionarySSPS_12MixpanelType__T_"></a>
                     <a name="//apple_ref/swift/Method/registerSuperProperties(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance23registerSuperPropertiesFGVs10DictionarySSPs9AnyObject__T_">registerSuperProperties(_:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance23registerSuperPropertiesFGVs10DictionarySSPS_12MixpanelType__T_">registerSuperProperties(_:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1043,15 +1113,15 @@ mixpanelInstance.track(<q>Image Upload</q>)
 <p>Super properties, once registered, are automatically sent as properties for
 all event tracking calls. They save you having to maintain and add a common
 set of properties to your events.
-Property keys must be String objects and the supported value types are:
-String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.</p>
+Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">registerSuperProperties</span><span class="p">(</span><span class="n">_</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">registerSuperProperties</span><span class="p">(</span><span class="n">_</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -1081,9 +1151,9 @@ String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, a
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel16MixpanelInstance27registerSuperPropertiesOnceFTGVs10DictionarySSPs9AnyObject__12defaultValueGSqPS2____T_"></a>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance27registerSuperPropertiesOnceFTGVs10DictionarySSPS_12MixpanelType__12defaultValueGSqPS2____T_"></a>
                     <a name="//apple_ref/swift/Method/registerSuperPropertiesOnce(_:defaultValue:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance27registerSuperPropertiesOnceFTGVs10DictionarySSPs9AnyObject__12defaultValueGSqPS2____T_">registerSuperPropertiesOnce(_:defaultValue:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance27registerSuperPropertiesOnceFTGVs10DictionarySSPS_12MixpanelType__12defaultValueGSqPS2____T_">registerSuperPropertiesOnce(_:defaultValue:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1094,16 +1164,16 @@ String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, a
                         <p>Registers super properties without overwriting ones that have already been set,
 unless the existing value is equal to defaultValue. defaultValue is optional.</p>
 
-<p>Property keys must be String objects and the supported value types are:
-String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.</p>
+<p>Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">registerSuperPropertiesOnce</span><span class="p">(</span><span class="n">_</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">,</span>
-                                            <span class="n">defaultValue</span><span class="p">:</span> <span class="kt">AnyObject</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">registerSuperPropertiesOnce</span><span class="p">(</span><span class="n">_</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">,</span>
+                                            <span class="n">defaultValue</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -1171,7 +1241,7 @@ registered.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">unregisterSuperProperty</span><span class="p">(</span><span class="n">_</span> <span class="nv">propertyName</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">unregisterSuperProperty</span><span class="p">(</span><span class="n">_</span> <span class="nv">propertyName</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -1235,7 +1305,7 @@ registered.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">()</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>
@@ -1268,7 +1338,7 @@ registered.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">(</span><span class="nv">type</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">(</span><span class="nv">type</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -1321,7 +1391,7 @@ registered.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">(</span><span class="kt">ID</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">(</span><span class="kt">ID</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -1353,8 +1423,8 @@ registered.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2016 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2016-08-16)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2016 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2016-09-26)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

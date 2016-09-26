@@ -23,22 +23,22 @@ import Foundation
 import CoreFoundation
 import Security
 
-public let WebsocketDidConnectNotification = "WebsocketDidConnectNotification"
-public let WebsocketDidDisconnectNotification = "WebsocketDidDisconnectNotification"
-public let WebsocketDisconnectionErrorKeyName = "WebsocketDisconnectionErrorKeyName"
+let WebsocketDidConnectNotification = "WebsocketDidConnectNotification"
+let WebsocketDidDisconnectNotification = "WebsocketDidDisconnectNotification"
+let WebsocketDisconnectionErrorKeyName = "WebsocketDisconnectionErrorKeyName"
 
-public protocol WebSocketDelegate: class {
+protocol WebSocketDelegate: class {
     func websocketDidConnect(_ socket: WebSocket)
     func websocketDidDisconnect(_ socket: WebSocket, error: NSError?)
     func websocketDidReceiveMessage(_ socket: WebSocket, text: String)
     func websocketDidReceiveData(_ socket: WebSocket, data: Data)
 }
 
-public protocol WebSocketPongDelegate: class {
+protocol WebSocketPongDelegate: class {
     func websocketDidReceivePong(_ socket: WebSocket)
 }
 
-public class WebSocket: NSObject, StreamDelegate {
+class WebSocket: NSObject, StreamDelegate {
 
     enum OpCode: UInt8 {
         case continueFrame = 0x0
@@ -51,7 +51,7 @@ public class WebSocket: NSObject, StreamDelegate {
         // B-F reserved.
     }
 
-    public enum CloseCode: UInt16 {
+    enum CloseCode: UInt16 {
         case normal                 = 1000
         case goingAway              = 1001
         case protocolError          = 1002
@@ -64,7 +64,7 @@ public class WebSocket: NSObject, StreamDelegate {
         case messageTooBig          = 1009
     }
 
-    public static let ErrorDomain = "WebSocket"
+    static let ErrorDomain = "WebSocket"
 
     enum InternalErrorCode: UInt16 {
         // 0-999 WebSocket status codes not used
@@ -72,7 +72,7 @@ public class WebSocket: NSObject, StreamDelegate {
     }
 
     // Where the callback is executed. It defaults to the main UI thread queue.
-    public var callbackQueue        = DispatchQueue.main
+    var callbackQueue        = DispatchQueue.main
 
     var optionalProtocols: [String]?
 
@@ -111,32 +111,32 @@ public class WebSocket: NSObject, StreamDelegate {
 
     /// Responds to callback about new messages coming in over the WebSocket
     /// and also connection/disconnect messages.
-    public weak var delegate: WebSocketDelegate?
+    weak var delegate: WebSocketDelegate?
 
     /// Recives a callback for each pong message recived.
-    public weak var pongDelegate: WebSocketPongDelegate?
+    weak var pongDelegate: WebSocketPongDelegate?
 
 
     // MARK: - Block based API.
 
-    public var onConnect: ((Void) -> Void)?
-    public var onDisconnect: ((NSError?) -> Void)?
-    public var onText: ((String) -> Void)?
-    public var onData: ((Data) -> Void)?
-    public var onPong: ((Void) -> Void)?
+    var onConnect: ((Void) -> Void)?
+    var onDisconnect: ((NSError?) -> Void)?
+    var onText: ((String) -> Void)?
+    var onData: ((Data) -> Void)?
+    var onPong: ((Void) -> Void)?
 
-    public var headers = [String: String]()
-    public var voipEnabled = false
-    public var selfSignedSSL = false
-    public var security: SSLSecurity?
-    public var enabledSSLCipherSuites: [SSLCipherSuite]?
-    public var origin: String?
-    public var timeout = 5
-    public var isConnected: Bool {
+    var headers = [String: String]()
+    var voipEnabled = false
+    var selfSignedSSL = false
+    var security: SSLSecurity?
+    var enabledSSLCipherSuites: [SSLCipherSuite]?
+    var origin: String?
+    var timeout = 5
+    var isConnected: Bool {
         return connected
     }
 
-    public var currentURL: URL { return url }
+    var currentURL: URL { return url }
 
     // MARK: - Private
 
@@ -163,7 +163,7 @@ public class WebSocket: NSObject, StreamDelegate {
     /// The shared processing queue used for all WebSocket.
     private static let sharedWorkQueue = DispatchQueue(label: "com.vluxe.starscream.websocket", attributes: [])
 
-    public init(url: URL, protocols: [String]? = nil) {
+    init(url: URL, protocols: [String]? = nil) {
         self.url = url
         self.origin = url.absoluteString
         writeQueue.maxConcurrentOperationCount = 1
@@ -171,7 +171,7 @@ public class WebSocket: NSObject, StreamDelegate {
     }
 
     /// Connect to the WebSocket server on a background thread.
-    public func connect() {
+    func connect() {
         guard !isConnecting else { return }
         didDisconnect = false
         isConnecting = true
@@ -188,7 +188,7 @@ public class WebSocket: NSObject, StreamDelegate {
      I immediately close the socket (without sending a Close control frame) and notify my delegate.
      - Parameter forceTimeout: Maximum time to wait for the server to close the socket.
      */
-    public func disconnect(forceTimeout: TimeInterval? = nil) {
+    func disconnect(forceTimeout: TimeInterval? = nil) {
         switch forceTimeout {
         case .some(let seconds) where seconds > 0:
             callbackQueue.asyncAfter(deadline: .now() + Double(Int64(seconds * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) {
@@ -204,17 +204,17 @@ public class WebSocket: NSObject, StreamDelegate {
         }
     }
 
-    public func write(string: String, completion: (() -> ())? = nil) {
+    func write(string: String, completion: (() -> ())? = nil) {
         guard isConnected else { return }
         dequeueWrite(string.data(using: String.Encoding.utf8)!, code: .textFrame, writeCompletion: completion)
     }
 
-    public func write(data: Data, completion: (() -> ())? = nil) {
+    func write(data: Data, completion: (() -> ())? = nil) {
         guard isConnected else { return }
         dequeueWrite(data, code: .binaryFrame, writeCompletion: completion)
     }
 
-    public func write(_ ping: Data, completion: (() -> ())? = nil) {
+    func write(_ ping: Data, completion: (() -> ())? = nil) {
         guard isConnected else { return }
         dequeueWrite(ping, code: .ping, writeCompletion: completion)
     }
@@ -344,7 +344,7 @@ public class WebSocket: NSObject, StreamDelegate {
         }
     }
 
-    public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+    func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         if let sec = security, !certValidated && [.hasBytesAvailable, .hasSpaceAvailable].contains(eventCode) {
             let trust = aStream.property(forKey: kCFStreamPropertySSLPeerTrust as Stream.PropertyKey) as AnyObject
             let domain = aStream.property(forKey: kCFStreamSSLPeerName as Stream.PropertyKey) as? String

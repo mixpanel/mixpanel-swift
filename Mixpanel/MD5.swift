@@ -10,9 +10,11 @@
 //
 //  In no event will the authors be held liable for any damages arising from the use of this software.
 //
-//  Permission is granted to anyone to use this software for any purpose,including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:
+//  Permission is granted to anyone to use this software for any purpose,including commercial applications,
+//  and to alter it and redistribute it freely, subject to the following restrictions:
 //
-//  - The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation is required.
+//  - The origin of this software must not be misrepresented; you must not claim that you wrote the original software.
+//    If you use this software in a product, an acknowledgment in the product documentation is required.
 //  - Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 //  - This notice may not be removed or altered from any source or binary distribution.
 
@@ -153,7 +155,7 @@ extension MD5: Updatable {
     }
 }
 
-public protocol Updatable {
+protocol Updatable {
     /// Update given bytes in chunks.
     ///
     /// - parameter bytes: Bytes to process
@@ -184,7 +186,7 @@ public protocol Updatable {
 }
 
 extension Updatable {
-    mutating public func update<T: Sequence>(withBytes bytes: T,
+    mutating func update<T: Sequence>(withBytes bytes: T,
                                 isLast: Bool = false,
                                 output: (Array<UInt8>) -> Void) throws where T.Iterator.Element == UInt8 {
         let processed = try self.update(withBytes: bytes, isLast: isLast)
@@ -193,22 +195,22 @@ extension Updatable {
         }
     }
 
-    mutating public func finish<T: Sequence>(withBytes bytes: T) throws -> Array<UInt8> where T.Iterator.Element == UInt8 {
+    mutating func finish<T: Sequence>(withBytes bytes: T) throws -> Array<UInt8> where T.Iterator.Element == UInt8 {
         return try self.update(withBytes: bytes, isLast: true)
     }
 
-    mutating public func finish() throws  -> Array<UInt8> {
+    mutating func finish() throws  -> Array<UInt8> {
         return try self.update(withBytes: [], isLast: true)
     }
 
-    mutating public func finish<T: Sequence>(withBytes bytes: T, output: (Array<UInt8>) -> Void) throws where T.Iterator.Element == UInt8 {
+    mutating func finish<T: Sequence>(withBytes bytes: T, output: (Array<UInt8>) -> Void) throws where T.Iterator.Element == UInt8 {
         let processed = try self.update(withBytes: bytes, isLast: true)
         if !processed.isEmpty {
             output(processed)
         }
     }
 
-    mutating public func finish(output: (Array<UInt8>) -> Void) throws {
+    mutating func finish(output: (Array<UInt8>) -> Void) throws {
         try self.finish(withBytes: [], output: output)
     }
 }
@@ -348,7 +350,7 @@ struct BytesSequence<D: RandomAccessCollection>: Sequence where D.Iterator.Eleme
 }
 
 extension Data {
-    public func md5() -> Data {
+    func md5() -> Data {
         let result = Digest.md5(self.bytes)
         return Data(bytes: result)
     }
@@ -356,33 +358,33 @@ extension Data {
 
 extension Data {
 
-    public var bytes: Array<UInt8> {
+    var bytes: Array<UInt8> {
         return Array(self)
     }
 
-    public func toHexString() -> String {
+    func toHexString() -> String {
         return self.bytes.toHexString()
     }
 }
 
-public struct Digest {
-    public static func md5(_ bytes: Array<UInt8>) -> Array<UInt8> {
+struct Digest {
+    static func md5(_ bytes: Array<UInt8>) -> Array<UInt8> {
         return MD5().calculate(for: bytes)
     }
 }
 
-public protocol CSArrayType: Collection, RangeReplaceableCollection {
+protocol CSArrayType: Collection, RangeReplaceableCollection {
     func cs_arrayValue() -> [Iterator.Element]
 }
 
 extension Array: CSArrayType {
-    public func cs_arrayValue() -> [Iterator.Element] {
+    func cs_arrayValue() -> [Iterator.Element] {
         return self
     }
 }
 
-public extension CSArrayType where Iterator.Element == UInt8 {
-    public func toHexString() -> String {
+extension CSArrayType where Iterator.Element == UInt8 {
+    func toHexString() -> String {
         return self.lazy.reduce("") {
             var s = String($1, radix: 16)
             if s.characters.count == 1 {

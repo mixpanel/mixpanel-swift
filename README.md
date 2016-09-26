@@ -28,8 +28,6 @@ If you are using Objective-C, we recommend using our **[Objective-C Library](htt
 | In-app Notifications |               |       ✔       |
 | Codeless Tracking |               |       ✔       |
 
-If you'd like to use Codeless Tracking (with the visual editor) please use our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
-
 # Installation
 
 ## CocoaPods

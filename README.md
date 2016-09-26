@@ -4,9 +4,11 @@
 
 
 [![Build Status](https://travis-ci.org/mixpanel/mixpanel-swift.svg)](https://travis-ci.org/mixpanel/mixpanel-swift)
-[![CocoaPods Version](http://img.shields.io/cocoapods/v/Mixpanel.svg?style=flat)](https://mixpanel.com)
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
-[![Apache License](http://img.shields.io/cocoapods/l/Mixpanel.svg?style=flat)](https://mixpanel.com)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mixpanel/mixpanel-swift.svg)](http://isitmaintained.com/project/mixpanel/mixpanel-swift "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/mixpanel/mixpanel-swift.svg)](http://isitmaintained.com/project/mixpanel/mixpanel-swift "Percentage of issues still open")
+[![CocoaPods Compatible](http://img.shields.io/cocoapods/v/Mixpanel-swift.svg)](https://mixpanel.com)
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg)](https://github.com/Carthage/Carthage)
+[![Apache License](http://img.shields.io/cocoapods/l/Mixpanel-swift.svg)](https://mixpanel.com)
 
 # Introduction
 
@@ -15,14 +17,20 @@ Welcome to the official Mixpanel Swift Library
 The Mixpanel Swift library for iOS is an open source project, and we'd love to see your contributions! 
 We'd also love for you to come and work with us! Check out **[Jobs](http://boards.greenhouse.io/mixpanel/jobs/25226#.U_4JXEhORKU)** for details.
 
-If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**
+If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
 
 ## Current supported features
 
-* Tracking API
-* Mixpanel People API
-* Swift2.3 and latest [Swift3](https://github.com/mixpanel/mixpanel-swift/tree/swift3)
-* [Full Documentation](https://mixpanel.github.io/mixpanel-swift/)
+**Our master branch and our 2.x releases are now in Swift 3. If you wish to use our Swift 2.3 implementation, please point to our v1.0.1 release.**
+
+| Feature      | Swift 3 | [Swift 2.3](https://github.com/mixpanel/mixpanel-swift/tree/swift2.3) |
+| -------      | ------------- | -------------                                                            |
+| Tracking API |       ✔       |       ✔       |
+| People API   |       ✔       |       ✔       |
+| [Documentation](https://mixpanel.github.io/mixpanel-swift)|       ✔       |        ✔       |
+| tvOS Support |       ✔        |              |
+| In-app Notifications |       ✔        |              |
+| Codeless Tracking |       ✔        |              |
 
 # Installation
 

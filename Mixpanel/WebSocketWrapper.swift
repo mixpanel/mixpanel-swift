@@ -22,6 +22,7 @@ class WebSocketWrapper: WebSocketDelegate {
     static let sessionVariantKey = "session_variant"
     static let startLoadingAnimationKey = "connectivityBarLoading"
     static let finishLoadingAnimationKey = "connectivtyBarFinished"
+    static var retries = 0
     var open: Bool
     var connected: Bool
     let url: URL
@@ -71,27 +72,25 @@ class WebSocketWrapper: WebSocketDelegate {
     }
 
     func open(initiate: Bool, maxInterval: Int = 0, maxRetries: Int = 0) {
-        var retries = 0
-
         Logger.debug(message: "In opening connection. Initiate: \(initiate), "
-            + "retries: \(retries), maxRetries: \(maxRetries), "
+            + "retries: \(WebSocketWrapper.retries), maxRetries: \(maxRetries), "
             + "maxInterval: \(maxInterval), connected: \(connected)")
 
-        if connected || retries > maxRetries {
+        if connected || WebSocketWrapper.retries > maxRetries {
             // exit retry loop if any of the conditions are met
-            retries = 0
-        } else if initiate || retries > 0 {
+            WebSocketWrapper.retries = 0
+        } else if initiate || WebSocketWrapper.retries > 0 {
             if !open {
-                Logger.debug(message: "Attempting to open WebSocket to \(url), try \(retries) out of \(maxRetries)")
+                Logger.debug(message: "Attempting to open WebSocket to \(url), try \(WebSocketWrapper.retries) out of \(maxRetries)")
                 open = true
                 webSocket.connect()
             }
         }
-        if retries < maxRetries {
-            DispatchQueue.main.asyncAfter(deadline: .now() + min(pow(1.4, Double(retries)), Double(maxInterval))) {
+        if WebSocketWrapper.retries < maxRetries {
+            DispatchQueue.main.asyncAfter(deadline: .now() + min(pow(1.4, Double(WebSocketWrapper.retries)), Double(maxInterval))) {
                 self.open(initiate: false, maxInterval: maxInterval, maxRetries: maxRetries)
             }
-            retries += 1
+            WebSocketWrapper.retries += 1
         }
     }
 
@@ -214,9 +213,11 @@ class WebSocketWrapper: WebSocketDelegate {
     }
 
     func websocketDidReceiveMessage(_ socket: WebSocket, text: String) {
+        var shouldShowUI = false
         if !connected {
             connected = true
             showConnectedView(loading: true)
+            shouldShowUI = true
             if let callback = connectCallback {
                 callback()
             }
@@ -226,14 +227,21 @@ class WebSocketWrapper: WebSocketDelegate {
             Logger.info(message: "WebSocket received message: \(message.debugDescription)")
             if let commandOperation = message?.responseCommand(connection: self) {
                 commandQueue.addOperation(commandOperation)
+                if shouldShowUI {
+                    showConnectedView(loading: false)
+                }
+            } else if shouldShowUI {
+                hideConnectedView()
             }
         }
     }
 
     func websocketDidReceiveData(_ socket: WebSocket, data: Data) {
+        var shouldShowUI = false
         if !connected {
             connected = true
             showConnectedView(loading: true)
+            shouldShowUI = true
             if let callback = connectCallback {
                 callback()
             }
@@ -243,6 +251,11 @@ class WebSocketWrapper: WebSocketDelegate {
         Logger.info(message: "WebSocket received message: \(message.debugDescription)")
         if let commandOperation = message?.responseCommand(connection: self) {
             commandQueue.addOperation(commandOperation)
+            if shouldShowUI {
+                showConnectedView(loading: false)
+            }
+        } else {
+            hideConnectedView()
         }
 
     }
@@ -250,7 +263,6 @@ class WebSocketWrapper: WebSocketDelegate {
     func websocketDidConnect(_ socket: WebSocket) {
         Logger.info(message: "WebSocket \(socket) did open")
         commandQueue.isSuspended = false
-        showConnectedView(loading: false)
     }
 
     func websocketDidDisconnect(_ socket: WebSocket, error: NSError?) {

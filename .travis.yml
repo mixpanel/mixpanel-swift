@@ -9,7 +9,7 @@ env:
   global:
   - WORKSPACE=MixpanelDemo.xcworkspace
   - SCHEME=MixpanelDemo
-  - IOS_SDK=iphonesimulator9.3
+  - IOS_SDK=iphonesimulator10.0
   matrix:
     - DESTINATION="platform=iOS Simulator,OS=8.1,name=iPhone 4S"          SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="YES"
 #    - DESTINATION="platform=iOS Simulator,OS=8.2,name=iPhone 5"           SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="NO"

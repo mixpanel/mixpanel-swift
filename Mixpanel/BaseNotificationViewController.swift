@@ -21,8 +21,8 @@ class BaseNotificationViewController: UIViewController {
     var panStartPoint: CGPoint!
 
     enum Style: String {
-        case Dark = "dark"
-        case Light = "light"
+        case dark = "dark"
+        case light = "light"
     }
 
     convenience init(notification: InAppNotification, nameOfClass: String) {

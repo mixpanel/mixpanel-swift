@@ -44,7 +44,7 @@ struct InAppNotification {
             return nil
         }
 
-        guard let type = object["type"] as? String else { // todo check if its right types
+        guard let type = object["type"] as? String else {
             Logger.error(message: "invalid notification type")
             return nil
         }
@@ -82,7 +82,7 @@ struct InAppNotification {
                 return nil
         }
 
-        if type == InAppType.Takeover.rawValue {
+        if type == InAppType.takeover.rawValue {
             imageURLComponents.path = imageURLComponents.path.appendSuffixBeforeExtension(suffix: "@2x")
         }
 

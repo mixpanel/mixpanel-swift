@@ -59,7 +59,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         okButton.layer.cornerRadius = 5
         okButton.layer.borderWidth = 2
 
-        if notification.style == Style.Light.rawValue {
+        if notification.style == Style.light.rawValue {
             viewMask.backgroundColor = InAppNotificationsConstants.takeoverLightBGColor
             titleLabel.textColor = InAppNotificationsConstants.takeoverLightTitleColor
             bodyLabel.textColor = InAppNotificationsConstants.takeoverLightBodyColor

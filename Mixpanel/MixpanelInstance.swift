@@ -82,6 +82,20 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
 
+    /// Controls whether to enable the visual editor for codeless on mixpanel.com
+    /// You will be unable to edit codeless events with this disabled, however previously
+    /// created codeless events will still be delivered.
+    open var enableVisualEditorForCodeless: Bool {
+        set {
+            decideInstance.enableVisualEditorForCodeless = newValue
+            if !newValue {
+                decideInstance.webSocketWrapper?.close()
+            }
+        }
+        get {
+            return decideInstance.enableVisualEditorForCodeless
+        }
+    }
     /// The base URL used for Mixpanel API requests.
     /// Useful if you need to proxy Mixpanel requests. Defaults to
     /// https://api.mixpanel.com.
@@ -93,6 +107,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             return BasePath.MixpanelAPI
         }
     }
+
     open var debugDescription: String {
         return "Mixpanel(\n"
         + "    Token: \(apiToken),\n"
@@ -108,19 +123,19 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     open var loggingEnabled: Bool = false {
         didSet {
             if loggingEnabled {
-                Logger.enableLevel(.Debug)
-                Logger.enableLevel(.Info)
-                Logger.enableLevel(.Warning)
-                Logger.enableLevel(.Error)
+                Logger.enableLevel(.debug)
+                Logger.enableLevel(.info)
+                Logger.enableLevel(.warning)
+                Logger.enableLevel(.error)
 
                 Logger.info(message: "Logging Enabled")
             } else {
                 Logger.info(message: "Logging Disabled")
 
-                Logger.disableLevel(.Debug)
-                Logger.disableLevel(.Info)
-                Logger.disableLevel(.Warning)
-                Logger.disableLevel(.Error)
+                Logger.disableLevel(.debug)
+                Logger.disableLevel(.info)
+                Logger.disableLevel(.warning)
+                Logger.disableLevel(.error)
             }
         }
     }
@@ -187,6 +202,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         decideInstance.inAppDelegate = self
         setupListeners()
         unarchive()
+        executeCachedCodelessBindings()
 
         #if os(iOS)
             if let notification =
@@ -232,6 +248,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                                        name: NSNotification.Name("com.parse.bolts.measurement_event"),
                                        object: nil)
 
+        initializeGestureRecognizer()
     }
 
     deinit {
@@ -245,6 +262,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             if let decideResponse = decideResponse {
                 if self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
                     self.decideInstance.notificationsInstance.showNotification(decideResponse.unshownInAppNotifications.first!)
+                }
+
+                DispatchQueue.main.sync {
+                    for binding in decideResponse.newCodelessBindings {
+                        binding.execute()
+                    }
                 }
             }
         }
@@ -268,6 +291,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
         serialQueue.async() {
             self.archive()
+            self.decideInstance.decideFetched = false
 
             if self.taskId != UIBackgroundTaskInvalid {
                 sharedApplication.endBackgroundTask(self.taskId)
@@ -334,6 +358,26 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
     #endif
+
+    func initializeGestureRecognizer() {
+        DispatchQueue.main.async {
+            let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.connectGestureRecognized(gesture:)))
+            gestureRecognizer.minimumPressDuration = 3
+            gestureRecognizer.cancelsTouchesInView = false
+            #if IOS_SIMULATOR
+                gestureRecognizer.numberOfTouchesRequired = 2
+            #else
+                gestureRecognizer.numberOfTouchesRequired = 4
+            #endif
+            UIApplication.shared.keyWindow?.addGestureRecognizer(gestureRecognizer)
+        }
+    }
+
+    @objc func connectGestureRecognized(gesture: UILongPressGestureRecognizer) {
+        if gesture.state == UIGestureRecognizerState.began && enableVisualEditorForCodeless {
+            connectToWebSocket()
+        }
+    }
 
 }
 
@@ -435,6 +479,9 @@ extension MixpanelInstance {
             self.people.distinctId = nil
             self.people.peopleQueue = Queue()
             self.people.unidentifiedQueue = Queue()
+            self.decideInstance.notificationsInstance.shownNotifications = Set()
+            self.decideInstance.decideFetched = false
+            self.decideInstance.codelessInstance.codelessBindings = Set()
             self.archive()
         }
     }
@@ -464,6 +511,7 @@ extension MixpanelInstance {
         Persistence.archive(eventsQueue: eventsQueue,
                             peopleQueue: people.peopleQueue,
                             properties: properties,
+                            codelessBindings: decideInstance.codelessInstance.codelessBindings,
                             token: apiToken)
     }
 
@@ -475,7 +523,8 @@ extension MixpanelInstance {
          distinctId,
          people.distinctId,
          people.unidentifiedQueue,
-         decideInstance.notificationsInstance.shownNotifications) = Persistence.unarchive(token: apiToken)
+         decideInstance.notificationsInstance.shownNotifications,
+         decideInstance.codelessInstance.codelessBindings) = Persistence.unarchive(token: apiToken)
 
         if distinctId == "" {
             distinctId = defaultDistinctId()
@@ -718,8 +767,8 @@ extension MixpanelInstance {
 }
 
 extension MixpanelInstance: InAppNotificationsDelegate {
-    // MARK: - Decide
 
+    // MARK: - Decide
     func checkDecide(forceFetch: Bool = false, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
         guard let distinctId = people.distinctId else {
             Logger.info(message: "Can't fetch from Decide without identifying first")
@@ -732,6 +781,19 @@ extension MixpanelInstance: InAppNotificationsDelegate {
                                             completion: completion)
         }
     }
+
+    // MARK: - WebSocket
+    func connectToWebSocket() {
+        decideInstance.connectToWebSocket(token: apiToken, mixpanelInstance: self)
+    }
+
+    // MARK: - Codeless
+    func executeCachedCodelessBindings() {
+        for binding in decideInstance.codelessInstance.codelessBindings {
+            binding.execute()
+        }
+    }
+
 
     // MARK: - In App Notifications
 

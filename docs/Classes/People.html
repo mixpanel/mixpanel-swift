@@ -43,10 +43,51 @@
             </ul>
           </li>
           <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/Array.html">Array</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Bool.html">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Date.html">Date</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Dictionary.html">Dictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Double.html">Double</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Float.html">Float</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Int.html">Int</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/NSNull.html">NSNull</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/String.html">String</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UInt.html">UInt</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/URL.html">URL</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
             <a href="../Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="../Protocols/MixpanelDelegate.html">MixpanelDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelType.html">MixpanelType</a>
               </li>
             </ul>
           </li>
@@ -58,7 +99,7 @@
             <h1>People</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">People</span></code></pre>
+                  <pre class="highlight"><code><span class="n">open</span> <span class="kd">class</span> <span class="kt">People</span></code></pre>
 
                 </div>
               </div>
@@ -93,7 +134,7 @@ current time for all $set, $append, and $add operations</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">ignoreTime</span> <span class="o">=</span> <span class="kc">false</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">ignoreTime</span> <span class="o">=</span> <span class="kc">false</span></code></pre>
 
                         </div>
                       </div>
@@ -137,7 +178,7 @@ token passed to
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">addPushDeviceToken</span><span class="p">(</span><span class="n">_</span> <span class="nv">deviceToken</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">addPushDeviceToken</span><span class="p">(</span><span class="n">_</span> <span class="nv">deviceToken</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -187,7 +228,7 @@ in conjunction with a call to <code>reset</code>, or when a user is logging out.
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">removePushDeviceToken</span><span class="p">(</span><span class="n">_</span> <span class="nv">deviceToken</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">removePushDeviceToken</span><span class="p">(</span><span class="n">_</span> <span class="nv">deviceToken</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -217,9 +258,9 @@ in conjunction with a call to <code>reset</code>, or when a user is logging out.
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel6People3setFT10propertiesGVs10DictionarySSPs9AnyObject___T_"></a>
+                    <a name="/s:FC8Mixpanel6People3setFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_"></a>
                     <a name="//apple_ref/swift/Method/set(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel6People3setFT10propertiesGVs10DictionarySSPs9AnyObject___T_">set(properties:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel6People3setFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_">set(properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -229,9 +270,9 @@ in conjunction with a call to <code>reset</code>, or when a user is logging out.
                       <div class="abstract">
                         <p>Set properties on the current user in Mixpanel People.</p>
 
-<p>The properties will be set on the current user. The property keys must be String
-objects and the supported property value types are:
-String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.
+<p>The properties will be set on the current user.
+Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
 You can override the current project token and distinct Id by
 including the special properties: $token and $distinct_id. If the existing
 user record on the server already has a value for a given property, the old
@@ -248,7 +289,7 @@ value is overwritten. Other existing properties will not be affected.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -278,9 +319,9 @@ value is overwritten. Other existing properties will not be affected.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel6People3setFT8propertySS2toPs9AnyObject__T_"></a>
+                    <a name="/s:FC8Mixpanel6People3setFT8propertySS2toPS_12MixpanelType__T_"></a>
                     <a name="//apple_ref/swift/Method/set(property:to:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel6People3setFT8propertySS2toPs9AnyObject__T_">set(property:to:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel6People3setFT8propertySS2toPS_12MixpanelType__T_">set(property:to:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -290,15 +331,15 @@ value is overwritten. Other existing properties will not be affected.</p>
                       <div class="abstract">
                         <p>Convenience method for setting a single property in Mixpanel People.</p>
 
-<p>The property keys must be String objects and the supported property value types are:
-String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.</p>
+<p>Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">property</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">to</span><span class="p">:</span> <span class="kt">AnyObject</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">property</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">to</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -341,9 +382,9 @@ String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, a
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel6People7setOnceFT10propertiesGVs10DictionarySSPs9AnyObject___T_"></a>
+                    <a name="/s:FC8Mixpanel6People7setOnceFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_"></a>
                     <a name="//apple_ref/swift/Method/setOnce(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel6People7setOnceFT10propertiesGVs10DictionarySSPs9AnyObject___T_">setOnce(properties:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel6People7setOnceFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_">setOnce(properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -364,7 +405,7 @@ representing the first time something happened.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">setOnce</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">setOnce</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -415,7 +456,7 @@ that don&rsquo;t exist there will be no effect.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">unset</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">])</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">unset</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">])</span></code></pre>
 
                         </div>
                       </div>
@@ -445,9 +486,9 @@ that don&rsquo;t exist there will be no effect.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel6People9incrementFT10propertiesGVs10DictionarySSPs9AnyObject___T_"></a>
+                    <a name="/s:FC8Mixpanel6People9incrementFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_"></a>
                     <a name="//apple_ref/swift/Method/increment(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel6People9incrementFT10propertiesGVs10DictionarySSPs9AnyObject___T_">increment(properties:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel6People9incrementFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_">increment(properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -466,7 +507,7 @@ will be set to the increment amount. Property values must be number objects.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">increment</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">increment</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -514,7 +555,7 @@ amount.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">increment</span><span class="p">(</span><span class="nv">property</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">by</span><span class="p">:</span> <span class="kt">Double</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">increment</span><span class="p">(</span><span class="nv">property</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">by</span><span class="p">:</span> <span class="kt">Double</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -557,9 +598,9 @@ amount.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel6People6appendFT10propertiesGVs10DictionarySSPs9AnyObject___T_"></a>
+                    <a name="/s:FC8Mixpanel6People6appendFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_"></a>
                     <a name="//apple_ref/swift/Method/append(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel6People6appendFT10propertiesGVs10DictionarySSPs9AnyObject___T_">append(properties:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel6People6appendFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_">append(properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -569,15 +610,15 @@ amount.</p>
                       <div class="abstract">
                         <p>Append values to list properties.</p>
 
-<p>The property keys must be String objects and the supported property value types are:
-String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.</p>
+<p>Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">append</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">append</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -607,9 +648,9 @@ String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, a
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel6People6removeFT10propertiesGVs10DictionarySSPs9AnyObject___T_"></a>
+                    <a name="/s:FC8Mixpanel6People6removeFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_"></a>
                     <a name="//apple_ref/swift/Method/remove(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel6People6removeFT10propertiesGVs10DictionarySSPs9AnyObject___T_">remove(properties:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel6People6removeFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_">remove(properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -619,15 +660,15 @@ String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, a
                       <div class="abstract">
                         <p>Removes list properties.</p>
 
-<p>The property keys must be String objects and the supported property value types are:
-String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, and NSNull.</p>
+<p>Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">remove</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">remove</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -657,9 +698,9 @@ String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, a
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel6People5unionFT10propertiesGVs10DictionarySSPs9AnyObject___T_"></a>
+                    <a name="/s:FC8Mixpanel6People5unionFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_"></a>
                     <a name="//apple_ref/swift/Method/union(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel6People5unionFT10propertiesGVs10DictionarySSPs9AnyObject___T_">union(properties:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel6People5unionFT10propertiesGVs10DictionarySSPS_12MixpanelType___T_">union(properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -676,7 +717,7 @@ String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, a
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">union</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">union</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -706,9 +747,9 @@ String, Int, UInt, Double, Float, [AnyObject], [String: AnyObject], Date, URL, a
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC8Mixpanel6People11trackChargeFT6amountSd10propertiesGSqGVs10DictionarySSPs9AnyObject____T_"></a>
+                    <a name="/s:FC8Mixpanel6People11trackChargeFT6amountSd10propertiesGSqGVs10DictionarySSPS_12MixpanelType____T_"></a>
                     <a name="//apple_ref/swift/Method/trackCharge(amount:properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC8Mixpanel6People11trackChargeFT6amountSd10propertiesGSqGVs10DictionarySSPs9AnyObject____T_">trackCharge(amount:properties:)</a>
+                    <a class="token" href="#/s:FC8Mixpanel6People11trackChargeFT6amountSd10propertiesGSqGVs10DictionarySSPS_12MixpanelType____T_">trackCharge(amount:properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -728,7 +769,7 @@ revenue analytics to see which products are generating the most revenue.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">trackCharge</span><span class="p">(</span><span class="nv">amount</span><span class="p">:</span> <span class="kt">Double</span><span class="p">,</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">trackCharge</span><span class="p">(</span><span class="nv">amount</span><span class="p">:</span> <span class="kt">Double</span><span class="p">,</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -788,7 +829,7 @@ revenue analytics to see which products are generating the most revenue.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">clearCharges</span><span class="p">()</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">clearCharges</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>
@@ -815,7 +856,7 @@ revenue analytics to see which products are generating the most revenue.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">deleteUser</span><span class="p">()</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">deleteUser</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>
@@ -827,8 +868,8 @@ revenue analytics to see which products are generating the most revenue.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2016 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2016-08-16)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2016 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2016-09-26)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

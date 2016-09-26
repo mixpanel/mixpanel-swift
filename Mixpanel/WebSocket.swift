@@ -163,7 +163,6 @@ public class WebSocket: NSObject, StreamDelegate {
     /// The shared processing queue used for all WebSocket.
     private static let sharedWorkQueue = DispatchQueue(label: "com.vluxe.starscream.websocket", attributes: [])
 
-    /// Used for setting protocols.
     public init(url: URL, protocols: [String]? = nil) {
         self.url = url
         self.origin = url.absoluteString
@@ -205,23 +204,11 @@ public class WebSocket: NSObject, StreamDelegate {
         }
     }
 
-    /**
-     Write a string to the websocket. This sends it as a text frame.
-     If you supply a non-nil completion block, I will perform it when the write completes.
-     - parameter str:        The string to write.
-     - parameter completion: The (optional) completion handler.
-     */
     public func write(string: String, completion: (() -> ())? = nil) {
         guard isConnected else { return }
         dequeueWrite(string.data(using: String.Encoding.utf8)!, code: .textFrame, writeCompletion: completion)
     }
 
-    /**
-     Write binary data to the websocket. This sends it as a binary frame.
-     If you supply a non-nil completion block, I will perform it when the write completes.
-     - parameter data:       The data to write.
-     - parameter completion: The (optional) completion handler.
-     */
     public func write(data: Data, completion: (() -> ())? = nil) {
         guard isConnected else { return }
         dequeueWrite(data, code: .binaryFrame, writeCompletion: completion)

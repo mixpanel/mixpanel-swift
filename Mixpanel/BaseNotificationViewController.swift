@@ -26,7 +26,7 @@ class BaseNotificationViewController: UIViewController {
     }
 
     convenience init(notification: InAppNotification, nameOfClass: String) {
-        self.init(nibName: nameOfClass, bundle: Bundle(identifier: BundleConstants.ID))
+        self.init(nibName: nameOfClass, bundle: Bundle(for: type(of: self)))
         self.notification = notification
     }
 

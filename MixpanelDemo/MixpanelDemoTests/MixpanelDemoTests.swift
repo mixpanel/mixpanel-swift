@@ -552,36 +552,4 @@ class MixpanelDemoTests: MixpanelBaseTests {
     func testTelephonyInfoInitialized() {
         XCTAssertNotNil(AutomaticProperties.telephonyInfo, "telephonyInfo wasn't initialized")
     }
-
-    func testNestedUnsupportedTypes() {
-        stubTrack()
-        stubEngage()
-        let p = ["property": ["p": [Data()]]]
-        mixpanel.track(event: "test", properties: p)
-        mixpanel.identify(distinctId: "1234")
-        mixpanel.people.set(properties: p)
-        flushAndWaitForSerialQueue()
-    }
-
-    func testUnexpectedBeahviours() {
-        stubEngage()
-        mixpanel.identify(distinctId: "1234")
-        mixpanel.people.set(properties: ["p1": "string type"])
-        flushAndWaitForSerialQueue()
-
-        mixpanel.people.increment(property: "p1", by: 2.3)
-        flushAndWaitForSerialQueue()
-
-        mixpanel.people.union(properties: ["p1": ["unioned item"]])
-        flushAndWaitForSerialQueue()
-
-        mixpanel.people.append(properties: ["p1": "appended item"])
-        flushAndWaitForSerialQueue()
-    }
-
-    func testUnexpectedTypes() {
-        stubTrack()
-        mixpanel.identify(distinctId: "1234")
-        mixpanel.track(event: "lol", properties: ["hehe1": Date()])
-    }
 }

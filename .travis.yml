@@ -1,4 +1,6 @@
 language: objective-c
+before_install:
+  - gem install cocoapods --pre
 osx_image: xcode8
 before_script: cd MixpanelDemo
 podfile: MixpanelDemo/Podfile

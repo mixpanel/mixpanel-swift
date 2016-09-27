@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 enum MessageType: String {
     case bindingRequest = "event_binding_request"

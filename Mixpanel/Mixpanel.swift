@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 /// The primary class for integrating Mixpanel with your app.
 open class Mixpanel {

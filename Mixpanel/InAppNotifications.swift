@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 protocol InAppNotificationsDelegate {
     func notificationDidShow(_ notification: InAppNotification)
@@ -36,16 +37,17 @@ class InAppNotifications: NotificationViewControllerDelegate {
                     Logger.warn(message: "already showing an in-app notification")
                 } else {
                     var shownNotification = false
+                    #if os(iOS)
                     if notification.type == InAppType.mini.rawValue {
                         shownNotification = self.showMiniNotification(notification)
                     } else {
                         shownNotification = self.showTakeoverNotification(notification)
                     }
-
                     if shownNotification {
                         self.markNotificationShown(notification: notification)
                         self.delegate?.notificationDidShow(notification)
                     }
+                    #endif
                 }
             }
         } else {
@@ -60,6 +62,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
         shownNotifications.insert(notification.ID)
     }
 
+    #if os(iOS)
     func showMiniNotification(_ notification: InAppNotification) -> Bool {
         let miniNotificationVC = MiniNotificationViewController(notification: notification)
         miniNotificationVC.delegate = self
@@ -77,6 +80,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
         takeoverNotificationVC.show(animated: true)
         return true
     }
+    #endif
 
     @discardableResult
     func notificationShouldDismiss(controller: BaseNotificationViewController, status: Bool) -> Bool {

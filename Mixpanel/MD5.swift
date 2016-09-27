@@ -18,6 +18,8 @@
 //  - Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 //  - This notice may not be removed or altered from any source or binary distribution.
 
+import Foundation
+
 final class MD5 {
     static let blockSize: Int = 64
     static let digestSize: Int = 16 // 128 / 8

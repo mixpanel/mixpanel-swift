@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 class ObjectFilter: CustomStringConvertible {
     var name: String? = nil

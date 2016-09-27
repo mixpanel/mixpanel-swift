@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 @objc(UIFontToNSDictionary) class UIFontToNSDictionary: ValueTransformer {
     override class func transformedValueClass() -> AnyClass {

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 @objc(UIEdgeInsetsToNSDictionary) class UIEdgeInsetsToNSDictionary: ValueTransformer {
 

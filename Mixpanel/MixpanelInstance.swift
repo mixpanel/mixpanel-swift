@@ -82,20 +82,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
 
-    /// Controls whether to enable the visual editor for codeless on mixpanel.com
-    /// You will be unable to edit codeless events with this disabled, however previously
-    /// created codeless events will still be delivered.
-    open var enableVisualEditorForCodeless: Bool {
-        set {
-            decideInstance.enableVisualEditorForCodeless = newValue
-            if !newValue {
-                decideInstance.webSocketWrapper?.close()
-            }
-        }
-        get {
-            return decideInstance.enableVisualEditorForCodeless
-        }
-    }
     /// The base URL used for Mixpanel API requests.
     /// Useful if you need to proxy Mixpanel requests. Defaults to
     /// https://api.mixpanel.com.
@@ -140,6 +126,22 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
 
+    #if os(iOS)
+    /// Controls whether to enable the visual editor for codeless on mixpanel.com
+    /// You will be unable to edit codeless events with this disabled, however previously
+    /// created codeless events will still be delivered.
+    open var enableVisualEditorForCodeless: Bool {
+        set {
+            decideInstance.enableVisualEditorForCodeless = newValue
+            if !newValue {
+                decideInstance.webSocketWrapper?.close()
+            }
+        }
+        get {
+            return decideInstance.enableVisualEditorForCodeless
+        }
+    }
+
     /// Controls whether to automatically check for notifications for the
     /// currently identified user when the application becomes active.
     /// Defaults to true.
@@ -175,6 +177,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             return decideInstance.notificationsInstance.miniNotificationPresentationTime
         }
     }
+    #endif
 
     var apiToken = ""
     var superProperties = InternalProperties()
@@ -199,12 +202,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         people = People(apiToken: self.apiToken,
                         serialQueue: serialQueue)
         flushInstance._flushInterval = flushInterval
-        decideInstance.inAppDelegate = self
         setupListeners()
         unarchive()
-        executeCachedCodelessBindings()
 
         #if os(iOS)
+        decideInstance.inAppDelegate = self
+        executeCachedCodelessBindings()
+
             if let notification =
             launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
                 trackPushNotification(notification, event: "$app_open")
@@ -247,8 +251,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                                        selector: #selector(appLinksNotificationRaised(_:)),
                                        name: NSNotification.Name("com.parse.bolts.measurement_event"),
                                        object: nil)
-
+        #if os(iOS)
         initializeGestureRecognizer()
+        #endif
     }
 
     deinit {
@@ -257,7 +262,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
     @objc private func applicationDidBecomeActive(_ notification: Notification) {
         flushInstance.applicationDidBecomeActive()
-
+        #if os(iOS)
         checkDecide { decideResponse in
             if let decideResponse = decideResponse {
                 if self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
@@ -271,6 +276,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                 }
             }
         }
+        #endif
     }
 
     @objc private func applicationWillResignActive(_ notification: Notification) {
@@ -357,7 +363,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             AutomaticProperties.properties["$radio"] = currentRadio
         }
     }
-    #endif
 
     func initializeGestureRecognizer() {
         DispatchQueue.main.async {
@@ -378,6 +383,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             connectToWebSocket()
         }
     }
+    #endif
 
 }
 
@@ -766,6 +772,7 @@ extension MixpanelInstance {
     }
 }
 
+#if os(iOS)
 extension MixpanelInstance: InAppNotificationsDelegate {
 
     // MARK: - Decide
@@ -878,3 +885,4 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     }
 
 }
+#endif

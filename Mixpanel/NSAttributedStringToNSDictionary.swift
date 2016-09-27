@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 @objc(NSAttributedStringToNSDictionary) class NSAttributedStringToNSDictionary: ValueTransformer {
     override class func transformedValueClass() -> AnyClass {

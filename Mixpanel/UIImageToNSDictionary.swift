@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 @objc(UIImageToNSDictionary) class UIImageToNSDictionary: ValueTransformer {
 

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 @objc(UIColorToNSString) class UIColorToNSString: ValueTransformer {
 

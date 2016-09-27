@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 @objc(CGPointToNSDictionary) class CGPointToNSDictionary: ValueTransformer {
     override class func transformedValueClass() -> AnyClass {

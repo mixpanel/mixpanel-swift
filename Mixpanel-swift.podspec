@@ -8,8 +8,14 @@ Pod::Spec.new do |s|
   s.author       = { 'Mixpanel, Inc' => 'support@mixpanel.com' }
   s.source       = { :git => 'https://github.com/mixpanel/mixpanel-swift.git', :tag => "v#{s.version}" }
   s.ios.deployment_target = '8.0'
+  s.ios.source_files = 'Mixpanel/*.swift'
+  s.ios.resources = ['Mixpanel/**/*.{png,xib,storyboard}']
+  s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   s.tvos.deployment_target = '9.0'
-  s.source_files = 'Mixpanel/*.swift'
-  s.resources = ['Mixpanel/**/*.{png,xib,storyboard}']
+  s.tvos.source_files = 'Mixpanel/*.swift'
+  s.tvos.exclude_files = 'Mixpanel/MiniNotificationViewController.swift', 'Mixpanel/TakeoverNotificationViewController.swift'
+  s.tvos.frameworks = 'UIKit', 'Foundation'
   s.module_name = 'Mixpanel'
+
+
 end

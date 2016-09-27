@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 @objc(CGAffineTransformToNSDictionary) class CGAffineTransformToNSDictionary: ValueTransformer {
 

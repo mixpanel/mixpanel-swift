@@ -156,6 +156,10 @@ class Decide {
                 binding.stop()
             }
 
+            for variant in self.ABTestingInstance.variants {
+                variant.stop()
+            }
+
         }
 
         let disconnectCallback = { [weak mixpanelInstance] in
@@ -167,6 +171,10 @@ class Decide {
 
             for binding in self.codelessInstance.codelessBindings {
                 binding.execute()
+            }
+
+            for variant in self.ABTestingInstance.variants {
+                variant.execute()
             }
         }
 

@@ -142,6 +142,18 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
 
+    /// Controls whether to automatically check for A/B test variants for the
+    /// currently identified user when the application becomes active.
+    /// Defaults to true.
+    open var checkForVariantsOnActive: Bool {
+        set {
+            decideInstance.ABTestingInstance.checkForVariantsOnActive = newValue
+        }
+        get {
+            return decideInstance.ABTestingInstance.checkForVariantsOnActive
+        }
+    }
+
     /// Controls whether to automatically check for notifications for the
     /// currently identified user when the application becomes active.
     /// Defaults to true.
@@ -206,8 +218,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         unarchive()
 
         #if os(iOS)
-        decideInstance.inAppDelegate = self
-        executeCachedCodelessBindings()
+            decideInstance.inAppDelegate = self
+            executeCachedVariants()
+            executeCachedCodelessBindings()
 
             if let notification =
             launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
@@ -278,7 +291,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                 DispatchQueue.main.sync {
                     for variant in decideResponse.newVariants {
                         variant.execute()
-                        self.decideInstance.ABTestingInstance.markVariantRun(variant)
+                        self.markVariantRun(variant)
                     }
                 }
             }
@@ -494,6 +507,7 @@ extension MixpanelInstance {
             self.people.unidentifiedQueue = Queue()
             self.decideInstance.notificationsInstance.shownNotifications = Set()
             self.decideInstance.decideFetched = false
+            self.decideInstance.ABTestingInstance.variants = Set()
             self.decideInstance.codelessInstance.codelessBindings = Set()
             self.archive()
         }
@@ -525,6 +539,7 @@ extension MixpanelInstance {
                             peopleQueue: people.peopleQueue,
                             properties: properties,
                             codelessBindings: decideInstance.codelessInstance.codelessBindings,
+                            variants: decideInstance.ABTestingInstance.variants,
                             token: apiToken)
     }
 
@@ -537,7 +552,8 @@ extension MixpanelInstance {
          people.distinctId,
          people.unidentifiedQueue,
          decideInstance.notificationsInstance.shownNotifications,
-         decideInstance.codelessInstance.codelessBindings) = Persistence.unarchive(token: apiToken)
+         decideInstance.codelessInstance.codelessBindings,
+         decideInstance.ABTestingInstance.variants) = Persistence.unarchive(token: apiToken)
 
         if distinctId == "" {
             distinctId = defaultDistinctId()
@@ -808,6 +824,60 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         }
     }
 
+    // MARK: - A/B Testing
+    func markVariantRun(_ variant: Variant) {
+        Logger.info(message: "Marking variant \(variant.ID) shown for experiment \(variant.experimentID)")
+        let shownVariant = ["\(variant.experimentID)": variant.ID]
+        if people.distinctId != nil {
+            people.merge(properties: ["$experiments": shownVariant])
+        }
+
+        serialQueue.async {
+            guard let experiments = self.superProperties["$experiments"] as? [String: Any] else {
+                return
+            }
+            var superPropertiesCopy = self.superProperties
+            var shownVariants = experiments
+            shownVariants += shownVariant
+            superPropertiesCopy += ["$experiments": shownVariants]
+            self.superProperties = superPropertiesCopy
+            self.archiveProperties()
+        }
+
+        track(event: "$experiment_started", properties: ["$experiment_id": variant.experimentID,
+                                                         "$variant_id": variant.ID])
+
+    }
+
+    func executeCachedVariants() {
+        for variant in decideInstance.ABTestingInstance.variants {
+            variant.execute()
+        }
+    }
+
+    func checkForVariants(completion: @escaping (_ variants: Set<Variant>?) -> Void) {
+        checkDecide { response in
+            completion(response?.newVariants)
+        }
+    }
+
+    func joinExperiments(callback: (() -> Void)? = nil) {
+        checkForVariants { newVariants in
+            guard let newVariants = newVariants else {
+                return
+            }
+            for variant in newVariants {
+                variant.execute()
+                self.markVariantRun(variant)
+            }
+
+            DispatchQueue.main.async {
+                if let callback = callback {
+                    callback()
+                }
+            }
+        }
+    }
 
     // MARK: - In App Notifications
 

@@ -11,16 +11,6 @@ import Foundation
 class ABTesting {
 
     var variants = Set<Variant>()
+    var checkForVariantsOnActive = true
 
-    func markVariantRun(_ variant: Variant) {
-
-    }
-
-    func executeCachedVariants() {
-
-    }
-
-    func joinExperiments(callback: (() -> Void)? = nil) {
-
-    }
 }

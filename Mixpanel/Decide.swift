@@ -12,10 +12,12 @@ import UIKit
 struct DecideResponse {
     var unshownInAppNotifications: [InAppNotification]
     var newCodelessBindings: Set<CodelessBinding>
+    var newVariants: Set<Variant>
 
     init() {
         unshownInAppNotifications = []
         newCodelessBindings = Set()
+        newVariants = Set()
     }
 }
 
@@ -25,6 +27,7 @@ class Decide {
     var decideFetched = false
     var notificationsInstance = InAppNotifications()
     var codelessInstance = Codeless()
+    var ABTestingInstance = ABTesting()
     var webSocketWrapper: WebSocketWrapper?
 
     var inAppDelegate: InAppNotificationsDelegate? {
@@ -88,6 +91,28 @@ class Decide {
                 self.codelessInstance.codelessBindings.formUnion(newCodelessBindings)
                 self.codelessInstance.codelessBindings.subtract(finishedCodelessBindings)
 
+                var parsedVariants = Set<Variant>()
+                if let rawVariants = result["variants"] as? [[String: Any]] {
+                    for rawVariant in rawVariants {
+                        if let variant = Variant(JSONObject: rawVariant) {
+                            parsedVariants.insert(variant)
+                        }
+                    }
+                } else {
+                    Logger.error(message: "variants check response format error")
+                }
+
+                let runningVariants = Set(self.ABTestingInstance.variants.filter { return $0.running })
+                let finishedVariants = Set(self.ABTestingInstance.variants.filter { return $0.finished })
+                let toFinishVariants = runningVariants.subtracting(parsedVariants)
+                let newVariants = parsedVariants.subtracting(runningVariants)
+                decideResponse.newVariants = newVariants
+                let restartVariants = parsedVariants.intersection(runningVariants).intersection(finishedVariants)
+
+                self.ABTestingInstance.variants = newVariants.union(runningVariants)
+                restartVariants.forEach { $0.restart() }
+                toFinishVariants.forEach { $0.finish() }
+
                 self.decideFetched = true
                 semaphore.signal()
             }
@@ -105,7 +130,9 @@ class Decide {
             "available notifications out of " +
             "\(notificationsInstance.inAppNotifications.count) total")
         Logger.info(message: "decide check found \(decideResponse.newCodelessBindings.count) " +
-            "new codeless bindings our of \(codelessInstance.codelessBindings)")
+            "new codeless bindings out of \(codelessInstance.codelessBindings)")
+        Logger.info(message: "decide check found \(decideResponse.newVariants.count) " +
+            "new variants out of \(ABTestingInstance.variants)")
 
         completion(decideResponse)
     }

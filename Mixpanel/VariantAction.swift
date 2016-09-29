@@ -18,12 +18,12 @@ class VariantAction: NSObject, NSCoding {
     let swizzle: Bool
     let swizzleClass: AnyClass
     let swizzleSelector: Selector
-    let appliedTo: NSHashTable<AnyObject>
+    let appliedTo: NSHashTable<UIView>
 
     static let gettersForSetters = [NSSelectorFromString("setImage:forState:"):           NSSelectorFromString("imageForState:"),
                                     NSSelectorFromString("setImage:"):                    NSSelectorFromString("image"),
                                     NSSelectorFromString("setBackgroundImage:forState:"): NSSelectorFromString("imageForState:")]
-    static let originalCache = [UIView: UIImage]()
+    static var originalCache = [UIView: UIImage]()
 
     convenience init?(JSONObject: [String: Any]?) {
         guard let object = JSONObject else {
@@ -137,7 +137,14 @@ class VariantAction: NSObject, NSCoding {
     }
 
     func encode(with aCoder: NSCoder) {
-//TODO
+        aCoder.encode(name, forKey: "name")
+        aCoder.encode(path.string, forKey: "path")
+        aCoder.encode(NSStringFromSelector(selector), forKey: "selector")
+        aCoder.encode(args, forKey: "args")
+        aCoder.encode(original, forKey: "original")
+        aCoder.encode(swizzle, forKey: "swizzle")
+        aCoder.encode(NSStringFromClass(swizzleClass), forKey: "swizzleClass")
+        aCoder.encode(NSStringFromSelector(swizzleSelector), forKey: "swizzleSelector")
     }
 
     override func isEqual(_ object: Any?) -> Bool {
@@ -154,6 +161,91 @@ class VariantAction: NSObject, NSCoding {
 
     override var hash: Int {
         return self.name.hash
+    }
+
+    class func executeSelector(_ selector: Selector,
+                               args: [Any],
+                               path: ObjectSelector,
+                               root: AnyObject,
+                               leaf: AnyObject?) -> [(AnyObject, AnyObject?)] {
+        if let leaf = leaf {
+            if path.isSelected(leaf: leaf, from: root) {
+                return executeSelector(selector, args: args, on: [leaf])
+            } else {
+                return []
+            }
+        } else {
+            return executeSelector(selector, args: args, on: path.selectFrom(root: root))
+        }
+    }
+
+    @discardableResult
+    class func executeSelector(_ selector: Selector, args: [Any], on objects: [AnyObject]) -> [(AnyObject, AnyObject?)] {
+        var targetRetValuePairs = [(AnyObject, AnyObject?)]()
+        var transformedArgs = [Any]()
+        for argument in args {
+            if let argumentTuple = argument as? [AnyObject], argumentTuple.count == 2 {
+                guard let type = argumentTuple[1] as? String else {
+                    continue
+                }
+                let transformedArg = argumentTuple[0]
+                if let valueType = transformedArg as? NSValue {
+                    print("WE ARE FUCKED LOL")
+                }
+                transformedArgs.append(transformedArg)
+            }
+        }
+        for object in objects {
+            var retValue: AnyObject? = nil
+            if transformedArgs.isEmpty {
+                retValue = object.perform(selector)?.takeRetainedValue()
+            } else if transformedArgs.count == 1 {
+                retValue = object.perform(selector, with: transformedArgs[0])?.takeRetainedValue()
+            } else if transformedArgs.count == 2 {
+                retValue = object.perform(selector, with: transformedArgs[0], with: transformedArgs[1])?.takeRetainedValue()
+            } else {
+                print("WE ARE FUCKED 222 LOL")
+            }
+
+            targetRetValuePairs.append((object, retValue))
+        }
+        return targetRetValuePairs
+    }
+
+    func cacheOriginalImage(_ view: UIView) {
+        if let cacheSelector = VariantAction.gettersForSetters[selector] {
+            guard let rootVC = UIApplication.shared.keyWindow?.rootViewController else {
+                print("WTF JUST HAPPENED")
+                return
+            }
+            let cachedPerformedSelectors = VariantAction.executeSelector(cacheSelector, args: args, path: path, root: rootVC, leaf: view)
+            for performedSelector in cachedPerformedSelectors {
+                guard let view = performedSelector.0 as? UIView else {
+                    print("SOOOO FUCKED HAHA")
+                    continue
+                }
+                if VariantAction.originalCache[view] == nil {
+                    if let image = performedSelector.1 as? UIImage {
+                        VariantAction.originalCache[view] = image
+                    }
+                }
+            }
+        }
+    }
+
+    func restoreCachedImage() {
+        for object in appliedTo.allObjects {
+            if let originalImage = VariantAction.originalCache[object] {
+                let originalArgs = args.map { arg -> Any in
+                    if let arg = arg as? [AnyObject], let str = arg[1] as? String, str == "UIImage" {
+                        return [originalImage, "UIImage"] as [Any]
+                    }
+                    return arg
+                }
+                VariantAction.executeSelector(selector, args: originalArgs, on: [object])
+                VariantAction.originalCache.removeValue(forKey: object)
+            }
+        }
     }
 
 }

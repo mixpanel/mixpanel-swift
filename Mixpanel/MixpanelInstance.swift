@@ -274,6 +274,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                         binding.execute()
                     }
                 }
+
+                DispatchQueue.main.sync {
+                    for variant in decideResponse.newVariants {
+                        variant.execute()
+                        self.decideInstance.ABTestingInstance.markVariantRun(variant)
+                    }
+                }
             }
         }
         #endif

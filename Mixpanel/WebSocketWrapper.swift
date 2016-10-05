@@ -17,6 +17,10 @@ enum MessageType: String {
     case disconnect = "disconnect"
     case snapshotRequest = "snapshot_request"
     case snapshotResponse = "snapshot_response"
+    case changeRequest = "change_request"
+    case changeResponse = "change_response"
+    case tweakRequest = "tweak_request"
+    case tweakResponse = "tweak_response"
 }
 
 class WebSocketWrapper: WebSocketDelegate {
@@ -140,7 +144,13 @@ class WebSocketWrapper: WebSocketDelegate {
                     webSocketMessage = DisconnectMessage()
                 case .bindingRequest:
                     webSocketMessage = BindingRequest(payload: payload)
-                default: break
+                case .changeRequest:
+                    webSocketMessage = ChangeRequest(payload: payload)
+                case .tweakRequest:
+                    webSocketMessage = TweakRequest(payload: payload)
+                default:
+                    print("the type that was not parsed: \(type)")
+                    break
                 }
             } else {
                 Logger.warn(message: "Badly formed socket message, expected JSON dictionary.")

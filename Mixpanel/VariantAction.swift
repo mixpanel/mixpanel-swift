@@ -74,9 +74,26 @@ class VariantAction: NSObject, NSCoding {
 
     func execute() {
         let executeBlock = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
+            guard let rootVC = UIApplication.shared.keyWindow?.rootViewController else {
+                print("SO FUCKED AGAIN HUH? L:OL")
+                return
+            }
+
             if self.cacheOriginal {
-//                self.cacheOriginalImage(view)
-//                let invocations...
+                self.cacheOriginalImage(view as? UIView)
+            }
+
+            let performedSelectors = VariantAction.executeSelector(self.selector,
+                                                                   args: self.args,
+                                                                   path: self.path,
+                                                                   root: rootVC,
+                                                                   leaf: view)
+            for performedSelector in performedSelectors {
+                guard let target = performedSelector.0 as? UIView else {
+                    print("Whatsssss going on FUCKED lol")
+                    continue
+                }
+                self.appliedTo.add(target)
             }
 
         }
@@ -103,11 +120,10 @@ class VariantAction: NSObject, NSCoding {
         }
 
         if let original = original {
-            //
+            VariantAction.executeSelector(selector, args: original, on: appliedTo.allObjects)
         } else if cacheOriginal {
-            //
+            restoreCachedImage()
         }
-
         appliedTo.removeAllObjects()
     }
 
@@ -188,11 +204,12 @@ class VariantAction: NSObject, NSCoding {
                 guard let type = argumentTuple[1] as? String else {
                     continue
                 }
-                let transformedArg = argumentTuple[0]
-                if let valueType = transformedArg as? NSValue {
-                    print("WE ARE FUCKED LOL")
+                if let transformedArg = VariantAction.transformValue(argumentTuple[0], to: type) {
+                    if let valueType = transformedArg as? NSValue {
+                        print("WE ARE FUCKED LOL \(valueType)")
+                    }
+                    transformedArgs.append(transformedArg)
                 }
-                transformedArgs.append(transformedArg)
             }
         }
         for object in objects {
@@ -212,7 +229,7 @@ class VariantAction: NSObject, NSCoding {
         return targetRetValuePairs
     }
 
-    func cacheOriginalImage(_ view: UIView) {
+    func cacheOriginalImage(_ view: UIView?) {
         if let cacheSelector = VariantAction.gettersForSetters[selector] {
             guard let rootVC = UIApplication.shared.keyWindow?.rootViewController else {
                 print("WTF JUST HAPPENED")
@@ -246,6 +263,52 @@ class VariantAction: NSObject, NSCoding {
                 VariantAction.originalCache.removeValue(forKey: object)
             }
         }
+    }
+
+    static func SwiftToObjectiveCConversion(_ value: AnyObject) -> NSObject? {
+        if let value = value as? NSString {
+            return value
+        }
+        return nil
+    }
+
+    static func transformValue(_ value: AnyObject, to type: String) -> NSObject? {
+        guard let classType = NSClassFromString(type) else {
+            print("LOST IN THE LIGHT AND I DONT KNOW WHAT NIGHT IS")
+            return nil
+        }
+
+        if type(of: value) == classType {
+            return ValueTransformer(forName: NSValueTransformerName(rawValue: "IdentityTransformer"))?.transformedValue(value) as? NSObject
+        } else if let value = SwiftToObjectiveCConversion(value) {
+            return value
+        }
+
+        var fromType: String? = nil
+        if value is NSString {
+            fromType = NSStringFromClass(NSString.self)
+        } else if value is NSNumber {
+            fromType = NSStringFromClass(NSNumber.self)
+        } else if value is NSDictionary {
+            fromType = NSStringFromClass(NSDictionary.self)
+        }
+
+        guard let fromTypeUnwrapped = fromType else {
+            print("YOYOYOYOYOY")
+            return nil
+        }
+
+        let forwardTransformerName = "\(fromTypeUnwrapped)To\(type)"
+        if let transformer = ValueTransformer(forName: NSValueTransformerName(rawValue: forwardTransformerName)) {
+            return transformer.transformedValue(value) as? NSObject
+        }
+
+        let reverseTransformerName = "\(type)To\(fromTypeUnwrapped)"
+        if let transformer = ValueTransformer(forName: NSValueTransformerName(rawValue: reverseTransformerName)) {
+            return transformer.reverseTransformedValue(value) as? NSObject
+        }
+
+        return ValueTransformer(forName: NSValueTransformerName(rawValue: "IdentityTransformer"))?.transformedValue(value) as? NSObject
     }
 
 }

@@ -99,7 +99,7 @@ class Decide {
                         }
                     }
                 } else {
-                    Logger.error(message: "variants check response format error")
+                    Logger.debug(message: "variants check response format error")
                 }
 
                 let runningVariants = Set(self.ABTestingInstance.variants.filter { return $0.running })

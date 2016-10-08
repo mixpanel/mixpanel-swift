@@ -93,6 +93,7 @@
 		E174DAF51DA3381C00FED703 /* UIColor+Tweaks.swift in Sources */ = {isa = PBXBuildFile; fileRef = E174DAF41DA3381C00FED703 /* UIColor+Tweaks.swift */; };
 		E174DAF71DA45C9D00FED703 /* ChangeMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E174DAF61DA45C9D00FED703 /* ChangeMessage.swift */; };
 		E174DAF91DA4623E00FED703 /* TweakMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E174DAF81DA4623E00FED703 /* TweakMessage.swift */; };
+		E174DB361DA83F2E00FED703 /* ClearMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E174DB351DA83F2E00FED703 /* ClearMessage.swift */; };
 		E189D8F61D54ECBF007F3F29 /* Decide.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F51D54ECBF007F3F29 /* Decide.swift */; };
 		E189D8F81D552324007F3F29 /* DecideRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F71D552324007F3F29 /* DecideRequest.swift */; };
 		E189D8FD1D5A6985007F3F29 /* InAppNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */; };
@@ -222,6 +223,7 @@
 		E174DAF41DA3381C00FED703 /* UIColor+Tweaks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+Tweaks.swift"; sourceTree = "<group>"; };
 		E174DAF61DA45C9D00FED703 /* ChangeMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeMessage.swift; sourceTree = "<group>"; };
 		E174DAF81DA4623E00FED703 /* TweakMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TweakMessage.swift; sourceTree = "<group>"; };
+		E174DB351DA83F2E00FED703 /* ClearMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClearMessage.swift; sourceTree = "<group>"; };
 		E189D8F51D54ECBF007F3F29 /* Decide.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Decide.swift; sourceTree = "<group>"; };
 		E189D8F71D552324007F3F29 /* DecideRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DecideRequest.swift; sourceTree = "<group>"; };
 		E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppNotifications.swift; sourceTree = "<group>"; };
@@ -404,6 +406,7 @@
 				E15422301D7105D3009421A0 /* DisconnectMessage.swift */,
 				E174DAF61DA45C9D00FED703 /* ChangeMessage.swift */,
 				E174DAF81DA4623E00FED703 /* TweakMessage.swift */,
+				E174DB351DA83F2E00FED703 /* ClearMessage.swift */,
 			);
 			name = Messages;
 			sourceTree = "<group>";
@@ -708,6 +711,7 @@
 				E193126B1D5B9D1E007CE1E9 /* MiniNotificationViewController.swift in Sources */,
 				E1982BFF1D0AC2E2006B7330 /* Error.swift in Sources */,
 				51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */,
+				E174DB361DA83F2E00FED703 /* ClearMessage.swift in Sources */,
 				E11801AC1D7F7C970006DD2B /* UIColorToNSString.swift in Sources */,
 				E174DAF11DA337E400FED703 /* TweakGroup.swift in Sources */,
 				E19D12981D9C94A900A8016D /* ABTesting.swift in Sources */,

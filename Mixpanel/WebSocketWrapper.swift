@@ -21,6 +21,8 @@ enum MessageType: String {
     case changeResponse = "change_response"
     case tweakRequest = "tweak_request"
     case tweakResponse = "tweak_response"
+    case clearRequest = "clear_request"
+    case clearResponse = "clear_response"
 }
 
 class WebSocketWrapper: WebSocketDelegate {
@@ -148,6 +150,8 @@ class WebSocketWrapper: WebSocketDelegate {
                     webSocketMessage = ChangeRequest(payload: payload)
                 case .tweakRequest:
                     webSocketMessage = TweakRequest(payload: payload)
+                case .clearRequest:
+                    webSocketMessage = ClearRequest(payload: payload)
                 default:
                     print("the type that was not parsed: \(type)")
                     break

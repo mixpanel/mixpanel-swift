@@ -35,7 +35,7 @@ class TweakRequest: BaseWebSocketMessage {
                 }
             }
 
-            let response = ChangeResponse()
+            let response = TweakResponse()
             response.status = "OK"
             connection.send(message: response)
         }

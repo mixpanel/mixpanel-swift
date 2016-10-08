@@ -48,11 +48,7 @@ class VariantAction: NSObject, NSCoding {
             return nil
         }
 
-        var cacheOriginal = false
-        if let cacheOrig = object["cacheOriginal"] as? Bool {
-            cacheOriginal = !cacheOrig
-        }
-
+        let cacheOriginal = object["cacheOriginal"] == nil
         let original = object["original"] as? [Any]
         let name = object["name"] as? String
 
@@ -199,34 +195,98 @@ class VariantAction: NSObject, NSCoding {
     class func executeSelector(_ selector: Selector, args: [Any], on objects: [AnyObject]) -> [(AnyObject, AnyObject?)] {
         var targetRetValuePairs = [(AnyObject, AnyObject?)]()
         var transformedArgs = [Any]()
+        var doesHaveNSValue = false
         for argument in args {
             if let argumentTuple = argument as? [AnyObject], argumentTuple.count == 2 {
                 guard let type = argumentTuple[1] as? String else {
                     continue
                 }
                 if let transformedArg = VariantAction.transformValue(argumentTuple[0], to: type) {
-                    if let valueType = transformedArg as? NSValue {
-                        print("WE ARE FUCKED LOL \(valueType)")
+                    if transformedArg is NSValue {
+                        doesHaveNSValue = true
                     }
                     transformedArgs.append(transformedArg)
                 }
             }
         }
+
         for object in objects {
             var retValue: AnyObject? = nil
-            if transformedArgs.isEmpty {
-                retValue = object.perform(selector)?.takeRetainedValue()
-            } else if transformedArgs.count == 1 {
-                retValue = object.perform(selector, with: transformedArgs[0])?.takeRetainedValue()
-            } else if transformedArgs.count == 2 {
-                retValue = object.perform(selector, with: transformedArgs[0], with: transformedArgs[1])?.takeRetainedValue()
-            } else {
-                print("WE ARE FUCKED 222 LOL")
-            }
+            if doesHaveNSValue {
+                let method: Method!
+                if object is AnyClass {
+                    method = class_getClassMethod(object as! AnyClass, selector)
+                } else {
+                    method = class_getInstanceMethod(type(of: object), selector)
+                }
 
+                guard method != nil else {
+                    print("NIOOOOO OWHYYYY")
+                    continue
+                }
+                let implementation = method_getImplementation(method)
+                retValue = extractAndRunMethodFromSelector(selector: selector,
+                                                           implementation: implementation,
+                                                           object: object,
+                                                           args: transformedArgs)
+            } else {
+                var unmanagedObject: Unmanaged<AnyObject>! = nil
+                if transformedArgs.isEmpty {
+                    unmanagedObject = object.perform(selector)
+                } else if transformedArgs.count == 1 {
+                    unmanagedObject = object.perform(selector, with: transformedArgs[0])
+                } else if transformedArgs.count == 2 {
+                    unmanagedObject = object.perform(selector, with: transformedArgs[0], with: transformedArgs[1])
+                } else {
+                    print("WE ARE FUCKED 222 LOL")
+                }
+
+                if VariantAction.gettersForSetters.values.contains(selector) {
+                    retValue = unmanagedObject?.takeRetainedValue()
+                }
+            }
             targetRetValuePairs.append((object, retValue))
         }
         return targetRetValuePairs
+    }
+
+    class func extractAndRunMethodFromSelector(selector: Selector, implementation: IMP?, object: AnyObject, args: [Any]) -> AnyObject? {
+        print(selector.description)
+        if selector.description == "setImage:forState:" {
+            typealias Function = @convention(c) (AnyObject, Selector, UIImage, UIControlState) -> Void
+            let function = unsafeBitCast(implementation, to: Function.self)
+            function(object, selector, args[0] as! UIImage, UIControlState(rawValue: args[1] as! UInt))
+        } else if selector.description == "imageForState:" {
+            typealias Function = @convention(c) (AnyObject, Selector, UIControlState) -> Unmanaged<UIImage>
+            let function = unsafeBitCast(implementation, to: Function.self)
+            let val = function(object, #selector(UIButton.image(for:)), UIControlState(rawValue: args[1] as! UInt)).takeRetainedValue()
+            return val
+        } else if selector.description == "setFrame:" {
+            guard let nsValue = args[0] as? NSValue else {
+                return nil
+            }
+            typealias Function = @convention(c) (AnyObject, Selector, CGRect) -> Void
+            let function = unsafeBitCast(implementation, to: Function.self)
+            function(object, selector, nsValue.cgRectValue)
+        } else if selector.description == "setAlpha:" {
+            typealias Function = @convention(c) (AnyObject, Selector, CGFloat) -> Void
+            let function = unsafeBitCast(implementation, to: Function.self)
+            function(object, selector, args[0] as! CGFloat)
+        } else if selector.description == "setHidden:" {
+            typealias Function = @convention(c) (AnyObject, Selector, Bool) -> Void
+            let function = unsafeBitCast(implementation, to: Function.self)
+            function(object, selector, args[0] as! Bool)
+        } else if selector.description == "setUserInteractionEnabled:" {
+            typealias Function = @convention(c) (AnyObject, Selector, Bool) -> Void
+            let function = unsafeBitCast(implementation, to: Function.self)
+            function(object, selector, args[0] as! Bool)
+        } else if selector.description == "setBackgroundImage:forState:" {
+            typealias Function = @convention(c) (AnyObject, Selector, UIImage, UIControlState) -> Void
+            let function = unsafeBitCast(implementation, to: Function.self)
+            function(object, selector, args[0] as! UIImage, UIControlState(rawValue: args[1] as! UInt))
+        }
+
+        return nil
     }
 
     func cacheOriginalImage(_ view: UIView?) {
@@ -235,7 +295,11 @@ class VariantAction: NSObject, NSCoding {
                 print("WTF JUST HAPPENED")
                 return
             }
-            let cachedPerformedSelectors = VariantAction.executeSelector(cacheSelector, args: args, path: path, root: rootVC, leaf: view)
+            let cachedPerformedSelectors = VariantAction.executeSelector(cacheSelector,
+                                                                         args: args,
+                                                                         path: path,
+                                                                         root: rootVC,
+                                                                         leaf: view)
             for performedSelector in cachedPerformedSelectors {
                 guard let view = performedSelector.0 as? UIView else {
                     print("SOOOO FUCKED HAHA")
@@ -265,22 +329,21 @@ class VariantAction: NSObject, NSCoding {
         }
     }
 
-    static func SwiftToObjectiveCConversion(_ value: AnyObject) -> NSObject? {
-        if let value = value as? NSString {
+    static func SwiftToObjectiveCConversion(_ value: AnyObject, type: String) -> NSObject? {
+        if let value = value as? NSString, type == "NSString" {
+            return value
+        } else if let value = value as? NSValue {
             return value
         }
         return nil
     }
 
     static func transformValue(_ value: AnyObject, to type: String) -> NSObject? {
-        guard let classType = NSClassFromString(type) else {
-            print("LOST IN THE LIGHT AND I DONT KNOW WHAT NIGHT IS")
-            return nil
+        if let classType = NSClassFromString(type), type(of: value) == classType {
+            return ValueTransformer(forName: NSValueTransformerName(rawValue: "IdentityTransformer"))?.transformedValue(value) as? NSObject
         }
 
-        if type(of: value) == classType {
-            return ValueTransformer(forName: NSValueTransformerName(rawValue: "IdentityTransformer"))?.transformedValue(value) as? NSObject
-        } else if let value = SwiftToObjectiveCConversion(value) {
+        if let value = SwiftToObjectiveCConversion(value, type: type) {
             return value
         }
 

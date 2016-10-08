@@ -124,6 +124,7 @@ class Variant: NSObject, NSCoding {
             for action in actions {
                 action.execute()
             }
+            running = true
         }
     }
 

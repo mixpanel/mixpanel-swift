@@ -48,7 +48,7 @@ extension AnyTweak: Hashable {
 	}
 }
 
-public func ==(lhs: AnyTweak, rhs: AnyTweak) -> Bool {
+public func == (lhs: AnyTweak, rhs: AnyTweak) -> Bool {
 	return lhs.tweakIdentifier == rhs.tweakIdentifier
 }
 

@@ -33,7 +33,8 @@ class DeviceInfoRequest: BaseWebSocketMessage {
                                                           deviceModel: currentDevice.model,
                                                           libVersion: AutomaticProperties.libVersion(),
                                                           availableFontFamilies: self.availableFontFamilies(),
-                                                          mainBundleIdentifier: Bundle.main.bundleIdentifier)
+                                                          mainBundleIdentifier: Bundle.main.bundleIdentifier,
+                                                          tweaks: self.getTweaks())
                 response = DeviceInfoResponse(infoResponseInput)
             }
             connection.send(message: response)
@@ -65,9 +66,24 @@ class DeviceInfoRequest: BaseWebSocketMessage {
             fontFamilies.append(["family": systemFonts.first!.familyName as AnyObject,
                                  "font_names": systemFonts.map { $0.fontName } as AnyObject])
         }
-
         return fontFamilies
     }
+
+    func getTweaks() -> [[String: AnyObject]] {
+        var tweaks = [[String: AnyObject]]()
+        for tweak in MixpanelTweaks.defaultStore.tweakCollections["General"]!.allTweaks {
+            let (value, defaultValue, min, max) = MixpanelTweaks.defaultStore.currentViewDataForTweak(tweak).getValueDefaultMinMax()
+            let tweakDict = ["name": tweak.tweakName as AnyObject,
+                             "encoding": "no encoding" as AnyObject,
+                             "value": value as AnyObject,
+                             "default": defaultValue as AnyObject,
+                             "minimum": min as AnyObject? ?? defaultValue as AnyObject,
+                             "maximum": max as AnyObject? ?? defaultValue as AnyObject] as [String : AnyObject]
+            tweaks.append(tweakDict)
+        }
+        return tweaks
+    }
+
 }
 
 struct InfoResponseInput {
@@ -80,6 +96,7 @@ struct InfoResponseInput {
     let libVersion: String?
     let availableFontFamilies: [[String: Any]]
     let mainBundleIdentifier: String?
+    let tweaks: [[String: Any]]
 }
 
 class DeviceInfoResponse: BaseWebSocketMessage {
@@ -90,6 +107,7 @@ class DeviceInfoResponse: BaseWebSocketMessage {
         payload["device_name"] = infoResponse.deviceName as AnyObject
         payload["device_model"] = infoResponse.deviceModel as AnyObject
         payload["available_font_families"] = infoResponse.availableFontFamilies as AnyObject
+        payload["tweaks"] = infoResponse.tweaks as AnyObject
 
         if let appVersion = infoResponse.appVersion {
             payload["app_version"] = appVersion as AnyObject

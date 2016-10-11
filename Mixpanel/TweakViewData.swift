@@ -24,13 +24,25 @@ internal enum TweakViewData {
 			self = .color(value: value as! UIColor, defaultValue: defaultValue as! UIColor)
 		case .integer:
 			let clippedValue = clip(value as! Int, minimum as? Int, maximum as? Int)
-			self = .integer(value: clippedValue, defaultValue: defaultValue as! Int, min: minimum as? Int, max: maximum as? Int, stepSize: stepSize as? Int)
+			self = .integer(value: clippedValue,
+			                defaultValue: defaultValue as! Int,
+			                min: minimum as? Int,
+			                max: maximum as? Int,
+			                stepSize: stepSize as? Int)
 		case .cgFloat:
 			let clippedValue = clip(value as! CGFloat, minimum as? CGFloat, maximum as? CGFloat)
-			self = .float(value: clippedValue, defaultValue: defaultValue as! CGFloat, min: minimum as? CGFloat, max: maximum as? CGFloat, stepSize: stepSize as? CGFloat)
+			self = .float(value: clippedValue,
+			              defaultValue: defaultValue as! CGFloat,
+			              min: minimum as? CGFloat,
+			              max: maximum as? CGFloat,
+			              stepSize: stepSize as? CGFloat)
 		case .double:
 			let clippedValue = clip(value as! Double, minimum as? Double, maximum as? Double)
-			self = .doubleTweak(value: clippedValue, defaultValue: defaultValue as! Double, min: minimum as? Double, max: maximum as? Double, stepSize: stepSize as? Double)
+			self = .doubleTweak(value: clippedValue,
+			                    defaultValue: defaultValue as! Double,
+			                    min: minimum as? Double,
+			                    max: maximum as? Double,
+			                    stepSize: stepSize as? Double)
 		}
 	}
 
@@ -48,6 +60,21 @@ internal enum TweakViewData {
 			return colorValue
 		}
 	}
+
+    func getValueDefaultMinMax() -> (TweakableType, TweakableType, TweakableType?, TweakableType?) {
+        switch self {
+        case let .boolean(value: boolValue, defaultValue: defaultValue):
+            return (boolValue, defaultValue, defaultValue, defaultValue)
+        case let .integer(value: intValue, defaultValue: defaultValue, min: min, max: max, _):
+            return (intValue, defaultValue, min, max)
+        case let .float(value: floatValue, defaultValue: defaultValue, min: min, max: max, _):
+            return (floatValue, defaultValue, min, max)
+        case let .doubleTweak(value: doubleValue, defaultValue: defaultValue, min: min, max: max, _):
+            return (doubleValue, defaultValue, min, max)
+        case let .color(value: colorValue, defaultValue: defaultValue):
+            return (colorValue, defaultValue, defaultValue, defaultValue)
+        }
+    }
 
 	var stringRepresentation: (String, Bool) {
 		let string: String

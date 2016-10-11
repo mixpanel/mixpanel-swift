@@ -29,9 +29,9 @@ class TweakRequest: BaseWebSocketMessage {
                 connection.setSessionObjectSynchronized(with: variant, for: "session_variant")
             }
 
-            if let actions = self.payload["tweaks"] as? [[String: Any]] {
+            if let tweaks = self.payload["tweaks"] as? [[String: Any]] {
                 DispatchQueue.main.sync {
-                    variant?.addTweaks(JSONObject: actions, execute: true)
+                    variant?.addTweaks(JSONObject: tweaks, execute: true)
                 }
             }
 

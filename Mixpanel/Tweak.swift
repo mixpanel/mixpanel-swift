@@ -22,7 +22,13 @@ public struct Tweak<T: TweakableType> {
 	internal let maximumValue: T?	// Only supported for T: SignedNumberType
 	internal let stepSize: T?		// Only supported for T: SignedNumberType
 
-	internal init(collectionName: String, groupName: String, tweakName: String, defaultValue: T, minimumValue: T? = nil, maximumValue: T? = nil, stepSize: T? = nil) {
+	internal init(tweakName: String,
+	              defaultValue: T,
+	              minimumValue: T? = nil,
+	              maximumValue: T? = nil,
+	              stepSize: T? = nil,
+	              collectionName: String = "Mixpanel",
+	              groupName: String = "Mixpanel") {
 
 		[collectionName, groupName, tweakName].forEach {
 			if $0.contains(TweakIdentifierSeparator) {
@@ -45,10 +51,10 @@ internal let TweakIdentifierSeparator = "|"
 extension Tweak {
 	public init(_ collectionName: String, _ groupName: String, _ tweakName: String, _ defaultValue: T) {
 		self.init(
+            tweakName: tweakName,
+            defaultValue: defaultValue,
 			collectionName: collectionName,
-			groupName: groupName,
-			tweakName: tweakName,
-			defaultValue: defaultValue
+			groupName: groupName
 		)
 	}
 }
@@ -57,7 +63,13 @@ extension Tweak where T: SignedNumber {
 	/// Creates a Tweak<T> where T: SignedNumberType
 	/// You can optionally provide a min / max / stepSize to restrict the bounds and behavior of a tweak.
 	/// The step size is "how much does the value change when I tap the UIStepper"
-	public init(_ collectionName: String, _ groupName: String, _ tweakName: String, defaultValue: T, min minimumValue: T? = nil, max maximumValue: T? = nil, stepSize: T? = nil) {
+	public init(_ collectionName: String,
+	            _ groupName: String,
+	            _ tweakName: String,
+	            defaultValue: T,
+	            min minimumValue: T? = nil,
+	            max maximumValue: T? = nil,
+	            stepSize: T? = nil) {
 
 		// Assert that the tweak's defaultValue is between its min and max (if they exist)
 		if clip(defaultValue, minimumValue, maximumValue) != defaultValue {
@@ -65,13 +77,13 @@ extension Tweak where T: SignedNumber {
 		}
 
 		self.init(
-			collectionName: collectionName,
-			groupName: groupName,
-			tweakName: tweakName,
-			defaultValue: defaultValue,
-			minimumValue: minimumValue,
-			maximumValue: maximumValue,
-			stepSize: stepSize
+            tweakName: tweakName,
+            defaultValue: defaultValue,
+            minimumValue: minimumValue,
+            maximumValue: maximumValue,
+			stepSize: stepSize,
+            collectionName: collectionName,
+            groupName: groupName
 		)
 	}
 }
@@ -122,7 +134,7 @@ extension Tweak: Hashable {
 	}
 }
 
-public func ==<T>(lhs: Tweak<T>, rhs: Tweak<T>) -> Bool {
+public func == <T>(lhs: Tweak<T>, rhs: Tweak<T>) -> Bool {
 	return lhs.tweakIdentifier == rhs.tweakIdentifier
 }
 

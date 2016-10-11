@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Mixpanel
 
 class CodelessPlaygroundViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
@@ -36,7 +37,8 @@ class CodelessPlaygroundViewController: UIViewController, UITableViewDelegate, U
 
         for subview in cell.contentView.subviews {
             if let label = subview as? UILabel {
-                label.text = "Cell #\(indexPath.item)"
+                MixpanelTweaks.bind(MixpanelTweaks.marginHorizontal, binding: { label.text = "\($0)" })
+                //label.text = "Cell #\(indexPath.item)"
             }
         }
         return cell

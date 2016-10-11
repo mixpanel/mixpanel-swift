@@ -13,7 +13,8 @@ import UIKit
 internal extension UIColor {
 
 	/// Creates a UIColor with a given hex string (e.g. "#FF00FF")
-	// NOTE: Would use a failable init (e.g. `UIColor(hexString: _)` but have to wait until Swift 2.2.1 https://github.com/Khan/SwiftTweaks/issues/38
+	// NOTE: Would use a failable init (e.g. `UIColor(hexString: _)`
+    // but have to wait until Swift 2.2.1 https://github.com/Khan/SwiftTweaks/issues/38
 	internal static func colorWithHexString(_ hexString: String) -> UIColor? {
 		// Strip whitespace, "#", "0x", and make uppercase
 		let hexString = hexString
@@ -33,7 +34,11 @@ internal extension UIColor {
 			hexString[hexString.startIndex...hexString.characters.index(hexString.startIndex, offsetBy: 1)],
 			hexString[hexString.characters.index(hexString.startIndex, offsetBy: 2)...hexString.characters.index(hexString.startIndex, offsetBy: 3)],
 			hexString[hexString.characters.index(hexString.startIndex, offsetBy: 4)...hexString.characters.index(hexString.startIndex, offsetBy: 5)],
-			hexStringContainsAlpha ? hexString[hexString.characters.index(hexString.startIndex, offsetBy: 6)...hexString.characters.index(hexString.startIndex, offsetBy: 7)] : "FF"
+			hexStringContainsAlpha ? hexString[
+                hexString.characters.index(hexString.startIndex,
+                                           offsetBy: 6)...hexString.characters.index(hexString.startIndex,
+                                                                                     offsetBy: 7)
+                ] : "FF"
 		]
 
 		// Convert string components into their CGFloat (r,g,b,a) components

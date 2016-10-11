@@ -32,7 +32,7 @@ public final class TweakStore {
 	/// Determines whether tweaks are enabled, and whether the tweaks UI is accessible
 	internal let enabled: Bool
 
-	/// Creates a TweakStore, with information persisted on-disk. 
+	/// Creates a TweakStore, with information persisted on-disk.
 	/// If you want to have multiple TweakStores in your app, you can pass in a unique storeName to keep it separate from others on disk.
 	public init(tweaks: [TweakClusterType], storeName: String = "Tweaks", enabled: Bool) {
 		self.persistence = TweakPersistency(identifier: storeName)
@@ -96,7 +96,7 @@ public final class TweakStore {
 	}
 
 	// MARK: - Internal
-	
+
 	/// Resets all tweaks to their `defaultValue`
 	internal func reset() {
 		persistence.clearAllData()
@@ -143,7 +143,6 @@ public final class TweakStore {
 		persistence.setValue(viewData.value, forTweakIdentifiable: tweak)
 		updateBindingsForTweak(tweak)
 	}
-
 
 	// MARK - Private
 

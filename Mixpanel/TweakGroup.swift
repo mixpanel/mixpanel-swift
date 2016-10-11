@@ -27,4 +27,3 @@ extension TweakGroup {
 			.map { return $0.1 }
 	}
 }
-

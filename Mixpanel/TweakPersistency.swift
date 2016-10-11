@@ -47,7 +47,7 @@ internal final class TweakPersistency {
 		return tweakCache[tweakID.persistenceIdentifier]
 	}
 
-	internal func setValue(_ value: TweakableType?,  forTweakIdentifiable tweakID: TweakIdentifiable) {
+	internal func setValue(_ value: TweakableType?, forTweakIdentifiable tweakID: TweakIdentifiable) {
 		tweakCache[tweakID.persistenceIdentifier] = value
 		self.diskPersistency.saveToDisk(tweakCache)
 	}
@@ -79,7 +79,9 @@ private final class TweakDiskPersistency {
 	/// Creates a directory (if needed) for our persisted TweakCache on disk
 	private func ensureDirectoryExists() {
 		(self.queue).async {
-			try! FileManager.default.createDirectory(at: self.fileURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
+			try! FileManager.default.createDirectory(at: self.fileURL.deletingLastPathComponent(),
+			                                         withIntermediateDirectories: true,
+			                                         attributes: nil)
 		}
 	}
 
@@ -106,10 +108,11 @@ private final class TweakDiskPersistency {
             try? nsData.write(to: self.fileURL, options: [.atomic])
         }
     }
-    
+
 	/// Implements NSCoding for TweakCache.
-	/// TweakCache a flat dictionary: [String: TweakableType]. 
-	/// However, because re-hydrating TweakableType from its underlying NSNumber gets Bool & Int mixed up, we have to persist a different structure on disk: [TweakViewDataType: [String: AnyObject]]
+	/// TweakCache a flat dictionary: [String: TweakableType].
+	/// However, because re-hydrating TweakableType from its underlying NSNumber gets Bool & Int mixed up,
+    /// we have to persist a different structure on disk: [TweakViewDataType: [String: AnyObject]]
 	/// This ensures that if something was saved as a Bool, it's read back as a Bool.
 	@objc private final class Data: NSObject, NSCoding {
 		let cache: TweakCache

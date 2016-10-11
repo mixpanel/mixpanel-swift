@@ -16,7 +16,8 @@ public protocol TweakableType {
 }
 
 /// The data types that are currently supported for SwiftTweaks.
-/// While Tweak<T> is generic, we have to build UI for editing each kind of <T> - hence the need for a protocol to restrict what can be tweaked.
+/// While Tweak<T> is generic, we have to build UI for editing each kind of <T>
+/// - hence the need for a protocol to restrict what can be tweaked.
 /// Of course, we can add new TweakViewDataTypes over time, too!
 public enum TweakViewDataType {
 	case boolean
@@ -72,4 +73,3 @@ extension UIColor: TweakableType {
 		return .uiColor
 	}
 }
-

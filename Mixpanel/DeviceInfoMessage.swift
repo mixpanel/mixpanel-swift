@@ -77,7 +77,7 @@ class DeviceInfoRequest: BaseWebSocketMessage {
         for tweak in allTweaks {
             let (value, defaultValue, min, max) = MixpanelTweaks.defaultStore.currentViewDataForTweak(tweak).getValueDefaultMinMax()
             let tweakDict = ["name": tweak.tweakName as AnyObject,
-                             "encoding": "no encoding" as AnyObject,
+                             "encoding": getEncoding(value) as AnyObject,
                              "value": value as AnyObject,
                              "default": defaultValue as AnyObject,
                              "minimum": min as AnyObject? ?? defaultValue as AnyObject,
@@ -85,6 +85,19 @@ class DeviceInfoRequest: BaseWebSocketMessage {
             tweaks.append(tweakDict)
         }
         return tweaks
+    }
+
+    func getEncoding(_ value: TweakableType) -> String {
+        if value is Double || value is CGFloat {
+            return "d"
+        } else if value is String {
+            return "@"
+        } else if value is Int {
+            return "i"
+        } else if value is UInt {
+            return "I"
+        }
+        return ""
     }
 
 }

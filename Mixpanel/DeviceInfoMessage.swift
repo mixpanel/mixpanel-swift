@@ -71,7 +71,10 @@ class DeviceInfoRequest: BaseWebSocketMessage {
 
     func getTweaks() -> [[String: AnyObject]] {
         var tweaks = [[String: AnyObject]]()
-        for tweak in MixpanelTweaks.defaultStore.tweakCollections["General"]!.allTweaks {
+        guard let allTweaks = MixpanelTweaks.defaultStore.tweakCollections["Mixpanel"]?.allTweaks else {
+            return tweaks
+        }
+        for tweak in allTweaks {
             let (value, defaultValue, min, max) = MixpanelTweaks.defaultStore.currentViewDataForTweak(tweak).getValueDefaultMinMax()
             let tweakDict = ["name": tweak.tweakName as AnyObject,
                              "encoding": "no encoding" as AnyObject,

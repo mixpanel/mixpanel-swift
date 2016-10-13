@@ -51,17 +51,13 @@ class VariantTweak: NSObject, NSCoding {
     }
 
     func execute() {
-        guard let tweak = MixpanelTweaks.defaultStore.tweakCollections["General"]?.tweakGroups["General"]?.tweaks[name] else {
+        guard let tweak = MixpanelTweaks.defaultStore.tweakCollections["Mixpanel"]?.tweakGroups["Mixpanel"]?.tweaks[name] else {
             return
         }
 
-//        if let value = value {
-            let currentViewData = MixpanelTweaks.defaultStore.currentViewDataForTweak(tweak)
-            let tweakViewData = createViewDataType(value: value, viewData: currentViewData)
-            MixpanelTweaks.defaultStore.setValue(tweakViewData, forTweak: tweak)
-//        } else {
-//            MixpanelTweaks.defaultStore.setValue(MixpanelTweaks.defaultStore.currentViewDataForTweak(tweak), forTweak: tweak)
-//        }
+        let currentViewData = MixpanelTweaks.defaultStore.currentViewDataForTweak(tweak)
+        let tweakViewData = createViewDataType(value: value, viewData: currentViewData)
+        MixpanelTweaks.defaultStore.setValue(tweakViewData, forTweak: tweak)
     }
 
     func createViewDataType(value: AnyObject, viewData: TweakViewData) -> TweakViewData {
@@ -75,6 +71,10 @@ class VariantTweak: NSObject, NSCoding {
             } else if let value = value as? Int, let def = def as? Int {
                 return TweakViewData.integer(value: value, defaultValue: def, min: min as? Int, max: max as? Int, stepSize: 0)
             }
+        } else if type == "string" {
+            if let value = value as? String, let def = def as? String {
+                return TweakViewData.string(value: value, defaultValue: def)
+            }
         } else {
             if let value = value as? Bool, let def = def as? Bool {
                 return TweakViewData.boolean(value: value, defaultValue: def)
@@ -87,7 +87,7 @@ class VariantTweak: NSObject, NSCoding {
     }
 
     func stop() {
-        guard let tweak = MixpanelTweaks.defaultStore.tweakCollections["General"]?.tweakGroups["General"]?.tweaks[name] else {
+        guard let tweak = MixpanelTweaks.defaultStore.tweakCollections["Mixpanel"]?.tweakGroups["Mixpanel"]?.tweaks[name] else {
             return
         }
         let currentViewData = MixpanelTweaks.defaultStore.currentViewDataForTweak(tweak)
@@ -133,22 +133,12 @@ class VariantTweak: NSObject, NSCoding {
     override var hash: Int {
         return self.name.hash
     }
+
 }
 
 public struct MixpanelTweaks: TweakLibraryType {
-    public static let marginHorizontal = Tweak<CGFloat>(tweakName: "H. Margins", defaultValue: 15, minimumValue: 0)
-    public static let marginVertical = Tweak<CGFloat>(tweakName: "V. Margins", defaultValue: 10, minimumValue: 0)
-    public static let featureFlagMainScreenHelperText = Tweak(tweakName: "Show Body Text", defaultValue: true)
-
-
-    public static let defaultStore: TweakStore = {
-        let allTweaks: [TweakClusterType] = [marginHorizontal, marginVertical, featureFlagMainScreenHelperText]
-
-        let tweaksEnabled = true
-
-        return TweakStore(
-            tweaks: allTweaks,
-            enabled: tweaksEnabled
-        )
-    }()
+    public static var defaultStore: TweakStore = TweakStore(enabled: true)
+    public static func setTweaks(tweaks: [TweakClusterType]) {
+        defaultStore.addTweaks(tweaks)
+    }
 }

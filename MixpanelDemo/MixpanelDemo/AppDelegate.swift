@@ -17,9 +17,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
-        Mixpanel.initialize(token: "a8119caa2b2c5a95ddbb4d037cb1b72d")
+        Mixpanel.initialize(token: "MIXPANEL_TOKEN")
         Mixpanel.mainInstance().loggingEnabled = true
         Mixpanel.mainInstance().flushInterval = 5
+        let allTweaks: [TweakClusterType] = [MixpanelTweaks.floatTweak,
+                                             MixpanelTweaks.intTweak,
+                                             MixpanelTweaks.boolTweak,
+                                             MixpanelTweaks.stringTweak]
+        MixpanelTweaks.setTweaks(tweaks: allTweaks)
 
         let settings = UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
         UIApplication.shared.registerUserNotificationSettings(settings)
@@ -58,4 +63,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Mixpanel.mainInstance().trackPushNotification(userInfo)
     }
 
+}
+
+extension MixpanelTweaks {
+    public static let floatTweak = Tweak<CGFloat>(tweakName: "floatTweak", defaultValue: 15, minimumValue: 0)
+    public static let intTweak = Tweak<Int>(tweakName: "intTweak", defaultValue: 10, minimumValue: 0)
+    public static let boolTweak = Tweak(tweakName: "boolTweak", defaultValue: true)
+    public static let stringTweak = Tweak(tweakName: "stringTweak", defaultValue: "hello")
 }

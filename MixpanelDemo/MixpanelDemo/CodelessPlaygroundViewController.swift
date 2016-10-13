@@ -19,11 +19,24 @@ class CodelessPlaygroundViewController: UIViewController, UITableViewDelegate, U
     @IBOutlet weak var slider: UISlider!
     @IBOutlet weak var switchControl: UISwitch!
 
+    @IBOutlet weak var label1: UILabel!
+    @IBOutlet weak var label2: UILabel!
+    @IBOutlet weak var label3: UILabel!
+    @IBOutlet weak var label4: UILabel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate = self
         tableView.dataSource = self
+
+        MixpanelTweaks.bind(MixpanelTweaks.floatTweak, binding: { self.label1.text = "\($0)" })
+        MixpanelTweaks.bind(MixpanelTweaks.intTweak, binding: { self.label2.text = "\($0)" })
+        MixpanelTweaks.bind(MixpanelTweaks.stringTweak, binding: { self.label3.text = $0 })
+
+        if MixpanelTweaks.assign(MixpanelTweaks.boolTweak) {
+            self.label4.text = "SUCCESS"
+        }
+
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -37,8 +50,7 @@ class CodelessPlaygroundViewController: UIViewController, UITableViewDelegate, U
 
         for subview in cell.contentView.subviews {
             if let label = subview as? UILabel {
-                MixpanelTweaks.bind(MixpanelTweaks.marginHorizontal, binding: { label.text = "\($0)" })
-                //label.text = "Cell #\(indexPath.item)"
+                label.text = "Cell #\(indexPath.item)"
             }
         }
         return cell
@@ -48,5 +60,4 @@ class CodelessPlaygroundViewController: UIViewController, UITableViewDelegate, U
         tableView.deselectRow(at: indexPath, animated: true)
         print("Tapped playground cell!")
     }
-
 }

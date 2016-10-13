@@ -15,7 +15,7 @@ public final class TweakStore {
     var tweakCollections: [String: TweakCollection] = [:]
 
 	/// Useful when exporting or checking that a tweak exists in tweakCollections
-	private let allTweaks: Set<AnyTweak>
+    var allTweaks: Set<AnyTweak>
 
 	/// We hold a reference to the storeName so we can have a better error message if a tweak doesn't exist in allTweaks.
 	private let storeName: String
@@ -34,36 +34,39 @@ public final class TweakStore {
 
 	/// Creates a TweakStore, with information persisted on-disk.
 	/// If you want to have multiple TweakStores in your app, you can pass in a unique storeName to keep it separate from others on disk.
-	public init(tweaks: [TweakClusterType], storeName: String = "Tweaks", enabled: Bool) {
+	public init(storeName: String = "Tweaks", enabled: Bool) {
 		self.persistence = TweakPersistency(identifier: storeName)
 		self.storeName = storeName
 		self.enabled = enabled
-		self.allTweaks = Set(tweaks.reduce([]) { $0 + $1.tweakCluster })
+        self.allTweaks = Set()
+    }
 
-		self.allTweaks.forEach { tweak in
-			// Find or create its TweakCollection
-			var tweakCollection: TweakCollection
-			if let existingCollection = tweakCollections[tweak.collectionName] {
-				tweakCollection = existingCollection
-			} else {
-				tweakCollection = TweakCollection(title: tweak.collectionName)
-				tweakCollections[tweakCollection.title] = tweakCollection
-			}
+    public func addTweaks(_ tweaks: [TweakClusterType]) {
+        self.allTweaks.formUnion(Set(tweaks.reduce([]) { $0 + $1.tweakCluster }))
+        self.allTweaks.forEach { tweak in
+            // Find or create its TweakCollection
+            var tweakCollection: TweakCollection
+            if let existingCollection = tweakCollections[tweak.collectionName] {
+                tweakCollection = existingCollection
+            } else {
+                tweakCollection = TweakCollection(title: tweak.collectionName)
+                tweakCollections[tweakCollection.title] = tweakCollection
+            }
 
-			// Find or create its TweakGroup
-			var tweakGroup: TweakGroup
-			if let existingGroup = tweakCollection.tweakGroups[tweak.groupName] {
-				tweakGroup = existingGroup
-			} else {
-				tweakGroup = TweakGroup(title: tweak.groupName)
-			}
+            // Find or create its TweakGroup
+            var tweakGroup: TweakGroup
+            if let existingGroup = tweakCollection.tweakGroups[tweak.groupName] {
+                tweakGroup = existingGroup
+            } else {
+                tweakGroup = TweakGroup(title: tweak.groupName)
+            }
 
-			// Add the tweak to the tree
-			tweakGroup.tweaks[tweak.tweakName] = tweak
-			tweakCollection.tweakGroups[tweakGroup.title] = tweakGroup
-			tweakCollections[tweakCollection.title] = tweakCollection
-		}
-	}
+            // Add the tweak to the tree
+            tweakGroup.tweaks[tweak.tweakName] = tweak
+            tweakCollection.tweakGroups[tweakGroup.title] = tweakGroup
+            tweakCollections[tweakCollection.title] = tweakCollection
+        }
+    }
 
 	/// Returns the current value for a given tweak
 	public func assign<T>(_ tweak: Tweak<T>) -> T {
@@ -136,6 +139,9 @@ public final class TweakStore {
 		case let .color(defaultValue: defaultValue):
 			let currentValue = cachedValue as? UIColor ?? defaultValue
 			return .color(value: currentValue, defaultValue: defaultValue)
+        case let .string(defaultValue: defaultValue):
+            let currentValue = cachedValue as? String ?? defaultValue
+            return .string(value: currentValue, defaultValue: defaultValue)
 		}
 	}
 

@@ -22,7 +22,7 @@ public struct Tweak<T: TweakableType> {
 	internal let maximumValue: T?	// Only supported for T: SignedNumberType
 	internal let stepSize: T?		// Only supported for T: SignedNumberType
 
-	internal init(tweakName: String,
+	public init(tweakName: String,
 	              defaultValue: T,
 	              minimumValue: T? = nil,
 	              maximumValue: T? = nil,
@@ -120,8 +120,10 @@ extension Tweak: TweakType {
 			)
 		case .uiColor:
 			return .color(defaultValue: defaultValue as! UIColor)
-		}
-	}
+        case .string:
+            return .string(defaultValue: defaultValue as! String)
+        }
+    }
 
 	public var tweakViewDataType: TweakViewDataType {
 		return T.tweakViewDataType

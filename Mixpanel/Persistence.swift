@@ -188,8 +188,8 @@ class Persistence {
     }
 
     class private func unarchiveVariants(token: String) -> Set<Variant> {
-        let data = unarchiveWithType(.variants, token: token)
-        return data as? Set<Variant> ?? Set()
+        let data = unarchiveWithType(.variants, token: token) as? Set<Variant>
+        return data ?? Set()
     }
 
     class private func unarchiveWithType(_ type: ArchiveType, token: String) -> Any? {

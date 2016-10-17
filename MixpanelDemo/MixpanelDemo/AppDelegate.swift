@@ -66,8 +66,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 
 extension MixpanelTweaks {
-    public static let floatTweak = Tweak<CGFloat>(tweakName: "floatTweak", defaultValue: 15, minimumValue: 0)
-    public static let intTweak = Tweak<Int>(tweakName: "intTweak", defaultValue: 10, minimumValue: 0)
+    public static let floatTweak = Tweak<CGFloat>(tweakName: "floatTweak", defaultValue: 20.5, min: 0, max: 30.1)
+    public static let intTweak = Tweak<Int>(tweakName: "intTweak", defaultValue: 10, min: 0)
     public static let boolTweak = Tweak(tweakName: "boolTweak", defaultValue: true)
     public static let stringTweak = Tweak(tweakName: "stringTweak", defaultValue: "hello")
 }

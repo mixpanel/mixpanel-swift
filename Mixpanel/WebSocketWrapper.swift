@@ -153,7 +153,7 @@ class WebSocketWrapper: WebSocketDelegate {
                 case .clearRequest:
                     webSocketMessage = ClearRequest(payload: payload)
                 default:
-                    print("the type that was not parsed: \(type)")
+                    Logger.debug(message: "the type that was not parsed: \(type)")
                     break
                 }
             } else {

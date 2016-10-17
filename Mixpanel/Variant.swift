@@ -59,19 +59,16 @@ class Variant: NSObject, NSCoding {
     }
 
     required init?(coder aDecoder: NSCoder) {
-        guard let ID = aDecoder.decodeObject(forKey: "ID") as? Int,
-            let experimentID = aDecoder.decodeObject(forKey: "experimentID") as? Int,
-            let actions = aDecoder.decodeObject(forKey: "actions") as? Set<VariantAction>,
-            let tweaks = aDecoder.decodeObject(forKey: "tweaks") as? [VariantTweak],
-            let finished = aDecoder.decodeObject(forKey: "finished") as? Bool else {
+        guard let actions = aDecoder.decodeObject(forKey: "actions") as? Set<VariantAction>,
+            let tweaks = aDecoder.decodeObject(forKey: "tweaks") as? [VariantTweak] else {
                 return nil
         }
 
-        self.ID = ID
-        self.experimentID = experimentID
+        self.ID = aDecoder.decodeInteger(forKey: "ID")
+        self.experimentID = aDecoder.decodeInteger(forKey: "experimentID")
         self.actions = actions
         self.tweaks = tweaks
-        self.finished = finished
+        self.finished = aDecoder.decodeBool(forKey: "finished")
         self.running = false
     }
 

@@ -23,7 +23,8 @@ class VariantAction: NSObject, NSCoding {
     static let gettersForSetters = [NSSelectorFromString("setImage:forState:"):           NSSelectorFromString("imageForState:"),
                                     NSSelectorFromString("setImage:"):                    NSSelectorFromString("image"),
                                     NSSelectorFromString("setBackgroundImage:forState:"): NSSelectorFromString("imageForState:")]
-    static var originalCache = [UIView: UIImage]()
+    static let originalCache = NSMapTable<UIView, UIImage>(keyOptions: [.weakMemory, .objectPointerPersonality],
+                                                           valueOptions: [.strongMemory, .objectPointerPersonality])
 
     convenience init?(JSONObject: [String: Any]?) {
         guard let object = JSONObject else {
@@ -71,7 +72,7 @@ class VariantAction: NSObject, NSCoding {
     func execute() {
         let executeBlock = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
             guard let rootVC = UIApplication.shared.keyWindow?.rootViewController else {
-                print("SO FUCKED AGAIN HUH? L:OL")
+                Logger.error(message: "No apparent root view controller, cannot execute action")
                 return
             }
 
@@ -86,7 +87,7 @@ class VariantAction: NSObject, NSCoding {
                                                                    leaf: view)
             for performedSelector in performedSelectors {
                 guard let target = performedSelector.0 as? UIView else {
-                    print("Whatsssss going on FUCKED lol")
+                    Logger.error(message: "Performing a selector didn't return a non-nil target")
                     continue
                 }
                 self.appliedTo.add(target)
@@ -128,7 +129,6 @@ class VariantAction: NSObject, NSCoding {
             let pathString = aDecoder.decodeObject(forKey: "path") as? String,
             let selectorString = aDecoder.decodeObject(forKey: "selector") as? String,
             let args = aDecoder.decodeObject(forKey: "args") as? [Any],
-            let swizzle = aDecoder.decodeObject(forKey: "swizzle") as? Bool,
             let swizzleClassString = aDecoder.decodeObject(forKey: "swizzleClass") as? String,
             let swizzleClass = NSClassFromString(swizzleClassString),
             let swizzleSelectorString = aDecoder.decodeObject(forKey: "swizzleSelector") as? String
@@ -141,7 +141,7 @@ class VariantAction: NSObject, NSCoding {
         self.selector = NSSelectorFromString(selectorString)
         self.args = args
         self.original = aDecoder.decodeObject(forKey: "original") as? [Any]
-        self.swizzle = swizzle
+        self.swizzle = aDecoder.decodeBool(forKey: "swizzle")
         self.swizzleClass = swizzleClass
         self.swizzleSelector = NSSelectorFromString(swizzleSelectorString)
         self.cacheOriginal = false
@@ -221,7 +221,7 @@ class VariantAction: NSObject, NSCoding {
                 }
 
                 guard method != nil else {
-                    print("NIOOOOO OWHYYYY")
+                    Logger.error(message: "Could not find a method with that selector value")
                     continue
                 }
                 let implementation = method_getImplementation(method)
@@ -238,11 +238,11 @@ class VariantAction: NSObject, NSCoding {
                 } else if transformedArgs.count == 2 {
                     unmanagedObject = object.perform(selector, with: transformedArgs[0], with: transformedArgs[1])
                 } else {
-                    print("WE ARE FUCKED 222 LOL")
+                    Logger.warn(message: "We do not support selectors that get more than 2 values")
                 }
 
                 if VariantAction.gettersForSetters.values.contains(selector) {
-                    retValue = unmanagedObject?.takeRetainedValue()
+                    retValue = unmanagedObject?.takeUnretainedValue()
                 }
             }
             targetRetValuePairs.append((object, retValue))
@@ -251,7 +251,7 @@ class VariantAction: NSObject, NSCoding {
     }
 
     class func extractAndRunMethodFromSelector(selector: Selector, implementation: IMP?, object: AnyObject, args: [Any]) -> AnyObject? {
-        print(selector.description)
+        Logger.debug(message: selector.description)
         if selector.description == "setImage:forState:" {
             typealias Function = @convention(c) (AnyObject, Selector, UIImage, UIControlState) -> Void
             let function = unsafeBitCast(implementation, to: Function.self)
@@ -259,7 +259,7 @@ class VariantAction: NSObject, NSCoding {
         } else if selector.description == "imageForState:" {
             typealias Function = @convention(c) (AnyObject, Selector, UIControlState) -> Unmanaged<UIImage>
             let function = unsafeBitCast(implementation, to: Function.self)
-            let val = function(object, #selector(UIButton.image(for:)), UIControlState(rawValue: args[1] as! UInt)).takeRetainedValue()
+            let val = function(object, #selector(UIButton.image(for:)), UIControlState(rawValue: args[1] as! UInt)).takeUnretainedValue()
             return val
         } else if selector.description == "setFrame:" {
             guard let nsValue = args[0] as? NSValue else {
@@ -284,15 +284,18 @@ class VariantAction: NSObject, NSCoding {
             typealias Function = @convention(c) (AnyObject, Selector, UIImage, UIControlState) -> Void
             let function = unsafeBitCast(implementation, to: Function.self)
             function(object, selector, args[0] as! UIImage, UIControlState(rawValue: args[1] as! UInt))
+        } else if selector.description == "setTextAlignment:" {
+            typealias Function = @convention(c) (AnyObject, Selector, NSTextAlignment) -> Void
+            let function = unsafeBitCast(implementation, to: Function.self)
+            function(object, selector, NSTextAlignment(rawValue: args[0] as! Int)!)
         }
-
         return nil
     }
 
     func cacheOriginalImage(_ view: UIView?) {
         if let cacheSelector = VariantAction.gettersForSetters[selector] {
             guard let rootVC = UIApplication.shared.keyWindow?.rootViewController else {
-                print("WTF JUST HAPPENED")
+                Logger.error(message: "No apparent root view controller, cannot cache image")
                 return
             }
             let cachedPerformedSelectors = VariantAction.executeSelector(cacheSelector,
@@ -302,12 +305,12 @@ class VariantAction: NSObject, NSCoding {
                                                                          leaf: view)
             for performedSelector in cachedPerformedSelectors {
                 guard let view = performedSelector.0 as? UIView else {
-                    print("SOOOO FUCKED HAHA")
+                    Logger.error(message: "Performing a selector didn't return a non-nil target")
                     continue
                 }
-                if VariantAction.originalCache[view] == nil {
+                if VariantAction.originalCache.object(forKey: view) == nil {
                     if let image = performedSelector.1 as? UIImage {
-                        VariantAction.originalCache[view] = image
+                        VariantAction.originalCache.setObject(image, forKey: view)
                     }
                 }
             }
@@ -316,7 +319,7 @@ class VariantAction: NSObject, NSCoding {
 
     func restoreCachedImage() {
         for object in appliedTo.allObjects {
-            if let originalImage = VariantAction.originalCache[object] {
+            if let originalImage = VariantAction.originalCache.object(forKey: object) {
                 let originalArgs = args.map { arg -> Any in
                     if let arg = arg as? [AnyObject], let str = arg[1] as? String, str == "UIImage" {
                         return [originalImage, "UIImage"] as [Any]
@@ -324,7 +327,7 @@ class VariantAction: NSObject, NSCoding {
                     return arg
                 }
                 VariantAction.executeSelector(selector, args: originalArgs, on: [object])
-                VariantAction.originalCache.removeValue(forKey: object)
+                VariantAction.originalCache.removeObject(forKey: object)
             }
         }
     }
@@ -333,6 +336,8 @@ class VariantAction: NSObject, NSCoding {
         if let value = value as? NSString, type == "NSString" {
             return value
         } else if let value = value as? NSValue {
+            return value
+        } else if let value = value as? UIImage, type == "UIImage" {
             return value
         }
         return nil
@@ -357,7 +362,7 @@ class VariantAction: NSObject, NSCoding {
         }
 
         guard let fromTypeUnwrapped = fromType else {
-            print("YOYOYOYOYOY")
+            Logger.info(message: "Could not find a transformer for that 'from type'")
             return nil
         }
 

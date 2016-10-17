@@ -22,7 +22,7 @@ public struct Tweak<T: TweakableType> {
 	internal let maximumValue: T?	// Only supported for T: SignedNumberType
 	internal let stepSize: T?		// Only supported for T: SignedNumberType
 
-	public init(tweakName: String,
+	internal init(tweakName: String,
 	              defaultValue: T,
 	              minimumValue: T? = nil,
 	              maximumValue: T? = nil,
@@ -49,7 +49,7 @@ public struct Tweak<T: TweakableType> {
 internal let TweakIdentifierSeparator = "|"
 
 extension Tweak {
-	public init(_ collectionName: String, _ groupName: String, _ tweakName: String, _ defaultValue: T) {
+	public init(tweakName: String, defaultValue: T, _ collectionName: String = "Mixpanel", _ groupName: String = "Mixpanel") {
 		self.init(
             tweakName: tweakName,
             defaultValue: defaultValue,
@@ -63,13 +63,13 @@ extension Tweak where T: SignedNumber {
 	/// Creates a Tweak<T> where T: SignedNumberType
 	/// You can optionally provide a min / max / stepSize to restrict the bounds and behavior of a tweak.
 	/// The step size is "how much does the value change when I tap the UIStepper"
-	public init(_ collectionName: String,
-	            _ groupName: String,
-	            _ tweakName: String,
+	public init(tweakName: String,
 	            defaultValue: T,
 	            min minimumValue: T? = nil,
 	            max maximumValue: T? = nil,
-	            stepSize: T? = nil) {
+	            stepSize: T? = nil,
+	            _ collectionName: String = "Mixpanel",
+	            _ groupName: String = "Mixpanel") {
 
 		// Assert that the tweak's defaultValue is between its min and max (if they exist)
 		if clip(defaultValue, minimumValue, maximumValue) != defaultValue {

@@ -31,6 +31,7 @@ class DeviceInfoRequest: BaseWebSocketMessage {
                                                           appRelease: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
                                                           deviceName: currentDevice.name,
                                                           deviceModel: currentDevice.model,
+                                                          libLanguage: "Swift",
                                                           libVersion: AutomaticProperties.libVersion(),
                                                           availableFontFamilies: self.availableFontFamilies(),
                                                           mainBundleIdentifier: Bundle.main.bundleIdentifier,
@@ -109,6 +110,7 @@ struct InfoResponseInput {
     let appRelease: String?
     let deviceName: String
     let deviceModel: String
+    let libLanguage: String
     let libVersion: String?
     let availableFontFamilies: [[String: Any]]
     let mainBundleIdentifier: String?
@@ -124,6 +126,7 @@ class DeviceInfoResponse: BaseWebSocketMessage {
         payload["device_model"] = infoResponse.deviceModel as AnyObject
         payload["available_font_families"] = infoResponse.availableFontFamilies as AnyObject
         payload["tweaks"] = infoResponse.tweaks as AnyObject
+        payload["lib_language"] = infoResponse.libLanguage as AnyObject
 
         if let appVersion = infoResponse.appVersion {
             payload["app_version"] = appVersion as AnyObject

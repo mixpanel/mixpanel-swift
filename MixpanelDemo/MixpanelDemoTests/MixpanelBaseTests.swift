@@ -28,7 +28,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         mixpanel.reset()
         waitForSerialQueue()
         LSNocilla.sharedInstance().clearStubs()
-        stubDecide()
+        //stubDecide()
         NSLog("finished test setup")
     }
 
@@ -89,6 +89,14 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
                 "nested": nested,
                 "url": URL(string: "https://mixpanel.com/")!,
                 "float": 1.3]
+    }
+
+    func topViewController() -> UIViewController {
+        var rootViewController = UIApplication.shared.keyWindow?.rootViewController
+        while rootViewController?.presentedViewController != nil {
+            rootViewController = rootViewController?.presentedViewController
+        }
+        return rootViewController!
     }
 
 }

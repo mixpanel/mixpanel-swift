@@ -196,6 +196,7 @@ class VariantAction: NSObject, NSCoding {
         var targetRetValuePairs = [(AnyObject, AnyObject?)]()
         var transformedArgs = [Any]()
         var doesHaveNSValue = false
+        var doesHaveNSNullValue = false
         for argument in args {
             if let argumentTuple = argument as? [AnyObject], argumentTuple.count == 2 {
                 guard let type = argumentTuple[1] as? String else {
@@ -204,6 +205,8 @@ class VariantAction: NSObject, NSCoding {
                 if let transformedArg = VariantAction.transformValue(argumentTuple[0], to: type) {
                     if transformedArg is NSValue {
                         doesHaveNSValue = true
+                    } else if transformedArg is NSNull {
+                        doesHaveNSNullValue = true
                     }
                     transformedArgs.append(transformedArg)
                 }
@@ -229,7 +232,7 @@ class VariantAction: NSObject, NSCoding {
                                                            implementation: implementation,
                                                            object: object,
                                                            args: transformedArgs)
-            } else {
+            } else if !doesHaveNSNullValue {
                 var unmanagedObject: Unmanaged<AnyObject>! = nil
                 if transformedArgs.isEmpty {
                     unmanagedObject = object.perform(selector)
@@ -359,6 +362,8 @@ class VariantAction: NSObject, NSCoding {
             fromType = NSStringFromClass(NSNumber.self)
         } else if value is NSDictionary {
             fromType = NSStringFromClass(NSDictionary.self)
+        } else if value is NSNull {
+            fromType = NSStringFromClass(NSNull.self)
         }
 
         guard let fromTypeUnwrapped = fromType else {

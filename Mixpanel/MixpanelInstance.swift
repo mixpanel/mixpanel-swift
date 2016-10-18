@@ -833,11 +833,8 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         }
 
         serialQueue.async {
-            guard let experiments = self.superProperties["$experiments"] as? [String: Any] else {
-                return
-            }
             var superPropertiesCopy = self.superProperties
-            var shownVariants = experiments
+            var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]
             shownVariants += shownVariant
             superPropertiesCopy += ["$experiments": shownVariants]
             self.superProperties = superPropertiesCopy
@@ -856,7 +853,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     }
 
     func checkForVariants(completion: @escaping (_ variants: Set<Variant>?) -> Void) {
-        checkDecide { response in
+        checkDecide(forceFetch: true) { response in
             completion(response?.newVariants)
         }
     }
@@ -933,7 +930,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     }
 
     func checkForNotifications(completion: @escaping (_ notifications: [InAppNotification]?) -> Void) {
-        checkDecide { response in
+        checkDecide(forceFetch: true) { response in
             completion(response?.unshownInAppNotifications)
         }
     }

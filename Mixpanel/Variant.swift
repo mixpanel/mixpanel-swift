@@ -14,7 +14,7 @@ class Variant: NSObject, NSCoding {
     var running: Bool
     var finished: Bool
 
-    var actions: Set<VariantAction>
+    var actions: NSMutableOrderedSet
     var tweaks: [VariantTweak]
 
     convenience init?(JSONObject: [String: Any]?) {
@@ -49,7 +49,7 @@ class Variant: NSObject, NSCoding {
     init(ID: Int, experimentID: Int, actions: [[String: Any]], tweaks: [[String: Any]]) {
         self.ID = ID
         self.experimentID = experimentID
-        self.actions = Set<VariantAction>()
+        self.actions = NSMutableOrderedSet()
         self.tweaks = [VariantTweak]()
         self.running = false
         self.finished = false
@@ -59,7 +59,7 @@ class Variant: NSObject, NSCoding {
     }
 
     required init?(coder aDecoder: NSCoder) {
-        guard let actions = aDecoder.decodeObject(forKey: "actions") as? Set<VariantAction>,
+        guard let actions = aDecoder.decodeObject(forKey: "actions") as? NSMutableOrderedSet,
             let tweaks = aDecoder.decodeObject(forKey: "tweaks") as? [VariantTweak] else {
                 return nil
         }
@@ -84,7 +84,7 @@ class Variant: NSObject, NSCoding {
         for object in JSONObject {
             if let action = VariantAction(JSONObject: object) {
                 actions.remove(action)
-                actions.insert(action)
+                actions.add(action)
                 if execute {
                     action.execute()
                 }
@@ -94,6 +94,9 @@ class Variant: NSObject, NSCoding {
 
     func removeAction(name: String) {
         for action in actions {
+            guard let action = action as? VariantAction else {
+                continue
+            }
             if action.name == name {
                 action.stop()
                 actions.remove(action)
@@ -119,6 +122,9 @@ class Variant: NSObject, NSCoding {
                 tweak.execute()
             }
             for action in actions {
+                guard let action = action as? VariantAction else {
+                    continue
+                }
                 action.execute()
             }
             running = true
@@ -127,6 +133,9 @@ class Variant: NSObject, NSCoding {
 
     func stop() {
         for action in actions {
+            guard let action = action as? VariantAction else {
+                continue
+            }
             action.stop()
         }
         for tweak in tweaks {

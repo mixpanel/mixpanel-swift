@@ -116,12 +116,14 @@ class VariantAction: NSObject, NSCoding {
             Swizzler.unswizzleSelector(swizzleSelector, aClass: swizzleClass, name: name)
         }
 
-        if let original = original {
-            VariantAction.executeSelector(selector, args: original, on: appliedTo.allObjects)
-        } else if cacheOriginal {
-            restoreCachedImage()
+        DispatchQueue.main.sync {
+            if let original = original {
+                VariantAction.executeSelector(selector, args: original, on: appliedTo.allObjects)
+            } else if cacheOriginal {
+                restoreCachedImage()
+            }
+            appliedTo.removeAllObjects()
         }
-        appliedTo.removeAllObjects()
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -254,7 +256,6 @@ class VariantAction: NSObject, NSCoding {
     }
 
     class func extractAndRunMethodFromSelector(selector: Selector, implementation: IMP?, object: AnyObject, args: [Any]) -> AnyObject? {
-        Logger.debug(message: selector.description)
         if selector.description == "setImage:forState:" {
             typealias Function = @convention(c) (AnyObject, Selector, UIImage, UIControlState) -> Void
             let function = unsafeBitCast(implementation, to: Function.self)

@@ -32,7 +32,7 @@ class DeviceInfoRequest: BaseWebSocketMessage {
                                                           deviceName: currentDevice.name,
                                                           deviceModel: currentDevice.model,
                                                           libLanguage: "Swift",
-                                                          libVersion: AutomaticProperties.libVersion(),
+                                                          libVersion: "2.6", // workaround for a/b testing
                                                           availableFontFamilies: self.availableFontFamilies(),
                                                           mainBundleIdentifier: Bundle.main.bundleIdentifier,
                                                           tweaks: self.getTweaks())

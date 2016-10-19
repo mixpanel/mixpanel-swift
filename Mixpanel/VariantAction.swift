@@ -116,14 +116,12 @@ class VariantAction: NSObject, NSCoding {
             Swizzler.unswizzleSelector(swizzleSelector, aClass: swizzleClass, name: name)
         }
 
-        DispatchQueue.main.sync {
-            if let original = original {
-                VariantAction.executeSelector(selector, args: original, on: appliedTo.allObjects)
-            } else if cacheOriginal {
-                restoreCachedImage()
-            }
-            appliedTo.removeAllObjects()
+        if let original = original {
+            VariantAction.executeSelector(selector, args: original, on: appliedTo.allObjects)
+        } else if cacheOriginal {
+            restoreCachedImage()
         }
+        appliedTo.removeAllObjects()
     }
 
     required init?(coder aDecoder: NSCoder) {

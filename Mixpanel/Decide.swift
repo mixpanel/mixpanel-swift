@@ -13,11 +13,13 @@ struct DecideResponse {
     var unshownInAppNotifications: [InAppNotification]
     var newCodelessBindings: Set<CodelessBinding>
     var newVariants: Set<Variant>
+    var toFinishVariants: Set<Variant>
 
     init() {
         unshownInAppNotifications = []
         newCodelessBindings = Set()
         newVariants = Set()
+        toFinishVariants = Set()
     }
 }
 
@@ -104,14 +106,13 @@ class Decide {
 
                 let runningVariants = Set(self.ABTestingInstance.variants.filter { return $0.running })
                 let finishedVariants = Set(self.ABTestingInstance.variants.filter { return $0.finished })
-                let toFinishVariants = runningVariants.subtracting(parsedVariants)
+                decideResponse.toFinishVariants = runningVariants.subtracting(parsedVariants)
                 let newVariants = parsedVariants.subtracting(runningVariants)
                 decideResponse.newVariants = newVariants
                 let restartVariants = parsedVariants.intersection(runningVariants).intersection(finishedVariants)
 
                 self.ABTestingInstance.variants = newVariants.union(runningVariants)
                 restartVariants.forEach { $0.restart() }
-                toFinishVariants.forEach { $0.finish() }
 
                 self.decideFetched = true
                 semaphore.signal()

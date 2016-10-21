@@ -41,6 +41,7 @@ public final class TweakStore {
         self.allTweaks = Set()
     }
 
+    /// A method for adding Tweaks to the environment
     public func addTweaks(_ tweaks: [TweakClusterType]) {
         self.allTweaks.formUnion(Set(tweaks.reduce([]) { $0 + $1.tweakCluster }))
         self.allTweaks.forEach { tweak in
@@ -73,6 +74,7 @@ public final class TweakStore {
 		return self.currentValueForTweak(tweak)
 	}
 
+    /// The bind function for Tweaks. This is meant for binding Tweaks to the relevant components.
 	public func bind<T>(_ tweak: Tweak<T>, binding: @escaping (T) -> Void) {
 		// Create the TweakBinding<T>, and wrap it in our type-erasing AnyTweakBinding
 		let tweakBinding = TweakBinding(tweak: tweak, binding: binding)
@@ -86,7 +88,7 @@ public final class TweakStore {
 		binding(currentValueForTweak(tweak))
 	}
 
-	public func bindMultiple(_ tweaks: [TweakType], binding: @escaping () -> Void) {
+    func bindMultiple(_ tweaks: [TweakType], binding: @escaping () -> Void) {
 		// Convert the array (which makes it easier to call a `bindTweakSet`) into a set (which makes it possible to cache the tweakSet)
 		let tweakSet = Set(tweaks.map(AnyTweak.init))
 
@@ -153,6 +155,7 @@ public final class TweakStore {
 
 	// MARK - Private
 
+    /// Update Bindings for the Tweaks when a change is needed.
 	private func updateBindingsForTweak(_ tweak: AnyTweak) {
 		// Find any 1-to-1 bindings and update them
 		tweakBindings[tweak.persistenceIdentifier]?.forEach {

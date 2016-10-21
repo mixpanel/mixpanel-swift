@@ -12,11 +12,11 @@ import UIKit
 
 /// Tweaks let you adjust things on the fly.
 /// Because each T needs a UI component, we have to restrict what T can be - hence T: TweakableType.
-/// If T: SignedNumberType, you can declare a min / max / stepSize for a Tweak.
+/// If T: SignedNumberType, you can declare a min / max for a Tweak.
 public struct Tweak<T: TweakableType> {
-	public let collectionName: String
-	public let groupName: String
-	public let tweakName: String
+    internal let collectionName: String
+    internal let groupName: String
+    internal let tweakName: String
 	internal let defaultValue: T
 	internal let minimumValue: T?	// Only supported for T: SignedNumberType
 	internal let maximumValue: T?	// Only supported for T: SignedNumberType
@@ -49,6 +49,9 @@ public struct Tweak<T: TweakableType> {
 internal let TweakIdentifierSeparator = "|"
 
 extension Tweak {
+    /**
+    Initializer for a Tweak for A/B Testing
+    */
 	public init(tweakName: String, defaultValue: T, _ collectionName: String = "Mixpanel", _ groupName: String = "Mixpanel") {
 		self.init(
             tweakName: tweakName,
@@ -89,11 +92,11 @@ extension Tweak where T: SignedNumber {
 }
 
 extension Tweak: TweakType {
-	public var tweak: TweakType {
+    var tweak: TweakType {
 		return self
 	}
 
-	public var tweakDefaultData: TweakDefaultData {
+    var tweakDefaultData: TweakDefaultData {
 		switch T.tweakViewDataType {
 		case .boolean:
 			return .boolean(defaultValue: (defaultValue as! Bool))
@@ -125,17 +128,23 @@ extension Tweak: TweakType {
         }
     }
 
-	public var tweakViewDataType: TweakViewDataType {
+    var tweakViewDataType: TweakViewDataType {
 		return T.tweakViewDataType
 	}
 }
 
 extension Tweak: Hashable {
-	public var hashValue: Int {
+    /**
+     Hashing for a Tweak for A/B Testing in order for it to be stored.
+     */
+    public var hashValue: Int {
 		return tweakIdentifier.hashValue
 	}
 }
 
+/**
+ Comparator between two tweaks for A/B Testing.
+ */
 public func == <T>(lhs: Tweak<T>, rhs: Tweak<T>) -> Bool {
 	return lhs.tweakIdentifier == rhs.tweakIdentifier
 }
@@ -147,5 +156,5 @@ extension Tweak: TweakIdentifiable {
 
 /// Extend Tweak to support easy initialization of a TweakStore
 extension Tweak: TweakClusterType {
-	public var tweakCluster: [AnyTweak] { return [AnyTweak.init(tweak: self)] }
+    public var tweakCluster: [AnyTweak] { return [AnyTweak.init(tweak: self)] }
 }

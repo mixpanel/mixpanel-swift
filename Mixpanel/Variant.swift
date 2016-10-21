@@ -145,10 +145,8 @@ class Variant: NSObject, NSCoding {
     }
 
     func finish() {
-        DispatchQueue.main.sync {
-            stop()
-            finished = true
-        }
+        stop()
+        finished = true
     }
 
     func restart() {

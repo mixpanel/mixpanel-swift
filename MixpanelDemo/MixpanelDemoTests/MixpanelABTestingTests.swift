@@ -119,6 +119,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
     }
 
     func testDecideVariants() {
+        LSNocilla.sharedInstance().clearStubs()
         self.stubDecide("test_decide_response")
         self.mixpanel.identify(distinctId: "ABC")
         let expect = self.expectation(description: "wait for variants to be executed")
@@ -149,12 +150,13 @@ class MixpanelABTestingTests: MixpanelBaseTests {
                            1,
                            "Should have got 1 new variants from decide (new variant for same experiment)")})
         self.waitForSerialQueue()
-        XCTAssert(completionCalled, "coletion block should have been called")
+        XCTAssert(completionCalled, "completion block should have been called")
         // Reset to default decide response
         self.stubDecide("test_decide_response")
     }
 
     func testRunExperimentFromDecide() {
+        LSNocilla.sharedInstance().clearStubs()
         self.stubDecide("test_decide_response")
         // This view should be modified by the variant returned from decide.
         let button = UIButton()
@@ -162,39 +164,43 @@ class MixpanelABTestingTests: MixpanelBaseTests {
         topViewController().view.addSubview(button)
         self.mixpanel.identify(distinctId: "ABC")
         waitForSerialQueue()
-        self.mixpanel.joinExperiments()
-        self.waitForSerialQueue()
-        XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.count, 2, "Should have 2 variants")
-        XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.filter {
-            return $0.ID == 1 && $0.running
-            }.count, 1, "We should be running variant 1")
-        XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.filter {
-            return $0.ID == 2 && $0.running && !$0.finished
-            }.count, 1, "We should be running variant 2")
-        XCTAssertEqual(Int(((button.backgroundColor?.cgColor)?.components?[0])! * 255), 255, "Button background should be red")
-        // Returning a new variant for the same experiment from decide should override the old one
-        LSNocilla.sharedInstance().clearStubs()
-        self.stubDecide("test_decide_response_2")
-        var lastCall = false
-        self.mixpanel.joinExperiments(callback: {() -> Void in
-            XCTAssert(lastCall, "callback should run after variants have been processed")
-        })
-        self.waitForSerialQueue()
-        XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.count, 3, "Should have 3 variants")
-        XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.filter {
-            return $0.ID == 1 && $0.running
-            }.count, 1, "We should be running variant 1")
-        XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.filter {
-            return $0.ID == 2 && !$0.running && $0.finished
-            }.count, 1, "Variant 2 should be stopped but marked as finished.")
-        XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.filter {
-            return $0.ID == 3 && $0.running
-            }.count, 1, "We should be running variant 3")
-        XCTAssertEqual(Int(((button.backgroundColor?.cgColor)?.components?[2])! * 255), 255, "Button background should be blue")
-        lastCall = true
+        let expect = self.expectation(description: "Finish join experiments")
+        self.mixpanel.joinExperiments() {
+            XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.count, 2, "Should have 2 variants")
+            XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.filter {
+                return $0.ID == 1 && $0.running
+                }.count, 1, "We should be running variant 1")
+            XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.filter {
+                return $0.ID == 2 && $0.running && !$0.finished
+                }.count, 1, "We should be running variant 2")
+            XCTAssertEqual(Int(((button.backgroundColor?.cgColor)?.components?[0])! * 255), 255, "Button background should be red")
+            // Returning a new variant for the same experiment from decide should override the old one
+            LSNocilla.sharedInstance().clearStubs()
+            self.stubDecide("test_decide_response_2")
+            var lastCall = false
+            self.mixpanel.joinExperiments() {
+                XCTAssert(lastCall, "callback should run after variants have been processed")
+                self.waitForSerialQueue()
+                XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.count, 3, "Should have 3 variants")
+                XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.filter {
+                    return $0.ID == 1 && $0.running
+                    }.count, 1, "We should be running variant 1")
+                XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.filter {
+                    return $0.ID == 2 && !$0.running && $0.finished
+                    }.count, 1, "Variant 2 should be stopped but marked as finished.")
+                XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.filter {
+                    return $0.ID == 3 && $0.running
+                    }.count, 1, "We should be running variant 3")
+                XCTAssertEqual(Int(((button.backgroundColor?.cgColor)?.components?[2])! * 255), 255, "Button background should be blue")
+                expect.fulfill()
+            }
+            lastCall = true
+        }
+        self.waitForExpectations(timeout: 0.5, handler: nil)
     }
 
     func testVariantsTracked() {
+        LSNocilla.sharedInstance().clearStubs()
         self.stubDecide("test_decide_response")
         self.mixpanel.identify(distinctId: "DEF")
         waitForSerialQueue()

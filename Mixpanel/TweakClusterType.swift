@@ -12,5 +12,6 @@ import Foundation
 /// It allows you to combine one-off Tweak<T>'s with TweakGroupTemplates into a single array without hassle.
 /// (For example, a single Tweak can conform by returning itself wrapped in an array!)
 public protocol TweakClusterType {
+    /// The tweak cluster to allow easy initialization of Tweaks
 	var tweakCluster: [AnyTweak] { get }
 }

@@ -276,26 +276,32 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     @objc private func applicationDidBecomeActive(_ notification: Notification) {
         flushInstance.applicationDidBecomeActive()
         #if os(iOS)
-        checkDecide { decideResponse in
-            if let decideResponse = decideResponse {
-                if self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
-                    self.decideInstance.notificationsInstance.showNotification(decideResponse.unshownInAppNotifications.first!)
-                }
+            if checkForVariantsOnActive || checkForNotificationOnActive {
+                checkDecide { decideResponse in
+                    if let decideResponse = decideResponse {
+                        DispatchQueue.main.sync {
+                            decideResponse.toFinishVariants.forEach { $0.finish() }
+                        }
 
-                DispatchQueue.main.sync {
-                    for binding in decideResponse.newCodelessBindings {
-                        binding.execute()
-                    }
-                }
+                        if self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
+                            self.decideInstance.notificationsInstance.showNotification(decideResponse.unshownInAppNotifications.first!)
+                        }
 
-                DispatchQueue.main.sync {
-                    for variant in decideResponse.newVariants {
-                        variant.execute()
-                        self.markVariantRun(variant)
+                        DispatchQueue.main.sync {
+                            for binding in decideResponse.newCodelessBindings {
+                                binding.execute()
+                            }
+                        }
+
+                        DispatchQueue.main.sync {
+                            for variant in decideResponse.newVariants {
+                                variant.execute()
+                                self.markVariantRun(variant)
+                            }
+                        }
                     }
                 }
             }
-        }
         #endif
     }
 
@@ -854,11 +860,23 @@ extension MixpanelInstance: InAppNotificationsDelegate {
 
     func checkForVariants(completion: @escaping (_ variants: Set<Variant>?) -> Void) {
         checkDecide(forceFetch: true) { response in
+            DispatchQueue.main.sync {
+                response?.toFinishVariants.forEach { $0.finish() }
+            }
             completion(response?.newVariants)
         }
     }
 
-    func joinExperiments(callback: (() -> Void)? = nil) {
+    /**
+     Join any experiments (A/B tests) that are available for the current user.
+
+     Mixpanel will check for A/B tests automatically when your app enters
+     the foreground. Call this method if you would like to to check for,
+     and join, any experiments are newly available for the current user.
+
+     - parameter callback:  Optional callback for after the experiments have been loaded and applied
+     */
+    open func joinExperiments(callback: (() -> Void)? = nil) {
         checkForVariants { newVariants in
             guard let newVariants = newVariants else {
                 return
@@ -931,6 +949,9 @@ extension MixpanelInstance: InAppNotificationsDelegate {
 
     func checkForNotifications(completion: @escaping (_ notifications: [InAppNotification]?) -> Void) {
         checkDecide(forceFetch: true) { response in
+            DispatchQueue.main.sync {
+                response?.toFinishVariants.forEach { $0.finish() }
+            }
             completion(response?.unshownInAppNotifications)
         }
     }

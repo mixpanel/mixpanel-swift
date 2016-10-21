@@ -128,9 +128,12 @@ import UIKit
                     }
                 }
             }
+            if image == nil {
+                return UIImage()
+            }
             return image
         }
-        return nil
+        return UIImage()
     }
 
 

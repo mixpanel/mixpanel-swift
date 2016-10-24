@@ -215,18 +215,23 @@ class VariantAction: NSObject, NSCoding {
 
         for object in objects {
             var retValue: AnyObject? = nil
-            if doesHaveNSValue {
-                let method: Method!
-                if object is AnyClass {
-                    method = class_getClassMethod(object as! AnyClass, selector)
-                } else {
-                    method = class_getInstanceMethod(type(of: object), selector)
-                }
+            let method: Method!
+            if object is AnyClass {
+                method = class_getClassMethod(object as! AnyClass, selector)
+            } else {
+                method = class_getInstanceMethod(type(of: object), selector)
+            }
 
-                guard method != nil else {
-                    Logger.error(message: "Could not find a method with that selector value")
-                    continue
-                }
+            guard method != nil else {
+                Logger.error(message: "Could not find a method with that selector value")
+                continue
+            }
+            let numArguments = method_getNumberOfArguments(method)
+            guard (Int(numArguments) - 2) >= transformedArgs.count else {
+                Logger.error(message: "Wrong number of arguments to invoke for selector")
+                continue
+            }
+            if doesHaveNSValue {
                 let implementation = method_getImplementation(method)
                 retValue = extractAndRunMethodFromSelector(selector: selector,
                                                            implementation: implementation,
@@ -261,7 +266,7 @@ class VariantAction: NSObject, NSCoding {
         } else if selector.description == "imageForState:" {
             typealias Function = @convention(c) (AnyObject, Selector, UIControlState) -> Unmanaged<UIImage>
             let function = unsafeBitCast(implementation, to: Function.self)
-            let val = function(object, #selector(UIButton.image(for:)), UIControlState(rawValue: args[1] as! UInt)).takeUnretainedValue()
+            let val = function(object, #selector(UIButton.image(for:)), UIControlState(rawValue: args[0] as! UInt)).takeUnretainedValue()
             return val
         } else if selector.description == "setFrame:" {
             guard let nsValue = args[0] as? NSValue else {
@@ -300,8 +305,12 @@ class VariantAction: NSObject, NSCoding {
                 Logger.error(message: "No apparent root view controller, cannot cache image")
                 return
             }
+            var subsetArray = [Any]()
+            if args.count > 1 {
+                subsetArray = Array(args[1..<args.count])
+            }
             let cachedPerformedSelectors = VariantAction.executeSelector(cacheSelector,
-                                                                         args: args,
+                                                                         args: subsetArray,
                                                                          path: path,
                                                                          root: rootVC,
                                                                          leaf: view)

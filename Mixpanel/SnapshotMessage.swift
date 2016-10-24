@@ -76,10 +76,6 @@ class SnapshotRequest: BaseWebSocketMessage {
                 connection.setSessionObjectSynchronized(with: serializedObjects, for: "snapshot_hierarchy")
             }
 
-//            for object in serializedObjects {
-//                print(object)
-//            }
-
             response.serializedObjects = serializedObjects
             connection.send(message: response)
         }

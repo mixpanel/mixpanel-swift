@@ -24,6 +24,7 @@ class Persistence {
         case people
         case properties
         case codelessBindings
+        case variants
     }
 
     class func filePathWithType(_ type: ArchiveType, token: String) -> String? {
@@ -51,10 +52,12 @@ class Persistence {
                        peopleQueue: Queue,
                        properties: ArchivedProperties,
                        codelessBindings: Set<CodelessBinding>,
+                       variants: Set<Variant>,
                        token: String) {
         archiveEvents(eventsQueue, token: token)
         archivePeople(peopleQueue, token: token)
         archiveProperties(properties, token: token)
+        archiveVariants(variants, token: token)
         archiveCodelessBindings(codelessBindings, token: token)
     }
 
@@ -75,6 +78,10 @@ class Persistence {
         p["timedEvents"] = properties.timedEvents
         p["shownNotifications"] = properties.shownNotifications
         archiveToFile(.properties, object: p, token: token)
+    }
+
+    class func archiveVariants(_ variants: Set<Variant>, token: String) {
+        archiveToFile(.variants, object: variants, token: token)
     }
 
     class func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
@@ -102,11 +109,13 @@ class Persistence {
                                             peopleDistinctId: String?,
                                             peopleUnidentifiedQueue: Queue,
                                             shownNotifications: Set<Int>,
-                                            codelessBindings: Set<CodelessBinding>) {
+                                            codelessBindings: Set<CodelessBinding>,
+                                            variants: Set<Variant>) {
 
         let eventsQueue = unarchiveEvents(token: token)
         let peopleQueue = unarchivePeople(token: token)
         let codelessBindings = unarchiveCodelessBindings(token: token)
+        let variants = unarchiveVariants(token: token)
 
         let (superProperties,
             timedEvents,
@@ -123,7 +132,8 @@ class Persistence {
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
                 shownNotifications,
-                codelessBindings)
+                codelessBindings,
+                variants)
     }
 
     class private func unarchiveWithFilePath(_ filePath: String) -> Any? {
@@ -175,6 +185,11 @@ class Persistence {
     class private func unarchiveCodelessBindings(token: String) -> Set<CodelessBinding> {
         let data = unarchiveWithType(.codelessBindings, token: token)
         return data as? Set<CodelessBinding> ?? Set()
+    }
+
+    class private func unarchiveVariants(token: String) -> Set<Variant> {
+        let data = unarchiveWithType(.variants, token: token) as? Set<Variant>
+        return data ?? Set()
     }
 
     class private func unarchiveWithType(_ type: ArchiveType, token: String) -> Any? {

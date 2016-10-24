@@ -91,4 +91,12 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
                 "float": 1.3]
     }
 
+    func topViewController() -> UIViewController {
+        var rootViewController = UIApplication.shared.keyWindow?.rootViewController
+        while rootViewController?.presentedViewController != nil {
+            rootViewController = rootViewController?.presentedViewController
+        }
+        return rootViewController!
+    }
+
 }

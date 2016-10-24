@@ -20,6 +20,12 @@ class DisconnectMessage: BaseWebSocketMessage {
                 return
             }
 
+            if let variant = connection.getSessionObjectSynchronized(for: "session_variant") as? Variant {
+                DispatchQueue.main.sync {
+                    variant.stop()
+                }
+            }
+
             connection.connected = false
             connection.close()
         }

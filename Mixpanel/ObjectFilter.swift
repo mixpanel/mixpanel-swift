@@ -45,6 +45,16 @@ class ObjectFilter: CustomStringConvertible {
             }
         }
 
+        if !nameOnly {
+            if unique && result.count != 1 {
+                return []
+            }
+
+            if let predicate = predicate {
+                return result.filter { predicate.evaluate(with: $0) }
+            }
+        }
+
         return result
     }
 

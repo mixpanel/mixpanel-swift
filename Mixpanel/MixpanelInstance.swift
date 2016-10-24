@@ -395,7 +395,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.connectGestureRecognized(gesture:)))
             gestureRecognizer.minimumPressDuration = 3
             gestureRecognizer.cancelsTouchesInView = false
-            #if IOS_SIMULATOR
+            #if (arch(i386) || arch(x86_64)) && os(iOS)
                 gestureRecognizer.numberOfTouchesRequired = 2
             #else
                 gestureRecognizer.numberOfTouchesRequired = 4

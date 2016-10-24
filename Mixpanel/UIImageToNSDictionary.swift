@@ -113,7 +113,7 @@ import UIKit
                 }
             }
             var image: UIImage? = nil
-            if let duration = dictionaryValue["durstion"] as? Double, images.count > 1 {
+            if let duration = dictionaryValue["duration"] as? Double, images.count > 1 {
                 image = UIImage.animatedImage(with: images, duration: duration)
             } else if !images.isEmpty {
                 image = images[0]
@@ -128,9 +128,12 @@ import UIKit
                     }
                 }
             }
+            if image == nil {
+                return UIImage()
+            }
             return image
         }
-        return nil
+        return UIImage()
     }
 
 

@@ -15,7 +15,7 @@ let kTestToken = "abc123"
 let kDefaultServerString = "https://api.mixpanel.com"
 let kDefaultServerTrackString = "https://api.mixpanel.com/track/"
 let kDefaultServerEngageString = "https://api.mixpanel.com/engage/"
-let kDefaultServerDecideString = "https://api.mixpanel.com/decide/"
+let kDefaultServerDecideString = "^https://api.mixpanel.com/decide(.*?)".regex
 
 @discardableResult func stubEngage() -> LSStubRequestDSL {
     return stubRequest("POST", kDefaultServerEngageString as LSMatcheable!).withHeader("Accept-Encoding", "gzip")!
@@ -26,7 +26,7 @@ let kDefaultServerDecideString = "https://api.mixpanel.com/decide/"
 }
 
 @discardableResult func stubDecide() -> LSStubRequestDSL {
-    return stubRequest("GET", kDefaultServerDecideString as LSMatcheable!).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("GET", kDefaultServerDecideString()).withHeader("Accept-Encoding", "gzip")!
 }
 
 extension XCTestCase {

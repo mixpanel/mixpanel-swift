@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 class VariantAction: NSObject, NSCoding {
     let name: String

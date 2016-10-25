@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 class VariantTweak: NSObject, NSCoding {
     let name: String

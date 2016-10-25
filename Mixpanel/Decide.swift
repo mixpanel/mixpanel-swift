@@ -105,7 +105,6 @@ class Decide {
                 }
 
                 let runningVariants = Set(self.ABTestingInstance.variants.filter { return $0.running })
-                let finishedVariants = Set(self.ABTestingInstance.variants.filter { return $0.finished })
                 decideResponse.toFinishVariants = runningVariants.subtracting(parsedVariants)
                 let newVariants = parsedVariants.subtracting(runningVariants)
                 decideResponse.newVariants = newVariants

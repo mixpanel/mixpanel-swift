@@ -40,9 +40,6 @@
               <li class="nav-group-task">
                 <a href="../Classes/People.html">People</a>
               </li>
-              <li class="nav-group-task">
-                <a href="../Classes/TweakStore.html">TweakStore</a>
-              </li>
             </ul>
           </li>
           <li class="nav-group-name">
@@ -186,6 +183,65 @@ If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
 
                         </div>
                       </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>tweakName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>name of the tweak</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>defaultValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the default value set for the tweak</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>collectionName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the collection name of the tweak (do not set, optional)</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>groupName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the group name of the tweak (do not set, optional)</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
@@ -207,8 +263,7 @@ If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Creates a Tweak<T> where T: SignedNumberType
-You can optionally provide a min / max / stepSize to restrict the bounds and behavior of a tweak.
-The step size is <q>how much does the value change when I tap the UIStepper</q></p>
+You can optionally provide a min / max / stepSize to restrict the bounds and behavior of a tweak.</p>
 
                       </div>
                       <div class="declaration">
@@ -224,6 +279,104 @@ The step size is <q>how much does the value change when I tap the UIStepper</q><
 	            <span class="n">_</span> <span class="nv">groupName</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"Mixpanel"</span><span class="p">)</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>tweakName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>name of the tweak</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>defaultValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the default value set for the tweak</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>minimumValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>minimum value to allow for the tweak</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>maximumValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>maximum value to allow for the tweak</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>stepSize</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>step size for the tweak (do not set, optional)</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>collectionName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the collection name of the tweak (do not set, optional)</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>groupName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the group name of the tweak (do not set, optional)</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -295,7 +448,7 @@ The step size is <q>how much does the value change when I tap the UIStepper</q><
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2016 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2016-10-19)</p>
+          <p>&copy; 2016 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2016-10-25)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

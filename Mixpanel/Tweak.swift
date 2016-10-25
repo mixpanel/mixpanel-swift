@@ -51,7 +51,7 @@ internal let TweakIdentifierSeparator = "|"
 extension Tweak {
     /**
      Initializer for a Tweak for A/B Testing
-     
+
      - parameter tweakName:      name of the tweak
      - parameter defaultValue:   the default value set for the tweak
      - parameter collectionName: the collection name of the tweak (do not set, optional)
@@ -71,7 +71,7 @@ extension Tweak where T: SignedNumber {
     /**
      Creates a Tweak<T> where T: SignedNumberType
      You can optionally provide a min / max / stepSize to restrict the bounds and behavior of a tweak.
-     
+
      - parameter tweakName:      name of the tweak
      - parameter defaultValue:   the default value set for the tweak
      - parameter minimumValue:   minimum value to allow for the tweak
@@ -158,9 +158,10 @@ extension Tweak: Hashable {
 
 /**
  Comparator between two tweaks for A/B Testing.
- 
- -parameter lhs: the left hand side tweak to compare
- -parameter rhs: the right hand side tweak to compare
+
+ - parameter lhs: the left hand side tweak to compare
+ - parameter rhs: the right hand side tweak to compare
+ - returns: a boolean telling if both tweaks are equal
  */
 public func == <T>(lhs: Tweak<T>, rhs: Tweak<T>) -> Bool {
 	return lhs.tweakIdentifier == rhs.tweakIdentifier

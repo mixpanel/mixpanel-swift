@@ -145,7 +145,8 @@ extension MD5: Updatable {
 
         for hElement in self.accumulatedHash {
             let hLE = hElement.littleEndian
-            result += [UInt8(hLE & 0xff), UInt8((hLE >> 8) & 0xff), UInt8((hLE >> 16) & 0xff), UInt8((hLE >> 24) & 0xff)]
+            let toAppend: [UInt8] = [UInt8(hLE & 0xff), UInt8((hLE >> 8) & 0xff), UInt8((hLE >> 16) & 0xff), UInt8((hLE >> 24) & 0xff)]
+            result += toAppend
         }
 
         // reset hash value for instance

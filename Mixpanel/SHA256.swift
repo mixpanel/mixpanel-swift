@@ -206,7 +206,8 @@ final class SHA2 {
         result.reserveCapacity(hh.count / 4)
         variant.resultingArray(hh).forEach {
             let item = $0.bigEndian
-            result += [UInt8(item & 0xff), UInt8((item >> 8) & 0xff), UInt8((item >> 16) & 0xff), UInt8((item >> 24) & 0xff)]
+            let toAppend: [UInt8] = [UInt8(item & 0xff), UInt8((item >> 8) & 0xff), UInt8((item >> 16) & 0xff), UInt8((item >> 24) & 0xff)]
+            result += toAppend
         }
         return result
     }

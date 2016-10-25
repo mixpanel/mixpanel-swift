@@ -9,7 +9,7 @@
 import UIKit
 
 /// Looks up the persisted state for tweaks.
-public final class TweakStore {
+final class TweakStore {
 
 	/// The "tree structure" for our Tweaks UI.
     var tweakCollections: [String: TweakCollection] = [:]
@@ -32,9 +32,16 @@ public final class TweakStore {
 	/// Determines whether tweaks are enabled, and whether the tweaks UI is accessible
 	internal let enabled: Bool
 
-	/// Creates a TweakStore, with information persisted on-disk.
-	/// If you want to have multiple TweakStores in your app, you can pass in a unique storeName to keep it separate from others on disk.
-	public init(storeName: String = "Tweaks", enabled: Bool) {
+	///
+	///
+    /**
+     Creates a TweakStore, with information persisted on-disk.
+     If you want to have multiple TweakStores in your app, you can pass in a unique storeName to keep it separate from others on disk.
+
+     - parameter storeName:     the name of the store (optional)
+     - parameter enabled:       if debugging is enabled or not
+     */
+    init(storeName: String = "Tweaks", enabled: Bool) {
 		self.persistence = TweakPersistency(identifier: storeName)
 		self.storeName = storeName
 		self.enabled = enabled
@@ -42,7 +49,7 @@ public final class TweakStore {
     }
 
     /// A method for adding Tweaks to the environment
-    public func addTweaks(_ tweaks: [TweakClusterType]) {
+    func addTweaks(_ tweaks: [TweakClusterType]) {
         self.allTweaks.formUnion(Set(tweaks.reduce([]) { $0 + $1.tweakCluster }))
         self.allTweaks.forEach { tweak in
             // Find or create its TweakCollection
@@ -70,12 +77,17 @@ public final class TweakStore {
     }
 
 	/// Returns the current value for a given tweak
-	public func assign<T>(_ tweak: Tweak<T>) -> T {
+    func assign<T>(_ tweak: Tweak<T>) -> T {
 		return self.currentValueForTweak(tweak)
 	}
 
-    /// The bind function for Tweaks. This is meant for binding Tweaks to the relevant components.
-	public func bind<T>(_ tweak: Tweak<T>, binding: @escaping (T) -> Void) {
+    /**
+     The bind function for Tweaks. This is meant for binding Tweaks to the relevant components.
+
+     - parameter tweak:      the tweak to bind
+     - parameter binding:    the binding to issue for the tweak
+     */
+    func bind<T>(_ tweak: Tweak<T>, binding: @escaping (T) -> Void) {
 		// Create the TweakBinding<T>, and wrap it in our type-erasing AnyTweakBinding
 		let tweakBinding = TweakBinding(tweak: tweak, binding: binding)
 		let anyTweakBinding = AnyTweakBinding(tweakBinding: tweakBinding)

@@ -50,8 +50,13 @@ internal let TweakIdentifierSeparator = "|"
 
 extension Tweak {
     /**
-    Initializer for a Tweak for A/B Testing
-    */
+     Initializer for a Tweak for A/B Testing
+     
+     - parameter tweakName:      name of the tweak
+     - parameter defaultValue:   the default value set for the tweak
+     - parameter collectionName: the collection name of the tweak (do not set, optional)
+     - parameter groupName:      the group name of the tweak (do not set, optional)
+     */
 	public init(tweakName: String, defaultValue: T, _ collectionName: String = "Mixpanel", _ groupName: String = "Mixpanel") {
 		self.init(
             tweakName: tweakName,
@@ -63,9 +68,18 @@ extension Tweak {
 }
 
 extension Tweak where T: SignedNumber {
-	/// Creates a Tweak<T> where T: SignedNumberType
-	/// You can optionally provide a min / max / stepSize to restrict the bounds and behavior of a tweak.
-	/// The step size is "how much does the value change when I tap the UIStepper"
+    /**
+     Creates a Tweak<T> where T: SignedNumberType
+     You can optionally provide a min / max / stepSize to restrict the bounds and behavior of a tweak.
+     
+     - parameter tweakName:      name of the tweak
+     - parameter defaultValue:   the default value set for the tweak
+     - parameter minimumValue:   minimum value to allow for the tweak
+     - parameter maximumValue:   maximum value to allow for the tweak
+     - parameter stepSize:       step size for the tweak (do not set, optional)
+     - parameter collectionName: the collection name of the tweak (do not set, optional)
+     - parameter groupName:      the group name of the tweak (do not set, optional)
+     */
 	public init(tweakName: String,
 	            defaultValue: T,
 	            min minimumValue: T? = nil,
@@ -144,6 +158,9 @@ extension Tweak: Hashable {
 
 /**
  Comparator between two tweaks for A/B Testing.
+ 
+ -parameter lhs: the left hand side tweak to compare
+ -parameter rhs: the right hand side tweak to compare
  */
 public func == <T>(lhs: Tweak<T>, rhs: Tweak<T>) -> Bool {
 	return lhs.tweakIdentifier == rhs.tweakIdentifier

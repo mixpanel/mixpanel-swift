@@ -149,10 +149,6 @@ class Variant: NSObject, NSCoding {
         finished = true
     }
 
-    func restart() {
-        finished = false
-    }
-
     override func isEqual(_ object: Any?) -> Bool {
         guard let object = object as? Variant else {
             return false

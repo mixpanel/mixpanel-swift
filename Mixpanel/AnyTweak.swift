@@ -53,6 +53,9 @@ extension AnyTweak: Hashable {
 
 /**
  Comparator between two tweaks for A/B Testing.
+
+ -parameter lhs: the left hand side tweak to compare
+ -parameter rhs: the right hand side tweak to compare
  */
 public func == (lhs: AnyTweak, rhs: AnyTweak) -> Bool {
 	return lhs.tweakIdentifier == rhs.tweakIdentifier

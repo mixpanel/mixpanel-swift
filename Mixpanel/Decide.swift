@@ -109,10 +109,7 @@ class Decide {
                 decideResponse.toFinishVariants = runningVariants.subtracting(parsedVariants)
                 let newVariants = parsedVariants.subtracting(runningVariants)
                 decideResponse.newVariants = newVariants
-                let restartVariants = parsedVariants.intersection(runningVariants).intersection(finishedVariants)
-
                 self.ABTestingInstance.variants = newVariants.union(runningVariants)
-                restartVariants.forEach { $0.restart() }
 
                 self.decideFetched = true
                 semaphore.signal()

@@ -31,7 +31,7 @@ If you are using Objective-C, we recommend using our **[Objective-C Library](htt
 | tvOS Support |       ✔        |              |
 | In-app Notifications |       ✔        |              |
 | Codeless Tracking |       ✔        |              |
-
+| A/B Testing |       ✔        |              |
 # Installation
 
 ## CocoaPods

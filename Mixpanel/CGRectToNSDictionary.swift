@@ -22,8 +22,12 @@ import UIKit
         guard let value = value as? NSValue, value.responds(to: #selector(getter: NSValue.cgRectValue)) else {
             return nil
         }
-
-        return value.cgRectValue.dictionaryRepresentation as NSDictionary
+        var rect = value.cgRectValue
+        rect.origin.x = rect.origin.x.isNormal ? rect.origin.x : 0.0
+        rect.origin.y = rect.origin.y.isNormal ? rect.origin.y : 0.0
+        rect.size.width = rect.size.width.isNormal ? rect.size.width : 0.0
+        rect.size.height = rect.size.height.isNormal ? rect.size.height : 0.0
+        return rect.dictionaryRepresentation as NSDictionary
     }
 
     override func reverseTransformedValue(_ value: Any?) -> Any? {

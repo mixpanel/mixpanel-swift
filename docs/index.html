@@ -13,7 +13,7 @@
     <a title="Mixpanel  Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="index.html">Mixpanel Docs</a> (100% documented)</p>
+        <p><a href="index.html">Mixpanel Docs</a> (99% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="img/gh.png"/>View on GitHub</a></p>
       </div>
     </header>
@@ -42,6 +42,14 @@
             </ul>
           </li>
           <li class="nav-group-name">
+            <a href="Enums.html">Enums</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Enums/TweakViewDataType.html">TweakViewDataType</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
             <a href="Extensions.html">Extensions</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
@@ -49,6 +57,9 @@
               </li>
               <li class="nav-group-task">
                 <a href="Extensions/Bool.html">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Extensions/CGFloat.html">CGFloat</a>
               </li>
               <li class="nav-group-task">
                 <a href="Extensions/Date.html">Date</a>
@@ -72,10 +83,27 @@
                 <a href="Extensions/String.html">String</a>
               </li>
               <li class="nav-group-task">
+                <a href="Extensions/TweakLibraryType.html">TweakLibraryType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Extensions/UIColor.html">UIColor</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Extensions/UInt.html">UInt</a>
               </li>
               <li class="nav-group-task">
                 <a href="Extensions/URL.html">URL</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Functions.html#/s:F8Mixpaneloi2eeFTVS_8AnyTweakS0__Sb">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Functions/==(_:_:).html">==(_:_:)</a>
               </li>
             </ul>
           </li>
@@ -87,6 +115,26 @@
               </li>
               <li class="nav-group-task">
                 <a href="Protocols/MixpanelType.html">MixpanelType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Protocols/TweakClusterType.html">TweakClusterType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Protocols/TweakableType.html">TweakableType</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Structs.html">Structs</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Structs/AnyTweak.html">AnyTweak</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/MixpanelTweaks.html">MixpanelTweaks</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/Tweak.html">Tweak</a>
               </li>
             </ul>
           </li>
@@ -101,9 +149,11 @@
 </p>
 
 <p><a href="https://travis-ci.org/mixpanel/mixpanel-swift"><img src="https://travis-ci.org/mixpanel/mixpanel-swift.svg" alt="Build Status"></a>
-<a href="https://mixpanel.com"><img src="http://img.shields.io/cocoapods/v/Mixpanel.svg?style=flat" alt="CocoaPods Version"></a>
-<a href="https://github.com/Carthage/Carthage"><img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat" alt="Carthage compatible"></a>
-<a href="https://mixpanel.com"><img src="http://img.shields.io/cocoapods/l/Mixpanel.svg?style=flat" alt="Apache License"></a></p>
+<a href="http://isitmaintained.com/project/mixpanel/mixpanel-swift" title="Average time to resolve an issue"><img src="http://isitmaintained.com/badge/resolution/mixpanel/mixpanel-swift.svg" alt="Average time to resolve an issue"></a>
+<a href="http://isitmaintained.com/project/mixpanel/mixpanel-swift" title="Percentage of issues still open"><img src="http://isitmaintained.com/badge/open/mixpanel/mixpanel-swift.svg" alt="Percentage of issues still open"></a>
+<a href="https://mixpanel.com"><img src="http://img.shields.io/cocoapods/v/Mixpanel-swift.svg" alt="CocoaPods Compatible"></a>
+<a href="https://github.com/Carthage/Carthage"><img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg" alt="Carthage compatible"></a>
+<a href="https://mixpanel.com"><img src="http://img.shields.io/cocoapods/l/Mixpanel-swift.svg" alt="Apache License"></a></p>
 <a href='#introduction' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='introduction'>Introduction</h1>
 
 <p>Welcome to the official Mixpanel Swift Library</p>
@@ -111,15 +161,49 @@
 <p>The Mixpanel Swift library for iOS is an open source project, and we&rsquo;d love to see your contributions! 
 We&rsquo;d also love for you to come and work with us! Check out <strong><a href="http://boards.greenhouse.io/mixpanel/jobs/25226#.U_4JXEhORKU">Jobs</a></strong> for details.</p>
 
-<p>If you are using Objective-C, we recommend using our <strong><a href="https://github.com/mixpanel/mixpanel-iphone">Objective-C Library</a></strong></p>
+<p>If you are using Objective-C, we recommend using our <strong><a href="https://github.com/mixpanel/mixpanel-iphone">Objective-C Library</a></strong>.</p>
 <a href='#current-supported-features' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='current-supported-features'>Current supported features</h2>
 
-<ul>
-<li>Tracking API</li>
-<li>Mixpanel People API</li>
-<li>Swift2.3 and latest <a href="https://github.com/mixpanel/mixpanel-swift/tree/swift3">Swift3</a></li>
-<li><a href="https://mixpanel.github.io/mixpanel-swift/">Full Documentation</a></li>
-</ul>
+<p><strong>Our master branch and our 2.x releases are now in Swift 3. If you wish to use our Swift 2.3 implementation, please point to our v1.0.1 release.</strong></p>
+
+<table><thead>
+<tr>
+<th>Feature</th>
+<th>Swift 3</th>
+<th><a href="https://github.com/mixpanel/mixpanel-swift/tree/swift2.3">Swift 2.3</a></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Tracking API</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>People API</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr>
+<td><a href="https://mixpanel.github.io/mixpanel-swift">Documentation</a></td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>tvOS Support</td>
+<td>✔</td>
+<td></td>
+</tr>
+<tr>
+<td>In-app Notifications</td>
+<td>✔</td>
+<td></td>
+</tr>
+<tr>
+<td>Codeless Tracking</td>
+<td>✔</td>
+<td></td>
+</tr>
+</tbody></table>
 <a href='#installation' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='installation'>Installation</h1>
 <a href='#cocoapods' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='cocoapods'>CocoaPods</h2>
 
@@ -188,7 +272,7 @@ Mixpanel.mainInstance().track(event: &quot;Tracked Event!&quot;)
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2016 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2016-09-26)</p>
+          <p>&copy; 2016 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2016-10-25)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

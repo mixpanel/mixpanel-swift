@@ -12,10 +12,14 @@ import UIKit
 struct DecideResponse {
     var unshownInAppNotifications: [InAppNotification]
     var newCodelessBindings: Set<CodelessBinding>
+    var newVariants: Set<Variant>
+    var toFinishVariants: Set<Variant>
 
     init() {
         unshownInAppNotifications = []
         newCodelessBindings = Set()
+        newVariants = Set()
+        toFinishVariants = Set()
     }
 }
 
@@ -25,6 +29,7 @@ class Decide {
     var decideFetched = false
     var notificationsInstance = InAppNotifications()
     var codelessInstance = Codeless()
+    var ABTestingInstance = ABTesting()
     var webSocketWrapper: WebSocketWrapper?
 
     var inAppDelegate: InAppNotificationsDelegate? {
@@ -88,6 +93,23 @@ class Decide {
                 self.codelessInstance.codelessBindings.formUnion(newCodelessBindings)
                 self.codelessInstance.codelessBindings.subtract(finishedCodelessBindings)
 
+                var parsedVariants = Set<Variant>()
+                if let rawVariants = result["variants"] as? [[String: Any]] {
+                    for rawVariant in rawVariants {
+                        if let variant = Variant(JSONObject: rawVariant) {
+                            parsedVariants.insert(variant)
+                        }
+                    }
+                } else {
+                    Logger.debug(message: "variants check response format error")
+                }
+
+                let runningVariants = Set(self.ABTestingInstance.variants.filter { return $0.running })
+                decideResponse.toFinishVariants = runningVariants.subtracting(parsedVariants)
+                let newVariants = parsedVariants.subtracting(runningVariants)
+                decideResponse.newVariants = newVariants
+                self.ABTestingInstance.variants = newVariants.union(runningVariants)
+
                 self.decideFetched = true
                 semaphore.signal()
             }
@@ -105,7 +127,9 @@ class Decide {
             "available notifications out of " +
             "\(notificationsInstance.inAppNotifications.count) total")
         Logger.info(message: "decide check found \(decideResponse.newCodelessBindings.count) " +
-            "new codeless bindings our of \(codelessInstance.codelessBindings)")
+            "new codeless bindings out of \(codelessInstance.codelessBindings)")
+        Logger.info(message: "decide check found \(decideResponse.newVariants.count) " +
+            "new variants out of \(ABTestingInstance.variants)")
 
         completion(decideResponse)
     }
@@ -129,6 +153,10 @@ class Decide {
                 binding.stop()
             }
 
+            for variant in self.ABTestingInstance.variants {
+                variant.stop()
+            }
+
         }
 
         let disconnectCallback = { [weak mixpanelInstance] in
@@ -140,6 +168,10 @@ class Decide {
 
             for binding in self.codelessInstance.codelessBindings {
                 binding.execute()
+            }
+
+            for variant in self.ABTestingInstance.variants {
+                variant.execute()
             }
         }
 

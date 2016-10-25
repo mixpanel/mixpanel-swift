@@ -1,6 +1,12 @@
 {
   "warnings": [
-
+    {
+      "file": "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/Tweak.swift",
+      "line": 166,
+      "symbol": "==(_:_:).T",
+      "symbol_kind": "source.lang.swift.decl.generic_type_param",
+      "warning": "undocumented"
+    }
   ],
   "source_directory": "/Users/yardeneitan/Development/mixpanel-swift"
 }

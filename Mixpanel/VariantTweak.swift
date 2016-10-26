@@ -140,7 +140,7 @@ class VariantTweak: NSObject, NSCoding {
 /// The MixpanelTweaks struct that needs to be extended to define new Tweaks for A/B testing
 public struct MixpanelTweaks: TweakLibraryType {
     /// The default store that holds the Tweaks
-    static var defaultStore: TweakStore = TweakStore(enabled: true)
+    public static var defaultStore: TweakStore = TweakStore(enabled: true)
     /**
      setTweaks needs to be called to add the defined Tweaks into the environment.
 

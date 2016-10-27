@@ -365,7 +365,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
     func defaultDistinctId() -> String {
         var distinctId: String? = IFA()
-        if NSClassFromString("UIDevice") != nil {
+        if distinctId == nil && NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString
         }
 

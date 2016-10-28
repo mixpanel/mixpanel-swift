@@ -65,8 +65,14 @@ class VariantAction: NSObject, NSCoding {
         self.swizzle = true
         self.cacheOriginal = cacheOriginal
         self.name = name ?? UUID().uuidString
-        self.swizzleClass = UIView.self
-        self.swizzleSelector = NSSelectorFromString("didMoveToWindow")
+        self.swizzleClass = self.path.selectedClass() ?? UIView.self
+        let isTableCell = self.swizzleClass.isSubclass(of: UITableViewCell.self)
+        let tableCellInPath = self.path.pathContainsObjectOfClass(UITableViewCell.self)
+        if isTableCell || tableCellInPath {
+            self.swizzleSelector = NSSelectorFromString("layoutSubviews")
+        } else {
+            self.swizzleSelector = NSSelectorFromString("didMoveToWindow")
+        }
         self.appliedTo = NSHashTable(options: [.weakMemory, .objectPointerPersonality])
     }
 
@@ -104,11 +110,21 @@ class VariantAction: NSObject, NSCoding {
         }
 
         if swizzle {
-            Swizzler.swizzleSelector(swizzleSelector,
-                                     withSelector: #selector(UIView.newDidMoveToWindow),
-                                     for: swizzleClass,
-                                     name: name,
-                                     block: swizzleBlock)
+            if swizzleSelector == NSSelectorFromString("layoutSubviews") {
+                Swizzler.swizzleSelector(swizzleSelector,
+                                         withSelector: #selector(UIView.newLayoutSubviews),
+                                         for: swizzleClass,
+                                         name: name,
+                                         block: swizzleBlock)
+            } else if swizzleSelector == NSSelectorFromString("didMoveToWindow") {
+                Swizzler.swizzleSelector(swizzleSelector,
+                                         withSelector: #selector(UIView.newDidMoveToWindow),
+                                         for: swizzleClass,
+                                         name: name,
+                                         block: swizzleBlock)
+            } else {
+                Logger.error(message: "Selector \(swizzleSelector) wasn't recognized for swizzling")
+            }
         }
     }
 

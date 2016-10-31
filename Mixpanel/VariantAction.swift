@@ -66,9 +66,8 @@ class VariantAction: NSObject, NSCoding {
         self.cacheOriginal = cacheOriginal
         self.name = name ?? UUID().uuidString
         self.swizzleClass = self.path.selectedClass() ?? UIView.self
-        let isTableCell = self.swizzleClass.isSubclass(of: UITableViewCell.self)
         let tableCellInPath = self.path.pathContainsObjectOfClass(UITableViewCell.self)
-        if isTableCell || tableCellInPath {
+        if tableCellInPath {
             self.swizzleSelector = NSSelectorFromString("layoutSubviews")
         } else {
             self.swizzleSelector = NSSelectorFromString("didMoveToWindow")

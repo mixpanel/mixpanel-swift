@@ -107,8 +107,7 @@ class ObjectSelector: NSObject {
     }
 
     func selectedClass() -> AnyClass? {
-        let filter = filters.last
-        if let filterName = filter?.name {
+        if let filterName = filters.last?.name {
             return NSClassFromString(filterName)
         }
         return nil

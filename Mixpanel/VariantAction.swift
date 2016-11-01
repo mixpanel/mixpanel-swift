@@ -66,8 +66,17 @@ class VariantAction: NSObject, NSCoding {
         self.cacheOriginal = cacheOriginal
         self.name = name ?? UUID().uuidString
         self.swizzleClass = self.path.selectedClass() ?? UIView.self
-        let tableCellInPath = self.path.pathContainsObjectOfClass(UITableViewCell.self)
-        if tableCellInPath {
+
+        var shouldUseLayoutSubviews = false
+        let classesToUseLayoutSubviews = [UITableViewCell.self, UINavigationBar.self] as [AnyClass]
+        for klass in classesToUseLayoutSubviews {
+            if self.path.pathContainsObjectOfClass(klass) {
+                shouldUseLayoutSubviews = true
+                break
+            }
+        }
+
+        if shouldUseLayoutSubviews {
             self.swizzleSelector = NSSelectorFromString("layoutSubviews")
         } else {
             self.swizzleSelector = NSSelectorFromString("didMoveToWindow")

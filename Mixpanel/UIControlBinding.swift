@@ -207,8 +207,7 @@ class UIControlBinding: CodelessBinding {
 }
 
 extension UIView {
-    @objc func newDidMoveToWindow() {
-        let originalSelector = NSSelectorFromString("didMoveToWindow")
+    @objc func callOriginalFunctionAndSwizzledBlocks(originalSelector: Selector) {
         if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
             let swizzle = Swizzler.swizzles[originalMethod] {
             typealias MyCFunction = @convention(c) (AnyObject, Selector) -> Void
@@ -219,34 +218,21 @@ extension UIView {
                 block(self, swizzle.selector, nil, nil)
             }
         }
+    }
+
+    @objc func newDidMoveToWindow() {
+        let originalSelector = NSSelectorFromString("didMoveToWindow")
+        callOriginalFunctionAndSwizzledBlocks(originalSelector: originalSelector)
     }
 
     @objc func newDidMoveToSuperview() {
         let originalSelector = NSSelectorFromString("didMoveToSuperview")
-        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
-            let swizzle = Swizzler.swizzles[originalMethod] {
-            typealias MyCFunction = @convention(c) (AnyObject, Selector) -> Void
-            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
-            curriedImplementation(self, originalSelector)
-
-            for (_, block) in swizzle.blocks {
-                block(self, swizzle.selector, nil, nil)
-            }
-        }
+        callOriginalFunctionAndSwizzledBlocks(originalSelector: originalSelector)
     }
 
     @objc func newLayoutSubviews() {
         let originalSelector = NSSelectorFromString("layoutSubviews")
-        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
-            let swizzle = Swizzler.swizzles[originalMethod] {
-            typealias MyCFunction = @convention(c) (AnyObject, Selector) -> Void
-            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
-            curriedImplementation(self, originalSelector)
-
-            for (_, block) in swizzle.blocks {
-                block(self, swizzle.selector, nil, nil)
-            }
-        }
+        callOriginalFunctionAndSwizzledBlocks(originalSelector: originalSelector)
     }
 
 }

@@ -51,7 +51,7 @@ class SnapshotRequest: BaseWebSocketMessage {
             var objectIdentityProvider = connection.getSessionObjectSynchronized(for: "object_identity_provider")
             if objectIdentityProvider == nil {
                 objectIdentityProvider = ObjectIdentityProvider()
-                connection.setSessionObjectSynchronized(with: objectIdentityProvider, for: "object_identity_provider")
+                connection.setSessionObjectSynchronized(with: objectIdentityProvider!, for: "object_identity_provider")
             }
 
             let serializer = ApplicationStateSerializer(application: UIApplication.shared,

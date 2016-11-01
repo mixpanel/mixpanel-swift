@@ -26,7 +26,7 @@ class TweakRequest: BaseWebSocketMessage {
             var variant = connection.getSessionObjectSynchronized(for: "session_variant") as? Variant
             if variant == nil {
                 variant = Variant(ID: 0, experimentID: 0, actions: [], tweaks: [])
-                connection.setSessionObjectSynchronized(with: variant, for: "session_variant")
+                connection.setSessionObjectSynchronized(with: variant!, for: "session_variant")
             }
 
             if let tweaks = self.payload["tweaks"] as? [[String: Any]] {

@@ -80,7 +80,7 @@ extension UIView {
     func mp_imageFingerprint() -> String? {
         var result: String? = nil
         var originalImage: UIImage? = nil
-        let imageSelector = Selector("image")
+        let imageSelector = NSSelectorFromString("image")
 
         if let button = self as? UIButton {
             originalImage = button.image(for: UIControlState.normal)
@@ -146,7 +146,7 @@ extension UIView {
 
     func mp_text() -> String? {
         var text: String? = nil
-        let titleSelector = Selector("title")
+        let titleSelector = NSSelectorFromString("title")
         if let label = self as? UILabel {
             text = label.text
         } else if let button = self as? UIButton {

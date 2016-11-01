@@ -47,7 +47,7 @@ class ObjectSerializer {
                 }
             }
 
-            let delegateSelector: Selector = Selector("delegate")
+            let delegateSelector: Selector = NSSelectorFromString("delegate")
             if !classDescription.delegateInfos.isEmpty && object.responds(to: delegateSelector) {
                 let imp = object.method(for: delegateSelector)
                 typealias MyCFunction = @convention(c) (AnyObject, Selector) -> AnyObject

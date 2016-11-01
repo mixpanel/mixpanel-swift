@@ -74,7 +74,9 @@ import UIKit
             var images = [UIImage]()
             if let imagesDictionary = dictionaryValue["images"] as? [[String: Any]] {
                 for imageDictionary in imagesDictionary {
-                    let scale = imageDictionary["scale"] as? CGFloat
+                    guard let scale = (imageDictionary["scale"] as? NSNumber)?.floatValue else {
+                        return UIImage()
+                    }
                     var image: UIImage? = nil
                     if let imageStr = imageDictionary["url"] as? String {
                         image = UIImageToNSDictionary.imageCache[imageStr]
@@ -82,7 +84,7 @@ import UIKit
                             if let imageURL = URL(string: imageStr) {
                                 do {
                                     let imageData = try Data(contentsOf: imageURL)
-                                    image = UIImage(data: imageData, scale: min(1.0, scale!))
+                                    image = UIImage(data: imageData, scale: min(1.0, CGFloat(scale)))
                                     if let image = image {
                                         UIImageToNSDictionary.imageCache[imageStr] = image
                                     }
@@ -93,9 +95,9 @@ import UIKit
                         }
                         if image != nil,
                             let dimensions = imageDictionary["dimensions"] as? [String: Any],
-                            let width = dimensions["Width"] as? CGFloat,
-                            let height = dimensions["Height"] as? CGFloat {
-                            let size = CGSize(width: width, height: height)
+                            let width = (dimensions["Width"] as? NSNumber)?.floatValue,
+                            let height = (dimensions["Height"] as? NSNumber)?.floatValue {
+                            let size = CGSize(width: CGFloat(width), height: CGFloat(height))
                             UIGraphicsBeginImageContext(size)
                             image?.draw(in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
                             image = UIGraphicsGetImageFromCurrentImageContext()!
@@ -103,7 +105,7 @@ import UIKit
                         }
                     } else if let imageDataString = imageDictionary["data"] as? String {
                         if let imageData = Data(base64Encoded: imageDataString, options: [.ignoreUnknownCharacters]) {
-                            image = UIImage(data: imageData, scale: min(1.0, scale!))
+                            image = UIImage(data: imageData, scale: min(1.0, CGFloat(scale)))
                         }
                     }
 

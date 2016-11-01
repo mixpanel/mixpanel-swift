@@ -231,7 +231,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
-
         trackIntegration()
         #if os(iOS)
             setCurrentRadio()
@@ -316,7 +315,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             self.taskId = UIBackgroundTaskInvalid
         }
 
-
         if flushOnBackground {
             flush()
         }
@@ -368,11 +366,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         if distinctId == nil && NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString
         }
-
         guard let distId = distinctId else {
             return UUID().uuidString
         }
-
         return distId
     }
 
@@ -484,7 +480,6 @@ extension MixpanelInstance {
                 self.people.unidentifiedQueue.removeAll()
                 Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
             }
-
             self.archiveProperties()
         }
     }
@@ -638,11 +633,9 @@ extension MixpanelInstance {
             if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
                 return
             }
-
             self.flushInstance.flushEventsQueue(&self.eventsQueue)
             self.flushInstance.flushPeopleQueue(&self.people.peopleQueue)
             self.archive()
-
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
             }
@@ -798,7 +791,6 @@ extension MixpanelInstance {
                                                            superProperties: &self.superProperties,
                                                            defaultValue: defaultValue)
         }
-
     }
 
     /**
@@ -865,7 +857,6 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         if people.distinctId != nil {
             people.merge(properties: ["$experiments": shownVariant])
         }
-
         serialQueue.async {
             var superPropertiesCopy = self.superProperties
             var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]
@@ -874,7 +865,6 @@ extension MixpanelInstance: InAppNotificationsDelegate {
             self.superProperties = superPropertiesCopy
             self.archiveProperties()
         }
-
         track(event: "$experiment_started", properties: ["$experiment_id": variant.experimentID,
                                                          "$variant_id": variant.ID])
 
@@ -941,7 +931,6 @@ extension MixpanelInstance: InAppNotificationsDelegate {
      Shows a notification with the given type if one is available.
 
      - note: You do not need to call this method on the main thread.
-
      - parameter type: The type of notification to show, either "mini" or "takeover"
     */
     open func showNotification(type: String) {
@@ -960,7 +949,6 @@ extension MixpanelInstance: InAppNotificationsDelegate {
      Shows a notification with the given ID
 
      - note: You do not need to call this method on the main thread.
-
      - parameter ID: The notification ID you want to present
      */
     open func showNotification(ID: Int) {
@@ -1006,6 +994,5 @@ extension MixpanelInstance: InAppNotificationsDelegate {
                                       "message_subtype": notification.type]
         track(event: event, properties: properties)
     }
-
 }
 #endif

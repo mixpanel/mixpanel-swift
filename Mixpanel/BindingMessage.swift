@@ -26,7 +26,7 @@ class BindingRequest: BaseWebSocketMessage {
                 var bindingCollection = connection.getSessionObjectSynchronized(for: "event_bindings") as? CodelessBindingCollection
                 if bindingCollection == nil {
                     bindingCollection = CodelessBindingCollection()
-                    connection.setSessionObjectSynchronized(with: bindingCollection, for: "event_bindings")
+                    connection.setSessionObjectSynchronized(with: bindingCollection!, for: "event_bindings")
                 }
 
                 if let payload = self.payload["events"] as? [[String: Any]] {

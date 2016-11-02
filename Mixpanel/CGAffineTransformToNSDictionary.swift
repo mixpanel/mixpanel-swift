@@ -39,15 +39,15 @@ import UIKit
             return NSValue(cgAffineTransform: .identity)
         }
 
-        let a = dict["a"] as? CGFloat
-        let b = dict["b"] as? CGFloat
-        let c = dict["c"] as? CGFloat
-        let d = dict["d"] as? CGFloat
-        let tx = dict["tx"] as? CGFloat
-        let ty = dict["ty"] as? CGFloat
+        let a = (dict["a"] as? NSNumber)?.floatValue
+        let b = (dict["b"] as? NSNumber)?.floatValue
+        let c = (dict["c"] as? NSNumber)?.floatValue
+        let d = (dict["d"] as? NSNumber)?.floatValue
+        let tx = (dict["tx"] as? NSNumber)?.floatValue
+        let ty = (dict["ty"] as? NSNumber)?.floatValue
 
         if let a = a, let b = b, let c = c, let d = d, let tx = tx, let ty = ty {
-            return CGAffineTransform(a: a, b: b, c: c, d: d, tx: tx, ty: ty)
+            return CGAffineTransform(a: CGFloat(a), b: CGFloat(b), c: CGFloat(c), d: CGFloat(d), tx: CGFloat(tx), ty: CGFloat(ty))
         }
 
         return NSValue(cgAffineTransform: .identity)

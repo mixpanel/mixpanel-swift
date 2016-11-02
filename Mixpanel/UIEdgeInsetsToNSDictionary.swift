@@ -41,11 +41,11 @@ import UIKit
         let left = dict["left"]
         let right = dict["right"]
 
-        if let top = top as? CGFloat,
-            let bottom = bottom as? CGFloat,
-            let left = left as? CGFloat,
-            let right = right as? CGFloat {
-            let edgeInsets = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
+        if let top = (top as? NSNumber)?.floatValue,
+            let bottom = (bottom as? NSNumber)?.floatValue,
+            let left = (left as? NSNumber)?.floatValue,
+            let right = (right as? NSNumber)?.floatValue {
+            let edgeInsets = UIEdgeInsets(top: CGFloat(top), left: CGFloat(left), bottom: CGFloat(bottom), right: CGFloat(right))
             return NSValue(uiEdgeInsets: edgeInsets)
         }
 

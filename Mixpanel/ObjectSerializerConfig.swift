@@ -171,7 +171,7 @@ class PropertyDescription {
             predicate = NSPredicate(format: predicateFormat)
         }
 
-        let getDict = dict["get"] as? [String: Any] ?? ["selector": name,
+        let getDict = dict["get"] as? [String: Any] ?? ["selector": name ?? "",
                                                         "result": ["type": dict["type"],
                                                                    "name": "value"],
                                                         "parameters": []]

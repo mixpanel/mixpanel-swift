@@ -201,7 +201,7 @@ class WebSocketWrapper: WebSocketDelegate {
         } else {
             indeterminateLayer?.removeAnimation(forKey: WebSocketWrapper.startLoadingAnimationKey)
             loadBasicAnimation(duration: 0.4,
-                               fromValue: indeterminateLayer?.presentation()?.value(forKey: "bounds.size.width"),
+                               fromValue: indeterminateLayer?.presentation()?.value(forKey: "bounds.size.width") ?? 0.0,
                                toValue: connectivityIndiciatorWindow!.bounds.size.width * 2,
                                animationKey: WebSocketWrapper.finishLoadingAnimationKey)
         }

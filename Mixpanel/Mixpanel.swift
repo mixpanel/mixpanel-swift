@@ -32,9 +32,9 @@ open class Mixpanel {
      */
     @discardableResult
     open class func initialize(token apiToken: String,
-                                                    launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil,
-                                                    flushInterval: Double = 60,
-                                                    instanceName: String = UUID().uuidString) -> MixpanelInstance {
+                               launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil,
+                               flushInterval: Double = 60,
+                               instanceName: String = UUID().uuidString) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token:         apiToken,
                                                          launchOptions: launchOptions,
                                                          flushInterval: flushInterval,

@@ -297,6 +297,11 @@ class VariantAction: NSObject, NSCoding {
             guard let nsValue = args[0] as? NSValue else {
                 return nil
             }
+            // This check is done to avoid moving and resizing UI components that you are not allowed to change.
+            if object is UINavigationBar {
+                return nil
+            }
+            (object as? UIView)?.translatesAutoresizingMaskIntoConstraints = true
             typealias Function = @convention(c) (AnyObject, Selector, CGRect) -> Void
             let function = unsafeBitCast(implementation, to: Function.self)
             function(object, selector, nsValue.cgRectValue)

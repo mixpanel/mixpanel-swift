@@ -593,7 +593,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "88d41d51-9b2f-4efc-aa57-83fb1297bb4b";
 				PROVISIONING_PROFILE_SPECIFIER = "E8FVX7QLET/Swift SDK Demo";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 3.0.1;
 			};
 			name = Debug;
 		};
@@ -614,7 +614,7 @@
 				PROVISIONING_PROFILE = "88d41d51-9b2f-4efc-aa57-83fb1297bb4b";
 				PROVISIONING_PROFILE_SPECIFIER = "E8FVX7QLET/Swift SDK Demo";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 3.0.1;
 			};
 			name = Release;
 		};
@@ -636,7 +636,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 3.0.1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MixpanelDemo.app/MixpanelDemo";
 			};
 			name = Debug;
@@ -655,7 +655,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 3.0.1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MixpanelDemo.app/MixpanelDemo";
 			};
 			name = Release;

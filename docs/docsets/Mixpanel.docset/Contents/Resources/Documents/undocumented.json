@@ -6,6 +6,13 @@
       "symbol": "==(_:_:).T",
       "symbol_kind": "source.lang.swift.decl.generic_type_param",
       "warning": "undocumented"
+    },
+    {
+      "file": "/Users/yardeneitan/Development/mixpanel-swift/Mixpanel/TweakLibrary.swift",
+      "line": 13,
+      "symbol": "TweakLibraryType.defaultStore",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
     }
   ],
   "source_directory": "/Users/yardeneitan/Development/mixpanel-swift"

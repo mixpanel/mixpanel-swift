@@ -408,10 +408,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     }
 
     @objc func setCurrentRadio() {
-        let currentRadio = AutomaticProperties.getCurrentRadio()
+       /* let currentRadio = AutomaticProperties.getCurrentRadio()
         serialQueue.async() {
             AutomaticProperties.properties["$radio"] = currentRadio
-        }
+        }*/
     }
 
     func initializeGestureRecognizer() {

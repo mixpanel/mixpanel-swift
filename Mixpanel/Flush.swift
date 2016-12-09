@@ -102,7 +102,11 @@ class Flush: AppLifecycle {
                                                 self.delegate?.updateNetworkActivityIndicator(false)
                                             #endif
                                             if success {
-                                                shadowQueue.removeSubrange(range)
+                                                if let lastIndex = range.last, shadowQueue.count < lastIndex {
+                                                    shadowQueue.removeSubrange(range)
+                                                } else {
+                                                    shadowQueue.removeAll()
+                                                }
                                             }
                                             shouldContinue = success
                                             semaphore.signal()

@@ -40,7 +40,7 @@ class FlushRequest: Network {
                                              headers: ["Accept-Encoding": "gzip"],
                                              parse: responseParser)
 
-        flushRequestHandler(BasePath.MixpanelAPI,
+        flushRequestHandler(BasePath.getServerURL(identifier: basePathIdentifier),
                             resource: resource,
                             completion: { success in
                                 completion(success)

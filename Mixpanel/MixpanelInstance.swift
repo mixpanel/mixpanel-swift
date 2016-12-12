@@ -85,12 +85,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     /// The base URL used for Mixpanel API requests.
     /// Useful if you need to proxy Mixpanel requests. Defaults to
     /// https://api.mixpanel.com.
-    open var serverURL: String {
-        set {
-            BasePath.MixpanelAPI = newValue
-        }
-        get {
-            return BasePath.MixpanelAPI
+    open var serverURL = BasePath.DefaultMixpanelAPI {
+        didSet {
+            BasePath.namedBasePaths[name] = serverURL
         }
     }
 
@@ -125,6 +122,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             }
         }
     }
+
+    /// A unique identifier for this MixpanelInstance
+    open let name: String
 
     #if os(iOS)
     /// Controls whether to enable the visual editor for codeless on mixpanel.com
@@ -197,14 +197,19 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     var timedEvents = InternalProperties()
     var serialQueue: DispatchQueue!
     var taskId = UIBackgroundTaskInvalid
-    let flushInstance = Flush()
+    let flushInstance: Flush
     let trackInstance: Track
-    let decideInstance = Decide()
+    let decideInstance: Decide
 
-    init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double) {
+    init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String=UUID().uuidString) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
+
+        self.name = name
+
+        flushInstance = Flush(basePathIdentifier: name)
+        decideInstance = Decide(basePathIdentifier: name)
 
         trackInstance = Track(apiToken: self.apiToken)
         flushInstance.delegate = self
@@ -603,7 +608,7 @@ extension MixpanelInstance {
         let defaultsKey = "trackedKey"
         if !UserDefaults.standard.bool(forKey: defaultsKey) {
             serialQueue.async() {
-                Network.trackIntegration(apiToken: self.apiToken) {
+                Network.trackIntegration(apiToken: self.apiToken, serverURL: self.serverURL) {
                     (success) in
                     if success {
                         UserDefaults.standard.set(true, forKey: defaultsKey)

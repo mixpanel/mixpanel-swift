@@ -106,7 +106,8 @@ class MixpanelManager {
                     instanceName: String) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
                                         launchOptions: launchOptions,
-                                        flushInterval: flushInterval)
+                                        flushInterval: flushInterval,
+                                        name: instanceName)
         mainInstance = instance
         instances[instanceName] = instance
 

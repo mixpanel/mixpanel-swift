@@ -10,7 +10,8 @@ import Foundation
 
 
 struct BasePath {
-    static var MixpanelAPI = "https://api.mixpanel.com"
+    static let DefaultMixpanelAPI = "https://api.mixpanel.com"
+    static var namedBasePaths = [String:String]()
 
     static func buildURL(base: String, path: String, queryItems: [URLQueryItem]?) -> URL? {
         guard let url = URL(string: base) else {
@@ -20,6 +21,10 @@ struct BasePath {
         components?.path = path
         components?.queryItems = queryItems
         return components?.url
+    }
+
+    static func getServerURL(identifier: String) -> String {
+        return namedBasePaths[identifier] ?? DefaultMixpanelAPI
     }
 }
 
@@ -45,6 +50,12 @@ enum Reason {
 }
 
 class Network {
+
+    let basePathIdentifier: String
+
+    required init(basePathIdentifier: String) {
+        self.basePathIdentifier = basePathIdentifier
+    }
 
     class func apiRequest<A>(base: String,
                           resource: Resource<A>,
@@ -108,7 +119,7 @@ class Network {
                         parse: parse)
     }
 
-    class func trackIntegration(apiToken: String, completion: @escaping (Bool) -> ()) {
+    class func trackIntegration(apiToken: String, serverURL: String, completion: @escaping (Bool) -> ()) {
         let requestData = JSONHandler.encodeAPIData([["event": "Integration",
                                                       "properties": ["token": "85053bf24bba75239b16a601d9387e17",
                                                                      "mp_lib": "swift",
@@ -133,7 +144,7 @@ class Network {
                                                  headers: ["Accept-Encoding": "gzip"],
                                                  parse: responseParser)
 
-            Network.apiRequest(base: BasePath.MixpanelAPI,
+            Network.apiRequest(base: serverURL,
                                resource: resource,
                                failure: { (reason, data, response) in
                                 Logger.debug(message: "failed to track integration")

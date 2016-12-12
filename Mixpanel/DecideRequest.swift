@@ -64,17 +64,15 @@ class DecideRequest: Network {
                                              headers: ["Accept-Encoding": "gzip"],
                                              parse: responseParser)
 
-        decideRequestHandler(BasePath.MixpanelAPI,
-                             resource: resource,
+        decideRequestHandler(resource: resource,
                              completion: { result in
                                 completion(result)
         })
     }
 
-    private func decideRequestHandler(_ base: String,
-                                      resource: Resource<DecideResult>,
+    private func decideRequestHandler(resource: Resource<DecideResult>,
                                       completion: @escaping (DecideResult?) -> Void) {
-        Network.apiRequest(base: base, resource: resource,
+        Network.apiRequest(base: BasePath.getServerURL(identifier: basePathIdentifier), resource: resource,
             failure: { (reason, data, response) in
                 Logger.warn(message: "API request to \(resource.path) has failed with reason \(reason)")
                 completion(nil)

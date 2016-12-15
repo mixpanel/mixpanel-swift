@@ -43,7 +43,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     
     /// alias string that uniquely identifies the current user.
     open var alias = ""
-
+    
     /// Accessor to the Mixpanel People API object.
     open var people: People!
 
@@ -534,8 +534,6 @@ extension MixpanelInstance {
         } else {
             Logger.error(message: "alias matches distinctId - skipping api call.")
         }
-
-        
     }
 
     /**

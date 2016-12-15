@@ -579,6 +579,7 @@ extension MixpanelInstance {
         let properties = ArchivedProperties(superProperties: superProperties,
                                             timedEvents: timedEvents,
                                             distinctId: distinctId,
+                                            alias: alias,
                                             peopleDistinctId: people.distinctId,
                                             peopleUnidentifiedQueue: people.unidentifiedQueue,
                                             shownNotifications: decideInstance.notificationsInstance.shownNotifications)
@@ -596,6 +597,7 @@ extension MixpanelInstance {
          superProperties,
          timedEvents,
          distinctId,
+         alias,
          people.distinctId,
          people.unidentifiedQueue,
          decideInstance.notificationsInstance.shownNotifications,

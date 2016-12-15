@@ -41,7 +41,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     /// distinctId string that uniquely identifies the current user.
     open var distinctId = ""
     
-    /// distinctId string that uniquely identifies the current user.
+    /// alias string that uniquely identifies the current user.
     open var alias = ""
 
     /// Accessor to the Mixpanel People API object.

@@ -40,6 +40,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
     /// distinctId string that uniquely identifies the current user.
     open var distinctId = ""
+    
+    /// distinctId string that uniquely identifies the current user.
+    open var alias = ""
 
     /// Accessor to the Mixpanel People API object.
     open var people: People!
@@ -470,8 +473,13 @@ extension MixpanelInstance {
         }
 
         serialQueue.async() {
-            self.distinctId = distinctId
-            self.people.distinctId = distinctId
+            // identify only changes the distinct id if it doesn't match either the existing or the alias;
+            // if it's new, blow away the alias as well.
+            if distinctId != self.distinctId && distinctId != self.alias {
+                self.alias = nil
+                self.distinctId = distinctId
+                self.people.distinctId = distinctId
+            }
             if !self.people.unidentifiedQueue.isEmpty {
                 for var r in self.people.unidentifiedQueue {
                     r["$distinct_id"] = distinctId
@@ -514,11 +522,20 @@ extension MixpanelInstance {
             Logger.error(message: "\(self) create alias called with empty alias")
             return
         }
+        if alias != distinctId {
+            self.alias = alias
+            let properties = ["distinct_id": distinctId, "alias": alias]
+            track(event: "$create_alias",
+                  properties: properties)
+            serialQueue.async() {
+                self.archiveProperties()
+            }
+            flush()
+        } else {
+            Logger.error(message: "alias matches distinctId - skipping api call.")
+        }
 
-        let properties = ["distinct_id": distinctId, "alias": alias]
-        track(event: "$create_alias",
-              properties: properties)
-        flush()
+        
     }
 
     /**
@@ -532,6 +549,7 @@ extension MixpanelInstance {
             self.eventsQueue = Queue()
             self.timedEvents = InternalProperties()
             self.people.distinctId = nil
+            self.alias = nil
             self.people.peopleQueue = Queue()
             self.people.unidentifiedQueue = Queue()
             self.decideInstance.notificationsInstance.shownNotifications = Set()
@@ -593,6 +611,7 @@ extension MixpanelInstance {
         let properties = ArchivedProperties(superProperties: superProperties,
                                             timedEvents: timedEvents,
                                             distinctId: distinctId,
+                                            alias: alias,
                                             peopleDistinctId: people.distinctId,
                                             peopleUnidentifiedQueue: people.unidentifiedQueue,
                                             shownNotifications: decideInstance.notificationsInstance.shownNotifications)

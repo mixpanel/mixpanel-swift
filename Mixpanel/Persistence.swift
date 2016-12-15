@@ -72,6 +72,7 @@ class Persistence {
     class func archiveProperties(_ properties: ArchivedProperties, token: String) {
         var p = InternalProperties()
         p["distinctId"] = properties.distinctId
+        p["alias"] = properties.alias
         p["superProperties"] = properties.superProperties
         p["peopleDistinctId"] = properties.peopleDistinctId
         p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue

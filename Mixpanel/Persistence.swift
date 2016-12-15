@@ -12,6 +12,7 @@ struct ArchivedProperties {
     let superProperties: InternalProperties
     let timedEvents: InternalProperties
     let distinctId: String
+    let alias: String?
     let peopleDistinctId: String?
     let peopleUnidentifiedQueue: Queue
     let shownNotifications: Set<Int>
@@ -107,6 +108,7 @@ class Persistence {
                                             superProperties: InternalProperties,
                                             timedEvents: InternalProperties,
                                             distinctId: String,
+                                            alias: String?,
                                             peopleDistinctId: String?,
                                             peopleUnidentifiedQueue: Queue,
                                             shownNotifications: Set<Int>,
@@ -121,6 +123,7 @@ class Persistence {
         let (superProperties,
             timedEvents,
             distinctId,
+            alias,
             peopleDistinctId,
             peopleUnidentifiedQueue,
             shownNotifications) = unarchiveProperties(token: token)
@@ -130,6 +133,7 @@ class Persistence {
                 superProperties,
                 timedEvents,
                 distinctId,
+                alias,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
                 shownNotifications,
@@ -168,6 +172,8 @@ class Persistence {
             properties?["timedEvents"] as? InternalProperties ?? InternalProperties()
         let distinctId =
             properties?["distinctId"] as? String ?? ""
+        let alias =
+            properties?["alias"] as? String ?? nil
         let peopleDistinctId =
             properties?["peopleDistinctId"] as? String ?? nil
         let peopleUnidentifiedQueue =
@@ -178,6 +184,7 @@ class Persistence {
         return (superProperties,
                 timedEvents,
                 distinctId,
+                alias,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
                 shownNotifications)

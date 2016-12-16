@@ -482,7 +482,7 @@ extension MixpanelInstance {
             }
             if !self.people.unidentifiedQueue.isEmpty {
                 for var r in self.people.unidentifiedQueue {
-                    r["$distinct_id"] = distinctId
+                    r["$distinct_id"] = self.distinctId
                     self.people.peopleQueue.append(r)
                 }
                 self.people.unidentifiedQueue.removeAll()
@@ -522,17 +522,18 @@ extension MixpanelInstance {
             Logger.error(message: "\(self) create alias called with empty alias")
             return
         }
+        
         if alias != distinctId {
-            self.alias = alias
             let properties = ["distinct_id": distinctId, "alias": alias]
             track(event: "$create_alias",
                   properties: properties)
+            flush()
             serialQueue.async() {
+                self.alias = alias
                 self.archiveProperties()
             }
-            flush()
         } else {
-            Logger.error(message: "alias matches distinctId - skipping api call.")
+            Logger.error(message: "alias: \(alias) matches distinctId: \(distinctId) - skipping api call.")
         }
     }
 

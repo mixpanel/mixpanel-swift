@@ -164,7 +164,13 @@ class Persistence {
         return data as? Queue ?? []
     }
 
-    class private func unarchiveProperties(token: String) -> (InternalProperties, InternalProperties, String, String?, String?, Queue, Set<Int>) {
+    class private func unarchiveProperties(token: String) -> (InternalProperties,
+                                                              InternalProperties,
+                                                              String,
+                                                              String?,
+                                                              String?,
+                                                              Queue,
+                                                              Set<Int>) {
         let properties = unarchiveWithType(.properties, token: token) as? InternalProperties
         let superProperties =
             properties?["superProperties"] as? InternalProperties ?? InternalProperties()

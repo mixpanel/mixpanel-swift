@@ -1,7 +1,7 @@
 language: objective-c
 before_install:
   - gem install cocoapods
-osx_image: xcode8.1
+osx_image: xcode8.2
 before_script: cd MixpanelDemo
 podfile: MixpanelDemo/Podfile
 branches:
@@ -11,7 +11,7 @@ env:
   global:
   - WORKSPACE=MixpanelDemo.xcworkspace
   - SCHEME=MixpanelDemo
-  - IOS_SDK=iphonesimulator10.1
+  - IOS_SDK=iphonesimulator10.2
   matrix:
     - DESTINATION="platform=iOS Simulator,OS=10.0,name=iPhone 5"          SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="YES"
 #    - DESTINATION="platform=iOS Simulator,OS=8.2,name=iPhone 5"           SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="NO"

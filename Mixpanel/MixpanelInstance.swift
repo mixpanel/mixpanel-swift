@@ -524,13 +524,13 @@ extension MixpanelInstance {
         }
         
         if alias != distinctId {
-            let properties = ["distinct_id": distinctId, "alias": alias]
-            track(event: "$create_alias", properties: properties)
-            flush()
             serialQueue.async() {
                 self.alias = alias
                 self.archiveProperties()
             }
+            let properties = ["distinct_id": distinctId, "alias": alias]
+            track(event: "$create_alias", properties: properties)
+            flush()
         } else {
             Logger.error(message: "alias: \(alias) matches distinctId: \(distinctId) - skipping api call.")
         }

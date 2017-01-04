@@ -201,7 +201,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     let trackInstance: Track
     let decideInstance: Decide
 
-    init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String=UUID().uuidString) {
+    init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -608,7 +608,7 @@ extension MixpanelInstance {
         let defaultsKey = "trackedKey"
         if !UserDefaults.standard.bool(forKey: defaultsKey) {
             serialQueue.async() {
-                Network.trackIntegration(apiToken: self.apiToken, serverURL: self.serverURL) {
+                Network.trackIntegration(apiToken: self.apiToken, serverURL: BasePath.DefaultMixpanelAPI) {
                     (success) in
                     if success {
                         UserDefaults.standard.set(true, forKey: defaultsKey)

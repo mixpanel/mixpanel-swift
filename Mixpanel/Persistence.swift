@@ -12,6 +12,7 @@ struct ArchivedProperties {
     let superProperties: InternalProperties
     let timedEvents: InternalProperties
     let distinctId: String
+    let alias: String?
     let peopleDistinctId: String?
     let peopleUnidentifiedQueue: Queue
     let shownNotifications: Set<Int>
@@ -72,6 +73,7 @@ class Persistence {
     class func archiveProperties(_ properties: ArchivedProperties, token: String) {
         var p = InternalProperties()
         p["distinctId"] = properties.distinctId
+        p["alias"] = properties.alias
         p["superProperties"] = properties.superProperties
         p["peopleDistinctId"] = properties.peopleDistinctId
         p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
@@ -106,6 +108,7 @@ class Persistence {
                                             superProperties: InternalProperties,
                                             timedEvents: InternalProperties,
                                             distinctId: String,
+                                            alias: String?,
                                             peopleDistinctId: String?,
                                             peopleUnidentifiedQueue: Queue,
                                             shownNotifications: Set<Int>,
@@ -120,6 +123,7 @@ class Persistence {
         let (superProperties,
             timedEvents,
             distinctId,
+            alias,
             peopleDistinctId,
             peopleUnidentifiedQueue,
             shownNotifications) = unarchiveProperties(token: token)
@@ -129,6 +133,7 @@ class Persistence {
                 superProperties,
                 timedEvents,
                 distinctId,
+                alias,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
                 shownNotifications,
@@ -159,7 +164,13 @@ class Persistence {
         return data as? Queue ?? []
     }
 
-    class private func unarchiveProperties(token: String) -> (InternalProperties, InternalProperties, String, String?, Queue, Set<Int>) {
+    class private func unarchiveProperties(token: String) -> (InternalProperties,
+                                                              InternalProperties,
+                                                              String,
+                                                              String?,
+                                                              String?,
+                                                              Queue,
+                                                              Set<Int>) {
         let properties = unarchiveWithType(.properties, token: token) as? InternalProperties
         let superProperties =
             properties?["superProperties"] as? InternalProperties ?? InternalProperties()
@@ -167,6 +178,8 @@ class Persistence {
             properties?["timedEvents"] as? InternalProperties ?? InternalProperties()
         let distinctId =
             properties?["distinctId"] as? String ?? ""
+        let alias =
+            properties?["alias"] as? String ?? nil
         let peopleDistinctId =
             properties?["peopleDistinctId"] as? String ?? nil
         let peopleUnidentifiedQueue =
@@ -177,6 +190,7 @@ class Persistence {
         return (superProperties,
                 timedEvents,
                 distinctId,
+                alias,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
                 shownNotifications)

@@ -136,6 +136,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     open var enableVisualEditorForCodeless: Bool {
         set {
             decideInstance.enableVisualEditorForCodeless = newValue
+            decideInstance.gestureRecognizer?.isEnabled = newValue
             if !newValue {
                 decideInstance.webSocketWrapper?.close()
             }
@@ -416,23 +417,25 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     }
 
     @objc func setCurrentRadio() {
-       /* let currentRadio = AutomaticProperties.getCurrentRadio()
+        let currentRadio = AutomaticProperties.getCurrentRadio()
         serialQueue.async() {
             AutomaticProperties.properties["$radio"] = currentRadio
-        }*/
+        }
     }
 
     func initializeGestureRecognizer() {
         DispatchQueue.main.async {
-            let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.connectGestureRecognized(gesture:)))
-            gestureRecognizer.minimumPressDuration = 3
-            gestureRecognizer.cancelsTouchesInView = false
+            self.decideInstance.gestureRecognizer = UILongPressGestureRecognizer(target: self,
+                                                                                 action: #selector(self.connectGestureRecognized(gesture:)))
+            self.decideInstance.gestureRecognizer?.minimumPressDuration = 3
+            self.decideInstance.gestureRecognizer?.cancelsTouchesInView = false
             #if (arch(i386) || arch(x86_64)) && os(iOS)
-                gestureRecognizer.numberOfTouchesRequired = 2
+                self.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 2
             #else
-                gestureRecognizer.numberOfTouchesRequired = 4
+                self.decideInstance.gestureRecognizer.numberOfTouchesRequired = 4
             #endif
-            UIApplication.shared.keyWindow?.addGestureRecognizer(gestureRecognizer)
+            self.decideInstance.gestureRecognizer?.isEnabled = self.enableVisualEditorForCodeless
+            UIApplication.shared.keyWindow?.addGestureRecognizer(self.decideInstance.gestureRecognizer!)
         }
     }
 

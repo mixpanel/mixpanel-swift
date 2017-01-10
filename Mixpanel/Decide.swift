@@ -31,6 +31,7 @@ class Decide {
     var codelessInstance = Codeless()
     var ABTestingInstance = ABTesting()
     var webSocketWrapper: WebSocketWrapper?
+    var gestureRecognizer: UILongPressGestureRecognizer?
 
     var inAppDelegate: InAppNotificationsDelegate? {
         set {

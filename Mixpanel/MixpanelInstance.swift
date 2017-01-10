@@ -527,7 +527,7 @@ extension MixpanelInstance {
             Logger.error(message: "\(self) create alias called with empty alias")
             return
         }
-        
+
         if alias != distinctId {
             serialQueue.async() {
                 self.alias = alias

@@ -20,7 +20,7 @@ class Flush: AppLifecycle {
     var timer: Timer?
     var delegate: FlushDelegate?
     var useIPAddressForGeoLocation = true
-    var flushRequest = FlushRequest()
+    var flushRequest: FlushRequest
     var flushOnBackground = true
     var _flushInterval = 0.0
     var flushInterval: Double {
@@ -38,6 +38,10 @@ class Flush: AppLifecycle {
 
             return _flushInterval
         }
+    }
+
+    required init(basePathIdentifier: String) {
+        self.flushRequest = FlushRequest(basePathIdentifier: basePathIdentifier)
     }
 
     func flushEventsQueue(_ eventsQueue: inout Queue) {

@@ -25,7 +25,7 @@ struct DecideResponse {
 
 class Decide {
 
-    var decideRequest = DecideRequest()
+    let decideRequest: DecideRequest
     var decideFetched = false
     var notificationsInstance = InAppNotifications()
     var codelessInstance = Codeless()
@@ -43,6 +43,10 @@ class Decide {
     var enableVisualEditorForCodeless = true
 
     let switchboardURL = "wss://switchboard.mixpanel.com"
+
+    required init(basePathIdentifier: String) {
+        self.decideRequest = DecideRequest(basePathIdentifier: basePathIdentifier)
+    }
 
     func checkDecide(forceFetch: Bool = false,
                      distinctId: String,

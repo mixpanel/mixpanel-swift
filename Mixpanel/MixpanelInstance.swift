@@ -483,9 +483,11 @@ extension MixpanelInstance {
         serialQueue.async() {
             // identify only changes the distinct id if it doesn't match either the existing or the alias;
             // if it's new, blow away the alias as well.
-            if distinctId != self.distinctId && distinctId != self.alias {
-                self.alias = nil
-                self.distinctId = distinctId
+            if distinctId != self.alias {
+                if distinctId != self.distinctId {
+                    self.alias = nil
+                    self.distinctId = distinctId
+                }
                 self.people.distinctId = distinctId
             }
             if !self.people.unidentifiedQueue.isEmpty {

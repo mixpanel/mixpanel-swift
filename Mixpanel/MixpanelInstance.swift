@@ -432,7 +432,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             #if (arch(i386) || arch(x86_64)) && os(iOS)
                 self.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 2
             #else
-                self.decideInstance.gestureRecognizer.numberOfTouchesRequired = 4
+                self.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 4
             #endif
             self.decideInstance.gestureRecognizer?.isEnabled = self.enableVisualEditorForCodeless
             UIApplication.shared.keyWindow?.addGestureRecognizer(self.decideInstance.gestureRecognizer!)

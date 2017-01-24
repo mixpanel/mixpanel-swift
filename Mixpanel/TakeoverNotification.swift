@@ -14,10 +14,9 @@ class TakeoverNotification: InAppNotification {
     let closeButtonColor: Int
     let title: String
     let titleColor: Int
-    let shouldFadeImage: Bool
+    var shouldFadeImage: Bool = false
 
     override init?(JSONObject: [String: Any]?) {
-        super.init(JSONObject: JSONObject)
 
         guard let object = JSONObject else {
             Logger.error(message: "notification json object should not be nil")
@@ -51,16 +50,19 @@ class TakeoverNotification: InAppNotification {
             return nil
         }
 
-        guard let shouldFadeImage = object["close_color"] as? Bool else {
-            Logger.error(message: "invalid notification fade image boolean")
-            return nil
-        }
-
         self.buttons            = parsedButtons
         self.closeButtonColor   = closeButtonColor
         self.title              = title
         self.titleColor         = titleColor
+
+        super.init(JSONObject: JSONObject)
+
+        guard let shouldFadeImage = extras["image_fade"] as? Bool else {
+            Logger.error(message: "invalid notification fade image boolean")
+            return nil
+        }
         self.shouldFadeImage    = shouldFadeImage
+
     }
 }
 

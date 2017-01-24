@@ -12,7 +12,7 @@ class MiniNotification: InAppNotification {
     let callToActionURL: URL?
     let imageTintColor: Int
     let borderColor: Int
-    
+
     override init?(JSONObject: [String: Any]?) {
         guard let object = JSONObject else {
             Logger.error(message: "notification json object should not be nil")

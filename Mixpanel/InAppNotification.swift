@@ -91,4 +91,3 @@ class InAppNotification {
         self.type               = type
     }
 }
-

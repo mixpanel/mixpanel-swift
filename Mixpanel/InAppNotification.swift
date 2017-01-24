@@ -8,11 +8,9 @@
 
 import Foundation
 
-struct InAppNotification {
+class InAppNotification {
     let ID: Int
     let messageID: Int
-    let type: String
-    let style: String
     let imageURL: URL
     lazy var image: Data? = {
         var data: Data?
@@ -23,10 +21,10 @@ struct InAppNotification {
         }
         return data
     }()
-    let title: String
     let body: String
-    let callToAction: String
-    let callToActionURL: URL?
+    let extras: [String: Any]
+    let backgroundColor: Int
+    let bodyColor: Int
 
     init?(JSONObject: [String: Any]?) {
         guard let object = JSONObject else {
@@ -44,46 +42,32 @@ struct InAppNotification {
             return nil
         }
 
-        guard let type = object["type"] as? String else {
-            Logger.error(message: "invalid notification type")
-            return nil
-        }
-
-        guard let style = object["style"] as? String else {
-            Logger.error(message: "invalid notification style")
-            return nil
-        }
-
-        guard let title = object["title"] as? String, !title.isEmpty else {
-            Logger.error(message: "invalid notification title")
-            return nil
-        }
-
         guard let body = object["body"] as? String, !body.isEmpty else {
             Logger.error(message: "invalid notification body")
             return nil
         }
 
-        guard let callToAction = object["cta"] as? String else {
-            Logger.error(message: "invalid notification cta")
+        guard let extras = object["extras"] as? [String: Any] else {
+            Logger.error(message: "invalid notification extra section")
             return nil
         }
 
-        var callToActionURL: URL?
-        if let URLString = object["cta_url"] as? String {
-            callToActionURL = URL(string: URLString)
+        guard let backgroundColor = object["bg_color"] as? Int else {
+            Logger.error(message: "invalid notification bg_color")
+            return nil
+        }
+
+        guard let bodyColor = object["body_color"] as? Int else {
+            Logger.error(message: "invalid notification body_color")
+            return nil
         }
 
         guard let imageURLString = object["image_url"] as? String,
             let escapedImageURLString = imageURLString
                 .addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed),
-            var imageURLComponents = URLComponents(string: escapedImageURLString) else {
+            let imageURLComponents = URLComponents(string: escapedImageURLString) else {
                 Logger.error(message: "invalid notification image url")
                 return nil
-        }
-
-        if type == InAppType.takeover.rawValue {
-            imageURLComponents.path = imageURLComponents.path.appendSuffixBeforeExtension(suffix: "@2x")
         }
 
         guard let imageURLParsed = imageURLComponents.url else {
@@ -93,29 +77,11 @@ struct InAppNotification {
 
         self.ID                 = ID
         self.messageID          = messageID
-        self.type               = type
-        self.style              = style
         self.imageURL           = imageURLParsed
-        self.title              = title
         self.body               = body
-        self.callToAction       = callToAction
-        self.callToActionURL    = callToActionURL
+        self.extras             = extras
+        self.backgroundColor    = backgroundColor
+        self.bodyColor          = bodyColor
     }
 }
 
-extension String {
-    func appendSuffixBeforeExtension(suffix: String) -> String {
-        var newString = suffix
-        do {
-            let regex = try NSRegularExpression(pattern: "(\\.\\w+$)", options: [])
-            newString = regex.stringByReplacingMatches(in: self,
-                                                       options: [],
-                                                       range: NSRange(location: 0,
-                                                                      length: self.characters.count),
-                                                       withTemplate: "\(suffix)$1")
-        } catch {
-            Logger.error(message: "cannot add suffix to URL string")
-        }
-        return newString
-    }
-}

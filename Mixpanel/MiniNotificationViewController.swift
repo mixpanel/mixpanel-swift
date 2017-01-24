@@ -10,13 +10,18 @@ import UIKit
 
 class MiniNotificationViewController: BaseNotificationViewController {
 
+    var miniNotification: MiniNotification! {
+        get {
+            return super.notification as! MiniNotification
+        }
+    }
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var bodyLabel: UILabel!
     var isDismissing = false
     var canPan = true
     var position: CGPoint!
 
-    convenience init(notification: InAppNotification) {
+    convenience init(notification: MiniNotification) {
         self.init(notification: notification, nameOfClass: String(describing: MiniNotificationViewController.self))
     }
 
@@ -28,12 +33,12 @@ class MiniNotificationViewController: BaseNotificationViewController {
             imageView.image = UIImage(data: image)
         }
 
-        if notification.style == Style.light.rawValue {
-            view.backgroundColor = InAppNotificationsConstants.miniLightBGColor
-            bodyLabel.textColor = InAppNotificationsConstants.miniLightTextColor
-            imageView.image = imageView.image?.withRenderingMode(.alwaysTemplate)
-            imageView.tintColor = InAppNotificationsConstants.miniLightTextColor
-        }
+        //if notification.style == Style.light.rawValue {
+        //    view.backgroundColor = InAppNotificationsConstants.miniLightBGColor
+        //    bodyLabel.textColor = InAppNotificationsConstants.miniLightTextColor
+        //    imageView.image = imageView.image?.withRenderingMode(.alwaysTemplate)
+        //    imageView.tintColor = InAppNotificationsConstants.miniLightTextColor
+        //}
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(gesture:)))
         tapGesture.numberOfTapsRequired = 1
@@ -64,10 +69,10 @@ class MiniNotificationViewController: BaseNotificationViewController {
             window.clipsToBounds = true
             window.rootViewController = self
             window.layer.cornerRadius = 6
-            if notification.style == Style.light.rawValue {
-                window.layer.borderColor = InAppNotificationsConstants.miniLightBorderColor.cgColor
-                window.layer.borderWidth = 1
-            }
+            //if notification.style == Style.light.rawValue {
+            //    window.layer.borderColor = InAppNotificationsConstants.miniLightBorderColor.cgColor
+            //    window.layer.borderWidth = 1
+            //}
             window.isHidden = false
         }
 
@@ -98,7 +103,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
 
     func didTap(gesture: UITapGestureRecognizer) {
         if !isDismissing && gesture.state == UIGestureRecognizerState.ended {
-            delegate?.notificationShouldDismiss(controller: self, status: true)
+            delegate?.notificationShouldDismiss(controller: self, callToActionURL: miniNotification.callToActionURL)
         }
     }
 
@@ -114,7 +119,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
                 window.layer.position = CGPoint(x: window.layer.position.x, y: position.y)
             case UIGestureRecognizerState.ended, UIGestureRecognizerState.cancelled:
                 if window.layer.position.y > position.y + (InAppNotificationsConstants.miniInAppHeight / 2) {
-                    delegate?.notificationShouldDismiss(controller: self, status: false)
+                    delegate?.notificationShouldDismiss(controller: self, callToActionURL: miniNotification.callToActionURL)
                 } else {
                     UIView.animate(withDuration: 0.2, animations: {
                         window.layer.position = self.position

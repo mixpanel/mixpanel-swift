@@ -67,8 +67,14 @@ class Decide {
                 var parsedNotifications = [InAppNotification]()
                 if let rawNotifications = result["notifications"] as? [[String: Any]] {
                     for rawNotif in rawNotifications {
-                        if let notification = InAppNotification(JSONObject: rawNotif) {
-                            parsedNotifications.append(notification)
+                        if let notificationType = rawNotif["type"] as? String {
+                            if notificationType == InAppType.takeover.rawValue,
+                                let notification = TakeoverNotification(JSONObject: rawNotif) {
+                                parsedNotifications.append(notification)
+                            } else if notificationType == InAppType.mini.rawValue,
+                                let notification = MiniNotification(JSONObject: rawNotif) {
+                                parsedNotifications.append(notification)
+                            }
                         }
                     }
                 } else {

@@ -10,7 +10,7 @@ import UIKit
 
 protocol NotificationViewControllerDelegate {
     @discardableResult
-    func notificationShouldDismiss(controller: BaseNotificationViewController, status: Bool) -> Bool
+    func notificationShouldDismiss(controller: BaseNotificationViewController, callToActionURL: URL?) -> Bool
 }
 
 class BaseNotificationViewController: UIViewController {

@@ -30,7 +30,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
     var delegate: InAppNotificationsDelegate?
 
     func showNotification( _ notification: InAppNotification) {
-        var notification = notification
+        let notification = notification
         if notification.image != nil {
             DispatchQueue.main.async {
                 if self.currentlyShowingNotification != nil {
@@ -38,9 +38,9 @@ class InAppNotifications: NotificationViewControllerDelegate {
                 } else {
                     var shownNotification = false
                     #if os(iOS)
-                    if notification.type == InAppType.mini.rawValue {
+                    if let notification = notification as? MiniNotification {
                         shownNotification = self.showMiniNotification(notification)
-                    } else {
+                    } else if let notification = notification as? TakeoverNotification {
                         shownNotification = self.showTakeoverNotification(notification)
                     }
                     if shownNotification {
@@ -63,18 +63,18 @@ class InAppNotifications: NotificationViewControllerDelegate {
     }
 
     #if os(iOS)
-    func showMiniNotification(_ notification: InAppNotification) -> Bool {
+    func showMiniNotification(_ notification: MiniNotification) -> Bool {
         let miniNotificationVC = MiniNotificationViewController(notification: notification)
         miniNotificationVC.delegate = self
         miniNotificationVC.show(animated: true)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + miniNotificationPresentationTime) {
-            self.notificationShouldDismiss(controller: miniNotificationVC, status: false)
+            self.notificationShouldDismiss(controller: miniNotificationVC, callToActionURL: nil)
         }
         return true
     }
 
-    func showTakeoverNotification(_ notification: InAppNotification) -> Bool {
+    func showTakeoverNotification(_ notification: TakeoverNotification) -> Bool {
         let takeoverNotificationVC = TakeoverNotificationViewController(notification: notification)
         takeoverNotificationVC.delegate = self
         takeoverNotificationVC.show(animated: true)
@@ -83,7 +83,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
     #endif
 
     @discardableResult
-    func notificationShouldDismiss(controller: BaseNotificationViewController, status: Bool) -> Bool {
+    func notificationShouldDismiss(controller: BaseNotificationViewController, callToActionURL: URL?) -> Bool {
         if currentlyShowingNotification?.ID != controller.notification.ID {
             return false
         }
@@ -92,11 +92,11 @@ class InAppNotifications: NotificationViewControllerDelegate {
             self.currentlyShowingNotification = nil
         }
 
-        if status, let URL = controller.notification.callToActionURL {
+        if let callToActionURL = callToActionURL {
             controller.hide(animated: true) {
-                Logger.info(message: "opening CTA URL: \(URL)")
-                if !UIApplication.shared.openURL(URL) {
-                    Logger.error(message: "Mixpanel failed to open given URL: \(URL)")
+                Logger.info(message: "opening CTA URL: \(callToActionURL)")
+                if !UIApplication.shared.openURL(callToActionURL) {
+                    Logger.error(message: "Mixpanel failed to open given URL: \(callToActionURL)")
                 }
 
                 self.delegate?.notificationDidCTA(controller.notification, event: "$campaign_open")

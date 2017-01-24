@@ -11,7 +11,7 @@ import Foundation
 class InAppNotification {
     let ID: Int
     let messageID: Int
-    let imageURL: URL
+    var imageURL: URL
     lazy var image: Data? = {
         var data: Data?
         do {
@@ -25,6 +25,7 @@ class InAppNotification {
     let extras: [String: Any]
     let backgroundColor: Int
     let bodyColor: Int
+    let type: String
 
     init?(JSONObject: [String: Any]?) {
         guard let object = JSONObject else {
@@ -75,6 +76,11 @@ class InAppNotification {
             return nil
         }
 
+        guard let type = object["type"] as? String else {
+            Logger.error(message: "invalid notification type")
+            return nil
+        }
+
         self.ID                 = ID
         self.messageID          = messageID
         self.imageURL           = imageURLParsed
@@ -82,6 +88,7 @@ class InAppNotification {
         self.extras             = extras
         self.backgroundColor    = backgroundColor
         self.bodyColor          = bodyColor
+        self.type               = type
     }
 }
 

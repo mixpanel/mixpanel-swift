@@ -10,6 +10,11 @@ import UIKit
 
 class TakeoverNotificationViewController: BaseNotificationViewController {
 
+    var takeoverNotification: TakeoverNotification! {
+        get {
+            return super.notification as! TakeoverNotification
+        }
+    }
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var bodyLabel: UILabel!
@@ -21,7 +26,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
     @IBOutlet weak var viewMask: UIView!
 
 
-    convenience init(notification: InAppNotification) {
+    convenience init(notification: TakeoverNotification) {
         self.init(notification: notification, nameOfClass: TakeoverNotificationViewController.notificationXibToLoad())
     }
 
@@ -51,29 +56,29 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
             Logger.error(message: "notification image failed to load from data")
         }
 
-        titleLabel.text = notification.title
-        bodyLabel.text = notification.body
+        titleLabel.text = takeoverNotification.title
+        bodyLabel.text = takeoverNotification.body
 
-        if !notification.callToAction.isEmpty {
-            okButton.setTitle(notification.callToAction, for: UIControlState.normal)
-        }
+        //if !takeoverNotification.callToAction.isEmpty {
+        //    okButton.setTitle(takeoverNotification.callToAction, for: UIControlState.normal)
+        //}
 
         okButton.layer.cornerRadius = 5
         okButton.layer.borderWidth = 2
 
-        if notification.style == Style.light.rawValue {
-            viewMask.backgroundColor = InAppNotificationsConstants.takeoverLightBGColor
-            titleLabel.textColor = InAppNotificationsConstants.takeoverLightTitleColor
-            bodyLabel.textColor = InAppNotificationsConstants.takeoverLightBodyColor
-            okButton.setTitleColor(InAppNotificationsConstants.takeoverLightBodyColor, for: UIControlState.normal)
-            okButton.layer.borderColor = InAppNotificationsConstants.takeoverOKButtonBorderColor.cgColor
-            let origImage = closeButton.image(for: UIControlState.normal)
-            let tintedImage = origImage?.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
-            closeButton.setImage(tintedImage, for: UIControlState.normal)
-            closeButton.tintColor = InAppNotificationsConstants.takeoverCloseButtonColor
-        } else {
-            okButton.layer.borderColor = UIColor.white.cgColor
-        }
+        //if notification.style == Style.light.rawValue {
+        //    viewMask.backgroundColor = InAppNotificationsConstants.takeoverLightBGColor
+        //    titleLabel.textColor = InAppNotificationsConstants.takeoverLightTitleColor
+        //    bodyLabel.textColor = InAppNotificationsConstants.takeoverLightBodyColor
+        //    okButton.setTitleColor(InAppNotificationsConstants.takeoverLightBodyColor, for: UIControlState.normal)
+        //    okButton.layer.borderColor = InAppNotificationsConstants.takeoverOKButtonBorderColor.cgColor
+        //    let origImage = closeButton.image(for: UIControlState.normal)
+        //    let tintedImage = origImage?.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
+        //    closeButton.setImage(tintedImage, for: UIControlState.normal)
+        //    closeButton.tintColor = InAppNotificationsConstants.takeoverCloseButtonColor
+        //} else {
+        //    okButton.layer.borderColor = UIColor.white.cgColor
+        //}
         viewMask.clipsToBounds = true
         viewMask.layer.cornerRadius = 6
     }
@@ -109,11 +114,11 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
     }
 
     @IBAction func tappedOk(_ sender: AnyObject) {
-        delegate?.notificationShouldDismiss(controller: self, status: true)
+        delegate?.notificationShouldDismiss(controller: self, callToActionURL: takeoverNotification.buttons[0].callToActionURL)
     }
 
     @IBAction func tappedClose(_ sender: AnyObject) {
-        delegate?.notificationShouldDismiss(controller: self, status: false)
+        delegate?.notificationShouldDismiss(controller: self, callToActionURL: nil)
     }
 
     override var shouldAutorotate: Bool {

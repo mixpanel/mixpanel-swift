@@ -44,8 +44,9 @@ class InAppNotifications: NotificationViewControllerDelegate {
                         shownNotification = self.showTakeoverNotification(notification)
                     }
                     if shownNotification {
-                        self.markNotificationShown(notification: notification)
-                        self.delegate?.notificationDidShow(notification)
+                        self.currentlyShowingNotification = notification
+                        //self.markNotificationShown(notification: notification)
+                        //self.delegate?.notificationDidShow(notification)
                     }
                     #endif
                 }

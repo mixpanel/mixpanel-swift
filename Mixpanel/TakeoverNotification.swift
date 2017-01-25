@@ -12,7 +12,7 @@ class TakeoverNotification: InAppNotification {
 
     let buttons: [InAppButton]
     let closeButtonColor: Int
-    let title: String
+    var title: String? = nil
     let titleColor: Int
     var shouldFadeImage: Bool = false
 
@@ -40,9 +40,8 @@ class TakeoverNotification: InAppNotification {
             return nil
         }
 
-        guard let title = object["title"] as? String else {
-            Logger.error(message: "invalid notification title")
-            return nil
+        if let title = object["title"] as? String {
+            self.title = title
         }
 
         guard let titleColor = object["title_color"] as? Int else {
@@ -52,7 +51,6 @@ class TakeoverNotification: InAppNotification {
 
         self.buttons            = parsedButtons
         self.closeButtonColor   = closeButtonColor
-        self.title              = title
         self.titleColor         = titleColor
 
         super.init(JSONObject: JSONObject)

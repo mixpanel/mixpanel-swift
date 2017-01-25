@@ -40,5 +40,10 @@ class MiniNotification: InAppNotification {
 
         super.init(JSONObject: JSONObject)
 
+        if self.body == nil {
+            Logger.error(message: "invalid notification body")
+            return nil
+        }
+
     }
 }

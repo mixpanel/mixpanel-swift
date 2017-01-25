@@ -21,11 +21,11 @@ class InAppNotification {
         }
         return data
     }()
-    let body: String
     let extras: [String: Any]
     let backgroundColor: Int
     let bodyColor: Int
     let type: String
+    var body: String? = nil
 
     init?(JSONObject: [String: Any]?) {
         guard let object = JSONObject else {
@@ -40,11 +40,6 @@ class InAppNotification {
 
         guard let messageID = object["message_id"] as? Int, messageID > 0 else {
             Logger.error(message: "invalid notification message id")
-            return nil
-        }
-
-        guard let body = object["body"] as? String, !body.isEmpty else {
-            Logger.error(message: "invalid notification body")
             return nil
         }
 
@@ -81,10 +76,13 @@ class InAppNotification {
             return nil
         }
 
+        if let body = object["body"] as? String, !body.isEmpty {
+            self.body = body
+        }
+
         self.ID                 = ID
         self.messageID          = messageID
         self.imageURL           = imageURLParsed
-        self.body               = body
         self.extras             = extras
         self.backgroundColor    = backgroundColor
         self.bodyColor          = bodyColor

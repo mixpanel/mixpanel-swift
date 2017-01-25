@@ -57,7 +57,7 @@ class Decide {
 
         if !decideFetched || forceFetch {
             let semaphore = DispatchSemaphore(value: 0)
-            decideRequest.sendRequest(distinctId: "0D67D704-4651-4B8B-A0E8-4D4E3A525ACC", token: token) { decideResult in
+            decideRequest.sendRequest(distinctId: distinctId, token: token) { decideResult in
                 guard let result = decideResult else {
                     semaphore.signal()
                     completion(nil)

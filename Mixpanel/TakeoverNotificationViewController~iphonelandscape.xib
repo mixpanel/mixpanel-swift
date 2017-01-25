@@ -96,7 +96,7 @@
                                     <size key="shadowOffset" width="0.0" height="1"/>
                                 </label>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="q6u-Gu-7TB">
-                                    <rect key="frame" x="34" y="77" width="264" height="40"/>
+                                    <rect key="frame" x="34.5" y="77" width="264" height="40"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="S0D-AI-bOn">
                                             <rect key="frame" x="0.0" y="0.0" width="128" height="40"/>
@@ -156,8 +156,10 @@
                             <constraints>
                                 <constraint firstAttribute="trailing" secondItem="uU8-iL-VPd" secondAttribute="trailing" constant="15" id="10S-r5-aMQ"/>
                                 <constraint firstAttribute="trailing" secondItem="lod-K4-ZtM" secondAttribute="trailing" constant="15" id="5L9-Z8-kxN"/>
+                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="q6u-Gu-7TB" secondAttribute="trailing" constant="5" id="6i5-Ai-cqb"/>
                                 <constraint firstItem="lod-K4-ZtM" firstAttribute="top" secondItem="uU8-iL-VPd" secondAttribute="bottom" constant="10" id="DpS-sr-CDR"/>
                                 <constraint firstItem="lod-K4-ZtM" firstAttribute="leading" secondItem="uOA-rR-CAL" secondAttribute="leading" constant="15" id="Ihv-lg-J0f"/>
+                                <constraint firstItem="q6u-Gu-7TB" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="uOA-rR-CAL" secondAttribute="leading" constant="5" id="U6w-Qe-Bdv"/>
                                 <constraint firstItem="q6u-Gu-7TB" firstAttribute="centerX" secondItem="uOA-rR-CAL" secondAttribute="centerX" id="UQa-y9-uEz"/>
                                 <constraint firstItem="uU8-iL-VPd" firstAttribute="leading" secondItem="uOA-rR-CAL" secondAttribute="leading" constant="15" id="a3E-1C-N4V"/>
                                 <constraint firstItem="q6u-Gu-7TB" firstAttribute="top" secondItem="lod-K4-ZtM" secondAttribute="bottom" constant="15" id="ayq-fc-zj6"/>

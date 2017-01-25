@@ -50,14 +50,14 @@ extension UIColor {
      The shorthand four-digit hexadecimal representation of color with alpha.
      #RGBA defines to the color #AARRGGBB.
 
-     - parameter hex4: Four-digit hexadecimal value.
+     - parameter hex4: hexadecimal value.
      */
     public convenience init(hex4: Int) {
-        let divisor = CGFloat(15)
-        let alpha   = CGFloat((hex4 & 0xF000) >> 12) / divisor
-        let red     = CGFloat((hex4 & 0x0F00) >>  8) / divisor
-        let green   = CGFloat((hex4 & 0x00F0) >>  4) / divisor
-        let blue    = CGFloat( hex4 & 0x000F       ) / divisor
+        let divisor = CGFloat(255)
+        let alpha   = CGFloat((hex4 & 0xFF000000) >> 24) / divisor
+        let red     = CGFloat((hex4 & 0x00FF0000) >> 16) / divisor
+        let green   = CGFloat((hex4 & 0x0000FF00) >>  8) / divisor
+        let blue    = CGFloat( hex4 & 0x000000FF       ) / divisor
         self.init(red: red, green: green, blue: blue, alpha: alpha)
     }
 }

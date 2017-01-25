@@ -34,7 +34,7 @@
                 </imageView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WAp-k0-Mff">
                     <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
-                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.55000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qEo-cT-dUY" userLabel="Bg Mask">
                     <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>

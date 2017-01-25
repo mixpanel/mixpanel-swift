@@ -21,7 +21,7 @@
                 <outlet property="firstButton" destination="Uud-dR-diT" id="IYU-je-0I6"/>
                 <outlet property="imageView" destination="oJa-eQ-3o2" id="ySr-U6-We0"/>
                 <outlet property="secondButton" destination="isu-29-YtI" id="fu7-Bb-ZMN"/>
-                <outlet property="secondButtonContainer" destination="vew-gZ-q3O" id="Kbx-2i-Bi0"/>
+                <outlet property="secondButtonContainer" destination="OqR-XN-72p" id="RTQ-3S-eaR"/>
                 <outlet property="titleLabel" destination="hG6-Nx-B8K" id="NOj-QA-kD0"/>
                 <outlet property="view" destination="LSp-1n-nEk" id="0y8-z6-NHw"/>
                 <outlet property="viewMask" destination="Bjs-uh-0cZ" id="5g3-vh-10K"/>

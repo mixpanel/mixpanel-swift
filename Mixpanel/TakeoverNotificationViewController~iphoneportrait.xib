@@ -15,7 +15,6 @@
                 <outlet property="backgroundImageView" destination="T8g-zh-2N3" id="q2b-NN-ZV7"/>
                 <outlet property="bodyLabel" destination="h8M-cd-GVv" id="8H2-h1-dHN"/>
                 <outlet property="bottomImageSpacing" destination="pi1-uq-dJ5" id="iuu-b2-G7p"/>
-                <outlet property="cancelButtonContainer" destination="Xaf-4Z-Id4" id="QqN-jF-6Ii"/>
                 <outlet property="closeButton" destination="6kd-pr-ub6" id="fGv-mf-xEa"/>
                 <outlet property="fadingView" destination="MgN-Di-l2U" id="cL9-y5-O5i"/>
                 <outlet property="firstButton" destination="1LO-WG-GYz" id="o81-BT-oJk"/>

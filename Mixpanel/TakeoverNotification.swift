@@ -62,7 +62,7 @@ class TakeoverNotification: InAppNotification {
             return nil
         }
         self.shouldFadeImage    = shouldFadeImage
-        imageURL = URL(string: imageURL.path.appendSuffixBeforeExtension(suffix: "@2x"))!
+        imageURL = URL(string: imageURL.absoluteString.appendSuffixBeforeExtension(suffix: "@2x"))!
 
     }
 }

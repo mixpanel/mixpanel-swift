@@ -512,21 +512,45 @@
 			name = Networking;
 			sourceTree = "<group>";
 		};
-		E19312681D5B9CE2007CE1E9 /* InAppNotifications */ = {
+		E18C77A51E381ED00006CBB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */,
 				E19312661D5A7848007CE1E9 /* InAppNotification.swift */,
 				E118E9FF1E37E28400223C47 /* InAppButton.swift */,
 				E118E9FD1E37DE3B00223C47 /* TakeoverNotification.swift */,
 				E118EA011E37F3A700223C47 /* MiniNotification.swift */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		E18C77A61E381EF70006CBB9 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
 				E11619DA1D5D52F900610404 /* BaseNotificationViewController.swift */,
 				E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */,
-				E193126A1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib */,
 				E158C6E51D5D32DD00651465 /* TakeoverNotificationViewController.swift */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
+		E18C77A71E381F060006CBB9 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				E193126A1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib */,
 				E158C6F01D5D39A100651465 /* TakeoverNotificationViewController~iphoneportrait.xib */,
 				E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */,
 				E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		E19312681D5B9CE2007CE1E9 /* InAppNotifications */ = {
+			isa = PBXGroup;
+			children = (
+				E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */,
+				E18C77A51E381ED00006CBB9 /* Models */,
+				E18C77A71E381F060006CBB9 /* Views */,
+				E18C77A61E381EF70006CBB9 /* Controllers */,
 			);
 			name = InAppNotifications;
 			sourceTree = "<group>";

@@ -14,11 +14,14 @@
             <connections>
                 <outlet property="backgroundImageView" destination="T8g-zh-2N3" id="q2b-NN-ZV7"/>
                 <outlet property="bodyLabel" destination="h8M-cd-GVv" id="8H2-h1-dHN"/>
-                <outlet property="cancelButton" destination="AbO-EA-1tQ" id="Heg-aq-3rb"/>
+                <outlet property="bottomImageSpacing" destination="pi1-uq-dJ5" id="iuu-b2-G7p"/>
                 <outlet property="cancelButtonContainer" destination="Xaf-4Z-Id4" id="QqN-jF-6Ii"/>
                 <outlet property="closeButton" destination="6kd-pr-ub6" id="fGv-mf-xEa"/>
+                <outlet property="fadingView" destination="MgN-Di-l2U" id="cL9-y5-O5i"/>
+                <outlet property="firstButton" destination="1LO-WG-GYz" id="o81-BT-oJk"/>
                 <outlet property="imageView" destination="yFj-Sb-VWy" id="kOH-mh-bZ5"/>
-                <outlet property="okButton" destination="1LO-WG-GYz" id="rsg-LP-5a4"/>
+                <outlet property="secondButton" destination="AbO-EA-1tQ" id="InX-Qn-Zu7"/>
+                <outlet property="secondButtonContainer" destination="Xaf-4Z-Id4" id="PcM-d6-5oY"/>
                 <outlet property="titleLabel" destination="h51-dK-9V2" id="K4Y-EH-4x3"/>
                 <outlet property="view" destination="3XT-6L-3fN" id="iIT-8f-qnl"/>
                 <outlet property="viewMask" destination="S9c-D7-A3k" id="E9S-Io-1A2"/>
@@ -103,9 +106,6 @@
                                     <state key="highlighted">
                                         <color key="titleColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     </state>
-                                    <connections>
-                                        <action selector="tappedOk:" destination="-1" eventType="touchUpInside" id="MjP-Z5-0pt"/>
-                                    </connections>
                                 </button>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Xaf-4Z-Id4">
                                     <rect key="frame" x="128" y="0.0" width="136" height="40"/>
@@ -122,9 +122,6 @@
                                             <state key="highlighted">
                                                 <color key="titleColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             </state>
-                                            <connections>
-                                                <action selector="tappedOk:" destination="-1" eventType="touchUpInside" id="OMb-li-zQu"/>
-                                            </connections>
                                         </button>
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>

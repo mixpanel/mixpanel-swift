@@ -14,93 +14,90 @@ import Nocilla
 
 class MixpanelNotificationTests: MixpanelBaseTests {
 
+    var notificationDict = ["id": 3,
+                            "message_id": 1,
+                            "title": "title",
+                            "title_color": 12345,
+                            "type": "takeover",
+                            "body": "body",
+                            "body_color": 12345,
+                            "image_url": "https://cdn.mxpnl.com/site_media/images/engage/inapp_messages/mini/icon_coin.png",
+                            "bg_color": 23456,
+                            "close_color": 34567,
+                            "buttons": [
+                                [
+                                    "text": "Done",
+                                    "text_color": 34567,
+                                    "bg_color": 0,
+                                    "border_color": 34567,
+                                    "cta_url": "maps://"
+                                ],
+                                [
+                                    "text": "Cancel",
+                                    "text_color": 23456,
+                                    "bg_color": 34567,
+                                    "border_color": 34567,
+                                    "cta_url": "maps://"
+                                ]
+                            ],
+                            "extras": [
+                                "image_fade": false
+                            ]] as [String : Any]
+
     func testMalformedImageURL() {
-        let info: Properties = ["id": 3,
-                                "message_id": 1,
-                                "title": "title",
-                                "type": "takeover",
-                                "style": "dark",
-                                "body": "body",
-                                "cta": "cta",
-                                "cta_url": "maps://",
-                                "image_url": "1466606494290.684919.uwp5.png"]
-        let notification = InAppNotification(JSONObject: info)
+        var notificationDict = self.notificationDict
+        notificationDict["image_url"] = "1466606494290.684919.uwp5.png"
+        let notification = TakeoverNotification(JSONObject: notificationDict)
         XCTAssertEqual(notification?.imageURL.absoluteString, "1466606494290.684919.uwp5@2x.png")
     }
 
     func testParseNotification() {
-        // invalid bad title
-        let invalid: Properties = ["id": 3,
-                                   "title": 5,
-                                   "type": "takeover",
-                                   "style": "dark",
-                                   "body": "Hi!",
-                                   "cta_url": "blah blah blah",
-                                   "cta": NSNull(),
-                                   "image_url": []]
-        XCTAssertNil(InAppNotification(JSONObject: invalid))
         // valid
-        let notifDict: Properties = ["id": 3,
-                                     "message_id": 1,
-                                     "title": "title",
-                                     "type": "takeover",
-                                     "style": "dark",
-                                     "body": "body",
-                                     "cta": "cta",
-                                     "cta_url": "maps://",
-                                     "image_url": "http://mixpanel.com/coolimage.png"]
-        XCTAssertNotNil(InAppNotification(JSONObject: notifDict))
+        XCTAssertNotNil(TakeoverNotification(JSONObject: notificationDict))
         // nil
-        XCTAssertNil(InAppNotification(JSONObject: nil))
+        XCTAssertNil(TakeoverNotification(JSONObject: nil))
         // empty
-        XCTAssertNil(InAppNotification(JSONObject: [:]))
+        XCTAssertNil(TakeoverNotification(JSONObject: [:]))
         // garbage keys
-        let testingInApp = InAppNotification(JSONObject: ["gar": "bage"])
+        let testingInApp = TakeoverNotification(JSONObject: ["gar": "bage"])
         XCTAssertNil(testingInApp)
         var testDict: [String: Any]!
         // invalid id
-        testDict = notifDict
+        testDict = notificationDict
         testDict["id"] = false
-        XCTAssertNil(InAppNotification(JSONObject: testDict))
-        // invalid title
-        testDict = notifDict
-        testDict["title"] = false
-        XCTAssertNil(InAppNotification(JSONObject: testDict))
-        // invalid body
-        testDict = notifDict
-        testDict["body"] = false
-        XCTAssertNil(InAppNotification(JSONObject: testDict))
+        XCTAssertNil(TakeoverNotification(JSONObject: testDict))
         // invalid cta
-        testDict = notifDict
-        testDict["cta"] = false
-        XCTAssertNil(InAppNotification(JSONObject: testDict))
+        testDict = notificationDict
+        testDict["buttons"] = [[
+            "text": false,
+            "text_color": 34567,
+            "bg_color": 0,
+            "border_color": 34567,
+            "cta_url": "maps://"
+        ]]
+        XCTAssertNil(TakeoverNotification(JSONObject: testDict))
         // invalid image_urls
-        testDict = notifDict
+        testDict = notificationDict
         testDict["image_url"] = false
-        XCTAssertNil(InAppNotification(JSONObject: testDict))
+        XCTAssertNil(TakeoverNotification(JSONObject: testDict))
         // invalid image_urls item
-        testDict = notifDict
+        testDict = notificationDict
         testDict["image_url"] = [false]
-        XCTAssertNil(InAppNotification(JSONObject: testDict))
+        XCTAssertNil(TakeoverNotification(JSONObject: testDict))
         // an image with a space in the URL should be % encoded
-        testDict = notifDict
+        testDict = notificationDict
         testDict["image_url"] = "https://test.com/animagewithaspace init.jpg"
-        XCTAssertNotNil(InAppNotification(JSONObject: testDict))
+        XCTAssertNotNil(TakeoverNotification(JSONObject: testDict))
+        // invalid color
+        testDict = notificationDict
+        testDict["bg_color"] = false
+        XCTAssertNil(TakeoverNotification(JSONObject: testDict))
     }
 
     func testNoDoubleShowNotification() {
         LSNocilla.sharedInstance().stop()
-        let notifDict: Properties = ["id": 3,
-                                     "message_id": 1,
-                                     "title": "title",
-                                     "type": "takeover",
-                                     "style": "light",
-                                     "body": "body",
-                                     "cta": "cta",
-                                     "cta_url": "maps://",
-                                     "image_url": "https://cdn.mxpnl.com/site_media/images/engage/inapp_messages/mini/icon_coin.png"]
         let numberOfWindows = UIApplication.shared.windows.count
-        let notif = InAppNotification(JSONObject: notifDict)
+        let notif = TakeoverNotification(JSONObject: notificationDict)
         mixpanel.decideInstance.notificationsInstance.showNotification(notif!)
         mixpanel.decideInstance.notificationsInstance.showNotification(notif!)
         //wait for notifs to be shown from main queue

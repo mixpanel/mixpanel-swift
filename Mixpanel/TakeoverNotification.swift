@@ -30,9 +30,11 @@ class TakeoverNotification: InAppNotification {
 
         var parsedButtons = [InAppButton]()
         for unparsedButton in unparsedButtons {
-            if let button = InAppButton(JSONObject: unparsedButton) {
-                parsedButtons.append(button)
+            guard let button = InAppButton(JSONObject: unparsedButton) else {
+                Logger.error(message: "invalid notification button")
+                return nil
             }
+            parsedButtons.append(button)
         }
 
         guard let closeButtonColor = object["close_color"] as? Int else {

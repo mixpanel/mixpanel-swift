@@ -11,9 +11,9 @@ import Foundation
 class InAppButton {
 
     let text: String
-    let textColor: Int
-    let backgroundColor: Int
-    let borderColor: Int
+    let textColor: UInt
+    let backgroundColor: UInt
+    let borderColor: UInt
     let callToActionURL: URL?
 
     init?(JSONObject: [String: Any]?) {
@@ -27,17 +27,17 @@ class InAppButton {
             return nil
         }
 
-        guard let textColor = object["text_color"] as? Int else {
+        guard let textColor = object["text_color"] as? UInt else {
             Logger.error(message: "invalid notification button text color")
             return nil
         }
 
-        guard let backgroundColor = object["bg_color"] as? Int else {
+        guard let backgroundColor = object["bg_color"] as? UInt else {
             Logger.error(message: "invalid notification button background color")
             return nil
         }
 
-        guard let borderColor = object["border_color"] as? Int else {
+        guard let borderColor = object["border_color"] as? UInt else {
             Logger.error(message: "invalid notification button border color")
             return nil
         }

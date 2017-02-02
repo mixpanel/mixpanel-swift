@@ -22,8 +22,8 @@ class InAppNotification {
         return data
     }()
     let extras: [String: Any]
-    let backgroundColor: Int
-    let bodyColor: Int
+    let backgroundColor: UInt
+    let bodyColor: UInt
     let type: String
     var body: String? = nil
 
@@ -48,12 +48,12 @@ class InAppNotification {
             return nil
         }
 
-        guard let backgroundColor = object["bg_color"] as? Int else {
+        guard let backgroundColor = object["bg_color"] as? UInt else {
             Logger.error(message: "invalid notification bg_color")
             return nil
         }
 
-        guard let bodyColor = object["body_color"] as? Int else {
+        guard let bodyColor = object["body_color"] as? UInt else {
             Logger.error(message: "invalid notification body_color")
             return nil
         }

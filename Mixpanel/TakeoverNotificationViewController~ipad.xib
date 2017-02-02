@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="ipad9_7" orientation="landscape">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16E144f" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="ipad12_9" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
@@ -21,7 +21,7 @@
                 <outlet property="firstButton" destination="Uud-dR-diT" id="IYU-je-0I6"/>
                 <outlet property="imageView" destination="oJa-eQ-3o2" id="ySr-U6-We0"/>
                 <outlet property="secondButton" destination="isu-29-YtI" id="fu7-Bb-ZMN"/>
-                <outlet property="secondButtonContainer" destination="OqR-XN-72p" id="RTQ-3S-eaR"/>
+                <outlet property="secondButtonContainer" destination="vew-gZ-q3O" id="xm2-UL-erc"/>
                 <outlet property="titleLabel" destination="hG6-Nx-B8K" id="NOj-QA-kD0"/>
                 <outlet property="view" destination="LSp-1n-nEk" id="0y8-z6-NHw"/>
                 <outlet property="viewMask" destination="Bjs-uh-0cZ" id="5g3-vh-10K"/>
@@ -29,18 +29,18 @@
         </placeholder>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view contentMode="scaleToFill" id="LSp-1n-nEk">
-            <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+            <rect key="frame" x="0.0" y="0.0" width="1024" height="1366"/>
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="y52-0P-44z" userLabel="Bg Image View">
-                    <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+                    <rect key="frame" x="0.0" y="0.0" width="1024" height="1366"/>
                 </imageView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bd1-Ag-adM">
-                    <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+                    <rect key="frame" x="0.0" y="0.0" width="1024" height="1366"/>
                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.55000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bjs-uh-0cZ" userLabel="Bg Mask">
-                    <rect key="frame" x="375" y="153.5" width="274" height="461"/>
+                    <rect key="frame" x="375" y="273" width="274" height="820"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tt0-5R-PYS">
                             <rect key="frame" x="30" y="50" width="214" height="225"/>
@@ -50,9 +50,6 @@
                                     <subviews>
                                         <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="249" verticalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="oJa-eQ-3o2" userLabel="Notif Image View">
                                             <rect key="frame" x="0.0" y="0.0" width="200" height="225"/>
-                                            <connections>
-                                                <outletCollection property="gestureRecognizers" destination="7sE-9V-9CY" appends="YES" id="wJw-4C-hVi"/>
-                                            </connections>
                                         </imageView>
                                     </subviews>
                                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
@@ -110,14 +107,14 @@
                             <nil key="highlightedColor"/>
                         </label>
                         <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="252" text="Notification body" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xoN-7v-tw1">
-                            <rect key="frame" x="30" y="298" width="214" height="38"/>
+                            <rect key="frame" x="30" y="298" width="214" height="397"/>
                             <fontDescription key="fontDescription" name="AvenirNext-Medium" family="Avenir Next" pointSize="17"/>
                             <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <nil key="highlightedColor"/>
                             <size key="shadowOffset" width="0.0" height="1"/>
                         </label>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OqR-XN-72p">
-                            <rect key="frame" x="5" y="366" width="264" height="50"/>
+                            <rect key="frame" x="5" y="725" width="264" height="50"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Uud-dR-diT">
                                     <rect key="frame" x="0.0" y="0.0" width="128" height="50"/>
@@ -132,7 +129,7 @@
                                         <color key="titleColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     </state>
                                 </button>
-                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vew-gZ-q3O">
+                                <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vew-gZ-q3O">
                                     <rect key="frame" x="128" y="0.0" width="136" height="50"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="isu-29-YtI">
@@ -214,11 +211,6 @@
                 <constraint firstItem="y52-0P-44z" firstAttribute="leading" secondItem="LSp-1n-nEk" secondAttribute="leading" id="zi3-Ad-UcN"/>
             </constraints>
         </view>
-        <panGestureRecognizer minimumNumberOfTouches="1" id="7sE-9V-9CY">
-            <connections>
-                <action selector="didPan:" destination="-1" id="d21-5J-QDv"/>
-            </connections>
-        </panGestureRecognizer>
     </objects>
     <resources>
         <image name="MPCloseButton.png" width="25" height="25"/>

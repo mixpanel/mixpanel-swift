@@ -72,7 +72,7 @@ class DecideRequest: Network {
 
     private func decideRequestHandler(resource: Resource<DecideResult>,
                                       completion: @escaping (DecideResult?) -> Void) {
-        Network.apiRequest(base: "http://yarden.dev.mixpanel.org:8021", resource: resource,
+        Network.apiRequest(base: BasePath.getServerURL(identifier: basePathIdentifier), resource: resource,
             failure: { (reason, data, response) in
                 Logger.warn(message: "API request to \(resource.path) has failed with reason \(reason)")
                 completion(nil)

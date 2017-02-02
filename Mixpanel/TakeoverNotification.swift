@@ -11,9 +11,9 @@ import Foundation
 class TakeoverNotification: InAppNotification {
 
     let buttons: [InAppButton]
-    let closeButtonColor: Int
+    let closeButtonColor: UInt
     var title: String? = nil
-    let titleColor: Int
+    let titleColor: UInt
     var shouldFadeImage: Bool = false
 
     override init?(JSONObject: [String: Any]?) {
@@ -37,7 +37,7 @@ class TakeoverNotification: InAppNotification {
             parsedButtons.append(button)
         }
 
-        guard let closeButtonColor = object["close_color"] as? Int else {
+        guard let closeButtonColor = object["close_color"] as? UInt else {
             Logger.error(message: "invalid notification close button color")
             return nil
         }
@@ -46,7 +46,7 @@ class TakeoverNotification: InAppNotification {
             self.title = title
         }
 
-        guard let titleColor = object["title_color"] as? Int else {
+        guard let titleColor = object["title_color"] as? UInt else {
             Logger.error(message: "invalid notification title color")
             return nil
         }

@@ -10,8 +10,8 @@ import Foundation
 
 class MiniNotification: InAppNotification {
     let callToActionURL: URL?
-    let imageTintColor: Int
-    let borderColor: Int
+    let imageTintColor: UInt
+    let borderColor: UInt
 
     override init?(JSONObject: [String: Any]?) {
         guard let object = JSONObject else {
@@ -19,12 +19,12 @@ class MiniNotification: InAppNotification {
             return nil
         }
 
-        guard let imageTintColor = object["image_tint_color"] as? Int else {
+        guard let imageTintColor = object["image_tint_color"] as? UInt else {
             Logger.error(message: "invalid notification image tint color")
             return nil
         }
 
-        guard let borderColor = object["border_color"] as? Int else {
+        guard let borderColor = object["border_color"] as? UInt else {
             Logger.error(message: "invalid notification border color")
             return nil
         }

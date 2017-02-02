@@ -89,6 +89,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         let tintedImage = origImage?.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
         closeButton.setImage(tintedImage, for: UIControlState.normal)
         closeButton.tintColor = UIColor(hex4: takeoverNotification.closeButtonColor)
+        closeButton.imageView?.contentMode = UIViewContentMode.scaleAspectFit
 
         if takeoverNotification.buttons.count >= 1 {
             setupButtonView(buttonView: firstButton, buttonModel: takeoverNotification.buttons[0], index: 0)
@@ -166,25 +167,6 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
 
     override var shouldAutorotate: Bool {
         return false
-    }
-
-    @IBAction func didPan(_ gesture: UIPanGestureRecognizer) {
-        switch gesture.state {
-        case UIGestureRecognizerState.began:
-            panStartPoint = imageView.layer.position
-        case UIGestureRecognizerState.changed:
-            let translation = gesture.translation(in: view)
-            imageView.layer.position = CGPoint(x: 0.3 * translation.x + panStartPoint.x, y: 0.3 * translation.y + panStartPoint.y)
-        case UIGestureRecognizerState.ended, UIGestureRecognizerState.cancelled:
-            let viewEnd = imageView.layer.position
-            let viewDistance = CGPoint(x: viewEnd.x - panStartPoint.x, y: viewEnd.y - panStartPoint.y)
-            let duration = sqrtf(Float(viewDistance.x * viewDistance.x) + Float(viewDistance.y * viewDistance.y)) / 500
-            UIView.animate(withDuration: TimeInterval(duration), animations: {
-                self.imageView.layer.position = self.panStartPoint
-                }, completion: nil)
-        default:
-            break
-        }
     }
 
 }

@@ -52,7 +52,7 @@ extension UIColor {
 
      - parameter hex4: hexadecimal value.
      */
-    public convenience init(hex4: Int) {
+    public convenience init(hex4: UInt) {
         let divisor = CGFloat(255)
         let alpha   = CGFloat((hex4 & 0xFF000000) >> 24) / divisor
         let red     = CGFloat((hex4 & 0x00FF0000) >> 16) / divisor

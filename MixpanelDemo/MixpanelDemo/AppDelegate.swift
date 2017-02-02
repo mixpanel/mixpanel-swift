@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
-        Mixpanel.initialize(token: "00a6a43c7b44ff09bdd3237f869917b8")
+        Mixpanel.initialize(token: "MIXPANEL_TOKEN")
         Mixpanel.mainInstance().loggingEnabled = true
         Mixpanel.mainInstance().flushInterval = 5
         let allTweaks: [TweakClusterType] = [MixpanelTweaks.floatTweak,

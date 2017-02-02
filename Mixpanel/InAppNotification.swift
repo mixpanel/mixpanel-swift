@@ -61,12 +61,10 @@ class InAppNotification {
         guard let imageURLString = object["image_url"] as? String,
             let escapedImageURLString = imageURLString
                 .addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed),
-            var imageURLComponents = URLComponents(string: escapedImageURLString) else {
+            let imageURLComponents = URLComponents(string: escapedImageURLString) else {
                 Logger.error(message: "invalid notification image url")
                 return nil
         }
-
-        //imageURLComponents.scheme = "http"
 
         guard let imageURLParsed = imageURLComponents.url else {
             Logger.error(message: "invalid notification image url")

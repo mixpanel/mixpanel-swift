@@ -20,11 +20,6 @@ class BaseNotificationViewController: UIViewController {
     var window: UIWindow?
     var panStartPoint: CGPoint!
 
-    enum Style: String {
-        case dark = "dark"
-        case light = "light"
-    }
-
     convenience init(notification: InAppNotification, nameOfClass: String) {
         self.init(nibName: nameOfClass, bundle: Bundle(for: type(of: self)))
         self.notification = notification

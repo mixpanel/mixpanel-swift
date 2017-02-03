@@ -17,26 +17,26 @@ class MixpanelNotificationTests: MixpanelBaseTests {
     var notificationDict = ["id": 3,
                             "message_id": 1,
                             "title": "title",
-                            "title_color": 12345,
+                            "title_color": UInt(12345),
                             "type": "takeover",
                             "body": "body",
-                            "body_color": 12345,
+                            "body_color": UInt(12345),
                             "image_url": "https://cdn.mxpnl.com/site_media/images/engage/inapp_messages/mini/icon_coin.png",
-                            "bg_color": 23456,
-                            "close_color": 34567,
+                            "bg_color": UInt(23456),
+                            "close_color": UInt(34567),
                             "buttons": [
                                 [
                                     "text": "Done",
-                                    "text_color": 34567,
-                                    "bg_color": 0,
-                                    "border_color": 34567,
+                                    "text_color": UInt(34567),
+                                    "bg_color": UInt(0),
+                                    "border_color": UInt(34567),
                                     "cta_url": "maps://"
                                 ],
                                 [
                                     "text": "Cancel",
-                                    "text_color": 23456,
-                                    "bg_color": 34567,
-                                    "border_color": 34567,
+                                    "text_color": UInt(23456),
+                                    "bg_color": UInt(34567),
+                                    "border_color": UInt(34567),
                                     "cta_url": "maps://"
                                 ]
                             ],
@@ -70,9 +70,9 @@ class MixpanelNotificationTests: MixpanelBaseTests {
         testDict = notificationDict
         testDict["buttons"] = [[
             "text": false,
-            "text_color": 34567,
-            "bg_color": 0,
-            "border_color": 34567,
+            "text_color": UInt(34567),
+            "bg_color": UInt(0),
+            "border_color": UInt(34567),
             "cta_url": "maps://"
         ]]
         XCTAssertNil(TakeoverNotification(JSONObject: testDict))

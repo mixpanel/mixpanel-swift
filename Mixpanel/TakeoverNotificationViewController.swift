@@ -79,8 +79,6 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         }
 
         viewMask.backgroundColor = UIColor(hex4: takeoverNotification.backgroundColor)
-        viewMask.clipsToBounds = true
-        viewMask.layer.cornerRadius = 6
 
         titleLabel.textColor = UIColor(hex4: takeoverNotification.titleColor)
         bodyLabel.textColor = UIColor(hex4: takeoverNotification.bodyColor)
@@ -113,10 +111,18 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
             fadingView.layer.mask = nil
         }
 
+        if UIDevice.current.userInterfaceIdiom == UIUserInterfaceIdiom.pad {
+            self.view.backgroundColor = UIColor(hex4: takeoverNotification.backgroundColor)
+            self.view.backgroundColor = self.view.backgroundColor?.withAlphaComponent(0.8)
+            viewMask.clipsToBounds = true
+            viewMask.layer.cornerRadius = 6
+        }
+
     }
 
     func setupButtonView(buttonView: UIButton, buttonModel: InAppButton, index: Int) {
         buttonView.setTitle(buttonModel.text, for: UIControlState.normal)
+        buttonView.titleLabel?.adjustsFontSizeToFitWidth = true
         buttonView.layer.cornerRadius = 5
         buttonView.layer.borderWidth = 2
         buttonView.setTitleColor(UIColor(hex4: buttonModel.textColor), for: UIControlState.normal)

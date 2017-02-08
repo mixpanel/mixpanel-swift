@@ -43,13 +43,13 @@
                     <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eYq-nb-bDI">
-                            <rect key="frame" x="35" y="90" width="250" height="225"/>
+                            <rect key="frame" x="35" y="90" width="250" height="224"/>
                             <subviews>
                                 <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MgN-Di-l2U" customClass="FadingView" customModule="Mixpanel" customModuleProvider="target">
-                                    <rect key="frame" x="0.0" y="0.0" width="250" height="225"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="250" height="224"/>
                                     <subviews>
                                         <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="yFj-Sb-VWy" userLabel="Notif Image View">
-                                            <rect key="frame" x="0.0" y="0.0" width="250" height="225"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="250" height="224"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </imageView>
                                     </subviews>
@@ -72,23 +72,23 @@
                             </constraints>
                         </view>
                         <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="252" verticalCompressionResistancePriority="760" text="Notification Title" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="h51-dK-9V2">
-                            <rect key="frame" x="30" y="295" width="260" height="31"/>
+                            <rect key="frame" x="30" y="294" width="260" height="31"/>
                             <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="22"/>
                             <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <nil key="highlightedColor"/>
                         </label>
                         <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="252" text="Notification body" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="h8M-cd-GVv">
-                            <rect key="frame" x="30" y="336" width="260" height="24"/>
+                            <rect key="frame" x="30" y="335" width="260" height="24"/>
                             <fontDescription key="fontDescription" name="AvenirNext-Medium" family="Avenir Next" pointSize="17"/>
                             <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <nil key="highlightedColor"/>
                             <size key="shadowOffset" width="0.0" height="1"/>
                         </label>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="faI-kr-vfs">
-                            <rect key="frame" x="35" y="390" width="250" height="40"/>
+                            <rect key="frame" x="35" y="389" width="250" height="41"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1LO-WG-GYz">
-                                    <rect key="frame" x="0.0" y="0.0" width="121" height="40"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="121" height="41"/>
                                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                     <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="18"/>
                                     <inset key="contentEdgeInsets" minX="15" minY="8" maxX="15" maxY="9"/>
@@ -101,10 +101,10 @@
                                     </state>
                                 </button>
                                 <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Xaf-4Z-Id4">
-                                    <rect key="frame" x="121" y="0.0" width="129" height="40"/>
+                                    <rect key="frame" x="121" y="0.0" width="129" height="41"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AbO-EA-1tQ">
-                                            <rect key="frame" x="8" y="0.0" width="121" height="40"/>
+                                            <rect key="frame" x="8" y="0.0" width="121" height="41"/>
                                             <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                             <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="18"/>
                                             <inset key="contentEdgeInsets" minX="15" minY="8" maxX="15" maxY="9"/>
@@ -136,7 +136,7 @@
                                 <constraint firstItem="1LO-WG-GYz" firstAttribute="top" secondItem="faI-kr-vfs" secondAttribute="top" id="Zb1-uY-dAz"/>
                                 <constraint firstAttribute="bottom" secondItem="1LO-WG-GYz" secondAttribute="bottom" id="bAv-w0-aqb"/>
                                 <constraint firstAttribute="trailing" secondItem="Xaf-4Z-Id4" secondAttribute="trailing" id="f8S-wW-TJE"/>
-                                <constraint firstAttribute="height" constant="40" id="lQK-tN-2HH"/>
+                                <constraint firstAttribute="height" constant="41" id="lQK-tN-2HH"/>
                                 <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="250" id="yLR-7A-bWT"/>
                             </constraints>
                         </view>

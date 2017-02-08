@@ -134,10 +134,11 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
 
     override func show(animated: Bool) {
         window = UIWindow(frame: CGRect(x: 0,
-                                        y: UIScreen.main.bounds.size.height,
+                                        y: 0,
                                         width: UIScreen.main.bounds.size.width,
                                         height: UIScreen.main.bounds.size.height))
         if let window = window {
+            window.alpha = 0
             window.windowLevel = UIWindowLevelAlert
             window.rootViewController = self
             window.isHidden = false
@@ -145,15 +146,15 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
 
         let duration = animated ? 0.25 : 0
         UIView.animate(withDuration: duration, animations: {
-            self.window?.frame.origin.y -= UIScreen.main.bounds.size.height
+            self.window?.alpha = 1
             }, completion: { _ in
         })
     }
 
     override func hide(animated: Bool, completion: @escaping () -> Void) {
-        let duration = animated ? 0.5 : 0
+        let duration = animated ? 0.25 : 0
         UIView.animate(withDuration: duration, animations: {
-            self.window?.frame.origin.y += UIScreen.main.bounds.size.height
+            self.window?.alpha = 0
             }, completion: { _ in
                 self.window?.isHidden = true
                 self.window?.removeFromSuperview()

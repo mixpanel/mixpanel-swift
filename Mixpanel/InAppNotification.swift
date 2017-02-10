@@ -124,7 +124,9 @@ struct InAppNotification {
         payload[PayloadKey.title] = title as AnyObject
         payload[PayloadKey.body] = body as AnyObject
         payload[PayloadKey.callToAction] = callToAction as AnyObject
-        payload[PayloadKey.callToActionURL] = callToActionURL?.absoluteString as AnyObject
+        if let urlString = callToActionURL?.absoluteString {
+            payload[PayloadKey.callToActionURL] = urlString as AnyObject
+        }
         return payload
     }
 }

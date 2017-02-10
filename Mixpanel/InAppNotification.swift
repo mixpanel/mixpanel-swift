@@ -9,6 +9,18 @@
 import Foundation
 
 struct InAppNotification {
+    enum PayloadKey {
+        static let ID = "id"
+        static let messageID = "message_id"
+        static let type = "type"
+        static let style = "style"
+        static let title = "title"
+        static let body = "body"
+        static let callToAction = "cta"
+        static let callToActionURL = "cta_url"
+        static let imageURLString = "image_url"
+    }
+    
     let ID: Int
     let messageID: Int
     let type: String
@@ -34,47 +46,47 @@ struct InAppNotification {
             return nil
         }
 
-        guard let ID = object["id"] as? Int, ID > 0 else {
+        guard let ID = object[PayloadKey.ID] as? Int, ID > 0 else {
             Logger.error(message: "invalid notification id")
             return nil
         }
 
-        guard let messageID = object["message_id"] as? Int, messageID > 0 else {
+        guard let messageID = object[PayloadKey.messageID] as? Int, messageID > 0 else {
             Logger.error(message: "invalid notification message id")
             return nil
         }
 
-        guard let type = object["type"] as? String else {
+        guard let type = object[PayloadKey.type] as? String else {
             Logger.error(message: "invalid notification type")
             return nil
         }
 
-        guard let style = object["style"] as? String else {
+        guard let style = object[PayloadKey.style] as? String else {
             Logger.error(message: "invalid notification style")
             return nil
         }
 
-        guard let title = object["title"] as? String, !title.isEmpty else {
+        guard let title = object[PayloadKey.title] as? String, !title.isEmpty else {
             Logger.error(message: "invalid notification title")
             return nil
         }
 
-        guard let body = object["body"] as? String, !body.isEmpty else {
+        guard let body = object[PayloadKey.body] as? String, !body.isEmpty else {
             Logger.error(message: "invalid notification body")
             return nil
         }
 
-        guard let callToAction = object["cta"] as? String else {
+        guard let callToAction = object[PayloadKey.callToAction] as? String else {
             Logger.error(message: "invalid notification cta")
             return nil
         }
 
         var callToActionURL: URL?
-        if let URLString = object["cta_url"] as? String {
+        if let URLString = object[PayloadKey.callToActionURL] as? String {
             callToActionURL = URL(string: URLString)
         }
 
-        guard let imageURLString = object["image_url"] as? String,
+        guard let imageURLString = object[PayloadKey.imageURLString] as? String,
             let escapedImageURLString = imageURLString
                 .addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed),
             var imageURLComponents = URLComponents(string: escapedImageURLString) else {
@@ -104,15 +116,15 @@ struct InAppNotification {
     
     func payload() -> [String: AnyObject] {
         var payload = [String: AnyObject]()
-        payload["ID"] = ID as AnyObject
-        payload["messageID"] = messageID as AnyObject
-        payload["type"] = type as AnyObject
-        payload["style"] = style as AnyObject
-        payload["imageURL"] = imageURL as AnyObject
-        payload["title"] = title as AnyObject
-        payload["body"] = body as AnyObject
-        payload["callToAction"] = callToAction as AnyObject
-        payload["callToActionURL"] = callToActionURL as AnyObject
+        payload[PayloadKey.ID] = ID as AnyObject
+        payload[PayloadKey.messageID] = messageID as AnyObject
+        payload[PayloadKey.type] = type as AnyObject
+        payload[PayloadKey.style] = style as AnyObject
+        payload[PayloadKey.imageURLString] = imageURL.absoluteString as AnyObject
+        payload[PayloadKey.title] = title as AnyObject
+        payload[PayloadKey.body] = body as AnyObject
+        payload[PayloadKey.callToAction] = callToAction as AnyObject
+        payload[PayloadKey.callToActionURL] = callToActionURL?.absoluteString as AnyObject
         return payload
     }
 }

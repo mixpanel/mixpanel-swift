@@ -101,6 +101,20 @@ struct InAppNotification {
         self.callToAction       = callToAction
         self.callToActionURL    = callToActionURL
     }
+    
+    func payload() -> [String: AnyObject] {
+        var payload = [String: AnyObject]()
+        payload["ID"] = ID as AnyObject
+        payload["messageID"] = messageID as AnyObject
+        payload["type"] = type as AnyObject
+        payload["style"] = style as AnyObject
+        payload["imageURL"] = imageURL as AnyObject
+        payload["title"] = title as AnyObject
+        payload["body"] = body as AnyObject
+        payload["callToAction"] = callToAction as AnyObject
+        payload["callToActionURL"] = callToActionURL as AnyObject
+        return payload
+    }
 }
 
 extension String {

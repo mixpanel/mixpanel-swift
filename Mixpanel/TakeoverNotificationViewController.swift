@@ -54,6 +54,9 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
 
         if let notificationImage = notification.image, let image = UIImage(data: notificationImage, scale: 2) {
             imageView.image = image
+            if let width = imageView.image?.size.width, width / UIScreen.main.bounds.width <= 0.6 {
+                imageView.contentMode = UIViewContentMode.center
+            }
         } else {
             Logger.error(message: "notification image failed to load from data")
         }

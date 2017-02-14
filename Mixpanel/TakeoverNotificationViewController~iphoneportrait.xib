@@ -49,7 +49,7 @@
                                 <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MgN-Di-l2U" customClass="FadingView" customModule="Mixpanel" customModuleProvider="target">
                                     <rect key="frame" x="0.0" y="0.0" width="344" height="476"/>
                                     <subviews>
-                                        <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="yFj-Sb-VWy" userLabel="Notif Image View">
+                                        <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" image="placeholder-image.png" translatesAutoresizingMaskIntoConstraints="NO" id="yFj-Sb-VWy" userLabel="Notif Image View">
                                             <rect key="frame" x="0.0" y="0.0" width="344" height="476"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </imageView>
@@ -57,6 +57,7 @@
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
                                         <constraint firstItem="yFj-Sb-VWy" firstAttribute="leading" secondItem="MgN-Di-l2U" secondAttribute="leading" id="5yJ-O7-EMU"/>
+                                        <constraint firstItem="yFj-Sb-VWy" firstAttribute="centerX" secondItem="MgN-Di-l2U" secondAttribute="centerX" id="GbC-pv-T70"/>
                                         <constraint firstItem="yFj-Sb-VWy" firstAttribute="top" secondItem="MgN-Di-l2U" secondAttribute="top" id="H6Y-BF-qHJ"/>
                                         <constraint firstAttribute="trailing" secondItem="yFj-Sb-VWy" secondAttribute="trailing" id="Nug-Of-ZpQ"/>
                                         <constraint firstAttribute="bottom" secondItem="yFj-Sb-VWy" secondAttribute="bottom" id="QeX-3h-HXP"/>
@@ -199,5 +200,6 @@
     </objects>
     <resources>
         <image name="MPCloseButton.png" width="25" height="25"/>
+        <image name="placeholder-image.png" width="800" height="600"/>
     </resources>
 </document>

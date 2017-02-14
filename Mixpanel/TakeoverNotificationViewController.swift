@@ -126,6 +126,8 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         buttonView.layer.cornerRadius = 5
         buttonView.layer.borderWidth = 2
         buttonView.setTitleColor(UIColor(hex4: buttonModel.textColor), for: UIControlState.normal)
+        buttonView.setTitleColor(UIColor(hex4: buttonModel.textColor), for: UIControlState.highlighted)
+        buttonView.setTitleColor(UIColor(hex4: buttonModel.textColor), for: UIControlState.selected)
         buttonView.layer.borderColor = UIColor(hex4: buttonModel.borderColor).cgColor
         buttonView.backgroundColor = UIColor(hex4: buttonModel.backgroundColor)
         buttonView.addTarget(self, action: #selector(buttonTapped(_:)), for: UIControlEvents.touchUpInside)
@@ -194,5 +196,32 @@ class FadingView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         gradientMask.frame = bounds
+    }
+}
+
+class InAppButtonView: UIButton {
+    var origColor: UIColor?
+    var wasCalled = false
+    let overlayColor = UIColor(hex: 0x868686, alpha: 0.2)
+    override var isHighlighted: Bool {
+        didSet {
+            switch isHighlighted {
+            case true:
+                if !wasCalled {
+                    print("lol")
+                    origColor = backgroundColor
+                    if origColor == UIColor(red: 0, green: 0, blue: 0, alpha: 0) {
+                        backgroundColor = overlayColor
+                    } else {
+                        backgroundColor = backgroundColor?.add(overlay: overlayColor)
+                    }
+                    wasCalled = true
+                }
+            case false:
+                print("haha")
+                backgroundColor = origColor
+                wasCalled = false
+            }
+        }
     }
 }

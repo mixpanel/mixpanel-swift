@@ -86,10 +86,10 @@
                             <size key="shadowOffset" width="0.0" height="1"/>
                         </label>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="faI-kr-vfs">
-                            <rect key="frame" x="38.333333333333343" y="641" width="337.33333333333337" height="45"/>
+                            <rect key="frame" x="36" y="641" width="342" height="45"/>
                             <subviews>
-                                <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1LO-WG-GYz">
-                                    <rect key="frame" x="0.0" y="0.0" width="163.66666666666666" height="45"/>
+                                <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1LO-WG-GYz" customClass="InAppButtonView" customModule="Mixpanel" customModuleProvider="target">
+                                    <rect key="frame" x="0.3333333333333286" y="0.0" width="163.66666666666669" height="45"/>
                                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                     <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="18"/>
                                     <inset key="contentEdgeInsets" minX="15" minY="8" maxX="15" maxY="9"/>
@@ -102,10 +102,10 @@
                                     </state>
                                 </button>
                                 <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Xaf-4Z-Id4">
-                                    <rect key="frame" x="163.66666666666666" y="0.0" width="173.66666666666671" height="45"/>
+                                    <rect key="frame" x="164" y="0.0" width="178.66666666666669" height="45"/>
                                     <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AbO-EA-1tQ">
-                                            <rect key="frame" x="10" y="0.0" width="163.66666666666669" height="45"/>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AbO-EA-1tQ" customClass="InAppButtonView" customModule="Mixpanel" customModuleProvider="target">
+                                            <rect key="frame" x="15" y="0.0" width="163.66666666666669" height="45"/>
                                             <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                             <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="18"/>
                                             <inset key="contentEdgeInsets" minX="15" minY="8" maxX="15" maxY="9"/>
@@ -122,7 +122,7 @@
                                     <constraints>
                                         <constraint firstItem="AbO-EA-1tQ" firstAttribute="top" secondItem="Xaf-4Z-Id4" secondAttribute="top" id="4az-Ud-RmO"/>
                                         <constraint firstAttribute="trailing" secondItem="AbO-EA-1tQ" secondAttribute="trailing" id="CWM-U8-9Cb"/>
-                                        <constraint firstItem="AbO-EA-1tQ" firstAttribute="leading" secondItem="Xaf-4Z-Id4" secondAttribute="leading" constant="10" id="paE-0i-VgE"/>
+                                        <constraint firstItem="AbO-EA-1tQ" firstAttribute="leading" secondItem="Xaf-4Z-Id4" secondAttribute="leading" constant="15" id="paE-0i-VgE"/>
                                         <constraint firstAttribute="bottom" secondItem="AbO-EA-1tQ" secondAttribute="bottom" id="shE-Pa-ngq"/>
                                     </constraints>
                                 </view>

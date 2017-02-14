@@ -217,7 +217,6 @@ class InAppButtonView: UIButton {
                     wasCalled = true
                 }
             case false:
-                print("haha")
                 backgroundColor = origColor
                 wasCalled = false
             }

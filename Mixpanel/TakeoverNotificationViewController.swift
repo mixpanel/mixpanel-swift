@@ -208,7 +208,6 @@ class InAppButtonView: UIButton {
             switch isHighlighted {
             case true:
                 if !wasCalled {
-                    print("lol")
                     origColor = backgroundColor
                     if origColor == UIColor(red: 0, green: 0, blue: 0, alpha: 0) {
                         backgroundColor = overlayColor

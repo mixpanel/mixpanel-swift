@@ -101,6 +101,9 @@
 		E189D8F81D552324007F3F29 /* DecideRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F71D552324007F3F29 /* DecideRequest.swift */; };
 		E189D8FD1D5A6985007F3F29 /* InAppNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */; };
 		E19087BF1E53985300023FCC /* placeholder-image.png in Resources */ = {isa = PBXBuildFile; fileRef = E19087BE1E53985300023FCC /* placeholder-image.png */; };
+		E19087C41E53DCC200023FCC /* TakeoverNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E118E9FD1E37DE3B00223C47 /* TakeoverNotification.swift */; };
+		E19087C51E53DCC500023FCC /* MiniNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E118EA011E37F3A700223C47 /* MiniNotification.swift */; };
+		E19087C61E53DCCD00023FCC /* InAppButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E118E9FF1E37E28400223C47 /* InAppButton.swift */; };
 		E19312671D5A7848007CE1E9 /* InAppNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312661D5A7848007CE1E9 /* InAppNotification.swift */; };
 		E193126B1D5B9D1E007CE1E9 /* MiniNotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */; };
 		E193126C1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E193126A1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib */; };
@@ -795,6 +798,7 @@
 				E19D127E1D9AF6EC00A8016D /* CGAffineTransformToNSDictionary.swift in Sources */,
 				E19D128C1D9AF6FA00A8016D /* SHA256.swift in Sources */,
 				E12782BE1D4AB5CB0025FB05 /* Mixpanel.swift in Sources */,
+				E19087C41E53DCC200023FCC /* TakeoverNotification.swift in Sources */,
 				E1CBF5051DBEBC39009A46EC /* ClearMessage.swift in Sources */,
 				E12782BF1D4AB5CB0025FB05 /* MixpanelInstance.swift in Sources */,
 				E19D12751D9AF6E700A8016D /* CodelessBinding.swift in Sources */,
@@ -808,6 +812,7 @@
 				E19D127A1D9AF6EC00A8016D /* UIEdgeInsetsToNSDictionary.swift in Sources */,
 				E1CBF4FF1DBEBC39009A46EC /* DeviceInfoMessage.swift in Sources */,
 				E1CBF4F71DBEBBE2009A46EC /* Tweak.swift in Sources */,
+				E19087C61E53DCCD00023FCC /* InAppButton.swift in Sources */,
 				E1CBF4F81DBEBBE2009A46EC /* TweakStore.swift in Sources */,
 				E19D126E1D9AF6E300A8016D /* ObjectFilter.swift in Sources */,
 				E19D12631D9AF6CF00A8016D /* Swizzle.swift in Sources */,
@@ -852,6 +857,7 @@
 				E19D127C1D9AF6EC00A8016D /* CGRectToNSDictionary.swift in Sources */,
 				E1CBF4F41DBEBBE2009A46EC /* AnyTweak.swift in Sources */,
 				E19D12801D9AF6EC00A8016D /* NSAttributedStringToNSDictionary.swift in Sources */,
+				E19087C51E53DCC500023FCC /* MiniNotification.swift in Sources */,
 				E12782C91D4AB5CB0025FB05 /* AutomaticProperties.swift in Sources */,
 				E19D12611D9AF6C900A8016D /* DecideRequest.swift in Sources */,
 				E1CBF4FE1DBEBC39009A46EC /* BaseWebSocketMessage.swift in Sources */,

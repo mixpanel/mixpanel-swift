@@ -49,6 +49,7 @@ class AutomaticProperties {
         p["$ios_device_model"]  = AutomaticProperties.deviceModel()
         p["$ios_version"]       = UIDevice.current.systemVersion
         p["$ios_lib_version"]   = AutomaticProperties.libVersion()
+        p["$swift_lib_version"] = AutomaticProperties.libVersion()
 
         return p
     }()

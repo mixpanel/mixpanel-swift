@@ -10,16 +10,25 @@ import UIKit
 
 class TakeoverNotificationViewController: BaseNotificationViewController {
 
+    var takeoverNotification: TakeoverNotification! {
+        get {
+            return super.notification as! TakeoverNotification
+        }
+    }
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var bodyLabel: UILabel!
-    @IBOutlet weak var okButton: UIButton!
+    @IBOutlet weak var firstButton: UIButton!
+    @IBOutlet weak var secondButton: UIButton!
+    @IBOutlet weak var secondButtonContainer: UIView!
     @IBOutlet weak var closeButton: UIButton!
     @IBOutlet weak var backgroundImageView: UIImageView!
     @IBOutlet weak var viewMask: UIView!
 
+    @IBOutlet weak var fadingView: FadingView!
+    @IBOutlet weak var bottomImageSpacing: NSLayoutConstraint!
 
-    convenience init(notification: InAppNotification) {
+    convenience init(notification: TakeoverNotification) {
         self.init(notification: notification, nameOfClass: TakeoverNotificationViewController.notificationXibToLoad())
     }
 
@@ -45,43 +54,97 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
 
         if let notificationImage = notification.image, let image = UIImage(data: notificationImage, scale: 2) {
             imageView.image = image
+            if let width = imageView.image?.size.width, width / UIScreen.main.bounds.width <= 0.6, let height = imageView.image?.size.height,
+                height / UIScreen.main.bounds.height <= 0.3 {
+                imageView.contentMode = UIViewContentMode.center
+            }
         } else {
             Logger.error(message: "notification image failed to load from data")
         }
 
-        titleLabel.text = notification.title
-        bodyLabel.text = notification.body
-
-        if !notification.callToAction.isEmpty {
-            okButton.setTitle(notification.callToAction, for: UIControlState.normal)
-        }
-
-        okButton.layer.cornerRadius = 5
-        okButton.layer.borderWidth = 2
-
-        if notification.style == Style.light.rawValue {
-            viewMask.backgroundColor = InAppNotificationsConstants.takeoverLightBGColor
-            titleLabel.textColor = InAppNotificationsConstants.takeoverLightTitleColor
-            bodyLabel.textColor = InAppNotificationsConstants.takeoverLightBodyColor
-            okButton.setTitleColor(InAppNotificationsConstants.takeoverLightBodyColor, for: UIControlState.normal)
-            okButton.layer.borderColor = InAppNotificationsConstants.takeoverOKButtonBorderColor.cgColor
-            let origImage = closeButton.image(for: UIControlState.normal)
-            let tintedImage = origImage?.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
-            closeButton.setImage(tintedImage, for: UIControlState.normal)
-            closeButton.tintColor = InAppNotificationsConstants.takeoverCloseButtonColor
+        if takeoverNotification.title == nil || takeoverNotification.body == nil {
+            NSLayoutConstraint(item: titleLabel,
+                               attribute: NSLayoutAttribute.height,
+                               relatedBy: NSLayoutRelation.equal,
+                               toItem: nil,
+                               attribute: NSLayoutAttribute.notAnAttribute,
+                               multiplier: 1,
+                               constant: 0).isActive = true
+            NSLayoutConstraint(item: bodyLabel,
+                               attribute: NSLayoutAttribute.height,
+                               relatedBy: NSLayoutRelation.equal,
+                               toItem: nil,
+                               attribute: NSLayoutAttribute.notAnAttribute,
+                               multiplier: 1,
+                               constant: 0).isActive = true
         } else {
-            okButton.layer.borderColor = UIColor.white.cgColor
+            titleLabel.text = takeoverNotification.title
+            bodyLabel.text = takeoverNotification.body
         }
-        viewMask.clipsToBounds = true
-        viewMask.layer.cornerRadius = 6
+
+        viewMask.backgroundColor = UIColor(hex4: takeoverNotification.backgroundColor)
+
+        titleLabel.textColor = UIColor(hex4: takeoverNotification.titleColor)
+        bodyLabel.textColor = UIColor(hex4: takeoverNotification.bodyColor)
+
+        let origImage = closeButton.image(for: UIControlState.normal)
+        let tintedImage = origImage?.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
+        closeButton.setImage(tintedImage, for: UIControlState.normal)
+        closeButton.tintColor = UIColor(hex4: takeoverNotification.closeButtonColor)
+        closeButton.imageView?.contentMode = UIViewContentMode.scaleAspectFit
+
+        if takeoverNotification.buttons.count >= 1 {
+            setupButtonView(buttonView: firstButton, buttonModel: takeoverNotification.buttons[0], index: 0)
+            if takeoverNotification.buttons.count == 2 {
+                setupButtonView(buttonView: secondButton, buttonModel: takeoverNotification.buttons[1], index: 1)
+            } else {
+                NSLayoutConstraint(item: secondButtonContainer,
+                                   attribute: NSLayoutAttribute.width,
+                                   relatedBy: NSLayoutRelation.equal,
+                                   toItem: nil,
+                                   attribute: NSLayoutAttribute.notAnAttribute,
+                                   multiplier: 1,
+                                   constant: 0).isActive = true
+            }
+        }
+
+        if !takeoverNotification.shouldFadeImage {
+            if bottomImageSpacing != nil {
+                bottomImageSpacing.constant = 30
+            }
+            fadingView.layer.mask = nil
+        }
+
+        if UIDevice.current.userInterfaceIdiom == UIUserInterfaceIdiom.pad {
+            self.view.backgroundColor = UIColor(hex4: takeoverNotification.backgroundColor)
+            self.view.backgroundColor = self.view.backgroundColor?.withAlphaComponent(0.8)
+            viewMask.clipsToBounds = true
+            viewMask.layer.cornerRadius = 6
+        }
+
+    }
+
+    func setupButtonView(buttonView: UIButton, buttonModel: InAppButton, index: Int) {
+        buttonView.setTitle(buttonModel.text, for: UIControlState.normal)
+        buttonView.titleLabel?.adjustsFontSizeToFitWidth = true
+        buttonView.layer.cornerRadius = 5
+        buttonView.layer.borderWidth = 2
+        buttonView.setTitleColor(UIColor(hex4: buttonModel.textColor), for: UIControlState.normal)
+        buttonView.setTitleColor(UIColor(hex4: buttonModel.textColor), for: UIControlState.highlighted)
+        buttonView.setTitleColor(UIColor(hex4: buttonModel.textColor), for: UIControlState.selected)
+        buttonView.layer.borderColor = UIColor(hex4: buttonModel.borderColor).cgColor
+        buttonView.backgroundColor = UIColor(hex4: buttonModel.backgroundColor)
+        buttonView.addTarget(self, action: #selector(buttonTapped(_:)), for: UIControlEvents.touchUpInside)
+        buttonView.tag = index
     }
 
     override func show(animated: Bool) {
         window = UIWindow(frame: CGRect(x: 0,
-                                        y: UIScreen.main.bounds.size.height,
+                                        y: 0,
                                         width: UIScreen.main.bounds.size.width,
                                         height: UIScreen.main.bounds.size.height))
         if let window = window {
+            window.alpha = 0
             window.windowLevel = UIWindowLevelAlert
             window.rootViewController = self
             window.isHidden = false
@@ -89,15 +152,15 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
 
         let duration = animated ? 0.25 : 0
         UIView.animate(withDuration: duration, animations: {
-            self.window?.frame.origin.y -= UIScreen.main.bounds.size.height
+            self.window?.alpha = 1
             }, completion: { _ in
         })
     }
 
     override func hide(animated: Bool, completion: @escaping () -> Void) {
-        let duration = animated ? 0.5 : 0
+        let duration = animated ? 0.25 : 0
         UIView.animate(withDuration: duration, animations: {
-            self.window?.frame.origin.y += UIScreen.main.bounds.size.height
+            self.window?.alpha = 0
             }, completion: { _ in
                 self.window?.isHidden = true
                 self.window?.removeFromSuperview()
@@ -106,35 +169,17 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         })
     }
 
-    @IBAction func tappedOk(_ sender: AnyObject) {
-        delegate?.notificationShouldDismiss(controller: self, status: true)
+    func buttonTapped(_ sender: AnyObject) {
+        delegate?.notificationShouldDismiss(controller: self, callToActionURL: takeoverNotification.buttons[sender.tag].callToActionURL)
     }
 
+
     @IBAction func tappedClose(_ sender: AnyObject) {
-        delegate?.notificationShouldDismiss(controller: self, status: false)
+        delegate?.notificationShouldDismiss(controller: self, callToActionURL: nil)
     }
 
     override var shouldAutorotate: Bool {
         return false
-    }
-
-    @IBAction func didPan(_ gesture: UIPanGestureRecognizer) {
-        switch gesture.state {
-        case UIGestureRecognizerState.began:
-            panStartPoint = imageView.layer.position
-        case UIGestureRecognizerState.changed:
-            let translation = gesture.translation(in: view)
-            imageView.layer.position = CGPoint(x: 0.3 * translation.x + panStartPoint.x, y: 0.3 * translation.y + panStartPoint.y)
-        case UIGestureRecognizerState.ended, UIGestureRecognizerState.cancelled:
-            let viewEnd = imageView.layer.position
-            let viewDistance = CGPoint(x: viewEnd.x - panStartPoint.x, y: viewEnd.y - panStartPoint.y)
-            let duration = sqrtf(Float(viewDistance.x * viewDistance.x) + Float(viewDistance.y * viewDistance.y)) / 500
-            UIView.animate(withDuration: TimeInterval(duration), animations: {
-                self.imageView.layer.position = self.panStartPoint
-                }, completion: nil)
-        default:
-            break
-        }
     }
 
 }
@@ -155,5 +200,30 @@ class FadingView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         gradientMask.frame = bounds
+    }
+}
+
+class InAppButtonView: UIButton {
+    var origColor: UIColor?
+    var wasCalled = false
+    let overlayColor = UIColor(hex: 0x868686, alpha: 0.2)
+    override var isHighlighted: Bool {
+        didSet {
+            switch isHighlighted {
+            case true:
+                if !wasCalled {
+                    origColor = backgroundColor
+                    if origColor == UIColor(red: 0, green: 0, blue: 0, alpha: 0) {
+                        backgroundColor = overlayColor
+                    } else {
+                        backgroundColor = backgroundColor?.add(overlay: overlayColor)
+                    }
+                    wasCalled = true
+                }
+            case false:
+                backgroundColor = origColor
+                wasCalled = false
+            }
+        }
     }
 }

@@ -8,24 +8,21 @@
 
 import Foundation
 
-struct InAppNotification {
+class InAppNotification {
     enum PayloadKey {
         static let ID = "id"
         static let messageID = "message_id"
         static let type = "type"
-        static let style = "style"
-        static let title = "title"
         static let body = "body"
-        static let callToAction = "cta"
-        static let callToActionURL = "cta_url"
         static let imageURLString = "image_url"
+        static let extras = "extras"
+        static let backgroundColor = "bg_color"
+        static let bodyColor = "body_color"
     }
     
     let ID: Int
     let messageID: Int
-    let type: String
-    let style: String
-    let imageURL: URL
+    var imageURL: URL
     lazy var image: Data? = {
         var data: Data?
         do {
@@ -35,10 +32,11 @@ struct InAppNotification {
         }
         return data
     }()
-    let title: String
-    let body: String
-    let callToAction: String
-    let callToActionURL: URL?
+    let extras: [String: Any]
+    let backgroundColor: UInt
+    let bodyColor: UInt
+    let type: String
+    var body: String? = nil
 
     init?(JSONObject: [String: Any]?) {
         guard let object = JSONObject else {
@@ -61,41 +59,27 @@ struct InAppNotification {
             return nil
         }
 
-        guard let style = object[PayloadKey.style] as? String else {
-            Logger.error(message: "invalid notification style")
+        guard let extras = object[PayloadKey.extras] as? [String: Any] else {
+            Logger.error(message: "invalid notification extra section")
             return nil
         }
 
-        guard let title = object[PayloadKey.title] as? String, !title.isEmpty else {
-            Logger.error(message: "invalid notification title")
+        guard let backgroundColor = object[PayloadKey.backgroundColor] as? UInt else {
+            Logger.error(message: "invalid notification bg_color")
             return nil
         }
 
-        guard let body = object[PayloadKey.body] as? String, !body.isEmpty else {
-            Logger.error(message: "invalid notification body")
+        guard let bodyColor = object[PayloadKey.bodyColor] as? UInt else {
+            Logger.error(message: "invalid notification body_color")
             return nil
-        }
-
-        guard let callToAction = object[PayloadKey.callToAction] as? String else {
-            Logger.error(message: "invalid notification cta")
-            return nil
-        }
-
-        var callToActionURL: URL?
-        if let URLString = object[PayloadKey.callToActionURL] as? String {
-            callToActionURL = URL(string: URLString)
         }
 
         guard let imageURLString = object[PayloadKey.imageURLString] as? String,
             let escapedImageURLString = imageURLString
                 .addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed),
-            var imageURLComponents = URLComponents(string: escapedImageURLString) else {
+            let imageURLComponents = URLComponents(string: escapedImageURLString) else {
                 Logger.error(message: "invalid notification image url")
                 return nil
-        }
-
-        if type == InAppType.takeover.rawValue {
-            imageURLComponents.path = imageURLComponents.path.appendSuffixBeforeExtension(suffix: "@2x")
         }
 
         guard let imageURLParsed = imageURLComponents.url else {
@@ -103,47 +87,30 @@ struct InAppNotification {
             return nil
         }
 
+        if let body = object[PayloadKey.body] as? String, !body.isEmpty {
+            self.body = body
+        }
+
         self.ID                 = ID
         self.messageID          = messageID
-        self.type               = type
-        self.style              = style
         self.imageURL           = imageURLParsed
-        self.title              = title
-        self.body               = body
-        self.callToAction       = callToAction
-        self.callToActionURL    = callToActionURL
+        self.extras             = extras
+        self.backgroundColor    = backgroundColor
+        self.bodyColor          = bodyColor
+        self.type               = type
     }
     
     func payload() -> [String: AnyObject] {
         var payload = [String: AnyObject]()
         payload[PayloadKey.ID] = ID as AnyObject
         payload[PayloadKey.messageID] = messageID as AnyObject
-        payload[PayloadKey.type] = type as AnyObject
-        payload[PayloadKey.style] = style as AnyObject
         payload[PayloadKey.imageURLString] = imageURL.absoluteString as AnyObject
-        payload[PayloadKey.title] = title as AnyObject
+        payload[PayloadKey.extras] = extras as AnyObject
+        payload[PayloadKey.backgroundColor] = backgroundColor as AnyObject
+        payload[PayloadKey.bodyColor] = bodyColor as AnyObject
+        payload[PayloadKey.type] = type as AnyObject
         payload[PayloadKey.body] = body as AnyObject
-        payload[PayloadKey.callToAction] = callToAction as AnyObject
-        if let urlString = callToActionURL?.absoluteString {
-            payload[PayloadKey.callToActionURL] = urlString as AnyObject
-        }
+        
         return payload
-    }
-}
-
-extension String {
-    func appendSuffixBeforeExtension(suffix: String) -> String {
-        var newString = suffix
-        do {
-            let regex = try NSRegularExpression(pattern: "(\\.\\w+$)", options: [])
-            newString = regex.stringByReplacingMatches(in: self,
-                                                       options: [],
-                                                       range: NSRange(location: 0,
-                                                                      length: self.characters.count),
-                                                       withTemplate: "\(suffix)$1")
-        } catch {
-            Logger.error(message: "cannot add suffix to URL string")
-        }
-        return newString
     }
 }

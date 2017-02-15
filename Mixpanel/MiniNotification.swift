@@ -14,6 +14,7 @@ class MiniNotification: InAppNotification {
         static let borderColor = "border_color"
         static let callToActionURL = "cta_url"
     }
+
     let callToActionURL: URL?
     let imageTintColor: UInt
     let borderColor: UInt
@@ -28,7 +29,7 @@ class MiniNotification: InAppNotification {
             Logger.error(message: "invalid notification image tint color")
             return nil
         }
-
+    
         guard let borderColor = object[PayloadKey.borderColor] as? UInt else {
             Logger.error(message: "invalid notification border color")
             return nil

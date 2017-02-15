@@ -1000,7 +1000,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     open func fetchNotificationPayload(completion: @escaping ([String: AnyObject]?) -> Void){
         checkForNotifications { (notifications) in
             if let notifications = notifications, !notifications.isEmpty {
-                if var notification = notifications.first {
+                if let notification = notifications.first {
                     completion(notification.payload())
                     self.notificationDidShow(notification)
                 }

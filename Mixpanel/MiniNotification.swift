@@ -29,7 +29,7 @@ class MiniNotification: InAppNotification {
             Logger.error(message: "invalid notification image tint color")
             return nil
         }
-    
+
         guard let borderColor = object[PayloadKey.borderColor] as? UInt else {
             Logger.error(message: "invalid notification border color")
             return nil

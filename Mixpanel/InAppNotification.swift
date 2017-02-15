@@ -54,11 +54,6 @@ class InAppNotification {
             return nil
         }
 
-        guard let type = object[PayloadKey.type] as? String else {
-            Logger.error(message: "invalid notification type")
-            return nil
-        }
-
         guard let extras = object[PayloadKey.extras] as? [String: Any] else {
             Logger.error(message: "invalid notification extra section")
             return nil
@@ -84,6 +79,11 @@ class InAppNotification {
 
         guard let imageURLParsed = imageURLComponents.url else {
             Logger.error(message: "invalid notification image url")
+            return nil
+        }
+        
+        guard let type = object[PayloadKey.type] as? String else {
+            Logger.error(message: "invalid notification type")
             return nil
         }
 

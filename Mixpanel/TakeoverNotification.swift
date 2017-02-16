@@ -11,7 +11,7 @@ import Foundation
 class TakeoverNotification: InAppNotification {
     enum PayloadKey {
         static let title = "title"
-        static let titleColor = "titleColor"
+        static let titleColor = "title_color"
         static let callToAction = "cta"
         static let callToActionURL = "cta_url"
         static let style = "style"

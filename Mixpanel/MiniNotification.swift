@@ -9,6 +9,12 @@
 import Foundation
 
 class MiniNotification: InAppNotification {
+    enum PayloadKey {
+        static let imageTintColor = "image_tint_color"
+        static let borderColor = "border_color"
+        static let callToActionURL = "cta_url"
+    }
+
     let callToActionURL: URL?
     let imageTintColor: UInt
     let borderColor: UInt
@@ -19,18 +25,18 @@ class MiniNotification: InAppNotification {
             return nil
         }
 
-        guard let imageTintColor = object["image_tint_color"] as? UInt else {
+        guard let imageTintColor = object[PayloadKey.imageTintColor] as? UInt else {
             Logger.error(message: "invalid notification image tint color")
             return nil
         }
 
-        guard let borderColor = object["border_color"] as? UInt else {
+        guard let borderColor = object[PayloadKey.borderColor] as? UInt else {
             Logger.error(message: "invalid notification border color")
             return nil
         }
 
         var callToActionURL: URL?
-        if let URLString = object["cta_url"] as? String {
+        if let URLString = object[PayloadKey.callToActionURL] as? String {
             callToActionURL = URL(string: URLString)
         }
 
@@ -45,5 +51,17 @@ class MiniNotification: InAppNotification {
             return nil
         }
 
+    }
+    
+    override func payload() -> [String : AnyObject] {
+        var payload = super.payload()
+        
+        payload[PayloadKey.imageTintColor] = imageTintColor as AnyObject
+        if let urlString = callToActionURL?.absoluteString {
+            payload[PayloadKey.callToActionURL] = urlString as AnyObject
+        }
+        payload[PayloadKey.borderColor] = borderColor as AnyObject
+        
+        return payload
     }
 }

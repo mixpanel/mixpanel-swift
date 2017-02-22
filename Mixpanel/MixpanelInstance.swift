@@ -991,6 +991,24 @@ extension MixpanelInstance: InAppNotificationsDelegate {
             }
         }
     }
+    
+    /**
+     Returns the payload of a notification if available
+     
+     - note: You do not need to call this method on the main thread.
+     */
+    open func fetchNotificationPayload(completion: @escaping ([String: AnyObject]?) -> Void){
+        checkForNotifications { (notifications) in
+            if let notifications = notifications, !notifications.isEmpty {
+                if let notification = notifications.first {
+                    completion(notification.payload())
+                    self.notificationDidShow(notification)
+                }
+            } else {
+                completion(nil)
+            }
+        }
+    }
 
     func checkForNotifications(completion: @escaping (_ notifications: [InAppNotification]?) -> Void) {
         checkDecide(forceFetch: true) { response in

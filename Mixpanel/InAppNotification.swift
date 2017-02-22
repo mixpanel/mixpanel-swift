@@ -9,6 +9,17 @@
 import Foundation
 
 class InAppNotification {
+    enum PayloadKey {
+        static let ID = "id"
+        static let messageID = "message_id"
+        static let type = "type"
+        static let body = "body"
+        static let imageURLString = "image_url"
+        static let extras = "extras"
+        static let backgroundColor = "bg_color"
+        static let bodyColor = "body_color"
+    }
+    
     let ID: Int
     let messageID: Int
     var imageURL: URL
@@ -33,32 +44,32 @@ class InAppNotification {
             return nil
         }
 
-        guard let ID = object["id"] as? Int, ID > 0 else {
+        guard let ID = object[PayloadKey.ID] as? Int, ID > 0 else {
             Logger.error(message: "invalid notification id")
             return nil
         }
 
-        guard let messageID = object["message_id"] as? Int, messageID > 0 else {
+        guard let messageID = object[PayloadKey.messageID] as? Int, messageID > 0 else {
             Logger.error(message: "invalid notification message id")
             return nil
         }
 
-        guard let extras = object["extras"] as? [String: Any] else {
+        guard let extras = object[PayloadKey.extras] as? [String: Any] else {
             Logger.error(message: "invalid notification extra section")
             return nil
         }
 
-        guard let backgroundColor = object["bg_color"] as? UInt else {
+        guard let backgroundColor = object[PayloadKey.backgroundColor] as? UInt else {
             Logger.error(message: "invalid notification bg_color")
             return nil
         }
 
-        guard let bodyColor = object["body_color"] as? UInt else {
+        guard let bodyColor = object[PayloadKey.bodyColor] as? UInt else {
             Logger.error(message: "invalid notification body_color")
             return nil
         }
 
-        guard let imageURLString = object["image_url"] as? String,
+        guard let imageURLString = object[PayloadKey.imageURLString] as? String,
             let escapedImageURLString = imageURLString
                 .addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed),
             let imageURLComponents = URLComponents(string: escapedImageURLString) else {
@@ -70,13 +81,13 @@ class InAppNotification {
             Logger.error(message: "invalid notification image url")
             return nil
         }
-
-        guard let type = object["type"] as? String else {
+        
+        guard let type = object[PayloadKey.type] as? String else {
             Logger.error(message: "invalid notification type")
             return nil
         }
 
-        if let body = object["body"] as? String, !body.isEmpty {
+        if let body = object[PayloadKey.body] as? String, !body.isEmpty {
             self.body = body
         }
 
@@ -87,5 +98,19 @@ class InAppNotification {
         self.backgroundColor    = backgroundColor
         self.bodyColor          = bodyColor
         self.type               = type
+    }
+    
+    func payload() -> [String: AnyObject] {
+        var payload = [String: AnyObject]()
+        payload[PayloadKey.ID] = ID as AnyObject
+        payload[PayloadKey.messageID] = messageID as AnyObject
+        payload[PayloadKey.imageURLString] = imageURL.absoluteString as AnyObject
+        payload[PayloadKey.extras] = extras as AnyObject
+        payload[PayloadKey.backgroundColor] = backgroundColor as AnyObject
+        payload[PayloadKey.bodyColor] = bodyColor as AnyObject
+        payload[PayloadKey.type] = type as AnyObject
+        payload[PayloadKey.body] = body as AnyObject
+        
+        return payload
     }
 }

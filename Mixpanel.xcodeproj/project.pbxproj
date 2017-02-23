@@ -945,7 +945,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				"OTHER_SWIFT_FLAGS[sdk=iphonesimulator*]" = "-D IOS_SIMULATOR";
+				OTHER_SWIFT_FLAGS = "-D DECIDE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -967,6 +967,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				OTHER_SWIFT_FLAGS = "-D DECIDE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -987,6 +988,7 @@
 				INFOPLIST_FILE = "Mixpanel/Info-tvOS.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				OTHER_SWIFT_FLAGS = "-D tvOS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = Mixpanel;
@@ -1012,6 +1014,7 @@
 				INFOPLIST_FILE = "Mixpanel/Info-tvOS.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				OTHER_SWIFT_FLAGS = "-D tvOS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = Mixpanel;
@@ -1039,7 +1042,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				OTHER_SWIFT_FLAGS = "-D APPEXTENSION";
+				OTHER_SWIFT_FLAGS = "-D APP_EXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1062,7 +1065,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				OTHER_SWIFT_FLAGS = "-D APPEXTENSION";
+				OTHER_SWIFT_FLAGS = "-D APP_EXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

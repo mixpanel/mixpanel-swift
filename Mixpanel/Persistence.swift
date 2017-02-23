@@ -15,9 +15,9 @@ struct ArchivedProperties {
     let alias: String?
     let peopleDistinctId: String?
     let peopleUnidentifiedQueue: Queue
-    #if os(iOS) && !APPEXTENSION
+    #if DECIDE
     let shownNotifications: Set<Int>
-    #endif // os(iOS) && !APPEXTENSION
+    #endif // DECIDE
 }
 
 class Persistence {
@@ -42,7 +42,7 @@ class Persistence {
             let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
         #else
             let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
-        #endif
+        #endif // os(iOS)
 
         guard let urlUnwrapped = url?.appendingPathComponent(filename).path else {
             return nil
@@ -51,7 +51,7 @@ class Persistence {
         return urlUnwrapped
     }
 
-    #if os(iOS) && !APPEXTENSION
+    #if DECIDE
     class func archive(eventsQueue: Queue,
                        peopleQueue: Queue,
                        properties: ArchivedProperties,
@@ -73,7 +73,7 @@ class Persistence {
         archivePeople(peopleQueue, token: token)
         archiveProperties(properties, token: token)
     }
-    #endif
+    #endif // DECIDE
 
     class func archiveEvents(_ eventsQueue: Queue, token: String) {
         archiveToFile(.events, object: eventsQueue, token: token)
@@ -91,13 +91,13 @@ class Persistence {
         p["peopleDistinctId"] = properties.peopleDistinctId
         p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
         p["timedEvents"] = properties.timedEvents
-        #if os(iOS) && !APPEXTENSION
+        #if DECIDE
         p["shownNotifications"] = properties.shownNotifications
-        #endif // os(iOS) && !APPEXTENSION
+        #endif // DECIDE
         archiveToFile(.properties, object: p, token: token)
     }
 
-    #if os(iOS) && !APPEXTENSION
+    #if DECIDE
     class func archiveVariants(_ variants: Set<Variant>, token: String) {
         archiveToFile(.variants, object: variants, token: token)
     }
@@ -105,7 +105,7 @@ class Persistence {
     class func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
         archiveToFile(.codelessBindings, object: codelessBindings, token: token)
     }
-    #endif // os(iOS && !APPEXTENSION
+    #endif // DECIDE
 
     class private func archiveToFile(_ type: ArchiveType, object: Any, token: String) {
         let filePath = filePathWithType(type, token: token)
@@ -120,7 +120,7 @@ class Persistence {
 
     }
 
-    #if os(iOS) && !APPEXTENSION
+    #if DECIDE
     class func unarchive(token: String) -> (eventsQueue: Queue,
                                             peopleQueue: Queue,
                                             superProperties: InternalProperties,
@@ -185,7 +185,7 @@ class Persistence {
                     peopleDistinctId,
                     peopleUnidentifiedQueue)
     }
-    #endif // os(iOS) && !APPEXTENSION
+    #endif // DECIDE
 
     class private func unarchiveWithFilePath(_ filePath: String) -> Any? {
         let unarchivedData: Any? = NSKeyedUnarchiver.unarchiveObject(withFile: filePath)
@@ -210,7 +210,7 @@ class Persistence {
         return data as? Queue ?? []
     }
 
-    #if os(iOS) && !APPEXTENSION
+    #if DECIDE
     class private func unarchiveProperties(token: String) -> (InternalProperties,
                                                               InternalProperties,
                                                               String,
@@ -270,9 +270,9 @@ class Persistence {
                     peopleDistinctId,
                     peopleUnidentifiedQueue)
     }
-    #endif // os(iOS) && !APPEXTENSION
+    #endif // DECIDE
 
-    #if os(iOS) && !APPEXTENSION
+    #if DECIDE
     class private func unarchiveCodelessBindings(token: String) -> Set<CodelessBinding> {
         let data = unarchiveWithType(.codelessBindings, token: token)
         return data as? Set<CodelessBinding> ?? Set()
@@ -282,7 +282,7 @@ class Persistence {
         let data = unarchiveWithType(.variants, token: token) as? Set<Variant>
         return data ?? Set()
     }
-    #endif // os(iOS) && !APPEXTENSION
+    #endif // DECIDE
 
     class private func unarchiveWithType(_ type: ArchiveType, token: String) -> Any? {
         let filePath = filePathWithType(type, token: token)

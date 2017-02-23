@@ -25,7 +25,6 @@ class BaseNotificationViewController: UIViewController {
         self.notification = notification
     }
 
-    #if os(iOS)
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .all
     }
@@ -33,7 +32,6 @@ class BaseNotificationViewController: UIViewController {
     override var shouldAutorotate: Bool {
         return true
     }
-    #endif
 
     func show(animated: Bool) {}
     func hide(animated: Bool, completion: @escaping () -> Void) {}

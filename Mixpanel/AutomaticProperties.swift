@@ -10,12 +10,12 @@ import Foundation
 import UIKit
 #if os(iOS)
     import CoreTelephony
-#endif
+#endif // os(iOS
 
 class AutomaticProperties {
     #if os(iOS)
     static let telephonyInfo = CTTelephonyNetworkInfo()
-    #endif
+    #endif // os(iOS)
 
     static var properties: InternalProperties = {
         var p = InternalProperties()
@@ -27,7 +27,7 @@ class AutomaticProperties {
         }
         #if os(iOS)
             p["$carrier"] = AutomaticProperties.telephonyInfo.subscriberCellularProvider?.carrierName
-        #endif
+        #endif // os(iOS)
         p["mp_lib"]             = "swift"
         p["$lib_version"]       = AutomaticProperties.libVersion()
         p["$manufacturer"]      = "Apple"
@@ -65,7 +65,7 @@ class AutomaticProperties {
         }
         return radio
     }
-    #endif
+    #endif // os(iOS)
 
     class func deviceModel() -> String {
         var systemInfo = utsname()

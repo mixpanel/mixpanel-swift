@@ -15,7 +15,9 @@ struct ArchivedProperties {
     let alias: String?
     let peopleDistinctId: String?
     let peopleUnidentifiedQueue: Queue
+    #if os(iOS) && !APPEXTENSION
     let shownNotifications: Set<Int>
+    #endif // os(iOS) && !APPEXTENSION
 }
 
 class Persistence {
@@ -49,6 +51,7 @@ class Persistence {
         return urlUnwrapped
     }
 
+    #if os(iOS) && !APPEXTENSION
     class func archive(eventsQueue: Queue,
                        peopleQueue: Queue,
                        properties: ArchivedProperties,
@@ -61,6 +64,16 @@ class Persistence {
         archiveVariants(variants, token: token)
         archiveCodelessBindings(codelessBindings, token: token)
     }
+    #else
+    class func archive(eventsQueue: Queue,
+                       peopleQueue: Queue,
+                       properties: ArchivedProperties,
+                       token: String) {
+        archiveEvents(eventsQueue, token: token)
+        archivePeople(peopleQueue, token: token)
+        archiveProperties(properties, token: token)
+    }
+    #endif
 
     class func archiveEvents(_ eventsQueue: Queue, token: String) {
         archiveToFile(.events, object: eventsQueue, token: token)
@@ -78,10 +91,13 @@ class Persistence {
         p["peopleDistinctId"] = properties.peopleDistinctId
         p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
         p["timedEvents"] = properties.timedEvents
+        #if os(iOS) && !APPEXTENSION
         p["shownNotifications"] = properties.shownNotifications
+        #endif // os(iOS) && !APPEXTENSION
         archiveToFile(.properties, object: p, token: token)
     }
 
+    #if os(iOS) && !APPEXTENSION
     class func archiveVariants(_ variants: Set<Variant>, token: String) {
         archiveToFile(.variants, object: variants, token: token)
     }
@@ -89,6 +105,7 @@ class Persistence {
     class func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
         archiveToFile(.codelessBindings, object: codelessBindings, token: token)
     }
+    #endif // os(iOS && !APPEXTENSION
 
     class private func archiveToFile(_ type: ArchiveType, object: Any, token: String) {
         let filePath = filePathWithType(type, token: token)
@@ -103,6 +120,7 @@ class Persistence {
 
     }
 
+    #if os(iOS) && !APPEXTENSION
     class func unarchive(token: String) -> (eventsQueue: Queue,
                                             peopleQueue: Queue,
                                             superProperties: InternalProperties,
@@ -114,7 +132,6 @@ class Persistence {
                                             shownNotifications: Set<Int>,
                                             codelessBindings: Set<CodelessBinding>,
                                             variants: Set<Variant>) {
-
         let eventsQueue = unarchiveEvents(token: token)
         let peopleQueue = unarchivePeople(token: token)
         let codelessBindings = unarchiveCodelessBindings(token: token)
@@ -140,6 +157,35 @@ class Persistence {
                 codelessBindings,
                 variants)
     }
+    #else
+    class func unarchive(token: String) -> (eventsQueue: Queue,
+                                            peopleQueue: Queue,
+                                            superProperties: InternalProperties,
+                                            timedEvents: InternalProperties,
+                                            distinctId: String,
+                                            alias: String?,
+                                            peopleDistinctId: String?,
+                                            peopleUnidentifiedQueue: Queue) {
+            let eventsQueue = unarchiveEvents(token: token)
+            let peopleQueue = unarchivePeople(token: token)
+
+            let (superProperties,
+                timedEvents,
+                distinctId,
+                alias,
+                peopleDistinctId,
+                peopleUnidentifiedQueue) = unarchiveProperties(token: token)
+
+            return (eventsQueue,
+                    peopleQueue,
+                    superProperties,
+                    timedEvents,
+                    distinctId,
+                    alias,
+                    peopleDistinctId,
+                    peopleUnidentifiedQueue)
+    }
+    #endif // os(iOS) && !APPEXTENSION
 
     class private func unarchiveWithFilePath(_ filePath: String) -> Any? {
         let unarchivedData: Any? = NSKeyedUnarchiver.unarchiveObject(withFile: filePath)
@@ -164,6 +210,7 @@ class Persistence {
         return data as? Queue ?? []
     }
 
+    #if os(iOS) && !APPEXTENSION
     class private func unarchiveProperties(token: String) -> (InternalProperties,
                                                               InternalProperties,
                                                               String,
@@ -195,7 +242,37 @@ class Persistence {
                 peopleUnidentifiedQueue,
                 shownNotifications)
     }
+    #else
+    class private func unarchiveProperties(token: String) -> (InternalProperties,
+        InternalProperties,
+        String,
+        String?,
+        String?,
+        Queue) {
+            let properties = unarchiveWithType(.properties, token: token) as? InternalProperties
+            let superProperties =
+                properties?["superProperties"] as? InternalProperties ?? InternalProperties()
+            let timedEvents =
+                properties?["timedEvents"] as? InternalProperties ?? InternalProperties()
+            let distinctId =
+                properties?["distinctId"] as? String ?? ""
+            let alias =
+                properties?["alias"] as? String ?? nil
+            let peopleDistinctId =
+                properties?["peopleDistinctId"] as? String ?? nil
+            let peopleUnidentifiedQueue =
+                properties?["peopleUnidentifiedQueue"] as? Queue ?? Queue()
 
+            return (superProperties,
+                    timedEvents,
+                    distinctId,
+                    alias,
+                    peopleDistinctId,
+                    peopleUnidentifiedQueue)
+    }
+    #endif // os(iOS) && !APPEXTENSION
+
+    #if os(iOS) && !APPEXTENSION
     class private func unarchiveCodelessBindings(token: String) -> Set<CodelessBinding> {
         let data = unarchiveWithType(.codelessBindings, token: token)
         return data as? Set<CodelessBinding> ?? Set()
@@ -205,6 +282,7 @@ class Persistence {
         let data = unarchiveWithType(.variants, token: token) as? Set<Variant>
         return data ?? Set()
     }
+    #endif // os(iOS) && !APPEXTENSION
 
     class private func unarchiveWithType(_ type: ArchiveType, token: String) -> Any? {
         let filePath = filePathWithType(type, token: token)

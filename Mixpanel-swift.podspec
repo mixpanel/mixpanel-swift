@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
       'Mixpanel/Constants.swift', 'Mixpanel/MixpanelType.swift', 'Mixpanel/Mixpanel.swift', 'Mixpanel/MixpanelInstance.swift',
       'Mixpanel/Persistence.swift', 'Mixpanel/Flush.swift','Mixpanel/Track.swift', 'Mixpanel/People.swift']
     appex.ios.pod_target_xcconfig = {
-      'OTHER_SWIFT_FLAGS' => '$(inherited) -D APP_EXTENSION'
+      'OTHER_SWIFT_FLAGS' => '$(inherited) -D APP_EXTENSION -D DOUCHEBAG'
     }
     appex.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
     appex.ios.deployment_target = '8.0'

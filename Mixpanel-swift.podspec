@@ -22,18 +22,19 @@ Pod::Spec.new do |s|
     mp.source_files = 'Mixpanel/*.swift'
     mp.resources = ['Mixpanel/**/*.{png,xib,storyboard}']
     mp.pod_target_xcconfig = {
-      'OTHER_SWIFT_FLAGS' => '-D DECIDE'
+      'OTHER_SWIFT_FLAGS' => '$(inherited) -D DECIDE'
     }
     mp.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   end
 
   s.subspec 'AppExtension' do |appex|
-    appex.source_files  = ['Mixpanel/Network.swift', 'Mixpanel/FlushRequest.swift', 'Mixpanel/PrintLogging.swift', 'Mixpanel/FileLogging.swift',
-      'Mixpanel/Logger.swift', 'Mixpanel/JSONHandler.swift', 'Mixpanel/Error.swift', 'Mixpanel/AutomaticProperties.swift',
-      'Mixpanel/Constants.swift', 'Mixpanel/MixpanelType.swift', 'Mixpanel/Mixpanel.swift', 'Mixpanel/MixpanelInstance.swift',
-      'Mixpanel/Persistence.swift', 'Mixpanel/Flush.swift','Mixpanel/Track.swift', 'Mixpanel/People.swift']
+    # appex.source_files  = ['Mixpanel/Network.swift', 'Mixpanel/FlushRequest.swift', 'Mixpanel/PrintLogging.swift', 'Mixpanel/FileLogging.swift',
+    #   'Mixpanel/Logger.swift', 'Mixpanel/JSONHandler.swift', 'Mixpanel/Error.swift', 'Mixpanel/AutomaticProperties.swift',
+    #   'Mixpanel/Constants.swift', 'Mixpanel/MixpanelType.swift', 'Mixpanel/Mixpanel.swift', 'Mixpanel/MixpanelInstance.swift',
+    #   'Mixpanel/Persistence.swift', 'Mixpanel/Flush.swift','Mixpanel/Track.swift', 'Mixpanel/People.swift']
+    appex.source_files = 'Mixpanel/*.swift'
     appex.pod_target_xcconfig = {
-      'OTHER_SWIFT_FLAGS' => '-D APP_EXTENSION'
+      'OTHER_SWIFT_FLAGS' => '$(inherited) -D APP_EXTENSION'
     }
     appex.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   end

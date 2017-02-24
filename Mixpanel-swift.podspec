@@ -19,12 +19,12 @@ Pod::Spec.new do |s|
   }
 
   s.subspec 'Mixpanel' do |mp|
-    mp.ios.source_files = 'Mixpanel/*.swift'
-    mp.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
-    mp.ios.resources = ['Mixpanel/**/*.{png,xib,storyboard}']
-    mp.ios.pod_target_xcconfig = {
+    mp.source_files = 'Mixpanel/*.swift'
+    mp.resources = ['Mixpanel/**/*.{png,xib,storyboard}']
+    mp.pod_target_xcconfig = {
       'OTHER_SWIFT_FLAGS' => '-D DECIDE'
     }
+    mp.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   end
 
   s.subspec 'AppExtension' do |appex|

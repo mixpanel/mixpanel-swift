@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.ios.resources = ['Mixpanel/**/*.{png,xib,storyboard}']
   s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   s.ios.pod_target_xcconfig = {
-    'OTHER_SWIFT_FLAGS' => '$(inherited) -D DECIDE'
+    'OTHER_SWIFT_FLAGS' => '-D DECIDE'
   }
   s.tvos.deployment_target = '9.0'
   s.tvos.source_files = 'Mixpanel/*.swift'
@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
       'Mixpanel/Constants.swift', 'Mixpanel/MixpanelType.swift', 'Mixpanel/Mixpanel.swift', 'Mixpanel/MixpanelInstance.swift',
       'Mixpanel/Persistence.swift', 'Mixpanel/Flush.swift','Mixpanel/Track.swift', 'Mixpanel/People.swift']
     appex.pod_target_xcconfig = {
-      'OTHER_SWIFT_FLAGS' => '$(inherited) -D APP_EXTENSION -D DOUCHEBAG'
+      'OTHER_SWIFT_FLAGS' => '-D APP_EXTENSION'
     }
     appex.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
     appex.ios.deployment_target = '8.0'

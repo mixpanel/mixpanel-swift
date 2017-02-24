@@ -10,6 +10,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => 'https://github.com/mixpanel/mixpanel-swift.git', :tag => "v#{s.version}" }
   s.default_subspec = 'Mixpanel'
   s.ios.deployment_target = '8.0'
+  s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   s.tvos.deployment_target = '9.0'
   s.tvos.source_files = 'Mixpanel/*.swift'
   s.tvos.exclude_files = 'Mixpanel/MiniNotificationViewController.swift', 'Mixpanel/TakeoverNotificationViewController.swift'
@@ -24,7 +25,6 @@ Pod::Spec.new do |s|
     mp.pod_target_xcconfig = {
       'OTHER_SWIFT_FLAGS' => '$(inherited) -D DECIDE'
     }
-    mp.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   end
 
   s.subspec 'AppExtension' do |appex|
@@ -36,7 +36,6 @@ Pod::Spec.new do |s|
     appex.pod_target_xcconfig = {
       'OTHER_SWIFT_FLAGS' => '$(inherited) -D APP_EXTENSION'
     }
-    appex.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   end
 
 end

@@ -35,4 +35,10 @@ Pod::Spec.new do |s|
     appex.ios.deployment_target = '8.0'
   end
 
+  s.subspec 'Lolz' do |lolz|
+    lolz.pod_target_xcconfig = {
+      'OTHER_SWIFT_FLAGS' => '-D LOLZ'
+    }
+  end
+
 end

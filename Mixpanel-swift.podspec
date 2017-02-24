@@ -39,6 +39,14 @@ Pod::Spec.new do |s|
     lolz.pod_target_xcconfig = {
       'OTHER_SWIFT_FLAGS' => '-D LOLZ'
     }
+    lolz.source_files  = ['Mixpanel/Network.swift', 'Mixpanel/FlushRequest.swift', 'Mixpanel/PrintLogging.swift', 'Mixpanel/FileLogging.swift',
+      'Mixpanel/Logger.swift', 'Mixpanel/JSONHandler.swift', 'Mixpanel/Error.swift', 'Mixpanel/AutomaticProperties.swift',
+      'Mixpanel/Constants.swift', 'Mixpanel/MixpanelType.swift', 'Mixpanel/Mixpanel.swift', 'Mixpanel/MixpanelInstance.swift',
+      'Mixpanel/Persistence.swift', 'Mixpanel/Flush.swift','Mixpanel/Track.swift', 'Mixpanel/People.swift']
+    lolz.pod_target_xcconfig = {
+      'OTHER_SWIFT_FLAGS' => '-D APP_EXTENSION'
+    }
+    lolz.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   end
 
 end

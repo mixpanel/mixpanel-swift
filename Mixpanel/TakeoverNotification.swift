@@ -72,6 +72,17 @@ class TakeoverNotification: InAppNotification {
         imageURL = URL(string: imageURL.absoluteString.appendSuffixBeforeExtension(suffix: "@2x"))!
 
     }
+    
+    override func payload() -> [String : AnyObject] {
+        var payload = super.payload()
+        
+        payload[PayloadKey.buttons] = buttons.map({ $0.payload() }) as AnyObject
+        payload[PayloadKey.closeColor] = closeButtonColor as AnyObject
+        payload[PayloadKey.title] = title as AnyObject
+        payload[PayloadKey.titleColor] = titleColor as AnyObject
+        payload[PayloadKey.imageFade] = shouldFadeImage as AnyObject
+        return payload
+    }
 }
 
 extension String {

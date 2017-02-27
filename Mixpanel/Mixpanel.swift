@@ -52,7 +52,7 @@ open class Mixpanel {
                                                          flushInterval: flushInterval,
                                                          instanceName:  instanceName)
     }
-    #endif
+    #endif // MAC_OS
 
     /**
      Gets the mixpanel instance with the given name
@@ -139,7 +139,7 @@ class MixpanelManager {
 
         return instance
     }
-    #endif
+    #endif // MAC_OS
 
     func getInstance(name instanceName: String) -> MixpanelInstance? {
         guard let instance = instances[instanceName] else {

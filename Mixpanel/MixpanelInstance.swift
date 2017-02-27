@@ -11,7 +11,7 @@ import Foundation
 import UIKit
 #else
 import Cocoa
-#endif
+#endif // MAC_OS
 
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
@@ -206,7 +206,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     var serialQueue: DispatchQueue!
     #if !MAC_OS
     var taskId = UIBackgroundTaskInvalid
-    #endif
+    #endif // MAC_OS
     let flushInstance: Flush
     let trackInstance: Track
     #if DECIDE
@@ -267,7 +267,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         setupListeners()
         unarchive()
     }
-    #endif
+    #endif // MAC_OS
 
     #if !MAC_OS
     private func setupListeners() {
@@ -330,7 +330,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                                        name: .NSApplicationDidHide,
                                        object: nil)
     }
-    #endif
+    #endif // MAC_OS
 
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -450,7 +450,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
         #else
         let distinctId = MixpanelInstance.macOSIdentifier()
-        #endif
+        #endif // MAC_OS
         guard let distId = distinctId else {
             return UUID().uuidString
         }
@@ -492,7 +492,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         IOObjectRelease(platformExpert);
         return (serialNumberAsCFString?.takeUnretainedValue() as? String)
     }
-    #endif
+    #endif // MAC_OS
 
     #if os(iOS)
     #if !APP_EXTENSION

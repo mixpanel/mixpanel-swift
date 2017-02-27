@@ -7,7 +7,11 @@
 //
 
 import Foundation
+#if !MAC_OS
 import UIKit
+#else
+import Cocoa
+#endif
 
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
@@ -200,12 +204,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     var eventsQueue = Queue()
     var timedEvents = InternalProperties()
     var serialQueue: DispatchQueue!
+    #if !MAC_OS
     var taskId = UIBackgroundTaskInvalid
+    #endif
     let flushInstance: Flush
     let trackInstance: Track
     #if DECIDE
     let decideInstance: Decide
     #endif // DECIDE
+
+    #if !MAC_OS
     init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
@@ -239,7 +247,29 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             }
         #endif // DECIDE
     }
+    #else
+    init(apiToken: String?, flushInterval: Double, name: String) {
+        if let apiToken = apiToken, !apiToken.isEmpty {
+            self.apiToken = apiToken
+        }
 
+        self.name = name
+
+        flushInstance = Flush(basePathIdentifier: name)
+        trackInstance = Track(apiToken: self.apiToken)
+        flushInstance.delegate = self
+        let label = "com.mixpanel.\(self.apiToken)"
+        serialQueue = DispatchQueue(label: label)
+        distinctId = defaultDistinctId()
+        people = People(apiToken: self.apiToken,
+                        serialQueue: serialQueue)
+        flushInstance._flushInterval = flushInterval
+        setupListeners()
+        unarchive()
+    }
+    #endif
+
+    #if !MAC_OS
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
         trackIntegration()
@@ -280,6 +310,27 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         #endif // os(iOS)
         #endif // !APP_EXTENSION
     }
+    #else
+    private func setupListeners() {
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.addObserver(self,
+                                       selector: #selector(applicationWillTerminate(_:)),
+                                       name: .NSApplicationWillTerminate,
+                                       object: nil)
+        notificationCenter.addObserver(self,
+                                       selector: #selector(applicationWillResignActive(_:)),
+                                       name: .NSApplicationWillResignActive,
+                                       object: nil)
+        notificationCenter.addObserver(self,
+                                       selector: #selector(applicationDidBecomeActive(_:)),
+                                       name: .NSApplicationDidBecomeActive,
+                                       object: nil)
+        notificationCenter.addObserver(self,
+                                       selector: #selector(applicationDidHide(_:)),
+                                       name: .NSApplicationDidHide,
+                                       object: nil)
+    }
+    #endif
 
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -323,6 +374,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         flushInstance.applicationWillResignActive()
     }
 
+    #if !MAC_OS
     @objc private func applicationDidEnterBackground(_ notification: Notification) {
         let sharedApplication = UIApplication.shared
 
@@ -358,12 +410,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
 
-    @objc private func applicationWillTerminate(_ notification: Notification) {
-        serialQueue.async() {
-            self.archive()
-        }
-    }
-
     @objc private func appLinksNotificationRaised(_ notification: Notification) {
         let eventMap = ["al_nav_out": "$al_nav_out",
                         "al_nav_in": "$al_nav_in",
@@ -371,25 +417,47 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         let userInfo = (notification as Notification).userInfo
 
         if let eventName = userInfo?["event_name"] as? String,
-            let eventArgs = userInfo?["event_args"] as? Properties,
-            let eventNameMap = eventMap[eventName] {
+           let eventArgs = userInfo?["event_args"] as? Properties,
+           let eventNameMap = eventMap[eventName] {
             track(event: eventNameMap, properties:eventArgs)
+        }
+    }
+    #else
+    @objc private func applicationDidHide(_ notification: Notification) {
+        if flushOnBackground {
+            flush()
+        }
+
+        serialQueue.async() {
+            self.archive()
+        }
+    }
+    #endif // MAC_OS
+
+    @objc private func applicationWillTerminate(_ notification: Notification) {
+        serialQueue.async() {
+            self.archive()
         }
     }
 
     #endif // !APP_EXTENSION
 
     func defaultDistinctId() -> String {
+        #if !MAC_OS
         var distinctId: String? = IFA()
         if distinctId == nil && NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString
         }
+        #else
+        let distinctId = MixpanelInstance.macOSIdentifier()
+        #endif
         guard let distId = distinctId else {
             return UUID().uuidString
         }
         return distId
     }
 
+    #if !MAC_OS
     func IFA() -> String? {
         var ifa: String? = nil
         if let ASIdentifierManagerClass = NSClassFromString("ASIdentifierManager") {
@@ -417,6 +485,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
         return ifa
     }
+    #else
+    static func macOSIdentifier() -> String? {
+        let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"));
+        let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString!, kCFAllocatorDefault, 0);
+        IOObjectRelease(platformExpert);
+        return (serialNumberAsCFString?.takeUnretainedValue() as? String)
+    }
+    #endif
 
     #if os(iOS)
     #if !APP_EXTENSION

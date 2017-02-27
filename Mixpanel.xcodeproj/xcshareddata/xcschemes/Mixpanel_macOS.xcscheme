@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E1F15F311E5F847200391AE3"
-               BuildableName = "Mixpanel_appExtension.framework"
-               BlueprintName = "Mixpanel_appExtension"
+               BlueprintIdentifier = "E1F15FC81E64A10700391AE3"
+               BuildableName = "Mixpanel.framework"
+               BlueprintName = "Mixpanel_macOS"
                ReferencedContainer = "container:Mixpanel.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -33,7 +33,7 @@
       </AdditionalOptions>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -45,9 +45,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E1F15F311E5F847200391AE3"
-            BuildableName = "Mixpanel_appExtension.framework"
-            BlueprintName = "Mixpanel_appExtension"
+            BlueprintIdentifier = "E1F15FC81E64A10700391AE3"
+            BuildableName = "Mixpanel.framework"
+            BlueprintName = "Mixpanel_macOS"
             ReferencedContainer = "container:Mixpanel.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -63,9 +63,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E1F15F311E5F847200391AE3"
-            BuildableName = "Mixpanel_appExtension.framework"
-            BlueprintName = "Mixpanel_appExtension"
+            BlueprintIdentifier = "E1F15FC81E64A10700391AE3"
+            BuildableName = "Mixpanel.framework"
+            BlueprintName = "Mixpanel_macOS"
             ReferencedContainer = "container:Mixpanel.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

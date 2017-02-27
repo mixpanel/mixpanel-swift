@@ -7,9 +7,15 @@
 //
 
 import Foundation
+
+#if !MAC_OS
 import UIKit
+#else
+import Cocoa
+#endif // MAC_OS
+
 #if os(iOS)
-    import CoreTelephony
+import CoreTelephony
 #endif // os(iOS
 
 class AutomaticProperties {
@@ -19,23 +25,35 @@ class AutomaticProperties {
 
     static var properties: InternalProperties = {
         var p = InternalProperties()
+        #if !MAC_OS
         let size = UIScreen.main.bounds.size
+        p["$screen_height"]     = Int(size.height)
+        p["$screen_width"]      = Int(size.width)
+        p["$os"]                = UIDevice.current.systemName
+        p["$os_version"]        = UIDevice.current.systemVersion
+
+        #if os(iOS)
+        p["$carrier"] = AutomaticProperties.telephonyInfo.subscriberCellularProvider?.carrierName
+        #endif // os(iOS)
+
+        #else
+        if let size = NSScreen.main()?.frame.size {
+            p["$screen_height"]     = Int(size.height)
+            p["$screen_width"]      = Int(size.width)
+        }
+        p["$os"]                = "macOS"
+        p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
+        #endif // MAC_OS
+
         let infoDict = Bundle.main.infoDictionary
         if let infoDict = infoDict {
             p["$app_build_number"]     = infoDict["CFBundleVersion"]
             p["$app_version_string"]   = infoDict["CFBundleShortVersionString"]
         }
-        #if os(iOS)
-            p["$carrier"] = AutomaticProperties.telephonyInfo.subscriberCellularProvider?.carrierName
-        #endif // os(iOS)
         p["mp_lib"]             = "swift"
         p["$lib_version"]       = AutomaticProperties.libVersion()
         p["$manufacturer"]      = "Apple"
-        p["$os"]                = UIDevice.current.systemName
-        p["$os_version"]        = UIDevice.current.systemVersion
         p["$model"]             = AutomaticProperties.deviceModel()
-        p["$screen_height"]     = Int(size.height)
-        p["$screen_width"]      = Int(size.width)
         return p
     }()
 
@@ -47,7 +65,9 @@ class AutomaticProperties {
             p["$ios_app_release"] = infoDict["CFBundleShortVersionString"]
         }
         p["$ios_device_model"]  = AutomaticProperties.deviceModel()
+        #if !MAC_OS
         p["$ios_version"]       = UIDevice.current.systemVersion
+        #endif // MAC_OS
         p["$ios_lib_version"]   = AutomaticProperties.libVersion()
         p["$swift_lib_version"] = AutomaticProperties.libVersion()
 

@@ -22,4 +22,13 @@ Pod::Spec.new do |s|
   s.tvos.pod_target_xcconfig = {
     'OTHER_SWIFT_FLAGS' => '$(inherited) -D TV_OS'
   }
+  s.osx.deployment_target = '10.10'
+  s.osx.source_files = ['Mixpanel/Network.swift', 'Mixpanel/FlushRequest.swift', 'Mixpanel/PrintLogging.swift', 'Mixpanel/FileLogging.swift',
+      'Mixpanel/Logger.swift', 'Mixpanel/JSONHandler.swift', 'Mixpanel/Error.swift', 'Mixpanel/AutomaticProperties.swift',
+      'Mixpanel/Constants.swift', 'Mixpanel/MixpanelType.swift', 'Mixpanel/Mixpanel.swift', 'Mixpanel/MixpanelInstance.swift',
+      'Mixpanel/Persistence.swift', 'Mixpanel/Flush.swift','Mixpanel/Track.swift', 'Mixpanel/People.swift']
+  s.osx.frameworks = 'Cocoa', 'Foundation'
+  s.osx.pod_target_xcconfig = {
+    'OTHER_SWIFT_FLAGS' => '$(inherited) -D MAC_OS'
+  }
 end

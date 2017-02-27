@@ -325,10 +325,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                                        selector: #selector(applicationDidBecomeActive(_:)),
                                        name: .NSApplicationDidBecomeActive,
                                        object: nil)
-        notificationCenter.addObserver(self,
-                                       selector: #selector(applicationDidHide(_:)),
-                                       name: .NSApplicationDidHide,
-                                       object: nil)
     }
     #endif // MAC_OS
 
@@ -372,6 +368,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
     @objc private func applicationWillResignActive(_ notification: Notification) {
         flushInstance.applicationWillResignActive()
+        #if MAC_OS
+        if flushOnBackground {
+            flush()
+        }
+
+        serialQueue.async() {
+            self.archive()
+        }
+        #endif
     }
 
     #if !MAC_OS
@@ -420,16 +425,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
            let eventArgs = userInfo?["event_args"] as? Properties,
            let eventNameMap = eventMap[eventName] {
             track(event: eventNameMap, properties:eventArgs)
-        }
-    }
-    #else
-    @objc private func applicationDidHide(_ notification: Notification) {
-        if flushOnBackground {
-            flush()
-        }
-
-        serialQueue.async() {
-            self.archive()
         }
     }
     #endif // MAC_OS

@@ -303,7 +303,6 @@
 			isa = PBXGroup;
 			children = (
 				E115947F1CFF1491007F8B4F /* Mixpanel */,
-				E1F15FCA1E64A10800391AE3 /* Mixpanel_OSX */,
 				E115947E1CFF1491007F8B4F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -564,13 +563,6 @@
 				E19D12951D9C5E6600A8016D /* VariantTweak.swift */,
 			);
 			name = "A/B Testing";
-			sourceTree = "<group>";
-		};
-		E1F15FCA1E64A10800391AE3 /* Mixpanel_OSX */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Mixpanel_OSX;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1267,6 +1259,7 @@
 				E1F15FCF1E64A10800391AE3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

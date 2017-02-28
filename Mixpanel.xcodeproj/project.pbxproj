@@ -639,9 +639,9 @@
 			productReference = E12782B31D4AB4B30025FB05 /* Mixpanel.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		E1F15F311E5F847200391AE3 /* Mixpanel_appExtension */ = {
+		E1F15F311E5F847200391AE3 /* MixpanelAppex */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E1F15F8F1E5F847200391AE3 /* Build configuration list for PBXNativeTarget "Mixpanel_appExtension" */;
+			buildConfigurationList = E1F15F8F1E5F847200391AE3 /* Build configuration list for PBXNativeTarget "MixpanelAppex" */;
 			buildPhases = (
 				E1F15F321E5F847200391AE3 /* Sources */,
 				E1F15F821E5F847200391AE3 /* Frameworks */,
@@ -652,7 +652,7 @@
 			);
 			dependencies = (
 			);
-			name = Mixpanel_appExtension;
+			name = MixpanelAppex;
 			productName = Mixpanel;
 			productReference = E1F15F921E5F847200391AE3 /* MixpanelAppex.framework */;
 			productType = "com.apple.product-type.framework";
@@ -716,7 +716,7 @@
 			targets = (
 				E115947C1CFF1491007F8B4F /* Mixpanel */,
 				E12782B21D4AB4B30025FB05 /* Mixpanel_tvOS */,
-				E1F15F311E5F847200391AE3 /* Mixpanel_appExtension */,
+				E1F15F311E5F847200391AE3 /* MixpanelAppex */,
 				E1F15FC81E64A10700391AE3 /* Mixpanel_macOS */,
 			);
 		};
@@ -1128,7 +1128,7 @@
 				OTHER_SWIFT_FLAGS = "-D APP_EXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
-				PRODUCT_NAME = MixpanelAppex;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
@@ -1152,7 +1152,7 @@
 				OTHER_SWIFT_FLAGS = "-D APP_EXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
-				PRODUCT_NAME = MixpanelAppex;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 3.0;
@@ -1243,7 +1243,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E1F15F8F1E5F847200391AE3 /* Build configuration list for PBXNativeTarget "Mixpanel_appExtension" */ = {
+		E1F15F8F1E5F847200391AE3 /* Build configuration list for PBXNativeTarget "MixpanelAppex" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E1F15F901E5F847200391AE3 /* Debug */,

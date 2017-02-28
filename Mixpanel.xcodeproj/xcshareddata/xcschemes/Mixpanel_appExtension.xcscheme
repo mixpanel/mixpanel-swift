@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E1F15F311E5F847200391AE3"
-               BuildableName = "Mixpanel_appExtension.framework"
-               BlueprintName = "Mixpanel_appExtension"
+               BuildableName = "MixpanelAppex.framework"
+               BlueprintName = "MixpanelAppex"
                ReferencedContainer = "container:Mixpanel.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,8 +46,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E1F15F311E5F847200391AE3"
-            BuildableName = "Mixpanel_appExtension.framework"
-            BlueprintName = "Mixpanel_appExtension"
+            BuildableName = "MixpanelAppex.framework"
+            BlueprintName = "MixpanelAppex"
             ReferencedContainer = "container:Mixpanel.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -64,8 +64,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E1F15F311E5F847200391AE3"
-            BuildableName = "Mixpanel_appExtension.framework"
-            BlueprintName = "Mixpanel_appExtension"
+            BuildableName = "MixpanelAppex.framework"
+            BlueprintName = "MixpanelAppex"
             ReferencedContainer = "container:Mixpanel.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

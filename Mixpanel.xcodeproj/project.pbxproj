@@ -1127,6 +1127,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-D APP_EXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
+				PRODUCT_MODULE_NAME = MixpanelAppex;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1150,6 +1151,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-D APP_EXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
+				PRODUCT_MODULE_NAME = MixpanelAppex;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";

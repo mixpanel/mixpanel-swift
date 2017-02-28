@@ -24,6 +24,7 @@ open class People {
     var peopleQueue = Queue()
     var unidentifiedQueue = Queue()
     var distinctId: String? = nil
+    var delegate: FlushDelegate?
 
     init(apiToken: String, serialQueue: DispatchQueue) {
         self.apiToken = apiToken
@@ -65,6 +66,10 @@ open class People {
             }
             Persistence.archivePeople(self.peopleQueue, token: self.apiToken)
         }
+
+        #if APP_EXTENSION
+        delegate?.flush(completion: nil)
+        #endif // APP_EXTENSION
     }
 
     func addPeopleObject(_ r: InternalProperties) {

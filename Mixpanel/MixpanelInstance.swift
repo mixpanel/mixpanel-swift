@@ -232,6 +232,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
                         serialQueue: serialQueue)
+        people.delegate = self
         flushInstance._flushInterval = flushInterval
         setupListeners()
         unarchive()
@@ -584,6 +585,10 @@ extension MixpanelInstance {
             }
             self.archiveProperties()
         }
+
+        #if APP_EXTENSION
+        self.flush()
+        #endif // APP_EXTENSION
     }
 
     /**
@@ -828,6 +833,10 @@ extension MixpanelInstance {
 
             Persistence.archiveEvents(self.eventsQueue, token: self.apiToken)
         }
+
+        #if APP_EXTENSION
+        self.flush()
+        #endif // APP_EXTENSION
     }
 
     /**

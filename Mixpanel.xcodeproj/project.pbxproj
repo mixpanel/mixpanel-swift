@@ -243,7 +243,7 @@
 		E1D335CB1D303A0D00E68E12 /* FlushRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlushRequest.swift; sourceTree = "<group>"; };
 		E1D335CD1D30578E00E68E12 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutomaticProperties.swift; sourceTree = "<group>"; };
-		E1F15F921E5F847200391AE3 /* Mixpanel_appExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel_appExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1F15F921E5F847200391AE3 /* MixpanelAppex.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MixpanelAppex.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1F15FC91E64A10700391AE3 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -312,7 +312,7 @@
 			children = (
 				E115947D1CFF1491007F8B4F /* Mixpanel.framework */,
 				E12782B31D4AB4B30025FB05 /* Mixpanel.framework */,
-				E1F15F921E5F847200391AE3 /* Mixpanel_appExtension.framework */,
+				E1F15F921E5F847200391AE3 /* MixpanelAppex.framework */,
 				E1F15FC91E64A10700391AE3 /* Mixpanel.framework */,
 			);
 			name = Products;
@@ -654,7 +654,7 @@
 			);
 			name = Mixpanel_appExtension;
 			productName = Mixpanel;
-			productReference = E1F15F921E5F847200391AE3 /* Mixpanel_appExtension.framework */;
+			productReference = E1F15F921E5F847200391AE3 /* MixpanelAppex.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		E1F15FC81E64A10700391AE3 /* Mixpanel_macOS */ = {
@@ -1127,8 +1127,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-D APP_EXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
-				PRODUCT_MODULE_NAME = MixpanelAppex;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
+				PRODUCT_NAME = MixpanelAppex;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
@@ -1151,8 +1151,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-D APP_EXTENSION";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
-				PRODUCT_MODULE_NAME = MixpanelAppex;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
+				PRODUCT_NAME = MixpanelAppex;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 3.0;

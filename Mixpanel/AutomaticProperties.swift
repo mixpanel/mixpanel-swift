@@ -8,11 +8,11 @@
 
 import Foundation
 
-#if !MAC_OS
+#if !os(OSX)
 import UIKit
 #else
 import Cocoa
-#endif // MAC_OS
+#endif // os(OSX)
 
 #if os(iOS)
 import CoreTelephony
@@ -25,7 +25,7 @@ class AutomaticProperties {
 
     static var properties: InternalProperties = {
         var p = InternalProperties()
-        #if !MAC_OS
+        #if !os(OSX)
         let size = UIScreen.main.bounds.size
         p["$screen_height"]     = Int(size.height)
         p["$screen_width"]      = Int(size.width)
@@ -43,7 +43,7 @@ class AutomaticProperties {
         }
         p["$os"]                = "macOS"
         p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
-        #endif // MAC_OS
+        #endif // os(OSX)
 
         let infoDict = Bundle.main.infoDictionary
         if let infoDict = infoDict {
@@ -65,11 +65,11 @@ class AutomaticProperties {
             p["$ios_app_release"] = infoDict["CFBundleShortVersionString"]
         }
         p["$ios_device_model"]  = AutomaticProperties.deviceModel()
-        #if !MAC_OS
+        #if !os(OSX)
         p["$ios_version"]       = UIDevice.current.systemVersion
         #else
         p["$ios_version"]       = ProcessInfo.processInfo.operatingSystemVersionString
-        #endif // MAC_OS
+        #endif // os(OSX)
         p["$ios_lib_version"]   = AutomaticProperties.libVersion()
         p["$swift_lib_version"] = AutomaticProperties.libVersion()
 

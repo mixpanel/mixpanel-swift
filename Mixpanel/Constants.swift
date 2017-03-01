@@ -7,9 +7,9 @@
 //
 
 import Foundation
-#if !MAC_OS
+#if !os(OSX)
 import UIKit
-#endif // MAC_OS
+#endif // os(OSX)
 
 struct QueueConstants {
     static var queueSize = 5000

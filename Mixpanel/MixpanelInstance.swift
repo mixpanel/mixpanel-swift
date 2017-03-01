@@ -7,11 +7,11 @@
 //
 
 import Foundation
-#if !MAC_OS
+#if !os(OSX)
 import UIKit
 #else
 import Cocoa
-#endif // MAC_OS
+#endif // os(OSX)
 
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
@@ -204,16 +204,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     var eventsQueue = Queue()
     var timedEvents = InternalProperties()
     var serialQueue: DispatchQueue!
-    #if !MAC_OS
+    #if !os(OSX)
     var taskId = UIBackgroundTaskInvalid
-    #endif // MAC_OS
+    #endif // os(OSX)
     let flushInstance: Flush
     let trackInstance: Track
     #if DECIDE
     let decideInstance: Decide
     #endif // DECIDE
 
-    #if !MAC_OS
+    #if !os(OSX)
     init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
@@ -264,9 +264,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         setupListeners()
         unarchive()
     }
-    #endif // MAC_OS
+    #endif // os(OSX)
 
-    #if !MAC_OS
+    #if !os(OSX)
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
         trackIntegration()
@@ -323,7 +323,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                                        name: .NSApplicationDidBecomeActive,
                                        object: nil)
     }
-    #endif // MAC_OS
+    #endif // os(OSX)
 
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -365,7 +365,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
 
     @objc private func applicationWillResignActive(_ notification: Notification) {
         flushInstance.applicationWillResignActive()
-        #if MAC_OS
+        #if os(OSX)
         if flushOnBackground {
             flush()
         }
@@ -376,7 +376,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         #endif
     }
 
-    #if !MAC_OS
+    #if !os(OSX)
     @objc private func applicationDidEnterBackground(_ notification: Notification) {
         let sharedApplication = UIApplication.shared
 
@@ -424,7 +424,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             track(event: eventNameMap, properties:eventArgs)
         }
     }
-    #endif // MAC_OS
+    #endif // os(OSX)
 
     @objc private func applicationWillTerminate(_ notification: Notification) {
         serialQueue.async() {
@@ -435,21 +435,21 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     #endif // !APP_EXTENSION
 
     func defaultDistinctId() -> String {
-        #if !MAC_OS
+        #if !os(OSX)
         var distinctId: String? = IFA()
         if distinctId == nil && NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString
         }
         #else
         let distinctId = MixpanelInstance.macOSIdentifier()
-        #endif // MAC_OS
+        #endif // os(OSX)
         guard let distId = distinctId else {
             return UUID().uuidString
         }
         return distId
     }
 
-    #if !MAC_OS
+    #if !os(OSX)
     func IFA() -> String? {
         var ifa: String? = nil
         if let ASIdentifierManagerClass = NSClassFromString("ASIdentifierManager") {
@@ -484,7 +484,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         IOObjectRelease(platformExpert);
         return (serialNumberAsCFString?.takeUnretainedValue() as? String)
     }
-    #endif // MAC_OS
+    #endif // os(OSX)
 
     #if os(iOS)
     #if !APP_EXTENSION

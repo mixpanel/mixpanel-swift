@@ -67,6 +67,8 @@ class AutomaticProperties {
         p["$ios_device_model"]  = AutomaticProperties.deviceModel()
         #if !MAC_OS
         p["$ios_version"]       = UIDevice.current.systemVersion
+        #else
+        p["$ios_version"]       = ProcessInfo.processInfo.operatingSystemVersionString
         #endif // MAC_OS
         p["$ios_lib_version"]   = AutomaticProperties.libVersion()
         p["$swift_lib_version"] = AutomaticProperties.libVersion()

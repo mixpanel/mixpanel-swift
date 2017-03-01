@@ -218,9 +218,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
-
         self.name = name
-
         flushInstance = Flush(basePathIdentifier: name)
         #if DECIDE
         decideInstance = Decide(basePathIdentifier: name)
@@ -253,9 +251,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
-
         self.name = name
-
         flushInstance = Flush(basePathIdentifier: name)
         trackInstance = Track(apiToken: self.apiToken)
         flushInstance.delegate = self

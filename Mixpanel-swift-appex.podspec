@@ -7,8 +7,7 @@ Pod::Spec.new do |s|
   s.homepage = 'https://mixpanel.com'
   s.author       = { 'Mixpanel, Inc' => 'support@mixpanel.com' }
   s.source       = { :git => 'https://github.com/mixpanel/mixpanel-swift.git',
-                     :tag => "v#{s.version}",
-                     :branch => "appextension-support" }
+                     :tag => "v#{s.version}" }
   s.ios.deployment_target = '8.0'
   s.pod_target_xcconfig = {
     'OTHER_SWIFT_FLAGS' => '$(inherited) -D APP_EXTENSION'

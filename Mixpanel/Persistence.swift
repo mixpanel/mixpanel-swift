@@ -219,18 +219,12 @@ class Persistence {
                                                               Queue,
                                                               Set<Int>) {
         let properties = unarchiveWithType(.properties, token: token) as? InternalProperties
-        let superProperties =
-            properties?["superProperties"] as? InternalProperties ?? InternalProperties()
-        let timedEvents =
-            properties?["timedEvents"] as? InternalProperties ?? InternalProperties()
-        let distinctId =
-            properties?["distinctId"] as? String ?? ""
-        let alias =
-            properties?["alias"] as? String ?? nil
-        let peopleDistinctId =
-            properties?["peopleDistinctId"] as? String ?? nil
-        let peopleUnidentifiedQueue =
-            properties?["peopleUnidentifiedQueue"] as? Queue ?? Queue()
+        let (superProperties,
+             timedEvents,
+             distinctId,
+             alias,
+             peopleDistinctId,
+             peopleUnidentifiedQueue) = unarchivePropertiesHelper(token: token)
         let shownNotifications =
             properties?["shownNotifications"] as? Set<Int> ?? Set<Int>()
 
@@ -244,6 +238,16 @@ class Persistence {
     }
     #else
     class private func unarchiveProperties(token: String) -> (InternalProperties,
+        InternalProperties,
+        String,
+        String?,
+        String?,
+        Queue) {
+        return unarchivePropertiesHelper(token: token)
+    }
+    #endif // DECIDE
+
+    class private func unarchivePropertiesHelper(token: String) -> (InternalProperties,
         InternalProperties,
         String,
         String?,
@@ -270,7 +274,6 @@ class Persistence {
                     peopleDistinctId,
                     peopleUnidentifiedQueue)
     }
-    #endif // DECIDE
 
     #if DECIDE
     class private func unarchiveCodelessBindings(token: String) -> Set<CodelessBinding> {

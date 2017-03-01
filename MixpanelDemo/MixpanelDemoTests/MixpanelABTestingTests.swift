@@ -91,7 +91,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
             XCTAssertEqual(label2.text!, "New Text")
             expect.fulfill()
         })
-        self.waitForExpectations(timeout: 0.1, handler: nil)
+        self.waitForExpectations(timeout: 0.5, handler: nil)
         variant?.stop()
     }
 

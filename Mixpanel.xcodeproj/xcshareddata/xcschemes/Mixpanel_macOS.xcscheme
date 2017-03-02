@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E12782B21D4AB4B30025FB05"
+               BlueprintIdentifier = "E1F15FC81E64A10700391AE3"
                BuildableName = "Mixpanel.framework"
-               BlueprintName = "Mixpanel_tvOS"
+               BlueprintName = "Mixpanel_macOS"
                ReferencedContainer = "container:Mixpanel.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,9 +45,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E12782B21D4AB4B30025FB05"
+            BlueprintIdentifier = "E1F15FC81E64A10700391AE3"
             BuildableName = "Mixpanel.framework"
-            BlueprintName = "Mixpanel_tvOS"
+            BlueprintName = "Mixpanel_macOS"
             ReferencedContainer = "container:Mixpanel.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -63,9 +63,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E12782B21D4AB4B30025FB05"
+            BlueprintIdentifier = "E1F15FC81E64A10700391AE3"
             BuildableName = "Mixpanel.framework"
-            BlueprintName = "Mixpanel_tvOS"
+            BlueprintName = "Mixpanel_macOS"
             ReferencedContainer = "container:Mixpanel.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

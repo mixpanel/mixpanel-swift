@@ -7,7 +7,9 @@
 //
 
 import Foundation
+#if !os(OSX)
 import UIKit
+#endif // os(OSX)
 
 /// The primary class for integrating Mixpanel with your app.
 open class Mixpanel {
@@ -30,6 +32,7 @@ open class Mixpanel {
      - returns: returns a mixpanel instance if needed to keep throughout the project.
      You can always get the instance by calling getInstance(name)
      */
+    #if !os(OSX)
     @discardableResult
     open class func initialize(token apiToken: String,
                                launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil,
@@ -40,6 +43,16 @@ open class Mixpanel {
                                                          flushInterval: flushInterval,
                                                          instanceName:  instanceName)
     }
+    #else
+    @discardableResult
+    open class func initialize(token apiToken: String,
+                               flushInterval: Double = 60,
+                               instanceName: String = UUID().uuidString) -> MixpanelInstance {
+        return MixpanelManager.sharedInstance.initialize(token:         apiToken,
+                                                         flushInterval: flushInterval,
+                                                         instanceName:  instanceName)
+    }
+    #endif // os(OSX)
 
     /**
      Gets the mixpanel instance with the given name
@@ -100,6 +113,7 @@ class MixpanelManager {
         Logger.addLogging(PrintLogging())
     }
 
+    #if !os(OSX)
     func initialize(token apiToken: String,
                     launchOptions: [UIApplicationLaunchOptionsKey : Any]?,
                     flushInterval: Double,
@@ -113,6 +127,19 @@ class MixpanelManager {
 
         return instance
     }
+    #else
+    func initialize(token apiToken: String,
+                    flushInterval: Double,
+                    instanceName: String) -> MixpanelInstance {
+        let instance = MixpanelInstance(apiToken: apiToken,
+                                        flushInterval: flushInterval,
+                                        name: instanceName)
+        mainInstance = instance
+        instances[instanceName] = instance
+
+        return instance
+    }
+    #endif // os(OSX)
 
     func getInstance(name instanceName: String) -> MixpanelInstance? {
         guard let instance = instances[instanceName] else {

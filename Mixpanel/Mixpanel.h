@@ -6,7 +6,7 @@
 //  Copyright © 2016 Mixpanel. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+@import Foundation;
 
 //! Project version number for Mixpanel.
 FOUNDATION_EXPORT double MixpanelVersionNumber;
@@ -15,5 +15,3 @@ FOUNDATION_EXPORT double MixpanelVersionNumber;
 FOUNDATION_EXPORT const unsigned char MixpanelVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <Mixpanel/PublicHeader.h>
-
-

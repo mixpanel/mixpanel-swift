@@ -659,6 +659,7 @@ extension MixpanelInstance {
 extension MixpanelInstance {
     // MARK: - Persistence
 
+    #if DECIDE
     /**
      Writes current project info including the distinct Id, super properties,
      and pending event and People record queues to disk.
@@ -670,7 +671,6 @@ extension MixpanelInstance {
 
      - important: You do not need to call this method.**
      */
-    #if DECIDE
     open func archive() {
         let properties = ArchivedProperties(superProperties: superProperties,
                                             timedEvents: timedEvents,
@@ -687,6 +687,17 @@ extension MixpanelInstance {
                             token: apiToken)
     }
     #else
+    /**
+     Writes current project info including the distinct Id, super properties,
+     and pending event and People record queues to disk.
+
+     This state will be recovered when the app is launched again if the Mixpanel
+     library is initialized with the same project token.
+     The library listens for app state changes and handles
+     persisting data as needed.
+
+     - important: You do not need to call this method.**
+     */
     open func archive() {
         let properties = ArchivedProperties(superProperties: superProperties,
                                             timedEvents: timedEvents,

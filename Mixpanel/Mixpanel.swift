@@ -14,6 +14,7 @@ import UIKit
 /// The primary class for integrating Mixpanel with your app.
 open class Mixpanel {
 
+    #if !os(OSX)
     /**
      Initializes an instance of the API with the given project token.
 
@@ -32,7 +33,6 @@ open class Mixpanel {
      - returns: returns a mixpanel instance if needed to keep throughout the project.
      You can always get the instance by calling getInstance(name)
      */
-    #if !os(OSX)
     @discardableResult
     open class func initialize(token apiToken: String,
                                launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil,
@@ -44,6 +44,24 @@ open class Mixpanel {
                                                          instanceName:  instanceName)
     }
     #else
+    /**
+     Initializes an instance of the API with the given project token (MAC OS ONLY).
+
+     Returns a new Mixpanel instance API object. This allows you to create more than one instance
+     of the API object, which is convenient if you'd like to send data to more than
+     one Mixpanel project from a single app.
+
+     - parameter token:         your project token
+     - parameter flushInterval: Optional. Interval to run background flushing
+     - parameter instanceName:  Optional. The name you want to call this instance
+
+     - important: If you have more than one Mixpanel instance, it is beneficial to initialize
+     the instances with an instanceName. Then they can be reached by calling getInstance with name.
+
+     - returns: returns a mixpanel instance if needed to keep throughout the project.
+     You can always get the instance by calling getInstance(name)
+     */
+
     @discardableResult
     open class func initialize(token apiToken: String,
                                flushInterval: Double = 60,

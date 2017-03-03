@@ -24,6 +24,7 @@ class AutomaticProperties {
     #endif // os(iOS)
 
     static var properties: InternalProperties = {
+        objc_sync_enter(AutomaticProperties.self); defer { objc_sync_exit(AutomaticProperties.self) }
         var p = InternalProperties()
         #if !os(OSX)
         let size = UIScreen.main.bounds.size
@@ -58,6 +59,7 @@ class AutomaticProperties {
     }()
 
     static var peopleProperties: InternalProperties = {
+        objc_sync_enter(AutomaticProperties.self); defer { objc_sync_exit(AutomaticProperties.self) }
         var p = InternalProperties()
         let infoDict = Bundle.main.infoDictionary
         if let infoDict = infoDict {

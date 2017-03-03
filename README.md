@@ -41,7 +41,13 @@ If you are using Objective-C, we recommend using our **[Objective-C Library](htt
 Mixpanel supports `CocoaPods` for easy installation.
 To Install, see our **[swift integration guide »](https://mixpanel.com/help/reference/swift)**
 
+For iOS, tvOS, and macOS integrations:
+
 `pod 'Mixpanel-swift'`
+
+For App Extension integrations:
+
+`pod 'Mixpanel-swift-appex'`
 
 ## Carthage
 
@@ -82,7 +88,7 @@ Select your app .xcodeproj file. Under "General", add the Mixpanel framework as 
 Import Mixpanel into AppDelegate.swift, and initialize Mixpanel within `application:didFinishLaunchingWithOptions:`
 ![alt text](http://images.mxpnl.com/docs/2016-07-19%2023:27:03.724972-Screen%20Shot%202016-07-18%20at%207.16.51%20PM.png)
 
-```
+```swift
 func application(_ application: UIApplication,
                  didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
     Mixpanel.initialize(token: "MIXPANEL_TOKEN")
@@ -92,17 +98,17 @@ func application(_ application: UIApplication,
 # Initializing and Usage
 
 By calling:
-```
+```swift
 let mixpanel = Mixpanel.initialize(token: "MIXPANEL_TOKEN")
 ```
 
 You initialize your mixpanel instance with the token provided to you on mixpanel.com.
 To interact with the instance and start tracking, you can either use the mixpanel instance given when initializing:
-```
+```swift
 mixpanel.track(event: "Tracked Event!")
 ```
 or you can directly fetch the instance and use it from the Mixpanel object:
-```
+```swift
 Mixpanel.mainInstance().track(event: "Tracked Event!")
 ```
 

@@ -14,15 +14,12 @@ internal enum TweakViewData {
 	case integer(value: Int, defaultValue: Int, min: Int?, max: Int?, stepSize: Int?)
 	case float(value: CGFloat, defaultValue: CGFloat, min: CGFloat?, max: CGFloat?, stepSize: CGFloat?)
 	case doubleTweak(value: Double, defaultValue: Double, min: Double?, max: Double?, stepSize: Double?)
-	case color(value: UIColor, defaultValue: UIColor)
     case string(value: String, defaultValue: String)
 
 	init<T: TweakableType>(type: TweakViewDataType, value: T, defaultValue: T, minimum: T?, maximum: T?, stepSize: T?) {
 		switch type {
 		case .boolean:
 			self = .boolean(value: value as! Bool, defaultValue: defaultValue as! Bool)
-		case .uiColor:
-			self = .color(value: value as! UIColor, defaultValue: defaultValue as! UIColor)
 		case .integer:
 			let clippedValue = clip(value as! Int, minimum as? Int, maximum as? Int)
 			self = .integer(value: clippedValue,
@@ -59,8 +56,6 @@ internal enum TweakViewData {
 			return floatValue
 		case let .doubleTweak(value: doubleValue, _, _, _, _):
 			return doubleValue
-		case let .color(value: colorValue, defaultValue: _):
-			return colorValue
         case let .string(value: stringValue, defaultValue: _):
             return stringValue
 		}
@@ -76,8 +71,6 @@ internal enum TweakViewData {
             return (floatValue, defaultValue, min, max)
         case let .doubleTweak(value: doubleValue, defaultValue: defaultValue, min: min, max: max, _):
             return (doubleValue, defaultValue, min, max)
-        case let .color(value: colorValue, defaultValue: defaultValue):
-            return (colorValue, defaultValue, defaultValue, defaultValue)
         case let .string(value: stringValue, defaultValue: defaultValue):
             return (stringValue, defaultValue, defaultValue, defaultValue)
         }
@@ -99,9 +92,6 @@ internal enum TweakViewData {
 		case let .doubleTweak(value: value, defaultValue: defaultValue, _, _, _):
 			string = "Double(\(value))"
 			differsFromDefault = (value != defaultValue)
-		case let .color(value: value, defaultValue: defaultValue):
-			string = "Color(\(value.hexString), alpha: \(value.alphaValue))"
-			differsFromDefault = (value != defaultValue)
         case let .string(value: value, defaultValue: defaultValue):
             string = "String(\(value)"
             differsFromDefault = (value != defaultValue)
@@ -113,7 +103,7 @@ internal enum TweakViewData {
 		switch self {
 		case .integer, .float, .doubleTweak:
 			return true
-		case .boolean, .color, .string:
+		case .boolean, .string:
 			return false
 		}
 	}
@@ -136,7 +126,7 @@ internal enum TweakViewData {
 		let maximum: Double?
 
 		switch self {
-		case .boolean, .color, .string:
+		case .boolean, .string:
 			return nil
 
 		case let .integer(intValue, intDefaultValue, intMin, intMax, _):

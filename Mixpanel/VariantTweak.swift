@@ -79,8 +79,6 @@ class VariantTweak: NSObject, NSCoding {
         } else {
             if let value = value as? Bool, let def = def as? Bool {
                 return TweakViewData.boolean(value: value, defaultValue: def)
-            } else if let value = value as? UIColor, let def = def as? UIColor {
-                return TweakViewData.color(value: value, defaultValue: def)
             }
         }
 

@@ -93,7 +93,6 @@
 		E174DAEF1DA337CB00FED703 /* TweakViewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E174DAED1DA337CB00FED703 /* TweakViewData.swift */; };
 		E174DAF11DA337E400FED703 /* TweakGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = E174DAF01DA337E400FED703 /* TweakGroup.swift */; };
 		E174DAF31DA3380900FED703 /* Clip.swift in Sources */ = {isa = PBXBuildFile; fileRef = E174DAF21DA3380900FED703 /* Clip.swift */; };
-		E174DAF51DA3381C00FED703 /* UIColor+Tweaks.swift in Sources */ = {isa = PBXBuildFile; fileRef = E174DAF41DA3381C00FED703 /* UIColor+Tweaks.swift */; };
 		E174DAF71DA45C9D00FED703 /* ChangeMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E174DAF61DA45C9D00FED703 /* ChangeMessage.swift */; };
 		E174DAF91DA4623E00FED703 /* TweakMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E174DAF81DA4623E00FED703 /* TweakMessage.swift */; };
 		E174DB361DA83F2E00FED703 /* ClearMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E174DB351DA83F2E00FED703 /* ClearMessage.swift */; };
@@ -224,7 +223,6 @@
 		E174DAED1DA337CB00FED703 /* TweakViewData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TweakViewData.swift; sourceTree = "<group>"; };
 		E174DAF01DA337E400FED703 /* TweakGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TweakGroup.swift; sourceTree = "<group>"; };
 		E174DAF21DA3380900FED703 /* Clip.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Clip.swift; sourceTree = "<group>"; };
-		E174DAF41DA3381C00FED703 /* UIColor+Tweaks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+Tweaks.swift"; sourceTree = "<group>"; };
 		E174DAF61DA45C9D00FED703 /* ChangeMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeMessage.swift; sourceTree = "<group>"; };
 		E174DAF81DA4623E00FED703 /* TweakMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TweakMessage.swift; sourceTree = "<group>"; };
 		E174DB351DA83F2E00FED703 /* ClearMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClearMessage.swift; sourceTree = "<group>"; };
@@ -458,7 +456,6 @@
 			children = (
 				E174DAF21DA3380900FED703 /* Clip.swift */,
 				E174DAF01DA337E400FED703 /* TweakGroup.swift */,
-				E174DAF41DA3381C00FED703 /* UIColor+Tweaks.swift */,
 				E174DAEC1DA337CB00FED703 /* TweakCollection.swift */,
 				E174DAED1DA337CB00FED703 /* TweakViewData.swift */,
 				E174DAEA1DA337A300FED703 /* TweakPersistency.swift */,
@@ -809,7 +806,6 @@
 				E174DAF31DA3380900FED703 /* Clip.swift in Sources */,
 				E174DAE31DA3370300FED703 /* TweakableType.swift in Sources */,
 				E165228F1D6781DF000D5949 /* MixpanelType.swift in Sources */,
-				E174DAF51DA3381C00FED703 /* UIColor+Tweaks.swift in Sources */,
 				E19D12961D9C5E6600A8016D /* VariantTweak.swift in Sources */,
 				E11801B01D7F92F10006DD2B /* UIFontToNSDictionary.swift in Sources */,
 				E118EA021E37F3A700223C47 /* MiniNotification.swift in Sources */,

@@ -82,15 +82,15 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
             bodyLabel.text = takeoverNotification.body
         }
 
-        viewMask.backgroundColor = UIColor(hex4: takeoverNotification.backgroundColor)
+        viewMask.backgroundColor = UIColor(MPHex: takeoverNotification.backgroundColor)
 
-        titleLabel.textColor = UIColor(hex4: takeoverNotification.titleColor)
-        bodyLabel.textColor = UIColor(hex4: takeoverNotification.bodyColor)
+        titleLabel.textColor = UIColor(MPHex: takeoverNotification.titleColor)
+        bodyLabel.textColor = UIColor(MPHex: takeoverNotification.bodyColor)
 
         let origImage = closeButton.image(for: UIControlState.normal)
         let tintedImage = origImage?.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
         closeButton.setImage(tintedImage, for: UIControlState.normal)
-        closeButton.tintColor = UIColor(hex4: takeoverNotification.closeButtonColor)
+        closeButton.tintColor = UIColor(MPHex: takeoverNotification.closeButtonColor)
         closeButton.imageView?.contentMode = UIViewContentMode.scaleAspectFit
 
         if takeoverNotification.buttons.count >= 1 {
@@ -116,7 +116,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         }
 
         if UIDevice.current.userInterfaceIdiom == UIUserInterfaceIdiom.pad {
-            self.view.backgroundColor = UIColor(hex4: takeoverNotification.backgroundColor)
+            self.view.backgroundColor = UIColor(MPHex: takeoverNotification.backgroundColor)
             self.view.backgroundColor = self.view.backgroundColor?.withAlphaComponent(0.8)
             viewMask.clipsToBounds = true
             viewMask.layer.cornerRadius = 6
@@ -129,11 +129,11 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         buttonView.titleLabel?.adjustsFontSizeToFitWidth = true
         buttonView.layer.cornerRadius = 5
         buttonView.layer.borderWidth = 2
-        buttonView.setTitleColor(UIColor(hex4: buttonModel.textColor), for: UIControlState.normal)
-        buttonView.setTitleColor(UIColor(hex4: buttonModel.textColor), for: UIControlState.highlighted)
-        buttonView.setTitleColor(UIColor(hex4: buttonModel.textColor), for: UIControlState.selected)
-        buttonView.layer.borderColor = UIColor(hex4: buttonModel.borderColor).cgColor
-        buttonView.backgroundColor = UIColor(hex4: buttonModel.backgroundColor)
+        buttonView.setTitleColor(UIColor(MPHex: buttonModel.textColor), for: UIControlState.normal)
+        buttonView.setTitleColor(UIColor(MPHex: buttonModel.textColor), for: UIControlState.highlighted)
+        buttonView.setTitleColor(UIColor(MPHex: buttonModel.textColor), for: UIControlState.selected)
+        buttonView.layer.borderColor = UIColor(MPHex: buttonModel.borderColor).cgColor
+        buttonView.backgroundColor = UIColor(MPHex: buttonModel.backgroundColor)
         buttonView.addTarget(self, action: #selector(buttonTapped(_:)), for: UIControlEvents.touchUpInside)
         buttonView.tag = index
     }
@@ -206,7 +206,7 @@ class FadingView: UIView {
 class InAppButtonView: UIButton {
     var origColor: UIColor?
     var wasCalled = false
-    let overlayColor = UIColor(hex: 0x868686, alpha: 0.2)
+    let overlayColor = UIColor(MPHex: 0x33868686)
     override var isHighlighted: Bool {
         didSet {
             switch isHighlighted {

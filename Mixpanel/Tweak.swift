@@ -135,8 +135,6 @@ extension Tweak: TweakType {
 				max: maximumValue as? Double,
 				stepSize: stepSize as? Double
 			)
-		case .uiColor:
-			return .color(defaultValue: defaultValue as! UIColor)
         case .string:
             return .string(defaultValue: defaultValue as! String)
         }

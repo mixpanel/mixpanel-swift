@@ -33,10 +33,10 @@ class MiniNotificationViewController: BaseNotificationViewController {
             imageView.image = UIImage(data: image)
         }
 
-        view.backgroundColor = UIColor(hex4: miniNotification.backgroundColor)
-        bodyLabel.textColor = UIColor(hex4: miniNotification.bodyColor)
+        view.backgroundColor = UIColor(MPHex: miniNotification.backgroundColor)
+        bodyLabel.textColor = UIColor(MPHex: miniNotification.bodyColor)
         imageView.image = imageView.image?.withRenderingMode(.alwaysTemplate)
-        imageView.tintColor = UIColor(hex4: miniNotification.imageTintColor)
+        imageView.tintColor = UIColor(MPHex: miniNotification.imageTintColor)
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(gesture:)))
         tapGesture.numberOfTapsRequired = 1
@@ -67,7 +67,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
             window.clipsToBounds = true
             window.rootViewController = self
             window.layer.cornerRadius = 6
-            window.layer.borderColor = UIColor(hex4: miniNotification.borderColor).cgColor
+            window.layer.borderColor = UIColor(MPHex: miniNotification.borderColor).cgColor
             window.layer.borderWidth = 1
             window.isHidden = false
         }

@@ -151,9 +151,6 @@ public final class TweakStore {
 		case let .doubleTweak(defaultValue: defaultValue, min: min, max: max, stepSize: step):
 			let currentValue = cachedValue as? Double ?? defaultValue
 			return .doubleTweak(value: currentValue, defaultValue: defaultValue, min: min, max: max, stepSize: step)
-		case let .color(defaultValue: defaultValue):
-			let currentValue = cachedValue as? UIColor ?? defaultValue
-			return .color(value: currentValue, defaultValue: defaultValue)
         case let .string(defaultValue: defaultValue):
             let currentValue = cachedValue as? String ?? defaultValue
             return .string(value: currentValue, defaultValue: defaultValue)

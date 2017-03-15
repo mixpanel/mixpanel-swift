@@ -121,6 +121,9 @@ class Decide {
                 decideResponse.newVariants = newVariants
                 self.ABTestingInstance.variants = newVariants.union(runningVariants)
 
+                let automaticEvents = true
+                
+
                 self.decideFetched = true
                 semaphore.signal()
             }

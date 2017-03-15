@@ -49,6 +49,7 @@
 		E142DBD31D76263600F34C12 /* ObjectSerializerContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E142DBD21D76263600F34C12 /* ObjectSerializerContext.swift */; };
 		E1497EF21D6B8DC900B2B65C /* CodelessBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1497EF11D6B8DC900B2B65C /* CodelessBinding.swift */; };
 		E14A42971D79FFDE0021D42D /* UIViewSelectors.swift in Sources */ = {isa = PBXBuildFile; fileRef = E14A42961D79FFDE0021D42D /* UIViewSelectors.swift */; };
+		E151FA381E70DFB5002EF53D /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		E154220C1D6E199B009421A0 /* UIControlBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = E154220B1D6E199B009421A0 /* UIControlBinding.swift */; };
 		E154220E1D6E19A7009421A0 /* UITableViewBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = E154220D1D6E19A7009421A0 /* UITableViewBinding.swift */; };
 		E15422111D6E5835009421A0 /* ObjectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15422101D6E5835009421A0 /* ObjectSelector.swift */; };
@@ -180,6 +181,7 @@
 		E142DBD21D76263600F34C12 /* ObjectSerializerContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectSerializerContext.swift; sourceTree = "<group>"; };
 		E1497EF11D6B8DC900B2B65C /* CodelessBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodelessBinding.swift; sourceTree = "<group>"; };
 		E14A42961D79FFDE0021D42D /* UIViewSelectors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewSelectors.swift; sourceTree = "<group>"; };
+		E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutomaticEvents.swift; sourceTree = "<group>"; };
 		E154220B1D6E199B009421A0 /* UIControlBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIControlBinding.swift; sourceTree = "<group>"; };
 		E154220D1D6E19A7009421A0 /* UITableViewBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITableViewBinding.swift; sourceTree = "<group>"; };
 		E15422101D6E5835009421A0 /* ObjectSelector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectSelector.swift; sourceTree = "<group>"; };
@@ -489,6 +491,7 @@
 				E11594981D01689F007F8B4F /* JSONHandler.swift */,
 				E1982BFE1D0AC2E2006B7330 /* Error.swift */,
 				E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */,
+				E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */,
 				E1D335CD1D30578E00E68E12 /* Constants.swift */,
 				E165228E1D6781DF000D5949 /* MixpanelType.swift */,
 				E16C0EB21D80BF290051EF35 /* MD5.swift */,
@@ -773,6 +776,7 @@
 				E11801AE1D7F86320006DD2B /* NSAttributedStringToNSDictionary.swift in Sources */,
 				E174DAE51DA3373600FED703 /* TweakBinding.swift in Sources */,
 				E174DAF71DA45C9D00FED703 /* ChangeMessage.swift in Sources */,
+				E151FA381E70DFB5002EF53D /* AutomaticEvents.swift in Sources */,
 				E15422291D710587009421A0 /* SnapshotMessage.swift in Sources */,
 				E12BD38D1D91EBE2008989C9 /* SHA256.swift in Sources */,
 				E174DAF91DA4623E00FED703 /* TweakMessage.swift in Sources */,

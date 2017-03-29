@@ -71,8 +71,8 @@ class ObjectSelector: NSObject {
 
         let filter = ObjectFilter()
         var name: NSString? = nil
-        if scanner.scanCharacters(from: classAndPropertyChars, into: &name) {
-            filter.name = name as? String
+        if scanner.scanCharacters(from: classAndPropertyChars, into: &name), let name = name {
+            filter.name = name as String
         } else {
             filter.name = "*"
         }
@@ -94,8 +94,8 @@ class ObjectSelector: NSObject {
 
             if scanner.scanInt(&index) && scanner.scanCharacters(from: predicateEndChar, into: nil) {
                 filter.index = index
-            } else if scanner.scanUpToCharacters(from: predicateEndChar, into: &predicateFormat) {
-                let parsedPredicate = NSPredicate(format: predicateFormat as! String)
+            } else if scanner.scanUpToCharacters(from: predicateEndChar, into: &predicateFormat), let predicateFormat = predicateFormat {
+                let parsedPredicate = NSPredicate(format: predicateFormat as String)
                 filter.predicate = NSPredicate { (evaluatedObject, bindings) in
                     return parsedPredicate.evaluate(with: evaluatedObject, substitutionVariables: bindings)
                 }

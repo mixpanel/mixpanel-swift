@@ -84,7 +84,7 @@ open class People {
     }
 
     private func deviceTokenDataToString(_ deviceToken: Data) -> String {
-        let tokenChars = unsafeBitCast((deviceToken as NSData).bytes, to: UnsafePointer<CChar>.self)
+        let tokenChars = (deviceToken as NSData).bytes.assumingMemoryBound(to: CChar.self)
         var tokenString = ""
 
         for i in 0..<deviceToken.count {

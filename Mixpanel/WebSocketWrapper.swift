@@ -281,8 +281,9 @@ class WebSocketWrapper: WebSocketDelegate {
     }
 
     func websocketDidDisconnect(_ socket: WebSocket, error: NSError?) {
-        Logger.debug(message: "WebSocket disconnected because of: \(error?.description)")
-
+        if let error = error {
+            Logger.debug(message: "WebSocket disconnected because of: \(error.description)")
+        }
         commandQueue.isSuspended = true
         commandQueue.cancelAllOperations()
         hideConnectedView()

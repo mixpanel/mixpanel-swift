@@ -23,7 +23,17 @@ class ObjectFilter: CustomStringConvertible {
     }
 
     var description: String {
-        return "name: \(name), index: \(index), predicate: \(predicate)]"
+        var desc = ""
+        if let name = name {
+            desc += "name: \(name),"
+        }
+        if let index = index {
+            desc += "index: \(index),"
+        }
+        if let predicate = predicate {
+            desc += "predicate: \(predicate)"
+        }
+        return desc
     }
 
 

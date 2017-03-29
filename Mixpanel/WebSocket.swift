@@ -555,7 +555,8 @@ class WebSocket: NSObject, StreamDelegate {
             if !isControlFrame && (receivedOpcode != .binaryFrame && receivedOpcode != .continueFrame &&
                 receivedOpcode != .textFrame && receivedOpcode != .pong) {
                 let errCode = CloseCode.protocolError.rawValue
-                doDisconnect(errorWithDetail("unknown opcode: \(receivedOpcode)", code: errCode))
+                let detail = (receivedOpcode != nil) ? "unknown opcode: \(receivedOpcode!)" : "unknown opcode"
+                doDisconnect(errorWithDetail(detail, code: errCode))
                 writeError(errCode)
                 return emptyBuffer
             }
@@ -612,13 +613,7 @@ class WebSocket: NSObject, StreamDelegate {
             if dataLength > UInt64(bufferLen) {
                 len = UInt64(bufferLen-offset)
             }
-            let data: Data
-            if len < 0 {
-                len = 0
-                data = Data()
-            } else {
-                data = Data(bytes: baseAddress+offset, count: Int(len))
-            }
+            let data = Data(bytes: baseAddress+offset, count: Int(len))
             if receivedOpcode == .pong {
                 if canDispatch {
                     callbackQueue.async { [weak self] in

@@ -45,7 +45,7 @@ For iOS, tvOS, and macOS integrations:
 
 `pod 'Mixpanel-swift'`
 
-For App Extension integrations:
+For App Extension integrations (you may need both the above *and* this):
 
 `pod 'Mixpanel-swift-appex'`
 

@@ -302,9 +302,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
                                        selector: #selector(appLinksNotificationRaised(_:)),
                                        name: NSNotification.Name("com.parse.bolts.measurement_event"),
                                        object: nil)
-        #if os(iOS)
+        #if DECIDE && os(iOS)
         initializeGestureRecognizer()
-        #endif // os(iOS)
+        #endif // DECIDE && os(iOS)
         #endif // !APP_EXTENSION
     }
     #else
@@ -502,7 +502,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         }
     }
 
-    #if !APP_EXTENSION
+    #if DECIDE && !APP_EXTENSION
     func initializeGestureRecognizer() {
         DispatchQueue.main.async {
             self.decideInstance.gestureRecognizer = UILongPressGestureRecognizer(target: self,
@@ -524,7 +524,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             connectToWebSocket()
         }
     }
-    #endif // !APP_EXTENSION
+    #endif // DECIDE && !APP_EXTENSION
     #endif // os(iOS)
 
 }

@@ -21,17 +21,10 @@ If you are using Objective-C, we recommend using our **[Objective-C Library](htt
 
 ## Current supported features
 
-**Our master branch and our 2.x releases are now in Swift 3. If you wish to use our Swift 2.3 implementation, please point to our v1.0.1 release.**
+**Our master branch and our releases are in Swift 3. If you wish to use our Swift 2.3 implementation, please point to our v1.0.1 release.**
 
-| Feature      | Swift 3 | [Swift 2.3](https://github.com/mixpanel/mixpanel-swift/tree/swift2.3) |
-| -------      | ------------- | -------------                                                            |
-| Tracking API |       ✔       |       ✔       |
-| People API   |       ✔       |       ✔       |
-| [Documentation](https://mixpanel.github.io/mixpanel-swift)|       ✔       |        ✔       |
-| tvOS Support |       ✔        |              |
-| In-app Notifications |       ✔        |              |
-| Codeless Tracking |       ✔        |              |
-| A/B Testing |       ✔        |              |
+Our Swift library fully supports all of the Mixpanel features, and has full parity with the [Objective-C Library](https://github.com/mixpanel/mixpanel-iphone).
+
 # Installation
 
 ## CocoaPods

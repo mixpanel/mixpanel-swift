@@ -32,6 +32,7 @@ class Decide {
     var ABTestingInstance = ABTesting()
     var webSocketWrapper: WebSocketWrapper?
     var gestureRecognizer: UILongPressGestureRecognizer?
+    static var automaticEvents = false
 
     var inAppDelegate: InAppNotificationsDelegate? {
         set {
@@ -121,8 +122,9 @@ class Decide {
                 decideResponse.newVariants = newVariants
                 self.ABTestingInstance.variants = newVariants.union(runningVariants)
 
-                let automaticEvents = true
-                
+//                if let automaticEvents = result["automatic_events"] as? Bool {
+                    Decide.automaticEvents = true
+//                }
 
                 self.decideFetched = true
                 semaphore.signal()

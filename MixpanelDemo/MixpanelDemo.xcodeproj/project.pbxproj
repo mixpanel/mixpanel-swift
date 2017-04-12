@@ -35,6 +35,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		E12CE4131E9E1C370023AA2D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E1F15F921E5F847200391AE3;
+			remoteInfo = MixpanelAppex;
+		};
+		E12CE4151E9E1C370023AA2D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E1F15FC91E64A10700391AE3;
+			remoteInfo = Mixpanel_macOS;
+		};
 		E15FF7E81D0461130076CDE3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E15FF7CB1D0461130076CDE3 /* Project object */;
@@ -231,6 +245,8 @@
 			children = (
 				E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */,
 				E16C35E41D872045003500AC /* Mixpanel.framework */,
+				E12CE4141E9E1C370023AA2D /* MixpanelAppex.framework */,
+				E12CE4161E9E1C370023AA2D /* Mixpanel.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -293,7 +309,7 @@
 						DevelopmentTeam = E8FVX7QLET;
 						DevelopmentTeamName = "Mixpanel, Inc.";
 						LastSwiftMigration = 0800;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Push = {
 								enabled = 1;
@@ -333,6 +349,20 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		E12CE4141E9E1C370023AA2D /* MixpanelAppex.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MixpanelAppex.framework;
+			remoteRef = E12CE4131E9E1C370023AA2D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E12CE4161E9E1C370023AA2D /* Mixpanel.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Mixpanel.framework;
+			remoteRef = E12CE4151E9E1C370023AA2D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -587,14 +617,15 @@
 				CODE_SIGN_ENTITLEMENTS = MixpanelDemo/MixpanelDemo.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = MixpanelDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Mixpanel";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.swiftdemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "88d41d51-9b2f-4efc-aa57-83fb1297bb4b";
-				PROVISIONING_PROFILE_SPECIFIER = "E8FVX7QLET/Swift SDK Demo";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -607,14 +638,15 @@
 				CODE_SIGN_ENTITLEMENTS = MixpanelDemo/MixpanelDemo.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = MixpanelDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Mixpanel";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.swiftdemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "88d41d51-9b2f-4efc-aa57-83fb1297bb4b";
-				PROVISIONING_PROFILE_SPECIFIER = "E8FVX7QLET/Swift SDK Demo";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 3.0;
 			};

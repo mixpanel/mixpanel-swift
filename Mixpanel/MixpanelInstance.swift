@@ -37,7 +37,7 @@ protocol AppLifecycle {
 }
 
 /// The class that represents the Mixpanel Instance
-open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
+open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackDelegate {
 
     /// The a MixpanelDelegate object that gives control over Mixpanel network activity.
     open var delegate: MixpanelDelegate?
@@ -227,8 +227,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         trackInstance = Track(apiToken: self.apiToken)
         let label = "com.mixpanel.\(self.apiToken)"
         serialQueue = DispatchQueue(label: label)
-        automaticEvents = AutomaticEvents(serialQueue: serialQueue,
-                                          trackInstance: trackInstance)
+        automaticEvents = AutomaticEvents()
+        automaticEvents.delegate = self
         flushInstance.delegate = self
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,

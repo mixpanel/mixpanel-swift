@@ -211,6 +211,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     let trackInstance: Track
     #if DECIDE
     let decideInstance: Decide
+    let automaticEvents: AutomaticEvents
     #endif // DECIDE
 
     #if !os(OSX)
@@ -224,9 +225,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         decideInstance = Decide(basePathIdentifier: name)
         #endif // DECIDE
         trackInstance = Track(apiToken: self.apiToken)
-        flushInstance.delegate = self
         let label = "com.mixpanel.\(self.apiToken)"
         serialQueue = DispatchQueue(label: label)
+        automaticEvents = AutomaticEvents(serialQueue: serialQueue,
+                                          trackInstance: trackInstance)
+        flushInstance.delegate = self
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
                         serialQueue: serialQueue)

@@ -9,21 +9,36 @@
 import Foundation
 import UIKit
 
-extension UIViewController {
-//    optional public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool
-    //application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-    @objc func newDidFinishLaunchingWithOptions(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
-        let originalSelector = NSSelectorFromString("application:didFinishLaunchingWithOptions:")
-        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
-            let swizzle = Swizzler.swizzles[originalMethod] {
-            typealias MyCFunction = @convention(c) (AnyObject, Selector, UIApplication, NSDictionary) -> Bool
-            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
-            curriedImplementation(self, originalSelector, application, launchOptions)
+class AutomaticEvents {
+    let defaults = UserDefaults(suiteName: "Mixpanel")
+    init(serialQueue: DispatchQueue, trackInstance: Track) {
 
-            for (_, block) in swizzle.blocks {
-                block(self, swizzle.selector, tableView, indexPath as AnyObject?)
+        let firstOpenKey = "MPfirstOpen"
+        if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
+            Mixpanel.mainInstance().track(event: "MP: First App Open", properties: nil)
+            defaults.set(true, forKey: firstOpenKey)
+            defaults.synchronize()
+        }
+        Mixpanel.mainInstance().time(event: "MP: App Open")
+
+        if let defaults = defaults, let infoDict = Bundle.main.infoDictionary {
+            let appVersionKey = "MPAppVersion"
+            let appVersionValue = infoDict["CFBundleShortVersionString"]
+            if let appVersionValue = appVersionValue as? String,
+                appVersionValue != defaults.string(forKey: appVersionKey) {
+                Mixpanel.mainInstance().track(event: "MP: App Updated", properties: ["App Version": appVersionValue])
+                defaults.set(appVersionValue, forKey: appVersionKey)
+                defaults.synchronize()
             }
         }
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(appEnteredBackground(_:)),
+                                               name: .UIApplicationDidEnterBackground,
+                                               object: nil)
     }
     
+    @objc private func appEnteredBackground(_ notification: Notification) {
+        Mixpanel.mainInstance().track(event: "MP: App Open", properties: nil)
+    }
+
 }

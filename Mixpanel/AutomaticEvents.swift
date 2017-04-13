@@ -17,7 +17,7 @@ protocol TrackDelegate {
 class AutomaticEvents {
     let defaults = UserDefaults(suiteName: "Mixpanel")
     var delegate: TrackDelegate?
-    static let startTime = DispatchTime.now()
+    static var startTime = DispatchTime.now()
     var appLoadSpeed: UInt64 = 0
     var sessionLength: Float = 0
 
@@ -73,24 +73,25 @@ class AutomaticEvents {
     }
 
     @objc private func appDidBecomeActive(_ notification: Notification) {
-        appLoadSpeed = (DispatchTime.now().uptimeNanoseconds - AutomaticEvents.startTime.uptimeNanoseconds) / 1000000
+        let now = DispatchTime.now().uptimeNanoseconds
+        let start = AutomaticEvents.startTime.uptimeNanoseconds
+        appLoadSpeed = (now - start) / 1000000
     }
 
 }
 
-//
-//extension UIApplication {
-//    private static let runOnce: Void = {
-//        print(AutomaticEvents.startTime)
-//        print(DispatchTime.now())
-//    }()
-//
-//    override open var next: UIResponder? {
-//        // Called before applicationDidFinishLaunching
-//        UIApplication.runOnce
-//        return super.next
-//    }
-//}
+
+extension UIApplication {
+    private static let runOnce: Void = {
+        AutomaticEvents.startTime = DispatchTime.now()
+    }()
+
+    override open var next: UIResponder? {
+        // Called before applicationDidFinishLaunching
+        UIApplication.runOnce
+        return super.next
+    }
+}
 
 extension UIResponder {
 

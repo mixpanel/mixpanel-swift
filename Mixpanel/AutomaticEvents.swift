@@ -17,6 +17,9 @@ protocol TrackDelegate {
 class AutomaticEvents {
     let defaults = UserDefaults(suiteName: "Mixpanel")
     var delegate: TrackDelegate?
+    static let startTime = DispatchTime.now()
+    var appLoadSpeed: UInt64 = 0
+    var sessionLength: Float = 0
 
     init() {
         let firstOpenKey = "MPfirstOpen"
@@ -25,7 +28,6 @@ class AutomaticEvents {
             defaults.set(true, forKey: firstOpenKey)
             defaults.synchronize()
         }
-        delegate?.time(event: "MP: App Open")
 
         if let defaults = defaults, let infoDict = Bundle.main.infoDictionary {
             let appVersionKey = "MPAppVersion"
@@ -41,39 +43,56 @@ class AutomaticEvents {
                                                selector: #selector(appEnteredBackground(_:)),
                                                name: .UIApplicationDidEnterBackground,
                                                object: nil)
-        Swizzler.swizzleSelector(NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:"), withSelector: #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)), for: type(of: UIApplication.shared.delegate!), name: "notification opened", block: { _ in
-                self.delegate?.track(event: "MP: Notification Opened", properties: nil)
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(appDidBecomeActive(_:)),
+                                               name: .UIApplicationDidBecomeActive,
+                                               object: nil)
+
+        Swizzler.swizzleSelector(NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:"),
+                                 withSelector: #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)),
+                                 for: type(of: UIApplication.shared.delegate!), name: "notification opened",
+                                 block: { _ in
+            self.delegate?.track(event: "MP: Notification Opened", properties: nil)
         })
+
+//        Swizzler.swizzleSelector(NSSelectorFromString("application:didFinishLaunchingWithOptions:"),
+//                                 withSelector: #selector(UIResponder.application(_:newDidFinishLaunchingWithOptions:)),
+//                                 for: type(of: UIApplication.shared.delegate!), name: "notification opened",
+//                                 block: { _ in
+//                                    print("woot da fook")
+////                                    self.delegate?.track(event: "MP: Notification Opened", properties: nil)
+//        })
 
     }
 
     @objc private func appEnteredBackground(_ notification: Notification) {
-        delegate?.track(event: "MP: App Open", properties: nil)
+        sessionLength = Float(DispatchTime.now().uptimeNanoseconds - AutomaticEvents.startTime.uptimeNanoseconds ) / 1000000000
+        delegate?.track(event: "MP: App Open", properties: ["Session Length": sessionLength,
+                                                            "App Load Speed (ms)": UInt(appLoadSpeed)])
+    }
+
+    @objc private func appDidBecomeActive(_ notification: Notification) {
+        appLoadSpeed = (DispatchTime.now().uptimeNanoseconds - AutomaticEvents.startTime.uptimeNanoseconds) / 1000000
     }
 
 }
 
+//
+//extension UIApplication {
+//    private static let runOnce: Void = {
+//        print(AutomaticEvents.startTime)
+//        print(DispatchTime.now())
+//    }()
+//
+//    override open var next: UIResponder? {
+//        // Called before applicationDidFinishLaunching
+//        UIApplication.runOnce
+//        return super.next
+//    }
+//}
 
 extension UIResponder {
-
-    //    optional public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool
-    //application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-    //    @objc func newDidFinishLaunchingWithOptions(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
-    //        let originalSelector = NSSelectorFromString("application(_:didFinishLaunchingWithOptions:)")
-    //        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
-    //            let swizzle = Swizzler.swizzles[originalMethod] {
-    //            typealias MyCFunction = @convention(c) (AnyObject, Selector, UIApplication, NSDictionary) -> Bool
-    //            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
-    //            let ret = curriedImplementation(self, originalSelector, application, launchOptions! as NSDictionary)
-    //
-    //            for (_, block) in swizzle.blocks {
-    //                block(self, swizzle.selector, application as AnyObject?, launchOptions as AnyObject?)
-    //            }
-    //
-    //            return ret
-    //        }
-    //        return true
-    //    }
 
     func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Swift.Void) {
         let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
@@ -88,6 +107,22 @@ extension UIResponder {
             }
             
         }
+    }
+
+    func application(_ application: UIApplication, newDidFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
+        let originalSelector = NSSelectorFromString("application:didFinishLaunchingWithOptions:")
+        var retValue = true
+        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
+            let swizzle = Swizzler.swizzles[originalMethod] {
+            typealias MyCFunction = @convention(c) (AnyObject, Selector, UIApplication, NSDictionary?) -> Bool
+            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
+            retValue = curriedImplementation(self, originalSelector, application, launchOptions as NSDictionary?)
+
+            for (_, block) in swizzle.blocks {
+                block(self, swizzle.selector, application as AnyObject?, launchOptions as AnyObject?)
+            }
+        }
+        return retValue
     }
     
 }

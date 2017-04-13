@@ -45,7 +45,16 @@ class Flush: AppLifecycle {
     }
 
     func flushEventsQueue(_ eventsQueue: inout Queue) {
+        removeAutomaticTracking(queue: &eventsQueue)
         flushQueue(type: .events, queue: &eventsQueue)
+    }
+
+    func removeAutomaticTracking(queue: inout Queue) {
+//        if Decide.automaticEvents == false {
+            for item in queue {
+
+            }
+//        }
     }
 
     func flushPeopleQueue(_ peopleQueue: inout Queue) {

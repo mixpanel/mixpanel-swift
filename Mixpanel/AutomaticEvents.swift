@@ -8,20 +8,61 @@
 
 import Foundation
 import UIKit
+import StoreKit
 
 protocol TrackDelegate {
     func track(event: String?, properties: Properties?)
     func time(event: String)
 }
 
-class AutomaticEvents {
+class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
+
+    var awaitingTransactions = [String: SKPaymentTransaction]()
+
+    func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
+        var productsRequest = SKProductsRequest()
+        var productIdentifiers: Set<String> = []
+        objc_sync_enter(awaitingTransactions)
+        for transaction:AnyObject in transactions {
+            if let trans = transaction as? SKPaymentTransaction {
+                switch trans.transactionState {
+                case .purchased:
+                    productIdentifiers.insert(trans.payment.productIdentifier)
+                    awaitingTransactions[trans.payment.productIdentifier] = trans
+                    break
+                case .failed: break
+                case .restored: break
+                default: break
+                }
+            }
+        }
+        objc_sync_exit(awaitingTransactions)
+        productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
+        productsRequest.delegate = self
+        productsRequest.start()
+    }
+
+    func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
+        objc_sync_enter(awaitingTransactions)
+        for product in response.products {
+            if let trans = awaitingTransactions[product.productIdentifier] {
+                delegate?.track(event: "MP: In-App Purchase", properties: ["Price": "\(product.price)",
+                                                                           "Quantity": trans.payment.quantity,
+                                                                           "Product Name": product.productIdentifier])
+                awaitingTransactions.removeValue(forKey: product.productIdentifier)
+            }
+        }
+        objc_sync_exit(awaitingTransactions)
+    }
+
     let defaults = UserDefaults(suiteName: "Mixpanel")
     var delegate: TrackDelegate?
     static var startTime = DispatchTime.now()
     var appLoadSpeed: UInt64 = 0
     var sessionLength: Float = 0
 
-    init() {
+    override init() {
+        super.init()
         let firstOpenKey = "MPfirstOpen"
         if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
             delegate?.track(event: "MP: First App Open", properties: nil)
@@ -49,21 +90,14 @@ class AutomaticEvents {
                                                name: .UIApplicationDidBecomeActive,
                                                object: nil)
 
+        SKPaymentQueue.default().add(self)
+
         Swizzler.swizzleSelector(NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:"),
                                  withSelector: #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)),
                                  for: type(of: UIApplication.shared.delegate!), name: "notification opened",
                                  block: { _ in
             self.delegate?.track(event: "MP: Notification Opened", properties: nil)
         })
-
-//        Swizzler.swizzleSelector(NSSelectorFromString("application:didFinishLaunchingWithOptions:"),
-//                                 withSelector: #selector(UIResponder.application(_:newDidFinishLaunchingWithOptions:)),
-//                                 for: type(of: UIApplication.shared.delegate!), name: "notification opened",
-//                                 block: { _ in
-//                                    print("woot da fook")
-////                                    self.delegate?.track(event: "MP: Notification Opened", properties: nil)
-//        })
-
     }
 
     @objc private func appEnteredBackground(_ notification: Notification) {

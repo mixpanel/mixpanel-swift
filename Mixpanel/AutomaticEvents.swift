@@ -26,7 +26,15 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             return _minimumSessionDuration
         }
     }
-//    open var sessionTimeout: UInt64 = 1800000
+    var _sessionTimeout: UInt64 = 1800000
+    var sessionTimeout: UInt64 {
+        set {
+            _sessionTimeout = newValue
+        }
+        get {
+            return _sessionTimeout
+        }
+    }
     var awaitingTransactions = [String: SKPaymentTransaction]()
     let defaults = UserDefaults(suiteName: "Mixpanel")
     var delegate: TrackDelegate?

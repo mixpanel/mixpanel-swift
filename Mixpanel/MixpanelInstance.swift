@@ -198,7 +198,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackD
         }
     }
 
-    /// The minimum session duration (ms) that is tracked in the automatic events.
+    /// The minimum session duration (ms) that is tracked in automatic events.
     /// The default value is 10000 (10 seconds).
     open var minimumSessionDuration: UInt64 {
         set {
@@ -206,6 +206,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackD
         }
         get {
             return automaticEvents.minimumSessionDuration
+        }
+    }
+
+    /// The timeout duration (ms) in which we start a new session tracked in automatic events.
+    /// The default value is 1800000 (30 minutes).
+    open var sessionTimeout: UInt64 {
+        set {
+            automaticEvents.sessionTimeout = newValue
+        }
+        get {
+            return automaticEvents.sessionTimeout
         }
     }
     #endif // DECIDE

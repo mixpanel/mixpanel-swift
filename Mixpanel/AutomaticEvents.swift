@@ -17,7 +17,83 @@ protocol TrackDelegate {
 
 class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
 
+    var _minimumSessionDuration: UInt64 = 10000
+    var minimumSessionDuration: UInt64 {
+        set {
+            _minimumSessionDuration = newValue
+        }
+        get {
+            return _minimumSessionDuration
+        }
+    }
+//    open var sessionTimeout: UInt64 = 1800000
     var awaitingTransactions = [String: SKPaymentTransaction]()
+    let defaults = UserDefaults(suiteName: "Mixpanel")
+    var delegate: TrackDelegate?
+    static var appStartTime = DispatchTime.now()
+    var appLoadSpeed: UInt64 = 0
+    var sessionLength: Float = 0
+    var sessionStartTime: UInt64 = 0
+
+    override init() {
+        super.init()
+        let firstOpenKey = "MPfirstOpen"
+        if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
+            delegate?.track(event: "MP: First App Open", properties: nil)
+            defaults.set(true, forKey: firstOpenKey)
+            defaults.synchronize()
+        }
+
+        if let defaults = defaults, let infoDict = Bundle.main.infoDictionary {
+            let appVersionKey = "MPAppVersion"
+            let appVersionValue = infoDict["CFBundleShortVersionString"]
+            if let appVersionValue = appVersionValue as? String,
+                appVersionValue != defaults.string(forKey: appVersionKey) {
+                delegate?.track(event: "MP: App Updated", properties: ["App Version": appVersionValue])
+                defaults.set(appVersionValue, forKey: appVersionKey)
+                defaults.synchronize()
+            }
+        }
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(appEnteredBackground(_:)),
+                                               name: .UIApplicationDidEnterBackground,
+                                               object: nil)
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(appDidBecomeActive(_:)),
+                                               name: .UIApplicationDidBecomeActive,
+                                               object: nil)
+
+        SKPaymentQueue.default().add(self)
+
+        Swizzler.swizzleSelector(NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:"),
+                                 withSelector: #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)),
+                                 for: type(of: UIApplication.shared.delegate!), name: "notification opened",
+                                 block: { _ in
+            self.delegate?.track(event: "MP: Notification Opened", properties: nil)
+        })
+    }
+
+    @objc private func appEnteredBackground(_ notification: Notification) {
+        sessionLength = Float(DispatchTime.now().uptimeNanoseconds - sessionStartTime) / 1000000000
+        if sessionLength > Float(minimumSessionDuration) / 1000 {
+            delegate?.track(event: "MP: App Open", properties: ["Session Length": sessionLength,
+                                                                "App Load Speed (ms)": UInt(appLoadSpeed)])
+        }
+//        if let defaults = defaults {
+//            let sessionTimeoutKey = "MPSessionTimeoutKey"
+//            defaults.set(Date(), forKey: sessionTimeoutKey)
+//            defaults.synchronize()
+//        }
+    }
+
+    @objc private func appDidBecomeActive(_ notification: Notification) {
+        let nowTime = DispatchTime.now().uptimeNanoseconds
+        appLoadSpeed = (nowTime -
+            AutomaticEvents.appStartTime.uptimeNanoseconds) / 1000000
+        sessionStartTime = nowTime
+    }
 
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         var productsRequest = SKProductsRequest()
@@ -47,77 +123,19 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         for product in response.products {
             if let trans = awaitingTransactions[product.productIdentifier] {
                 delegate?.track(event: "MP: In-App Purchase", properties: ["Price": "\(product.price)",
-                                                                           "Quantity": trans.payment.quantity,
-                                                                           "Product Name": product.productIdentifier])
+                    "Quantity": trans.payment.quantity,
+                    "Product Name": product.productIdentifier])
                 awaitingTransactions.removeValue(forKey: product.productIdentifier)
             }
         }
         objc_sync_exit(awaitingTransactions)
     }
 
-    let defaults = UserDefaults(suiteName: "Mixpanel")
-    var delegate: TrackDelegate?
-    static var startTime = DispatchTime.now()
-    var appLoadSpeed: UInt64 = 0
-    var sessionLength: Float = 0
-
-    override init() {
-        super.init()
-        let firstOpenKey = "MPfirstOpen"
-        if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
-            delegate?.track(event: "MP: First App Open", properties: nil)
-            defaults.set(true, forKey: firstOpenKey)
-            defaults.synchronize()
-        }
-
-        if let defaults = defaults, let infoDict = Bundle.main.infoDictionary {
-            let appVersionKey = "MPAppVersion"
-            let appVersionValue = infoDict["CFBundleShortVersionString"]
-            if let appVersionValue = appVersionValue as? String,
-                appVersionValue != defaults.string(forKey: appVersionKey) {
-                delegate?.track(event: "MP: App Updated", properties: ["App Version": appVersionValue])
-                defaults.set(appVersionValue, forKey: appVersionKey)
-                defaults.synchronize()
-            }
-        }
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(appEnteredBackground(_:)),
-                                               name: .UIApplicationDidEnterBackground,
-                                               object: nil)
-
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(appDidBecomeActive(_:)),
-                                               name: .UIApplicationDidBecomeActive,
-                                               object: nil)
-
-        SKPaymentQueue.default().add(self)
-
-        Swizzler.swizzleSelector(NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:"),
-                                 withSelector: #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)),
-                                 for: type(of: UIApplication.shared.delegate!), name: "notification opened",
-                                 block: { _ in
-            self.delegate?.track(event: "MP: Notification Opened", properties: nil)
-        })
-    }
-
-    @objc private func appEnteredBackground(_ notification: Notification) {
-        sessionLength = Float(DispatchTime.now().uptimeNanoseconds - AutomaticEvents.startTime.uptimeNanoseconds ) / 1000000000
-        delegate?.track(event: "MP: App Open", properties: ["Session Length": sessionLength,
-                                                            "App Load Speed (ms)": UInt(appLoadSpeed)])
-    }
-
-    @objc private func appDidBecomeActive(_ notification: Notification) {
-        let now = DispatchTime.now().uptimeNanoseconds
-        let start = AutomaticEvents.startTime.uptimeNanoseconds
-        appLoadSpeed = (now - start) / 1000000
-    }
-
 }
-
 
 extension UIApplication {
     private static let runOnce: Void = {
-        AutomaticEvents.startTime = DispatchTime.now()
+        AutomaticEvents.appStartTime = DispatchTime.now()
     }()
 
     override open var next: UIResponder? {
@@ -140,7 +158,6 @@ extension UIResponder {
             for (_, block) in swizzle.blocks {
                 block(self, swizzle.selector, application as AnyObject?, userInfo as AnyObject?)
             }
-            
         }
     }
 
@@ -159,5 +176,4 @@ extension UIResponder {
         }
         return retValue
     }
-    
 }

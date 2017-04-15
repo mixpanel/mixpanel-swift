@@ -197,6 +197,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackD
             return decideInstance.notificationsInstance.miniNotificationPresentationTime
         }
     }
+
+    /// The minimum session duration (ms) that is tracked in the automatic events.
+    /// The default value is 10000 (10 seconds).
+    open var minimumSessionDuration: UInt64 {
+        set {
+            automaticEvents.minimumSessionDuration = newValue
+        }
+        get {
+            return automaticEvents.minimumSessionDuration
+        }
+    }
     #endif // DECIDE
 
     var apiToken = ""

@@ -1,0 +1,9 @@
+framework module Mixpanel {
+    umbrella header "Mixpanel.h"
+    module * { export * }
+    export *
+
+    explicit module ObjectiveCTools {
+        header "ObjectiveCTools.h"
+    }
+}

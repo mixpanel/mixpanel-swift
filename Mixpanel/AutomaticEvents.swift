@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import StoreKit
+import Mixpanel.ObjectiveCTools
 
 protocol TrackDelegate {
     func track(event: String?, properties: Properties?)

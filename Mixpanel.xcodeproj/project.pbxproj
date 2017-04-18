@@ -45,6 +45,8 @@
 		E12782C81D4AB5CB0025FB05 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CD1D30578E00E68E12 /* Constants.swift */; };
 		E12782C91D4AB5CB0025FB05 /* AutomaticProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */; };
 		E12BD38D1D91EBE2008989C9 /* SHA256.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12BD38C1D91EBE2008989C9 /* SHA256.swift */; };
+		E12CE4311EA684F00023AA2D /* ObjectiveCTools.h in Headers */ = {isa = PBXBuildFile; fileRef = E12CE42F1EA684F00023AA2D /* ObjectiveCTools.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E12CE4321EA684F00023AA2D /* ObjectiveCTools.m in Sources */ = {isa = PBXBuildFile; fileRef = E12CE4301EA684F00023AA2D /* ObjectiveCTools.m */; };
 		E142DBD11D75F86300F34C12 /* ObjectSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E142DBD01D75F86300F34C12 /* ObjectSerializer.swift */; };
 		E142DBD31D76263600F34C12 /* ObjectSerializerContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E142DBD21D76263600F34C12 /* ObjectSerializerContext.swift */; };
 		E1497EF21D6B8DC900B2B65C /* CodelessBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1497EF11D6B8DC900B2B65C /* CodelessBinding.swift */; };
@@ -177,6 +179,10 @@
 		E118EA011E37F3A700223C47 /* MiniNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MiniNotification.swift; sourceTree = "<group>"; };
 		E12782B31D4AB4B30025FB05 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E12BD38C1D91EBE2008989C9 /* SHA256.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SHA256.swift; sourceTree = "<group>"; };
+		E12CE4251EA59B1B0023AA2D /* mpmodule.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = mpmodule.modulemap; path = ../mpmodule.modulemap; sourceTree = "<group>"; };
+		E12CE4261EA67FB80023AA2D /* mpmodule.private.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = mpmodule.private.modulemap; path = ../mpmodule.private.modulemap; sourceTree = "<group>"; };
+		E12CE42F1EA684F00023AA2D /* ObjectiveCTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectiveCTools.h; sourceTree = SOURCE_ROOT; };
+		E12CE4301EA684F00023AA2D /* ObjectiveCTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ObjectiveCTools.m; sourceTree = SOURCE_ROOT; };
 		E142DBD01D75F86300F34C12 /* ObjectSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectSerializer.swift; sourceTree = "<group>"; };
 		E142DBD21D76263600F34C12 /* ObjectSerializerContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectSerializerContext.swift; sourceTree = "<group>"; };
 		E1497EF11D6B8DC900B2B65C /* CodelessBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodelessBinding.swift; sourceTree = "<group>"; };
@@ -350,7 +356,11 @@
 			children = (
 				E158C6F31D5D3A8200651465 /* Images */,
 				E11594801CFF1491007F8B4F /* Mixpanel.h */,
+				E12CE42F1EA684F00023AA2D /* ObjectiveCTools.h */,
+				E12CE4301EA684F00023AA2D /* ObjectiveCTools.m */,
 				E11594821CFF1491007F8B4F /* Info.plist */,
+				E12CE4251EA59B1B0023AA2D /* mpmodule.modulemap */,
+				E12CE4261EA67FB80023AA2D /* mpmodule.private.modulemap */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -572,6 +582,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E12CE4311EA684F00023AA2D /* ObjectiveCTools.h in Headers */,
 				E11594811CFF1491007F8B4F /* Mixpanel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -777,6 +788,7 @@
 				E174DAE51DA3373600FED703 /* TweakBinding.swift in Sources */,
 				E174DAF71DA45C9D00FED703 /* ChangeMessage.swift in Sources */,
 				E151FA381E70DFB5002EF53D /* AutomaticEvents.swift in Sources */,
+				E12CE4321EA684F00023AA2D /* ObjectiveCTools.m in Sources */,
 				E15422291D710587009421A0 /* SnapshotMessage.swift in Sources */,
 				E12BD38D1D91EBE2008989C9 /* SHA256.swift in Sources */,
 				E174DAF91DA4623E00FED703 /* TweakMessage.swift in Sources */,
@@ -1027,17 +1039,21 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Mixpanel/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = mpmodule.modulemap;
 				OTHER_SWIFT_FLAGS = "-D DECIDE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_INCLUDE_PATHS = "${SRCROOT}";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
@@ -1051,17 +1067,21 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Mixpanel/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = mpmodule.modulemap;
 				OTHER_SWIFT_FLAGS = "-D DECIDE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_INCLUDE_PATHS = "${SRCROOT}";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 3.0;
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
 		};

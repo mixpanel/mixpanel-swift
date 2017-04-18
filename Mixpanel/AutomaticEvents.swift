@@ -17,7 +17,7 @@ protocol TrackDelegate {
 
 class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
 
-    var _minimumSessionDuration: UInt64 = 10000
+    var _minimumSessionDuration: UInt64 = 2000
     var minimumSessionDuration: UInt64 {
         set {
             _minimumSessionDuration = newValue
@@ -38,13 +38,12 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     var awaitingTransactions = [String: SKPaymentTransaction]()
     let defaults = UserDefaults(suiteName: "Mixpanel")
     var delegate: TrackDelegate?
-    static var appStartTime = DispatchTime.now()
-    var appLoadSpeed: UInt64 = 0
-    var sessionLength: Float = 0
-    var sessionStartTime: UInt64 = 0
+    static var appStartTime = Date().timeIntervalSince1970
+    var appLoadSpeed: TimeInterval = 0
+    var sessionLength: TimeInterval = 0
+    var sessionStartTime: TimeInterval = 0
 
-    override init() {
-        super.init()
+    func initializeEvents() {
         let firstOpenKey = "MPfirstOpen"
         if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
             delegate?.track(event: "MP: First App Open", properties: nil)
@@ -56,7 +55,8 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             let appVersionKey = "MPAppVersion"
             let appVersionValue = infoDict["CFBundleShortVersionString"]
             if let appVersionValue = appVersionValue as? String,
-                appVersionValue != defaults.string(forKey: appVersionKey) {
+                let savedVersionValue = defaults.string(forKey: appVersionKey),
+                appVersionValue != savedVersionValue {
                 delegate?.track(event: "MP: App Updated", properties: ["App Version": appVersionValue])
                 defaults.set(appVersionValue, forKey: appVersionKey)
                 defaults.synchronize()
@@ -79,27 +79,31 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                                  withSelector: #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)),
                                  for: type(of: UIApplication.shared.delegate!), name: "notification opened",
                                  block: { _ in
-            self.delegate?.track(event: "MP: Notification Opened", properties: nil)
+                                    self.delegate?.track(event: "MP: Notification Opened", properties: nil)
         })
     }
 
     @objc private func appEnteredBackground(_ notification: Notification) {
-        sessionLength = Float(DispatchTime.now().uptimeNanoseconds - sessionStartTime) / 1000000000
-        if sessionLength > Float(minimumSessionDuration) / 1000 {
-            delegate?.track(event: "MP: App Open", properties: ["Session Length": sessionLength,
-                                                                "App Load Speed (ms)": UInt(appLoadSpeed)])
+        sessionLength = Date().timeIntervalSince1970 - sessionStartTime
+        if sessionLength > Double(minimumSessionDuration / 1000) {
+            var properties: Properties = ["Session Length": sessionLength]
+            if appLoadSpeed > 0 {
+                properties["App Load Speed (ms)"] = UInt(appLoadSpeed)
+            }
+            delegate?.track(event: "MP: App Open", properties: properties)
         }
-//        if let defaults = defaults {
-//            let sessionTimeoutKey = "MPSessionTimeoutKey"
-//            defaults.set(Date(), forKey: sessionTimeoutKey)
-//            defaults.synchronize()
-//        }
+        AutomaticEvents.appStartTime = 0
+        //        if let defaults = defaults {
+        //            let sessionTimeoutKey = "MPSessionTimeoutKey"
+        //            defaults.set(Date(), forKey: sessionTimeoutKey)
+        //            defaults.synchronize()
+        //        }
+
     }
 
     @objc private func appDidBecomeActive(_ notification: Notification) {
-        let nowTime = DispatchTime.now().uptimeNanoseconds
-        appLoadSpeed = (nowTime -
-            AutomaticEvents.appStartTime.uptimeNanoseconds) / 1000000
+        let nowTime = Date().timeIntervalSince1970
+        appLoadSpeed = AutomaticEvents.appStartTime != 0 ? (nowTime - AutomaticEvents.appStartTime) * 1000 : 0
         sessionStartTime = nowTime
     }
 
@@ -143,7 +147,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 
 extension UIApplication {
     private static let runOnce: Void = {
-        AutomaticEvents.appStartTime = DispatchTime.now()
+        AutomaticEvents.appStartTime = Date().timeIntervalSince1970
     }()
 
     override open var next: UIResponder? {

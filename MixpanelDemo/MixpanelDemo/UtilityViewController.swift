@@ -8,14 +8,16 @@
 
 import UIKit
 import Mixpanel
+import StoreKit
 
-class UtilityViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class UtilityViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, SKProductsRequestDelegate, SKPaymentTransactionObserver {
 
     @IBOutlet weak var tableView: UITableView!
     var tableViewItems = ["Create Alias",
                           "Reset",
                           "Archive",
-                          "Flush"]
+                          "Flush",
+                          "In-App Purchase"]
 
     override func viewDidLoad() {
         tableView.delegate = self
@@ -48,6 +50,8 @@ class UtilityViewController: UIViewController, UITableViewDelegate, UITableViewD
         case 3:
             Mixpanel.mainInstance().flush()
             descStr = "Flushed Data"
+        case 4:
+            IAPFlow()
         default:
             break
         }
@@ -62,6 +66,54 @@ class UtilityViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tableViewItems.count
+    }
+
+    func IAPFlow() {
+        let productIdentifiers = NSSet(objects:
+            "com.mixpanel.swiftdemo.test",
+            "test",
+            "com.mixpanel.swiftdemo.SwiftSDKIAPTestingProductID",
+            "SwiftSDKIAPTestingProductID",
+            "mixpanel.swiftdemo.test"
+        )
+        var productsRequest = SKProductsRequest()
+        productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers as! Set<String>)
+        productsRequest.delegate = self
+        productsRequest.start()
+    }
+
+    func productsRequest (_ request:SKProductsRequest, didReceive response:SKProductsResponse) {
+        if (response.products.count > 0) {
+            if let firstProduct = response.products.first {
+                let payment = SKPayment(product: firstProduct)
+                SKPaymentQueue.default().add(self)
+                SKPaymentQueue.default().add(payment)
+            }
+        }
+    }
+
+    func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
+        for transaction:AnyObject in transactions {
+            if let trans = transaction as? SKPaymentTransaction {
+                switch trans.transactionState {
+                case .purchased:
+                    SKPaymentQueue.default().finishTransaction(transaction as! SKPaymentTransaction)
+                    print("IAP purchased")
+                    break
+
+                case .failed:
+                    SKPaymentQueue.default().finishTransaction(transaction as! SKPaymentTransaction)
+                    print("IAP failed")
+                    break
+                case .restored:
+                    SKPaymentQueue.default().finishTransaction(transaction as! SKPaymentTransaction)
+                    print("IAP restored")
+                    break
+                    
+                default: break
+                }
+            }
+        }
     }
 
 }

@@ -199,7 +199,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackD
     }
 
     /// The minimum session duration (ms) that is tracked in automatic events.
-    /// The default value is 10000 (10 seconds).
+    /// The default value is 2000 (2 seconds).
     open var minimumSessionDuration: UInt64 {
         set {
             automaticEvents.minimumSessionDuration = newValue
@@ -233,7 +233,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackD
     let trackInstance: Track
     #if DECIDE
     let decideInstance: Decide
-    let automaticEvents: AutomaticEvents
+    let automaticEvents = AutomaticEvents()
     #endif // DECIDE
 
     #if !os(OSX)
@@ -249,7 +249,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackD
         trackInstance = Track(apiToken: self.apiToken)
         let label = "com.mixpanel.\(self.apiToken)"
         serialQueue = DispatchQueue(label: label)
-        automaticEvents = AutomaticEvents()
         automaticEvents.delegate = self
         flushInstance.delegate = self
         distinctId = defaultDistinctId()
@@ -257,6 +256,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackD
                         serialQueue: serialQueue)
         people.delegate = self
         flushInstance._flushInterval = flushInterval
+        automaticEvents.initializeEvents()
         setupListeners()
         unarchive()
 

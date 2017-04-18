@@ -20,6 +20,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Mixpanel.initialize(token: "93fdad6026e4debf13479bf0aeba0e9f")
         Mixpanel.mainInstance().loggingEnabled = true
         Mixpanel.mainInstance().flushInterval = 5
+        let secondInstance = Mixpanel.initialize(token: "de868b8da6d09aec7c9149e6a41cf359",
+                                                 launchOptions: launchOptions,
+                                                 flushInterval: 5,
+                                                 instanceName: "2nd Instance")
         let allTweaks: [TweakClusterType] = [MixpanelTweaks.floatTweak,
                                              MixpanelTweaks.intTweak,
                                              MixpanelTweaks.boolTweak,
@@ -32,8 +36,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Mixpanel.mainInstance().identify(
             distinctId: Mixpanel.mainInstance().distinctId)
-        Mixpanel.mainInstance().people.set(properties: ["$name": "Max Pançelle", "lolz": false, "meh": true])
-        Mixpanel.mainInstance().track(event: "lol", properties: ["hehe": false])
+        secondInstance.identify(distinctId: secondInstance.distinctId)
+        Mixpanel.mainInstance().people.set(properties: ["$name": "Max Pançelle"])
         return true
     }
 

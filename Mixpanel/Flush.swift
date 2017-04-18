@@ -51,12 +51,12 @@ class Flush: AppLifecycle {
 
     func removeAutomaticTracking(queue: inout Queue) {
 //        if Decide.automaticEvents == false {
-        for (i, item) in queue.enumerated().reversed()
-        {
-            if let event = item["event"] as? String, event.hasPrefix("MP: ") {
-                queue.remove(at: i)
-            }
-        }
+//        for (i, item) in queue.enumerated().reversed()
+//        {
+//            if let event = item["event"] as? String, event.hasPrefix("MP: ") {
+//                queue.remove(at: i)
+//            }
+//        }
 //        }
     }
 

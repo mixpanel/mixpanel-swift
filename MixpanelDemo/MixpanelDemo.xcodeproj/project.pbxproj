@@ -13,6 +13,7 @@
 		E12406201D249B2500383635 /* MixpanelBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E124061F1D249B2500383635 /* MixpanelBaseTests.swift */; };
 		E12BD0371D89FE6A008989C9 /* MixpanelCodelessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */; };
 		E12BD03D1D8A14F3008989C9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E12BD03C1D8A14F3008989C9 /* Assets.xcassets */; };
+		E12CE4241EA571730023AA2D /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12CE4231EA571730023AA2D /* StoreKit.framework */; };
 		E131C43C1DB56B1000FAEE37 /* MixpanelABTestingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E131C43B1DB56B1000FAEE37 /* MixpanelABTestingTests.swift */; };
 		E131C4401DB5A2FE00FAEE37 /* test_decide_response_2.json in Resources */ = {isa = PBXBuildFile; fileRef = E131C43E1DB5A2FE00FAEE37 /* test_decide_response_2.json */; };
 		E131C4411DB5A2FE00FAEE37 /* test_decide_response.json in Resources */ = {isa = PBXBuildFile; fileRef = E131C43F1DB5A2FE00FAEE37 /* test_decide_response.json */; };
@@ -102,6 +103,7 @@
 		E124061F1D249B2500383635 /* MixpanelBaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelBaseTests.swift; sourceTree = "<group>"; };
 		E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelCodelessTests.swift; sourceTree = "<group>"; };
 		E12BD03C1D8A14F3008989C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E12CE4231EA571730023AA2D /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		E131C43B1DB56B1000FAEE37 /* MixpanelABTestingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelABTestingTests.swift; sourceTree = "<group>"; };
 		E131C43E1DB5A2FE00FAEE37 /* test_decide_response_2.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_decide_response_2.json; sourceTree = "<group>"; };
 		E131C43F1DB5A2FE00FAEE37 /* test_decide_response.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_decide_response.json; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E15FF7FC1D0461D70076CDE3 /* Mixpanel.framework in Frameworks */,
+				E12CE4241EA571730023AA2D /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -159,6 +162,7 @@
 		773080F90ECB3A0D67A6E636 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E12CE4231EA571730023AA2D /* StoreKit.framework */,
 				37433CF0620BC6A0A5EFC541 /* Pods_MixpanelDemoTests.framework */,
 			);
 			name = Frameworks;
@@ -311,6 +315,9 @@
 						LastSwiftMigration = 0800;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
+							com.apple.InAppPurchase = {
+								enabled = 1;
+							};
 							com.apple.Push = {
 								enabled = 1;
 							};

@@ -10,23 +10,43 @@
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg)](https://github.com/Carthage/Carthage)
 [![Apache License](http://img.shields.io/cocoapods/l/Mixpanel-swift.svg)](https://mixpanel.com)
 
+# Table of Contents
+
+<!-- MarkdownTOC -->
+
+- [Introduction](#introduction)
+    - [Current supported features](#current-supported-features)
+- [Installation](#installation)
+    - [CocoaPods](#cocoapods)
+    - [Carthage](#carthage)
+    - [Manual Installation](#manual-installation)
+- [Initializing and Usage](#initializing-and-usage)
+    - [Integrate](#integrate)
+    - [Start tracking](#start-tracking)
+
+<!-- /MarkdownTOC -->
+
+<a name="introduction"></a>
 # Introduction
 
 Welcome to the official Mixpanel Swift Library
 
 The Mixpanel Swift library for iOS is an open source project, and we'd love to see your contributions! 
-We'd also love for you to come and work with us! Check out **[Jobs](http://boards.greenhouse.io/mixpanel/jobs/25226#.U_4JXEhORKU)** for details.
+We'd also love for you to come and work with us! Check out **[Jobs](https://mixpanel.com/jobs/#openings)** for details.
 
 If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
 
+<a name="current-supported-features"></a>
 ## Current supported features
 
 **Our master branch and our releases are in Swift 3. If you wish to use our Swift 2.3 implementation, please point to our v1.0.1 release.**
 
 Our Swift library fully supports all of the Mixpanel features, and has full parity with the [Objective-C Library](https://github.com/mixpanel/mixpanel-iphone).
 
+<a name="installation"></a>
 # Installation
 
+<a name="cocoapods"></a>
 ## CocoaPods
 
 **Our current release only supports CocoaPods version 1.1.0+**
@@ -42,6 +62,7 @@ For App Extension integrations (you may need both the above *and* this):
 
 `pod 'Mixpanel-swift-appex'`
 
+<a name="carthage"></a>
 ## Carthage
 
 Mixpanel also supports `Carthage` to package your dependencies as a framework. Include the following dependency in your Cartfile:
@@ -50,6 +71,7 @@ Mixpanel also supports `Carthage` to package your dependencies as a framework. I
 
 Check out the **[Carthage docs »](https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos)** for more info. 
 
+<a name="manual-installation"></a>
 ## Manual Installation
 
 To help users stay up to date with the latests version of our Swift SDK, we always recommend integrating our SDK via CocoaPods, which simplifies version updates and dependency management. However, there are cases where users can't use CocoaPods. Not to worry, just follow these manual installation steps and you'll be all set.
@@ -76,7 +98,11 @@ Select your app .xcodeproj file. Under "General", add the Mixpanel framework as 
 
 ![alt text](http://images.mxpnl.com/docs/2016-07-19%2023:31:29.237158-add_framework.png)
 
-### Step 4: Integrate!
+<a name="initializing-and-usage"></a>
+# Initializing and Usage
+
+<a name="integrate"></a>
+## Integrate
 
 Import Mixpanel into AppDelegate.swift, and initialize Mixpanel within `application:didFinishLaunchingWithOptions:`
 ![alt text](http://images.mxpnl.com/docs/2016-07-19%2023:27:03.724972-Screen%20Shot%202016-07-18%20at%207.16.51%20PM.png)
@@ -88,14 +114,11 @@ func application(_ application: UIApplication,
 }
 ```
 
-# Initializing and Usage
+You initialize your Mixpanel instance with the token provided to you on mixpanel.com.
 
-By calling:
-```swift
-let mixpanel = Mixpanel.initialize(token: "MIXPANEL_TOKEN")
-```
+<a name="start-tracking"></a>
+## Start tracking
 
-You initialize your mixpanel instance with the token provided to you on mixpanel.com.
 To interact with the instance and start tracking, you can either use the mixpanel instance given when initializing:
 ```swift
 mixpanel.track(event: "Tracked Event!")
@@ -104,8 +127,6 @@ or you can directly fetch the instance and use it from the Mixpanel object:
 ```swift
 Mixpanel.mainInstance().track(event: "Tracked Event!")
 ```
-
-## Start tracking
 
 You're done! You've successfully integrated the Mixpanel Swift SDK into your app. To stay up to speed on important SDK releases and updates, star or watch our repository on [Github](https://github.com/mixpanel/mixpanel-swift).
 

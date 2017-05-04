@@ -44,20 +44,29 @@ class Flush: AppLifecycle {
         self.flushRequest = FlushRequest(basePathIdentifier: basePathIdentifier)
     }
 
-    func flushEventsQueue(_ eventsQueue: inout Queue) {
-        removeAutomaticTracking(queue: &eventsQueue)
+    func flushEventsQueue(_ eventsQueue: inout Queue, automaticEventsEnabled: Bool?) {
+        let automaticEventsQueue = orderAutomaticEvents(queue: &eventsQueue,
+                                                        automaticEventsEnabled: automaticEventsEnabled)
         flushQueue(type: .events, queue: &eventsQueue)
+        if let automaticEventsQueue = automaticEventsQueue {
+            eventsQueue.append(contentsOf: automaticEventsQueue)
+        }
     }
 
-    func removeAutomaticTracking(queue: inout Queue) {
-//        if Decide.automaticEvents == false {
-//        for (i, item) in queue.enumerated().reversed()
-//        {
-//            if let event = item["event"] as? String, event.hasPrefix("MP: ") {
-//                queue.remove(at: i)
-//            }
-//        }
-//        }
+    func orderAutomaticEvents(queue: inout Queue, automaticEventsEnabled: Bool?) -> Queue? {
+        if automaticEventsEnabled == nil || !automaticEventsEnabled! {
+            var discardedItems = Queue()
+            for (i, ev) in queue.enumerated().reversed() {
+                if let eventName = ev["event"] as? String, eventName.hasPrefix("$ae_") {
+                    discardedItems.append(ev)
+                    queue.remove(at: i)
+                }
+            }
+            if automaticEventsEnabled == nil {
+                return discardedItems
+            }
+        }
+        return nil
     }
 
     func flushPeopleQueue(_ peopleQueue: inout Queue) {

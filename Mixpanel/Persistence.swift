@@ -17,6 +17,7 @@ struct ArchivedProperties {
     let peopleUnidentifiedQueue: Queue
     #if DECIDE
     let shownNotifications: Set<Int>
+    let automaticEventsEnabled: Bool?
     #endif // DECIDE
 }
 
@@ -93,6 +94,7 @@ class Persistence {
         p["timedEvents"] = properties.timedEvents
         #if DECIDE
         p["shownNotifications"] = properties.shownNotifications
+        p["automaticEvents"] = properties.automaticEventsEnabled
         #endif // DECIDE
         archiveToFile(.properties, object: p, token: token)
     }
@@ -131,7 +133,8 @@ class Persistence {
                                             peopleUnidentifiedQueue: Queue,
                                             shownNotifications: Set<Int>,
                                             codelessBindings: Set<CodelessBinding>,
-                                            variants: Set<Variant>) {
+                                            variants: Set<Variant>,
+                                            automaticEventsEnabled: Bool?) {
         let eventsQueue = unarchiveEvents(token: token)
         let peopleQueue = unarchivePeople(token: token)
         let codelessBindings = unarchiveCodelessBindings(token: token)
@@ -143,7 +146,8 @@ class Persistence {
             alias,
             peopleDistinctId,
             peopleUnidentifiedQueue,
-            shownNotifications) = unarchiveProperties(token: token)
+            shownNotifications,
+            automaticEventsEnabled) = unarchiveProperties(token: token)
 
         return (eventsQueue,
                 peopleQueue,
@@ -155,7 +159,8 @@ class Persistence {
                 peopleUnidentifiedQueue,
                 shownNotifications,
                 codelessBindings,
-                variants)
+                variants,
+                automaticEventsEnabled)
     }
     #else
     class func unarchive(token: String) -> (eventsQueue: Queue,
@@ -217,14 +222,16 @@ class Persistence {
                                                               String?,
                                                               String?,
                                                               Queue,
-                                                              Set<Int>) {
+                                                              Set<Int>,
+                                                              Bool?) {
         let properties = unarchiveWithType(.properties, token: token) as? InternalProperties
         let (superProperties,
              timedEvents,
              distinctId,
              alias,
              peopleDistinctId,
-             peopleUnidentifiedQueue) = unarchivePropertiesHelper(token: token)
+             peopleUnidentifiedQueue,
+             automaticEventsEnabled) = unarchivePropertiesHelper(token: token)
         let shownNotifications =
             properties?["shownNotifications"] as? Set<Int> ?? Set<Int>()
 
@@ -234,7 +241,8 @@ class Persistence {
                 alias,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
-                shownNotifications)
+                shownNotifications,
+                automaticEventsEnabled)
     }
     #else
     class private func unarchiveProperties(token: String) -> (InternalProperties,
@@ -252,7 +260,8 @@ class Persistence {
         String,
         String?,
         String?,
-        Queue) {
+        Queue,
+        Bool?) {
             let properties = unarchiveWithType(.properties, token: token) as? InternalProperties
             let superProperties =
                 properties?["superProperties"] as? InternalProperties ?? InternalProperties()
@@ -266,13 +275,15 @@ class Persistence {
                 properties?["peopleDistinctId"] as? String ?? nil
             let peopleUnidentifiedQueue =
                 properties?["peopleUnidentifiedQueue"] as? Queue ?? Queue()
-
+            let automaticEventsEnabled =
+                properties?["automaticEvents"] as? Bool ?? nil
             return (superProperties,
                     timedEvents,
                     distinctId,
                     alias,
                     peopleDistinctId,
-                    peopleUnidentifiedQueue)
+                    peopleUnidentifiedQueue,
+                    automaticEventsEnabled)
     }
 
     #if DECIDE

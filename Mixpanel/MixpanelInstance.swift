@@ -37,7 +37,7 @@ protocol AppLifecycle {
 }
 
 /// The class that represents the Mixpanel Instance
-open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackDelegate {
+open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate {
 
     /// The a MixpanelDelegate object that gives control over Mixpanel network activity.
     open var delegate: MixpanelDelegate?
@@ -198,8 +198,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackD
         }
     }
 
-    /// The minimum session duration (ms) that is tracked in automatic events.
-    /// The default value is 2000 (2 seconds).
+    /// The maximum session duration (ms) that is tracked in automatic events.
+    /// The default value is UINT64_MAX (no maximum session duration).
     open var minimumSessionDuration: UInt64 {
         set {
             automaticEvents.minimumSessionDuration = newValue
@@ -209,14 +209,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackD
         }
     }
 
-    /// The timeout duration (ms) in which we start a new session tracked in automatic events.
-    /// The default value is 1800000 (30 minutes).
-    open var sessionTimeout: UInt64 {
+    /// The minimum session duration (ms) that is tracked in automatic events.
+    /// The default value is 2000 (2 seconds).
+    open var maximumSessionDuration: UInt64 {
         set {
-            automaticEvents.sessionTimeout = newValue
+            automaticEvents.maximumSessionDuration = newValue
         }
         get {
-            return automaticEvents.sessionTimeout
+            return automaticEvents.maximumSessionDuration
         }
     }
     #endif // DECIDE
@@ -249,18 +249,20 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, TrackD
         trackInstance = Track(apiToken: self.apiToken)
         let label = "com.mixpanel.\(self.apiToken)"
         serialQueue = DispatchQueue(label: label)
-        automaticEvents.delegate = self
         flushInstance.delegate = self
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
                         serialQueue: serialQueue)
         people.delegate = self
         flushInstance._flushInterval = flushInterval
-        automaticEvents.initializeEvents()
         setupListeners()
         unarchive()
 
         #if DECIDE
+            if decideInstance.automaticEventsEnabled == nil || decideInstance.automaticEventsEnabled! {
+                automaticEvents.delegate = self
+                automaticEvents.initializeEvents(people: people)
+            }
             decideInstance.inAppDelegate = self
             executeCachedVariants()
             executeCachedCodelessBindings()
@@ -703,7 +705,8 @@ extension MixpanelInstance {
                                             alias: alias,
                                             peopleDistinctId: people.distinctId,
                                             peopleUnidentifiedQueue: people.unidentifiedQueue,
-                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications)
+                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications,
+                                            automaticEventsEnabled: decideInstance.automaticEventsEnabled)
         Persistence.archive(eventsQueue: eventsQueue,
                             peopleQueue: people.peopleQueue,
                             properties: properties,
@@ -749,7 +752,8 @@ extension MixpanelInstance {
          people.unidentifiedQueue,
          decideInstance.notificationsInstance.shownNotifications,
          decideInstance.codelessInstance.codelessBindings,
-         decideInstance.ABTestingInstance.variants) = Persistence.unarchive(token: apiToken)
+         decideInstance.ABTestingInstance.variants,
+         decideInstance.automaticEventsEnabled) = Persistence.unarchive(token: apiToken)
 
         if distinctId == "" {
             distinctId = defaultDistinctId()
@@ -763,7 +767,8 @@ extension MixpanelInstance {
                                             alias: alias,
                                             peopleDistinctId: people.distinctId,
                                             peopleUnidentifiedQueue: people.unidentifiedQueue,
-                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications)
+                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications,
+                                            automaticEventsEnabled: decideInstance.automaticEventsEnabled)
         Persistence.archiveProperties(properties, token: apiToken)
     }
     #else
@@ -827,7 +832,8 @@ extension MixpanelInstance {
             if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
                 return
             }
-            self.flushInstance.flushEventsQueue(&self.eventsQueue)
+            self.flushInstance.flushEventsQueue(&self.eventsQueue,
+                                                automaticEventsEnabled: self.decideInstance.automaticEventsEnabled)
             self.flushInstance.flushPeopleQueue(&self.people.peopleQueue)
             self.archive()
             if let completion = completion {

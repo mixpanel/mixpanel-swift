@@ -11,9 +11,8 @@ import UIKit
 import StoreKit
 import Mixpanel.ObjectiveCTools
 
-protocol TrackDelegate {
+protocol AEDelegate {
     func track(event: String?, properties: Properties?)
-    func time(event: String)
 }
 
 class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
@@ -27,27 +26,31 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             return _minimumSessionDuration
         }
     }
-    var _sessionTimeout: UInt64 = 1800000
-    var sessionTimeout: UInt64 {
+    var _maximumSessionDuration: UInt64 = UINT64_MAX
+    var maximumSessionDuration: UInt64 {
         set {
-            _sessionTimeout = newValue
+            _maximumSessionDuration = newValue
         }
         get {
-            return _sessionTimeout
+            return _maximumSessionDuration
         }
     }
     var awaitingTransactions = [String: SKPaymentTransaction]()
     let defaults = UserDefaults(suiteName: "Mixpanel")
-    var delegate: TrackDelegate?
+    var delegate: AEDelegate?
     static var appStartTime = Date().timeIntervalSince1970
-    var appLoadSpeed: TimeInterval = 0
     var sessionLength: TimeInterval = 0
     var sessionStartTime: TimeInterval = 0
+    var people: People? = nil
 
-    func initializeEvents() {
+    func initializeEvents(people: People) {
+        self.people = people
         let firstOpenKey = "MPfirstOpen"
         if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
-            delegate?.track(event: "MP: First App Open", properties: nil)
+            if !isExistingUser() {
+                delegate?.track(event: "$ae_first_open", properties: nil)
+                self.people!.setOnce(properties: ["First App Open Date": Date()])
+            }
             defaults.set(true, forKey: firstOpenKey)
             defaults.synchronize()
         }
@@ -55,18 +58,22 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         if let defaults = defaults, let infoDict = Bundle.main.infoDictionary {
             let appVersionKey = "MPAppVersion"
             let appVersionValue = infoDict["CFBundleShortVersionString"]
+            let savedVersionValue = defaults.string(forKey: appVersionKey)
             if let appVersionValue = appVersionValue as? String,
-                let savedVersionValue = defaults.string(forKey: appVersionKey),
+                let savedVersionValue = savedVersionValue,
                 appVersionValue != savedVersionValue {
-                delegate?.track(event: "MP: App Updated", properties: ["App Version": appVersionValue])
+                delegate?.track(event: "$ae_updated", properties: ["App Version": appVersionValue])
+                defaults.set(appVersionValue, forKey: appVersionKey)
+                defaults.synchronize()
+            } else if savedVersionValue == nil {
                 defaults.set(appVersionValue, forKey: appVersionKey)
                 defaults.synchronize()
             }
         }
 
         NotificationCenter.default.addObserver(self,
-                                               selector: #selector(appEnteredBackground(_:)),
-                                               name: .UIApplicationDidEnterBackground,
+                                               selector: #selector(appWillResignActive(_:)),
+                                               name: .UIApplicationWillResignActive,
                                                object: nil)
 
         NotificationCenter.default.addObserver(self,
@@ -76,35 +83,43 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 
         SKPaymentQueue.default().add(self)
 
-        Swizzler.swizzleSelector(NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:"),
-                                 withSelector: #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)),
-                                 for: type(of: UIApplication.shared.delegate!), name: "notification opened",
-                                 block: { _ in
-                                    self.delegate?.track(event: "MP: Notification Opened", properties: nil)
-        })
+        guard let appDelegate = UIApplication.shared.delegate else {
+            return
+        }
+        var selector: Selector? = nil
+        let aClass: AnyClass = type(of: appDelegate)
+        if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")) != nil {
+            selector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
+        } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:")) != nil {
+            selector = NSSelectorFromString("application:didReceiveRemoteNotification:")
+        }
+
+        if let selector = selector {
+            Swizzler.swizzleSelector(selector,
+                                     withSelector: #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)),
+                                     for: aClass,
+                                     name: "notification opened",
+                                     block: { _ in
+                                        self.delegate?.track(event: "$ae_notif_opened", properties: nil)
+            })
+        }
+
     }
 
-    @objc private func appEnteredBackground(_ notification: Notification) {
+    @objc private func appWillResignActive(_ notification: Notification) {
         sessionLength = Date().timeIntervalSince1970 - sessionStartTime
-        if sessionLength > Double(minimumSessionDuration / 1000) {
-            var properties: Properties = ["Session Length": sessionLength]
-            if appLoadSpeed > 0 {
-                properties["App Load Speed (ms)"] = UInt(appLoadSpeed)
-            }
+        if sessionLength > Double(minimumSessionDuration / 1000) &&
+           sessionLength < Double(maximumSessionDuration / 1000) {
+            let properties: Properties = ["Session Length": sessionLength]
             delegate?.track(event: "MP: App Open", properties: properties)
+            people!.increment(property: "Total App Sessions", by: 1)
+            people!.increment(property: "Total App Sessions Length", by: sessionLength)
         }
         AutomaticEvents.appStartTime = 0
-        //        if let defaults = defaults {
-        //            let sessionTimeoutKey = "MPSessionTimeoutKey"
-        //            defaults.set(Date(), forKey: sessionTimeoutKey)
-        //            defaults.synchronize()
-        //        }
-
     }
 
     @objc private func appDidBecomeActive(_ notification: Notification) {
         let nowTime = Date().timeIntervalSince1970
-        appLoadSpeed = AutomaticEvents.appStartTime != 0 ? (nowTime - AutomaticEvents.appStartTime) * 1000 : 0
         sessionStartTime = nowTime
     }
 
@@ -131,6 +146,26 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         productsRequest.start()
     }
 
+    func roundOneDigit(num: TimeInterval) -> TimeInterval {
+        return round(num * 10.0) / 10.0
+    }
+
+    func isExistingUser() -> Bool {
+        do {
+            if let searchPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).last {
+                let pathContents = try FileManager.default.contentsOfDirectory(atPath: searchPath)
+                for path in pathContents {
+                    if path.hasPrefix("mixpanel-") {
+                        return true
+                    }
+                }
+            }
+        } catch {
+            return false
+        }
+        return false
+    }
+
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         objc_sync_enter(awaitingTransactions)
         for product in response.products {
@@ -144,18 +179,6 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         objc_sync_exit(awaitingTransactions)
     }
 
-}
-
-extension UIApplication {
-    private static let runOnce: Void = {
-        AutomaticEvents.appStartTime = Date().timeIntervalSince1970
-    }()
-
-    override open var next: UIResponder? {
-        // Called before applicationDidFinishLaunching
-        UIApplication.runOnce
-        return super.next
-    }
 }
 
 extension UIResponder {
@@ -174,19 +197,17 @@ extension UIResponder {
         }
     }
 
-    func application(_ application: UIApplication, newDidFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
-        let originalSelector = NSSelectorFromString("application:didFinishLaunchingWithOptions:")
-        var retValue = true
+    func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+        let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:")
         if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
             let swizzle = Swizzler.swizzles[originalMethod] {
-            typealias MyCFunction = @convention(c) (AnyObject, Selector, UIApplication, NSDictionary?) -> Bool
+            typealias MyCFunction = @convention(c) (AnyObject, Selector, UIApplication, NSDictionary) -> Void
             let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
-            retValue = curriedImplementation(self, originalSelector, application, launchOptions as NSDictionary?)
+            curriedImplementation(self, originalSelector, application, userInfo as NSDictionary)
 
             for (_, block) in swizzle.blocks {
-                block(self, swizzle.selector, application as AnyObject?, launchOptions as AnyObject?)
+                block(self, swizzle.selector, application as AnyObject?, userInfo as AnyObject?)
             }
         }
-        return retValue
     }
 }

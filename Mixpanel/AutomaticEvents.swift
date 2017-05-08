@@ -6,14 +6,16 @@
 //  Copyright © 2017 Mixpanel. All rights reserved.
 //
 
-import Foundation
-import UIKit
-import StoreKit
-import Mixpanel.ObjectiveCTools
 
 protocol AEDelegate {
     func track(event: String?, properties: Properties?)
 }
+
+#if DECIDE
+import Foundation
+import UIKit
+import StoreKit
+import Mixpanel.ObjectiveCTools
 
 class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
 
@@ -211,3 +213,4 @@ extension UIResponder {
         }
     }
 }
+#endif

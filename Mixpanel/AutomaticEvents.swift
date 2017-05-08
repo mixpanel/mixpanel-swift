@@ -49,7 +49,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
             if !isExistingUser() {
                 delegate?.track(event: "$ae_first_open", properties: nil)
-                self.people!.setOnce(properties: ["First App Open Date": Date()])
+                self.people!.setOnce(properties: ["$ae_first_app_open_date": Date()])
             }
             defaults.set(true, forKey: firstOpenKey)
             defaults.synchronize()
@@ -62,7 +62,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             if let appVersionValue = appVersionValue as? String,
                 let savedVersionValue = savedVersionValue,
                 appVersionValue != savedVersionValue {
-                delegate?.track(event: "$ae_updated", properties: ["App Version": appVersionValue])
+                delegate?.track(event: "$ae_updated", properties: ["$ae_updated_version": appVersionValue])
                 defaults.set(appVersionValue, forKey: appVersionKey)
                 defaults.synchronize()
             } else if savedVersionValue == nil {
@@ -107,13 +107,13 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     }
 
     @objc private func appWillResignActive(_ notification: Notification) {
-        sessionLength = Date().timeIntervalSince1970 - sessionStartTime
+        sessionLength = roundOneDigit(num: Date().timeIntervalSince1970 - sessionStartTime)
         if sessionLength > Double(minimumSessionDuration / 1000) &&
            sessionLength < Double(maximumSessionDuration / 1000) {
-            let properties: Properties = ["Session Length": sessionLength]
-            delegate?.track(event: "MP: App Open", properties: properties)
-            people!.increment(property: "Total App Sessions", by: 1)
-            people!.increment(property: "Total App Sessions Length", by: sessionLength)
+            let properties: Properties = ["$ae_session_length": sessionLength]
+            delegate?.track(event: "$ae_session", properties: properties)
+            people!.increment(property: "$ae_total_app_sessions", by: 1)
+            people!.increment(property: "$ae_total_app_session_length", by: sessionLength)
         }
         AutomaticEvents.appStartTime = 0
     }
@@ -170,9 +170,9 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         objc_sync_enter(awaitingTransactions)
         for product in response.products {
             if let trans = awaitingTransactions[product.productIdentifier] {
-                delegate?.track(event: "MP: In-App Purchase", properties: ["Price": "\(product.price)",
-                    "Quantity": trans.payment.quantity,
-                    "Product Name": product.productIdentifier])
+                delegate?.track(event: "$ae_iap", properties: ["$ae_iap_price": "\(product.price)",
+                    "$ae_iap_quantity": trans.payment.quantity,
+                    "$ae_iap_name": product.productIdentifier])
                 awaitingTransactions.removeValue(forKey: product.productIdentifier)
             }
         }

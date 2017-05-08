@@ -832,8 +832,13 @@ extension MixpanelInstance {
             if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
                 return
             }
+            #if DECIDE
             self.flushInstance.flushEventsQueue(&self.eventsQueue,
                                                 automaticEventsEnabled: self.decideInstance.automaticEventsEnabled)
+            #else
+            self.flushInstance.flushEventsQueue(&self.eventsQueue,
+                                                automaticEventsEnabled: false)
+            #endif
             self.flushInstance.flushPeopleQueue(&self.people.peopleQueue)
             self.archive()
             if let completion = completion {

@@ -179,7 +179,8 @@ class Persistence {
                 distinctId,
                 alias,
                 peopleDistinctId,
-                peopleUnidentifiedQueue) = unarchiveProperties(token: token)
+                peopleUnidentifiedQueue,
+                _) = unarchiveProperties(token: token)
 
             return (eventsQueue,
                     peopleQueue,
@@ -250,7 +251,8 @@ class Persistence {
         String,
         String?,
         String?,
-        Queue) {
+        Queue,
+        Bool?) {
         return unarchivePropertiesHelper(token: token)
     }
     #endif // DECIDE

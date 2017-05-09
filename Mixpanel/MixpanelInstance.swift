@@ -862,8 +862,8 @@ extension MixpanelInstance {
         if let mpPayload = userInfo["mp"] as? InternalProperties {
             if let m = mpPayload["m"], let c = mpPayload["c"] {
                 var properties = Properties()
-                properties["campaign_id"]  = c as? String
-                properties["message_id"]   = m as? String
+                properties["campaign_id"]  = c as? Int
+                properties["message_id"]   = m as? Int
                 properties["message_type"] = "push"
                 track(event: event,
                       properties: properties)

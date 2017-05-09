@@ -13,7 +13,6 @@
 		E12406201D249B2500383635 /* MixpanelBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E124061F1D249B2500383635 /* MixpanelBaseTests.swift */; };
 		E12BD0371D89FE6A008989C9 /* MixpanelCodelessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */; };
 		E12BD03D1D8A14F3008989C9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E12BD03C1D8A14F3008989C9 /* Assets.xcassets */; };
-		E12CE4241EA571730023AA2D /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12CE4231EA571730023AA2D /* StoreKit.framework */; };
 		E131C43C1DB56B1000FAEE37 /* MixpanelABTestingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E131C43B1DB56B1000FAEE37 /* MixpanelABTestingTests.swift */; };
 		E131C4401DB5A2FE00FAEE37 /* test_decide_response_2.json in Resources */ = {isa = PBXBuildFile; fileRef = E131C43E1DB5A2FE00FAEE37 /* test_decide_response_2.json */; };
 		E131C4411DB5A2FE00FAEE37 /* test_decide_response.json in Resources */ = {isa = PBXBuildFile; fileRef = E131C43F1DB5A2FE00FAEE37 /* test_decide_response.json */; };
@@ -32,6 +31,7 @@
 		E16C35E11D872044003500AC /* CodelessPlaygroundViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16C35E01D872044003500AC /* CodelessPlaygroundViewController.swift */; };
 		E1C61EBA1D22F6470056C56C /* MixpanelPeopleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */; };
 		E1C61EBE1D22F9F60056C56C /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EBD1D22F9F60056C56C /* TestConstants.swift */; };
+		E1C8F50C1EC244E90089C537 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1C8F50B1EC244E90089C537 /* StoreKit.framework */; };
 		E1E8F8B01D626BE80081295D /* MixpanelNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E8F8AF1D626BE80081295D /* MixpanelNotificationTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -103,7 +103,6 @@
 		E124061F1D249B2500383635 /* MixpanelBaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelBaseTests.swift; sourceTree = "<group>"; };
 		E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelCodelessTests.swift; sourceTree = "<group>"; };
 		E12BD03C1D8A14F3008989C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		E12CE4231EA571730023AA2D /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		E131C43B1DB56B1000FAEE37 /* MixpanelABTestingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelABTestingTests.swift; sourceTree = "<group>"; };
 		E131C43E1DB5A2FE00FAEE37 /* test_decide_response_2.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_decide_response_2.json; sourceTree = "<group>"; };
 		E131C43F1DB5A2FE00FAEE37 /* test_decide_response.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_decide_response.json; sourceTree = "<group>"; };
@@ -126,6 +125,7 @@
 		E16C35E01D872044003500AC /* CodelessPlaygroundViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodelessPlaygroundViewController.swift; sourceTree = "<group>"; };
 		E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelPeopleTests.swift; sourceTree = "<group>"; };
 		E1C61EBD1D22F9F60056C56C /* TestConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstants.swift; sourceTree = "<group>"; };
+		E1C8F50B1EC244E90089C537 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		E1E8F8AF1D626BE80081295D /* MixpanelNotificationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelNotificationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -135,7 +135,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E15FF7FC1D0461D70076CDE3 /* Mixpanel.framework in Frameworks */,
-				E12CE4241EA571730023AA2D /* StoreKit.framework in Frameworks */,
+				E1C8F50C1EC244E90089C537 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,7 +162,7 @@
 		773080F90ECB3A0D67A6E636 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				E12CE4231EA571730023AA2D /* StoreKit.framework */,
+				E1C8F50B1EC244E90089C537 /* StoreKit.framework */,
 				37433CF0620BC6A0A5EFC541 /* Pods_MixpanelDemoTests.framework */,
 			);
 			name = Frameworks;
@@ -313,8 +313,11 @@
 						DevelopmentTeam = E8FVX7QLET;
 						DevelopmentTeamName = "Mixpanel, Inc.";
 						LastSwiftMigration = 0800;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
+							com.apple.ApplePay = {
+								enabled = 0;
+							};
 							com.apple.InAppPurchase = {
 								enabled = 1;
 							};
@@ -625,16 +628,17 @@
 				CODE_SIGN_ENTITLEMENTS = MixpanelDemo/MixpanelDemo.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = E8FVX7QLET;
 				INFOPLIST_FILE = MixpanelDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Mixpanel";
-				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.swiftdemo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.swiftsdkdemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE = "360196ea-537a-422b-bbdc-8491973cc49b";
+				PROVISIONING_PROFILE_SPECIFIER = "Swift SDK Demo Dev";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -645,19 +649,20 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = MixpanelDemo/MixpanelDemo.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = E8FVX7QLET;
 				INFOPLIST_FILE = MixpanelDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Mixpanel";
-				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.swiftdemo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.swiftsdkdemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE = "8dbb1e46-8e7c-46d1-ab89-5eaf0d900313";
+				PROVISIONING_PROFILE_SPECIFIER = "Swift SDK Demo Dist";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

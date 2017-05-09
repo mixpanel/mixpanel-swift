@@ -70,14 +70,14 @@ class UtilityViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func IAPFlow() {
         let productIdentifiers = NSSet(objects:
-            "com.mixpanel.swiftdemo.test",
-            "test",
-            "com.mixpanel.swiftdemo.SwiftSDKIAPTestingProductID",
-            "SwiftSDKIAPTestingProductID",
-            "mixpanel.swiftdemo.test"
+            "com.iaptutorial.fun",
+            "com.mixpanel.swiftsdkdemo.fun",
+            "com.mixpanel.com.mixpanel.swiftsdkdemo.fun",
+            "fun",
+            "com.mixpanel.fun",
+            "com.mixpanel.swiftsdkdemo.com.mixpanel.swiftsdkdemo.fun"
         )
-        var productsRequest = SKProductsRequest()
-        productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers as! Set<String>)
+        let productsRequest =  SKProductsRequest(productIdentifiers: productIdentifiers as! Set<String>)
         productsRequest.delegate = self
         productsRequest.start()
     }

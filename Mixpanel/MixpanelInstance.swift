@@ -270,6 +270,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             if let notification =
             launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
                 trackPushNotification(notification, event: "$app_open")
+                if decideInstance.automaticEventsEnabled == nil || decideInstance.automaticEventsEnabled! {
+                    automaticEvents.trackAutomaticEventsPush(payload: notification)
+                }
             }
         #endif // DECIDE
     }

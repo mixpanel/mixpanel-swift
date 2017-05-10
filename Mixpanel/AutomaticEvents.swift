@@ -101,8 +101,10 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                                      withSelector: #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)),
                                      for: aClass,
                                      name: "notification opened",
-                                     block: { _ in
-                                        self.delegate?.track(event: "$ae_notif_opened", properties: nil)
+                                     block: { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
+                                        if let param1 = param1 as? [AnyHashable: Any] {
+                                            self.trackAutomaticEventsPush(payload: param1)
+                                        }
             })
         }
 
@@ -166,6 +168,23 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             return false
         }
         return false
+    }
+
+    func trackAutomaticEventsPush(payload: [AnyHashable: Any]) {
+        var properties: InternalProperties = [:];
+        if let mpPayload = payload["mp"] as? InternalProperties {
+            if let m = mpPayload["m"], let c = mpPayload["c"] {
+                properties["campaign_id"]  = c as? Int
+                properties["message_id"]   = m as? Int
+            } else {
+                properties["campaign_id"]  = "External"
+                properties["message_id"]   = "External"
+            }
+        }
+        if let apsPayload = payload["aps"] as? [AnyHashable: Any],
+           let apsMessage = apsPayload["alert"] as? String {
+            properties["$ae_notif_message"] = apsMessage
+        }
     }
 
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {

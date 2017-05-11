@@ -85,29 +85,6 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 
         SKPaymentQueue.default().add(self)
 
-        guard let appDelegate = UIApplication.shared.delegate else {
-            return
-        }
-        var selector: Selector? = nil
-        let aClass: AnyClass = type(of: appDelegate)
-        if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")) != nil {
-            selector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
-        } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:")) != nil {
-            selector = NSSelectorFromString("application:didReceiveRemoteNotification:")
-        }
-
-        if let selector = selector {
-            Swizzler.swizzleSelector(selector,
-                                     withSelector: #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)),
-                                     for: aClass,
-                                     name: "notification opened",
-                                     block: { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
-                                        if let param1 = param1 as? [AnyHashable: Any] {
-                                            self.trackAutomaticEventsPush(payload: param1)
-                                        }
-            })
-        }
-
     }
 
     @objc private func appWillResignActive(_ notification: Notification) {
@@ -145,9 +122,11 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             }
         }
         objc_sync_exit(awaitingTransactions)
-        productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
-        productsRequest.delegate = self
-        productsRequest.start()
+        if productIdentifiers.count > 0 {
+            productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
+            productsRequest.delegate = self
+            productsRequest.start()
+        }
     }
 
     func roundOneDigit(num: TimeInterval) -> TimeInterval {
@@ -170,23 +149,6 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         return false
     }
 
-    func trackAutomaticEventsPush(payload: [AnyHashable: Any]) {
-        var properties: InternalProperties = [:];
-        if let mpPayload = payload["mp"] as? InternalProperties {
-            if let m = mpPayload["m"], let c = mpPayload["c"] {
-                properties["campaign_id"]  = c as? Int
-                properties["message_id"]   = m as? Int
-            } else {
-                properties["campaign_id"]  = "External"
-                properties["message_id"]   = "External"
-            }
-        }
-        if let apsPayload = payload["aps"] as? [AnyHashable: Any],
-           let apsMessage = apsPayload["alert"] as? String {
-            properties["$ae_notif_message"] = apsMessage
-        }
-    }
-
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         objc_sync_enter(awaitingTransactions)
         for product in response.products {
@@ -202,34 +164,4 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 
 }
 
-extension UIResponder {
-
-    func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Swift.Void) {
-        let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
-        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
-            let swizzle = Swizzler.swizzles[originalMethod] {
-            typealias MyCFunction = @convention(c) (AnyObject, Selector, UIApplication, NSDictionary, (UIBackgroundFetchResult) -> Void) -> Void
-            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
-            curriedImplementation(self, originalSelector, application, userInfo as NSDictionary, completionHandler)
-
-            for (_, block) in swizzle.blocks {
-                block(self, swizzle.selector, application as AnyObject?, userInfo as AnyObject?)
-            }
-        }
-    }
-
-    func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
-        let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:")
-        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
-            let swizzle = Swizzler.swizzles[originalMethod] {
-            typealias MyCFunction = @convention(c) (AnyObject, Selector, UIApplication, NSDictionary) -> Void
-            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
-            curriedImplementation(self, originalSelector, application, userInfo as NSDictionary)
-
-            for (_, block) in swizzle.blocks {
-                block(self, swizzle.selector, application as AnyObject?, userInfo as AnyObject?)
-            }
-        }
-    }
-}
 #endif

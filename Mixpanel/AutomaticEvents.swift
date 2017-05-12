@@ -47,7 +47,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 
     func initializeEvents(people: People) {
         self.people = people
-        let firstOpenKey = "MPfirstOpen"
+        let firstOpenKey = "MPFirstOpen"
         if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
             if !isExistingUser() {
                 delegate?.track(event: "$ae_first_open", properties: nil)
@@ -87,7 +87,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 
     }
 
-    @objc private func appWillResignActive(_ notification: Notification) {
+    @objc func appWillResignActive(_ notification: Notification) {
         sessionLength = roundOneDigit(num: Date().timeIntervalSince1970 - sessionStartTime)
         if sessionLength > Double(minimumSessionDuration / 1000) &&
            sessionLength < Double(maximumSessionDuration / 1000) {

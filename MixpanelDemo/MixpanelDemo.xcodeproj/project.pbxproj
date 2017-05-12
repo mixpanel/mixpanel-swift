@@ -29,6 +29,7 @@
 		E15FF7FC1D0461D70076CDE3 /* Mixpanel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */; };
 		E15FF7FD1D0461D70076CDE3 /* Mixpanel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E16C35E11D872044003500AC /* CodelessPlaygroundViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16C35E01D872044003500AC /* CodelessPlaygroundViewController.swift */; };
+		E17AA05E1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17AA05D1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift */; };
 		E1C61EBA1D22F6470056C56C /* MixpanelPeopleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */; };
 		E1C61EBE1D22F9F60056C56C /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EBD1D22F9F60056C56C /* TestConstants.swift */; };
 		E1C8F50C1EC244E90089C537 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1C8F50B1EC244E90089C537 /* StoreKit.framework */; };
@@ -123,6 +124,7 @@
 		E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Mixpanel.xcodeproj; path = ../Mixpanel.xcodeproj; sourceTree = "<group>"; };
 		E16BAEB41D3DB4FC00C442CE /* MixpanelDemo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = MixpanelDemo.entitlements; sourceTree = "<group>"; };
 		E16C35E01D872044003500AC /* CodelessPlaygroundViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodelessPlaygroundViewController.swift; sourceTree = "<group>"; };
+		E17AA05D1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelAutomaticEventsTests.swift; sourceTree = "<group>"; };
 		E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelPeopleTests.swift; sourceTree = "<group>"; };
 		E1C61EBD1D22F9F60056C56C /* TestConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstants.swift; sourceTree = "<group>"; };
 		E1C8F50B1EC244E90089C537 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
@@ -237,6 +239,7 @@
 				E1E8F8AF1D626BE80081295D /* MixpanelNotificationTests.swift */,
 				E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */,
 				E131C43B1DB56B1000FAEE37 /* MixpanelABTestingTests.swift */,
+				E17AA05D1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift */,
 				E1C61EBD1D22F9F60056C56C /* TestConstants.swift */,
 				51DD56891D3077390045D3DB /* LoggerTests.swift */,
 				E12BD03A1D8A14D6008989C9 /* Supporting Files */,
@@ -487,6 +490,7 @@
 				E1C61EBA1D22F6470056C56C /* MixpanelPeopleTests.swift in Sources */,
 				E1C61EBE1D22F9F60056C56C /* TestConstants.swift in Sources */,
 				E12406201D249B2500383635 /* MixpanelBaseTests.swift in Sources */,
+				E17AA05E1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift in Sources */,
 				E15FF7EC1D0461130076CDE3 /* MixpanelDemoTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -15,7 +15,6 @@ protocol AEDelegate {
 import Foundation
 import UIKit
 import StoreKit
-import Mixpanel.ObjectiveCTools
 
 class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
 

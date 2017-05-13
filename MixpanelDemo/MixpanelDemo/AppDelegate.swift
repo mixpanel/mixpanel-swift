@@ -36,14 +36,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        Mixpanel.mainInstance().time(event: "session length")
-    }
-
-    func applicationWillResignActive(_ application: UIApplication) {
-        Mixpanel.mainInstance().track(event: "session length")
-    }
-
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         debugPrint("did register for remote notification with token")
         Mixpanel.mainInstance().people.addPushDeviceToken(deviceToken)

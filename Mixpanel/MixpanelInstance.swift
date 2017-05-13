@@ -210,7 +210,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     /// The minimum session duration (ms) that is tracked in automatic events.
-    /// The default value is 2000 (2 seconds).
+    /// The default value is 10000 (10 seconds).
     open var maximumSessionDuration: UInt64 {
         set {
             automaticEvents.maximumSessionDuration = newValue
@@ -261,7 +261,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #if DECIDE
             if decideInstance.automaticEventsEnabled == nil || decideInstance.automaticEventsEnabled! {
                 automaticEvents.delegate = self
-                automaticEvents.initializeEvents(people: people)
+                automaticEvents.initializeEvents()
             }
             decideInstance.inAppDelegate = self
             executeCachedVariants()

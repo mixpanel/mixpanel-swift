@@ -123,7 +123,7 @@ class Decide {
                 self.ABTestingInstance.variants = newVariants.union(runningVariants)
 
                 if let automaticEvents = result["automatic_events"] as? Bool {
-                    self.automaticEventsEnabled = true//automaticEvents
+                    self.automaticEventsEnabled = automaticEvents
                 }
 
                 self.decideFetched = true

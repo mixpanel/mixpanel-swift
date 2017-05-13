@@ -19,7 +19,7 @@ import Mixpanel.ObjectiveCTools
 
 class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
 
-    var _minimumSessionDuration: UInt64 = 2000
+    var _minimumSessionDuration: UInt64 = 10000
     var minimumSessionDuration: UInt64 {
         set {
             _minimumSessionDuration = newValue
@@ -43,15 +43,12 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     static var appStartTime = Date().timeIntervalSince1970
     var sessionLength: TimeInterval = 0
     var sessionStartTime: TimeInterval = 0
-    var people: People? = nil
 
-    func initializeEvents(people: People) {
-        self.people = people
+    func initializeEvents() {
         let firstOpenKey = "MPFirstOpen"
         if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
             if !isExistingUser() {
                 delegate?.track(event: "$ae_first_open", properties: nil)
-                self.people!.setOnce(properties: ["$ae_first_app_open_date": Date()])
             }
             defaults.set(true, forKey: firstOpenKey)
             defaults.synchronize()
@@ -93,8 +90,6 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
            sessionLength < Double(maximumSessionDuration / 1000) {
             let properties: Properties = ["$ae_session_length": sessionLength]
             delegate?.track(event: "$ae_session", properties: properties)
-            people!.increment(property: "$ae_total_app_sessions", by: 1)
-            people!.increment(property: "$ae_total_app_session_length", by: sessionLength)
         }
         AutomaticEvents.appStartTime = 0
     }

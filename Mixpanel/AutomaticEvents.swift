@@ -39,9 +39,8 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     var awaitingTransactions = [String: SKPaymentTransaction]()
     let defaults = UserDefaults(suiteName: "Mixpanel")
     var delegate: AEDelegate?
-    static var appStartTime = Date().timeIntervalSince1970
     var sessionLength: TimeInterval = 0
-    var sessionStartTime: TimeInterval = 0
+    var sessionStartTime: TimeInterval = Date().timeIntervalSince1970
 
     func initializeEvents() {
         let firstOpenKey = "MPFirstOpen"
@@ -90,12 +89,10 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             let properties: Properties = ["$ae_session_length": sessionLength]
             delegate?.track(event: "$ae_session", properties: properties)
         }
-        AutomaticEvents.appStartTime = 0
     }
 
     @objc private func appDidBecomeActive(_ notification: Notification) {
-        let nowTime = Date().timeIntervalSince1970
-        sessionStartTime = nowTime
+        sessionStartTime = Date().timeIntervalSince1970
     }
 
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {

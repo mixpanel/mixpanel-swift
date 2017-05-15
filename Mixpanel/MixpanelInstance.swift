@@ -198,8 +198,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
     }
 
-    /// The maximum session duration (ms) that is tracked in automatic events.
-    /// The default value is UINT64_MAX (no maximum session duration).
+    /// The minimum session duration (ms) that is tracked in automatic events.
+    /// The default value is 10000 (10 seconds).
     open var minimumSessionDuration: UInt64 {
         set {
             automaticEvents.minimumSessionDuration = newValue
@@ -209,8 +209,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
     }
 
-    /// The minimum session duration (ms) that is tracked in automatic events.
-    /// The default value is 10000 (10 seconds).
+    /// The maximum session duration (ms) that is tracked in automatic events.
+    /// The default value is UINT64_MAX (no maximum session duration).
     open var maximumSessionDuration: UInt64 {
         set {
             automaticEvents.maximumSessionDuration = newValue

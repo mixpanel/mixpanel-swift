@@ -59,7 +59,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             let savedVersionValue = defaults.string(forKey: appVersionKey)
             if let appVersionValue = appVersionValue as? String,
                 let savedVersionValue = savedVersionValue,
-                appVersionValue != savedVersionValue {
+                appVersionValue.compare(savedVersionValue, options: .numeric, range: nil, locale: nil) == .orderedDescending {
                 delegate?.track(event: "$ae_updated", properties: ["$ae_updated_version": appVersionValue])
                 defaults.set(appVersionValue, forKey: appVersionKey)
                 defaults.synchronize()

@@ -259,10 +259,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         unarchive()
 
         #if DECIDE
-            if decideInstance.automaticEventsEnabled == nil || decideInstance.automaticEventsEnabled! {
-                automaticEvents.delegate = self
-                automaticEvents.initializeEvents()
-            }
+            automaticEvents.delegate = self
+            automaticEvents.initializeEvents()
             decideInstance.inAppDelegate = self
             executeCachedVariants()
             executeCachedCodelessBindings()

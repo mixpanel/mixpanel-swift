@@ -335,8 +335,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
         var e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertEqual(e["event"] as? String, "$app_open", "incorrect event name")
         var p: InternalProperties = e["properties"] as! InternalProperties
-        XCTAssertEqual(p["campaign_id"] as? Int, "the_campaign_id", "campaign_id not equal")
-        XCTAssertEqual(p["message_id"] as? Int, "the_message_id", "message_id not equal")
+        XCTAssertEqual(p["campaign_id"] as? Int, 54321, "campaign_id not equal")
+        XCTAssertEqual(p["message_id"] as? Int, 12345, "message_id not equal")
         XCTAssertEqual(p["message_type"] as? String, "push", "type does not equal inapp")
     }
 
@@ -346,8 +346,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
         var e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertEqual(e["event"] as? String, "$campaign_received", "incorrect event name")
         var p: InternalProperties = e["properties"] as! InternalProperties
-        XCTAssertEqual(p["campaign_id"] as? Int, "the_campaign_id", "campaign_id not equal")
-        XCTAssertEqual(p["message_id"] as? Int, "the_message_id", "message_id not equal")
+        XCTAssertEqual(p["campaign_id"] as? Int, 56789, "campaign_id not equal")
+        XCTAssertEqual(p["message_id"] as? Int, 98765, "message_id not equal")
         XCTAssertEqual(p["message_type"] as? String, "push", "type does not equal inapp")
     }
 

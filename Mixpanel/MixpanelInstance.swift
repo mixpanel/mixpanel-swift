@@ -1035,7 +1035,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     func checkDecide(forceFetch: Bool = false, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
         serialQueue.async {
             self.decideInstance.checkDecide(forceFetch: forceFetch,
-                                            distinctId: people.distinctId ?? self.distinctId,
+                                            distinctId: self.people.distinctId ?? self.distinctId,
                                             token: self.apiToken,
                                             completion: completion)
         }

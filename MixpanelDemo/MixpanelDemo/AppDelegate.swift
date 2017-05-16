@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
-        Mixpanel.initialize(token: "MIXPANEL_TOKEN")
+        Mixpanel.initialize(token: "93fdad6026e4debf13479bf0aeba0e9f")
         Mixpanel.mainInstance().loggingEnabled = true
         Mixpanel.mainInstance().flushInterval = 5
         let allTweaks: [TweakClusterType] = [MixpanelTweaks.floatTweak,
@@ -30,15 +30,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UIApplication.shared.registerUserNotificationSettings(settings)
         UIApplication.shared.registerForRemoteNotifications()
 
-        Mixpanel.mainInstance().identify(
-            distinctId: Mixpanel.mainInstance().distinctId)
-        Mixpanel.mainInstance().people.set(properties: ["$name": "Max Pançelle"])
+        //Mixpanel.mainInstance().identify(
+        //    distinctId: Mixpanel.mainInstance().distinctId)
+        //Mixpanel.mainInstance().people.set(properties: ["$name": "Max Pançelle"])
         return true
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         debugPrint("did register for remote notification with token")
-        Mixpanel.mainInstance().people.addPushDeviceToken(deviceToken)
+        //Mixpanel.mainInstance().people.addPushDeviceToken(deviceToken)
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {

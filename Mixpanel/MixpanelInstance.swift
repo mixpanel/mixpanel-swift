@@ -1033,13 +1033,9 @@ extension MixpanelInstance: InAppNotificationsDelegate {
 
     // MARK: - Decide
     func checkDecide(forceFetch: Bool = false, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
-        guard let distinctId = people.distinctId else {
-            Logger.info(message: "Can't fetch from Decide without identifying first")
-            return
-        }
         serialQueue.async {
             self.decideInstance.checkDecide(forceFetch: forceFetch,
-                                            distinctId: distinctId,
+                                            distinctId: people.distinctId ?? self.distinctId,
                                             token: self.apiToken,
                                             completion: completion)
         }

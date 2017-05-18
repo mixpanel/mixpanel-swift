@@ -327,7 +327,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testTrackLaunchOptions() {
         let launchOptions: [UIApplicationLaunchOptionsKey: Any] = [UIApplicationLaunchOptionsKey.remoteNotification: ["mp":
-            ["m": "the_message_id", "c": "the_campaign_id"]]]
+            ["m": 12345, "c": 54321]]]
         mixpanel = Mixpanel.initialize(token: kTestToken,
                                        launchOptions: launchOptions,
                                        flushInterval: 60)
@@ -335,25 +335,25 @@ class MixpanelDemoTests: MixpanelBaseTests {
         var e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertEqual(e["event"] as? String, "$app_open", "incorrect event name")
         var p: InternalProperties = e["properties"] as! InternalProperties
-        XCTAssertEqual(p["campaign_id"] as? String, "the_campaign_id", "campaign_id not equal")
-        XCTAssertEqual(p["message_id"] as? String, "the_message_id", "message_id not equal")
+        XCTAssertEqual(p["campaign_id"] as? Int, 54321, "campaign_id not equal")
+        XCTAssertEqual(p["message_id"] as? Int, 12345, "message_id not equal")
         XCTAssertEqual(p["message_type"] as? String, "push", "type does not equal inapp")
     }
 
     func testTrackPushNotification() {
-        mixpanel.trackPushNotification(["mp": ["m": "the_message_id", "c": "the_campaign_id"]])
+        mixpanel.trackPushNotification(["mp": ["m": 98765, "c": 56789]])
         waitForSerialQueue()
         var e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertEqual(e["event"] as? String, "$campaign_received", "incorrect event name")
         var p: InternalProperties = e["properties"] as! InternalProperties
-        XCTAssertEqual(p["campaign_id"] as? String, "the_campaign_id", "campaign_id not equal")
-        XCTAssertEqual(p["message_id"] as? String, "the_message_id", "message_id not equal")
+        XCTAssertEqual(p["campaign_id"] as? Int, 56789, "campaign_id not equal")
+        XCTAssertEqual(p["message_id"] as? Int, 98765, "message_id not equal")
         XCTAssertEqual(p["message_type"] as? String, "push", "type does not equal inapp")
     }
 
     func testTrackPushNotificationMalformed() {
         mixpanel.trackPushNotification(["mp":
-            ["m": "the_message_id", "cid": "the_campaign_id"]])
+            ["m": 11111, "cid": 22222]])
         waitForSerialQueue()
         XCTAssertTrue(mixpanel.eventsQueue.isEmpty,
                       "Invalid push notification was incorrectly queued.")

@@ -50,6 +50,8 @@ class AutomaticProperties {
         if let infoDict = infoDict {
             p["$app_build_number"]     = infoDict["CFBundleVersion"]
             p["$app_version_string"]   = infoDict["CFBundleShortVersionString"]
+            p["$app_version"]          = infoDict["CFBundleVersion"]
+            p["$app_release"]          = infoDict["CFBundleShortVersionString"]
         }
         p["mp_lib"]             = "swift"
         p["$lib_version"]       = AutomaticProperties.libVersion()

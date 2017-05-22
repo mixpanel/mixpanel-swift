@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'Mixpanel-swift-appex'
-  s.version = '2.1.5'
+  s.version = '2.1.6'
   s.module_name = 'MixpanelAppex' 
   s.license = 'Apache License, Version 2.0'
   s.summary = 'Mixpanel tracking library for iOS (Swift) App Extensions'

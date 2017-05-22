@@ -108,68 +108,6 @@
             </ul>
           </li>
           <li class="nav-group-name">
-            <a href="Instance Methods.html">Instance Methods</a>
-            <ul class="nav-group-tasks">
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance7archiveFT_T_">archive()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance20clearSuperPropertiesFT_T_">clearSuperProperties()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16clearTimedEventsFT_T_">clearTimedEvents()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance11createAliasFTSS10distinctIdSS_T_">createAlias(_:distinctId:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance22currentSuperPropertiesFT_GVs10DictionarySSP__">currentSuperProperties()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance24fetchNotificationPayloadFT10completionFGSqGVs10DictionarySSPs9AnyObject___T__T_">fetchNotificationPayload(completion:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance5flushFT10completionGSqFT_T___T_">flush(completion:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance8identifyFT10distinctIdSS_T_">identify(distinctId:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance15joinExperimentsFT8callbackGSqFT_T___T_">joinExperiments(callback:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance23registerSuperPropertiesFGVs10DictionarySSPS_12MixpanelType__T_">registerSuperProperties(_:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance27registerSuperPropertiesOnceFTGVs10DictionarySSPS_12MixpanelType__12defaultValueGSqPS2____T_">registerSuperPropertiesOnce(_:defaultValue:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance5resetFT_T_">reset()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT_T_">showNotification()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT2IDSi_T_">showNotification(ID:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT4typeSS_T_">showNotification(type:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance4timeFT5eventSS_T_">time(event:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance5trackFT5eventGSqSS_10propertiesGSqGVs10DictionarySSPS_12MixpanelType____T_">track(event:properties:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance21trackPushNotificationFTGVs10DictionaryVs11AnyHashableP__5eventSS_T_">trackPushNotification(_:event:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance23unregisterSuperPropertyFSST_">unregisterSuperProperty(_:)</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-group-name">
             <a href="Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
@@ -219,123 +157,126 @@
 <a href="https://mixpanel.com"><img src="http://img.shields.io/cocoapods/v/Mixpanel-swift.svg" alt="CocoaPods Compatible"></a>
 <a href="https://github.com/Carthage/Carthage"><img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg" alt="Carthage compatible"></a>
 <a href="https://mixpanel.com"><img src="http://img.shields.io/cocoapods/l/Mixpanel-swift.svg" alt="Apache License"></a></p>
-<a href='#introduction' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='introduction'>Introduction</h1>
+<h1 id='table-of-contents' class='heading'>Table of Contents</h1>
+
+<!-- MarkdownTOC -->
+
+<ul>
+<li><a href="#introduction">Introduction</a>
+
+<ul>
+<li><a href="#current-supported-features">Current supported features</a></li>
+</ul></li>
+<li><a href="#installation">Installation</a>
+
+<ul>
+<li><a href="#cocoapods">CocoaPods</a></li>
+<li><a href="#carthage">Carthage</a></li>
+<li><a href="#manual-installation">Manual Installation</a></li>
+</ul></li>
+<li><a href="#initializing-and-usage">Initializing and Usage</a>
+
+<ul>
+<li><a href="#integrate">Integrate</a></li>
+<li><a href="#start-tracking">Start tracking</a></li>
+</ul></li>
+</ul>
+
+<!-- /MarkdownTOC -->
+
+<p><a name="introduction"></a></p>
+<h1 id='introduction' class='heading'>Introduction</h1>
 
 <p>Welcome to the official Mixpanel Swift Library</p>
 
 <p>The Mixpanel Swift library for iOS is an open source project, and we&rsquo;d love to see your contributions! 
-We&rsquo;d also love for you to come and work with us! Check out <strong><a href="http://boards.greenhouse.io/mixpanel/jobs/25226#.U_4JXEhORKU">Jobs</a></strong> for details.</p>
+We&rsquo;d also love for you to come and work with us! Check out <strong><a href="https://mixpanel.com/jobs/#openings">Jobs</a></strong> for details.</p>
 
 <p>If you are using Objective-C, we recommend using our <strong><a href="https://github.com/mixpanel/mixpanel-iphone">Objective-C Library</a></strong>.</p>
-<a href='#current-supported-features' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='current-supported-features'>Current supported features</h2>
 
-<p><strong>Our master branch and our 2.x releases are now in Swift 3. If you wish to use our Swift 2.3 implementation, please point to our v1.0.1 release.</strong></p>
+<p><a name="current-supported-features"></a></p>
+<h2 id='current-supported-features' class='heading'>Current supported features</h2>
 
-<table><thead>
-<tr>
-<th>Feature</th>
-<th>Swift 3</th>
-<th><a href="https://github.com/mixpanel/mixpanel-swift/tree/swift2.3">Swift 2.3</a></th>
-</tr>
-</thead><tbody>
-<tr>
-<td>Tracking API</td>
-<td>✔</td>
-<td>✔</td>
-</tr>
-<tr>
-<td>People API</td>
-<td>✔</td>
-<td>✔</td>
-</tr>
-<tr>
-<td><a href="https://mixpanel.github.io/mixpanel-swift">Documentation</a></td>
-<td>✔</td>
-<td>✔</td>
-</tr>
-<tr>
-<td>tvOS Support</td>
-<td>✔</td>
-<td></td>
-</tr>
-<tr>
-<td>In-app Notifications</td>
-<td>✔</td>
-<td></td>
-</tr>
-<tr>
-<td>Codeless Tracking</td>
-<td>✔</td>
-<td></td>
-</tr>
-<tr>
-<td>A/B Testing</td>
-<td>✔</td>
-<td></td>
-</tr>
-</tbody></table>
-<a href='#installation' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='installation'>Installation</h1>
-<a href='#cocoapods' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='cocoapods'>CocoaPods</h2>
+<p><strong>Our master branch and our releases are in Swift 3. If you wish to use our Swift 2.3 implementation, please point to our v1.0.1 release.</strong></p>
+
+<p>Our Swift library fully supports all of the Mixpanel features, and has full parity with the <a href="https://github.com/mixpanel/mixpanel-iphone">Objective-C Library</a>.</p>
+
+<p><a name="installation"></a></p>
+<h1 id='installation' class='heading'>Installation</h1>
+
+<p><a name="cocoapods"></a></p>
+<h2 id='cocoapods' class='heading'>CocoaPods</h2>
 
 <p><strong>Our current release only supports CocoaPods version 1.1.0+</strong></p>
 
 <p>Mixpanel supports <code>CocoaPods</code> for easy installation.
 To Install, see our <strong><a href="https://mixpanel.com/help/reference/swift">swift integration guide »</a></strong></p>
 
+<p>For iOS, tvOS, and macOS integrations:</p>
+
 <p><code>pod &#39;Mixpanel-swift&#39;</code></p>
-<a href='#carthage' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='carthage'>Carthage</h2>
+
+<p>For App Extension integrations (you may need both the above <em>and</em> this):</p>
+
+<p><code>pod &#39;Mixpanel-swift-appex&#39;</code></p>
+
+<p><a name="carthage"></a></p>
+<h2 id='carthage' class='heading'>Carthage</h2>
 
 <p>Mixpanel also supports <code>Carthage</code> to package your dependencies as a framework. Include the following dependency in your Cartfile:</p>
 
 <p><code>github &quot;mixpanel/mixpanel-swift&quot;</code></p>
 
 <p>Check out the <strong><a href="https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos">Carthage docs »</a></strong> for more info. </p>
-<a href='#manual-installation' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='manual-installation'>Manual Installation</h2>
+
+<p><a name="manual-installation"></a></p>
+<h2 id='manual-installation' class='heading'>Manual Installation</h2>
 
 <p>To help users stay up to date with the latests version of our Swift SDK, we always recommend integrating our SDK via CocoaPods, which simplifies version updates and dependency management. However, there are cases where users can&rsquo;t use CocoaPods. Not to worry, just follow these manual installation steps and you&rsquo;ll be all set.</p>
-<a href='#step-1-add-as-a-submodule' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='step-1-add-as-a-submodule'>Step 1: Add as a Submodule</h3>
+<h3 id='step-1-add-as-a-submodule' class='heading'>Step 1: Add as a Submodule</h3>
 
 <p>Add Mixpanel as a submodule to your local git repo like so:</p>
 <pre class="highlight plaintext"><code>git submodule add git@github.com:mixpanel/mixpanel-swift.git
 </code></pre>
 
 <p>Now the Mixpanel project and its files should be in your project folder! </p>
-<a href='#step-2-drag-mixpanel-to-your-project' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='step-2-drag-mixpanel-to-your-project'>Step 2: Drag Mixpanel to your project</h3>
+<h3 id='step-2-drag-mixpanel-to-your-project' class='heading'>Step 2: Drag Mixpanel to your project</h3>
 
 <p>Drag the Mixpanel.xcodeproj inside your sample project under the main sample project file:</p>
 
 <p><img src="http://images.mxpnl.com/docs/2016-07-19%2023:34:02.724663-Screen%20Shot%202016-07-19%20at%204.33.34%20PM.png" alt="alt text"></p>
-<a href='#step-3-embed-the-framework' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='step-3-embed-the-framework'>Step 3: Embed the framework</h3>
+<h3 id='step-3-embed-the-framework' class='heading'>Step 3: Embed the framework</h3>
 
 <p>Select your app .xcodeproj file. Under <q>General</q>, add the Mixpanel framework as an embedded binary:</p>
 
 <p><img src="http://images.mxpnl.com/docs/2016-07-19%2023:31:29.237158-add_framework.png" alt="alt text"></p>
-<a href='#step-4-integrate' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='step-4-integrate'>Step 4: Integrate!</h3>
+
+<p><a name="initializing-and-usage"></a></p>
+<h1 id='initializing-and-usage' class='heading'>Initializing and Usage</h1>
+
+<p><a name="integrate"></a></p>
+<h2 id='integrate' class='heading'>Integrate</h2>
 
 <p>Import Mixpanel into AppDelegate.swift, and initialize Mixpanel within <code>application:didFinishLaunchingWithOptions:</code>
 <img src="http://images.mxpnl.com/docs/2016-07-19%2023:27:03.724972-Screen%20Shot%202016-07-18%20at%207.16.51%20PM.png" alt="alt text"></p>
-<pre class="highlight plaintext"><code>func application(_ application: UIApplication,
-                 didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -&gt; Bool {
-    Mixpanel.initialize(token: "MIXPANEL_TOKEN")
-}
+<pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">application</span><span class="p">(</span><span class="n">_</span> <span class="nv">application</span><span class="p">:</span> <span class="kt">UIApplication</span><span class="p">,</span>
+                 <span class="n">didFinishLaunchingWithOptions</span> <span class="nv">launchOptions</span><span class="p">:</span> <span class="p">[</span><span class="kt">NSObject</span><span class="p">:</span> <span class="kt">AnyObject</span><span class="p">]?)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span> <span class="p">{</span>
+    <span class="kt">Mixpanel</span><span class="o">.</span><span class="nf">initialize</span><span class="p">(</span><span class="nv">token</span><span class="p">:</span> <span class="s">"MIXPANEL_TOKEN"</span><span class="p">)</span>
+<span class="p">}</span>
 </code></pre>
-<a href='#initializing-and-usage' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='initializing-and-usage'>Initializing and Usage</h1>
 
-<p>By calling:
-<code>
-let mixpanel = Mixpanel.initialize(token: &quot;MIXPANEL_TOKEN&quot;)
-</code></p>
+<p>You initialize your Mixpanel instance with the token provided to you on mixpanel.com.</p>
 
-<p>You initialize your mixpanel instance with the token provided to you on mixpanel.com.
-To interact with the instance and start tracking, you can either use the mixpanel instance given when initializing:
-<code>
-mixpanel.track(event: &quot;Tracked Event!&quot;)
-</code>
-or you can directly fetch the instance and use it from the Mixpanel object:
-<code>
-Mixpanel.mainInstance().track(event: &quot;Tracked Event!&quot;)
-</code></p>
-<a href='#start-tracking' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='start-tracking'>Start tracking</h2>
+<p><a name="start-tracking"></a></p>
+<h2 id='start-tracking' class='heading'>Start tracking</h2>
+
+<p>To interact with the instance and start tracking, you can either use the mixpanel instance given when initializing:</p>
+<pre class="highlight swift"><code><span class="n">mixpanel</span><span class="o">.</span><span class="nf">track</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="s">"Tracked Event!"</span><span class="p">)</span>
+</code></pre>
+
+<p>or you can directly fetch the instance and use it from the Mixpanel object:</p>
+<pre class="highlight swift"><code><span class="kt">Mixpanel</span><span class="o">.</span><span class="nf">mainInstance</span><span class="p">()</span><span class="o">.</span><span class="nf">track</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="s">"Tracked Event!"</span><span class="p">)</span>
+</code></pre>
 
 <p>You&rsquo;re done! You&rsquo;ve successfully integrated the Mixpanel Swift SDK into your app. To stay up to speed on important SDK releases and updates, star or watch our repository on <a href="https://github.com/mixpanel/mixpanel-swift">Github</a>.</p>
 
@@ -344,8 +285,8 @@ Mixpanel.mainInstance().track(event: &quot;Tracked Event!&quot;)
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2017 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2017-03-02)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.4</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2017 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2017-05-22)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

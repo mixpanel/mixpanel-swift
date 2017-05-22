@@ -109,68 +109,6 @@
             </ul>
           </li>
           <li class="nav-group-name">
-            <a href="../Instance Methods.html">Instance Methods</a>
-            <ul class="nav-group-tasks">
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance7archiveFT_T_">archive()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance20clearSuperPropertiesFT_T_">clearSuperProperties()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16clearTimedEventsFT_T_">clearTimedEvents()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance11createAliasFTSS10distinctIdSS_T_">createAlias(_:distinctId:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance22currentSuperPropertiesFT_GVs10DictionarySSP__">currentSuperProperties()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance24fetchNotificationPayloadFT10completionFGSqGVs10DictionarySSPs9AnyObject___T__T_">fetchNotificationPayload(completion:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance5flushFT10completionGSqFT_T___T_">flush(completion:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance8identifyFT10distinctIdSS_T_">identify(distinctId:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance15joinExperimentsFT8callbackGSqFT_T___T_">joinExperiments(callback:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance23registerSuperPropertiesFGVs10DictionarySSPS_12MixpanelType__T_">registerSuperProperties(_:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance27registerSuperPropertiesOnceFTGVs10DictionarySSPS_12MixpanelType__12defaultValueGSqPS2____T_">registerSuperPropertiesOnce(_:defaultValue:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance5resetFT_T_">reset()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT_T_">showNotification()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT2IDSi_T_">showNotification(ID:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT4typeSS_T_">showNotification(type:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance4timeFT5eventSS_T_">time(event:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance5trackFT5eventGSqSS_10propertiesGSqGVs10DictionarySSPS_12MixpanelType____T_">track(event:properties:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance21trackPushNotificationFTGVs10DictionaryVs11AnyHashableP__5eventSS_T_">trackPushNotification(_:event:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance23unregisterSuperPropertyFSST_">unregisterSuperProperty(_:)</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-group-name">
             <a href="../Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
@@ -307,8 +245,8 @@ token passed to
                               </td>
                               <td>
                                 <div>
-                                  <p>device token as returned from <code>application:didRegisterForRemoteNotificationsWithDeviceToken:</code></p>
-
+                                  <p>device token as returned from
+<code>application:didRegisterForRemoteNotificationsWithDeviceToken:</code></p>
                                 </div>
                               </td>
                             </tr>
@@ -357,8 +295,8 @@ in conjunction with a call to <code>reset</code>, or when a user is logging out.
                               </td>
                               <td>
                                 <div>
-                                  <p>device token as returned from <code>application:didRegisterForRemoteNotificationsWithDeviceToken:</code></p>
-
+                                  <p>device token as returned from
+<code>application:didRegisterForRemoteNotificationsWithDeviceToken:</code></p>
                                 </div>
                               </td>
                             </tr>
@@ -390,7 +328,6 @@ You can override the current project token and distinct Id by
 including the special properties: $token and $distinct_id. If the existing
 user record on the server already has a value for a given property, the old
 value is overwritten. Other existing properties will not be affected.</p>
-
 <div class="aside aside-precondition">
     <p class="aside-title">Precondition</p>
     <p>You must identify for the set information to be linked to that user</p>
@@ -419,7 +356,6 @@ value is overwritten. Other existing properties will not be affected.</p>
                               <td>
                                 <div>
                                   <p>properties dictionary</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -469,7 +405,6 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                               <td>
                                 <div>
                                   <p>property name</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -482,7 +417,6 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                               <td>
                                 <div>
                                   <p>property value</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -535,7 +469,6 @@ representing the first time something happened.</p>
                               <td>
                                 <div>
                                   <p>properties dictionary</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -586,7 +519,6 @@ that don&rsquo;t exist there will be no effect.</p>
                               <td>
                                 <div>
                                   <p>properties array</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -637,7 +569,6 @@ will be set to the increment amount. Property values must be number objects.</p>
                               <td>
                                 <div>
                                   <p>properties array</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -685,7 +616,6 @@ amount.</p>
                               <td>
                                 <div>
                                   <p>property name</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -698,7 +628,6 @@ amount.</p>
                               <td>
                                 <div>
                                   <p>amount to increment by</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -748,7 +677,6 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                               <td>
                                 <div>
                                   <p>mapping of list property names to values to append</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -798,7 +726,6 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                               <td>
                                 <div>
                                   <p>mapping of list property names to values to remove</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -847,7 +774,6 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                               <td>
                                 <div>
                                   <p>mapping of list property names to lists to union</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -899,7 +825,6 @@ revenue analytics to see which products are generating the most revenue.</p>
                               <td>
                                 <div>
                                   <p>amount of revenue received</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -912,7 +837,6 @@ revenue analytics to see which products are generating the most revenue.</p>
                               <td>
                                 <div>
                                   <p>Optional. properties dictionary</p>
-
                                 </div>
                               </td>
                             </tr>
@@ -981,8 +905,8 @@ revenue analytics to see which products are generating the most revenue.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2017 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2017-03-02)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.4</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2017 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2017-05-22)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

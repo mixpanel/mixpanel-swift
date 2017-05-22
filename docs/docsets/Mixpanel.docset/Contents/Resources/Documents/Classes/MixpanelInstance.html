@@ -109,68 +109,6 @@
             </ul>
           </li>
           <li class="nav-group-name">
-            <a href="../Instance Methods.html">Instance Methods</a>
-            <ul class="nav-group-tasks">
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance7archiveFT_T_">archive()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance20clearSuperPropertiesFT_T_">clearSuperProperties()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16clearTimedEventsFT_T_">clearTimedEvents()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance11createAliasFTSS10distinctIdSS_T_">createAlias(_:distinctId:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance22currentSuperPropertiesFT_GVs10DictionarySSP__">currentSuperProperties()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance24fetchNotificationPayloadFT10completionFGSqGVs10DictionarySSPs9AnyObject___T__T_">fetchNotificationPayload(completion:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance5flushFT10completionGSqFT_T___T_">flush(completion:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance8identifyFT10distinctIdSS_T_">identify(distinctId:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance15joinExperimentsFT8callbackGSqFT_T___T_">joinExperiments(callback:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance23registerSuperPropertiesFGVs10DictionarySSPS_12MixpanelType__T_">registerSuperProperties(_:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance27registerSuperPropertiesOnceFTGVs10DictionarySSPS_12MixpanelType__12defaultValueGSqPS2____T_">registerSuperPropertiesOnce(_:defaultValue:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance5resetFT_T_">reset()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT_T_">showNotification()</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT2IDSi_T_">showNotification(ID:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT4typeSS_T_">showNotification(type:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance4timeFT5eventSS_T_">time(event:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance5trackFT5eventGSqSS_10propertiesGSqGVs10DictionarySSPS_12MixpanelType____T_">track(event:properties:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance21trackPushNotificationFTGVs10DictionaryVs11AnyHashableP__5eventSS_T_">trackPushNotification(_:event:)</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Instance Methods.html#/s:FC8Mixpanel16MixpanelInstance23unregisterSuperPropertyFSST_">unregisterSuperProperty(_:)</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-group-name">
             <a href="../Protocols.html">Protocols</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
@@ -212,7 +150,7 @@
             <h1>MixpanelInstance</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="n">open</span> <span class="kd">class</span> <span class="kt">MixpanelInstance</span><span class="p">:</span> <span class="kt">CustomDebugStringConvertible</span><span class="p">,</span> <span class="kt">FlushDelegate</span></code></pre>
+                  <pre class="highlight"><code><span class="n">open</span> <span class="kd">class</span> <span class="kt">MixpanelInstance</span><span class="p">:</span> <span class="kt">CustomDebugStringConvertible</span><span class="p">,</span> <span class="kt">FlushDelegate</span><span class="p">,</span> <span class="kt">AEDelegate</span></code></pre>
 
                 </div>
               </div>
@@ -485,10 +423,7 @@ Useful if you need to proxy Mixpanel requests. Defaults to
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The base URL used for Mixpanel API requests.
-Useful if you need to proxy Mixpanel requests. Defaults to
-<a href="https://api.mixpanel.com">https://api.mixpanel.com</a>.</p>
-
+                        
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
@@ -514,9 +449,13 @@ Useful if you need to proxy Mixpanel requests. Defaults to
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>This allows enabling or disabling of all Mixpanel logs at run time.
-- Note: All logging is disabled by default. Usually, this is only required
-        if you are running in to issues with the SDK and you need support.</p>
+                        <p>This allows enabling or disabling of all Mixpanel logs at run time.</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    All logging is disabled by default. Usually, this is only required
+    if you are running in to issues with the SDK and you need support.
+
+</div>
 
                       </div>
                       <div class="declaration">
@@ -702,13 +641,1080 @@ Defaults to 6 (seconds).</p>
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC8Mixpanel16MixpanelInstance22minimumSessionDurationVs6UInt64"></a>
+                    <a name="//apple_ref/swift/Property/minimumSessionDuration" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC8Mixpanel16MixpanelInstance22minimumSessionDurationVs6UInt64">minimumSessionDuration</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The minimum session duration (ms) that is tracked in automatic events.
+The default value is 10000 (10 seconds).</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">minimumSessionDuration</span><span class="p">:</span> <span class="kt">UInt64</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC8Mixpanel16MixpanelInstance22maximumSessionDurationVs6UInt64"></a>
+                    <a name="//apple_ref/swift/Property/maximumSessionDuration" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC8Mixpanel16MixpanelInstance22maximumSessionDurationVs6UInt64">maximumSessionDuration</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The maximum session duration (ms) that is tracked in automatic events.
+The default value is UINT64_MAX (no maximum session duration).</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="k">var</span> <span class="nv">maximumSessionDuration</span><span class="p">:</span> <span class="kt">UInt64</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Identity"></a>
+                <a name="//apple_ref/swift/Section/Identity" class="dashAnchor"></a>
+                <a href="#/Identity">
+                  <h3 class="section-name">Identity</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance8identifyFT10distinctIdSS_T_"></a>
+                    <a name="//apple_ref/swift/Method/identify(distinctId:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance8identifyFT10distinctIdSS_T_">identify(distinctId:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Sets the distinct ID of the current user.</p>
+
+<p>Mixpanel uses the IFV String (<code>UIDevice.current().identifierForVendor</code>)
+as the default distinct ID. This ID will identify a user across all apps by the same
+vendor, but cannot be used to link the same user across apps from different
+vendors. If we are unable to get the IFV, we will fall back to generating a
+random persistent UUID</p>
+
+<p>For tracking events, you do not need to call <code>identify:</code> if you
+want to use the default. However,
+<strong>Mixpanel People always requires an explicit call to <code>identify:</code>.</strong>
+If calls are made to
+<code>set:</code>, <code>increment</code> or other <code><a href="../Classes/People.html">People</a></code>
+methods prior to calling <code>identify:</code>, then they are queued up and
+flushed once <code>identify:</code> is called.</p>
+
+<p>If you&rsquo;d like to use the default distinct ID for Mixpanel People as well
+(recommended), call <code>identify:</code> using the current distinct ID:
+<code>mixpanelInstance.identify(mixpanelInstance.distinctId)</code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">identify</span><span class="p">(</span><span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>distinctId</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>string that uniquely identifies the current user</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance11createAliasFTSS10distinctIdSS_T_"></a>
+                    <a name="//apple_ref/swift/Method/createAlias(_:distinctId:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance11createAliasFTSS10distinctIdSS_T_">createAlias(_:distinctId:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Creates a distinctId alias from alias to the current id.</p>
+
+<p>This method is used to map an identifier called an alias to the existing Mixpanel
+distinct id. This causes all events and people requests sent with the alias to be
+mapped back to the original distinct id. The recommended usage pattern is to call
+both createAlias: and identify: when the user signs up, and only identify: (with
+their new user ID) when they log in. This will keep your signup funnels working
+correctly.</p>
+
+<p>This makes the current id and &lsquo;Alias&rsquo; interchangeable distinct ids.
+Mixpanel.
+mixpanelInstance.createAlias(<q>Alias</q>, mixpanelInstance.distinctId)</p>
+<div class="aside aside-precondition">
+    <p class="aside-title">Precondition</p>
+    <p>You must call identify if you haven&rsquo;t already
+(e.g. when your app launches)</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">createAlias</span><span class="p">(</span><span class="n">_</span> <span class="nv">alias</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>alias</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the new distinct id that should represent the original</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>distinctId</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the old distinct id that alias will be mapped to</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance5resetFT_T_"></a>
+                    <a name="//apple_ref/swift/Method/reset()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance5resetFT_T_">reset()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Clears all stored properties including the distinct Id.
+Useful if your app&rsquo;s user logs out.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">reset</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Persistence"></a>
+                <a name="//apple_ref/swift/Section/Persistence" class="dashAnchor"></a>
+                <a href="#/Persistence">
+                  <h3 class="section-name">Persistence</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance7archiveFT_T_"></a>
+                    <a name="//apple_ref/swift/Method/archive()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance7archiveFT_T_">archive()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Writes current project info including the distinct Id, super properties,
+and pending event and People record queues to disk.</p>
+
+<p>This state will be recovered when the app is launched again if the Mixpanel
+library is initialized with the same project token.
+The library listens for app state changes and handles
+persisting data as needed.</p>
+<div class="aside aside-important">
+    <p class="aside-title">Important</p>
+    You do not need to call this method.**
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">archive</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/archive()" class="dashAnchor"></a>
+                    <a class="token" href="#/">archive()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">class</span> <span class="kt">MixpanelInstance</span><span class="p">:</span> <span class="kt">CustomDebugStringConvertible</span><span class="p">,</span> <span class="kt">FlushDelegate</span><span class="p">,</span> <span class="kt">AEDelegate</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Flush"></a>
+                <a name="//apple_ref/swift/Section/Flush" class="dashAnchor"></a>
+                <a href="#/Flush">
+                  <h3 class="section-name">Flush</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance5flushFT10completionGSqFT_T___T_"></a>
+                    <a name="//apple_ref/swift/Method/flush(completion:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance5flushFT10completionGSqFT_T___T_">flush(completion:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Uploads queued data to the Mixpanel server.</p>
+
+<p>By default, queued data is flushed to the Mixpanel servers every minute (the
+default for <code><a href="../Classes/MixpanelInstance.html#/s:vC8Mixpanel16MixpanelInstance13flushIntervalSd">flushInterval</a></code>), and on background (since
+<code><a href="../Classes/MixpanelInstance.html#/s:vC8Mixpanel16MixpanelInstance17flushOnBackgroundSb">flushOnBackground</a></code> is on by default). You only need to call this
+method manually if you want to force a flush at a particular moment.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">flush</span><span class="p">(</span><span class="nv">completion</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>completion</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>an optional completion handler for when the flush has completed.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Track"></a>
+                <a name="//apple_ref/swift/Section/Track" class="dashAnchor"></a>
+                <a href="#/Track">
+                  <h3 class="section-name">Track</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance5trackFT5eventGSqSS_10propertiesGSqGVs10DictionarySSPS_12MixpanelType____T_"></a>
+                    <a name="//apple_ref/swift/Method/track(event:properties:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance5trackFT5eventGSqSS_10propertiesGSqGVs10DictionarySSPS_12MixpanelType____T_">track(event:properties:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Tracks an event with properties.
+Properties are optional and can be added only if needed.</p>
+
+<p>Properties will allow you to segment your events in your Mixpanel reports.
+Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
+If the event is being timed, the timer will stop and be added as a property.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">track</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">?,</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>event</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>event name</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>properties dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance21trackPushNotificationFTGVs10DictionaryVs11AnyHashableP__5eventSS_T_"></a>
+                    <a name="//apple_ref/swift/Method/trackPushNotification(_:event:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance21trackPushNotificationFTGVs10DictionaryVs11AnyHashableP__5eventSS_T_">trackPushNotification(_:event:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Track a push notification using its payload sent from Mixpanel.</p>
+
+<p>To simplify user interaction tracking, Mixpanel
+automatically sends IDs for the relevant notification of each push.
+This method parses the standard payload and queues a track call using this information.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">trackPushNotification</span><span class="p">(</span><span class="n">_</span> <span class="nv">userInfo</span><span class="p">:</span> <span class="p">[</span><span class="kt">AnyHashable</span><span class="p">:</span> <span class="kt">Any</span><span class="p">],</span>
+                                      <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"$campaign_received"</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>userInfo</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>remote notification payload dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>event</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>optional, and usually shouldn&rsquo;t be used,
+unless the results is needed to be tracked elsewhere.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance4timeFT5eventSS_T_"></a>
+                    <a name="//apple_ref/swift/Method/time(event:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance4timeFT5eventSS_T_">time(event:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Starts a timer that will be stopped and added as a property when a
+corresponding event is tracked.</p>
+
+<p>This method is intended to be used in advance of events that have
+a duration. For example, if a developer were to track an <q>Image Upload</q> event
+she might want to also know how long the upload took. Calling this method
+before the upload code would implicitly cause the <code>track</code>
+call to record its duration.</p>
+<div class="aside aside-precondition">
+    <p class="aside-title">Precondition</p>
+    <p>// begin timing the image upload:
+mixpanelInstance.time(event:<q>Image Upload</q>)
+// upload the image:
+self.uploadImageWithSuccessHandler() { _ in
+// track the event
+mixpanelInstance.track(<q>Image Upload</q>)
+}</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">time</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>event</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the event name to be timed</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance16clearTimedEventsFT_T_"></a>
+                    <a name="//apple_ref/swift/Method/clearTimedEvents()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance16clearTimedEventsFT_T_">clearTimedEvents()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Clears all current event timers.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">clearTimedEvents</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance22currentSuperPropertiesFT_GVs10DictionarySSP__"></a>
+                    <a name="//apple_ref/swift/Method/currentSuperProperties()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance22currentSuperPropertiesFT_GVs10DictionarySSP__">currentSuperProperties()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns the currently set super properties.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">currentSuperProperties</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">Any</span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>the current super properties</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance20clearSuperPropertiesFT_T_"></a>
+                    <a name="//apple_ref/swift/Method/clearSuperProperties()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance20clearSuperPropertiesFT_T_">clearSuperProperties()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Clears all currently set super properties.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">clearSuperProperties</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance23registerSuperPropertiesFGVs10DictionarySSPS_12MixpanelType__T_"></a>
+                    <a name="//apple_ref/swift/Method/registerSuperProperties(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance23registerSuperPropertiesFGVs10DictionarySSPS_12MixpanelType__T_">registerSuperProperties(_:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Registers super properties, overwriting ones that have already been set.</p>
+
+<p>Super properties, once registered, are automatically sent as properties for
+all event tracking calls. They save you having to maintain and add a common
+set of properties to your events.
+Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">registerSuperProperties</span><span class="p">(</span><span class="n">_</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>properties dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance27registerSuperPropertiesOnceFTGVs10DictionarySSPS_12MixpanelType__12defaultValueGSqPS2____T_"></a>
+                    <a name="//apple_ref/swift/Method/registerSuperPropertiesOnce(_:defaultValue:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance27registerSuperPropertiesOnceFTGVs10DictionarySSPS_12MixpanelType__12defaultValueGSqPS2____T_">registerSuperPropertiesOnce(_:defaultValue:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Registers super properties without overwriting ones that have already been set,
+unless the existing value is equal to defaultValue. defaultValue is optional.</p>
+
+<p>Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">registerSuperPropertiesOnce</span><span class="p">(</span><span class="n">_</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Properties</span><span class="p">,</span>
+                                            <span class="n">defaultValue</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>properties dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>defaultValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Optional. overwrite existing properties that have this value</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance23unregisterSuperPropertyFSST_"></a>
+                    <a name="//apple_ref/swift/Method/unregisterSuperProperty(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance23unregisterSuperPropertyFSST_">unregisterSuperProperty(_:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Removes a previously registered super property.</p>
+
+<p>As an alternative to clearing all properties, unregistering specific super
+properties prevents them from being recorded on future events. This operation
+does not affect the value of other super properties. Any property name that is
+not registered is ignored.
+Note that after removing a super property, events will show the attribute as
+having the value <code>undefined</code> in Mixpanel until a new value is
+registered.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">unregisterSuperProperty</span><span class="p">(</span><span class="n">_</span> <span class="nv">propertyName</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>propertyName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>array of property name strings to remove</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/A/B%20Testing"></a>
+                <a name="//apple_ref/swift/Section/A/B Testing" class="dashAnchor"></a>
+                <a href="#/A/B%20Testing">
+                  <h3 class="section-name">A/B Testing</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance15joinExperimentsFT8callbackGSqFT_T___T_"></a>
+                    <a name="//apple_ref/swift/Method/joinExperiments(callback:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance15joinExperimentsFT8callbackGSqFT_T___T_">joinExperiments(callback:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Join any experiments (A/B tests) that are available for the current user.</p>
+
+<p>Mixpanel will check for A/B tests automatically when your app enters
+the foreground. Call this method if you would like to to check for,
+and join, any experiments are newly available for the current user.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">joinExperiments</span><span class="p">(</span><span class="nv">callback</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>callback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Optional callback for after the experiments have been loaded and applied</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/In%20App%20Notifications"></a>
+                <a name="//apple_ref/swift/Section/In App Notifications" class="dashAnchor"></a>
+                <a href="#/In%20App%20Notifications">
+                  <h3 class="section-name">In App Notifications</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance16showNotificationFT_T_"></a>
+                    <a name="//apple_ref/swift/Method/showNotification()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT_T_">showNotification()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Shows a notification if one is available.</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    You do not need to call this method on the main thread.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance16showNotificationFT4typeSS_T_"></a>
+                    <a name="//apple_ref/swift/Method/showNotification(type:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT4typeSS_T_">showNotification(type:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Shows a notification with the given type if one is available.</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    You do not need to call this method on the main thread.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">(</span><span class="nv">type</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>type</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The type of notification to show, either <q>mini</q> or <q>takeover</q></p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance16showNotificationFT2IDSi_T_"></a>
+                    <a name="//apple_ref/swift/Method/showNotification(ID:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance16showNotificationFT2IDSi_T_">showNotification(ID:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Shows a notification with the given ID</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    You do not need to call this method on the main thread.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">showNotification</span><span class="p">(</span><span class="kt">ID</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>ID</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The notification ID you want to present</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC8Mixpanel16MixpanelInstance24fetchNotificationPayloadFT10completionFGSqGVs10DictionarySSPs9AnyObject___T__T_"></a>
+                    <a name="//apple_ref/swift/Method/fetchNotificationPayload(completion:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC8Mixpanel16MixpanelInstance24fetchNotificationPayloadFT10completionFGSqGVs10DictionarySSPs9AnyObject___T__T_">fetchNotificationPayload(completion:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns the payload of a notification if available</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    You do not need to call this method on the main thread.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">fetchNotificationPayload</span><span class="p">(</span><span class="nv">completion</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">([</span><span class="kt">String</span><span class="p">:</span> <span class="kt">AnyObject</span><span class="p">]?)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2017 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2017-03-02)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.4</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2017 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2017-05-22)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.2</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

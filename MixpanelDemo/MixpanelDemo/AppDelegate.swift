@@ -36,14 +36,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        Mixpanel.mainInstance().time(event: "session length")
-    }
-
-    func applicationWillTerminate(_ application: UIApplication) {
-        Mixpanel.mainInstance().track(event: "session length")
-    }
-
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         debugPrint("did register for remote notification with token")
         Mixpanel.mainInstance().people.addPushDeviceToken(deviceToken)
@@ -53,14 +45,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         debugPrint(error)
     }
 
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
-        debugPrint("did receive remote notificaiton")
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Swift.Void) {
+        debugPrint("did receive remote notification")
+
         if let message = (userInfo["aps"] as? [String: Any])?["alert"] as? String {
             let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
             window?.rootViewController?.present(alert, animated: true, completion: nil)
         }
         Mixpanel.mainInstance().trackPushNotification(userInfo)
+        completionHandler(.newData)
     }
 
 }

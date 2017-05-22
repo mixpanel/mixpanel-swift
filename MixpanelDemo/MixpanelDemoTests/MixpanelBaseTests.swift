@@ -22,18 +22,18 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         super.setUp()
 
         LSNocilla.sharedInstance().start()
-        stubTrack()
         mixpanelWillFlush = false
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
-        mixpanel.reset()
-        waitForSerialQueue()
-        LSNocilla.sharedInstance().clearStubs()
-        stubDecide()
         NSLog("finished test setup")
     }
 
     override func tearDown() {
         super.tearDown()
+        stubTrack()
+        stubDecide()
+        mixpanel.reset()
+        waitForSerialQueue()
+
         LSNocilla.sharedInstance().stop()
         LSNocilla.sharedInstance().clearStubs()
 

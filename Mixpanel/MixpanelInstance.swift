@@ -37,7 +37,7 @@ protocol AppLifecycle {
 }
 
 /// The class that represents the Mixpanel Instance
-open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
+open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate {
 
     /// The a MixpanelDelegate object that gives control over Mixpanel network activity.
     open var delegate: MixpanelDelegate?
@@ -197,6 +197,28 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
             return decideInstance.notificationsInstance.miniNotificationPresentationTime
         }
     }
+
+    /// The minimum session duration (ms) that is tracked in automatic events.
+    /// The default value is 10000 (10 seconds).
+    open var minimumSessionDuration: UInt64 {
+        set {
+            automaticEvents.minimumSessionDuration = newValue
+        }
+        get {
+            return automaticEvents.minimumSessionDuration
+        }
+    }
+
+    /// The maximum session duration (ms) that is tracked in automatic events.
+    /// The default value is UINT64_MAX (no maximum session duration).
+    open var maximumSessionDuration: UInt64 {
+        set {
+            automaticEvents.maximumSessionDuration = newValue
+        }
+        get {
+            return automaticEvents.maximumSessionDuration
+        }
+    }
     #endif // DECIDE
 
     var apiToken = ""
@@ -211,6 +233,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
     let trackInstance: Track
     #if DECIDE
     let decideInstance: Decide
+    let automaticEvents = AutomaticEvents()
     #endif // DECIDE
 
     #if !os(OSX)
@@ -224,9 +247,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         decideInstance = Decide(basePathIdentifier: name)
         #endif // DECIDE
         trackInstance = Track(apiToken: self.apiToken)
-        flushInstance.delegate = self
         let label = "com.mixpanel.\(self.apiToken)"
         serialQueue = DispatchQueue(label: label)
+        flushInstance.delegate = self
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
                         serialQueue: serialQueue)
@@ -236,6 +259,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate {
         unarchive()
 
         #if DECIDE
+            automaticEvents.delegate = self
+            automaticEvents.initializeEvents()
             decideInstance.inAppDelegate = self
             executeCachedVariants()
             executeCachedCodelessBindings()
@@ -678,7 +703,8 @@ extension MixpanelInstance {
                                             alias: alias,
                                             peopleDistinctId: people.distinctId,
                                             peopleUnidentifiedQueue: people.unidentifiedQueue,
-                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications)
+                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications,
+                                            automaticEventsEnabled: decideInstance.automaticEventsEnabled)
         Persistence.archive(eventsQueue: eventsQueue,
                             peopleQueue: people.peopleQueue,
                             properties: properties,
@@ -724,7 +750,8 @@ extension MixpanelInstance {
          people.unidentifiedQueue,
          decideInstance.notificationsInstance.shownNotifications,
          decideInstance.codelessInstance.codelessBindings,
-         decideInstance.ABTestingInstance.variants) = Persistence.unarchive(token: apiToken)
+         decideInstance.ABTestingInstance.variants,
+         decideInstance.automaticEventsEnabled) = Persistence.unarchive(token: apiToken)
 
         if distinctId == "" {
             distinctId = defaultDistinctId()
@@ -738,7 +765,8 @@ extension MixpanelInstance {
                                             alias: alias,
                                             peopleDistinctId: people.distinctId,
                                             peopleUnidentifiedQueue: people.unidentifiedQueue,
-                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications)
+                                            shownNotifications: decideInstance.notificationsInstance.shownNotifications,
+                                            automaticEventsEnabled: decideInstance.automaticEventsEnabled)
         Persistence.archiveProperties(properties, token: apiToken)
     }
     #else
@@ -802,7 +830,13 @@ extension MixpanelInstance {
             if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
                 return
             }
-            self.flushInstance.flushEventsQueue(&self.eventsQueue)
+            #if DECIDE
+            self.flushInstance.flushEventsQueue(&self.eventsQueue,
+                                                automaticEventsEnabled: self.decideInstance.automaticEventsEnabled)
+            #else
+            self.flushInstance.flushEventsQueue(&self.eventsQueue,
+                                                automaticEventsEnabled: false)
+            #endif
             self.flushInstance.flushPeopleQueue(&self.people.peopleQueue)
             self.archive()
             if let completion = completion {
@@ -999,13 +1033,9 @@ extension MixpanelInstance: InAppNotificationsDelegate {
 
     // MARK: - Decide
     func checkDecide(forceFetch: Bool = false, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
-        guard let distinctId = people.distinctId else {
-            Logger.info(message: "Can't fetch from Decide without identifying first")
-            return
-        }
         serialQueue.async {
             self.decideInstance.checkDecide(forceFetch: forceFetch,
-                                            distinctId: distinctId,
+                                            distinctId: self.people.distinctId ?? self.distinctId,
                                             token: self.apiToken,
                                             completion: completion)
         }

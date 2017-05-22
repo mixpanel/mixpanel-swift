@@ -14,26 +14,12 @@ import Nocilla
 
 class MixpanelAutomaticEventsTests: MixpanelBaseTests {
 
-    var startTime: TimeInterval = 0
-
     override func setUp() {
-        let firstOpenKey = "MPFirstOpen"
-        let defaults = UserDefaults.init(suiteName: "Mixpanel")
-        defaults?.set(nil, forKey: firstOpenKey)
-        defaults?.synchronize()
-        let searchPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).last
-        try! FileManager.default.removeItem(atPath: searchPath!)
         super.setUp()
-        startTime = Date().timeIntervalSince1970
     }
     
     override func tearDown() {
         super.tearDown()
-    }
-    
-    func testFirstOpen() {
-        self.waitForSerialQueue()
-        XCTAssert(self.mixpanel.eventsQueue.count == 1, "First App Open should be tracked")
     }
 
     func testSession() {

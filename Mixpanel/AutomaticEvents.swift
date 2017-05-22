@@ -84,8 +84,8 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 
     @objc func appWillResignActive(_ notification: Notification) {
         sessionLength = roundOneDigit(num: Date().timeIntervalSince1970 - sessionStartTime)
-        if sessionLength > Double(minimumSessionDuration / 1000) &&
-           sessionLength < Double(maximumSessionDuration / 1000) {
+        if sessionLength >= Double(minimumSessionDuration / 1000) &&
+           sessionLength <= Double(maximumSessionDuration / 1000) {
             let properties: Properties = ["$ae_session_length": sessionLength]
             delegate?.track(event: "$ae_session", properties: properties)
         }

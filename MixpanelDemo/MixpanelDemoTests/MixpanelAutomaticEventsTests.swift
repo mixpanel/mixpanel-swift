@@ -37,6 +37,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
     }
 
     func testSession() {
+        self.mixpanel.minimumSessionDuration = 0;
         self.mixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         self.waitForSerialQueue()
@@ -56,9 +57,11 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
 
     func testMultipleInstances() {
         let mp = Mixpanel.initialize(token: "abc")
-        mp.decideInstance.automaticEventsEnabled = false
-        self.mixpanel.decideInstance.automaticEventsEnabled = true
+        mp.minimumSessionDuration = 0;
+        self.mixpanel.minimumSessionDuration = 0;
         self.mixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
+                                              with: Notification(name: Notification.Name(rawValue: "test")))
+        mp.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         self.waitForSerialQueue()
         mp.serialQueue.sync() { }
@@ -67,6 +70,6 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         XCTAssertEqual(event?["event"] as? String, "$ae_session", "should be app session event")
         XCTAssertNotNil((event?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")
         let otherEvent = mp.eventsQueue.last
-        XCTAssertNil(otherEvent, "Shouldn't have an event")
-    }
+        XCTAssertEqual(otherEvent?["event"] as? String, "$ae_session", "should be app session event")
+        XCTAssertNotNil((otherEvent?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")    }
 }

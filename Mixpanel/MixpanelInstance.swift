@@ -937,6 +937,18 @@ extension MixpanelInstance {
     }
 
     /**
+     Retrieves the time elapsed for the named event since time(event:) was called.
+
+     - parameter event: the name of the event to be tracked that was passed to time(event:)
+     */
+    open func eventElapsedTime(event: String) -> Double {
+        if let startTime = self.timedEvents[event] as? TimeInterval {
+            return Date().timeIntervalSince1970 - startTime
+        }
+        return 0
+    }
+
+    /**
      Clears all current event timers.
      */
     open func clearTimedEvents() {

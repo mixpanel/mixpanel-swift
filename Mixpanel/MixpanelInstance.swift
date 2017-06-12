@@ -896,6 +896,11 @@ extension MixpanelInstance {
         if let mpPayload = userInfo["mp"] as? InternalProperties {
             if let m = mpPayload["m"], let c = mpPayload["c"] {
                 var properties = Properties()
+                for (key, value) in mpPayload {
+                    if key != "m" && key != "c" {
+                        properties[key] = value
+                    }
+                }
                 properties["campaign_id"]  = c as? Int
                 properties["message_id"]   = m as? Int
                 properties["message_type"] = "push"

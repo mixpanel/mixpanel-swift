@@ -327,7 +327,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testTrackLaunchOptions() {
         let launchOptions: [UIApplicationLaunchOptionsKey: Any] = [UIApplicationLaunchOptionsKey.remoteNotification: ["mp":
-            ["m": 12345, "c": 54321]]]
+            ["m": 12345, "c": 54321, "journey_id": 1]]]
         mixpanel = Mixpanel.initialize(token: kTestToken,
                                        launchOptions: launchOptions,
                                        flushInterval: 60)
@@ -337,6 +337,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         var p: InternalProperties = e["properties"] as! InternalProperties
         XCTAssertEqual(p["campaign_id"] as? Int, 54321, "campaign_id not equal")
         XCTAssertEqual(p["message_id"] as? Int, 12345, "message_id not equal")
+        XCTAssertEqual(p["journey_id"] as? Int, 1, "journey_id not equal")
         XCTAssertEqual(p["message_type"] as? String, "push", "type does not equal inapp")
     }
 

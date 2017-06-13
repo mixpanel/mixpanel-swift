@@ -47,9 +47,12 @@ class MiniNotificationViewController: BaseNotificationViewController {
     }
 
     override func show(animated: Bool) {
+        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+            return
+        }
         canPan = false
         let frame: CGRect
-        if UIInterfaceOrientationIsPortrait(UIApplication.shared.statusBarOrientation)
+        if UIInterfaceOrientationIsPortrait(sharedApplication.statusBarOrientation)
             && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiom.phone {
             frame = CGRect(x: InAppNotificationsConstants.miniSidePadding,
                            y: UIScreen.main.bounds.size.height,
@@ -104,12 +107,15 @@ class MiniNotificationViewController: BaseNotificationViewController {
     }
 
     func didPan(gesture: UIPanGestureRecognizer) {
+        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+            return
+        }
         if canPan, let window = window {
             switch gesture.state {
             case UIGestureRecognizerState.began:
-                panStartPoint = gesture.location(in: UIApplication.shared.keyWindow)
+                panStartPoint = gesture.location(in: sharedApplication.keyWindow)
             case UIGestureRecognizerState.changed:
-                var position = gesture.location(in: UIApplication.shared.keyWindow)
+                var position = gesture.location(in: sharedApplication.keyWindow)
                 let diffY = position.y - panStartPoint.y
                 position.y = max(position.y, position.y + diffY)
                 window.layer.position = CGPoint(x: window.layer.position.x, y: position.y)
@@ -128,10 +134,13 @@ class MiniNotificationViewController: BaseNotificationViewController {
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+            return
+        }
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: { (ctx) in
             let frame: CGRect
-            if UIInterfaceOrientationIsPortrait(UIApplication.shared.statusBarOrientation)
+            if UIInterfaceOrientationIsPortrait(sharedApplication.statusBarOrientation)
                 && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiom.phone {
                 frame = CGRect(x: InAppNotificationsConstants.miniSidePadding,
                                y: UIScreen.main.bounds.size.height -

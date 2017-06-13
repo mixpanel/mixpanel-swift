@@ -168,7 +168,10 @@ class WebSocketWrapper: WebSocketDelegate {
 
     func showConnectedView(loading: Bool) {
         if connectivityIndiciatorWindow == nil {
-            guard let mainWindow = UIApplication.shared.delegate?.window, let window = mainWindow else {
+            guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+                return
+            }
+            guard let mainWindow = sharedApplication.delegate?.window, let window = mainWindow else {
                 return
             }
             connectivityIndiciatorWindow = UIWindow(frame: CGRect(x: 0, y: 0, width: window.frame.size.width, height: 4))

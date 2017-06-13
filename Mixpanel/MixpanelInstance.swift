@@ -244,7 +244,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         self.name = name
         flushInstance = Flush(basePathIdentifier: name)
         #if DECIDE
-        decideInstance = Decide(basePathIdentifier: name)
+            decideInstance = Decide(basePathIdentifier: name)
         #endif // DECIDE
         trackInstance = Track(apiToken: self.apiToken)
         let label = "com.mixpanel.\(self.apiToken)"
@@ -259,15 +259,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         unarchive()
 
         #if DECIDE
-            automaticEvents.delegate = self
-            automaticEvents.initializeEvents()
-            decideInstance.inAppDelegate = self
-            executeCachedVariants()
-            executeCachedCodelessBindings()
+            if !MixpanelInstance.isiOSAppExtension() {
+                automaticEvents.delegate = self
+                automaticEvents.initializeEvents()
+                decideInstance.inAppDelegate = self
+                executeCachedVariants()
+                executeCachedCodelessBindings()
 
-            if let notification =
-            launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
-                trackPushNotification(notification, event: "$app_open")
+                if let notification =
+                    launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
+                    trackPushNotification(notification, event: "$app_open")
+                }
             }
         #endif // DECIDE
     }
@@ -329,9 +331,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                            selector: #selector(appLinksNotificationRaised(_:)),
                                            name: NSNotification.Name("com.parse.bolts.measurement_event"),
                                            object: nil)
-            #if DECIDE && os(iOS)
+            #if os(iOS)
                 initializeGestureRecognizer()
-            #endif // DECIDE && os(iOS)
+            #endif // os(iOS)
         }
     }
     #else
@@ -541,6 +543,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     #if DECIDE
     func initializeGestureRecognizer() {
+        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+            return
+        }
         DispatchQueue.main.async {
             self.decideInstance.gestureRecognizer = UILongPressGestureRecognizer(target: self,
                                                                                  action: #selector(self.connectGestureRecognized(gesture:)))
@@ -552,7 +557,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 self.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 4
             #endif // (arch(i386) || arch(x86_64)) && DECIDE
             self.decideInstance.gestureRecognizer?.isEnabled = self.enableVisualEditorForCodeless
-            UIApplication.shared.keyWindow?.addGestureRecognizer(self.decideInstance.gestureRecognizer!)
+            sharedApplication.keyWindow?.addGestureRecognizer(self.decideInstance.gestureRecognizer!)
         }
     }
 

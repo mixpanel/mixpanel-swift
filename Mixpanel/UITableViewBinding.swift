@@ -44,12 +44,15 @@ class UITableViewBinding: CodelessBinding {
     }
 
     override func execute() {
+        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+            return
+        }
         if !running {
             let executeBlock = { (view: AnyObject?, command: Selector, tableView: AnyObject?, indexPath: AnyObject?) in
                 guard let tableView = tableView as? UITableView, let indexPath = indexPath as? IndexPath else {
                     return
                 }
-                if let root = UIApplication.shared.keyWindow?.rootViewController {
+                if let root = sharedApplication.keyWindow?.rootViewController {
                     // select targets based off path
                     if self.path.isSelected(leaf: tableView, from: root) {
                         var label = ""

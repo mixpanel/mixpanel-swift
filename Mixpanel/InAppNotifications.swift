@@ -80,6 +80,9 @@ class InAppNotifications: NotificationViewControllerDelegate {
 
     @discardableResult
     func notificationShouldDismiss(controller: BaseNotificationViewController, callToActionURL: URL?) -> Bool {
+        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+            return false
+        }
         if currentlyShowingNotification?.ID != controller.notification.ID {
             return false
         }
@@ -91,7 +94,10 @@ class InAppNotifications: NotificationViewControllerDelegate {
         if let callToActionURL = callToActionURL {
             controller.hide(animated: true) {
                 Logger.info(message: "opening CTA URL: \(callToActionURL)")
-                if !UIApplication.shared.openURL(callToActionURL) {
+                guard let canOpenURL = sharedApplication.perform(NSSelectorFromString("openURL"), with: callToActionURL).takeRetainedValue() as? Bool else {
+                    return
+                }
+                if !canOpenURL {
                     Logger.error(message: "Mixpanel failed to open given URL: \(callToActionURL)")
                 }
 

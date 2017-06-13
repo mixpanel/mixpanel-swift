@@ -138,7 +138,10 @@ class ObjectFilter: CustomStringConvertible {
 
     func getParents(of object: AnyObject) -> [AnyObject] {
         var result = [AnyObject]()
-
+        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+            return result
+        }
+        
         if let object = object as? UIView {
             if let superview = object.superview {
                 result.append(superview)
@@ -156,7 +159,7 @@ class ObjectFilter: CustomStringConvertible {
                 result.append(presentingViewController)
             }
 
-            if let keyWindow = UIApplication.shared.keyWindow, keyWindow.rootViewController == object {
+            if let keyWindow = sharedApplication.keyWindow, keyWindow.rootViewController == object {
                 result.append(keyWindow)
             }
         }

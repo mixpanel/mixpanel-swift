@@ -290,8 +290,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         flushInstance._flushInterval = flushInterval
         setupListeners()
         unarchive()
-
-
     }
     #endif // os(OSX)
 

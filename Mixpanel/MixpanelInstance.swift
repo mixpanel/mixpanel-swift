@@ -898,7 +898,9 @@ extension MixpanelInstance {
                 var properties = Properties()
                 for (key, value) in mpPayload {
                     if key != "m" && key != "c" {
-                        properties[key] = value
+                        if let typedValue = value as? MixpanelType {
+                            properties[key] = typedValue;
+                        }
                     }
                 }
                 properties["campaign_id"]  = c as? Int

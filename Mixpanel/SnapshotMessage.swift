@@ -28,7 +28,7 @@ class SnapshotRequest: BaseWebSocketMessage {
     }
 
     override func responseCommand(connection: WebSocketWrapper) -> Operation? {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return nil
         }
         var serializerConfig = configurarion

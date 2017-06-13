@@ -180,10 +180,7 @@ class UIControlBinding: CodelessBinding {
     }
 
     func verifyControlMatchesPath(_ control: AnyObject) -> Bool {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
-            return false
-        }
-        if let root = sharedApplication.keyWindow?.rootViewController {
+        if let root = MixpanelInstance.sharedUIApplication()?.keyWindow?.rootViewController {
             return path.isSelected(leaf: control, from: root)
         }
         return false

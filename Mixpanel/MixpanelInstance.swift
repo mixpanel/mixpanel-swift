@@ -360,10 +360,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     static func isiOSAppExtension() -> Bool {
         #if os(iOS)
-            return !UIApplication.responds(to: NSSelectorFromString("sharedApplication"))
+            return Bundle.main.bundlePath.hasSuffix(".appex")
         #else
             return false
         #endif
+    }
+
+    static func sharedUIApplication() -> UIApplication? {
+        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+            return nil
+        }
+        return sharedApplication
     }
 
     @objc private func applicationDidBecomeActive(_ notification: Notification) {
@@ -413,10 +420,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     #if !os(OSX)
     @objc private func applicationDidEnterBackground(_ notification: Notification) {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
         }
-
         taskId = sharedApplication.beginBackgroundTask() {
             self.taskId = UIBackgroundTaskInvalid
         }
@@ -438,7 +444,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     @objc private func applicationWillEnterForeground(_ notification: Notification) {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
         }
         serialQueue.async() {
@@ -526,11 +532,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     #if os(iOS)
     func updateNetworkActivityIndicator(_ on: Bool) {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
-            return
-        }
         if showNetworkActivityIndicator {
-            sharedApplication.isNetworkActivityIndicatorVisible = on
+            MixpanelInstance.sharedUIApplication()?.isNetworkActivityIndicatorVisible = on
         }
     }
 
@@ -543,9 +546,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     #if DECIDE
     func initializeGestureRecognizer() {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
-            return
-        }
         DispatchQueue.main.async {
             self.decideInstance.gestureRecognizer = UILongPressGestureRecognizer(target: self,
                                                                                  action: #selector(self.connectGestureRecognized(gesture:)))
@@ -557,7 +557,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 self.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 4
             #endif // (arch(i386) || arch(x86_64)) && DECIDE
             self.decideInstance.gestureRecognizer?.isEnabled = self.enableVisualEditorForCodeless
-            sharedApplication.keyWindow?.addGestureRecognizer(self.decideInstance.gestureRecognizer!)
+            MixpanelInstance.sharedUIApplication()?.keyWindow?.addGestureRecognizer(self.decideInstance.gestureRecognizer!)
         }
     }
 

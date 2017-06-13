@@ -47,7 +47,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
     }
 
     override func show(animated: Bool) {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
         }
         canPan = false
@@ -107,15 +107,12 @@ class MiniNotificationViewController: BaseNotificationViewController {
     }
 
     func didPan(gesture: UIPanGestureRecognizer) {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
-            return
-        }
         if canPan, let window = window {
             switch gesture.state {
             case UIGestureRecognizerState.began:
-                panStartPoint = gesture.location(in: sharedApplication.keyWindow)
+                panStartPoint = gesture.location(in: MixpanelInstance.sharedUIApplication()?.keyWindow)
             case UIGestureRecognizerState.changed:
-                var position = gesture.location(in: sharedApplication.keyWindow)
+                var position = gesture.location(in: MixpanelInstance.sharedUIApplication()?.keyWindow)
                 let diffY = position.y - panStartPoint.y
                 position.y = max(position.y, position.y + diffY)
                 window.layer.position = CGPoint(x: window.layer.position.x, y: position.y)
@@ -134,7 +131,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
         }
         super.viewWillTransition(to: size, with: coordinator)

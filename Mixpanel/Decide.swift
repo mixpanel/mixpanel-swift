@@ -151,9 +151,6 @@ class Decide {
     }
 
     func connectToWebSocket(token: String, mixpanelInstance: MixpanelInstance, reconnect: Bool = false) {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
-            return
-        }
         var oldInterval = 0.0
         let webSocketURL = "\(switchboardURL)/connect?key=\(token)&type=device"
         guard let url = URL(string: webSocketURL) else {
@@ -166,7 +163,7 @@ class Decide {
             }
             oldInterval = mixpanelInstance.flushInterval
             mixpanelInstance.flushInterval = 1
-            sharedApplication.isIdleTimerDisabled = true
+            MixpanelInstance.sharedUIApplication()?.isIdleTimerDisabled = true
 
             for binding in self.codelessInstance.codelessBindings {
                 binding.stop()
@@ -183,7 +180,7 @@ class Decide {
                 return
             }
             mixpanelInstance.flushInterval = oldInterval
-            sharedApplication.isIdleTimerDisabled = false
+            MixpanelInstance.sharedUIApplication()?.isIdleTimerDisabled = false
 
             for binding in self.codelessInstance.codelessBindings {
                 binding.execute()

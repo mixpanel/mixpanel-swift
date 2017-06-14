@@ -326,7 +326,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testTrackLaunchOptions() {
-        let nsJourneyId: NSNumber = 1;
+        let nsJourneyId: NSNumber = 1
         let launchOptions: [UIApplicationLaunchOptionsKey: Any] = [UIApplicationLaunchOptionsKey.remoteNotification: ["mp":
             ["m": 12345, "c": 54321, "journey_id": nsJourneyId, "additional_param": "abcd"]]]
         mixpanel = Mixpanel.initialize(token: kTestToken,
@@ -344,7 +344,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testTrackPushNotification() {
-        let nsJourneyId: NSNumber = 1;
+        let nsJourneyId: NSNumber = 1
         mixpanel.trackPushNotification(["mp": ["m": 98765, "c": 56789, "journey_id": nsJourneyId, "additional_param": "abcd"]])
         waitForSerialQueue()
         var e: InternalProperties = mixpanel.eventsQueue.last!

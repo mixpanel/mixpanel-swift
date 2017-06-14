@@ -101,7 +101,7 @@ class UIControlBinding: CodelessBinding {
     }
 
     override func execute() {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
         }
         if !self.running {

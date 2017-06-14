@@ -365,7 +365,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     static func sharedUIApplication() -> UIApplication? {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeRetainedValue() as? UIApplication else {
+        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeUnretainedValue() as? UIApplication else {
             return nil
         }
         return sharedApplication

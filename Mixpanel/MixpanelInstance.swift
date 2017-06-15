@@ -896,6 +896,14 @@ extension MixpanelInstance {
         if let mpPayload = userInfo["mp"] as? InternalProperties {
             if let m = mpPayload["m"], let c = mpPayload["c"] {
                 var properties = Properties()
+                for (key, value) in mpPayload {
+                    if key != "m" && key != "c" {
+                        // Check Int first, since a number in the push payload is parsed as __NCSFNumber
+                        // which fails to convert to MixpanelType.
+                        if let typedValue = value as? Int { properties[key] = typedValue }
+                        if let typedValue = value as? MixpanelType { properties[key] = typedValue }
+                    }
+                }
                 properties["campaign_id"]  = c as? Int
                 properties["message_id"]   = m as? Int
                 properties["message_type"] = "push"

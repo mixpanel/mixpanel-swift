@@ -364,12 +364,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif
     }
 
+    #if !os(OSX)
     static func sharedUIApplication() -> UIApplication? {
         guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeUnretainedValue() as? UIApplication else {
             return nil
         }
         return sharedApplication
     }
+    #endif // !os(OSX)
 
     @objc private func applicationDidBecomeActive(_ notification: Notification) {
         flushInstance.applicationDidBecomeActive()

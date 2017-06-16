@@ -125,19 +125,19 @@ class MixpanelCodelessTests: MixpanelBaseTests {
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 2, "didMoveToWindow should have been unSwizzled")
         // Test archive
         let archive = NSKeyedArchiver.archivedData(withRootObject: binding!)
-        let unarchivedBinding = NSKeyedUnarchiver.unarchiveObject(with: archive)!
+        let unarchivedBinding = NSKeyedUnarchiver.unarchiveObject(with: archive) as! UIControlBinding
         XCTAssertEqual(NSStringFromClass(type(of: binding!)),
-                       NSStringFromClass(type(of: unarchivedBinding) as! AnyClass),
+                       NSStringFromClass(type(of: unarchivedBinding)),
                        "Binding should have correct serialized properties after archive")
-        XCTAssertTrue((binding!.name == (unarchivedBinding as AnyObject).name),
+        XCTAssertTrue((binding!.name == unarchivedBinding.name),
                       "Binding should have correct serialized properties after archive")
-        XCTAssertTrue((binding?.path == (unarchivedBinding as AnyObject).path!),
+        XCTAssertTrue((binding?.path == unarchivedBinding.path),
                       "Binding should have correct serialized properties after archive")
         XCTAssertEqual(binding?.controlEvent,
-                       (unarchivedBinding as AnyObject).controlEvent,
+                       unarchivedBinding.controlEvent,
                        "Binding should have correct serialized properties after archive")
         XCTAssertEqual(binding?.verifyEvent,
-                       (unarchivedBinding as AnyObject).verifyEvent,
+                       unarchivedBinding.verifyEvent,
                        "Binding should have correct serialized properties after archive")
     }
 
@@ -185,13 +185,13 @@ class MixpanelCodelessTests: MixpanelBaseTests {
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 1, "No track calls should be fired")
         // Test archive
         let archive = NSKeyedArchiver.archivedData(withRootObject: binding!)
-        let unarchivedBinding = NSKeyedUnarchiver.unarchiveObject(with: archive)!
+        let unarchivedBinding = NSKeyedUnarchiver.unarchiveObject(with: archive) as! UITableViewBinding
         XCTAssertEqual(NSStringFromClass(type(of: binding!)),
-                       NSStringFromClass(type(of: unarchivedBinding) as! AnyClass),
+                       NSStringFromClass(type(of: unarchivedBinding)),
                        "Binding should have correct serialized properties after archive")
-        XCTAssertTrue((binding!.name == (unarchivedBinding as AnyObject).name),
+        XCTAssertTrue((binding!.name == unarchivedBinding.name),
                       "Binding should have correct serialized properties after archive")
-        XCTAssertTrue((binding?.path == (unarchivedBinding as AnyObject).path!),
+        XCTAssertTrue((binding?.path == unarchivedBinding.path),
                       "Binding should have correct serialized properties after archive")
     }
 

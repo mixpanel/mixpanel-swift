@@ -67,7 +67,7 @@ extension Tweak {
 	}
 }
 
-extension Tweak where T: SignedNumber {
+extension Tweak where T: SignedNumeric & Comparable {
     /**
      Creates a Tweak<T> where T: SignedNumberType
      You can optionally provide a min / max / stepSize to restrict the bounds and behavior of a tweak.

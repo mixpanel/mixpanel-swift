@@ -339,15 +339,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillTerminate(_:)),
-                                       name: .NSApplicationWillTerminate,
+                                       name: NSApplication.willTerminateNotification,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillResignActive(_:)),
-                                       name: .NSApplicationWillResignActive,
+                                       name: NSApplication.willResignActiveNotification,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationDidBecomeActive(_:)),
-                                       name: .NSApplicationDidBecomeActive,
+                                       name: NSApplication.didBecomeActiveNotification,
                                        object: nil)
     }
     #endif // os(OSX)

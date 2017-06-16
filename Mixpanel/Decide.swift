@@ -163,7 +163,7 @@ class Decide {
             }
             oldInterval = mixpanelInstance.flushInterval
             mixpanelInstance.flushInterval = 1
-            UIApplication.shared.isIdleTimerDisabled = true
+            MixpanelInstance.sharedUIApplication()?.isIdleTimerDisabled = true
 
             for binding in self.codelessInstance.codelessBindings {
                 binding.stop()
@@ -180,7 +180,7 @@ class Decide {
                 return
             }
             mixpanelInstance.flushInterval = oldInterval
-            UIApplication.shared.isIdleTimerDisabled = false
+            MixpanelInstance.sharedUIApplication()?.isIdleTimerDisabled = false
 
             for binding in self.codelessInstance.codelessBindings {
                 binding.execute()

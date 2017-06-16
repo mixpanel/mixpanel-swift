@@ -86,7 +86,7 @@ class VariantAction: NSObject, NSCoding {
 
     func execute() {
         let executeBlock = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
-            guard let rootVC = UIApplication.shared.keyWindow?.rootViewController else {
+            guard let rootVC = MixpanelInstance.sharedUIApplication()?.keyWindow?.rootViewController else {
                 Logger.error(message: "No apparent root view controller, cannot execute action")
                 return
             }
@@ -331,7 +331,7 @@ class VariantAction: NSObject, NSCoding {
 
     func cacheOriginalImage(_ view: UIView?) {
         if let cacheSelector = VariantAction.gettersForSetters[selector] {
-            guard let rootVC = UIApplication.shared.keyWindow?.rootViewController else {
+            guard let rootVC = MixpanelInstance.sharedUIApplication()?.keyWindow?.rootViewController else {
                 Logger.error(message: "No apparent root view controller, cannot cache image")
                 return
             }

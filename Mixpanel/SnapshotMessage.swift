@@ -28,6 +28,9 @@ class SnapshotRequest: BaseWebSocketMessage {
     }
 
     override func responseCommand(connection: WebSocketWrapper) -> Operation? {
+        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
+            return nil
+        }
         var serializerConfig = configurarion
         let imageHash = payload["image_hash"] as? String
 
@@ -54,7 +57,7 @@ class SnapshotRequest: BaseWebSocketMessage {
                 connection.setSessionObjectSynchronized(with: objectIdentityProvider!, for: "object_identity_provider")
             }
 
-            let serializer = ApplicationStateSerializer(application: UIApplication.shared,
+            let serializer = ApplicationStateSerializer(application: sharedApplication,
                                                         configuration: serializerConfig!,
                                                         objectIdentityProvider: objectIdentityProvider as! ObjectIdentityProvider)
 

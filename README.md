@@ -54,13 +54,9 @@ Our Swift library fully supports all of the Mixpanel features, and has full pari
 Mixpanel supports `CocoaPods` for easy installation.
 To Install, see our **[swift integration guide »](https://mixpanel.com/help/reference/swift)**
 
-For iOS, tvOS, and macOS integrations:
+For iOS, tvOS, macOS, and App Extension integrations:
 
 `pod 'Mixpanel-swift'`
-
-For App Extension integrations (you may need both the above *and* this):
-
-`pod 'Mixpanel-swift-appex'`
 
 <a name="carthage"></a>
 ## Carthage

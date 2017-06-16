@@ -67,9 +67,9 @@ open class People {
             Persistence.archivePeople(self.peopleQueue, token: self.apiToken)
         }
 
-        #if APP_EXTENSION
-        delegate?.flush(completion: nil)
-        #endif // APP_EXTENSION
+        if MixpanelInstance.isiOSAppExtension() {
+            delegate?.flush(completion: nil)
+        }
     }
 
     func addPeopleObject(_ r: InternalProperties) {

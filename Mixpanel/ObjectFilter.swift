@@ -138,7 +138,6 @@ class ObjectFilter: CustomStringConvertible {
 
     func getParents(of object: AnyObject) -> [AnyObject] {
         var result = [AnyObject]()
-
         if let object = object as? UIView {
             if let superview = object.superview {
                 result.append(superview)
@@ -156,7 +155,7 @@ class ObjectFilter: CustomStringConvertible {
                 result.append(presentingViewController)
             }
 
-            if let keyWindow = UIApplication.shared.keyWindow, keyWindow.rootViewController == object {
+            if let keyWindow = MixpanelInstance.sharedUIApplication()?.keyWindow, keyWindow.rootViewController == object {
                 result.append(keyWindow)
             }
         }

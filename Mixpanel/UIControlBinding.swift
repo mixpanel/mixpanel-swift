@@ -101,10 +101,12 @@ class UIControlBinding: CodelessBinding {
     }
 
     override func execute() {
-
+        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
+            return
+        }
         if !self.running {
             let executeBlock = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
-                if let root = UIApplication.shared.keyWindow?.rootViewController {
+                if let root = sharedApplication.keyWindow?.rootViewController {
                     if let view = view as? UIControl, self.appliedTo.contains(view) {
                         if !self.path.isSelected(leaf: view, from: root, isFuzzy: true) {
                             self.stopOn(view: view)
@@ -178,7 +180,7 @@ class UIControlBinding: CodelessBinding {
     }
 
     func verifyControlMatchesPath(_ control: AnyObject) -> Bool {
-        if let root = UIApplication.shared.keyWindow?.rootViewController {
+        if let root = MixpanelInstance.sharedUIApplication()?.keyWindow?.rootViewController {
             return path.isSelected(leaf: control, from: root)
         }
         return false

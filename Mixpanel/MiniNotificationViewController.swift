@@ -47,9 +47,12 @@ class MiniNotificationViewController: BaseNotificationViewController {
     }
 
     override func show(animated: Bool) {
+        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
+            return
+        }
         canPan = false
         let frame: CGRect
-        if UIInterfaceOrientationIsPortrait(UIApplication.shared.statusBarOrientation)
+        if UIInterfaceOrientationIsPortrait(sharedApplication.statusBarOrientation)
             && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiom.phone {
             frame = CGRect(x: InAppNotificationsConstants.miniSidePadding,
                            y: UIScreen.main.bounds.size.height,
@@ -107,9 +110,9 @@ class MiniNotificationViewController: BaseNotificationViewController {
         if canPan, let window = window {
             switch gesture.state {
             case UIGestureRecognizerState.began:
-                panStartPoint = gesture.location(in: UIApplication.shared.keyWindow)
+                panStartPoint = gesture.location(in: MixpanelInstance.sharedUIApplication()?.keyWindow)
             case UIGestureRecognizerState.changed:
-                var position = gesture.location(in: UIApplication.shared.keyWindow)
+                var position = gesture.location(in: MixpanelInstance.sharedUIApplication()?.keyWindow)
                 let diffY = position.y - panStartPoint.y
                 position.y = max(position.y, position.y + diffY)
                 window.layer.position = CGPoint(x: window.layer.position.x, y: position.y)
@@ -128,10 +131,13 @@ class MiniNotificationViewController: BaseNotificationViewController {
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
+            return
+        }
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: { (ctx) in
             let frame: CGRect
-            if UIInterfaceOrientationIsPortrait(UIApplication.shared.statusBarOrientation)
+            if UIInterfaceOrientationIsPortrait(sharedApplication.statusBarOrientation)
                 && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiom.phone {
                 frame = CGRect(x: InAppNotificationsConstants.miniSidePadding,
                                y: UIScreen.main.bounds.size.height -

@@ -91,7 +91,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
         if let callToActionURL = callToActionURL {
             controller.hide(animated: true) {
                 Logger.info(message: "opening CTA URL: \(callToActionURL)")
-                guard let canOpenURL = MixpanelInstance.sharedUIApplication()?.perform(NSSelectorFromString("openURL"), with: callToActionURL).takeRetainedValue() as? Bool else {
+                guard let canOpenURL = MixpanelInstance.sharedUIApplication()?.perform(NSSelectorFromString("openURL"), with: callToActionURL).takeUnretainedValue() as? Bool else {
                     return
                 }
                 if !canOpenURL {

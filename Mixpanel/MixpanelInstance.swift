@@ -515,7 +515,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if !APP_EXTENSION
     func updateNetworkActivityIndicator(_ on: Bool) {
         if showNetworkActivityIndicator {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = on
+            DispatchQueue.main.async {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = on
+            }
         }
     }
     #endif // !APP_EXTENSION

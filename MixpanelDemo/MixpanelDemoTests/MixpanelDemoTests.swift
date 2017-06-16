@@ -326,8 +326,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testTrackLaunchOptions() {
+        let nsJourneyId: NSNumber = 1
         let launchOptions: [UIApplicationLaunchOptionsKey: Any] = [UIApplicationLaunchOptionsKey.remoteNotification: ["mp":
-            ["m": 12345, "c": 54321]]]
+            ["m": 12345, "c": 54321, "journey_id": nsJourneyId, "additional_param": "abcd"]]]
         mixpanel = Mixpanel.initialize(token: kTestToken,
                                        launchOptions: launchOptions,
                                        flushInterval: 60)
@@ -337,17 +338,22 @@ class MixpanelDemoTests: MixpanelBaseTests {
         var p: InternalProperties = e["properties"] as! InternalProperties
         XCTAssertEqual(p["campaign_id"] as? Int, 54321, "campaign_id not equal")
         XCTAssertEqual(p["message_id"] as? Int, 12345, "message_id not equal")
+        XCTAssertEqual(p["journey_id"] as? Int, 1, "journey_id not equal")
+        XCTAssertEqual(p["additional_param"] as? String, "abcd", "additional_param not equal")
         XCTAssertEqual(p["message_type"] as? String, "push", "type does not equal inapp")
     }
 
     func testTrackPushNotification() {
-        mixpanel.trackPushNotification(["mp": ["m": 98765, "c": 56789]])
+        let nsJourneyId: NSNumber = 1
+        mixpanel.trackPushNotification(["mp": ["m": 98765, "c": 56789, "journey_id": nsJourneyId, "additional_param": "abcd"]])
         waitForSerialQueue()
         var e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertEqual(e["event"] as? String, "$campaign_received", "incorrect event name")
         var p: InternalProperties = e["properties"] as! InternalProperties
         XCTAssertEqual(p["campaign_id"] as? Int, 56789, "campaign_id not equal")
         XCTAssertEqual(p["message_id"] as? Int, 98765, "message_id not equal")
+        XCTAssertEqual(p["journey_id"] as? Int, 1, "journey_id not equal")
+        XCTAssertEqual(p["additional_param"] as? String, "abcd", "additional_param not equal")
         XCTAssertEqual(p["message_type"] as? String, "push", "type does not equal inapp")
     }
 

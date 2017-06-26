@@ -329,9 +329,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                            selector: #selector(appLinksNotificationRaised(_:)),
                                            name: NSNotification.Name("com.parse.bolts.measurement_event"),
                                            object: nil)
-            #if os(iOS)
+            #if os(iOS) && DECIDE
                 initializeGestureRecognizer()
-            #endif // os(iOS)
+            #endif // os(iOS) && DECIDE
         }
     }
     #else

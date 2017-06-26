@@ -899,18 +899,9 @@ extension MixpanelInstance {
         }
     }
 
-    /**
-     Track a push notification using its payload sent from Mixpanel.
 
-     To simplify user interaction tracking, Mixpanel
-     automatically sends IDs for the relevant notification of each push.
-     This method parses the standard payload and queues a track call using this information.
-
-     - parameter userInfo: remote notification payload dictionary
-     - parameter event:    optional, and usually shouldn't be used,
-     unless the results is needed to be tracked elsewhere.
-     */
-    open func trackPushNotification(_ userInfo: [AnyHashable: Any],
+    #if DECIDE
+    func trackPushNotification(_ userInfo: [AnyHashable: Any],
                                       event: String = "$campaign_received") {
         if let mpPayload = userInfo["mp"] as? InternalProperties {
             if let m = mpPayload["m"], let c = mpPayload["c"] {
@@ -933,6 +924,32 @@ extension MixpanelInstance {
             }
         }
     }
+
+    func setupAutomaticPushTracking() {
+        guard let appDelegate = UIApplication.shared.delegate else {
+            return
+        }
+        var selector: Selector? = nil
+        let aClass: AnyClass = type(of: appDelegate)
+        if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")) != nil {
+            selector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
+        } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:")) != nil {
+            selector = NSSelectorFromString("application:didReceiveRemoteNotification:")
+        }
+
+        if let selector = selector {
+            Swizzler.swizzleSelector(selector,
+                                     withSelector: #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)),
+                                     for: aClass,
+                                     name: "notification opened",
+                                     block: { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
+                                        if let param1 = param1 as? [AnyHashable: Any] {
+                                            self.trackPushNotification(param1)
+                                        }
+            })
+        }
+    }
+    #endif
 
     /**
      Starts a timer that will be stopped and added as a property when a

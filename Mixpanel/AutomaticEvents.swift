@@ -155,4 +155,34 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 
 }
 
+extension UIResponder {
+    func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Swift.Void) {
+        let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
+        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
+            let swizzle = Swizzler.swizzles[originalMethod] {
+            typealias MyCFunction = @convention(c) (AnyObject, Selector, UIApplication, NSDictionary, (UIBackgroundFetchResult) -> Void) -> Void
+            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
+            curriedImplementation(self, originalSelector, application, userInfo as NSDictionary, completionHandler)
+
+            for (_, block) in swizzle.blocks {
+                block(self, swizzle.selector, application as AnyObject?, userInfo as AnyObject?)
+            }
+        }
+    }
+
+    func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+        let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:")
+        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
+            let swizzle = Swizzler.swizzles[originalMethod] {
+            typealias MyCFunction = @convention(c) (AnyObject, Selector, UIApplication, NSDictionary) -> Void
+            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
+            curriedImplementation(self, originalSelector, application, userInfo as NSDictionary)
+
+            for (_, block) in swizzle.blocks {
+                block(self, swizzle.selector, application as AnyObject?, userInfo as AnyObject?)
+            }
+        }
+    }
+}
+
 #endif

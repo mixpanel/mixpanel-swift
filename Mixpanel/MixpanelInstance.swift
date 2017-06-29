@@ -1161,11 +1161,12 @@ extension MixpanelInstance: InAppNotificationsDelegate {
             guard let newVariants = newVariants else {
                 return
             }
-            for variant in newVariants {
-                variant.execute()
-                self.markVariantRun(variant)
+            DispatchQueue.main.sync {
+                for variant in newVariants {
+                    variant.execute()
+                    self.markVariantRun(variant)
+                }
             }
-
             DispatchQueue.main.async {
                 if let callback = callback {
                     callback()

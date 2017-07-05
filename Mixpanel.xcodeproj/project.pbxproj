@@ -146,7 +146,7 @@
 		E11594801CFF1491007F8B4F /* Mixpanel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Mixpanel.h; sourceTree = "<group>"; };
 		E11594821CFF1491007F8B4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E115948A1CFF1538007F8B4F /* Mixpanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mixpanel.swift; sourceTree = "<group>"; };
-		E115948D1D000709007F8B4F /* MixpanelInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelInstance.swift; sourceTree = "<group>"; };
+		E115948D1D000709007F8B4F /* MixpanelInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MixpanelInstance.swift; path = "/Users/hairuosang/Documents/GitHub/mixpanel-swift/Mixpanel/MixpanelInstance.swift"; sourceTree = "<absolute>"; };
 		E11594921D0036E1007F8B4F /* Persistence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		E11594961D006022007F8B4F /* Network.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		E11594981D01689F007F8B4F /* JSONHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONHandler.swift; sourceTree = "<group>"; };

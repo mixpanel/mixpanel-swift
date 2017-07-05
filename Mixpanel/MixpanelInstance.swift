@@ -1116,9 +1116,8 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     func markVariantRun(_ variant: Variant) {
         Logger.info(message: "Marking variant \(variant.ID) shown for experiment \(variant.experimentID)")
         let shownVariant = ["\(variant.experimentID)": variant.ID]
-        if people.distinctId != nil {
-            people.merge(properties: ["$experiments": shownVariant])
-        }
+        people.merge(properties: ["$experiments": shownVariant])
+        
         serialQueue.async {
             var superPropertiesCopy = self.superProperties
             var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]

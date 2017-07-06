@@ -24,6 +24,8 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         LSNocilla.sharedInstance().start()
         mixpanelWillFlush = false
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
+        mixpanel.reset()
+        waitForTrackingQueue()
         NSLog("finished test setup")
     }
 

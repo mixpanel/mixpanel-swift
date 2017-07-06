@@ -876,8 +876,14 @@ extension MixpanelInstance {
         
         NSLog("\(self.eventsQueue.count)  AAAA")
         NSLog("\(self.people.peopleQueue.count)  AAAA")
+        
+        self.archive()
 
         networkQueue.async() {
+            
+            if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
+                return
+            }
             
             self.trackingQueue.sync {
                 self.copyEventsQueue = self.eventsQueue
@@ -890,10 +896,6 @@ extension MixpanelInstance {
                 self.people.peopleQueue.removeAll()
             }
             
-            if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
-                return
-            }
-            
             #if DECIDE
             self.flushInstance.flushEventsQueue(&self.copyEventsQueue,
                                                 automaticEventsEnabled: self.decideInstance.automaticEventsEnabled)
@@ -902,15 +904,18 @@ extension MixpanelInstance {
                                                 automaticEventsEnabled: false)
             #endif
             self.flushInstance.flushPeopleQueue(&self.copyPeopleQueue)
-            self.archive()
-            
+
             self.trackingQueue.sync {
                 self.eventsQueue = self.copyEventsQueue + self.eventsQueue
                 self.people.peopleQueue = self.copyPeopleQueue + self.copyPeopleQueue
+                self.copyEventsQueue.removeAll()
+                self.copyPeopleQueue.removeAll()
                 NSLog("\(self.eventsQueue.count)  BBBB")
                 NSLog("\(self.people.peopleQueue.count)  BBBB")
-
             }
+            self.archive()
+
+
             
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)

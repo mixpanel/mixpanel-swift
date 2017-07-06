@@ -80,7 +80,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         for i in 0..<50 {
             mixpanel.people.set(property: "p1", to: "\(i)")
         }
-
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty, "people should have been flushed")
         for i in 0..<60 {
@@ -102,8 +101,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.eventsQueue.count == 50,
                       "events should still be in the queue if flush fails")
-        stubTrack()
-        flushAndWaitForNetworkQueue()
+        
 
     }
 

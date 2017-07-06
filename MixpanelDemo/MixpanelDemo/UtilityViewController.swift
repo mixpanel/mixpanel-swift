@@ -20,6 +20,8 @@ class UtilityViewController: UIViewController, UITableViewDelegate, UITableViewD
                           "In-App Purchase"]
 
     override func viewDidLoad() {
+        super.viewDidLoad()
+        
         tableView.delegate = self
         tableView.dataSource = self
     }

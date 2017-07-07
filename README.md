@@ -115,7 +115,9 @@ You initialize your Mixpanel instance with the token provided to you on mixpanel
 <a name="start-tracking"></a>
 ## Start tracking
 
-To interact with the instance and start tracking, you can either use the mixpanel instance given when initializing:
+After installing the library into your iOS app, Mixpanel will <a href="https://mixpanel.com/help/questions/articles/which-common-mobile-events-can-mixpanel-collect-on-my-behalf-automatically" target="_blank">automatically collect common mobile events</a>. You can enable/ disable automatic collection through your <a href="https://mixpanel.com/help/questions/articles/how-do-i-enable-common-mobile-events-if-i-have-already-implemented-mixpanel" target="_blank">project settings</a>.
+
+To interact with the instance and track additional events, you can either use the mixpanel instance given when initializing:
 ```swift
 mixpanel.track(event: "Tracked Event!")
 ```

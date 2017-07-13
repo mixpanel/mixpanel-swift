@@ -339,15 +339,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillTerminate(_:)),
-                                       name: .NSApplicationWillTerminate,
+                                       name: NSApplication.willTerminateNotification,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillResignActive(_:)),
-                                       name: .NSApplicationWillResignActive,
+                                       name: NSApplication.willResignActiveNotification,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationDidBecomeActive(_:)),
-                                       name: .NSApplicationDidBecomeActive,
+                                       name: NSApplication.didBecomeActiveNotification,
                                        object: nil)
     }
     #endif // os(OSX)
@@ -1160,11 +1160,12 @@ extension MixpanelInstance: InAppNotificationsDelegate {
             guard let newVariants = newVariants else {
                 return
             }
-            for variant in newVariants {
-                variant.execute()
-                self.markVariantRun(variant)
+            DispatchQueue.main.sync {
+                for variant in newVariants {
+                    variant.execute()
+                    self.markVariantRun(variant)
+                }
             }
-
             DispatchQueue.main.async {
                 if let callback = callback {
                     callback()

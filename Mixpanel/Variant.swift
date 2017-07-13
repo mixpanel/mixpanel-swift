@@ -157,7 +157,7 @@ class Variant: NSObject, NSCoding {
         if object === self {
             return true
         } else {
-            return self.ID == object.ID
+            return self.ID == object.ID && self.actions == object.actions
         }
     }
 
@@ -166,3 +166,4 @@ class Variant: NSObject, NSCoding {
     }
 
 }
+

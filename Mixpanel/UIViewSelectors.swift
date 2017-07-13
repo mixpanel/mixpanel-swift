@@ -26,29 +26,29 @@ extension UIView {
         return encryptedStuff
     }
 
-    func mp_fingerprintVersion() -> NSNumber {
+    @objc func mp_fingerprintVersion() -> NSNumber {
         return NSNumber(value: 1)
     }
 
-    func mp_varA() -> NSString? {
+    @objc func mp_varA() -> NSString? {
         return mp_encryptHelper(input: mp_viewId())
     }
 
-    func mp_varB() -> NSString? {
+    @objc func mp_varB() -> NSString? {
         return mp_encryptHelper(input: mp_controllerVariable())
     }
 
-    func mp_varC() -> NSString? {
+    @objc func mp_varC() -> NSString? {
         return mp_encryptHelper(input: mp_imageFingerprint())
     }
 
-    func mp_varSetD() -> NSArray {
+    @objc func mp_varSetD() -> NSArray {
         return mp_targetActions().map {
             mp_encryptHelper(input: $0)
         } as NSArray
     }
 
-    func mp_varE() -> NSString? {
+    @objc func mp_varE() -> NSString? {
         return mp_encryptHelper(input: mp_text())
     }
 
@@ -86,7 +86,7 @@ extension UIView {
             originalImage = button.image(for: UIControlState.normal)
         } else if let superviewUnwrapped = self.superview,
             NSStringFromClass(type(of: superviewUnwrapped)) == "UITabBarButton" && self.responds(to: imageSelector) {
-            originalImage = self.perform(imageSelector).takeRetainedValue() as? UIImage
+            originalImage = self.perform(imageSelector)?.takeRetainedValue() as? UIImage
         }
 
         if let originalImage = originalImage, let cgImage = originalImage.cgImage {
@@ -108,10 +108,11 @@ extension UIView {
             for i in 0..<32 {
                 let j = 2*i
                 let k = 2*i + 1
-                let part1 = ((data32[j] & 0x80000000) >> 24) | ((data32[j] & 0x800000) >> 17) | ((data32[j] & 0x8000) >> 10)
-                let part2 = ((data32[j] & 0x80) >> 3) | ((data32[k] & 0x80000000) >> 28) | ((data32[k] & 0x800000) >> 21)
-                let part3 = ((data32[k] & 0x8000) >> 14) | ((data32[k] & 0x80) >> 7)
-                data4[i] = UInt8(part1 | part2 | part3)
+                let part1 = ((data32[j] & 0x80000000) >> 24) | ((data32[j] & 0x800000) >> 17)
+                let part2 = ((data32[j] & 0x8000) >> 10) | ((data32[j] & 0x80) >> 3)
+                let part3 = ((data32[k] & 0x80000000) >> 28) | ((data32[k] & 0x800000) >> 21)
+                let part4 = ((data32[k] & 0x8000) >> 14) | ((data32[k] & 0x80) >> 7)
+                data4[i] = UInt8(part1 | part2 | part3 | part4)
             }
             let arr = Array(UnsafeBufferPointer(start: data4, count: 32))
             result = Data(bytes: arr).base64EncodedString()
@@ -152,7 +153,7 @@ extension UIView {
         } else if let button = self as? UIButton {
             text = button.title(for: .normal)
         } else if self.responds(to: titleSelector) {
-            if let titleImp = self.perform(titleSelector).takeUnretainedValue() as? String {
+            if let titleImp = self.perform(titleSelector)?.takeUnretainedValue() as? String {
                 text = titleImp
             }
         }

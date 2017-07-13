@@ -171,7 +171,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         })
     }
 
-    func buttonTapped(_ sender: AnyObject) {
+    @objc func buttonTapped(_ sender: AnyObject) {
         delegate?.notificationShouldDismiss(controller: self, callToActionURL: takeoverNotification.buttons[sender.tag].callToActionURL)
     }
 

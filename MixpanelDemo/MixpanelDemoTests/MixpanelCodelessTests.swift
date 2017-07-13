@@ -125,19 +125,19 @@ class MixpanelCodelessTests: MixpanelBaseTests {
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 2, "didMoveToWindow should have been unSwizzled")
         // Test archive
         let archive = NSKeyedArchiver.archivedData(withRootObject: binding!)
-        let unarchivedBinding = NSKeyedUnarchiver.unarchiveObject(with: archive)!
+        let unarchivedBinding = NSKeyedUnarchiver.unarchiveObject(with: archive) as! UIControlBinding
         XCTAssertEqual(NSStringFromClass(type(of: binding!)),
-                       NSStringFromClass(type(of: unarchivedBinding) as! AnyClass),
+                       NSStringFromClass(type(of: unarchivedBinding)),
                        "Binding should have correct serialized properties after archive")
-        XCTAssertTrue((binding!.name == (unarchivedBinding as AnyObject).name),
+        XCTAssertTrue((binding!.name == unarchivedBinding.name),
                       "Binding should have correct serialized properties after archive")
-        XCTAssertTrue((binding?.path == (unarchivedBinding as AnyObject).path!),
+        XCTAssertTrue((binding?.path == unarchivedBinding.path),
                       "Binding should have correct serialized properties after archive")
         XCTAssertEqual(binding?.controlEvent,
-                       (unarchivedBinding as AnyObject).controlEvent,
+                       unarchivedBinding.controlEvent,
                        "Binding should have correct serialized properties after archive")
         XCTAssertEqual(binding?.verifyEvent,
-                       (unarchivedBinding as AnyObject).verifyEvent,
+                       unarchivedBinding.verifyEvent,
                        "Binding should have correct serialized properties after archive")
     }
 
@@ -185,13 +185,13 @@ class MixpanelCodelessTests: MixpanelBaseTests {
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 1, "No track calls should be fired")
         // Test archive
         let archive = NSKeyedArchiver.archivedData(withRootObject: binding!)
-        let unarchivedBinding = NSKeyedUnarchiver.unarchiveObject(with: archive)!
+        let unarchivedBinding = NSKeyedUnarchiver.unarchiveObject(with: archive) as! UITableViewBinding
         XCTAssertEqual(NSStringFromClass(type(of: binding!)),
-                       NSStringFromClass(type(of: unarchivedBinding) as! AnyClass),
+                       NSStringFromClass(type(of: unarchivedBinding)),
                        "Binding should have correct serialized properties after archive")
-        XCTAssertTrue((binding!.name == (unarchivedBinding as AnyObject).name),
+        XCTAssertTrue((binding!.name == unarchivedBinding.name),
                       "Binding should have correct serialized properties after archive")
-        XCTAssertTrue((binding?.path == (unarchivedBinding as AnyObject).path!),
+        XCTAssertTrue((binding?.path == unarchivedBinding.path),
                       "Binding should have correct serialized properties after archive")
     }
 
@@ -208,7 +208,7 @@ class MixpanelCodelessTests: MixpanelBaseTests {
         b1.setImage(image, for: .normal)
         // Assert that we have versioning available and we are at least at v1
         XCTAssert(b1.responds(to: NSSelectorFromString("mp_fingerprintVersion")))
-        XCTAssert(Int(b1.perform(#selector(UIView.mp_fingerprintVersion)).takeUnretainedValue() as! NSNumber) >= 1)
+        XCTAssert((b1.perform(#selector(UIView.mp_fingerprintVersion)).takeUnretainedValue() as! NSNumber).intValue >= 1)
         // Test a versioned predicate where the first clause passes and the second would fail
         format = "(mp_fingerprintVersion >= 1 AND true == true) OR 1 = 2"
         XCTAssert(NSPredicate(format: format).evaluate(with: b1))

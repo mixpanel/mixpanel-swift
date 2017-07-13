@@ -52,9 +52,10 @@ class Swizzler {
                                                   _ param2: AnyObject?) -> Void)) {
 
         if let originalMethod = class_getInstanceMethod(aClass, originalSelector),
-            let swizzledMethod = class_getInstanceMethod(aClass, newSelector),
-            let swizzledMethodImplementation = method_getImplementation(swizzledMethod),
-            let originalMethodImplementation = method_getImplementation(originalMethod) {
+            let swizzledMethod = class_getInstanceMethod(aClass, newSelector) {
+
+            let swizzledMethodImplementation = method_getImplementation(swizzledMethod)
+            let originalMethodImplementation = method_getImplementation(originalMethod)
 
             var swizzle = getSwizzle(for: originalMethod)
             if swizzle == nil {
@@ -73,7 +74,7 @@ class Swizzler {
                                                swizzledMethodImplementation,
                                                method_getTypeEncoding(swizzledMethod))
             if didAddMethod {
-                setSwizzle(swizzle!, for: class_getInstanceMethod(aClass, originalSelector))
+                setSwizzle(swizzle!, for: class_getInstanceMethod(aClass, originalSelector)!)
             } else {
                 method_setImplementation(originalMethod, swizzledMethodImplementation)
             }

@@ -32,7 +32,7 @@ internal final class TweakPersistency {
 		return persistedValueForTweakIdentifiable(AnyTweak(tweak: tweak)) as? T
 	}
 
-	internal func currentValueForTweak<T>(_ tweak: Tweak<T>) -> T? where T: SignedNumber {
+	internal func currentValueForTweak<T>(_ tweak: Tweak<T>) -> T? where T: SignedNumeric & Comparable {
 		if let currentValue = persistedValueForTweakIdentifiable(AnyTweak(tweak: tweak)) as? T {
 				// If the tweak can be clipped, then we'll need to clip it - because
 				// the tweak might've been persisted without a min / max, but then you changed the tweak definition.
@@ -114,7 +114,7 @@ private final class TweakDiskPersistency {
 	/// However, because re-hydrating TweakableType from its underlying NSNumber gets Bool & Int mixed up,
     /// we have to persist a different structure on disk: [TweakViewDataType: [String: AnyObject]]
 	/// This ensures that if something was saved as a Bool, it's read back as a Bool.
-	@objc private final class Data: NSObject, NSCoding {
+	@objc(TweakDiskPersistencyData) private final class Data: NSObject, NSCoding {
 		let cache: TweakCache
 
 		init(cache: TweakCache) {

@@ -125,8 +125,10 @@ class MixpanelABTestingTests: MixpanelBaseTests {
         let expect = self.expectation(description: "wait for variants to be executed")
         self.mixpanel.checkDecide(completion: { (response: DecideResponse?) -> Void in
             XCTAssertEqual(response!.newVariants.count, 2, "Should have got 2 new variants from decide")
-            for variant: Variant in response!.newVariants {
-                variant.execute()
+            DispatchQueue.main.sync {
+                for variant: Variant in response!.newVariants {
+                    variant.execute()
+                }
             }
             expect.fulfill()
         })
@@ -205,11 +207,14 @@ class MixpanelABTestingTests: MixpanelBaseTests {
         self.mixpanel.identify(distinctId: "DEF")
         waitForSerialQueue()
         self.mixpanel.checkDecide(completion: { (response: DecideResponse?) -> Void in
-            for variant: Variant in response!.newVariants {
-                variant.execute()
-                self.mixpanel.markVariantRun(variant)
+            DispatchQueue.main.async {
+                for variant: Variant in response!.newVariants {
+                    variant.execute()
+                    self.mixpanel.markVariantRun(variant)
+                }
             }
         })
+        self.waitForAsyncTasks()
         self.waitForSerialQueue()
         let expect = self.expectation(description: "decide variants tracked")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -301,7 +306,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
     }
 
     func testUITableViewCellOrdering() {
-        let sel = ObjectSelector(string: "/UITableViewController/UITableView/UITableViewWrapperView/" +
+        let sel = ObjectSelector(string: "/UITableViewController/UITableView/" +
             "UITableViewCell[0]/UITableViewCellContentView/UILabel")
         var selected = sel.selectFrom(root: UIApplication.shared.keyWindow?.rootViewController!)
         XCTAssertEqual(selected.count, 1, "Should have selected one object")

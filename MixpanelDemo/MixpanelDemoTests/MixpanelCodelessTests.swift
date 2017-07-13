@@ -208,7 +208,7 @@ class MixpanelCodelessTests: MixpanelBaseTests {
         b1.setImage(image, for: .normal)
         // Assert that we have versioning available and we are at least at v1
         XCTAssert(b1.responds(to: NSSelectorFromString("mp_fingerprintVersion")))
-        XCTAssert(Int(b1.perform(#selector(UIView.mp_fingerprintVersion)).takeUnretainedValue() as! NSNumber) >= 1)
+        XCTAssert((b1.perform(#selector(UIView.mp_fingerprintVersion)).takeUnretainedValue() as! NSNumber).intValue >= 1)
         // Test a versioned predicate where the first clause passes and the second would fail
         format = "(mp_fingerprintVersion >= 1 AND true == true) OR 1 = 2"
         XCTAssert(NSPredicate(format: format).evaluate(with: b1))

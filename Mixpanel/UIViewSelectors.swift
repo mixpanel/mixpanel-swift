@@ -86,7 +86,7 @@ extension UIView {
             originalImage = button.image(for: UIControlState.normal)
         } else if let superviewUnwrapped = self.superview,
             NSStringFromClass(type(of: superviewUnwrapped)) == "UITabBarButton" && self.responds(to: imageSelector) {
-            originalImage = self.perform(imageSelector).takeRetainedValue() as? UIImage
+            originalImage = self.perform(imageSelector).takeUnretainedValue() as? UIImage
         }
 
         if let originalImage = originalImage, let cgImage = originalImage.cgImage {

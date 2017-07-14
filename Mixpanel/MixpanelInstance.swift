@@ -624,6 +624,10 @@ extension MixpanelInstance {
                 Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
             }
             self.archiveProperties()
+            Persistence.storeIdentity(token: self.apiToken,
+                                      distinctID: self.distinctId,
+                                      peopleDistinctID: self.people.distinctId,
+                                      alias: self.alias)
         }
 
         if MixpanelInstance.isiOSAppExtension() {
@@ -666,6 +670,10 @@ extension MixpanelInstance {
             serialQueue.async() {
                 self.alias = alias
                 self.archiveProperties()
+                Persistence.storeIdentity(token: self.apiToken,
+                                          distinctID: self.distinctId,
+                                          peopleDistinctID: self.people.distinctId,
+                                          alias: self.alias)
             }
             let properties = ["distinct_id": distinctId, "alias": alias]
             track(event: "$create_alias", properties: properties)
@@ -1161,9 +1169,12 @@ extension MixpanelInstance: InAppNotificationsDelegate {
             guard let newVariants = newVariants else {
                 return
             }
-            for variant in newVariants {
-                variant.execute()
-                self.markVariantRun(variant)
+
+            DispatchQueue.main.sync {
+                for variant in newVariants {
+                    variant.execute()
+                    self.markVariantRun(variant)
+                }
             }
 
             DispatchQueue.main.async {

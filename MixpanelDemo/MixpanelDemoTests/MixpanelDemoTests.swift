@@ -203,6 +203,29 @@ class MixpanelDemoTests: MixpanelBaseTests {
             waitForSerialQueue()
         }
     }
+
+    func testPersistentIdentity() {
+        stubTrack()
+        let distinctId: String = "d1"
+        let alias: String = "a1"
+        mixpanel.identify(distinctId: distinctId)
+        waitForSerialQueue()
+        mixpanel.createAlias(alias, distinctId: mixpanel.distinctId)
+        waitForSerialQueue()
+        var tuple = Persistence.restoreIdentity(token: mixpanel.apiToken)
+        XCTAssertTrue(distinctId == tuple.0 && distinctId == tuple.1 && alias == tuple.2)
+        mixpanel.archive()
+        waitForSerialQueue()
+        mixpanel.unarchive()
+        waitForSerialQueue()
+        tuple = Persistence.restoreIdentity(token: mixpanel.apiToken)
+        XCTAssertTrue(mixpanel.distinctId == tuple.0 && mixpanel.people.distinctId == tuple.1 && mixpanel.alias == tuple.2)
+        Persistence.deleteMPUserDefaultsData(token: mixpanel.apiToken)
+        waitForSerialQueue()
+        tuple = Persistence.restoreIdentity(token: mixpanel.apiToken)
+        XCTAssertTrue("" == tuple.0 && nil == tuple.1 && nil == tuple.2)
+    }
+
     func testTrackWithDefaultProperties() {
         mixpanel.track(event: "Something Happened")
         waitForSerialQueue()
@@ -486,6 +509,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(fileManager.fileExists(
             atPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
                       "properties archive file not removed")
+        Persistence.deleteMPUserDefaultsData(token: kTestToken)
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
         waitForSerialQueue()
         XCTAssertEqual(mixpanel.distinctId, mixpanel.defaultDistinctId(),
@@ -543,11 +567,11 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testNetworkingWithStress() {
         _ = stubTrack().andReturn(503)
-        for _ in 0..<500 {
+        for _ in 0..<100 {
             mixpanel.track(event: "Track Call")
         }
         flushAndWaitForSerialQueue()
-        XCTAssertTrue(mixpanel.eventsQueue.count == 500, "none supposed to be flushed")
+        XCTAssertTrue(mixpanel.eventsQueue.count == 100, "none supposed to be flushed")
         LSNocilla.sharedInstance().clearStubs()
         _ = stubTrack().andReturn(200)
         mixpanel.flushInstance.flushRequest.networkRequestsAllowedAfterTime = 0

@@ -96,10 +96,6 @@ class Persistence {
         p["shownNotifications"] = properties.shownNotifications
         p["automaticEvents"] = properties.automaticEventsEnabled
         #endif // DECIDE
-        storeIdentity(token: token,
-                      distinctID: properties.distinctId,
-                      peopleDistinctID: properties.peopleDistinctId,
-                      alias: properties.alias)
         archiveToFile(.properties, object: p, token: token)
     }
 
@@ -340,9 +336,10 @@ class Persistence {
         guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
             return
         }
-        defaults.set(distinctID, forKey: "MPDistinctID")
-        defaults.set(peopleDistinctID, forKey: "MPPeopleDistinctID")
-        defaults.set(alias, forKey: "MPAlias")
+        let prefix = "mixpanel-\(token)-"
+        defaults.set(distinctID, forKey: prefix + "MPDistinctID")
+        defaults.set(peopleDistinctID, forKey: prefix + "MPPeopleDistinctID")
+        defaults.set(alias, forKey: prefix + "MPAlias")
         defaults.synchronize()
     }
 
@@ -350,18 +347,21 @@ class Persistence {
         guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
             return ("", nil, nil)
         }
-        return (defaults.string(forKey: "MPDistinctID") ?? "",
-                defaults.string(forKey: "MPPeopleDistinctID"),
-                defaults.string(forKey: "MPAlias"))
+        let prefix = "mixpanel-\(token)-"
+        return (defaults.string(forKey: prefix + "MPDistinctID") ?? "",
+                defaults.string(forKey: prefix + "MPPeopleDistinctID"),
+                defaults.string(forKey: prefix + "MPAlias"))
     }
 
     class func deleteMPUserDefaultsData(token: String) {
         guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
             return
         }
-        defaults.removeObject(forKey: "MPDistinctID")
-        defaults.removeObject(forKey: "MPPeopleDistinctID")
-        defaults.removeObject(forKey: "MPAlias")
+        let prefix = "mixpanel-\(token)-"
+        defaults.removeObject(forKey: prefix + "MPDistinctID")
+        defaults.removeObject(forKey: prefix + "MPPeopleDistinctID")
+        defaults.removeObject(forKey: prefix + "MPAlias")
+        defaults.synchronize()
     }
 
 }

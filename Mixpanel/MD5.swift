@@ -376,7 +376,7 @@ struct Digest {
     }
 }
 
-protocol CSArrayType: Collection, RangeReplaceableCollection {
+protocol CSArrayType: RangeReplaceableCollection {
     func cs_arrayValue() -> [Iterator.Element]
 }
 

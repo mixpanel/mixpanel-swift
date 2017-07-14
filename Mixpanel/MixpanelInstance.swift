@@ -681,6 +681,7 @@ extension MixpanelInstance {
      */
     open func reset() {
         serialQueue.async() {
+            Persistence.deleteMPUserDefaultsData(token: self.apiToken)
             self.distinctId = self.defaultDistinctId()
             self.superProperties = InternalProperties()
             self.eventsQueue = Queue()

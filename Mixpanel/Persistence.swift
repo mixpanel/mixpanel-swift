@@ -96,6 +96,10 @@ class Persistence {
         p["shownNotifications"] = properties.shownNotifications
         p["automaticEvents"] = properties.automaticEventsEnabled
         #endif // DECIDE
+        storeIdentity(token: token,
+                      distinctID: properties.distinctId,
+                      peopleDistinctID: properties.peopleDistinctId,
+                      alias: properties.alias)
         archiveToFile(.properties, object: p, token: token)
     }
 
@@ -118,8 +122,21 @@ class Persistence {
 
         if !NSKeyedArchiver.archiveRootObject(object, toFile: path) {
             Logger.error(message: "failed to archive \(type.rawValue)")
+            return
         }
 
+        addSkipBackupAttributeToItem(at: path)
+    }
+
+    class private func addSkipBackupAttributeToItem(at path: String) {
+        var url = URL.init(fileURLWithPath: path)
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        do {
+            try url.setResourceValues(resourceValues)
+        } catch {
+            Logger.info(message: "Error excluding \(path) from backup.")
+        }
     }
 
     #if DECIDE
@@ -269,16 +286,20 @@ class Persistence {
                 properties?["superProperties"] as? InternalProperties ?? InternalProperties()
             let timedEvents =
                 properties?["timedEvents"] as? InternalProperties ?? InternalProperties()
-            let distinctId =
+            var distinctId =
                 properties?["distinctId"] as? String ?? ""
-            let alias =
+            var alias =
                 properties?["alias"] as? String ?? nil
-            let peopleDistinctId =
+            var peopleDistinctId =
                 properties?["peopleDistinctId"] as? String ?? nil
             let peopleUnidentifiedQueue =
                 properties?["peopleUnidentifiedQueue"] as? Queue ?? Queue()
             let automaticEventsEnabled =
                 properties?["automaticEvents"] as? Bool ?? nil
+
+            if properties == nil {
+                (distinctId, peopleDistinctId, alias) = restoreIdentity(token: token)
+            }
             return (superProperties,
                     timedEvents,
                     distinctId,
@@ -313,6 +334,34 @@ class Persistence {
         }
 
         return unarchivedData
+    }
+
+    class func storeIdentity(token: String, distinctID: String, peopleDistinctID: String?, alias: String?) {
+        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
+            return
+        }
+        defaults.set(distinctID, forKey: "MPDistinctID")
+        defaults.set(peopleDistinctID, forKey: "MPPeopleDistinctID")
+        defaults.set(alias, forKey: "MPAlias")
+        defaults.synchronize()
+    }
+
+    class func restoreIdentity(token: String) -> (String, String?, String?) {
+        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
+            return ("", nil, nil)
+        }
+        return (defaults.string(forKey: "MPDistinctID") ?? "",
+                defaults.string(forKey: "MPPeopleDistinctID"),
+                defaults.string(forKey: "MPAlias"))
+    }
+
+    class func deleteMPUserDefaultsData(token: String) {
+        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
+            return
+        }
+        defaults.removeObject(forKey: "MPDistinctID")
+        defaults.removeObject(forKey: "MPPeopleDistinctID")
+        defaults.removeObject(forKey: "MPAlias")
     }
 
 }

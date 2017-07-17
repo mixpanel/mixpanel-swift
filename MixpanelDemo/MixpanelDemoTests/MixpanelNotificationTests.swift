@@ -14,7 +14,22 @@ import Nocilla
 
 class MixpanelNotificationTests: MixpanelBaseTests {
 
-    var notificationDict = ["id": 3,
+    var buttons = [[String: Any]]()
+    var notificationDict = [String: Any]()
+
+    override func setUp() {
+        super.setUp()
+        buttons.append(["text": "Done",
+                        "text_color": UInt(34567),
+                        "bg_color": UInt(0),
+                        "border_color": UInt(34567),
+                        "cta_url": "maps://"])
+        buttons.append(["text": "Cancel",
+                        "text_color": UInt(23456),
+                        "bg_color": UInt(34567),
+                        "border_color": UInt(34567),
+                        "cta_url": "maps://"])
+        notificationDict = ["id": 3,
                             "message_id": 1,
                             "title": "title",
                             "title_color": UInt(12345),
@@ -24,25 +39,11 @@ class MixpanelNotificationTests: MixpanelBaseTests {
                             "image_url": "https://cdn.mxpnl.com/site_media/images/engage/inapp_messages/mini/icon_coin.png",
                             "bg_color": UInt(23456),
                             "close_color": UInt(34567),
-                            "buttons": [
-                                [
-                                    "text": "Done",
-                                    "text_color": UInt(34567),
-                                    "bg_color": UInt(0),
-                                    "border_color": UInt(34567),
-                                    "cta_url": "maps://"
-                                ],
-                                [
-                                    "text": "Cancel",
-                                    "text_color": UInt(23456),
-                                    "bg_color": UInt(34567),
-                                    "border_color": UInt(34567),
-                                    "cta_url": "maps://"
-                                ]
-                            ],
+                            "buttons": buttons,
                             "extras": [
                                 "image_fade": false
-                            ]] as [String : Any]
+            ]] as [String : Any]
+    }
 
     func testMalformedImageURL() {
         var notificationDict = self.notificationDict

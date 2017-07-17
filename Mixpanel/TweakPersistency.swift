@@ -114,7 +114,7 @@ private final class TweakDiskPersistency {
 	/// However, because re-hydrating TweakableType from its underlying NSNumber gets Bool & Int mixed up,
     /// we have to persist a different structure on disk: [TweakViewDataType: [String: AnyObject]]
 	/// This ensures that if something was saved as a Bool, it's read back as a Bool.
-	@objc private final class Data: NSObject, NSCoding {
+	@objc(TweakDiskPersistencyData) private final class Data: NSObject, NSCoding {
 		let cache: TweakCache
 
 		init(cache: TweakCache) {

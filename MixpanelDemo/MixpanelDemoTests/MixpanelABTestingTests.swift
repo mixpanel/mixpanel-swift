@@ -135,14 +135,14 @@ class MixpanelABTestingTests: MixpanelBaseTests {
         self.waitForExpectations(timeout: 0.5, handler: nil)
         // Test that calling again uses the cache (no extra requests to decide).
         self.mixpanel.checkDecide(completion: { _ in })
-        self.waitForTrackingQueue()
+        self.waitForNetworkQueue()
         XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.count, 2, "no variants found")
         // Test that we make another request if useCache is off
         self.mixpanel.checkDecide(forceFetch: true, completion: { (response: DecideResponse?) -> Void in
             XCTAssertEqual(response!.newVariants.count,
                            0,
                            "Should not get any *new* variants if the decide response was the same")})
-        self.waitForTrackingQueue()
+        self.waitForNetworkQueue()
         LSNocilla.sharedInstance().clearStubs()
         self.stubDecide("test_decide_response_2")
         var completionCalled = false
@@ -151,7 +151,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
             XCTAssertEqual(response!.newVariants.count,
                            1,
                            "Should have got 1 new variants from decide (new variant for same experiment)")})
-        self.waitForTrackingQueue()
+        self.waitForNetworkQueue()
         XCTAssert(completionCalled, "completion block should have been called")
         // Reset to default decide response
         self.stubDecide("test_decide_response")

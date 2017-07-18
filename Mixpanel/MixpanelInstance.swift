@@ -224,8 +224,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var apiToken = ""
     var superProperties = InternalProperties()
     var eventsQueue = Queue()
-    var copyEventsQueue = Queue();
-    var copyPeopleQueue = Queue();
+    var flushEventsQueue = Queue();
+    var flushPeopleQueue = Queue();
     var timedEvents = InternalProperties()
     var trackingQueue: DispatchQueue!
     var networkQueue: DispatchQueue!
@@ -638,6 +638,8 @@ extension MixpanelInstance {
                 } else {
                     self.people.distinctId = nil
                 }
+                self.people.unidentifiedQueue.removeAll()
+                Persistence.archivePeople(self.flushPeopleQueue + self.people.peopleQueue, token: self.apiToken)
             }
             self.archiveProperties()
             Persistence.storeIdentity(token: self.apiToken,
@@ -752,8 +754,8 @@ extension MixpanelInstance {
                                             peopleUnidentifiedQueue: people.unidentifiedQueue,
                                             shownNotifications: decideInstance.notificationsInstance.shownNotifications,
                                             automaticEventsEnabled: decideInstance.automaticEventsEnabled)
-        Persistence.archive(eventsQueue: copyEventsQueue + eventsQueue,
-                            peopleQueue: copyPeopleQueue + people.peopleQueue,
+        Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
+                            peopleQueue: flushPeopleQueue + people.peopleQueue,
                             properties: properties,
                             codelessBindings: decideInstance.codelessInstance.codelessBindings,
                             variants: decideInstance.ABTestingInstance.variants,
@@ -779,7 +781,7 @@ extension MixpanelInstance {
                                             peopleDistinctId: people.distinctId,
                                             peopleUnidentifiedQueue: people.unidentifiedQueue)
         Persistence.archive(eventsQueue: copyEventsQueue + eventsQueue,
-                            peopleQueue: copyPeopleQueue + people.peopleQueue,
+                            peopleQueue: flushPeopleQueue + people.peopleQueue,
                             properties: properties,
                             token: apiToken)
     }
@@ -874,8 +876,6 @@ extension MixpanelInstance {
      */
     open func flush(completion: (() -> Void)? = nil) {
         
-        self.archive()
-
         networkQueue.async() {
             
             if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
@@ -883,31 +883,32 @@ extension MixpanelInstance {
             }
             
             self.trackingQueue.sync {
-                self.copyEventsQueue = self.eventsQueue
-                self.copyPeopleQueue = self.people.peopleQueue
+                self.flushEventsQueue = self.eventsQueue
+                self.flushPeopleQueue = self.people.peopleQueue
 
                 self.eventsQueue.removeAll()
                 self.people.peopleQueue.removeAll()
             }
             
             #if DECIDE
-            self.flushInstance.flushEventsQueue(&self.copyEventsQueue,
+            self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
                                                 automaticEventsEnabled: self.decideInstance.automaticEventsEnabled)
             #else
             self.flushInstance.flushEventsQueue(&self.copyEventsQueue,
                                                 automaticEventsEnabled: false)
             #endif
-            self.flushInstance.flushPeopleQueue(&self.copyPeopleQueue)
+            self.flushInstance.flushPeopleQueue(&self.flushPeopleQueue)
 
             self.trackingQueue.sync {
-                self.eventsQueue = self.copyEventsQueue + self.eventsQueue
-                self.people.peopleQueue = self.copyPeopleQueue + self.copyPeopleQueue
+                self.eventsQueue = self.flushEventsQueue + self.eventsQueue
+                self.people.peopleQueue = self.flushPeopleQueue + self.people.peopleQueue
                 
-                self.copyEventsQueue.removeAll()
-                self.copyPeopleQueue.removeAll()
+                self.flushEventsQueue.removeAll()
+                self.flushPeopleQueue.removeAll()
+                
+                self.archive()
             }
             
-            self.archive()
 
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
@@ -942,7 +943,7 @@ extension MixpanelInstance {
                                      distinctId: self.distinctId,
                                      epochInterval: epochInterval)
 
-            Persistence.archiveEvents(self.eventsQueue, token: self.apiToken)
+            Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
         }
 
         if MixpanelInstance.isiOSAppExtension() {
@@ -1115,7 +1116,10 @@ extension MixpanelInstance: InAppNotificationsDelegate {
 
     // MARK: - Decide
     func checkDecide(forceFetch: Bool = false, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
-        trackingQueue.async {
+        networkQueue.async {
+            self.trackingQueue.sync {
+                return;
+            }
             self.decideInstance.checkDecide(forceFetch: forceFetch,
                                             distinctId: self.people.distinctId ?? self.distinctId,
                                             token: self.apiToken,

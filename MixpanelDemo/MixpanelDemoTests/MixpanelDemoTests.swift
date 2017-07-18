@@ -530,6 +530,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         mixpanel.identify(distinctId: "d1")
         mixpanel.track(event: "e1")
         mixpanel.people.set(property: "p1", to: "a")
+        waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.eventsQueue.count == 1, "delegate should have stopped flush")
         XCTAssertTrue(mixpanel.people.peopleQueue.count == 1, "delegate should have stopped flush")

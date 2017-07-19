@@ -709,23 +709,26 @@ extension MixpanelInstance {
      Useful if your app's user logs out.
      */
     open func reset() {
-        trackingQueue.async() {
-            Persistence.deleteMPUserDefaultsData(token: self.apiToken)
-            self.distinctId = self.defaultDistinctId()
-            self.superProperties = InternalProperties()
-            self.eventsQueue = Queue()
-            self.timedEvents = InternalProperties()
-            self.people.distinctId = nil
-            self.alias = nil
-            self.people.peopleQueue = Queue()
-            self.people.unidentifiedQueue = Queue()
-            #if DECIDE
-            self.decideInstance.notificationsInstance.shownNotifications = Set()
-            self.decideInstance.decideFetched = false
-            self.decideInstance.ABTestingInstance.variants = Set()
-            self.decideInstance.codelessInstance.codelessBindings = Set()
-            #endif // DECIDE
-            self.archive()
+        flush();
+        networkQueue.async() {
+            self.trackingQueue.sync {
+                Persistence.deleteMPUserDefaultsData(token: self.apiToken)
+                self.distinctId = self.defaultDistinctId()
+                self.superProperties = InternalProperties()
+                self.eventsQueue = Queue()
+                self.timedEvents = InternalProperties()
+                self.people.distinctId = nil
+                self.alias = nil
+                self.people.peopleQueue = Queue()
+                self.people.unidentifiedQueue = Queue()
+                #if DECIDE
+                self.decideInstance.notificationsInstance.shownNotifications = Set()
+                self.decideInstance.decideFetched = false
+                self.decideInstance.ABTestingInstance.variants = Set()
+                self.decideInstance.codelessInstance.codelessBindings = Set()
+                #endif // DECIDE
+                self.archive()
+            }
         }
     }
 }
@@ -780,7 +783,7 @@ extension MixpanelInstance {
                                             alias: alias,
                                             peopleDistinctId: people.distinctId,
                                             peopleUnidentifiedQueue: people.unidentifiedQueue)
-        Persistence.archive(eventsQueue: copyEventsQueue + eventsQueue,
+        Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
                             peopleQueue: flushPeopleQueue + people.peopleQueue,
                             properties: properties,
                             token: apiToken)
@@ -894,7 +897,7 @@ extension MixpanelInstance {
             self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
                                                 automaticEventsEnabled: self.decideInstance.automaticEventsEnabled)
             #else
-            self.flushInstance.flushEventsQueue(&self.copyEventsQueue,
+            self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
                                                 automaticEventsEnabled: false)
             #endif
             self.flushInstance.flushPeopleQueue(&self.flushPeopleQueue)
@@ -1116,14 +1119,14 @@ extension MixpanelInstance: InAppNotificationsDelegate {
 
     // MARK: - Decide
     func checkDecide(forceFetch: Bool = false, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
-        networkQueue.async {
-            self.trackingQueue.sync {
-                return;
-            }
-            self.decideInstance.checkDecide(forceFetch: forceFetch,
+        self.trackingQueue.async {
+            self.networkQueue.async {
+                self.decideInstance.checkDecide(forceFetch: forceFetch,
                                             distinctId: self.people.distinctId ?? self.distinctId,
                                             token: self.apiToken,
                                             completion: completion)
+        
+            }
         }
     }
 

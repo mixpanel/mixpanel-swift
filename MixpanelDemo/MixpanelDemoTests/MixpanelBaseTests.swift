@@ -20,12 +20,15 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     override func setUp() {
         NSLog("starting test setup...")
         super.setUp()
-
+        stubTrack()
+        stubDecide()
+        stubEngage()
         LSNocilla.sharedInstance().start()
         mixpanelWillFlush = false
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
         mixpanel.reset()
-        waitForTrackingQueue()
+        waitForNetworkQueue()
+        LSNocilla.sharedInstance().clearStubs()
         NSLog("finished test setup")
     }
 
@@ -33,8 +36,9 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         super.tearDown()
         stubTrack()
         stubDecide()
+        stubEngage()
         mixpanel.reset()
-        waitForTrackingQueue()
+        waitForNetworkQueue()
 
         LSNocilla.sharedInstance().stop()
         LSNocilla.sharedInstance().clearStubs()

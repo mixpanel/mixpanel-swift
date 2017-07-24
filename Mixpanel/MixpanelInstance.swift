@@ -303,6 +303,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                            selector: #selector(setCurrentRadio),
                                            name: .CTRadioAccessTechnologyDidChange,
                                            object: nil)
+            notificationCenter.addObserver(self,
+                                           selector: #selector(executeTweaks),
+                                           name: Notification.Name("MPExecuteTweaks"),
+                                           object: nil)
         #endif // os(iOS)
         if !MixpanelInstance.isiOSAppExtension() {
             notificationCenter.addObserver(self,
@@ -1143,6 +1147,12 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     func executeCachedVariants() {
         for variant in decideInstance.ABTestingInstance.variants {
             variant.execute()
+        }
+    }
+
+    @objc func executeTweaks() {
+        for variant in decideInstance.ABTestingInstance.variants {
+            variant.executeTweaks()
         }
     }
 

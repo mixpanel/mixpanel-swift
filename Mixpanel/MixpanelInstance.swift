@@ -422,7 +422,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             flush()
         }
 
-        trackingQueue.async() {
+        networkQueue.async() {
             self.archive()
         }
         #endif
@@ -441,7 +441,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             flush()
         }
 
-        trackingQueue.async() {
+        networkQueue.async() {
             self.archive()
             #if DECIDE
             self.decideInstance.decideFetched = false
@@ -483,7 +483,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // os(OSX)
 
     @objc private func applicationWillTerminate(_ notification: Notification) {
-        trackingQueue.async() {
+        networkQueue.async() {
             self.archive()
         }
     }

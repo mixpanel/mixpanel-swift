@@ -602,8 +602,10 @@ extension MixpanelInstance {
      `mixpanelInstance.identify(mixpanelInstance.distinctId)`.
 
      - parameter distinctId: string that uniquely identifies the current user
+     - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
+                            This should only be set to false if you wish to prevent people profile updates for that user.
      */
-    open func identify(distinctId: String) {
+    open func identify(distinctId: String, usePeople: Bool = true) {
         if distinctId.isEmpty {
             Logger.error(message: "\(self) cannot identify blank distinct id")
             return
@@ -617,16 +619,22 @@ extension MixpanelInstance {
                     self.alias = nil
                     self.distinctId = distinctId
                 }
+            }
+
+            if usePeople {
                 self.people.distinctId = distinctId
-            }
-            if !self.people.unidentifiedQueue.isEmpty {
-                for var r in self.people.unidentifiedQueue {
-                    r["$distinct_id"] = self.distinctId
-                    self.people.peopleQueue.append(r)
+                if !self.people.unidentifiedQueue.isEmpty {
+                    for var r in self.people.unidentifiedQueue {
+                        r["$distinct_id"] = self.distinctId
+                        self.people.peopleQueue.append(r)
+                    }
+                    self.people.unidentifiedQueue.removeAll()
+                    Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
                 }
-                self.people.unidentifiedQueue.removeAll()
-                Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
+            } else {
+                self.people.distinctId = nil
             }
+
             self.archiveProperties()
             Persistence.storeIdentity(token: self.apiToken,
                                       distinctID: self.distinctId,

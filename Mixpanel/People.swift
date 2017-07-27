@@ -22,6 +22,7 @@ open class People {
     let apiToken: String
     let serialQueue: DispatchQueue
     var peopleQueue = Queue()
+    var flushPeopleQueue = Queue()
     var unidentifiedQueue = Queue()
     var distinctId: String? = nil
     var delegate: FlushDelegate?
@@ -64,7 +65,7 @@ open class People {
                     self.unidentifiedQueue.remove(at: 0)
                 }
             }
-            Persistence.archivePeople(self.peopleQueue, token: self.apiToken)
+            Persistence.archivePeople(self.flushPeopleQueue + self.peopleQueue, token: self.apiToken)
         }
 
         if MixpanelInstance.isiOSAppExtension() {
@@ -73,10 +74,13 @@ open class People {
     }
 
     func addPeopleObject(_ r: InternalProperties) {
+        objc_sync_enter(self)
         peopleQueue.append(r)
         if peopleQueue.count > QueueConstants.queueSize {
             peopleQueue.remove(at: 0)
         }
+        objc_sync_exit(self)
+
     }
 
     func merge(properties: InternalProperties) {

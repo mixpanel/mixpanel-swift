@@ -77,14 +77,19 @@ class Persistence {
     #endif // DECIDE
 
     class func archiveEvents(_ eventsQueue: Queue, token: String) {
+        objc_sync_enter(self)
         archiveToFile(.events, object: eventsQueue, token: token)
+        objc_sync_exit(self)
     }
 
     class func archivePeople(_ peopleQueue: Queue, token: String) {
+        objc_sync_enter(self)
         archiveToFile(.people, object: peopleQueue, token: token)
+        objc_sync_exit(self)
     }
 
     class func archiveProperties(_ properties: ArchivedProperties, token: String) {
+        objc_sync_enter(self)
         var p = InternalProperties()
         p["distinctId"] = properties.distinctId
         p["alias"] = properties.alias
@@ -97,15 +102,20 @@ class Persistence {
         p["automaticEvents"] = properties.automaticEventsEnabled
         #endif // DECIDE
         archiveToFile(.properties, object: p, token: token)
+        objc_sync_exit(self)
     }
 
     #if DECIDE
     class func archiveVariants(_ variants: Set<Variant>, token: String) {
+        objc_sync_enter(self)
         archiveToFile(.variants, object: variants, token: token)
+        objc_sync_exit(self)
     }
 
     class func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
+        objc_sync_enter(self)
         archiveToFile(.codelessBindings, object: codelessBindings, token: token)
+        objc_sync_exit(self)
     }
     #endif // DECIDE
 
@@ -120,7 +130,6 @@ class Persistence {
             Logger.error(message: "failed to archive \(type.rawValue)")
             return
         }
-
         addSkipBackupAttributeToItem(at: path)
     }
 

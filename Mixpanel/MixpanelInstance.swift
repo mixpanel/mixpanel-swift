@@ -225,7 +225,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var superProperties = InternalProperties()
     var eventsQueue = Queue()
     var flushEventsQueue = Queue();
-    var flushPeopleQueue = Queue();
     var timedEvents = InternalProperties()
     var trackingQueue: DispatchQueue!
     var networkQueue: DispatchQueue!
@@ -421,7 +420,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if flushOnBackground {
             flush()
         }
-
         networkQueue.async() {
             self.archive()
         }
@@ -444,7 +442,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         networkQueue.async() {
             self.archive()
             #if DECIDE
+            objc_sync_enter(self)
             self.decideInstance.decideFetched = false
+            objc_sync_exit(self)
             #endif // DECIDE
             if self.taskId != UIBackgroundTaskInvalid {
                 sharedApplication.endBackgroundTask(self.taskId)
@@ -637,9 +637,11 @@ extension MixpanelInstance {
                     }
                 } else {
                     self.people.distinctId = nil
+
                 }
                 self.people.unidentifiedQueue.removeAll()
-                Persistence.archivePeople(self.flushPeopleQueue + self.people.peopleQueue, token: self.apiToken)
+                objc_sync_exit(self)
+                Persistence.archivePeople(self.people.flushPeopleQueue + self.people.peopleQueue, token: self.apiToken)
             }
             self.archiveProperties()
             Persistence.storeIdentity(token: self.apiToken,
@@ -727,6 +729,7 @@ extension MixpanelInstance {
                 self.decideInstance.ABTestingInstance.variants = Set()
                 self.decideInstance.codelessInstance.codelessBindings = Set()
                 #endif // DECIDE
+                objc_sync_exit(self)
                 self.archive()
             }
         }
@@ -758,7 +761,7 @@ extension MixpanelInstance {
                                             shownNotifications: decideInstance.notificationsInstance.shownNotifications,
                                             automaticEventsEnabled: decideInstance.automaticEventsEnabled)
         Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
-                            peopleQueue: flushPeopleQueue + people.peopleQueue,
+                            peopleQueue: people.flushPeopleQueue + people.peopleQueue,
                             properties: properties,
                             codelessBindings: decideInstance.codelessInstance.codelessBindings,
                             variants: decideInstance.ABTestingInstance.variants,
@@ -784,7 +787,7 @@ extension MixpanelInstance {
                                             peopleDistinctId: people.distinctId,
                                             peopleUnidentifiedQueue: people.unidentifiedQueue)
         Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
-                            peopleQueue: flushPeopleQueue + people.peopleQueue,
+                            peopleQueue: people.flushPeopleQueue + people.peopleQueue,
                             properties: properties,
                             token: apiToken)
     }
@@ -885,13 +888,14 @@ extension MixpanelInstance {
                 return
             }
             
-            self.trackingQueue.sync {
-                self.flushEventsQueue = self.eventsQueue
-                self.flushPeopleQueue = self.people.peopleQueue
+            objc_sync_enter(self)
+            self.flushEventsQueue = self.eventsQueue
+            self.people.flushPeopleQueue = self.people.peopleQueue
 
-                self.eventsQueue.removeAll()
-                self.people.peopleQueue.removeAll()
-            }
+            self.eventsQueue.removeAll()
+            self.people.peopleQueue.removeAll()
+            objc_sync_exit(self)
+
             
             #if DECIDE
             self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
@@ -900,17 +904,18 @@ extension MixpanelInstance {
             self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
                                                 automaticEventsEnabled: false)
             #endif
-            self.flushInstance.flushPeopleQueue(&self.flushPeopleQueue)
+            self.flushInstance.flushPeopleQueue(&self.people.flushPeopleQueue)
 
-            self.trackingQueue.sync {
-                self.eventsQueue = self.flushEventsQueue + self.eventsQueue
-                self.people.peopleQueue = self.flushPeopleQueue + self.people.peopleQueue
+            objc_sync_enter(self)
+            self.eventsQueue = self.flushEventsQueue + self.eventsQueue
+            self.people.peopleQueue = self.people.flushPeopleQueue + self.people.peopleQueue
                 
-                self.flushEventsQueue.removeAll()
-                self.flushPeopleQueue.removeAll()
-                
-                self.archive()
-            }
+            self.flushEventsQueue.removeAll()
+            self.people.flushPeopleQueue.removeAll()
+            objc_sync_exit(self)
+
+            self.archive()
+            
             
 
             if let completion = completion {

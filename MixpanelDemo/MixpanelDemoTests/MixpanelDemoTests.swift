@@ -19,6 +19,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
         mixpanel.track(event: "Fake Event")
 
+        waitForTrackingQueue()
+        
         flushAndWaitForNetworkQueue()
 
         flushAndWaitForNetworkQueue()
@@ -38,6 +40,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
         _ = stubTrack().andReturn(200)?.withHeader("Retry-After", "60")
 
         mixpanel.track(event: "Fake Event")
+        
+        waitForTrackingQueue()
 
         flushAndWaitForNetworkQueue()
 
@@ -59,7 +63,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         for i in 0..<50 {
             mixpanel.track(event: "event \(i)")
         }
-
+        waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.eventsQueue.isEmpty,
                       "events should have been flushed")
@@ -67,7 +71,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
         for i in 0..<60 {
             mixpanel.track(event: "event \(i)")
         }
-
+        
+        waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.eventsQueue.isEmpty,
                       "events should have been flushed")
@@ -80,11 +85,13 @@ class MixpanelDemoTests: MixpanelBaseTests {
         for i in 0..<50 {
             mixpanel.people.set(property: "p1", to: "\(i)")
         }
+        waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty, "people should have been flushed")
         for i in 0..<60 {
             mixpanel.people.set(property: "p1", to: "\(i)")
         }
+        waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty, "people should have been flushed")
     }
@@ -570,6 +577,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         for _ in 0..<100 {
             mixpanel.track(event: "Track Call")
         }
+        waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.eventsQueue.count == 100, "none supposed to be flushed")
         LSNocilla.sharedInstance().clearStubs()

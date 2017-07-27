@@ -52,11 +52,14 @@ class Track {
         }
 
         let trackEvent: InternalProperties = ["event": ev!, "properties": p]
+        
+        objc_sync_enter(self)
         eventsQueue.append(trackEvent)
-
         if eventsQueue.count > QueueConstants.queueSize {
             eventsQueue.remove(at: 0)
         }
+        objc_sync_exit(self)
+
     }
 
     func registerSuperProperties(_ properties: Properties, superProperties: inout InternalProperties) {

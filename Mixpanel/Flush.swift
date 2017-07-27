@@ -141,6 +141,7 @@ class Flush: AppLifecycle {
                                             semaphore.signal()
                 })
                 _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+                
                 queue = shadowQueue
             }
 

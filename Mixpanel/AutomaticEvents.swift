@@ -15,6 +15,7 @@ protocol AEDelegate {
 import Foundation
 import UIKit
 import StoreKit
+import UserNotifications
 
 class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
 
@@ -180,6 +181,23 @@ extension UIResponder {
 
             for (_, block) in swizzle.blocks {
                 block(self, swizzle.selector, application as AnyObject?, userInfo as AnyObject?)
+            }
+        }
+    }
+
+    @available(iOS 10.0, *)
+    func UserNotificationCenter(_ center: UNUserNotificationCenter,
+                                newWillPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Swift.Void) {
+        let originalSelector = NSSelectorFromString("userNotificationCenter:willPresentNotification:withCompletionHandler:")
+        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
+            let swizzle = Swizzler.swizzles[originalMethod] {
+            typealias MyCFunction = @convention(c) (AnyObject, Selector, UNUserNotificationCenter, UNNotification, (UNNotificationPresentationOptions) -> Void) -> Void
+            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
+            curriedImplementation(self, originalSelector, center, notification, completionHandler)
+
+            for (_, block) in swizzle.blocks {
+                block(self, swizzle.selector, center as AnyObject?, notification.request.content.userInfo as AnyObject?)
             }
         }
     }

@@ -13,6 +13,10 @@ import UIKit
 import Cocoa
 #endif // os(OSX)
 
+#if os(iOS)
+    import UserNotifications
+#endif
+
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
  */
@@ -947,13 +951,24 @@ extension MixpanelInstance {
     }
 
     func setupAutomaticPushTracking() {
-        guard let appDelegate = UIApplication.shared.delegate else {
+        guard let appDelegate = MixpanelInstance.sharedUIApplication()?.delegate else {
             return
         }
         var selector: Selector? = nil
         var newSelector: Selector? = nil
         let aClass: AnyClass = type(of: appDelegate)
-        if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")) != nil {
+        var newClass: AnyClass?
+        if #available(iOS 10.0, *), let UNDelegate = UNUserNotificationCenter.current().delegate {
+                newClass = type(of: UNDelegate)
+        }
+
+        if let newClass = newClass,
+            #available(iOS 10.0, *),
+            class_getInstanceMethod(newClass,
+                                    NSSelectorFromString("userNotificationCenter:willPresentNotification:withCompletionHandler:")) != nil {
+            selector = NSSelectorFromString("userNotificationCenter:willPresentNotification:withCompletionHandler:")
+            newSelector = #selector(UIResponder.UserNotificationCenter(_:newWillPresent:withCompletionHandler:))
+        } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")) != nil {
             selector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
             newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:))
         } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:")) != nil {
@@ -962,15 +977,16 @@ extension MixpanelInstance {
         }
 
         if let selector = selector, let newSelector = newSelector {
+            let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
+                if let param2 = param2 as? [AnyHashable: Any] {
+                    self.trackPushNotification(param2)
+                }
+            }
             Swizzler.swizzleSelector(selector,
                                      withSelector: newSelector,
                                      for: aClass,
                                      name: "notification opened",
-                                     block: { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
-                                        if let param2 = param2 as? [AnyHashable: Any] {
-                                            self.trackPushNotification(param2)
-                                        }
-            })
+                                     block: block)
         }
     }
     #endif

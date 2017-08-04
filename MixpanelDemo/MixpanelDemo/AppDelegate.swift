@@ -8,15 +8,30 @@
 
 import UIKit
 import Mixpanel
+import UserNotifications
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
+
+        if #available(iOS 10.0, *) {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge], completionHandler: { (granted, error) in
+                if granted {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            })
+            UNUserNotificationCenter.current().delegate = self
+        } else {
+            let settings = UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
+            UIApplication.shared.registerUserNotificationSettings(settings)
+            UIApplication.shared.registerForRemoteNotifications()
+        }
+
         Mixpanel.initialize(token: "MIXPANEL_TOKEN")
         Mixpanel.mainInstance().loggingEnabled = true
         Mixpanel.mainInstance().flushInterval = 5
@@ -25,10 +40,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                                              MixpanelTweaks.boolTweak,
                                              MixpanelTweaks.stringTweak]
         MixpanelTweaks.setTweaks(tweaks: allTweaks)
-
-        let settings = UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
-        UIApplication.shared.registerUserNotificationSettings(settings)
-        UIApplication.shared.registerForRemoteNotifications()
 
         Mixpanel.mainInstance().identify(
             distinctId: Mixpanel.mainInstance().distinctId)
@@ -54,6 +65,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             window?.rootViewController?.present(alert, animated: true, completion: nil)
         }
         completionHandler(.newData)
+    }
+
+    @available(iOS 10.0, *)
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler(.alert)
     }
 
 }

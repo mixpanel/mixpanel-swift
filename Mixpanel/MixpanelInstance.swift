@@ -13,10 +13,6 @@ import UIKit
 import Cocoa
 #endif // os(OSX)
 
-#if os(iOS)
-    import UserNotifications
-#endif
-
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
  */
@@ -269,7 +265,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 decideInstance.inAppDelegate = self
                 executeCachedVariants()
                 executeCachedCodelessBindings()
-                setupAutomaticPushTracking()
                 if let notification =
                     launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
                     trackPushNotification(notification, event: "$app_open")
@@ -947,46 +942,6 @@ extension MixpanelInstance {
             } else {
                 Logger.info(message: "malformed mixpanel push payload")
             }
-        }
-    }
-
-    func setupAutomaticPushTracking() {
-        guard let appDelegate = MixpanelInstance.sharedUIApplication()?.delegate else {
-            return
-        }
-        var selector: Selector? = nil
-        var newSelector: Selector? = nil
-        let aClass: AnyClass = type(of: appDelegate)
-        var newClass: AnyClass?
-        if #available(iOS 10.0, *), let UNDelegate = UNUserNotificationCenter.current().delegate {
-                newClass = type(of: UNDelegate)
-        }
-
-        if let newClass = newClass,
-            #available(iOS 10.0, *),
-            class_getInstanceMethod(newClass,
-                                    NSSelectorFromString("userNotificationCenter:willPresentNotification:withCompletionHandler:")) != nil {
-            selector = NSSelectorFromString("userNotificationCenter:willPresentNotification:withCompletionHandler:")
-            newSelector = #selector(UIResponder.UserNotificationCenter(_:newWillPresent:withCompletionHandler:))
-        } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")) != nil {
-            selector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
-            newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:))
-        } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:")) != nil {
-            selector = NSSelectorFromString("application:didReceiveRemoteNotification:")
-            newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:))
-        }
-
-        if let selector = selector, let newSelector = newSelector {
-            let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
-                if let param2 = param2 as? [AnyHashable: Any] {
-                    self.trackPushNotification(param2)
-                }
-            }
-            Swizzler.swizzleSelector(selector,
-                                     withSelector: newSelector,
-                                     for: aClass,
-                                     name: "notification opened",
-                                     block: block)
         }
     }
     #endif

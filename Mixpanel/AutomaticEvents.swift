@@ -43,6 +43,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     var delegate: AEDelegate?
     var sessionLength: TimeInterval = 0
     var sessionStartTime: TimeInterval = Date().timeIntervalSince1970
+    var hasAddedObserver = false
 
     func initializeEvents() {
         let firstOpenKey = "MPFirstOpen"
@@ -168,6 +169,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             newClass = type(of: UNDelegate)
         } else if #available(iOS 10.0, *) {
             UNUserNotificationCenter.current().addDelegateObserver(ae: self)
+            hasAddedObserver = true
         }
 
         if let newClass = newClass,
@@ -222,7 +224,9 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     }
 
     deinit {
-        removeObserver(self, forKeyPath: "UNUserNotificationCenter.current().delegate")
+        if #available(iOS 10.0, *), hasAddedObserver {
+            UNUserNotificationCenter.current().removeDelegateObserver(ae: self)
+        }
     }
 
 }
@@ -230,7 +234,11 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 @available(iOS 10.0, *)
 extension UNUserNotificationCenter {
     func addDelegateObserver(ae: AutomaticEvents) {
-        addObserver(ae, forKeyPath: "delegate", options: [.old, .new], context: nil)
+        addObserver(ae, forKeyPath: #keyPath(delegate), options: [.old, .new], context: nil)
+    }
+
+    func removeDelegateObserver(ae: AutomaticEvents) {
+        removeObserver(ae, forKeyPath: #keyPath(delegate))
     }
 }
 

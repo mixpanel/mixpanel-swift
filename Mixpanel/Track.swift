@@ -16,9 +16,11 @@ func += <K, V> (left: inout [K:V], right: [K:V]) {
 
 class Track {
     let apiToken: String
-
-    init(apiToken: String) {
+    let mixpanelInstance: MixpanelInstance
+    
+    init(apiToken: String, mixpanelInstance: MixpanelInstance) {
         self.apiToken = apiToken
+        self.mixpanelInstance = mixpanelInstance
     }
 
     func track(event: String?,
@@ -53,12 +55,12 @@ class Track {
 
         let trackEvent: InternalProperties = ["event": ev!, "properties": p]
         
-        objc_sync_enter(self)
+        objc_sync_enter(mixpanelInstance)
         eventsQueue.append(trackEvent)
         if eventsQueue.count > QueueConstants.queueSize {
             eventsQueue.remove(at: 0)
         }
-        objc_sync_exit(self)
+        objc_sync_exit(mixpanelInstance)
 
     }
 

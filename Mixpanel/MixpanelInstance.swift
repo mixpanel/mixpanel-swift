@@ -232,7 +232,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var taskId = UIBackgroundTaskInvalid
     #endif // os(OSX)
     let flushInstance: Flush
-    let trackInstance: Track
+    var trackInstance: Track! = nil
     #if DECIDE
     let decideInstance: Decide
     let automaticEvents = AutomaticEvents()
@@ -248,14 +248,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #if DECIDE
             decideInstance = Decide(basePathIdentifier: name)
         #endif // DECIDE
-        trackInstance = Track(apiToken: self.apiToken)
+        trackInstance = Track(apiToken: self.apiToken, mixpanelInstance: self)
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: label)
         networkQueue = DispatchQueue(label: label)
         flushInstance.delegate = self
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
-                        serialQueue: trackingQueue)
+                        serialQueue: trackingQueue,
+                        mixpanelInstance: self)
         people.delegate = self
         flushInstance._flushInterval = flushInterval
         setupListeners()
@@ -640,8 +641,8 @@ extension MixpanelInstance {
 
                 }
                 self.people.unidentifiedQueue.removeAll()
-                objc_sync_exit(self)
                 Persistence.archivePeople(self.people.flushPeopleQueue + self.people.peopleQueue, token: self.apiToken)
+                objc_sync_exit(self)
             }
             self.archiveProperties()
             Persistence.storeIdentity(token: self.apiToken,
@@ -760,12 +761,14 @@ extension MixpanelInstance {
                                             peopleUnidentifiedQueue: people.unidentifiedQueue,
                                             shownNotifications: decideInstance.notificationsInstance.shownNotifications,
                                             automaticEventsEnabled: decideInstance.automaticEventsEnabled)
+        objc_sync_enter(self)
         Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
                             peopleQueue: people.flushPeopleQueue + people.peopleQueue,
                             properties: properties,
                             codelessBindings: decideInstance.codelessInstance.codelessBindings,
                             variants: decideInstance.ABTestingInstance.variants,
                             token: apiToken)
+        objc_sync_exit(self)
     }
     #else
     /**
@@ -786,10 +789,12 @@ extension MixpanelInstance {
                                             alias: alias,
                                             peopleDistinctId: people.distinctId,
                                             peopleUnidentifiedQueue: people.unidentifiedQueue)
+        objc_sync_enter(self)
         Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
                             peopleQueue: people.flushPeopleQueue + people.peopleQueue,
                             properties: properties,
                             token: apiToken)
+        objc_sync_exit(self)
     }
     #endif // DECIDE
 
@@ -950,8 +955,9 @@ extension MixpanelInstance {
                                      superProperties: self.superProperties,
                                      distinctId: self.distinctId,
                                      epochInterval: epochInterval)
-
+            objc_sync_enter(self)
             Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
+            objc_sync_exit(self)
         }
 
         if MixpanelInstance.isiOSAppExtension() {

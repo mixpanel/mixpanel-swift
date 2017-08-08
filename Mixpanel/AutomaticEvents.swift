@@ -9,7 +9,9 @@
 
 protocol AEDelegate {
     func track(event: String?, properties: Properties?)
-    func trackPushNotification(_ userInfo: [AnyHashable: Any], event: String)
+    #if DECIDE
+        func trackPushNotification(_ userInfo: [AnyHashable: Any], event: String)
+    #endif
 }
 
 #if DECIDE

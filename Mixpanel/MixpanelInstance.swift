@@ -265,7 +265,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 decideInstance.inAppDelegate = self
                 executeCachedVariants()
                 executeCachedCodelessBindings()
-                setupAutomaticPushTracking()
                 if let notification =
                     launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
                     trackPushNotification(notification, event: "$app_open")
@@ -943,34 +942,6 @@ extension MixpanelInstance {
             } else {
                 Logger.info(message: "malformed mixpanel push payload")
             }
-        }
-    }
-
-    func setupAutomaticPushTracking() {
-        guard let appDelegate = UIApplication.shared.delegate else {
-            return
-        }
-        var selector: Selector? = nil
-        var newSelector: Selector? = nil
-        let aClass: AnyClass = type(of: appDelegate)
-        if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")) != nil {
-            selector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
-            newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:))
-        } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:")) != nil {
-            selector = NSSelectorFromString("application:didReceiveRemoteNotification:")
-            newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:))
-        }
-
-        if let selector = selector, let newSelector = newSelector {
-            Swizzler.swizzleSelector(selector,
-                                     withSelector: newSelector,
-                                     for: aClass,
-                                     name: "notification opened",
-                                     block: { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
-                                        if let param2 = param2 as? [AnyHashable: Any] {
-                                            self.trackPushNotification(param2)
-                                        }
-            })
         }
     }
     #endif

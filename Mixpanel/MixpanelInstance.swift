@@ -302,10 +302,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                            selector: #selector(setCurrentRadio),
                                            name: .CTRadioAccessTechnologyDidChange,
                                            object: nil)
+            #if DECIDE
             notificationCenter.addObserver(self,
                                            selector: #selector(executeTweaks),
                                            name: Notification.Name("MPExecuteTweaks"),
                                            object: nil)
+            #endif
         #endif // os(iOS)
         if !MixpanelInstance.isiOSAppExtension() {
             notificationCenter.addObserver(self,

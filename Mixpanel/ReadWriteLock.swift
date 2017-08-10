@@ -9,7 +9,6 @@
 import Foundation
 
 class ReadWriteLock{
-    //A placeholder object that tracking/archiving/flushing threads lock on
     let conccurentQueue: DispatchQueue
     
     init(label: String) {

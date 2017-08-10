@@ -205,7 +205,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
             XCTAssertEqual(newDistinctId, distinctId,
                            "events should use new distinct id after identify:")
             mixpanel.reset()
-            waitForNetworkQueue()
+            waitForTrackingQueue()
         }
     }
 
@@ -418,7 +418,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         mixpanel.people.set(properties: p)
         mixpanel.archive()
         mixpanel.reset()
-        waitForNetworkQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(mixpanel.distinctId,
                        mixpanel.defaultDistinctId(),
                        "distinct id failed to reset")

@@ -27,7 +27,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         mixpanelWillFlush = false
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
         mixpanel.reset()
-        waitForNetworkQueue()
+        waitForTrackingQueue()
         LSNocilla.sharedInstance().clearStubs()
         NSLog("finished test setup")
     }
@@ -38,7 +38,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         stubDecide()
         stubEngage()
         mixpanel.reset()
-        waitForNetworkQueue()
+        waitForTrackingQueue()
 
         LSNocilla.sharedInstance().stop()
         LSNocilla.sharedInstance().clearStubs()

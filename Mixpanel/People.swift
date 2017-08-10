@@ -21,17 +21,17 @@ open class People {
 
     let apiToken: String
     let serialQueue: DispatchQueue
-    let mixpanelInstance: MixpanelInstance
+    let lock: ReadWriteLock
     var peopleQueue = Queue()
     var flushPeopleQueue = Queue()
     var unidentifiedQueue = Queue()
     var distinctId: String? = nil
     var delegate: FlushDelegate?
 
-    init(apiToken: String, serialQueue: DispatchQueue, mixpanelInstance: MixpanelInstance) {
+    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
-        self.mixpanelInstance = mixpanelInstance
+        self.lock = lock
     }
 
     func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
@@ -63,18 +63,18 @@ open class People {
                 self.addPeopleObject(r)
             } else {
                 
-                objc_sync_enter(self.mixpanelInstance)
-                self.unidentifiedQueue.append(r)
-                if self.unidentifiedQueue.count > QueueConstants.queueSize {
-                    self.unidentifiedQueue.remove(at: 0)
+                self.lock.write {
+                    self.unidentifiedQueue.append(r)
+                    if self.unidentifiedQueue.count > QueueConstants.queueSize {
+                        self.unidentifiedQueue.remove(at: 0)
+                    }
                 }
-                objc_sync_exit(self.mixpanelInstance)
 
             }
             
-            objc_sync_enter(self.mixpanelInstance)
-            Persistence.archivePeople(self.flushPeopleQueue + self.peopleQueue, token: self.apiToken)
-            objc_sync_exit(self.mixpanelInstance)
+            self.lock.write {
+                Persistence.archivePeople(self.flushPeopleQueue + self.peopleQueue, token: self.apiToken)
+            }
 
             
         }
@@ -85,13 +85,12 @@ open class People {
     }
 
     func addPeopleObject(_ r: InternalProperties) {
-        objc_sync_enter(mixpanelInstance)
-        peopleQueue.append(r)
-        if peopleQueue.count > QueueConstants.queueSize {
-            peopleQueue.remove(at: 0)
+        self.lock.write {
+            peopleQueue.append(r)
+            if peopleQueue.count > QueueConstants.queueSize {
+                peopleQueue.remove(at: 0)
+            }
         }
-        objc_sync_exit(mixpanelInstance)
-
     }
 
     func merge(properties: InternalProperties) {

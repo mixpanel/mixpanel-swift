@@ -245,11 +245,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             self.apiToken = apiToken
         }
         self.name = name
+        self.readWriteLock = ReadWriteLock(label: "globalLock")
         flushInstance = Flush(basePathIdentifier: name)
         #if DECIDE
-            decideInstance = Decide(basePathIdentifier: name)
+            decideInstance = Decide(basePathIdentifier: name, lock:self.readWriteLock)
         #endif // DECIDE
-        self.readWriteLock = ReadWriteLock(label: "readWrite")
         trackInstance = Track(apiToken: self.apiToken, lock: self.readWriteLock)
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: label)
@@ -1135,7 +1135,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     // MARK: - Decide
     func checkDecide(forceFetch: Bool = false, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
         self.trackingQueue.async {
-            self.networkQueue.sync {
+            self.networkQueue.async {
                 self.decideInstance.checkDecide(forceFetch: forceFetch,
                                             distinctId: self.people.distinctId ?? self.distinctId,
                                             token: self.apiToken,

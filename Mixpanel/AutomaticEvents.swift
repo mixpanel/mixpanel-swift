@@ -177,9 +177,9 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         if let newClass = newClass,
             #available(iOS 10.0, *),
             class_getInstanceMethod(newClass,
-                                    NSSelectorFromString("userNotificationCenter:willPresentNotification:withCompletionHandler:")) != nil {
-            selector = NSSelectorFromString("userNotificationCenter:willPresentNotification:withCompletionHandler:")
-            newSelector = #selector(UIResponder.UserNotificationCenter(_:newWillPresent:withCompletionHandler:))
+                NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")) != nil {
+            selector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")
+            newSelector = #selector(UIResponder.userNotificationCenter(_:newDidReceive:withCompletionHandler:))
         } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")) != nil {
             selector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
             newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:))
@@ -196,7 +196,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             }
             Swizzler.swizzleSelector(selector,
                                      withSelector: newSelector,
-                                     for: aClass,
+                                     for: newClass ?? aClass,
                                      name: "notification opened",
                                      block: block)
         }
@@ -208,9 +208,9 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             let UNDelegate = UNUserNotificationCenter.current().delegate {
             let delegateClass: AnyClass = type(of: UNDelegate)
             if class_getInstanceMethod(delegateClass,
-                                       NSSelectorFromString("userNotificationCenter:willPresentNotification:withCompletionHandler:")) != nil {
-                let selector = NSSelectorFromString("userNotificationCenter:willPresentNotification:withCompletionHandler:")
-                let newSelector = #selector(UIResponder.UserNotificationCenter(_:newWillPresent:withCompletionHandler:))
+                    NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")) != nil {
+                let selector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")
+                let newSelector = #selector(UIResponder.userNotificationCenter(_:newDidReceive:withCompletionHandler:))
                 let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
                     if let param2 = param2 as? [AnyHashable: Any] {
                         self.delegate?.trackPushNotification(param2, event: "$campaign_received")
@@ -274,21 +274,20 @@ extension UIResponder {
     }
 
     @available(iOS 10.0, *)
-    func UserNotificationCenter(_ center: UNUserNotificationCenter,
-                                newWillPresent notification: UNNotification,
-                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Swift.Void) {
-        let originalSelector = NSSelectorFromString("userNotificationCenter:willPresentNotification:withCompletionHandler:")
+    func userNotificationCenter(_ center: UNUserNotificationCenter, newDidReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let originalSelector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")
         if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
             let swizzle = Swizzler.swizzles[originalMethod] {
-            typealias MyCFunction = @convention(c) (AnyObject, Selector, UNUserNotificationCenter, UNNotification, (UNNotificationPresentationOptions) -> Void) -> Void
+            typealias MyCFunction = @convention(c) (AnyObject, Selector, UNUserNotificationCenter, UNNotificationResponse, () -> Void) -> Void
             let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
-            curriedImplementation(self, originalSelector, center, notification, completionHandler)
+            curriedImplementation(self, originalSelector, center, response, completionHandler)
 
             for (_, block) in swizzle.blocks {
-                block(self, swizzle.selector, center as AnyObject?, notification.request.content.userInfo as AnyObject?)
+                block(self, swizzle.selector, center as AnyObject?, response.notification.request.content.userInfo as AnyObject?)
             }
         }
     }
+
 }
 
 #endif

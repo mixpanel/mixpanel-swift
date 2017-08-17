@@ -1262,19 +1262,20 @@ extension MixpanelInstance: InAppNotificationsDelegate {
                             "type": "inapp",
                             "time": Date()]]
         people.append(properties: properties)
-        trackNotification(notification, event: "$campaign_delivery")
+        trackNotification(notification, event: "$campaign_delivery", properties: nil)
     }
 
-    func notificationDidCTA(_ notification: InAppNotification, event: String) {
-        trackNotification(notification, event: event)
-    }
-
-    func trackNotification(_ notification: InAppNotification, event: String) {
-        let properties: Properties = ["campaign_id": notification.ID,
-                                      "message_id": notification.messageID,
-                                      "message_type": "inapp",
-                                      "message_subtype": notification.type]
-        track(event: event, properties: properties)
+    func trackNotification(_ notification: InAppNotification, event: String, properties: Properties?) {
+        var notificationProperties: Properties = ["campaign_id": notification.ID,
+                                                  "message_id": notification.messageID,
+                                                  "message_type": "inapp",
+                                                  "message_subtype": notification.type]
+        if let properties = properties {
+            for (k, v) in properties {
+                notificationProperties[k] = v
+            }
+        }
+        track(event: event, properties: notificationProperties)
     }
 }
 #endif // DECIDE

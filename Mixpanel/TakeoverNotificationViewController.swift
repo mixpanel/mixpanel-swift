@@ -172,12 +172,22 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
     }
 
     func buttonTapped(_ sender: AnyObject) {
-        delegate?.notificationShouldDismiss(controller: self, callToActionURL: takeoverNotification.buttons[sender.tag].callToActionURL)
+        var whichButton = "primary"
+        if self.takeoverNotification.buttons.count == 2 {
+            whichButton = sender.tag == 0 ? "secondary" : "primary"
+        }
+        delegate?.notificationShouldDismiss(controller: self,
+                                            callToActionURL: takeoverNotification.buttons[sender.tag].callToActionURL,
+                                            shouldTrack: true,
+                                            additionalTrackingProperties: ["button": whichButton])
     }
 
 
     @IBAction func tappedClose(_ sender: AnyObject) {
-        delegate?.notificationShouldDismiss(controller: self, callToActionURL: nil)
+        delegate?.notificationShouldDismiss(controller: self,
+                                            callToActionURL: nil,
+                                            shouldTrack: false,
+                                            additionalTrackingProperties: nil)
     }
 
     override var shouldAutorotate: Bool {

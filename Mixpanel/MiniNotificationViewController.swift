@@ -102,7 +102,10 @@ class MiniNotificationViewController: BaseNotificationViewController {
 
     func didTap(gesture: UITapGestureRecognizer) {
         if !isDismissing && gesture.state == UIGestureRecognizerState.ended {
-            delegate?.notificationShouldDismiss(controller: self, callToActionURL: miniNotification.callToActionURL)
+            delegate?.notificationShouldDismiss(controller: self,
+                                                callToActionURL: miniNotification.callToActionURL,
+                                                shouldTrack: true,
+                                                additionalTrackingProperties: nil)
         }
     }
 
@@ -118,7 +121,10 @@ class MiniNotificationViewController: BaseNotificationViewController {
                 window.layer.position = CGPoint(x: window.layer.position.x, y: position.y)
             case UIGestureRecognizerState.ended, UIGestureRecognizerState.cancelled:
                 if window.layer.position.y > position.y + (InAppNotificationsConstants.miniInAppHeight / 2) {
-                    delegate?.notificationShouldDismiss(controller: self, callToActionURL: miniNotification.callToActionURL)
+                    delegate?.notificationShouldDismiss(controller: self,
+                                                        callToActionURL: miniNotification.callToActionURL,
+                                                        shouldTrack: false,
+                                                        additionalTrackingProperties: nil)
                 } else {
                     UIView.animate(withDuration: 0.2, animations: {
                         window.layer.position = self.position

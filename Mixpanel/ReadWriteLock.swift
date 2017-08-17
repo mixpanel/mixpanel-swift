@@ -8,21 +8,21 @@
 
 import Foundation
 
-class ReadWriteLock{
-    let conccurentQueue: DispatchQueue
+class ReadWriteLock {
+    let concurentQueue: DispatchQueue
     
     init(label: String) {
-        self.conccurentQueue = DispatchQueue(label: label, attributes: .concurrent)
+        self.concurentQueue = DispatchQueue(label: label, attributes: .concurrent)
     }
     
     func read(closure: () -> ()) {
-        self.conccurentQueue.sync {
+        self.concurentQueue.sync {
             closure();
         }
     }
     
     func write(closure: () -> ()) {
-        self.conccurentQueue.sync(flags: .barrier, execute: {
+        self.concurentQueue.sync(flags: .barrier, execute: {
             closure()
         })
     }

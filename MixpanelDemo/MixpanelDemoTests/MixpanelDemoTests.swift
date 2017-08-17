@@ -190,9 +190,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
                            kTestToken, "incorrect project token in people record")
             XCTAssertEqual(mixpanel.people.peopleQueue.last?["$distinct_id"] as? String,
                            distinctId, "distinct id not set properly on unidentified people record")
-           // var p: InternalProperties = mixpanel.people.peopleQueue.last?["$set"] as! InternalProperties
-            //XCTAssertEqual(p["p1"] as? String, "a", "custom people property not queued")
-            //assertDefaultPeopleProperties(p)
+            var p: InternalProperties = mixpanel.people.peopleQueue.last?["$set"] as! InternalProperties
+            XCTAssertEqual(p["p1"] as? String, "a", "custom people property not queued")
+            assertDefaultPeopleProperties(p)
             mixpanel.people.set(property: "p1", to: "a")
             waitForTrackingQueue()
             XCTAssertTrue(mixpanel.people.unidentifiedQueue.isEmpty,

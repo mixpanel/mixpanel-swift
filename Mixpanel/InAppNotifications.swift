@@ -21,7 +21,7 @@ enum InAppType: String {
 
 class InAppNotifications: NotificationViewControllerDelegate {
     
-    let lock:ReadWriteLock
+    let lock: ReadWriteLock
     var checkForNotificationOnActive = true
     var showNotificationOnActive = true
     var miniNotificationPresentationTime = 6.0

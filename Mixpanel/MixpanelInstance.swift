@@ -224,7 +224,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var apiToken = ""
     var superProperties = InternalProperties()
     var eventsQueue = Queue()
-    var flushEventsQueue = Queue();
+    var flushEventsQueue = Queue()
     var timedEvents = InternalProperties()
     var trackingQueue: DispatchQueue!
     var networkQueue: DispatchQueue!
@@ -246,9 +246,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         self.name = name
         self.readWriteLock = ReadWriteLock(label: "globalLock")
-        flushInstance = Flush(basePathIdentifier: name)
+        flushInstance = Flush(basePathIdentifier: name, lock: self.readWriteLock)
         #if DECIDE
-            decideInstance = Decide(basePathIdentifier: name, lock:self.readWriteLock)
+            decideInstance = Decide(basePathIdentifier: name, lock: self.readWriteLock)
         #endif // DECIDE
         trackInstance = Track(apiToken: self.apiToken, lock: self.readWriteLock)
         let label = "com.mixpanel.\(self.apiToken)"
@@ -636,6 +636,8 @@ extension MixpanelInstance {
                                 self.people.peopleQueue.append(r)
                             }
                             self.people.unidentifiedQueue.removeAll()
+                        }
+                        self.readWriteLock.read {
                             Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
                         }
                     }

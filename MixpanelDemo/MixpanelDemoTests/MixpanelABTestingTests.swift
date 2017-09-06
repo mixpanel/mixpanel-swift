@@ -306,8 +306,12 @@ class MixpanelABTestingTests: MixpanelBaseTests {
     }
 
     func testUITableViewCellOrdering() {
-        let sel = ObjectSelector(string: "/UITableViewController/UITableView/" +
+        var sel = ObjectSelector(string: "/UITableViewController/UITableView/UITableViewWrapperView/" +
             "UITableViewCell[0]/UITableViewCellContentView/UILabel")
+        if ProcessInfo().isOperatingSystemAtLeast(OperatingSystemVersion(majorVersion: 11, minorVersion: 0, patchVersion: 0)) {
+            sel = ObjectSelector(string: "/UITableViewController/UITableView/" +
+                "UITableViewCell[0]/UITableViewCellContentView/UILabel")
+        }
         var selected = sel.selectFrom(root: UIApplication.shared.keyWindow?.rootViewController!)
         XCTAssertEqual(selected.count, 1, "Should have selected one object")
         XCTAssert((selected[0] is UILabel), "object should be UITableViewCell")

@@ -26,6 +26,8 @@ class PeopleViewController: UIViewController, UITableViewDelegate, UITableViewDa
                           "Delete User"]
 
     override func viewDidLoad() {
+        super.viewDidLoad()
+
         tableView.delegate = self
         tableView.dataSource = self
     }

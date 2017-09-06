@@ -146,5 +146,6 @@ public struct MixpanelTweaks: TweakLibraryType {
      */
     public static func setTweaks(tweaks: [TweakClusterType]) {
         defaultStore.addTweaks(tweaks)
+        NotificationCenter.default.post(name: Notification.Name("MPExecuteTweaks"), object: nil)
     }
 }

@@ -11,7 +11,7 @@ import UIKit
 
 protocol InAppNotificationsDelegate {
     func notificationDidShow(_ notification: InAppNotification)
-    func notificationDidCTA(_ notification: InAppNotification, event: String)
+    func trackNotification(_ notification: InAppNotification, event: String, properties: Properties?)
 }
 
 enum InAppType: String {
@@ -66,7 +66,10 @@ class InAppNotifications: NotificationViewControllerDelegate {
         miniNotificationVC.show(animated: true)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + miniNotificationPresentationTime) {
-            self.notificationShouldDismiss(controller: miniNotificationVC, callToActionURL: nil)
+            self.notificationShouldDismiss(controller: miniNotificationVC,
+                                           callToActionURL: nil,
+                                           shouldTrack: false,
+                                           additionalTrackingProperties: nil)
         }
         return true
     }
@@ -79,12 +82,25 @@ class InAppNotifications: NotificationViewControllerDelegate {
     }
 
     @discardableResult
-    func notificationShouldDismiss(controller: BaseNotificationViewController, callToActionURL: URL?) -> Bool {
+    func notificationShouldDismiss(controller: BaseNotificationViewController,
+                                   callToActionURL: URL?,
+                                   shouldTrack: Bool,
+                                   additionalTrackingProperties: Properties?) -> Bool {
         if currentlyShowingNotification?.ID != controller.notification.ID {
             return false
         }
 
         let completionBlock = {
+            if shouldTrack {
+                var properties = additionalTrackingProperties
+                if let urlString = callToActionURL?.absoluteString {
+                    if properties == nil {
+                        properties = [:]
+                    }
+                    properties!["url"] = urlString
+                }
+                self.delegate?.trackNotification(controller.notification, event: "$campaign_open", properties: properties)
+            }
             self.currentlyShowingNotification = nil
         }
 
@@ -92,7 +108,6 @@ class InAppNotifications: NotificationViewControllerDelegate {
             controller.hide(animated: true) {
                 Logger.info(message: "opening CTA URL: \(callToActionURL)")
                 MixpanelInstance.sharedUIApplication()?.performSelector(onMainThread: NSSelectorFromString("openURL:"), with: callToActionURL, waitUntilDone: true)
-                self.delegate?.notificationDidCTA(controller.notification, event: "$campaign_open")
                 completionBlock()
             }
         } else {

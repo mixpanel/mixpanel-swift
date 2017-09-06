@@ -265,7 +265,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 decideInstance.inAppDelegate = self
                 executeCachedVariants()
                 executeCachedCodelessBindings()
-                setupAutomaticPushTracking()
                 if let notification =
                     launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
                     trackPushNotification(notification, event: "$app_open")
@@ -303,6 +302,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                            selector: #selector(setCurrentRadio),
                                            name: .CTRadioAccessTechnologyDidChange,
                                            object: nil)
+            #if DECIDE
+                notificationCenter.addObserver(self,
+                                               selector: #selector(executeTweaks),
+                                               name: Notification.Name("MPExecuteTweaks"),
+                                               object: nil)
+            #endif
         #endif // os(iOS)
         if !MixpanelInstance.isiOSAppExtension() {
             notificationCenter.addObserver(self,
@@ -366,7 +371,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     #if !os(OSX)
     static func sharedUIApplication() -> UIApplication? {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication")).takeUnretainedValue() as? UIApplication else {
+        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue() as? UIApplication else {
             return nil
         }
         return sharedApplication
@@ -599,7 +604,7 @@ extension MixpanelInstance {
 
      - parameter distinctId: string that uniquely identifies the current user
      */
-    open func identify(distinctId: String) {
+    open func identify(distinctId: String, usePeople: Bool = true) {
         if distinctId.isEmpty {
             Logger.error(message: "\(self) cannot identify blank distinct id")
             return
@@ -613,17 +618,26 @@ extension MixpanelInstance {
                     self.alias = nil
                     self.distinctId = distinctId
                 }
+            }
+            if usePeople {
                 self.people.distinctId = distinctId
-            }
-            if !self.people.unidentifiedQueue.isEmpty {
-                for var r in self.people.unidentifiedQueue {
-                    r["$distinct_id"] = self.distinctId
-                    self.people.peopleQueue.append(r)
+                if !self.people.unidentifiedQueue.isEmpty {
+                    for var r in self.people.unidentifiedQueue {
+                        r["$distinct_id"] = self.distinctId
+                        self.people.peopleQueue.append(r)
+                    }
+                    self.people.unidentifiedQueue.removeAll()
+                    Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
                 }
-                self.people.unidentifiedQueue.removeAll()
-                Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
+            } else {
+                self.people.distinctId = nil
             }
+
             self.archiveProperties()
+            Persistence.storeIdentity(token: self.apiToken,
+                                      distinctID: self.distinctId,
+                                      peopleDistinctID: self.people.distinctId,
+                                      alias: self.alias)
         }
 
         if MixpanelInstance.isiOSAppExtension() {
@@ -666,6 +680,10 @@ extension MixpanelInstance {
             serialQueue.async() {
                 self.alias = alias
                 self.archiveProperties()
+                Persistence.storeIdentity(token: self.apiToken,
+                                          distinctID: self.distinctId,
+                                          peopleDistinctID: self.people.distinctId,
+                                          alias: self.alias)
             }
             let properties = ["distinct_id": distinctId, "alias": alias]
             track(event: "$create_alias", properties: properties)
@@ -681,6 +699,7 @@ extension MixpanelInstance {
      */
     open func reset() {
         serialQueue.async() {
+            Persistence.deleteMPUserDefaultsData(token: self.apiToken)
             self.distinctId = self.defaultDistinctId()
             self.superProperties = InternalProperties()
             self.eventsQueue = Queue()
@@ -924,34 +943,6 @@ extension MixpanelInstance {
             }
         }
     }
-
-    func setupAutomaticPushTracking() {
-        guard let appDelegate = UIApplication.shared.delegate else {
-            return
-        }
-        var selector: Selector? = nil
-        var newSelector: Selector? = nil
-        let aClass: AnyClass = type(of: appDelegate)
-        if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")) != nil {
-            selector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
-            newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:))
-        } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:")) != nil {
-            selector = NSSelectorFromString("application:didReceiveRemoteNotification:")
-            newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:))
-        }
-
-        if let selector = selector, let newSelector = newSelector {
-            Swizzler.swizzleSelector(selector,
-                                     withSelector: newSelector,
-                                     for: aClass,
-                                     name: "notification opened",
-                                     block: { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
-                                        if let param2 = param2 as? [AnyHashable: Any] {
-                                            self.trackPushNotification(param2)
-                                        }
-            })
-        }
-    }
     #endif
 
     /**
@@ -1116,9 +1107,8 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     func markVariantRun(_ variant: Variant) {
         Logger.info(message: "Marking variant \(variant.ID) shown for experiment \(variant.experimentID)")
         let shownVariant = ["\(variant.experimentID)": variant.ID]
-        if people.distinctId != nil {
-            people.merge(properties: ["$experiments": shownVariant])
-        }
+        people.merge(properties: ["$experiments": shownVariant])
+
         serialQueue.async {
             var superPropertiesCopy = self.superProperties
             var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]
@@ -1135,6 +1125,12 @@ extension MixpanelInstance: InAppNotificationsDelegate {
     func executeCachedVariants() {
         for variant in decideInstance.ABTestingInstance.variants {
             variant.execute()
+        }
+    }
+
+    @objc func executeTweaks() {
+        for variant in decideInstance.ABTestingInstance.variants {
+            variant.executeTweaks()
         }
     }
 
@@ -1261,19 +1257,20 @@ extension MixpanelInstance: InAppNotificationsDelegate {
                             "type": "inapp",
                             "time": Date()]]
         people.append(properties: properties)
-        trackNotification(notification, event: "$campaign_delivery")
+        trackNotification(notification, event: "$campaign_delivery", properties: nil)
     }
 
-    func notificationDidCTA(_ notification: InAppNotification, event: String) {
-        trackNotification(notification, event: event)
-    }
-
-    func trackNotification(_ notification: InAppNotification, event: String) {
-        let properties: Properties = ["campaign_id": notification.ID,
-                                      "message_id": notification.messageID,
-                                      "message_type": "inapp",
-                                      "message_subtype": notification.type]
-        track(event: event, properties: properties)
+    func trackNotification(_ notification: InAppNotification, event: String, properties: Properties?) {
+        var notificationProperties: Properties = ["campaign_id": notification.ID,
+                                                  "message_id": notification.messageID,
+                                                  "message_type": "inapp",
+                                                  "message_subtype": notification.type]
+        if let properties = properties {
+            for (k, v) in properties {
+                notificationProperties[k] = v
+            }
+        }
+        track(event: event, properties: notificationProperties)
     }
 }
 #endif // DECIDE

@@ -9,12 +9,16 @@
 
 protocol AEDelegate {
     func track(event: String?, properties: Properties?)
+    #if DECIDE
+        func trackPushNotification(_ userInfo: [AnyHashable: Any], event: String)
+    #endif
 }
 
 #if DECIDE
 import Foundation
 import UIKit
 import StoreKit
+import UserNotifications
 
 class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
 
@@ -41,6 +45,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     var delegate: AEDelegate?
     var sessionLength: TimeInterval = 0
     var sessionStartTime: TimeInterval = Date().timeIntervalSince1970
+    var hasAddedObserver = false
 
     func initializeEvents() {
         let firstOpenKey = "MPFirstOpen"
@@ -79,7 +84,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                                                object: nil)
 
         SKPaymentQueue.default().add(self)
-
+        setupAutomaticPushTracking()
     }
 
     @objc func appWillResignActive(_ notification: Notification) {
@@ -153,6 +158,88 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         objc_sync_exit(awaitingTransactions)
     }
 
+    func setupAutomaticPushTracking() {
+        guard let appDelegate = MixpanelInstance.sharedUIApplication()?.delegate else {
+            return
+        }
+        var selector: Selector? = nil
+        var newSelector: Selector? = nil
+        let aClass: AnyClass = type(of: appDelegate)
+        var newClass: AnyClass?
+        if #available(iOS 10.0, *), let UNDelegate = UNUserNotificationCenter.current().delegate {
+            newClass = type(of: UNDelegate)
+        } else if #available(iOS 10.0, *) {
+            UNUserNotificationCenter.current().addDelegateObserver(ae: self)
+            hasAddedObserver = true
+        }
+
+        if let newClass = newClass,
+            #available(iOS 10.0, *),
+            class_getInstanceMethod(newClass,
+                                    NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")) != nil {
+            selector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")
+            newSelector = #selector(NSObject.userNotificationCenter(_:newDidReceive:withCompletionHandler:))
+        } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")) != nil {
+            selector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
+            newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:))
+        } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:")) != nil {
+            selector = NSSelectorFromString("application:didReceiveRemoteNotification:")
+            newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:))
+        }
+
+        if let selector = selector, let newSelector = newSelector {
+            let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
+                if let param2 = param2 as? [AnyHashable: Any] {
+                    self.delegate?.trackPushNotification(param2, event: "$campaign_received")
+                }
+            }
+            Swizzler.swizzleSelector(selector,
+                                     withSelector: newSelector,
+                                     for: newClass ?? aClass,
+                                     name: "notification opened",
+                                     block: block)
+        }
+    }
+
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if #available(iOS 10.0, *),
+            keyPath == "delegate",
+            let UNDelegate = UNUserNotificationCenter.current().delegate {
+            let delegateClass: AnyClass = type(of: UNDelegate)
+            if class_getInstanceMethod(delegateClass,
+                                       NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")) != nil {
+                let selector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")
+                let newSelector = #selector(NSObject.userNotificationCenter(_:newDidReceive:withCompletionHandler:))
+                let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
+                    if let param2 = param2 as? [AnyHashable: Any] {
+                        self.delegate?.trackPushNotification(param2, event: "$campaign_received")
+                    }
+                }
+                Swizzler.swizzleSelector(selector,
+                                         withSelector: newSelector,
+                                         for: delegateClass,
+                                         name: "notification opened",
+                                         block: block)
+            }
+        }
+    }
+
+    deinit {
+        if #available(iOS 10.0, *), hasAddedObserver {
+            UNUserNotificationCenter.current().removeDelegateObserver(ae: self)
+        }
+    }
+}
+
+@available(iOS 10.0, *)
+extension UNUserNotificationCenter {
+    func addDelegateObserver(ae: AutomaticEvents) {
+        addObserver(ae, forKeyPath: #keyPath(delegate), options: [.old, .new], context: nil)
+    }
+
+    func removeDelegateObserver(ae: AutomaticEvents) {
+        removeObserver(ae, forKeyPath: #keyPath(delegate))
+    }
 }
 
 extension UIResponder {
@@ -180,6 +267,23 @@ extension UIResponder {
 
             for (_, block) in swizzle.blocks {
                 block(self, swizzle.selector, application as AnyObject?, userInfo as AnyObject?)
+            }
+        }
+    }
+}
+
+@available(iOS 10.0, *)
+extension NSObject {
+    @objc func userNotificationCenter(_ center: UNUserNotificationCenter, newDidReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let originalSelector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")
+        if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
+            let swizzle = Swizzler.swizzles[originalMethod] {
+            typealias MyCFunction = @convention(c) (AnyObject, Selector, UNUserNotificationCenter, UNNotificationResponse, () -> Void) -> Void
+            let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
+            curriedImplementation(self, originalSelector, center, response, completionHandler)
+
+            for (_, block) in swizzle.blocks {
+                block(self, swizzle.selector, center as AnyObject?, response.notification.request.content.userInfo as AnyObject?)
             }
         }
     }

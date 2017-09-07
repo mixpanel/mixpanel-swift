@@ -14,7 +14,6 @@ import Nocilla
 
 class MixpanelNotificationTests: MixpanelBaseTests {
 
-
     var buttons = [[String: Any]]()
     var notificationDict = [String: Any]()
 

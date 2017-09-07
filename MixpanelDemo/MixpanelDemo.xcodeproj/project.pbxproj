@@ -37,13 +37,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		E12CE4131E9E1C370023AA2D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E1F15F921E5F847200391AE3;
-			remoteInfo = MixpanelAppex;
-		};
 		E12CE4151E9E1C370023AA2D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */;
@@ -252,7 +245,6 @@
 			children = (
 				E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */,
 				E16C35E41D872045003500AC /* Mixpanel.framework */,
-				E12CE4141E9E1C370023AA2D /* MixpanelAppex.framework */,
 				E12CE4161E9E1C370023AA2D /* Mixpanel.framework */,
 			);
 			name = Products;
@@ -362,13 +354,6 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		E12CE4141E9E1C370023AA2D /* MixpanelAppex.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = MixpanelAppex.framework;
-			remoteRef = E12CE4131E9E1C370023AA2D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		E12CE4161E9E1C370023AA2D /* Mixpanel.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;

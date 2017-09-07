@@ -603,6 +603,8 @@ extension MixpanelInstance {
      `mixpanelInstance.identify(mixpanelInstance.distinctId)`.
 
      - parameter distinctId: string that uniquely identifies the current user
+     - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
+                            This should only be set to false if you wish to prevent people profile updates for that user.
      */
     open func identify(distinctId: String, usePeople: Bool = true) {
         if distinctId.isEmpty {
@@ -619,6 +621,7 @@ extension MixpanelInstance {
                     self.distinctId = distinctId
                 }
             }
+
             if usePeople {
                 self.people.distinctId = distinctId
                 if !self.people.unidentifiedQueue.isEmpty {
@@ -1119,7 +1122,6 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         }
         track(event: "$experiment_started", properties: ["$experiment_id": variant.experimentID,
                                                          "$variant_id": variant.ID])
-
     }
 
     func executeCachedVariants() {
@@ -1157,6 +1159,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
             guard let newVariants = newVariants else {
                 return
             }
+
             DispatchQueue.main.sync {
                 for variant in newVariants {
                     variant.execute()

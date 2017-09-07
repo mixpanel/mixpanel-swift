@@ -170,3 +170,4 @@ class Variant: NSObject, NSCoding {
     }
 
 }
+

@@ -38,7 +38,7 @@ class AutomaticProperties {
         #endif // os(iOS)
 
         #else
-        if let size = NSScreen.main()?.frame.size {
+        if let size = NSScreen.main?.frame.size {
             p["$screen_height"]     = Int(size.height)
             p["$screen_width"]      = Int(size.width)
         }

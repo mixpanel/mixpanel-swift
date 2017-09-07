@@ -296,6 +296,7 @@ class Persistence {
             if properties == nil {
                 (distinctId, peopleDistinctId, alias) = restoreIdentity(token: token)
             }
+
             return (superProperties,
                     timedEvents,
                     distinctId,

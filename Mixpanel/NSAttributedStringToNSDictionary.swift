@@ -26,7 +26,8 @@ import UIKit
         do {
             let data = try attributedString.data(from: NSRange(location: 0,
                                                                length: attributedString.length),
-                                                 documentAttributes: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType])
+                                                 documentAttributes: [NSAttributedString.DocumentAttributeKey.documentType:
+                                                    NSAttributedString.DocumentType.html])
             if let dataString = String(data: data, encoding: String.Encoding.utf8) {
                 return ["mime_type": "text/html",
                         "data": dataString]
@@ -49,7 +50,7 @@ import UIKit
             if let data = dataString.data(using: String.Encoding.utf8) {
                 do {
                     return try NSAttributedString(data: data,
-                                                  options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType],
+                                                  options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.html],
                                                   documentAttributes: nil)
                 } catch {
                     Logger.debug(message: "Failed to convert HTML to NSAttributedString")

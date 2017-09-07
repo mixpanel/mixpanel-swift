@@ -303,10 +303,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                            name: .CTRadioAccessTechnologyDidChange,
                                            object: nil)
             #if DECIDE
-            notificationCenter.addObserver(self,
-                                           selector: #selector(executeTweaks),
-                                           name: Notification.Name("MPExecuteTweaks"),
-                                           object: nil)
+                notificationCenter.addObserver(self,
+                                               selector: #selector(executeTweaks),
+                                               name: Notification.Name("MPExecuteTweaks"),
+                                               object: nil)
             #endif
         #endif // os(iOS)
         if !MixpanelInstance.isiOSAppExtension() {
@@ -344,15 +344,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillTerminate(_:)),
-                                       name: .NSApplicationWillTerminate,
+                                       name: NSApplication.willTerminateNotification,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillResignActive(_:)),
-                                       name: .NSApplicationWillResignActive,
+                                       name: NSApplication.willResignActiveNotification,
                                        object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationDidBecomeActive(_:)),
-                                       name: .NSApplicationDidBecomeActive,
+                                       name: NSApplication.didBecomeActiveNotification,
                                        object: nil)
     }
     #endif // os(OSX)
@@ -1111,7 +1111,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         Logger.info(message: "Marking variant \(variant.ID) shown for experiment \(variant.experimentID)")
         let shownVariant = ["\(variant.experimentID)": variant.ID]
         people.merge(properties: ["$experiments": shownVariant])
-        
+
         serialQueue.async {
             var superPropertiesCopy = self.superProperties
             var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]
@@ -1122,7 +1122,6 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         }
         track(event: "$experiment_started", properties: ["$experiment_id": variant.experimentID,
                                                          "$variant_id": variant.ID])
-
     }
 
     func executeCachedVariants() {
@@ -1167,7 +1166,6 @@ extension MixpanelInstance: InAppNotificationsDelegate {
                     self.markVariantRun(variant)
                 }
             }
-
             DispatchQueue.main.async {
                 if let callback = callback {
                     callback()

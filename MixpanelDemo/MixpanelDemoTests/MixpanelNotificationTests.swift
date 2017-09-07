@@ -42,7 +42,7 @@ class MixpanelNotificationTests: MixpanelBaseTests {
                             "buttons": buttons,
                             "extras": [
                                 "image_fade": false
-            ]] as [String : Any]
+                            ]] as [String : Any]
     }
 
     func testMalformedImageURL() {

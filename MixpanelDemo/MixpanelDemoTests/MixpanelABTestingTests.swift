@@ -214,6 +214,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
                 }
             }
         })
+        self.waitForAsyncTasks()
         self.waitForSerialQueue()
         let expect = self.expectation(description: "decide variants tracked")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {

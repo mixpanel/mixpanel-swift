@@ -58,9 +58,9 @@ class JSONHandler {
 
         case let obj as InternalProperties:
             var serializedDict = InternalProperties()
-            _ = obj.map() { (k, v) in
-                serializedDict[k] =
-                    makeObjectSerializable(v) }
+            _ = obj.map() { e in
+                serializedDict[e.key] =
+                    makeObjectSerializable(e.value) }
             return serializedDict
 
         case let obj as Date:

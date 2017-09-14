@@ -171,7 +171,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         })
     }
 
-    func buttonTapped(_ sender: AnyObject) {
+    @objc func buttonTapped(_ sender: AnyObject) {
         var whichButton = "primary"
         if self.takeoverNotification.buttons.count == 2 {
             whichButton = sender.tag == 0 ? "secondary" : "primary"

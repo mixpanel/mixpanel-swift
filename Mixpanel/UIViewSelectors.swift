@@ -108,9 +108,23 @@ extension UIView {
             for i in 0..<32 {
                 let j = 2*i
                 let k = 2*i + 1
-                let part1 = ((data32[j] & 0x80000000) >> 24) | ((data32[j] & 0x800000) >> 17) | ((data32[j] & 0x8000) >> 10)
-                let part2 = ((data32[j] & 0x80) >> 3) | ((data32[k] & 0x80000000) >> 28) | ((data32[k] & 0x800000) >> 21)
-                let part3 = ((data32[k] & 0x8000) >> 14) | ((data32[k] & 0x80) >> 7)
+                let part1: UInt32 = {
+                    let subpart1 = (data32[j] & 0x80000000) >> 24
+                    let subpart2 = (data32[j] & 0x800000) >> 17
+                    let subpart3 = (data32[j] & 0x8000) >> 10
+                    return subpart1 | subpart2 | subpart3
+                }()
+                let part2: UInt32 = {
+                    let subpart1 = (data32[j] & 0x80) >> 3
+                    let subpart2 = (data32[k] & 0x80000000) >> 28
+                    let subpart3 = (data32[k] & 0x800000) >> 21
+                    return subpart1 | subpart2 | subpart3
+                }()
+                let part3: UInt32 = {
+                    let subpart1 = (data32[k] & 0x8000) >> 14
+                    let subpart2 = (data32[k] & 0x80) >> 7
+                    return subpart1 | subpart2
+                }()
                 data4[i] = UInt8(part1 | part2 | part3)
             }
             let arr = Array(UnsafeBufferPointer(start: data4, count: 32))

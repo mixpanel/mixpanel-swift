@@ -245,7 +245,7 @@ extension UNUserNotificationCenter {
 }
 
 extension UIResponder {
-    func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Swift.Void) {
+    @objc func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Swift.Void) {
         let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
         if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
             let swizzle = Swizzler.swizzles[originalMethod] {
@@ -259,7 +259,7 @@ extension UIResponder {
         }
     }
 
-    func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+    @objc func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
         let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:")
         if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
             let swizzle = Swizzler.swizzles[originalMethod] {
@@ -276,7 +276,7 @@ extension UIResponder {
 
 @available(iOS 10.0, *)
 extension NSObject {
-    func userNotificationCenter(_ center: UNUserNotificationCenter, newDidReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+    @objc func userNotificationCenter(_ center: UNUserNotificationCenter, newDidReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let originalSelector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")
         if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
             let swizzle = Swizzler.swizzles[originalMethod] {

@@ -100,7 +100,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
         }
     }
 
-    func didTap(gesture: UITapGestureRecognizer) {
+    @objc func didTap(gesture: UITapGestureRecognizer) {
         if !isDismissing && gesture.state == UIGestureRecognizerState.ended {
             delegate?.notificationShouldDismiss(controller: self,
                                                 callToActionURL: miniNotification.callToActionURL,
@@ -109,7 +109,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
         }
     }
 
-    func didPan(gesture: UIPanGestureRecognizer) {
+    @objc func didPan(gesture: UIPanGestureRecognizer) {
         if canPan, let window = window {
             switch gesture.state {
             case UIGestureRecognizerState.began:

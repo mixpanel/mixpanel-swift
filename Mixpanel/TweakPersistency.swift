@@ -32,7 +32,7 @@ internal final class TweakPersistency {
 		return persistedValueForTweakIdentifiable(AnyTweak(tweak: tweak)) as? T
 	}
 
-	internal func currentValueForTweak<T>(_ tweak: Tweak<T>) -> T? where T: SignedNumber {
+	internal func currentValueForTweak<T>(_ tweak: Tweak<T>) -> T? where T: SignedNumeric & Comparable {
 		if let currentValue = persistedValueForTweakIdentifiable(AnyTweak(tweak: tweak)) as? T {
 				// If the tweak can be clipped, then we'll need to clip it - because
 				// the tweak might've been persisted without a min / max, but then you changed the tweak definition.

@@ -241,8 +241,8 @@ class VariantAction: NSObject, NSCoding {
         for object in objects {
             var retValue: AnyObject? = nil
             let method: Method!
-            if object is AnyClass {
-                method = class_getClassMethod(object as! AnyClass, selector)
+            if let classObject = object as? AnyClass {
+                method = class_getClassMethod(classObject, selector)
             } else {
                 method = class_getInstanceMethod(type(of: object), selector)
             }
@@ -385,7 +385,7 @@ class VariantAction: NSObject, NSCoding {
     }
 
     static func transformValue(_ value: AnyObject, to type: String) -> NSObject? {
-        if let classType = NSClassFromString(type), type(of: value) == classType {
+        if let classType = NSClassFromString(type), Swift.type(of: value) == classType {
             return ValueTransformer(forName: NSValueTransformerName(rawValue: "IdentityTransformer"))?.transformedValue(value) as? NSObject
         }
 

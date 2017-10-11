@@ -13,7 +13,7 @@ env:
   - SCHEME=MixpanelDemo
   matrix:
     - DESTINATION="OS=9.0,name=iPhone 6"    SCHEME="$SCHEME"    RUN_TESTS="YES"     POD_LINT="YES"
-    - DESTINATION="OS=11.1,name=iPhone X"   SCHEME="$SCHEME"    RUN_TESTS="YES"     POD_LINT="NO"
+    - DESTINATION="OS=11.0,name=iPhone X"   SCHEME="$SCHEME"    RUN_TESTS="YES"     POD_LINT="NO"
 script:
   - set -o pipefail
   - xcodebuild -version

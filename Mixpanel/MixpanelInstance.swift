@@ -620,22 +620,20 @@ extension MixpanelInstance {
                     self.alias = nil
                     self.distinctId = distinctId
                 }
-            }
-
-            if usePeople {
-                self.people.distinctId = distinctId
-                if !self.people.unidentifiedQueue.isEmpty {
-                    for var r in self.people.unidentifiedQueue {
-                        r["$distinct_id"] = self.distinctId
-                        self.people.peopleQueue.append(r)
+                if usePeople {
+                    self.people.distinctId = distinctId
+                    if !self.people.unidentifiedQueue.isEmpty {
+                        for var r in self.people.unidentifiedQueue {
+                            r["$distinct_id"] = self.distinctId
+                            self.people.peopleQueue.append(r)
+                        }
+                        self.people.unidentifiedQueue.removeAll()
+                        Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
                     }
-                    self.people.unidentifiedQueue.removeAll()
-                    Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
+                } else {
+                    self.people.distinctId = nil
                 }
-            } else {
-                self.people.distinctId = nil
             }
-
             self.archiveProperties()
             Persistence.storeIdentity(token: self.apiToken,
                                       distinctID: self.distinctId,

@@ -1,7 +1,7 @@
 language: objective-c
 before_install:
-  - gem install cocoapods
-osx_image: xcode9.1
+  - gem install cocoapods --pre --no-rdoc --no-ri --no-document --quiet
+osx_image: xcode9
 before_script: cd MixpanelDemo
 podfile: MixpanelDemo/Podfile
 branches:
@@ -13,14 +13,8 @@ env:
   - SCHEME=MixpanelDemo
   - IOS_SDK=iphonesimulator11.1
   matrix:
-    - DESTINATION="platform=iOS Simulator,OS=9.0,name=iPhone 5"          SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="YES"
-#    - DESTINATION="platform=iOS Simulator,OS=8.2,name=iPhone 5"           SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="NO"
-#    - DESTINATION="platform=iOS Simulator,OS=8.3,name=iPhone 5S"          SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="NO"
-#    - DESTINATION="platform=iOS Simulator,OS=8.4,name=iPhone 6"           SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="NO"
-#    - DESTINATION="platform=iOS Simulator,OS=9.0,name=iPhone 6"           SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="NO"
-#    - DESTINATION="platform=iOS Simulator,OS=9.1,name=iPhone 6 Plus"      SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="NO"
-#    - DESTINATION="platform=iOS Simulator,OS=9.2,name=iPhone 6S"          SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="NO"
-    - DESTINATION="platform=iOS Simulator,OS=11.1,name=iPhone X"     SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES" POD_LINT="NO"
+    - DESTINATION="OS=9.0,name=iPhone 6"    SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES"     POD_LINT="YES"
+    - DESTINATION="OS=11.1,name=iPhone X"   SCHEME="$SCHEME"     SDK="$IOS_SDK"     RUN_TESTS="YES"     POD_LINT="NO"
 script:
   - set -o pipefail
   - xcodebuild -version

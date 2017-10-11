@@ -325,6 +325,10 @@ class VariantAction: NSObject, NSCoding {
             typealias Function = @convention(c) (AnyObject, Selector, NSTextAlignment) -> Void
             let function = unsafeBitCast(implementation, to: Function.self)
             function(object, selector, NSTextAlignment(rawValue: args[0] as! Int)!)
+        } else if selector.description == "setTitle:forState:" {
+            typealias Function = @convention(c) (AnyObject, Selector, NSString, UIControlState) -> Void
+            let function = unsafeBitCast(implementation, to: Function.self)
+            function(object, selector, args[0] as! NSString, UIControlState(rawValue: args[1] as! UInt))
         }
         return nil
     }

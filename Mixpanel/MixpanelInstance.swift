@@ -237,6 +237,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if DECIDE
     let decideInstance: Decide
     let automaticEvents = AutomaticEvents()
+    let connectIntegrations = ConnectIntegrations()
     #endif // DECIDE
 
     #if !os(OSX)
@@ -275,6 +276,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     trackPushNotification(notification, event: "$app_open")
                 }
             }
+            connectIntegrations.mixpanel = self
         #endif // DECIDE
     }
     #else
@@ -411,6 +413,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                 variant.execute()
                                 self.markVariantRun(variant)
                             }
+                        }
+
+                        if decideResponse.integrations.count > 0 {
+                            self.connectIntegrations.setupIntegrations(decideResponse.integrations)
                         }
                     }
                 }
@@ -733,6 +739,7 @@ extension MixpanelInstance {
                     self.decideInstance.decideFetched = false
                     self.decideInstance.ABTestingInstance.variants = Set()
                     self.decideInstance.codelessInstance.codelessBindings = Set()
+                    self.connectIntegrations.reset()
                     MixpanelTweaks.defaultStore.reset()
                     #endif // DECIDE
                 }

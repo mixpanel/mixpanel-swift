@@ -652,8 +652,8 @@ extension MixpanelInstance {
      This method is used to map an identifier called an alias to the existing Mixpanel
      distinct id. This causes all events and people requests sent with the alias to be
      mapped back to the original distinct id. The recommended usage pattern is to call
-     both createAlias: and identify: when the user signs up, and only identify: (with
-     their new user ID) when they log in. This will keep your signup funnels working
+     createAlias: and then identify: (with their new user ID)
+     when they log in the next time. This will keep your signup funnels working
      correctly.
 
      This makes the current id and 'Alias' interchangeable distinct ids.
@@ -665,8 +665,10 @@ extension MixpanelInstance {
 
      - parameter alias:      the new distinct id that should represent the original
      - parameter distinctId: the old distinct id that alias will be mapped to
+     - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
+     This should only be set to false if you wish to prevent people profile updates for that user.
      */
-    open func createAlias(_ alias: String, distinctId: String) {
+    open func createAlias(_ alias: String, distinctId: String, usePeople: Bool = true) {
         if distinctId.isEmpty {
             Logger.error(message: "\(self) cannot identify blank distinct id")
             return
@@ -688,6 +690,7 @@ extension MixpanelInstance {
             }
             let properties = ["distinct_id": distinctId, "alias": alias]
             track(event: "$create_alias", properties: properties)
+            identify(distinctId: distinctId, usePeople: usePeople)
             flush()
         } else {
             Logger.error(message: "alias: \(alias) matches distinctId: \(distinctId) - skipping api call.")

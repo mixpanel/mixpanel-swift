@@ -27,7 +27,7 @@ class ConnectIntegrations {
                     if let channelID = push.perform(NSSelectorFromString("channelID")).takeUnretainedValue() as? String {
                         self.urbanAirshipRetries = 0
                         if (channelID != self.savedUrbanAirshipChannelID) {
-                            self.mixpanel?.people.set(property: "$urban_airship_channel_id", to: channelID)
+                            self.mixpanel?.people.set(property: "$ios_urban_airship_channel_id", to: channelID)
                             self.savedUrbanAirshipChannelID = channelID
                         }
                     } else {

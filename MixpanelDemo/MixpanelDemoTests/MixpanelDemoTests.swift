@@ -592,32 +592,22 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testReadWriteLock() {
+        var array = [Int]()
         let lock = ReadWriteLock(label: "test")
-        var num = 0
-        
-        for i in 0..<200 {
-            lock.write {
-                self.mixpanel.track(event: "event \(UInt(i))")
-                num+=1
+        let queue = DispatchQueue(label: "concurrent", attributes: .concurrent)
+        for _ in 0..<10 {
+            queue.async {
+                lock.write {
+                    for i in 0..<100 {
+                        array.append(i)
+                    }
+                }
             }
-        }
-        self.waitForTrackingQueue()
 
-        lock.read {
-            XCTAssertTrue(self.mixpanel.eventsQueue.count == 200, "supposed to happen after write")
-        }
-
-        for i in 0..<500 {
-            lock.write {
-                self.mixpanel.track(event: "event \(UInt(i))")
-                num+=1
-            }
-        }
-        self.waitForTrackingQueue()
-
-        for _ in 0..<100 {
-            lock.read {
-                XCTAssertTrue(self.mixpanel.eventsQueue.count == 700, "supposed to happen after write")
+            queue.async {
+                lock.read {
+                    XCTAssertTrue(array.count % 100 == 0, "supposed to happen after write")
+                }
             }
         }
     }

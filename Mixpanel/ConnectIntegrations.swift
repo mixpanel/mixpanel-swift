@@ -11,8 +11,8 @@ class ConnectIntegrations {
     var urbanAirshipRetries = 0
     var savedUrbanAirshipChannelID: String?
 
-    open func setupIntegrations(_ integrations:[Int]) {
-        if integrations.contains(4) {
+    open func setupIntegrations(_ integrations:[String]) {
+        if integrations.contains("urban_airship") {
             self.setUrbanAirshipPeopleProp()
         }
     }

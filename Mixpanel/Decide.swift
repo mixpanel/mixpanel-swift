@@ -14,7 +14,7 @@ struct DecideResponse {
     var newCodelessBindings: Set<CodelessBinding>
     var newVariants: Set<Variant>
     var toFinishVariants: Set<Variant>
-    var integrations: [Int]
+    var integrations: [String]
 
     init() {
         unshownInAppNotifications = []
@@ -131,7 +131,7 @@ class Decide {
                     self.automaticEventsEnabled = automaticEvents
                 }
 
-                if let integrations = result["integrations"] as? [Int] {
+                if let integrations = result["integrations"] as? [String] {
                     decideResponse.integrations = integrations
                 }
 

@@ -17,7 +17,7 @@ class ReadWriteLock {
     
     func read(closure: () -> ()) {
         self.concurentQueue.sync {
-            closure();
+            closure()
         }
     }
     

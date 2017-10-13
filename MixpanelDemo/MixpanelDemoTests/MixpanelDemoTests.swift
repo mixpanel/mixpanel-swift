@@ -592,84 +592,33 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testReadWriteLock() {
-        
         let lock = ReadWriteLock(label: "test")
-        let testGroup = DispatchGroup()
         var num = 0
         
-        DispatchQueue.global(qos: .userInitiated).async(group: testGroup) {
+        for i in 0..<200 {
             lock.write {
-                for i in 0..<200 {
-                    self.mixpanel.track(event: "event \(UInt(i))")
-                    num+=1
-                }
-                self.waitForTrackingQueue()
+                self.mixpanel.track(event: "event \(UInt(i))")
+                num+=1
             }
         }
-        
-        DispatchQueue.global(qos: .userInitiated).async(group: testGroup) {
+        self.waitForTrackingQueue()
+
+        lock.read {
+            XCTAssertTrue(self.mixpanel.eventsQueue.count == 200, "supposed to happen after write")
+        }
+
+        for i in 0..<500 {
+            lock.write {
+                self.mixpanel.track(event: "event \(UInt(i))")
+                num+=1
+            }
+        }
+        self.waitForTrackingQueue()
+
+        for _ in 0..<100 {
             lock.read {
-                XCTAssertTrue(self.mixpanel.eventsQueue.count == 200, "supposed to happen after write")
+                XCTAssertTrue(self.mixpanel.eventsQueue.count == 700, "supposed to happen after write")
             }
         }
-        
-        DispatchQueue.global(qos: .userInitiated).async(group: testGroup) {
-            XCTAssertFalse(self.mixpanel.eventsQueue.count == 200, "should fail since not locked")
-        }
-        
-        DispatchQueue.global(qos: .userInitiated).async(group: testGroup) {
-            lock.write {
-                for i in 0..<200 {
-                    self.mixpanel.track(event: "event \(UInt(i))")
-                    num+=1
-                }
-                self.waitForTrackingQueue()
-            }
-        }
-        
-        DispatchQueue.global(qos: .userInitiated).async(group: testGroup) {
-            lock.write {
-                for i in 0..<200 {
-                    self.mixpanel.track(event: "event \(UInt(i))")
-                    num+=1
-                }
-                self.waitForTrackingQueue()
-            }
-        }
-        
-        DispatchQueue.global(qos: .userInitiated).async(group: testGroup) {
-            lock.read {
-                XCTAssertTrue(self.mixpanel.eventsQueue.count == 600, "should have occured after both writes")
-            }
-        }
-        
-        DispatchQueue.global(qos: .userInitiated).async(group: testGroup) {
-            XCTAssertFalse(self.mixpanel.eventsQueue.count == 600, "should fail since not locked")
-        }
-        
-        DispatchQueue.global(qos: .userInitiated).async(group: testGroup) {
-            lock.write {
-                for i in 0..<500 {
-                    self.mixpanel.track(event: "event \(UInt(i))")
-                    num+=1
-                }
-                self.waitForTrackingQueue()
-            }
-        }
-        
-        DispatchQueue.global(qos: .userInitiated).async(group: testGroup) {
-            lock.read {
-                XCTAssertTrue(self.mixpanel.eventsQueue.count == 1100, "should have occured after at least one write")
-            }
-        }
-        
-        DispatchQueue.global(qos: .userInitiated).async(group: testGroup) {
-            XCTAssertFalse(self.mixpanel.eventsQueue.count == 1100, "should fail since not locked")
-        }
-        
-        testGroup.wait()
-        
-        XCTAssertTrue(num == 1100)
-        
     }
 }

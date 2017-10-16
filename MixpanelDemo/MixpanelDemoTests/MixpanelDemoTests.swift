@@ -600,7 +600,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
             }
 
             queue.async {
-                lock.read {
+                lock.read 
                     XCTAssertTrue(array.count % 100 == 0, "supposed to happen after write")
                 }
             }

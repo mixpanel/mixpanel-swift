@@ -103,6 +103,8 @@
 		E189D8F61D54ECBF007F3F29 /* Decide.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F51D54ECBF007F3F29 /* Decide.swift */; };
 		E189D8F81D552324007F3F29 /* DecideRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F71D552324007F3F29 /* DecideRequest.swift */; };
 		E189D8FD1D5A6985007F3F29 /* InAppNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */; };
+		E19052001F9548F000900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
+		E19052011F9548F000900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
 		E19087BF1E53985300023FCC /* placeholder-image.png in Resources */ = {isa = PBXBuildFile; fileRef = E19087BE1E53985300023FCC /* placeholder-image.png */; };
 		E19312671D5A7848007CE1E9 /* InAppNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312661D5A7848007CE1E9 /* InAppNotification.swift */; };
 		E193126B1D5B9D1E007CE1E9 /* MiniNotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */; };
@@ -808,6 +810,7 @@
 				E12782C41D4AB5CB0025FB05 /* FlushRequest.swift in Sources */,
 				E12782C51D4AB5CB0025FB05 /* Track.swift in Sources */,
 				E12782C61D4AB5CB0025FB05 /* People.swift in Sources */,
+				E19052001F9548F000900E5D /* ReadWriteLock.swift in Sources */,
 				E12782C71D4AB5CB0025FB05 /* Error.swift in Sources */,
 				E16522901D67D421000D5949 /* MixpanelType.swift in Sources */,
 				E12782C81D4AB5CB0025FB05 /* Constants.swift in Sources */,
@@ -832,6 +835,7 @@
 				E1F15FDE1E64B60A00391AE3 /* MixpanelType.swift in Sources */,
 				E1F15FDA1E64B60A00391AE3 /* JSONHandler.swift in Sources */,
 				E1F15FE31E64B60D00391AE3 /* Track.swift in Sources */,
+				E19052011F9548F000900E5D /* ReadWriteLock.swift in Sources */,
 				E1F15FE41E64B60D00391AE3 /* People.swift in Sources */,
 				E1F15FDB1E64B60A00391AE3 /* Error.swift in Sources */,
 				E1F15FD81E64B60200391AE3 /* FileLogging.swift in Sources */,

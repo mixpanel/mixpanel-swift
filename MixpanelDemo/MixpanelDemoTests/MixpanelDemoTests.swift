@@ -573,19 +573,13 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testNetworkingWithStress() {
-        mixpanelWillFlush = false
-        _ = stubTrack().andReturn(503)
-        for _ in 0..<100 {
+        _ = stubTrack().andReturn(200)
+        for _ in 0..<300 {
             mixpanel.track(event: "Track Call")
         }
         waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
-        XCTAssertTrue(mixpanel.eventsQueue.count == 100, "none supposed to be flushed")
-        LSNocilla.sharedInstance().clearStubs()
-        _ = stubTrack().andReturn(200)
-        mixpanel.flushInstance.flushRequest.networkRequestsAllowedAfterTime = 0
-        flushAndWaitForNetworkQueue()
-        XCTAssertTrue(mixpanel.eventsQueue.isEmpty, "supposed to all be flushed")
+        XCTAssertTrue(mixpanel.eventsQueue.count == 0, "supposed to all be flushed")
     }
 
     func testTelephonyInfoInitialized() {

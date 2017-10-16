@@ -573,6 +573,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testNetworkingWithStress() {
+        mixpanelWillFlush = false
         _ = stubTrack().andReturn(503)
         for _ in 0..<100 {
             mixpanel.track(event: "Track Call")

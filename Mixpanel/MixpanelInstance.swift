@@ -228,13 +228,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var timedEvents = InternalProperties()
     var trackingQueue: DispatchQueue!
     var networkQueue: DispatchQueue!
+    let readWriteLock: ReadWriteLock
     #if !os(OSX)
     var taskId = UIBackgroundTaskInvalid
     #endif // os(OSX)
     let flushInstance: Flush
     let trackInstance: Track
     #if DECIDE
-    let readWriteLock: ReadWriteLock
     let decideInstance: Decide
     let automaticEvents = AutomaticEvents()
     #endif // DECIDE
@@ -283,15 +283,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             self.apiToken = apiToken
         }
         self.name = name
-        flushInstance = Flush(basePathIdentifier: name)
-        trackInstance = Track(apiToken: self.apiToken)
+        self.readWriteLock = ReadWriteLock(label: "globalLock")
+        flushInstance = Flush(basePathIdentifier: name, lock: self.readWriteLock)
+        trackInstance = Track(apiToken: self.apiToken, lock: self.readWriteLock)
         flushInstance.delegate = self
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: label)
         networkQueue = DispatchQueue(label: label)
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
-                        serialQueue: trackingQueue)
+                        serialQueue: trackingQueue,
+                        lock: self.readWriteLock)
         flushInstance._flushInterval = flushInterval
         setupListeners()
         unarchive()

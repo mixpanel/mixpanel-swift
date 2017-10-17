@@ -18,7 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
-        Mixpanel.initialize(token: "MIXPANEL_TOKEN")
+        Mixpanel.initialize(token: "f59d65e337997ccbb6d88cdbe813c467")
         Mixpanel.mainInstance().loggingEnabled = true
         Mixpanel.mainInstance().flushInterval = 5
         let allTweaks: [TweakClusterType] = [MixpanelTweaks.floatTweak,
@@ -30,16 +30,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         if #available(iOS 10.0, *) {
             UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge], completionHandler: { (granted, error) in
                 if granted {
-                    DispatchQueue.main.async(execute: {
+                    DispatchQueue.main.async {
                         UIApplication.shared.registerForRemoteNotifications()
-                    })
+                    }
                 }
             })
             UNUserNotificationCenter.current().delegate = self
         } else {
             let settings = UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
-            UIApplication.shared.registerUserNotificationSettings(settings)
-            UIApplication.shared.registerForRemoteNotifications()
+            DispatchQueue.main.async {
+                UIApplication.shared.registerUserNotificationSettings(settings)
+                UIApplication.shared.registerForRemoteNotifications()
+            }
         }
 
         Mixpanel.mainInstance().identify(

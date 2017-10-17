@@ -102,6 +102,9 @@
 		E189D8F61D54ECBF007F3F29 /* Decide.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F51D54ECBF007F3F29 /* Decide.swift */; };
 		E189D8F81D552324007F3F29 /* DecideRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F71D552324007F3F29 /* DecideRequest.swift */; };
 		E189D8FD1D5A6985007F3F29 /* InAppNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */; };
+		E19052041F96B4BF00900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19052031F96B4BF00900E5D /* ReadWriteLock.swift */; };
+		E19052051F96C7A500900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19052031F96B4BF00900E5D /* ReadWriteLock.swift */; };
+		E19052061F96C7A600900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19052031F96B4BF00900E5D /* ReadWriteLock.swift */; };
 		E19087BF1E53985300023FCC /* placeholder-image.png in Resources */ = {isa = PBXBuildFile; fileRef = E19087BE1E53985300023FCC /* placeholder-image.png */; };
 		E19312671D5A7848007CE1E9 /* InAppNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312661D5A7848007CE1E9 /* InAppNotification.swift */; };
 		E193126B1D5B9D1E007CE1E9 /* MiniNotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */; };
@@ -215,6 +218,7 @@
 		E189D8F51D54ECBF007F3F29 /* Decide.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Decide.swift; sourceTree = "<group>"; };
 		E189D8F71D552324007F3F29 /* DecideRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DecideRequest.swift; sourceTree = "<group>"; };
 		E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppNotifications.swift; sourceTree = "<group>"; };
+		E19052031F96B4BF00900E5D /* ReadWriteLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadWriteLock.swift; sourceTree = "<group>"; };
 		E19087BE1E53985300023FCC /* placeholder-image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "placeholder-image.png"; sourceTree = "<group>"; };
 		E19312661D5A7848007CE1E9 /* InAppNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppNotification.swift; sourceTree = "<group>"; };
 		E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MiniNotificationViewController.swift; sourceTree = "<group>"; };
@@ -470,6 +474,7 @@
 				E165228E1D6781DF000D5949 /* MixpanelType.swift */,
 				E16C0EB21D80BF290051EF35 /* MD5.swift */,
 				E12BD38C1D91EBE2008989C9 /* SHA256.swift */,
+				E19052031F96B4BF00900E5D /* ReadWriteLock.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -721,6 +726,7 @@
 				E15422291D710587009421A0 /* SnapshotMessage.swift in Sources */,
 				E12BD38D1D91EBE2008989C9 /* SHA256.swift in Sources */,
 				E174DAF91DA4623E00FED703 /* TweakMessage.swift in Sources */,
+				E19052041F96B4BF00900E5D /* ReadWriteLock.swift in Sources */,
 				E1D335CE1D30578E00E68E12 /* Constants.swift in Sources */,
 				E115949F1D01BE14007F8B4F /* Flush.swift in Sources */,
 				E174DAEE1DA337CB00FED703 /* TweakCollection.swift in Sources */,
@@ -805,6 +811,7 @@
 				E12782C41D4AB5CB0025FB05 /* FlushRequest.swift in Sources */,
 				E12782C51D4AB5CB0025FB05 /* Track.swift in Sources */,
 				E12782C61D4AB5CB0025FB05 /* People.swift in Sources */,
+				E19052051F96C7A500900E5D /* ReadWriteLock.swift in Sources */,
 				E12782C71D4AB5CB0025FB05 /* Error.swift in Sources */,
 				E16522901D67D421000D5949 /* MixpanelType.swift in Sources */,
 				E12782C81D4AB5CB0025FB05 /* Constants.swift in Sources */,
@@ -829,6 +836,7 @@
 				E1F15FDE1E64B60A00391AE3 /* MixpanelType.swift in Sources */,
 				E1F15FDA1E64B60A00391AE3 /* JSONHandler.swift in Sources */,
 				E1F15FE31E64B60D00391AE3 /* Track.swift in Sources */,
+				E19052061F96C7A600900E5D /* ReadWriteLock.swift in Sources */,
 				E1F15FE41E64B60D00391AE3 /* People.swift in Sources */,
 				E1F15FDB1E64B60A00391AE3 /* Error.swift in Sources */,
 				E1F15FD81E64B60200391AE3 /* FileLogging.swift in Sources */,
@@ -952,7 +960,7 @@
 		E11594861CFF1491007F8B4F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = NO;
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -981,7 +989,7 @@
 		E11594871CFF1491007F8B4F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = NO;
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";

@@ -572,15 +572,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
                      "Tracking the same event should require a second call to timeEvent.")
     }
 
-    func testNetworkingWithStress() {
-        for _ in 0..<100 {
-            mixpanel.track(event: "Track Call")
-        }
-        waitForTrackingQueue()
-        flushAndWaitForNetworkQueue()
-        XCTAssertTrue(mixpanel.eventsQueue.count == 0, "supposed to all be flushed")
-    }
-
     func testTelephonyInfoInitialized() {
         XCTAssertNotNil(AutomaticProperties.telephonyInfo, "telephonyInfo wasn't initialized")
     }

@@ -82,20 +82,20 @@ class MixpanelCodelessTests: MixpanelBaseTests {
         // Fire event
         c1.sendActions(for: .touchDown)
         c1.sendActions(for: .touchUpInside)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 1, "A track call should have been fired")
         // test that event doesnt fire for other UIControl
         c2.sendActions(for: .touchUpInside)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 1, "Should not have fired event for c2")
         // test `didMoveToWindow`
         let c3 = UIControl()
         v2.addSubview(c3)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 1, "Mixpanel track should not have been called.")
         c3.sendActions(for: .touchDown)
         c3.sendActions(for: .touchUpInside)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 2, "A track call should have been fired")
         /*
          nc__vc__v1___v2___c1
@@ -104,16 +104,16 @@ class MixpanelCodelessTests: MixpanelBaseTests {
          */
         // test moving element to different path
         v1.addSubview(c3)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 2, "Mixpanel track should not have been called.")
         c3.sendActions(for: .touchUpInside)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 2, "A track call should not have been fired")
         // test `stop` with c1
         binding?.stop()
         XCTAssertEqual(binding?.running, false, "Binding should NOT be running")
         c1.sendActions(for: .touchUpInside)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 2, "Target action should have been unbound")
         c1.removeFromSuperview()
         v2.addSubview(c1)
@@ -121,7 +121,7 @@ class MixpanelCodelessTests: MixpanelBaseTests {
         selector = ObjectSelector(string: c1_path)
         XCTAssertEqual(selector.selectFrom(root: rootViewController)[0] as! UIControl, c1, "c1 should have been replaced")
         c1.sendActions(for: .touchUpInside)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 2, "didMoveToWindow should have been unSwizzled")
         // Test archive
         let archive = NSKeyedArchiver.archivedData(withRootObject: binding!)
@@ -166,22 +166,22 @@ class MixpanelCodelessTests: MixpanelBaseTests {
         let binding = UITableViewBinding(object: eventParams)
         binding?.execute()
         XCTAssertEqual(binding?.running, true, "Binding should be running")
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 0, "No track calls should be fired")
         // test row selection
         var indexPath = IndexPath(row: 1, section: 0)
         vc.perform(#selector(UITableViewDelegate.tableView(_:didSelectRowAt:)), with: tv!, with: indexPath)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 1, "One track call should be fired")
         // test stop binding
         binding?.stop()
         XCTAssertEqual(binding?.running, false, "Binding should NOT be running")
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 1, "No track calls should be fired")
         // test row selection
         indexPath = IndexPath(row: 2, section: 0)
         vc.perform(#selector(UITableViewDelegate.tableView(_:didSelectRowAt:)), with: tv!, with: indexPath)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertEqual(Int(mixpanel.eventsQueue.count), 1, "No track calls should be fired")
         // Test archive
         let archive = NSKeyedArchiver.archivedData(withRootObject: binding!)

@@ -21,6 +21,7 @@ enum InAppType: String {
 
 class InAppNotifications: NotificationViewControllerDelegate {
 
+    let lock: ReadWriteLock
     var checkForNotificationOnActive = true
     var showNotificationOnActive = true
     var miniNotificationPresentationTime = 6.0
@@ -28,6 +29,10 @@ class InAppNotifications: NotificationViewControllerDelegate {
     var inAppNotifications = [InAppNotification]()
     var currentlyShowingNotification: InAppNotification?
     var delegate: InAppNotificationsDelegate?
+
+    init(lock: ReadWriteLock) {
+        self.lock = lock
+    }
 
     func showNotification( _ notification: InAppNotification) {
         let notification = notification
@@ -54,10 +59,11 @@ class InAppNotifications: NotificationViewControllerDelegate {
     }
 
     func markNotificationShown(notification: InAppNotification) {
-        Logger.info(message: "marking notification as seen: \(notification.ID)")
-
-        currentlyShowingNotification = notification
-        shownNotifications.insert(notification.ID)
+        self.lock.write {
+            Logger.info(message: "marking notification as seen: \(notification.ID)")
+            currentlyShowingNotification = notification
+            shownNotifications.insert(notification.ID)
+        }
     }
 
     func showMiniNotification(_ notification: MiniNotification) -> Bool {

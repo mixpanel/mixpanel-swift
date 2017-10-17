@@ -26,7 +26,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         self.mixpanel.minimumSessionDuration = 0;
         self.mixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
-        self.waitForSerialQueue()
+        self.waitForTrackingQueue()
         let event = self.mixpanel.eventsQueue.last
         XCTAssertNotNil(event, "Should have an event")
         XCTAssertEqual(event?["event"] as? String, "$ae_session", "should be app session event")
@@ -49,8 +49,8 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         mp.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
-        self.waitForSerialQueue()
-        mp.serialQueue.sync() { }
+        self.waitForTrackingQueue()
+        mp.trackingQueue.sync { }
         let event = self.mixpanel.eventsQueue.last
         XCTAssertNotNil(event, "Should have an event")
         XCTAssertEqual(event?["event"] as? String, "$ae_session", "should be app session event")

@@ -9,7 +9,7 @@
 import Foundation
 #if !os(OSX)
 import UIKit
-#endif // os(OSX)
+#endif // !os(OSX)
 
 struct QueueConstants {
     static var queueSize = 5000
@@ -26,8 +26,16 @@ struct BundleConstants {
     static let ID = "com.mixpanel.Mixpanel"
 }
 
+#if !os(OSX)
 struct InAppNotificationsConstants {
     static let miniInAppHeight: CGFloat = 65
-    static let miniBottomPadding: CGFloat = 10
+    static let miniBottomPadding: CGFloat = 10 + (UIDevice.current.iPhoneX ? 34 : 0)
     static let miniSidePadding: CGFloat = 15
 }
+
+extension UIDevice {
+    var iPhoneX: Bool {
+        return UIScreen.main.nativeBounds.height == 2436
+    }
+}
+#endif // !os(OSX)

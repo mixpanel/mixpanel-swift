@@ -573,8 +573,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testNetworkingWithStress() {
-        _ = stubTrack().andReturn(200)
-        for _ in 0..<300 {
+        for _ in 0..<100 {
             mixpanel.track(event: "Track Call")
         }
         waitForTrackingQueue()

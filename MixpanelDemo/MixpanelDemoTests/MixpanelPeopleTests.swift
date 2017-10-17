@@ -18,7 +18,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         mixpanel.identify(distinctId: "d1")
         let p: Properties = ["p1": "a"]
         mixpanel.people.set(properties: p)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         let q = mixpanel.people.peopleQueue.last!["$set"] as! InternalProperties
         XCTAssertEqual(q["p1"] as? String, "a", "custom people property not queued")
         assertDefaultPeopleProperties(q)
@@ -28,7 +28,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         mixpanel.identify(distinctId: "d1")
         let p: Properties = ["p1": "a"]
         mixpanel.people.setOnce(properties: p)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         let q = mixpanel.people.peopleQueue.last!["$set_once"] as! InternalProperties
         XCTAssertEqual(q["p1"] as? String, "a", "custom people property not queued")
         assertDefaultPeopleProperties(q)
@@ -38,7 +38,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         mixpanel.identify(distinctId: "d1")
         let p: Properties = ["$ios_app_version": "override"]
         mixpanel.people.set(properties: p)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         let q = mixpanel.people.peopleQueue.last!["$set"] as! InternalProperties
         XCTAssertEqual(q["$ios_app_version"] as? String,
                        "override",
@@ -49,7 +49,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
     func testPeopleSetTo() {
         mixpanel.identify(distinctId: "d1")
         mixpanel.people.set(property: "p1", to: "a")
-        waitForSerialQueue()
+        waitForTrackingQueue()
         var p: InternalProperties = mixpanel.people.peopleQueue.last!["$set"] as! InternalProperties
         XCTAssertEqual(p["p1"] as? String, "a", "custom people property not queued")
         assertDefaultPeopleProperties(p)
@@ -60,7 +60,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         for i in 0..<505 {
             mixpanel.people.set(property: "i", to: i)
         }
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertTrue(mixpanel.people.unidentifiedQueue.count == 500)
         var r: InternalProperties = mixpanel.people.unidentifiedQueue.first!
         XCTAssertEqual((r["$set"] as? InternalProperties)?["i"] as? Int, 5)
@@ -74,7 +74,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         for i in 0..<505 {
             mixpanel.people.set(property: "i", to: i)
         }
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertTrue(mixpanel.people.peopleQueue.count == 500)
         var r: InternalProperties = mixpanel.people.peopleQueue.first!
         XCTAssertEqual((r["$set"] as? InternalProperties)?["i"] as? Int, 5)
@@ -101,7 +101,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         mixpanel.identify(distinctId: "d1")
         let token: Data = "0123456789abcdef".data(using: String.Encoding.utf8)!
         mixpanel.people.addPushDeviceToken(token)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         XCTAssertTrue(mixpanel.people.peopleQueue.count == 1, "people records not queued")
         var p: Properties = mixpanel.people.peopleQueue.last!["$union"] as! Properties
         XCTAssertTrue(p.count == 1, "incorrect people properties: \(p)")
@@ -116,7 +116,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         mixpanel.identify(distinctId: "d1")
         let p: Properties = ["p1": 3]
         mixpanel.people.increment(properties: p)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         var q = mixpanel.people.peopleQueue.last!["$add"] as! InternalProperties
         XCTAssertTrue(q.count == 1, "incorrect people properties: \(p)")
         XCTAssertEqual(q["p1"] as? Int, 3, "custom people property not queued")
@@ -125,7 +125,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
     func testPeopleIncrementBy() {
         mixpanel.identify(distinctId: "d1")
         mixpanel.people.increment(property: "p1", by: 3)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         var p: InternalProperties = mixpanel.people.peopleQueue.last!["$add"] as! InternalProperties
         XCTAssertTrue(p.count == 1, "incorrect people properties: \(p)")
         XCTAssertEqual(p["p1"] as? Double, 3, "custom people property not queued")
@@ -134,7 +134,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
     func testPeopleDeleteUser() {
         mixpanel.identify(distinctId: "d1")
         mixpanel.people.deleteUser()
-        waitForSerialQueue()
+        waitForTrackingQueue()
         let p: InternalProperties = mixpanel.people.peopleQueue.last!["$delete"] as! InternalProperties
         XCTAssertTrue(p.isEmpty, "incorrect people properties: \(p)")
     }
@@ -143,7 +143,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
     func testPeopleTrackChargeDecimal() {
         mixpanel.identify(distinctId: "d1")
         mixpanel.people.trackCharge(amount: 25.34)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         var r: InternalProperties = mixpanel.people.peopleQueue.last!
         let prop = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$amount"] as? Double
         let prop2 = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$time"]
@@ -154,7 +154,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
     func testPeopleTrackChargeZero() {
         mixpanel.identify(distinctId: "d1")
         mixpanel.people.trackCharge(amount: 0)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         var r: InternalProperties = mixpanel.people.peopleQueue.last!
         let prop = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$amount"] as? Double
         let prop2 = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$time"]
@@ -165,7 +165,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         mixpanel.identify(distinctId: "d1")
         var p: Properties = allPropertyTypes()
         mixpanel.people.trackCharge(amount: 25, properties: ["$time": p["date"]!])
-        waitForSerialQueue()
+        waitForTrackingQueue()
         var r: InternalProperties = mixpanel.people.peopleQueue.last!
         let prop = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$amount"] as? Double
         let prop2 = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$time"]
@@ -176,7 +176,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
     func testPeopleTrackChargeWithProperties() {
         mixpanel.identify(distinctId: "d1")
         mixpanel.people.trackCharge(amount: 25, properties: ["p1": "a"])
-        waitForSerialQueue()
+        waitForTrackingQueue()
         var r: InternalProperties = mixpanel.people.peopleQueue.last!
         let prop = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$amount"] as? Double
         let prop2 = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["p1"]
@@ -187,7 +187,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
     func testPeopleTrackCharge() {
         mixpanel.identify(distinctId: "d1")
         mixpanel.people.trackCharge(amount: 25)
-        waitForSerialQueue()
+        waitForTrackingQueue()
         var r: InternalProperties = mixpanel.people.peopleQueue.last!
         let prop = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$amount"] as? Double
         let prop2 = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$time"]
@@ -198,7 +198,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
     func testPeopleClearCharges() {
         mixpanel.identify(distinctId: "d1")
         mixpanel.people.clearCharges()
-        waitForSerialQueue()
+        waitForTrackingQueue()
         var r: InternalProperties = mixpanel.people.peopleQueue.last!
         let transactions = (r["$set"] as? InternalProperties)?["$transactions"] as? [MixpanelType]
         XCTAssertEqual(transactions?.count, 0)

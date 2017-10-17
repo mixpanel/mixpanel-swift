@@ -16,9 +16,11 @@ func += <K, V> (left: inout [K:V], right: [K:V]) {
 
 class Track {
     let apiToken: String
-
-    init(apiToken: String) {
+    let lock: ReadWriteLock
+    
+    init(apiToken: String, lock: ReadWriteLock) {
         self.apiToken = apiToken
+        self.lock = lock
     }
 
     func track(event: String?,
@@ -42,7 +44,9 @@ class Track {
         p["token"] = apiToken
         p["time"] = epochSeconds
         if let eventStartTime = eventStartTime {
-            timedEvents.removeValue(forKey: ev!)
+            self.lock.write {
+                timedEvents.removeValue(forKey: ev!)
+            }
             p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
         }
         p["distinct_id"] = distinctId
@@ -52,48 +56,64 @@ class Track {
         }
 
         let trackEvent: InternalProperties = ["event": ev!, "properties": p]
-        eventsQueue.append(trackEvent)
-
-        if eventsQueue.count > QueueConstants.queueSize {
-            eventsQueue.remove(at: 0)
+        
+        self.lock.write {
+            eventsQueue.append(trackEvent)
+            if eventsQueue.count > QueueConstants.queueSize {
+                eventsQueue.remove(at: 0)
+            }
         }
+
     }
 
     func registerSuperProperties(_ properties: Properties, superProperties: inout InternalProperties) {
-        assertPropertyTypes(properties)
-        superProperties += properties
+        self.lock.write {
+            assertPropertyTypes(properties)
+            superProperties += properties
+        }
     }
 
     func registerSuperPropertiesOnce(_ properties: Properties,
                                      superProperties: inout InternalProperties,
                                      defaultValue: MixpanelType?) {
-        assertPropertyTypes(properties)
-            _ = properties.map() {
-                let val = superProperties[$0.key]
-                if val == nil ||
-                    (defaultValue != nil && (val as? NSObject == defaultValue as? NSObject)) {
-                    superProperties[$0.key] = $0.value
+        self.lock.write {
+            assertPropertyTypes(properties)
+                _ = properties.map() {
+                    let val = superProperties[$0.key]
+                    if val == nil ||
+                        (defaultValue != nil && (val as? NSObject == defaultValue as? NSObject)) {
+                        superProperties[$0.key] = $0.value
+                    }
                 }
-            }
+        }
+        
     }
 
     func unregisterSuperProperty(_ propertyName: String, superProperties: inout InternalProperties) {
-        superProperties.removeValue(forKey: propertyName)
+        self.lock.write {
+            superProperties.removeValue(forKey: propertyName)
+        }
     }
 
     func clearSuperProperties(_ superProperties: inout InternalProperties) {
-        superProperties.removeAll()
+        self.lock.write {
+            superProperties.removeAll()
+        }
     }
 
     func time(event: String?, timedEvents: inout InternalProperties, startTime: Double) {
-        guard let event = event, !event.isEmpty else {
-            Logger.error(message: "mixpanel cannot time an empty event")
-            return
+        self.lock.write {
+            guard let event = event, !event.isEmpty else {
+                Logger.error(message: "mixpanel cannot time an empty event")
+                return
+            }
+            timedEvents[event] = startTime
         }
-        timedEvents[event] = startTime
     }
 
     func clearTimedEvents(_ timedEvents: inout InternalProperties) {
-        timedEvents.removeAll()
+        self.lock.write {
+            timedEvents.removeAll()
+        }
     }
 }

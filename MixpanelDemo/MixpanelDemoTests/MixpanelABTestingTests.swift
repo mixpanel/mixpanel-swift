@@ -135,14 +135,16 @@ class MixpanelABTestingTests: MixpanelBaseTests {
         self.waitForExpectations(timeout: 0.5, handler: nil)
         // Test that calling again uses the cache (no extra requests to decide).
         self.mixpanel.checkDecide(completion: { _ in })
-        self.waitForSerialQueue()
+        self.waitForTrackingQueue()
+        self.waitForNetworkQueue()
         XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.count, 2, "no variants found")
         // Test that we make another request if useCache is off
         self.mixpanel.checkDecide(forceFetch: true, completion: { (response: DecideResponse?) -> Void in
             XCTAssertEqual(response!.newVariants.count,
                            0,
                            "Should not get any *new* variants if the decide response was the same")})
-        self.waitForSerialQueue()
+        self.waitForTrackingQueue()
+        self.waitForNetworkQueue()
         LSNocilla.sharedInstance().clearStubs()
         self.stubDecide("test_decide_response_2")
         var completionCalled = false
@@ -151,7 +153,8 @@ class MixpanelABTestingTests: MixpanelBaseTests {
             XCTAssertEqual(response!.newVariants.count,
                            1,
                            "Should have got 1 new variants from decide (new variant for same experiment)")})
-        self.waitForSerialQueue()
+        self.waitForTrackingQueue()
+        self.waitForNetworkQueue()
         XCTAssert(completionCalled, "completion block should have been called")
         // Reset to default decide response
         self.stubDecide("test_decide_response")
@@ -165,7 +168,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
         button.backgroundColor = UIColor.black
         topViewController().view.addSubview(button)
         self.mixpanel.identify(distinctId: "ABC")
-        waitForSerialQueue()
+        waitForTrackingQueue()
         let expect = self.expectation(description: "Finish join experiments")
         self.mixpanel.joinExperiments() {
             XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.count, 2, "Should have 2 variants")
@@ -182,7 +185,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
             var lastCall = false
             self.mixpanel.joinExperiments() {
                 XCTAssert(lastCall, "callback should run after variants have been processed")
-                self.waitForSerialQueue()
+                self.waitForTrackingQueue()
                 XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.count, 3, "Should have 3 variants")
                 XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.filter {
                     return $0.ID == 1 && $0.running
@@ -205,7 +208,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
         LSNocilla.sharedInstance().clearStubs()
         self.stubDecide("test_decide_response")
         self.mixpanel.identify(distinctId: "DEF")
-        waitForSerialQueue()
+        waitForTrackingQueue()
         self.mixpanel.checkDecide(completion: { (response: DecideResponse?) -> Void in
             DispatchQueue.main.async {
                 for variant: Variant in response!.newVariants {
@@ -214,7 +217,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
                 }
             }
         })
-        self.waitForSerialQueue()
+        self.waitForTrackingQueue()
         let expect = self.expectation(description: "decide variants tracked")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.count, 2, "no variants found")

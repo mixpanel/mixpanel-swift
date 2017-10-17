@@ -26,8 +26,9 @@ struct DecideResponse {
 class Decide {
 
     let decideRequest: DecideRequest
+    let lock: ReadWriteLock
     var decideFetched = false
-    var notificationsInstance = InAppNotifications()
+    var notificationsInstance: InAppNotifications
     var codelessInstance = Codeless()
     var ABTestingInstance = ABTesting()
     var webSocketWrapper: WebSocketWrapper?
@@ -46,8 +47,10 @@ class Decide {
 
     let switchboardURL = "wss://switchboard.mixpanel.com"
 
-    required init(basePathIdentifier: String) {
+    required init(basePathIdentifier: String, lock: ReadWriteLock) {
         self.decideRequest = DecideRequest(basePathIdentifier: basePathIdentifier)
+        self.lock = lock
+        self.notificationsInstance = InAppNotifications(lock: self.lock)
     }
 
     func checkDecide(forceFetch: Bool = false,

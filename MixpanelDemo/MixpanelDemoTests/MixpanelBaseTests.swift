@@ -20,10 +20,15 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     override func setUp() {
         NSLog("starting test setup...")
         super.setUp()
-
+        stubTrack()
+        stubDecide()
+        stubEngage()
         LSNocilla.sharedInstance().start()
         mixpanelWillFlush = false
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
+        mixpanel.reset()
+        waitForTrackingQueue()
+        LSNocilla.sharedInstance().clearStubs()
         NSLog("finished test setup")
     }
 
@@ -31,8 +36,9 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         super.tearDown()
         stubTrack()
         stubDecide()
+        stubEngage()
         mixpanel.reset()
-        waitForSerialQueue()
+        waitForTrackingQueue()
 
         LSNocilla.sharedInstance().stop()
         LSNocilla.sharedInstance().clearStubs()
@@ -44,8 +50,14 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         return mixpanelWillFlush
     }
 
-    func waitForSerialQueue() {
-        mixpanel.serialQueue.sync() {
+    func waitForTrackingQueue() {
+        mixpanel.trackingQueue.sync() {
+            return
+        }
+    }
+
+    func waitForNetworkQueue() {
+        mixpanel.networkQueue.sync() {
             return
         }
     }
@@ -62,9 +74,9 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         }
     }
 
-    func flushAndWaitForSerialQueue() {
+    func flushAndWaitForNetworkQueue() {
         mixpanel.flush()
-        waitForSerialQueue()
+        waitForNetworkQueue()
     }
 
     func assertDefaultPeopleProperties(_ properties: InternalProperties) {

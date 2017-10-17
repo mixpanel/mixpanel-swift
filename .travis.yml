@@ -30,5 +30,5 @@ script:
 
   # Run `pod lib lint` if specified
   - if [ $POD_LINT == "YES" ]; then
-      cd .. && pod _1.3.1_ lib lint --allow-warnings --verbose && cd MixpanelDemo;
+      cd .. && pod _1.3.1_ lib lint --allow-warnings && cd MixpanelDemo;
     fi

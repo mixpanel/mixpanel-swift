@@ -21,14 +21,17 @@ open class People {
 
     let apiToken: String
     let serialQueue: DispatchQueue
+    let lock: ReadWriteLock
     var peopleQueue = Queue()
+    var flushPeopleQueue = Queue()
     var unidentifiedQueue = Queue()
     var distinctId: String? = nil
     var delegate: FlushDelegate?
 
-    init(apiToken: String, serialQueue: DispatchQueue) {
+    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
+        self.lock = lock
     }
 
     func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
@@ -59,12 +62,19 @@ open class People {
                 r["$distinct_id"] = distinctId
                 self.addPeopleObject(r)
             } else {
-                self.unidentifiedQueue.append(r)
-                if self.unidentifiedQueue.count > QueueConstants.queueSize {
-                    self.unidentifiedQueue.remove(at: 0)
+                
+                self.lock.write {
+                    self.unidentifiedQueue.append(r)
+                    if self.unidentifiedQueue.count > QueueConstants.queueSize {
+                        self.unidentifiedQueue.remove(at: 0)
+                    }
                 }
+
             }
-            Persistence.archivePeople(self.peopleQueue, token: self.apiToken)
+            self.lock.read{
+                Persistence.archivePeople(self.flushPeopleQueue + self.peopleQueue, token: self.apiToken)
+            }
+            
         }
 
         if MixpanelInstance.isiOSAppExtension() {
@@ -73,9 +83,11 @@ open class People {
     }
 
     func addPeopleObject(_ r: InternalProperties) {
-        peopleQueue.append(r)
-        if peopleQueue.count > QueueConstants.queueSize {
-            peopleQueue.remove(at: 0)
+        self.lock.write {
+            peopleQueue.append(r)
+            if peopleQueue.count > QueueConstants.queueSize {
+                peopleQueue.remove(at: 0)
+            }
         }
     }
 

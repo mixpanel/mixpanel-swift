@@ -16,7 +16,8 @@ protocol FlushDelegate {
 }
 
 class Flush: AppLifecycle {
-
+    
+    let lock: ReadWriteLock
     var timer: Timer?
     var delegate: FlushDelegate?
     var useIPAddressForGeoLocation = true
@@ -40,8 +41,9 @@ class Flush: AppLifecycle {
         }
     }
 
-    required init(basePathIdentifier: String) {
+    required init(basePathIdentifier: String, lock: ReadWriteLock) {
         self.flushRequest = FlushRequest(basePathIdentifier: basePathIdentifier)
+        self.lock = lock
     }
 
     func flushEventsQueue(_ eventsQueue: inout Queue, automaticEventsEnabled: Bool?) {
@@ -141,7 +143,9 @@ class Flush: AppLifecycle {
                                             semaphore.signal()
                 })
                 _ = semaphore.wait(timeout: DispatchTime.distantFuture)
-                queue = shadowQueue
+                self.lock.write {
+                    queue = shadowQueue
+                }
             }
 
             if !shouldContinue {

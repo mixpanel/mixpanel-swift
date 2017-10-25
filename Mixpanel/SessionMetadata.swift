@@ -13,12 +13,18 @@ class SessionMetadata {
     var peopleCounter: UInt64 = 0
     var sessionID: UInt64 = 0
     var sessionStartEpoch: UInt64 = 0
+    var trackingQueue: DispatchQueue
 
+    init(trackingQueue: DispatchQueue) {
+        self.trackingQueue = trackingQueue
+    }
     func applicationDidBecomeActive() {
-        eventsCounter = 0
-        peopleCounter = 0
-        sessionID = UInt64.random
-        sessionStartEpoch = UInt64(Date().timeIntervalSince1970)
+        trackingQueue.async {
+            self.eventsCounter = 0
+            self.peopleCounter = 0
+            self.sessionID = UInt64.random
+            self.sessionStartEpoch = UInt64(Date().timeIntervalSince1970)
+        }
     }
 
     func toDict(isEvent: Bool = true) -> InternalProperties {
@@ -27,7 +33,6 @@ class SessionMetadata {
                     "$mp_session_seq_id": (isEvent ? eventsCounter : peopleCounter),
                     "$mp_session_start_sec": sessionStartEpoch]
         isEvent ? (eventsCounter += 1) : (peopleCounter += 1)
-        print(dict)
         return dict
     }
 }

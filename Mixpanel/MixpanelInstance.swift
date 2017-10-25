@@ -238,7 +238,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if !os(OSX)
     var taskId = UIBackgroundTaskInvalid
     #endif // os(OSX)
-    let sessionMetadata = SessionMetadata()
+    let sessionMetadata: SessionMetadata
     let flushInstance: Flush
     let trackInstance: Track
     #if DECIDE
@@ -258,11 +258,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #if DECIDE
             decideInstance = Decide(basePathIdentifier: name, lock: self.readWriteLock)
         #endif // DECIDE
+        let label = "com.mixpanel.\(self.apiToken)"
+        trackingQueue = DispatchQueue(label: label)
+        sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
                               metadata: sessionMetadata)
-        let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: label)
         networkQueue = DispatchQueue(label: label)
         #if os(iOS)
             reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
@@ -316,12 +317,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         self.name = name
         self.readWriteLock = ReadWriteLock(label: "globalLock")
         flushInstance = Flush(basePathIdentifier: name, lock: self.readWriteLock)
+        let label = "com.mixpanel.\(self.apiToken)"
+        trackingQueue = DispatchQueue(label: label)
+        sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
                               metadata: sessionMetadata)
         flushInstance.delegate = self
-        let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: label)
         networkQueue = DispatchQueue(label: label)
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,

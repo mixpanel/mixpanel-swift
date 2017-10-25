@@ -6,7 +6,6 @@
 //  Copyright © 2017 Mixpanel. All rights reserved.
 //
 
-
 protocol AEDelegate {
     func track(event: String?, properties: Properties?)
     #if DECIDE

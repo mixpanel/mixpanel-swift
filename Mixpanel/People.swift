@@ -27,11 +27,13 @@ open class People {
     var unidentifiedQueue = Queue()
     var distinctId: String? = nil
     var delegate: FlushDelegate?
+    let metadata: SessionMetadata
 
-    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock) {
+    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, metadata: SessionMetadata) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
         self.lock = lock
+        self.metadata = metadata
     }
 
     func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
@@ -59,6 +61,7 @@ open class People {
                 p += properties
                 r[action] = p
             }
+            self.metadata.toDict(isEvent: false).forEach { (k,v) in r[k] = v }
 
             if let distinctId = self.distinctId {
                 r["$distinct_id"] = distinctId

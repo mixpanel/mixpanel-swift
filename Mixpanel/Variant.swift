@@ -130,8 +130,10 @@ class Variant: NSObject, NSCoding {
     }
 
     func executeTweaks() {
-        for tweak in tweaks {
-            tweak.execute()
+        if !finished {
+            for tweak in tweaks {
+                tweak.execute()
+            }
         }
     }
 

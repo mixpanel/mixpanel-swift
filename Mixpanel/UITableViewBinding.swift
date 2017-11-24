@@ -18,12 +18,12 @@ class UITableViewBinding: CodelessBinding {
     }
 
     convenience init?(object: [String: Any]) {
-        guard let path = object["path"] as? String, path.characters.count >= 1 else {
+        guard let path = object["path"] as? String, path.count >= 1 else {
             Logger.warn(message: "must supply a view path to bind by")
             return nil
         }
 
-        guard let eventName = object["event_name"] as? String, eventName.characters.count >= 1 else {
+        guard let eventName = object["event_name"] as? String, eventName.count >= 1 else {
             Logger.warn(message: "binding requires an event name")
             return nil
         }

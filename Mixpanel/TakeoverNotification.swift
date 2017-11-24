@@ -93,7 +93,7 @@ extension String {
             newString = regex.stringByReplacingMatches(in: self,
                                                        options: [],
                                                        range: NSRange(location: 0,
-                                                                      length: self.characters.count),
+                                                                      length: self.count),
                                                        withTemplate: "\(suffix)$1")
         } catch {
             Logger.error(message: "cannot add suffix to URL string")

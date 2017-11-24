@@ -31,7 +31,7 @@ class Track {
                distinctId: String,
                epochInterval: Double) {
         var ev = event
-        if ev == nil || ev!.characters.isEmpty {
+        if ev == nil || ev!.isEmpty {
             Logger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")
             ev = "mp_event"
         }

@@ -85,7 +85,7 @@ class AutomaticProperties {
         if radio == nil {
             radio = "None"
         } else if radio!.hasPrefix(prefix) {
-            radio = (radio! as NSString).substring(from: prefix.characters.count)
+            radio = (radio! as NSString).substring(from: prefix.count)
         }
         return radio
     }

@@ -733,6 +733,7 @@ extension MixpanelInstance {
                     self.decideInstance.decideFetched = false
                     self.decideInstance.ABTestingInstance.variants = Set()
                     self.decideInstance.codelessInstance.codelessBindings = Set()
+                    MixpanelTweaks.defaultStore.reset()
                     #endif // DECIDE
                 }
                 self.archive()

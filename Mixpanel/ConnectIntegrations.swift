@@ -12,7 +12,7 @@ class ConnectIntegrations {
     var savedUrbanAirshipChannelID: String?
 
     open func setupIntegrations(_ integrations:[String]) {
-        if integrations.contains("urban_airship") {
+        if integrations.contains("urbanairship") {
             self.setUrbanAirshipPeopleProp()
         }
     }

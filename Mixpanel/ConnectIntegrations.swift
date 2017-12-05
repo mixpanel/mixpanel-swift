@@ -24,7 +24,7 @@ class ConnectIntegrations {
                 typealias pushFunc = @convention(c) (AnyObject, Selector) -> AnyObject!
                 let curriedImplementation = unsafeBitCast(pushIMP, to: pushFunc.self)
                 if let push = curriedImplementation(urbanAirship.self, pushSelector) {
-                    if let channelID = push.perform(NSSelectorFromString("channelID")).takeUnretainedValue() as? String {
+                    if let channelID = push.perform(NSSelectorFromString("channelID"))?.takeUnretainedValue() as? String {
                         self.urbanAirshipRetries = 0
                         if (channelID != self.savedUrbanAirshipChannelID) {
                             self.mixpanel?.people.set(property: "$ios_urban_airship_channel_id", to: channelID)

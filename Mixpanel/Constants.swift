@@ -39,3 +39,7 @@ extension UIDevice {
     }
 }
 #endif // !os(OSX)
+
+struct ConnectIntegrationsConstants {
+    static let uaMaxRetries = 3
+}

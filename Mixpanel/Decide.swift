@@ -14,12 +14,14 @@ struct DecideResponse {
     var newCodelessBindings: Set<CodelessBinding>
     var newVariants: Set<Variant>
     var toFinishVariants: Set<Variant>
+    var integrations: [String]
 
     init() {
         unshownInAppNotifications = []
         newCodelessBindings = Set()
         newVariants = Set()
         toFinishVariants = Set()
+        integrations = []
     }
 }
 
@@ -127,6 +129,10 @@ class Decide {
 
                 if let automaticEvents = result["automatic_events"] as? Bool {
                     self.automaticEventsEnabled = automaticEvents
+                }
+
+                if let integrations = result["integrations"] as? [String] {
+                    decideResponse.integrations = integrations
                 }
 
                 self.decideFetched = true

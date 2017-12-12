@@ -41,8 +41,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
 
-        flushAndWaitForNetworkQueue()
-
         // Failure count should be 3
         let waitTime =
             mixpanel.flushInstance.flushRequest.networkRequestsAllowedAfterTime - Date().timeIntervalSince1970
@@ -59,7 +57,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         for i in 0..<50 {
             mixpanel.track(event: "event \(i)")
         }
-
         waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.eventsQueue.isEmpty,
@@ -68,7 +65,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         for i in 0..<60 {
             mixpanel.track(event: "event \(i)")
         }
-
         waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.eventsQueue.isEmpty,
@@ -78,12 +74,10 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testFlushPeople() {
         stubEngage()
-
         mixpanel.identify(distinctId: "d1")
         for i in 0..<50 {
             mixpanel.people.set(property: "p1", to: "\(i)")
         }
-
         waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty, "people should have been flushed")
@@ -107,6 +101,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
         flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.eventsQueue.count == 50,
                       "events should still be in the queue if flush fails")
+
+
     }
 
     func testAddingEventsAfterFlush() {
@@ -538,8 +534,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
         mixpanel.identify(distinctId: "d1")
         mixpanel.track(event: "e1")
         mixpanel.people.set(property: "p1", to: "a")
-        mixpanel.flush()
         waitForTrackingQueue()
+        flushAndWaitForNetworkQueue()
         XCTAssertTrue(mixpanel.eventsQueue.count == 1, "delegate should have stopped flush")
         XCTAssertTrue(mixpanel.people.peopleQueue.count == 1, "delegate should have stopped flush")
     }
@@ -569,6 +565,10 @@ class MixpanelDemoTests: MixpanelBaseTests {
                      "Tracking the same event should require a second call to timeEvent.")
     }
 
+    func testTelephonyInfoInitialized() {
+        XCTAssertNotNil(AutomaticProperties.telephonyInfo, "telephonyInfo wasn't initialized")
+    }
+
     func testReadWriteLock() {
         var array = [Int]()
         let lock = ReadWriteLock(label: "test")
@@ -588,9 +588,5 @@ class MixpanelDemoTests: MixpanelBaseTests {
                 }
             }
         }
-    }
-
-    func testTelephonyInfoInitialized() {
-        XCTAssertNotNil(AutomaticProperties.telephonyInfo, "telephonyInfo wasn't initialized")
     }
 }

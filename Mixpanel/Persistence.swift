@@ -130,7 +130,6 @@ class Persistence {
             Logger.error(message: "failed to archive \(type.rawValue)")
             return
         }
-
         addSkipBackupAttributeToItem(at: path)
     }
 

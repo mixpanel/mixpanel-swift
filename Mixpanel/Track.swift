@@ -17,7 +17,6 @@ func += <K, V> (left: inout [K:V], right: [K:V]) {
 class Track {
     let apiToken: String
     let lock: ReadWriteLock
-
     init(apiToken: String, lock: ReadWriteLock) {
         self.apiToken = apiToken
         self.lock = lock
@@ -62,6 +61,7 @@ class Track {
                 eventsQueue.remove(at: 0)
             }
         }
+
     }
 
     func registerSuperProperties(_ properties: Properties, superProperties: inout InternalProperties) {

@@ -237,6 +237,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if DECIDE
     let decideInstance: Decide
     let automaticEvents = AutomaticEvents()
+    let connectIntegrations = ConnectIntegrations()
     #endif // DECIDE
 
     #if !os(OSX)
@@ -263,7 +264,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         flushInstance._flushInterval = flushInterval
         setupListeners()
         unarchive()
-
         #if DECIDE
             if !MixpanelInstance.isiOSAppExtension() {
                 automaticEvents.delegate = self
@@ -276,6 +276,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     trackPushNotification(notification, event: "$app_open")
                 }
             }
+            connectIntegrations.mixpanel = self
         #endif // DECIDE
     }
     #else
@@ -413,6 +414,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                 self.markVariantRun(variant)
                             }
                         }
+
+                        if decideResponse.integrations.count > 0 {
+                            self.connectIntegrations.setupIntegrations(decideResponse.integrations)
+                        }
                     }
                 }
             }
@@ -448,7 +453,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         networkQueue.async {
             self.archive()
             #if DECIDE
-            self.decideInstance.decideFetched = false
+            self.readWriteLock.write {
+                self.decideInstance.decideFetched = false
+            }
             #endif // DECIDE
             if self.taskId != UIBackgroundTaskInvalid {
                 sharedApplication.endBackgroundTask(self.taskId)
@@ -728,10 +735,12 @@ extension MixpanelInstance {
                     self.people.peopleQueue = Queue()
                     self.people.unidentifiedQueue = Queue()
                     #if DECIDE
-                        self.decideInstance.notificationsInstance.shownNotifications = Set()
-                        self.decideInstance.decideFetched = false
-                        self.decideInstance.ABTestingInstance.variants = Set()
-                        self.decideInstance.codelessInstance.codelessBindings = Set()
+                    self.decideInstance.notificationsInstance.shownNotifications = Set()
+                    self.decideInstance.decideFetched = false
+                    self.decideInstance.ABTestingInstance.variants = Set()
+                    self.decideInstance.codelessInstance.codelessBindings = Set()
+                    self.connectIntegrations.reset()
+                    MixpanelTweaks.defaultStore.reset()
                     #endif // DECIDE
                 }
                 self.archive()
@@ -765,8 +774,8 @@ extension MixpanelInstance {
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue,
                                                 shownNotifications: decideInstance.notificationsInstance.shownNotifications,
                                                 automaticEventsEnabled: decideInstance.automaticEventsEnabled)
-            Persistence.archive(eventsQueue: eventsQueue,
-                                peopleQueue: people.peopleQueue,
+            Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
+                                peopleQueue: people.flushPeopleQueue + people.peopleQueue,
                                 properties: properties,
                                 codelessBindings: decideInstance.codelessInstance.codelessBindings,
                                 variants: decideInstance.ABTestingInstance.variants,
@@ -793,8 +802,8 @@ extension MixpanelInstance {
                                                 alias: alias,
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue)
-            Persistence.archive(eventsQueue: eventsQueue,
-                                peopleQueue: people.peopleQueue,
+            Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
+                                peopleQueue: people.flushPeopleQueue + people.peopleQueue,
                                 properties: properties,
                                 token: apiToken)
         }
@@ -893,7 +902,7 @@ extension MixpanelInstance {
      - parameter completion: an optional completion handler for when the flush has completed.
      */
     open func flush(completion: (() -> Void)? = nil) {
-        networkQueue.async() {
+        networkQueue.async {
             if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
                 return
             }
@@ -918,12 +927,14 @@ extension MixpanelInstance {
             self.readWriteLock.write {
                 self.eventsQueue = self.flushEventsQueue + self.eventsQueue
                 self.people.peopleQueue = self.people.flushPeopleQueue + self.people.peopleQueue
-
                 self.flushEventsQueue.removeAll()
                 self.people.flushPeopleQueue.removeAll()
             }
 
             self.archive()
+
+
+
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
             }
@@ -957,7 +968,7 @@ extension MixpanelInstance {
                                      distinctId: self.distinctId,
                                      epochInterval: epochInterval)
             self.readWriteLock.read {
-                Persistence.archiveEvents(self.eventsQueue, token: self.apiToken)
+                Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
             }
         }
 
@@ -1158,7 +1169,6 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         Logger.info(message: "Marking variant \(variant.ID) shown for experiment \(variant.experimentID)")
         let shownVariant = ["\(variant.experimentID)": variant.ID]
         people.merge(properties: ["$experiments": shownVariant])
-
         trackingQueue.async {
             var superPropertiesCopy = self.superProperties
             var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]
@@ -1271,10 +1281,10 @@ extension MixpanelInstance: InAppNotificationsDelegate {
             }
         }
     }
-    
+
     /**
      Returns the payload of a notification if available
-     
+
      - note: You do not need to call this method on the main thread.
      */
     open func fetchNotificationPayload(completion: @escaping ([String: AnyObject]?) -> Void){

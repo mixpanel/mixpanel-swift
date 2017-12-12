@@ -68,9 +68,10 @@ open class People {
                         self.unidentifiedQueue.remove(at: 0)
                     }
                 }
+
             }
             self.lock.read{
-                Persistence.archivePeople(self.peopleQueue, token: self.apiToken)
+                Persistence.archivePeople(self.flushPeopleQueue + self.peopleQueue, token: self.apiToken)
             }
         }
 

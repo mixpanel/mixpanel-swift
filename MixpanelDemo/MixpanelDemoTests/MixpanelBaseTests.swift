@@ -20,7 +20,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     override func setUp() {
         NSLog("starting test setup...")
         super.setUp()
-
         stubTrack()
         stubDecide()
         stubEngage()

@@ -46,7 +46,7 @@
             </ul>
           </li>
           <li class="nav-group-name">
-            <a href="../Enums.html">Enums</a>
+            <a href="../Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="../Enums/TweakViewDataType.html">TweakViewDataType</a>
@@ -129,7 +129,7 @@
             </ul>
           </li>
           <li class="nav-group-name">
-            <a href="../Structs.html">Structs</a>
+            <a href="../Structs.html">Structures</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="../Structs/AnyTweak.html">AnyTweak</a>
@@ -788,9 +788,9 @@ flushed once <code>identify:</code> is called.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC11createAliasySS_SS10distinctIdtF"></a>
-                    <a name="//apple_ref/swift/Method/createAlias(_:distinctId:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11createAliasySS_SS10distinctIdtF">createAlias(_:distinctId:)</a>
+                    <a name="/s:8Mixpanel0A8InstanceC11createAliasySS_SS10distinctIdSb9usePeopletF"></a>
+                    <a name="//apple_ref/swift/Method/createAlias(_:distinctId:usePeople:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11createAliasySS_SS10distinctIdSb9usePeopletF">createAlias(_:distinctId:usePeople:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -803,8 +803,8 @@ flushed once <code>identify:</code> is called.</p>
 <p>This method is used to map an identifier called an alias to the existing Mixpanel
 distinct id. This causes all events and people requests sent with the alias to be
 mapped back to the original distinct id. The recommended usage pattern is to call
-both createAlias: and identify: when the user signs up, and only identify: (with
-their new user ID) when they log in. This will keep your signup funnels working
+createAlias: and then identify: (with their new user ID)
+when they log in the next time. This will keep your signup funnels working
 correctly.</p>
 
 <p>This makes the current id and &lsquo;Alias&rsquo; interchangeable distinct ids.
@@ -822,7 +822,7 @@ mixpanelInstance.createAlias(<q>Alias</q>, mixpanelInstance.distinctId)</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">createAlias</span><span class="p">(</span><span class="n">_</span> <span class="nv">alias</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="n">open</span> <span class="kd">func</span> <span class="nf">createAlias</span><span class="p">(</span><span class="n">_</span> <span class="nv">alias</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">usePeople</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -851,6 +851,19 @@ mixpanelInstance.createAlias(<q>Alias</q>, mixpanelInstance.distinctId)</p>
                               <td>
                                 <div>
                                   <p>the old distinct id that alias will be mapped to</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>usePeople</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>boolean that controls whether or not to set the people distinctId to the event distinctId.
+This should only be set to false if you wish to prevent people profile updates for that user.</p>
                                 </div>
                               </td>
                             </tr>
@@ -1719,8 +1732,8 @@ and join, any experiments are newly available for the current user.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2017 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2017-07-26)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.3</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2017 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2017-10-19)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.8.4</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

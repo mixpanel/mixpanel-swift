@@ -10,6 +10,7 @@
 		51DD567C1D306B740045D3DB /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56791D306B740045D3DB /* Logger.swift */; };
 		51DD56831D306B7B0045D3DB /* PrintLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56801D306B7B0045D3DB /* PrintLogging.swift */; };
 		51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56811D306B7B0045D3DB /* FileLogging.swift */; };
+		BB9614171F3BB87700C3EF3E /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
 		E10D118D1EC0F30900195CCD /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		E10D118F1EC0F30B00195CCD /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		E115234D1D7A59AF00657E80 /* UIImageToNSDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115234C1D7A59AF00657E80 /* UIImageToNSDictionary.swift */; };
@@ -102,9 +103,8 @@
 		E189D8F61D54ECBF007F3F29 /* Decide.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F51D54ECBF007F3F29 /* Decide.swift */; };
 		E189D8F81D552324007F3F29 /* DecideRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8F71D552324007F3F29 /* DecideRequest.swift */; };
 		E189D8FD1D5A6985007F3F29 /* InAppNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */; };
-		E19052041F96B4BF00900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19052031F96B4BF00900E5D /* ReadWriteLock.swift */; };
-		E19052051F96C7A500900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19052031F96B4BF00900E5D /* ReadWriteLock.swift */; };
-		E19052061F96C7A600900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19052031F96B4BF00900E5D /* ReadWriteLock.swift */; };
+		E19052001F9548F000900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
+		E19052011F9548F000900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
 		E19087BF1E53985300023FCC /* placeholder-image.png in Resources */ = {isa = PBXBuildFile; fileRef = E19087BE1E53985300023FCC /* placeholder-image.png */; };
 		E19312671D5A7848007CE1E9 /* InAppNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312661D5A7848007CE1E9 /* InAppNotification.swift */; };
 		E193126B1D5B9D1E007CE1E9 /* MiniNotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */; };
@@ -135,12 +135,14 @@
 		E1F15FE21E64B60D00391AE3 /* Flush.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115949E1D01BE14007F8B4F /* Flush.swift */; };
 		E1F15FE31E64B60D00391AE3 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594A01D01C597007F8B4F /* Track.swift */; };
 		E1F15FE41E64B60D00391AE3 /* People.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7C71D0435670076CDE3 /* People.swift */; };
+		F05767541F8D909600499D9B /* ConnectIntegrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05767531F8D909600499D9B /* ConnectIntegrations.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		51DD56791D306B740045D3DB /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		51DD56801D306B7B0045D3DB /* PrintLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrintLogging.swift; sourceTree = "<group>"; };
 		51DD56811D306B7B0045D3DB /* FileLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileLogging.swift; sourceTree = "<group>"; };
+		BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadWriteLock.swift; sourceTree = "<group>"; };
 		E115234C1D7A59AF00657E80 /* UIImageToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageToNSDictionary.swift; sourceTree = "<group>"; };
 		E115234E1D7F58B000657E80 /* CGSizeToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGSizeToNSDictionary.swift; sourceTree = "<group>"; };
 		E11523501D7F5C7500657E80 /* UIEdgeInsetsToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIEdgeInsetsToNSDictionary.swift; sourceTree = "<group>"; };
@@ -232,6 +234,7 @@
 		E1D335CD1D30578E00E68E12 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutomaticProperties.swift; sourceTree = "<group>"; };
 		E1F15FC91E64A10700391AE3 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F05767531F8D909600499D9B /* ConnectIntegrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectIntegrations.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -453,6 +456,7 @@
 		E189D8F91D5A6908007F3F29 /* Decide */ = {
 			isa = PBXGroup;
 			children = (
+				F05767521F8D905D00499D9B /* Connect Integrations */,
 				E189D8F51D54ECBF007F3F29 /* Decide.swift */,
 				E15422161D6FBA97009421A0 /* Swizzle.swift */,
 				E154221A1D70BEF0009421A0 /* Web Socket */,
@@ -474,7 +478,7 @@
 				E165228E1D6781DF000D5949 /* MixpanelType.swift */,
 				E16C0EB21D80BF290051EF35 /* MD5.swift */,
 				E12BD38C1D91EBE2008989C9 /* SHA256.swift */,
-				E19052031F96B4BF00900E5D /* ReadWriteLock.swift */,
+				BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -542,6 +546,14 @@
 				E19D12951D9C5E6600A8016D /* VariantTweak.swift */,
 			);
 			name = "A/B Testing";
+			sourceTree = "<group>";
+		};
+		F05767521F8D905D00499D9B /* Connect Integrations */ = {
+			isa = PBXGroup;
+			children = (
+				F05767531F8D909600499D9B /* ConnectIntegrations.swift */,
+			);
+			name = "Connect Integrations";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -761,6 +773,7 @@
 				E11801B01D7F92F10006DD2B /* UIFontToNSDictionary.swift in Sources */,
 				E118EA021E37F3A700223C47 /* MiniNotification.swift in Sources */,
 				E174DADD1DA336C000FED703 /* TweakLibrary.swift in Sources */,
+				BB9614171F3BB87700C3EF3E /* ReadWriteLock.swift in Sources */,
 				E19312671D5A7848007CE1E9 /* InAppNotification.swift in Sources */,
 				E189D8FD1D5A6985007F3F29 /* InAppNotifications.swift in Sources */,
 				E11619DB1D5D52F900610404 /* BaseNotificationViewController.swift in Sources */,
@@ -782,6 +795,7 @@
 				E1D335CC1D303A0D00E68E12 /* FlushRequest.swift in Sources */,
 				E115234F1D7F58B000657E80 /* CGSizeToNSDictionary.swift in Sources */,
 				E154221F1D70DB09009421A0 /* WebSocket.swift in Sources */,
+				F05767541F8D909600499D9B /* ConnectIntegrations.swift in Sources */,
 				E15422151D6F9F44009421A0 /* Codeless.swift in Sources */,
 				E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */,
 				E1497EF21D6B8DC900B2B65C /* CodelessBinding.swift in Sources */,
@@ -811,7 +825,7 @@
 				E12782C41D4AB5CB0025FB05 /* FlushRequest.swift in Sources */,
 				E12782C51D4AB5CB0025FB05 /* Track.swift in Sources */,
 				E12782C61D4AB5CB0025FB05 /* People.swift in Sources */,
-				E19052051F96C7A500900E5D /* ReadWriteLock.swift in Sources */,
+				E19052001F9548F000900E5D /* ReadWriteLock.swift in Sources */,
 				E12782C71D4AB5CB0025FB05 /* Error.swift in Sources */,
 				E16522901D67D421000D5949 /* MixpanelType.swift in Sources */,
 				E12782C81D4AB5CB0025FB05 /* Constants.swift in Sources */,
@@ -836,7 +850,7 @@
 				E1F15FDE1E64B60A00391AE3 /* MixpanelType.swift in Sources */,
 				E1F15FDA1E64B60A00391AE3 /* JSONHandler.swift in Sources */,
 				E1F15FE31E64B60D00391AE3 /* Track.swift in Sources */,
-				E19052061F96C7A600900E5D /* ReadWriteLock.swift in Sources */,
+				E19052011F9548F000900E5D /* ReadWriteLock.swift in Sources */,
 				E1F15FE41E64B60D00391AE3 /* People.swift in Sources */,
 				E1F15FDB1E64B60A00391AE3 /* Error.swift in Sources */,
 				E1F15FD81E64B60200391AE3 /* FileLogging.swift in Sources */,
@@ -900,6 +914,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -950,6 +965,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1018,6 +1034,7 @@
 		E12782B81D4AB4B30025FB05 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CODE_SIGN_IDENTITY = "";
@@ -1045,6 +1062,7 @@
 		E12782B91D4AB4B30025FB05 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CODE_SIGN_IDENTITY = "";
@@ -1072,6 +1090,7 @@
 		E1F15FCE1E64A10800391AE3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -1101,6 +1120,7 @@
 		E1F15FCF1E64A10800391AE3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CODE_SIGN_IDENTITY = "-";

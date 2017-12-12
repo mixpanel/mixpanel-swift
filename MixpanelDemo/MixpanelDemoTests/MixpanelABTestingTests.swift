@@ -217,8 +217,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
                 }
             }
         })
-        self.waitForAsyncTasks()
-        waitForTrackingQueue()
+        self.waitForTrackingQueue()
         let expect = self.expectation(description: "decide variants tracked")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             XCTAssertEqual(self.mixpanel.decideInstance.ABTestingInstance.variants.count, 2, "no variants found")

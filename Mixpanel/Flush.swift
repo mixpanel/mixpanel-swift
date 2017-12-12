@@ -16,7 +16,6 @@ protocol FlushDelegate {
 }
 
 class Flush: AppLifecycle {
-
     let lock: ReadWriteLock
     var timer: Timer?
     var delegate: FlushDelegate?

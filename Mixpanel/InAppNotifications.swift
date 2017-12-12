@@ -20,7 +20,6 @@ enum InAppType: String {
 }
 
 class InAppNotifications: NotificationViewControllerDelegate {
-
     let lock: ReadWriteLock
     var checkForNotificationOnActive = true
     var showNotificationOnActive = true

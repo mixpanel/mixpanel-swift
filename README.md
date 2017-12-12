@@ -39,9 +39,9 @@ If you are using Objective-C, we recommend using our **[Objective-C Library](htt
 <a name="current-supported-features"></a>
 ## Current supported features
 
-**Our library now also has Swift 4 support. If you wish to use our Swift 4 implementation, please point to our 'swift4' branch (https://github.com/mixpanel/mixpanel-swift/tree/swift4)**
+**Our master branch and our releases are now on Swift 4.**
 
-**Our master branch and our releases are in Swift 3. If you wish to use our Swift 2.3 implementation, please point to our v1.0.1 release.**
+**If you wish to use our Swift 3 implementation, please point to the v2.2.3 release. If you wish to use our Swift 2.3 implementation, please point to the v1.0.1 release.**
 
 Our Swift library fully supports all of the Mixpanel features, and has full parity with the [Objective-C Library](https://github.com/mixpanel/mixpanel-iphone).
 

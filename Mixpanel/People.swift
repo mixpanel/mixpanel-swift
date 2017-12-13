@@ -52,7 +52,9 @@ open class People {
                 r[action] = properties["$properties"]
             } else {
                 if action == "$set" || action == "$set_once" {
-                    p += AutomaticProperties.peopleProperties
+                    AutomaticProperties.automaticPropertiesLock.read {
+                        p += AutomaticProperties.peopleProperties
+                    }
                 }
                 p += properties
                 r[action] = p

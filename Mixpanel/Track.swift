@@ -39,7 +39,9 @@ class Track {
         let epochSeconds = Int(round(epochInterval))
         let eventStartTime = timedEvents[ev!] as? Double
         var p = InternalProperties()
-        p += AutomaticProperties.properties
+        AutomaticProperties.automaticPropertiesLock.read {
+            p += AutomaticProperties.properties
+        }
         p["token"] = apiToken
         p["time"] = epochSeconds
         if let eventStartTime = eventStartTime {

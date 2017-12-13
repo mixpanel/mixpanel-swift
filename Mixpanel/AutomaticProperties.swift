@@ -23,6 +23,8 @@ class AutomaticProperties {
     static let telephonyInfo = CTTelephonyNetworkInfo()
     #endif // os(iOS)
 
+    static let automaticPropertiesLock = ReadWriteLock(label: "automaticPropertiesLock")
+
     static var properties: InternalProperties = {
         objc_sync_enter(AutomaticProperties.self); defer { objc_sync_exit(AutomaticProperties.self) }
         var p = InternalProperties()

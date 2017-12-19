@@ -29,7 +29,10 @@ class DecideRequest: Network {
             self.distinctId = URLQueryItem(name: "distinct_id", value: distinctId)
 
             // workaround for a/b testing
-            var peoplePropertiesCopy = AutomaticProperties.peopleProperties
+            var peoplePropertiesCopy = InternalProperties()
+            AutomaticProperties.automaticPropertiesLock.read {
+                peoplePropertiesCopy += AutomaticProperties.peopleProperties
+            }
             peoplePropertiesCopy["$ios_lib_version"] = "2.6"
             // end of workaround
 

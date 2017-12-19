@@ -563,7 +563,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     @objc func setCurrentRadio() {
         let currentRadio = AutomaticProperties.getCurrentRadio()
         trackingQueue.async {
-            AutomaticProperties.properties["$radio"] = currentRadio
+            AutomaticProperties.automaticPropertiesLock.write {
+                AutomaticProperties.properties["$radio"] = currentRadio
+            }
         }
     }
 

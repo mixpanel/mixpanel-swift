@@ -23,6 +23,8 @@ class AutomaticProperties {
     static let telephonyInfo = CTTelephonyNetworkInfo()
     #endif // os(iOS)
 
+    static let automaticPropertiesLock = ReadWriteLock(label: "automaticPropertiesLock")
+
     static var properties: InternalProperties = {
         objc_sync_enter(AutomaticProperties.self); defer { objc_sync_exit(AutomaticProperties.self) }
         var p = InternalProperties()
@@ -79,13 +81,11 @@ class AutomaticProperties {
     }()
 
     #if os(iOS)
-    class func getCurrentRadio() -> String? {
-        var radio = telephonyInfo.currentRadioAccessTechnology
+    class func getCurrentRadio() -> String {
+        var radio = telephonyInfo.currentRadioAccessTechnology ?? "None"
         let prefix = "CTRadioAccessTechnology"
-        if radio == nil {
-            radio = "None"
-        } else if radio!.hasPrefix(prefix) {
-            radio = (radio! as NSString).substring(from: prefix.count)
+        if radio.hasPrefix(prefix) {
+            radio = (radio as NSString).substring(from: prefix.count)
         }
         return radio
     }

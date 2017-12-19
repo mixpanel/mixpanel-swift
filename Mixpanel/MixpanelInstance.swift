@@ -12,6 +12,9 @@ import UIKit
 #else
 import Cocoa
 #endif // os(OSX)
+#if os(iOS)
+import SystemConfiguration
+#endif
 
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
@@ -229,6 +232,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var trackingQueue: DispatchQueue!
     var networkQueue: DispatchQueue!
     let readWriteLock: ReadWriteLock
+    #if os(iOS)
+    var reachability: SCNetworkReachability?
+    #endif
     #if !os(OSX)
     var taskId = UIBackgroundTaskInvalid
     #endif // os(OSX)
@@ -255,6 +261,25 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: label)
         networkQueue = DispatchQueue(label: label)
+        #if os(iOS)
+            reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
+            if let reachability = reachability {
+                var context = SCNetworkReachabilityContext(version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
+                func reachabilityCallback(reachability: SCNetworkReachability, flags: SCNetworkReachabilityFlags, unsafePointer: UnsafeMutableRawPointer?) -> Void {
+                    let wifi = flags.contains(SCNetworkReachabilityFlags.reachable) && !flags.contains(SCNetworkReachabilityFlags.isWWAN)
+                    AutomaticProperties.automaticPropertiesLock.write {
+                        AutomaticProperties.properties["$wifi"] = wifi
+                    }
+                    Logger.info(message: "reachability changed, wifi=\(wifi)")
+                }
+                if SCNetworkReachabilitySetCallback(reachability, reachabilityCallback, &context) {
+                    if !SCNetworkReachabilitySetDispatchQueue(reachability, trackingQueue) {
+                        // cleanup callback if setting dispatch queue failed
+                        SCNetworkReachabilitySetCallback(reachability, nil, nil)
+                    }
+                }
+            }
+        #endif
         flushInstance.delegate = self
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
@@ -369,6 +394,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     deinit {
         NotificationCenter.default.removeObserver(self)
+        #if os(iOS)
+            if let reachability = reachability {
+                if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
+                    Logger.error(message: "\(self) error unsetting reachability callback")
+                }
+                if !SCNetworkReachabilitySetDispatchQueue(reachability, nil) {
+                    Logger.error(message: "\(self) error unsetting reachability dispatch queue")
+                }
+            }
+        #endif
     }
 
     static func isiOSAppExtension() -> Bool {

@@ -1102,10 +1102,13 @@ extension MixpanelInstance {
 
     /**
      Clears all currently set super properties.
+
+     - parameter completion: closure to call upon execution
      */
-    open func clearSuperProperties() {
+    open func clearSuperProperties(completion: (() -> Void)? = nil) {
         dispatchAndTrack() {
             self.trackInstance.clearSuperProperties(&self.superProperties)
+            completion?()
         }
     }
 
@@ -1119,11 +1122,13 @@ extension MixpanelInstance {
      MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
 
      - parameter properties: properties dictionary
+     - parameter completion: closure to call upon execution
      */
-    open func registerSuperProperties(_ properties: Properties) {
+    open func registerSuperProperties(_ properties: Properties, completion: (() -> Void)? = nil) {
         dispatchAndTrack() {
             self.trackInstance.registerSuperProperties(properties,
                                                        superProperties: &self.superProperties)
+            completion?()
         }
     }
 
@@ -1136,13 +1141,16 @@ extension MixpanelInstance {
 
      - parameter properties:   properties dictionary
      - parameter defaultValue: Optional. overwrite existing properties that have this value
+     - parameter completion: closure to call upon execution
      */
     open func registerSuperPropertiesOnce(_ properties: Properties,
-                                            defaultValue: MixpanelType? = nil) {
+                                            defaultValue: MixpanelType? = nil,
+                                            completion: (() -> Void)? = nil) {
         dispatchAndTrack() {
             self.trackInstance.registerSuperPropertiesOnce(properties,
                                                            superProperties: &self.superProperties,
                                                            defaultValue: defaultValue)
+            completion?()
         }
     }
 
@@ -1158,11 +1166,13 @@ extension MixpanelInstance {
      registered.
 
      - parameter propertyName: array of property name strings to remove
+     - parameter completion: closure to call upon execution
      */
-    open func unregisterSuperProperty(_ propertyName: String) {
+    open func unregisterSuperProperty(_ propertyName: String, completion: (() -> Void)? = nil) {
         dispatchAndTrack() {
             self.trackInstance.unregisterSuperProperty(propertyName,
                                                        superProperties: &self.superProperties)
+            completion?()
         }
     }
 

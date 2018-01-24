@@ -259,7 +259,7 @@ open class People {
     /**
      Union list properties.
 
-     Property keys must be array objects.
+     Property values must be array objects.
 
      - parameter properties: mapping of list property names to lists to union
      */

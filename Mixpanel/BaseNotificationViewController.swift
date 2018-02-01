@@ -24,7 +24,10 @@ class BaseNotificationViewController: UIViewController {
     var panStartPoint: CGPoint!
 
     convenience init(notification: InAppNotification, nameOfClass: String) {
-        self.init(nibName: nameOfClass, bundle: Bundle(for: type(of: self)))
+        // avoiding `type(of: self)` as it doesn't work with Swift 4.0.3 compiler
+        // perhaps due to `self` not being fully constructed at this point
+        let bundle = Bundle(for: BaseNotificationViewController.self)
+        self.init(nibName: nameOfClass, bundle: bundle)
         self.notification = notification
     }
 

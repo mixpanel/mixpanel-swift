@@ -12,7 +12,7 @@ import UIKit
 #endif // !os(OSX)
 
 struct QueueConstants {
-    static var queueSize = 5000
+    static let queueSize = 5000
 }
 
 struct APIConstants {

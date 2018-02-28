@@ -11,7 +11,7 @@ import Foundation
 class SessionMetadata {
     var eventsCounter: UInt64 = 0
     var peopleCounter: UInt64 = 0
-    var sessionID: String = ""
+    var sessionID: String = String.randomId()
     var sessionStartEpoch: UInt64 = 0
     var trackingQueue: DispatchQueue
 

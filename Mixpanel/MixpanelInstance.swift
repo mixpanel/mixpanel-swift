@@ -238,6 +238,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if !os(OSX)
     var taskId = UIBackgroundTaskInvalid
     #endif // os(OSX)
+    let sessionMetadata: SessionMetadata
     let flushInstance: Flush
     let trackInstance: Track
     #if DECIDE
@@ -257,9 +258,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #if DECIDE
             decideInstance = Decide(basePathIdentifier: name, lock: self.readWriteLock)
         #endif // DECIDE
-        trackInstance = Track(apiToken: self.apiToken, lock: self.readWriteLock)
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: label)
+        sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
+        trackInstance = Track(apiToken: self.apiToken,
+                              lock: self.readWriteLock,
+                              metadata: sessionMetadata)
         networkQueue = DispatchQueue(label: label)
         #if os(iOS)
             reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
@@ -284,7 +288,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
                         serialQueue: trackingQueue,
-                        lock: self.readWriteLock)
+                        lock: self.readWriteLock,
+                        metadata: sessionMetadata)
         people.delegate = self
         flushInstance._flushInterval = flushInterval
         setupListeners()
@@ -312,15 +317,19 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         self.name = name
         self.readWriteLock = ReadWriteLock(label: "globalLock")
         flushInstance = Flush(basePathIdentifier: name, lock: self.readWriteLock)
-        trackInstance = Track(apiToken: self.apiToken, lock: self.readWriteLock)
-        flushInstance.delegate = self
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: label)
+        sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
+        trackInstance = Track(apiToken: self.apiToken,
+                              lock: self.readWriteLock,
+                              metadata: sessionMetadata)
+        flushInstance.delegate = self
         networkQueue = DispatchQueue(label: label)
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
                         serialQueue: trackingQueue,
-                        lock: self.readWriteLock)
+                        lock: self.readWriteLock,
+                        metadata: sessionMetadata)
         flushInstance._flushInterval = flushInterval
         setupListeners()
         unarchive()
@@ -424,6 +433,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // !os(OSX)
 
     @objc private func applicationDidBecomeActive(_ notification: Notification) {
+        sessionMetadata.applicationDidBecomeActive()
         flushInstance.applicationDidBecomeActive()
         #if DECIDE
             if checkForVariantsOnActive || checkForNotificationOnActive {

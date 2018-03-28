@@ -108,6 +108,9 @@ class Flush: AppLifecycle {
     }
 
     func flushQueueInBatches(_ queue: inout Queue, type: FlushType) {
+        if Mixpanel.mainInstance().hasOptedOutTracking() {
+            return
+        }
         while !queue.isEmpty {
             var shouldContinue = false
             let batchSize = min(queue.count, APIConstants.batchSize)

@@ -29,6 +29,7 @@ class Persistence {
         case properties
         case codelessBindings
         case variants
+        case optOutStatus
     }
 
     class func filePathWithType(_ type: ArchiveType, token: String) -> String? {
@@ -88,6 +89,12 @@ class Persistence {
         objc_sync_exit(self)
     }
 
+    class func archiveOptOutStatus(_ optOutStatus: Bool, token: String) {
+        objc_sync_enter(self)
+        archiveToFile(.optOutStatus, object: optOutStatus, token: token)
+        objc_sync_exit(self)
+    }
+    
     class func archiveProperties(_ properties: ArchivedProperties, token: String) {
         objc_sync_enter(self)
         var p = InternalProperties()
@@ -156,12 +163,14 @@ class Persistence {
                                             shownNotifications: Set<Int>,
                                             codelessBindings: Set<CodelessBinding>,
                                             variants: Set<Variant>,
+                                            optOutStatus: Bool,
                                             automaticEventsEnabled: Bool?) {
         let eventsQueue = unarchiveEvents(token: token)
         let peopleQueue = unarchivePeople(token: token)
         let codelessBindings = unarchiveCodelessBindings(token: token)
         let variants = unarchiveVariants(token: token)
-
+        let optOutStatus = unarchiveOptOutStatus(token: token)
+                                                
         let (superProperties,
             timedEvents,
             distinctId,
@@ -182,6 +191,7 @@ class Persistence {
                 shownNotifications,
                 codelessBindings,
                 variants,
+                optOutStatus,
                 automaticEventsEnabled)
     }
     #else
@@ -236,6 +246,11 @@ class Persistence {
     class private func unarchivePeople(token: String) -> Queue {
         let data = unarchiveWithType(.people, token: token)
         return data as? Queue ?? []
+    }
+    
+    class private func unarchiveOptOutStatus(token: String) -> Bool {
+        let data = unarchiveWithType(.optOutStatus, token: token) as? Bool
+        return data ?? false
     }
 
     #if DECIDE

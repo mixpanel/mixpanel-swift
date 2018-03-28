@@ -32,6 +32,10 @@ class Track {
                superProperties: InternalProperties,
                distinctId: String,
                epochInterval: Double) {
+        if Mixpanel.mainInstance().hasOptedOutTracking() {
+            return
+        }
+        
         var ev = event
         if ev == nil || ev!.isEmpty {
             Logger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")
@@ -72,6 +76,9 @@ class Track {
     }
 
     func registerSuperProperties(_ properties: Properties, superProperties: inout InternalProperties) {
+        if Mixpanel.mainInstance().hasOptedOutTracking() {
+            return
+        }
         self.lock.write {
             assertPropertyTypes(properties)
             superProperties += properties
@@ -81,6 +88,9 @@ class Track {
     func registerSuperPropertiesOnce(_ properties: Properties,
                                      superProperties: inout InternalProperties,
                                      defaultValue: MixpanelType?) {
+        if Mixpanel.mainInstance().hasOptedOutTracking() {
+            return
+        }
         self.lock.write {
             assertPropertyTypes(properties)
                 _ = properties.map() {
@@ -106,6 +116,9 @@ class Track {
     }
 
     func time(event: String?, timedEvents: inout InternalProperties, startTime: Double) {
+        if Mixpanel.mainInstance().hasOptedOutTracking() {
+            return
+        }
         self.lock.write {
             guard let event = event, !event.isEmpty else {
                 Logger.error(message: "mixpanel cannot time an empty event")

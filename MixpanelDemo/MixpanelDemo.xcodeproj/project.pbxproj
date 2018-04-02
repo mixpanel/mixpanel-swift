@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		021F142821B8EA1313088AB6 /* Pods_MixpanelDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37433CF0620BC6A0A5EFC541 /* Pods_MixpanelDemoTests.framework */; };
 		51DD568A1D3077390045D3DB /* LoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56891D3077390045D3DB /* LoggerTests.swift */; };
+		860BE3132072B85D00C12F18 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 860BE30F2072B83E00C12F18 /* CoreTelephony.framework */; };
 		862773E3206B3B1D00CBE79E /* MixpanelOptOutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862773E2206B3B1D00CBE79E /* MixpanelOptOutTests.swift */; };
 		E1016E361D3D46DF00075BB7 /* ActionCompleteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1016E351D3D46DF00075BB7 /* ActionCompleteViewController.swift */; };
 		E12406201D249B2500383635 /* MixpanelBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E124061F1D249B2500383635 /* MixpanelBaseTests.swift */; };
@@ -93,6 +94,7 @@
 		37433CF0620BC6A0A5EFC541 /* Pods_MixpanelDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MixpanelDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		51DD56891D3077390045D3DB /* LoggerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoggerTests.swift; sourceTree = "<group>"; };
 		5609994314AFCE2B8FF1705B /* Pods-MixpanelDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MixpanelDemoTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests.release.xcconfig"; sourceTree = "<group>"; };
+		860BE30F2072B83E00C12F18 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		862773E2206B3B1D00CBE79E /* MixpanelOptOutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelOptOutTests.swift; sourceTree = "<group>"; };
 		9233A000BB35A654EEC9A9D6 /* Pods-MixpanelDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MixpanelDemoTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		E1016E351D3D46DF00075BB7 /* ActionCompleteViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionCompleteViewController.swift; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				860BE3132072B85D00C12F18 /* CoreTelephony.framework in Frameworks */,
 				021F142821B8EA1313088AB6 /* Pods_MixpanelDemoTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -159,6 +162,7 @@
 		773080F90ECB3A0D67A6E636 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				860BE30F2072B83E00C12F18 /* CoreTelephony.framework */,
 				E1C8F50B1EC244E90089C537 /* StoreKit.framework */,
 				37433CF0620BC6A0A5EFC541 /* Pods_MixpanelDemoTests.framework */,
 			);

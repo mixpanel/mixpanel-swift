@@ -160,6 +160,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
             XCTAssertEqual((mixpanel.eventsQueue.last?["properties"] as? InternalProperties)?["distinct_id"] as? String,
                            mixpanel.defaultDistinctId(),
                            "events should use default distinct id if none set")
+            XCTAssertEqual((mixpanel.eventsQueue.last?["properties"] as? InternalProperties)?["$lib_version"] as? String,
+                           AutomaticProperties.libVersion(),
+                           "events should has lib version in internal properties")
             mixpanel.people.set(property: "p1", to: "a")
             waitForTrackingQueue()
             XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty,

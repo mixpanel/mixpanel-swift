@@ -32,10 +32,6 @@ class Track {
                superProperties: InternalProperties,
                distinctId: String,
                epochInterval: Double) {
-        if Mixpanel.mainInstance().hasOptedOutTracking() {
-            return
-        }
-        
         var ev = event
         if ev == nil || ev!.isEmpty {
             Logger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")

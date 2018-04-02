@@ -30,6 +30,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         waitForTrackingQueue()
         LSNocilla.sharedInstance().clearStubs()
         NSLog("finished test setup")
+        deleteOptOutSettings(mixpanelInstance: mixpanel)
     }
 
     override func tearDown() {
@@ -37,6 +38,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         stubTrack()
         stubDecide()
         stubEngage()
+        deleteOptOutSettings(mixpanelInstance: mixpanel)
         mixpanel.reset()
         waitForTrackingQueue()
 
@@ -46,6 +48,16 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         mixpanel = nil
     }
 
+    func deleteOptOutSettings(mixpanelInstance: MixpanelInstance)
+    {
+        let filePath = Persistence.filePathWithType(.optOutStatus, token: mixpanelInstance.apiToken)
+        do {
+            try FileManager.default.removeItem(atPath: filePath!)
+        } catch {
+            Logger.info(message: "Unable to remove file at path: \(filePath!)")
+        }
+    }
+    
     func mixpanelWillFlush(_ mixpanel: MixpanelInstance) -> Bool {
         return mixpanelWillFlush
     }

@@ -139,7 +139,7 @@ class MixpanelManager {
                     launchOptions: [UIApplicationLaunchOptionsKey : Any]?,
                     flushInterval: Double,
                     instanceName: String,
-                    optOutTracking: Bool) -> MixpanelInstance {
+                    optOutTracking: Bool = false) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
                                         launchOptions: launchOptions,
                                         flushInterval: flushInterval,
@@ -154,7 +154,7 @@ class MixpanelManager {
     func initialize(token apiToken: String,
                     flushInterval: Double,
                     instanceName: String,
-                    optOutTracking: Bool) -> MixpanelInstance {
+                    optOutTracking: Bool = false) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
                                         flushInterval: flushInterval,
                                         name: instanceName)

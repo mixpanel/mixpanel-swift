@@ -1205,6 +1205,12 @@ extension MixpanelInstance {
         }
     }
     
+    /**
+     Opt out tracking.
+     
+     This method is used to opt out tracking. This causes all events and people request no longer
+     to be sent back to the Mixpanel server.
+     */
     open func optOutTracking() {
         trackingQueue.async {
             self.readWriteLock.write {
@@ -1235,6 +1241,17 @@ extension MixpanelInstance {
         Persistence.archiveOptOutStatus(self.optOutStatus, token: self.apiToken)
     }
     
+    /**
+     Opt in tracking.
+     
+     Use this method to opt in an already opted out user from tracking. People updates and track calls will be
+     sent to Mixpanel after using this method.
+     
+     This method will internally track an opt in event to your project.
+     
+     - parameter distintId: an optional string to use as the distinct ID for events
+     - parameter properties: an optional properties dictionary that could be passed to add properties to the opt-in event that is sent to Mixpanel
+     */
     open func optInTracking(distinctId: String? = nil, properties: Properties? = nil) {
         self.optOutStatus = false
         Persistence.archiveOptOutStatus(self.optOutStatus, token: self.apiToken)
@@ -1245,6 +1262,11 @@ extension MixpanelInstance {
         track(event: "$opt_in", properties: properties)
     }
     
+    /**
+     Returns if the current user has opted out tracking.
+
+     - returns: the current super opted out tracking status
+     */
     open func hasOptedOutTracking() -> Bool {
         return self.optOutStatus
     }

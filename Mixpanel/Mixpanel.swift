@@ -22,10 +22,11 @@ open class Mixpanel {
      of the API object, which is convenient if you'd like to send data to more than
      one Mixpanel project from a single app.
 
-     - parameter token:         your project token
-     - parameter launchOptions: Optional. App delegate launchOptions
-     - parameter flushInterval: Optional. Interval to run background flushing
-     - parameter instanceName:  Optional. The name you want to call this instance
+     - parameter token:             your project token
+     - parameter launchOptions:     Optional. App delegate launchOptions
+     - parameter flushInterval:     Optional. Interval to run background flushing
+     - parameter instanceName:      Optional. The name you want to call this instance
+     - parameter optOutTracking:    Optional. Whether or not to be opted out from tracking by default
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -53,9 +54,10 @@ open class Mixpanel {
      of the API object, which is convenient if you'd like to send data to more than
      one Mixpanel project from a single app.
 
-     - parameter token:         your project token
-     - parameter flushInterval: Optional. Interval to run background flushing
-     - parameter instanceName:  Optional. The name you want to call this instance
+     - parameter token:             your project token
+     - parameter flushInterval:     Optional. Interval to run background flushing
+     - parameter instanceName:      Optional. The name you want to call this instance
+     - parameter optOutTracking:    Optional. Whether or not to be opted out from tracking by default
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.

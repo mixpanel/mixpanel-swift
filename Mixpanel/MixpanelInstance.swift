@@ -440,7 +440,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // !os(OSX)
 
     @objc private func applicationDidBecomeActive(_ notification: Notification) {
-        sessionMetadata.applicationDidBecomeActive()
         flushInstance.applicationDidBecomeActive()
         #if DECIDE
             if checkForVariantsOnActive || checkForNotificationOnActive {
@@ -525,6 +524,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
         }
+        sessionMetadata.applicationWillEnterForeground()
         trackingQueue.async {
             if self.taskId != UIBackgroundTaskInvalid {
                 sharedApplication.endBackgroundTask(self.taskId)

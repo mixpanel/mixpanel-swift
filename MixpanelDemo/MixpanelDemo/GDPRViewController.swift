@@ -62,11 +62,11 @@ class GDPRViewController: UIViewController, UITableViewDelegate, UITableViewData
             Mixpanel.mainInstance().optInTracking(distinctId: "aDistinctIdForOptIn", properties: p)
             descStr = "Opt In with distinctId 'aDistinctIdForOptIn' and \(p)"
         case 5:
-            Mixpanel.initialize(token: randomId(), optOutTracking: true)
-            descStr = "Init Mixpanel with default opt-out"
+            Mixpanel.initialize(token: "a token id", optOutTrackingByDefault: true)
+            descStr = "Init Mixpanel with default opt-out(sample only), to make it work, place it in your startup stage of your app"
         case 6:
-            Mixpanel.initialize(token: randomId(), optOutTracking: false)
-            descStr = "Init Mixpanel with default opt-in"
+            Mixpanel.initialize(token: "a token id", optOutTrackingByDefault: false)
+            descStr = "Init Mixpanel with default opt-in(sample only), to make it work, place it in your startup stage of your app"
         default:
             break
         }
@@ -82,10 +82,4 @@ class GDPRViewController: UIViewController, UITableViewDelegate, UITableViewData
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tableViewItems.count
     }
-    
-    func randomId() -> String
-    {
-        return String(format: "%08x%08x", arc4random(), arc4random())
-    }
-    
 }

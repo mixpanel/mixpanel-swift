@@ -15,6 +15,7 @@ import Nocilla
 class MixpanelDemoTests: MixpanelBaseTests {
 
     func test5XXResponse() {
+        LSNocilla.sharedInstance().clearStubs()
         _ = stubTrack().andReturn(503)
 
         mixpanel.track(event: "Fake Event")
@@ -34,6 +35,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testRetryAfterHTTPHeader() {
+        LSNocilla.sharedInstance().clearStubs()
         _ = stubTrack().andReturn(200)?.withHeader("Retry-After", "60")
 
         mixpanel.track(event: "Fake Event")
@@ -90,6 +92,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testFlushNetworkFailure() {
+        LSNocilla.sharedInstance().clearStubs()
         stubTrack().andFailWithError(
             NSError(domain: "com.mixpanel.sdk.testing", code: 1, userInfo: nil))
         mixpanel.identify(distinctId: "d1")

@@ -28,7 +28,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
         mixpanel.reset()
         waitForTrackingQueue()
-        LSNocilla.sharedInstance().clearStubs()
         NSLog("finished test setup")
     }
 
@@ -37,6 +36,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         stubTrack()
         stubDecide()
         stubEngage()
+        deleteOptOutSettings(mixpanelInstance: mixpanel)
         mixpanel.reset()
         waitForTrackingQueue()
 
@@ -46,6 +46,18 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         mixpanel = nil
     }
 
+    func deleteOptOutSettings(mixpanelInstance: MixpanelInstance)
+    {
+        objc_sync_enter(self)
+        let filePath = Persistence.filePathWithType(.optOutStatus, token: mixpanelInstance.apiToken)
+        do {
+            try FileManager.default.removeItem(atPath: filePath!)
+        } catch {
+            Logger.info(message: "Unable to remove file at path: \(filePath!)")
+        }
+        objc_sync_exit(self)
+    }
+    
     func mixpanelWillFlush(_ mixpanel: MixpanelInstance) -> Bool {
         return mixpanelWillFlush
     }
@@ -53,6 +65,14 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     func waitForTrackingQueue() {
         mixpanel.trackingQueue.sync() {
             return
+        }
+    }
+    
+    func waitForMixpanelQueues() {
+        mixpanel.trackingQueue.sync() {
+            mixpanel.networkQueue.sync() {
+                return
+            }
         }
     }
 
@@ -76,7 +96,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
 
     func flushAndWaitForNetworkQueue() {
         mixpanel.flush()
-        waitForNetworkQueue()
+        waitForMixpanelQueues()
     }
 
     func assertDefaultPeopleProperties(_ properties: InternalProperties) {

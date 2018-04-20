@@ -124,7 +124,8 @@ class Network {
                                                       "properties": ["token": "85053bf24bba75239b16a601d9387e17",
                                                                      "mp_lib": "swift",
                                                                      "version": "3.0",
-                                                                     "distinct_id": apiToken]]])
+                                                                     "distinct_id": apiToken,
+                                                                     "$lib_version": AutomaticProperties.libVersion()]]])
 
         let responseParser: (Data) -> Int? = { data in
             let response = String(data: data, encoding: String.Encoding.utf8)

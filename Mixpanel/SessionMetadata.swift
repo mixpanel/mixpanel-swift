@@ -19,7 +19,7 @@ class SessionMetadata {
         self.trackingQueue = trackingQueue
     }
     
-    func applicationDidBecomeActive() {
+    func applicationWillEnterForeground() {
         trackingQueue.async {
             self.eventsCounter = 0
             self.peopleCounter = 0

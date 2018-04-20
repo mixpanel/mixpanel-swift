@@ -22,10 +22,11 @@ open class Mixpanel {
      of the API object, which is convenient if you'd like to send data to more than
      one Mixpanel project from a single app.
 
-     - parameter token:         your project token
-     - parameter launchOptions: Optional. App delegate launchOptions
-     - parameter flushInterval: Optional. Interval to run background flushing
-     - parameter instanceName:  Optional. The name you want to call this instance
+     - parameter token:                     your project token
+     - parameter launchOptions:             Optional. App delegate launchOptions
+     - parameter flushInterval:             Optional. Interval to run background flushing
+     - parameter instanceName:              Optional. The name you want to call this instance
+     - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -37,11 +38,13 @@ open class Mixpanel {
     open class func initialize(token apiToken: String,
                                launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil,
                                flushInterval: Double = 60,
-                               instanceName: String = UUID().uuidString) -> MixpanelInstance {
+                               instanceName: String = UUID().uuidString,
+                               optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token:         apiToken,
                                                          launchOptions: launchOptions,
                                                          flushInterval: flushInterval,
-                                                         instanceName:  instanceName)
+                                                         instanceName:  instanceName,
+                                                         optOutTrackingByDefault: optOutTrackingByDefault)
     }
     #else
     /**
@@ -51,9 +54,10 @@ open class Mixpanel {
      of the API object, which is convenient if you'd like to send data to more than
      one Mixpanel project from a single app.
 
-     - parameter token:         your project token
-     - parameter flushInterval: Optional. Interval to run background flushing
-     - parameter instanceName:  Optional. The name you want to call this instance
+     - parameter token:                     your project token
+     - parameter flushInterval:             Optional. Interval to run background flushing
+     - parameter instanceName:              Optional. The name you want to call this instance
+     - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -65,7 +69,8 @@ open class Mixpanel {
     @discardableResult
     open class func initialize(token apiToken: String,
                                flushInterval: Double = 60,
-                               instanceName: String = UUID().uuidString) -> MixpanelInstance {
+                               instanceName: String = UUID().uuidString,
+                               optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token:         apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName:  instanceName)
@@ -135,11 +140,13 @@ class MixpanelManager {
     func initialize(token apiToken: String,
                     launchOptions: [UIApplicationLaunchOptionsKey : Any]?,
                     flushInterval: Double,
-                    instanceName: String) -> MixpanelInstance {
+                    instanceName: String,
+                    optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
                                         launchOptions: launchOptions,
                                         flushInterval: flushInterval,
-                                        name: instanceName)
+                                        name: instanceName,
+                                        optOutTrackingByDefault: optOutTrackingByDefault)
         mainInstance = instance
         instances[instanceName] = instance
 
@@ -148,7 +155,8 @@ class MixpanelManager {
     #else
     func initialize(token apiToken: String,
                     flushInterval: Double,
-                    instanceName: String) -> MixpanelInstance {
+                    instanceName: String,
+                    optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
                                         flushInterval: flushInterval,
                                         name: instanceName)

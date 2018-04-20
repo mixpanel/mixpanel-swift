@@ -37,6 +37,9 @@ open class People {
     }
 
     func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
+        if Mixpanel.mainInstance().hasOptedOutTracking() {
+            return
+        }
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
         let ignoreTimeCopy = ignoreTime
 

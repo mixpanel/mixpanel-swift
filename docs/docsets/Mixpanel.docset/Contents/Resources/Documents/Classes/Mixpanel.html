@@ -14,7 +14,7 @@
     <a title="Mixpanel Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel Docs</a> (100% documented)</p>
+        <p><a href="../index.html">Mixpanel Docs</a> (99% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png"/>View on GitHub</a></p>
       </div>
     </header>
@@ -142,6 +142,14 @@
               </li>
             </ul>
           </li>
+          <li class="nav-group-name">
+            <a href="../Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a>
+              </li>
+            </ul>
+          </li>
         </ul>
       </nav>
       <article class="main-content">
@@ -163,9 +171,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8MixpanelAAC10initializeAA0A8InstanceCSS5token_s10DictionaryVySC29UIApplicationLaunchOptionsKeyVypGSg06launchH0Sd13flushIntervalSS12instanceNametFZ"></a>
-                    <a name="//apple_ref/swift/Method/initialize(token:launchOptions:flushInterval:instanceName:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8MixpanelAAC10initializeAA0A8InstanceCSS5token_s10DictionaryVySC29UIApplicationLaunchOptionsKeyVypGSg06launchH0Sd13flushIntervalSS12instanceNametFZ">initialize(token:launchOptions:flushInterval:instanceName:)</a>
+                    <a name="/s:8MixpanelAAC10initializeAA0A8InstanceCSS5token_s10DictionaryVySC29UIApplicationLaunchOptionsKeyVypGSg06launchH0Sd13flushIntervalSS12instanceNameSb23optOutTrackingByDefaulttFZ"></a>
+                    <a name="//apple_ref/swift/Method/initialize(token:launchOptions:flushInterval:instanceName:optOutTrackingByDefault:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8MixpanelAAC10initializeAA0A8InstanceCSS5token_s10DictionaryVySC29UIApplicationLaunchOptionsKeyVypGSg06launchH0Sd13flushIntervalSS12instanceNameSb23optOutTrackingByDefaulttFZ">initialize(token:launchOptions:flushInterval:instanceName:optOutTrackingByDefault:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -193,7 +201,8 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                           <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">token</span> <span class="nv">apiToken</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
                            <span class="nv">launchOptions</span><span class="p">:</span> <span class="p">[</span><span class="kt">UIApplicationLaunchOptionsKey</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
                            <span class="nv">flushInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
-                           <span class="nv">instanceName</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="kt">UUID</span><span class="p">()</span><span class="o">.</span><span class="n">uuidString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span></code></pre>
+                           <span class="nv">instanceName</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="kt">UUID</span><span class="p">()</span><span class="o">.</span><span class="n">uuidString</span><span class="p">,</span>
+                           <span class="nv">optOutTrackingByDefault</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span></code></pre>
 
                         </div>
                       </div>
@@ -249,6 +258,18 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                                 </div>
                               </td>
                             </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>optOutTrackingByDefault</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Optional. Whether or not to be opted out from tracking by default</p>
+                                </div>
+                              </td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -264,8 +285,8 @@ You can always get the instance by calling getInstance(name)</p>
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/initialize(token:flushInterval:instanceName:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">initialize(token:flushInterval:instanceName:)</a>
+                    <a name="//apple_ref/swift/Method/initialize(token:flushInterval:instanceName:optOutTrackingByDefault:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">initialize(token:flushInterval:instanceName:optOutTrackingByDefault:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -469,7 +490,7 @@ the instances with an instanceName. Then they can be reached by calling getInsta
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2018 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2018-03-12)</p>
+          <p>&copy; 2018 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2018-04-20)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

@@ -249,7 +249,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // DECIDE
 
     #if !os(OSX)
-    init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String, optOutTracking: Bool = false) {
+    init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -297,7 +297,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         setupListeners()
         unarchive()
         
-        if optOutTracking {
+        if optOutTrackingByDefault {
             self.optOutTracking()
         }
         
@@ -317,7 +317,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif // DECIDE
     }
     #else
-    init(apiToken: String?, flushInterval: Double, name: String, optOutTracking: Bool = false) {
+    init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }

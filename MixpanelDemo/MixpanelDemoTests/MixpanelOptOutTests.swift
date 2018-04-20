@@ -17,7 +17,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
     
     func testHasOptOutTrackingFlagBeingSetProperlyAfterInitializedWithOptedOutYES()
     {
-        mixpanel = Mixpanel.initialize(token: randomId(), optOutTracking: true)
+        mixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
         XCTAssertTrue(mixpanel.hasOptedOutTracking(), "When initialize with opted out flag set to YES, the current user should have opted out tracking")
     }
     
@@ -29,7 +29,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
                    "journey_id": 123456]
             ]]
         
-        mixpanel = Mixpanel.initialize(token: randomId(), launchOptions: launchOptions, optOutTracking: true)
+        mixpanel = Mixpanel.initialize(token: randomId(), launchOptions: launchOptions, optOutTrackingByDefault: true)
         waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
 
@@ -43,7 +43,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             ["mp":["m":"the_message_id","c": "the_campaign_id",
                    "journey_id": 123456]
             ]]
-        mixpanel = Mixpanel.initialize(token: randomId(), launchOptions: launchOptions, optOutTracking: true)
+        mixpanel = Mixpanel.initialize(token: randomId(), launchOptions: launchOptions, optOutTrackingByDefault: true)
         waitForMixpanelQueues()
         XCTAssertTrue(self.mixpanel.eventsQueue.count == 0, "When initialize with opted out flag set to YES, no event should be queued")
     }
@@ -54,7 +54,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             ["mp":["m":"the_message_id","c": "the_campaign_id",
                    "journey_id": 123456]
             ]]
-        mixpanel = Mixpanel.initialize(token: randomId(), launchOptions: launchOptions, optOutTracking: false)
+        mixpanel = Mixpanel.initialize(token: randomId(), launchOptions: launchOptions, optOutTrackingByDefault: false)
         waitForMixpanelQueues()
         let e = mixpanel.eventsQueue.last!
         XCTAssertEqual((e["event"] as? String), "$app_open", "incorrect event name")
@@ -126,10 +126,10 @@ class MixpanelOptOutTests: MixpanelBaseTests {
     
     func testHasOptOutTrackingFlagBeingSetProperlyForMultipleInstances()
     {
-        let mixpanel1 = Mixpanel.initialize(token: randomId(), optOutTracking: true)
+        let mixpanel1 = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
         XCTAssertTrue(mixpanel1.hasOptedOutTracking(), "When initialize with opted out flag set to YES, the current user should have opted out tracking")
         
-        let mixpanel2 = Mixpanel.initialize(token: randomId(), optOutTracking: false)
+        let mixpanel2 = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: false)
         XCTAssertFalse(mixpanel2.hasOptedOutTracking(), "When initialize with opted out flag set to NO, the current user should have opted in tracking")
         
         deleteOptOutSettings(mixpanelInstance: mixpanel1)
@@ -138,7 +138,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
     
     func testHasOptOutTrackingFlagBeingSetProperlyAfterInitializedWithOptedOutNO()
     {
-        mixpanel = Mixpanel.initialize(token: randomId(), optOutTracking: false)
+        mixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: false)
         XCTAssertFalse(mixpanel.hasOptedOutTracking(), "When initialize with opted out flag set to NO, the current user should have opted out tracking")
     }
     

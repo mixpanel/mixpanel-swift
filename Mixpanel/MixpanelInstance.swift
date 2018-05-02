@@ -577,7 +577,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let ASIdentifierManagerClass = NSClassFromString("ASIdentifierManager") {
             let sharedManagerSelector = NSSelectorFromString("sharedManager")
             if let sharedManagerIMP = ASIdentifierManagerClass.method(for: sharedManagerSelector) {
-                typealias sharedManagerFunc = @convention(c) (AnyObject, Selector) -> AnyObject!
+                typealias sharedManagerFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
                 let curriedImplementation = unsafeBitCast(sharedManagerIMP, to: sharedManagerFunc.self)
                 if let sharedManager = curriedImplementation(ASIdentifierManagerClass.self, sharedManagerSelector) {
                     let advertisingTrackingEnabledSelector = NSSelectorFromString("isAdvertisingTrackingEnabled")

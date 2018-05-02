@@ -313,8 +313,8 @@ func arrayOfBytes<T>(value: T, length: Int? = nil) -> Array<UInt8> {
         bytes[totalBytes - 1 - j] = (bytesPointer + j).pointee
     }
 
-    valuePointer.deinitialize()
-    valuePointer.deallocate(capacity: 1)
+    valuePointer.deinitialize(count: 1)
+    valuePointer.deallocate()
 
     return bytes
 }
@@ -332,10 +332,8 @@ protocol BitshiftOperationsType {
 }
 
 struct BytesSequence<D: RandomAccessCollection>: Sequence where D.Iterator.Element == UInt8,
-                                                                D.IndexDistance == Int,
-                                                                D.SubSequence.IndexDistance == Int,
                                                                 D.Index == Int {
-    let chunkSize: D.IndexDistance
+    let chunkSize: Int
     let data: D
 
     func makeIterator() -> AnyIterator<D.SubSequence> {

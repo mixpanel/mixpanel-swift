@@ -21,7 +21,7 @@ class ConnectIntegrations {
         if let urbanAirship = NSClassFromString("UAirship") {
             let pushSelector = NSSelectorFromString("push")
             if let pushIMP = urbanAirship.method(for: pushSelector) {
-                typealias pushFunc = @convention(c) (AnyObject, Selector) -> AnyObject!
+                typealias pushFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
                 let curriedImplementation = unsafeBitCast(pushIMP, to: pushFunc.self)
                 if let push = curriedImplementation(urbanAirship.self, pushSelector) {
                     if let channelID = push.perform(NSSelectorFromString("channelID"))?.takeUnretainedValue() as? String {

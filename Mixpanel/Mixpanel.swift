@@ -26,6 +26,7 @@ open class Mixpanel {
      - parameter launchOptions:             Optional. App delegate launchOptions
      - parameter flushInterval:             Optional. Interval to run background flushing
      - parameter instanceName:              Optional. The name you want to call this instance
+     - parameter automaticPushTracking      whether or not to automatically track pushes sent from Mixpanel
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
@@ -39,11 +40,13 @@ open class Mixpanel {
                                launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil,
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
+                               automaticPushTracking: Bool = true,
                                optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token:         apiToken,
                                                          launchOptions: launchOptions,
                                                          flushInterval: flushInterval,
                                                          instanceName:  instanceName,
+                                                         automaticPushTracking: automaticPushTracking,
                                                          optOutTrackingByDefault: optOutTrackingByDefault)
     }
     #else
@@ -141,11 +144,13 @@ class MixpanelManager {
                     launchOptions: [UIApplicationLaunchOptionsKey : Any]?,
                     flushInterval: Double,
                     instanceName: String,
+                    automaticPushTracking: Bool = true,
                     optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
                                         launchOptions: launchOptions,
                                         flushInterval: flushInterval,
                                         name: instanceName,
+                                        automaticPushTracking: automaticPushTracking,
                                         optOutTrackingByDefault: optOutTrackingByDefault)
         mainInstance = instance
         instances[instanceName] = instance

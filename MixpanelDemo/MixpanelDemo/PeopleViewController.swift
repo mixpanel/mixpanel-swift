@@ -23,7 +23,8 @@ class PeopleViewController: UIViewController, UITableViewDelegate, UITableViewDa
                           "Track Charge w/o Properties",
                           "Track Charge w Properties",
                           "Clear Charges",
-                          "Delete User"]
+                          "Delete User",
+                          "Identify"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -92,6 +93,15 @@ class PeopleViewController: UIViewController, UITableViewDelegate, UITableViewDa
             descStr = "Cleared Charges"
         case 11:
             Mixpanel.mainInstance().people.deleteUser()
+            descStr = "Deleted User"
+        case 12:
+            // Mixpanel People requires that you explicitly set a distinct ID for the current user. In this case,
+            // we're using the automatically generated distinct ID from event tracking, based on the device's MAC address.
+            // It is strongly recommended that you use the same distinct IDs for Mixpanel Engagement and Mixpanel People.
+            // Note that the call to Mixpanel People identify: can come after properties have been set. We queue them until
+            // identify: is called and flush them at that time. That way, you can set properties before a user is logged in
+            // and identify them once you know their user ID.
+            Mixpanel.mainInstance().identify(distinctId: Mixpanel.mainInstance().distinctId)
             descStr = "Deleted User"
         default:
             break

@@ -45,6 +45,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     var sessionLength: TimeInterval = 0
     var sessionStartTime: TimeInterval = Date().timeIntervalSince1970
     var hasAddedObserver = false
+    var automaticPushTracking = true
 
     func initializeEvents() {
         let firstOpenKey = "MPFirstOpen"
@@ -84,7 +85,9 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 
         SKPaymentQueue.default().add(self)
         DispatchQueue.main.async {
-            self.setupAutomaticPushTracking()
+            if self.automaticPushTracking {
+                self.setupAutomaticPushTracking()
+            }
         }
     }
 

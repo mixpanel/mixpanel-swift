@@ -16,6 +16,10 @@ import Cocoa
 import SystemConfiguration
 #endif
 
+#if os(iOS)
+import CoreTelephony
+#endif // os(iOS
+
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
  */
@@ -235,6 +239,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let readWriteLock: ReadWriteLock
     #if os(iOS)
     var reachability: SCNetworkReachability?
+    let telephonyInfo = CTTelephonyNetworkInfo()
     #endif
     #if !os(OSX)
     var taskId = UIBackgroundTaskInvalid
@@ -617,15 +622,27 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             }
         }
     }
-
+    #if os(iOS)
     @objc func setCurrentRadio() {
-        let currentRadio = AutomaticProperties.getCurrentRadio()
+        var radio = telephonyInfo.currentRadioAccessTechnology ?? "None"
+        let prefix = "CTRadioAccessTechnology"
+        if radio.hasPrefix(prefix) {
+            radio = (radio as NSString).substring(from: prefix.count)
+        }
         trackingQueue.async {
             AutomaticProperties.automaticPropertiesLock.write {
-                AutomaticProperties.properties["$radio"] = currentRadio
+                [unowned self] in
+                AutomaticProperties.properties["$radio"] = radio
+                if self.telephonyInfo.subscriberCellularProvider?.carrierName == nil {
+                    AutomaticProperties.properties["$carrier"] = ""
+                }
+                else {
+                    AutomaticProperties.properties["$carrier"] = self.telephonyInfo.subscriberCellularProvider?.carrierName
+                }
             }
         }
     }
+    #endif
 
     #if DECIDE
     func initializeGestureRecognizer() {

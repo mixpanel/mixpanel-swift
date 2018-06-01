@@ -19,10 +19,6 @@ import CoreTelephony
 #endif // os(iOS
 
 class AutomaticProperties {
-    #if os(iOS)
-    static let telephonyInfo = CTTelephonyNetworkInfo()
-    #endif // os(iOS)
-
     static let automaticPropertiesLock = ReadWriteLock(label: "automaticPropertiesLock")
 
     static var properties: InternalProperties = {
@@ -34,10 +30,6 @@ class AutomaticProperties {
         p["$screen_width"]      = Int(size.width)
         p["$os"]                = UIDevice.current.systemName
         p["$os_version"]        = UIDevice.current.systemVersion
-
-        #if os(iOS)
-        p["$carrier"] = AutomaticProperties.telephonyInfo.subscriberCellularProvider?.carrierName
-        #endif // os(iOS)
 
         #else
         if let size = NSScreen.main?.frame.size {
@@ -79,17 +71,6 @@ class AutomaticProperties {
 
         return p
     }()
-
-    #if os(iOS)
-    class func getCurrentRadio() -> String {
-        var radio = telephonyInfo.currentRadioAccessTechnology ?? "None"
-        let prefix = "CTRadioAccessTechnology"
-        if radio.hasPrefix(prefix) {
-            radio = (radio as NSString).substring(from: prefix.count)
-        }
-        return radio
-    }
-    #endif // os(iOS)
 
     class func deviceModel() -> String {
         var systemInfo = utsname()

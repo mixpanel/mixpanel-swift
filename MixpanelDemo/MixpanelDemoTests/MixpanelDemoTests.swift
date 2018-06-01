@@ -572,7 +572,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testTelephonyInfoInitialized() {
-        XCTAssertNotNil(AutomaticProperties.telephonyInfo, "telephonyInfo wasn't initialized")
+        XCTAssertNotNil(mixpanel.telephonyInfo, "telephonyInfo wasn't initialized")
     }
 
     func testReadWriteLock() {

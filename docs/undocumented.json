@@ -2,7 +2,7 @@
   "warnings": [
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 33,
+      "line": 37,
       "symbol": "Properties",
       "symbol_kind": "source.lang.swift.decl.typealias",
       "warning": "undocumented"

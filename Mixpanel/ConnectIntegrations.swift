@@ -11,6 +11,7 @@ class ConnectIntegrations {
     var urbanAirshipRetries = 0
     var savedUrbanAirshipChannelID: String?
     var savedBrazeID: String?
+    var savedDeviceId: String?
 
     open func setupIntegrations(_ integrations:[String]) {
         if integrations.contains("urbanairship") {
@@ -30,7 +31,7 @@ class ConnectIntegrations {
                 if let push = curriedImplementation(urbanAirship.self, pushSelector) {
                     if let channelID = push.perform(NSSelectorFromString("channelID"))?.takeUnretainedValue() as? String {
                         self.urbanAirshipRetries = 0
-                        if (channelID != self.savedUrbanAirshipChannelID) {
+                        if channelID != self.savedUrbanAirshipChannelID {
                             self.mixpanel?.people.set(property: "$ios_urban_airship_channel_id", to: channelID)
                             self.savedUrbanAirshipChannelID = channelID
                         }
@@ -54,11 +55,20 @@ class ConnectIntegrations {
                 typealias shareInstanceFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
                 let curriedImplementation = unsafeBitCast(appBoyShareInstanceIMP, to: shareInstanceFunc.self)
                 if let instance = curriedImplementation(brazeClass.self, shareInstanceSel) {
+                    if let deviceId = instance.perform(NSSelectorFromString("getDeviceId"))?.takeUnretainedValue() as? String {
+                        if deviceId != self.savedDeviceId {
+                            self.mixpanel?.createAlias(deviceId, distinctId: (self.mixpanel?.distinctId)!)
+                            self.mixpanel?.people.set(property: "$braze_device_id", to: deviceId)
+                            self.savedDeviceId = deviceId
+                        }
+                    }
                     if let user = instance.perform(NSSelectorFromString("user"))?.takeUnretainedValue() {
                         if let userId = user.perform(NSSelectorFromString("userID"))?.takeUnretainedValue() as? String {
-                            self.mixpanel?.createAlias(userId, distinctId: (self.mixpanel?.distinctId)!)
-                            self.mixpanel?.people.set(property: "$braze_external_id", to: userId)
-                            self.savedBrazeID = userId
+                            if userId != self.savedBrazeID {
+                                self.mixpanel?.createAlias(userId, distinctId: (self.mixpanel?.distinctId)!)
+                                self.mixpanel?.people.set(property: "$braze_external_id", to: userId)
+                                self.savedBrazeID = userId
+                            }
                         }
                     }
                 }
@@ -69,6 +79,7 @@ class ConnectIntegrations {
     open func reset() {
         self.savedUrbanAirshipChannelID = nil
         self.savedBrazeID = nil
+        self.savedDeviceId = nil
         self.urbanAirshipRetries = 0
     }
 }

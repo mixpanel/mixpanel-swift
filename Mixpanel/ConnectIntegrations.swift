@@ -10,10 +10,14 @@ class ConnectIntegrations {
     open var mixpanel: MixpanelInstance?
     var urbanAirshipRetries = 0
     var savedUrbanAirshipChannelID: String?
+    var savedBrazeID: String?
 
     open func setupIntegrations(_ integrations:[String]) {
         if integrations.contains("urbanairship") {
             self.setUrbanAirshipPeopleProp()
+        }
+        if integrations.contains("braze") {
+            self.setBrazePeopleProp()
         }
     }
 
@@ -42,9 +46,29 @@ class ConnectIntegrations {
             }
         }
     }
+    
+    func setBrazePeopleProp() {
+        if let brazeClass = NSClassFromString("Appboy") {
+            let shareInstanceSel = NSSelectorFromString("sharedInstance")
+            if let appBoyShareInstanceIMP = brazeClass.method(for: shareInstanceSel) {
+                typealias shareInstanceFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
+                let curriedImplementation = unsafeBitCast(appBoyShareInstanceIMP, to: shareInstanceFunc.self)
+                if let instance = curriedImplementation(brazeClass.self, shareInstanceSel) {
+                    if let user = instance.perform(NSSelectorFromString("user"))?.takeUnretainedValue() {
+                        if let userId = user.perform(NSSelectorFromString("userID"))?.takeUnretainedValue() as? String {
+                            self.mixpanel?.createAlias(userId, distinctId: (self.mixpanel?.distinctId)!)
+                            self.mixpanel?.people.set(property: "$braze_external_id", to: userId)
+                            self.savedBrazeID = userId
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     open func reset() {
         self.savedUrbanAirshipChannelID = nil
+        self.savedBrazeID = nil
         self.urbanAirshipRetries = 0
     }
 }

@@ -164,7 +164,8 @@ class MixpanelManager {
                     optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
                                         flushInterval: flushInterval,
-                                        name: instanceName)
+                                        name: instanceName,
+                                        optOutTrackingByDefault: optOutTrackingByDefault)
         mainInstance = instance
         instances[instanceName] = instance
 

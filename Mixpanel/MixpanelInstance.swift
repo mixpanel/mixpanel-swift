@@ -346,6 +346,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         flushInstance._flushInterval = flushInterval
         setupListeners()
         unarchive()
+        if optOutTrackingByDefault {
+            self.optOutTracking()
+        }
     }
     #endif // os(OSX)
 
@@ -990,6 +993,9 @@ extension MixpanelInstance {
      */
     open func flush(completion: (() -> Void)? = nil) {
         if self.hasOptedOutTracking() {
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
             return
         }
         trackingQueue.async {

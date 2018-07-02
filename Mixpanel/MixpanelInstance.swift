@@ -346,6 +346,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         flushInstance._flushInterval = flushInterval
         setupListeners()
         unarchive()
+        if optOutTrackingByDefault {
+            self.optOutTracking()
+        }
     }
     #endif // os(OSX)
 

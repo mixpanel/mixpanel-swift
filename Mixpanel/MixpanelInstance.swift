@@ -993,6 +993,9 @@ extension MixpanelInstance {
      */
     open func flush(completion: (() -> Void)? = nil) {
         if self.hasOptedOutTracking() {
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
             return
         }
         trackingQueue.async {

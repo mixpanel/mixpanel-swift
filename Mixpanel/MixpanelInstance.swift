@@ -290,6 +290,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     }
                 }
             }
+
+            Persistence.createMixpanelFolderIOS()
         #endif
         flushInstance.delegate = self
         distinctId = defaultDistinctId()

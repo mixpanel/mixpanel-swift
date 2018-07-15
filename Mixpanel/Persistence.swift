@@ -38,20 +38,68 @@ class Persistence {
 
     class private func filePathFor(_ archiveType: String, token: String) -> String? {
         let filename = "mixpanel-\(token)-\(archiveType)"
-        let manager = FileManager.default
 
-        #if os(iOS)
-            let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
-        #else
-            let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
-        #endif // os(iOS)
-
+        let url = mixpanelFolder()
         guard let urlUnwrapped = url?.appendingPathComponent(filename).path else {
             return nil
         }
 
         return urlUnwrapped
     }
+
+    class func mixpanelFolder() -> URL? {
+        let manager = FileManager.default
+
+        #if os(iOS)
+            let url = manager.urls(for: .applicationSupportDirectory, in: .userDomainMask).last?.appendingPathComponent(kMixpanelFolderName)
+        #else
+            let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
+        #endif // os(iOS)
+
+        return url
+    }
+
+    #if os(iOS)
+
+    private static let kMixpanelFolderName = "Mixpanel"
+
+    class func createMixpanelFolderIOS() {
+        do {
+            let manager = FileManager.default
+            guard let url = mixpanelFolder(), !manager.fileExists(atPath: url.path) else {
+                return
+            }
+
+            try manager.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
+
+            guard let oldFolder = manager.urls(for: .libraryDirectory, in: .userDomainMask).last else {
+                return
+            }
+
+            moveMixpanelFiles(from: oldFolder, to: url)
+        } catch {
+            Logger.info(message: "Error creating Mixpanel folder.")
+        }
+    }
+
+    class private func moveMixpanelFiles(from fromUrl: URL, to toUrl: URL) {
+        do {
+            let manager = FileManager.default
+
+            let files = try manager.contentsOfDirectory(at: fromUrl, includingPropertiesForKeys: nil, options: [.skipsSubdirectoryDescendants, .skipsHiddenFiles])
+            let mixpanelName = "mixpanel-"
+            for fileUrl in files {
+                let fileName = fileUrl.lastPathComponent
+
+                if fileName.prefix(mixpanelName.count) == mixpanelName {
+                    try manager.moveItem(at: fileUrl, to: toUrl.appendingPathComponent(fileName))
+                }
+            }
+        } catch {
+            Logger.info(message: "Error moving file to Mixpanel folder.")
+        }
+    }
+    #endif
 
     #if DECIDE
     class func archive(eventsQueue: Queue,

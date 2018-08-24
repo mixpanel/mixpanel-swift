@@ -534,7 +534,99 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(mixpanel.timedEvents.isEmpty,
                       "timedEvents is not empty")
     }
+    
+    func testUnarchiveInconsistentData() {
+        // corrupt file
+        let fileManager = FileManager.default
+        // Prior 2.1.7 we used to share every class between main target and extension target(appex). For serialization, this will cause problem.
+        // Because if the archive is triggered in extension, the class object will be saved as [Target Name].[Class name] for the key. Since in later version,
+        // we removed extension target. If the archive happened in 2.1.6, and unarchive happened in 2.4.4 (this is the case for upgrading the sdk), it will trigger a crash
+        // (throw NSException) because when try to map the key [Class name] to [Target Name].[Class name] and [Target Name].[Class name] no longer exists.
+        // The below line is to simulate this situation. Foo <--> Extension.Foo, Extension.Foo doesn't exist. We should catch the NSException and reset the file instead of
+        // crash the app
+        let data = try! Data(contentsOf: Bundle(for: type(of: self)).url(forResource: "test_variant", withExtension: "json")!)
+        let object = try! JSONSerialization.jsonObject(with: data, options: [])
+        let variant = Variant(JSONObject: object as? [String: Any])
+        NSKeyedArchiver.setClassName("Extension.Variant", for: Variant.self)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.events, token: kTestToken)!)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.people, token: kTestToken)!)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.properties, token: kTestToken)!)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.codelessBindings, token: kTestToken)!)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.variants, token: kTestToken)!)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.optOutStatus, token: kTestToken)!)
+    
+        mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
+        waitForTrackingQueue()
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.events, token: kTestToken)!),
+                      "events archive file not removed")
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.people, token: kTestToken)!),
+                      "people archive file not removed")
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
+                      "properties archive file not removed")
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.codelessBindings, token: kTestToken)!),
+                      "properties archive file not removed")
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.variants, token: kTestToken)!),
+                      "properties archive file not removed")
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.optOutStatus, token: kTestToken)!),
+                      "properties archive file not removed")
+    }
 
+    func testUnarchiveCorruptedData() {
+        // corrupt file
+        let fileManager = FileManager.default
+        let garbage = "garbage".data(using: String.Encoding.utf8)!
+        do {
+            try garbage.write(to: URL(
+                fileURLWithPath: Persistence.filePathWithType(.events, token: kTestToken)!),
+                              options: [])
+            try garbage.write(to: URL(
+                fileURLWithPath: Persistence.filePathWithType(.people, token: kTestToken)!),
+                              options: [])
+            try garbage.write(to: URL(
+                fileURLWithPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
+                              options: [])
+            try garbage.write(to: URL(
+                fileURLWithPath: Persistence.filePathWithType(.codelessBindings, token: kTestToken)!),
+                              options: [])
+            try garbage.write(to: URL(
+                fileURLWithPath: Persistence.filePathWithType(.variants, token: kTestToken)!),
+                              options: [])
+            try garbage.write(to: URL(
+                fileURLWithPath: Persistence.filePathWithType(.optOutStatus, token: kTestToken)!),
+                              options: [])
+        } catch {
+            print("couldn't write data")
+        }
+        
+        mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
+        waitForTrackingQueue()
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.events, token: kTestToken)!),
+                      "events archive file not removed")
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.people, token: kTestToken)!),
+                      "people archive file not removed")
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
+                      "properties archive file not removed")
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.codelessBindings, token: kTestToken)!),
+                      "properties archive file not removed")
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.variants, token: kTestToken)!),
+                      "properties archive file not removed")
+        XCTAssertTrue(!fileManager.fileExists(
+            atPath: Persistence.filePathWithType(.optOutStatus, token: kTestToken)!),
+                      "properties archive file not removed")
+        waitForTrackingQueue()
+    }
+    
     func testMixpanelDelegate() {
         mixpanel.delegate = self
         mixpanel.identify(distinctId: "d1")

@@ -7,6 +7,7 @@
 //
 
 @import Foundation;
+#import "ExceptionWrapper.h"
 
 //! Project version number for Mixpanel.
 FOUNDATION_EXPORT double MixpanelVersionNumber;

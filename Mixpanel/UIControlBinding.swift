@@ -121,8 +121,10 @@ class UIControlBinding: CodelessBinding {
                             } else {
                                 objects = []
                             }
-                        } else {
-                            objects = self.path.selectFrom(root: root, evaluateFinalPredicate: false) as! [UIControl]
+                        }else if let temp =  self.path.selectFrom(root: root, evaluateFinalPredicate: false) as? [UIControl] {
+                            objects = temp
+                        }else{
+                            objects = []
                         }
 
                         for control in objects {

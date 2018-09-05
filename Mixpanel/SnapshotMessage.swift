@@ -71,7 +71,7 @@ class SnapshotRequest: BaseWebSocketMessage {
             response.screenshot = screenshot
 
             if imageHash == response.imageHash {
-                serializedObjects = connection.getSessionObjectSynchronized(for: "snapshot_hierarchy") as! [String: AnyObject]
+                serializedObjects = connection.getSessionObjectSynchronized(for: "snapshot_hierarchy") as? [String: AnyObject]
             } else {
                 DispatchQueue.main.sync {
                     serializedObjects = serializer.getObjectHierarchyForWindow(at: 0)
@@ -98,7 +98,7 @@ class SnapshotResponse: BaseWebSocketMessage {
         }
         set {
             if let snapshot = newValue {
-                if let jpegSnapshotImageData = UIImageJPEGRepresentation(snapshot, 0.5) {
+                if let jpegSnapshotImageData = snapshot.jpegData(compressionQuality: 0.5) {
                     payload["screenshot"] = jpegSnapshotImageData.base64EncodedString(options: [.lineLength64Characters]) as AnyObject
                     self.imageHash = getImageHash(imageData: jpegSnapshotImageData)
                     payload["image_hash"] = self.imageHash as AnyObject

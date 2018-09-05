@@ -173,7 +173,7 @@ class WebSocketWrapper: WebSocketDelegate {
             }
             connectivityIndiciatorWindow = UIWindow(frame: CGRect(x: 0, y: 0, width: window.frame.size.width, height: 4))
             connectivityIndiciatorWindow?.backgroundColor = UIColor.clear
-            connectivityIndiciatorWindow?.windowLevel = UIWindowLevelAlert
+            connectivityIndiciatorWindow?.windowLevel = UIWindow.Level.alert
             connectivityIndiciatorWindow?.alpha = 0
             connectivityIndiciatorWindow?.isHidden = false
             recordingView = UIView(frame: connectivityIndiciatorWindow!.frame)
@@ -183,7 +183,7 @@ class WebSocketWrapper: WebSocketDelegate {
             indeterminateLayer?.frame = CGRect(x: 0, y: 0, width: 0, height: 4)
             recordingView?.layer.addSublayer(indeterminateLayer!)
             connectivityIndiciatorWindow?.addSubview(recordingView!)
-            connectivityIndiciatorWindow?.bringSubview(toFront: recordingView!)
+            connectivityIndiciatorWindow?.bringSubviewToFront(recordingView!)
 
             UIView.animate(withDuration: 0.3) {
                 self.connectivityIndiciatorWindow?.alpha = 1
@@ -212,8 +212,8 @@ class WebSocketWrapper: WebSocketDelegate {
         myAnimation.duration = duration
         myAnimation.fromValue = fromValue
         myAnimation.toValue = toValue
-        myAnimation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
-        myAnimation.fillMode = kCAFillModeForwards
+        myAnimation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeOut)
+        myAnimation.fillMode = CAMediaTimingFillMode.forwards
         myAnimation.isRemovedOnCompletion = false
         indeterminateLayer?.add(myAnimation, forKey: animationKey)
     }

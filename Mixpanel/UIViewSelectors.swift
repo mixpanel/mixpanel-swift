@@ -83,7 +83,7 @@ extension UIView {
         let imageSelector = NSSelectorFromString("image")
 
         if let button = self as? UIButton {
-            originalImage = button.image(for: UIControlState.normal)
+            originalImage = button.image(for: UIControl.State.normal)
         } else if let superviewUnwrapped = self.superview,
             NSStringFromClass(type(of: superviewUnwrapped)) == "UITabBarButton" && self.responds(to: imageSelector) {
             originalImage = self.perform(imageSelector)?.takeUnretainedValue() as? UIImage
@@ -124,12 +124,12 @@ extension UIView {
         var targetActions = [String]()
         if let control = self as? UIControl {
             for target in control.allTargets {
-                let allEvents: UIControlEvents = [.allTouchEvents, .allEditingEvents]
+                let allEvents: UIControl.Event = [.allTouchEvents, .allEditingEvents]
                 let allEventsRaw = allEvents.rawValue
                 var e: UInt = 0
                 while allEventsRaw >> e > 0 {
                     let event = allEventsRaw & (0x01 << e)
-                    let controlEvent = UIControlEvents(rawValue: event)
+                    let controlEvent = UIControl.Event(rawValue: event)
                     let ignoreActions = ["preVerify:forEvent:", "execute:forEvent:"]
                     if let actions = control.actions(forTarget: target, forControlEvent: controlEvent) {
                         for action in actions {

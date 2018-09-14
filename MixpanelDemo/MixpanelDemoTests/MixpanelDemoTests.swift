@@ -354,7 +354,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testTrackLaunchOptions() {
         let nsJourneyId: NSNumber = 1
-        let launchOptions: [UIApplicationLaunchOptionsKey: Any] = [UIApplicationLaunchOptionsKey.remoteNotification: ["mp":
+        let launchOptions: [UIApplication.LaunchOptionsKey: Any] = [UIApplication.LaunchOptionsKey.remoteNotification: ["mp":
             ["m": 12345, "c": 54321, "journey_id": nsJourneyId, "additional_param": "abcd"]]]
         mixpanel = Mixpanel.initialize(token: kTestToken,
                                        launchOptions: launchOptions,

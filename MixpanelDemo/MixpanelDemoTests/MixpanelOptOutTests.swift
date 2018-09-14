@@ -24,7 +24,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
     func testNoTrackShouldEverBeTriggeredDuringInitializedWithOptedOutYES()
     {
         _ = stubTrack().andReturn(503)
-        let launchOptions = [UIApplicationLaunchOptionsKey.remoteNotification:
+        let launchOptions = [UIApplication.LaunchOptionsKey.remoteNotification:
             ["mp":["m":"the_message_id","c": "the_campaign_id",
                    "journey_id": 123456]
             ]]
@@ -39,7 +39,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
     
     func testAutoTrackEventsShouldNotBeQueuedDuringInitializedWithOptedOutYES()
     {
-        let launchOptions = [UIApplicationLaunchOptionsKey.remoteNotification:
+        let launchOptions = [UIApplication.LaunchOptionsKey.remoteNotification:
             ["mp":["m":"the_message_id","c": "the_campaign_id",
                    "journey_id": 123456]
             ]]
@@ -50,7 +50,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testAutoTrackShouldBeTriggeredDuringInitializedWithOptedOutNO()
     {
-        let launchOptions = [UIApplicationLaunchOptionsKey.remoteNotification:
+        let launchOptions = [UIApplication.LaunchOptionsKey.remoteNotification:
             ["mp":["m":"the_message_id","c": "the_campaign_id",
                    "journey_id": 123456]
             ]]

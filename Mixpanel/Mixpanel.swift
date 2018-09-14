@@ -37,7 +37,7 @@ open class Mixpanel {
      */
     @discardableResult
     open class func initialize(token apiToken: String,
-                               launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil,
+                               launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil,
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
                                automaticPushTracking: Bool = true,
@@ -141,7 +141,7 @@ class MixpanelManager {
 
     #if !os(OSX)
     func initialize(token apiToken: String,
-                    launchOptions: [UIApplicationLaunchOptionsKey : Any]?,
+                    launchOptions: [UIApplication.LaunchOptionsKey : Any]?,
                     flushInterval: Double,
                     instanceName: String,
                     automaticPushTracking: Bool = true,

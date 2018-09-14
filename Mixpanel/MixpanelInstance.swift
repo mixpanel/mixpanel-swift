@@ -242,7 +242,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let telephonyInfo = CTTelephonyNetworkInfo()
     #endif
     #if !os(OSX)
-    var taskId = UIBackgroundTaskInvalid
+    var taskId = UIBackgroundTaskIdentifier.invalid
     #endif // os(OSX)
     let sessionMetadata: SessionMetadata
     let flushInstance: Flush
@@ -254,7 +254,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // DECIDE
 
     #if !os(OSX)
-    init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String, automaticPushTracking: Bool = true, optOutTrackingByDefault: Bool = false) {
+    init(apiToken: String?, launchOptions: [UIApplication.LaunchOptionsKey : Any]?, flushInterval: Double, name: String, automaticPushTracking: Bool = true, optOutTrackingByDefault: Bool = false) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -315,7 +315,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 executeCachedVariants()
                 executeCachedCodelessBindings()
                 if let notification =
-                    launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
+                    launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
                     trackPushNotification(notification, event: "$app_open")
                 }
             }
@@ -372,23 +372,23 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if !MixpanelInstance.isiOSAppExtension() {
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationWillTerminate(_:)),
-                                           name: .UIApplicationWillTerminate,
+                                           name: UIApplication.willTerminateNotification,
                                            object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationWillResignActive(_:)),
-                                           name: .UIApplicationWillResignActive,
+                                           name: UIApplication.willResignActiveNotification,
                                            object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationDidBecomeActive(_:)),
-                                           name: .UIApplicationDidBecomeActive,
+                                           name: UIApplication.didBecomeActiveNotification,
                                            object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationDidEnterBackground(_:)),
-                                           name: .UIApplicationDidEnterBackground,
+                                           name: UIApplication.didEnterBackgroundNotification,
                                            object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationWillEnterForeground(_:)),
-                                           name: .UIApplicationWillEnterForeground,
+                                           name: UIApplication.willEnterForegroundNotification,
                                            object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(appLinksNotificationRaised(_:)),
@@ -508,7 +508,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         
         taskId = sharedApplication.beginBackgroundTask() {
-            self.taskId = UIBackgroundTaskInvalid
+            self.taskId = UIBackgroundTaskIdentifier.invalid
         }
 
         if flushOnBackground {
@@ -522,9 +522,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 self.decideInstance.decideFetched = false
             }
             #endif // DECIDE
-            if self.taskId != UIBackgroundTaskInvalid {
+            if self.taskId != UIBackgroundTaskIdentifier.invalid {
                 sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskInvalid
+                self.taskId = UIBackgroundTaskIdentifier.invalid
             }
         }
     }
@@ -535,9 +535,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         sessionMetadata.applicationWillEnterForeground()
         trackingQueue.async {
-            if self.taskId != UIBackgroundTaskInvalid {
+            if self.taskId != UIBackgroundTaskIdentifier.invalid {
                 sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskInvalid
+                self.taskId = UIBackgroundTaskIdentifier.invalid
                 #if os(iOS)
                     self.updateNetworkActivityIndicator(false)
                 #endif // os(iOS)
@@ -665,7 +665,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     @objc func connectGestureRecognized(gesture: UILongPressGestureRecognizer) {
-        if gesture.state == UIGestureRecognizerState.began && enableVisualEditorForCodeless {
+        if gesture.state == UIGestureRecognizer.State.began && enableVisualEditorForCodeless {
             connectToWebSocket()
         }
     }

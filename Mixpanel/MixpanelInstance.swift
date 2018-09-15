@@ -138,7 +138,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     /// A unique identifier for this MixpanelInstance
-    open let name: String
+    public let name: String
 
     #if DECIDE
     /// Controls whether to enable the visual editor for codeless on mixpanel.com

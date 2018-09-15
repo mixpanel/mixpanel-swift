@@ -122,7 +122,7 @@ import UIKit
             }
 
             if let capInsets = capInsets {
-                if image != nil && !UIEdgeInsetsEqualToEdgeInsets(capInsets, UIEdgeInsets.zero) {
+                if image != nil && !(capInsets == UIEdgeInsets.zero) {
                     if let resizingMode = dictionaryValue["resizingMode"] as? UIImage.ResizingMode {
                         image = image?.resizableImage(withCapInsets: capInsets, resizingMode: resizingMode)
                     } else {

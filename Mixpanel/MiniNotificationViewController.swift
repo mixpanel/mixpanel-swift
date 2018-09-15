@@ -12,7 +12,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
 
     var miniNotification: MiniNotification! {
         get {
-            return super.notification as! MiniNotification
+            return super.notification as? MiniNotification
         }
     }
     @IBOutlet weak var imageView: UIImageView!
@@ -47,7 +47,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
     }
 
     override func show(animated: Bool) {
-        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
+        guard MixpanelInstance.sharedUIApplication() != nil else {
             return
         }
         canPan = false

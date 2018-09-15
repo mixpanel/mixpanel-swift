@@ -18,11 +18,11 @@ let kDefaultServerEngageString = "https://api.mixpanel.com/engage/"
 let kDefaultServerDecideString = "^https://api.mixpanel.com/decide(.*?)".regex
 
 @discardableResult func stubEngage() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerEngageString as LSMatcheable!).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("POST", kDefaultServerEngageString as LSMatcheable).withHeader("Accept-Encoding", "gzip")!
 }
 
 @discardableResult func stubTrack() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerTrackString as LSMatcheable!).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("POST", kDefaultServerTrackString as LSMatcheable).withHeader("Accept-Encoding", "gzip")!
 }
 
 @discardableResult func stubDecide() -> LSStubRequestDSL {

@@ -71,7 +71,7 @@ class SnapshotRequest: BaseWebSocketMessage {
             response.screenshot = screenshot
 
             if imageHash == response.imageHash {
-                serializedObjects = connection.getSessionObjectSynchronized(for: "snapshot_hierarchy") as! [String: AnyObject]
+                serializedObjects = connection.getSessionObjectSynchronized(for: "snapshot_hierarchy") as? [String: AnyObject]
             } else {
                 DispatchQueue.main.sync {
                     serializedObjects = serializer.getObjectHierarchyForWindow(at: 0)

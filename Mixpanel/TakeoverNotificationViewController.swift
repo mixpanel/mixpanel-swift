@@ -12,7 +12,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
 
     var takeoverNotification: TakeoverNotification! {
         get {
-            return super.notification as! TakeoverNotification
+            return super.notification as? TakeoverNotification
         }
     }
     @IBOutlet weak var imageView: UIImageView!

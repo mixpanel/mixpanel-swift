@@ -611,7 +611,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #else
     static func macOSIdentifier() -> String? {
         let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"));
-        let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString!, kCFAllocatorDefault, 0);
+        let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0);
         IOObjectRelease(platformExpert);
         return (serialNumberAsCFString?.takeUnretainedValue() as? String)
     }

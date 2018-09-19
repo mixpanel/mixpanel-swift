@@ -63,6 +63,9 @@ class AutomaticProperties {
         p["$ios_device_model"]  = AutomaticProperties.deviceModel()
         #if !os(OSX)
         p["$ios_version"]       = UIDevice.current.systemVersion
+        if let ifa = Mixpanel.mainInstance().IFA() {
+            p["$ios_ifa"] = ifa;
+        }
         #else
         p["$ios_version"]       = ProcessInfo.processInfo.operatingSystemVersionString
         #endif // os(OSX)

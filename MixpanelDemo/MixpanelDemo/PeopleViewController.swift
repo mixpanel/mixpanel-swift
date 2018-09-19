@@ -102,7 +102,7 @@ class PeopleViewController: UIViewController, UITableViewDelegate, UITableViewDa
             // identify: is called and flush them at that time. That way, you can set properties before a user is logged in
             // and identify them once you know their user ID.
             Mixpanel.mainInstance().identify(distinctId: Mixpanel.mainInstance().distinctId)
-            descStr = "Deleted User"
+            descStr = "Identified User"
         default:
             break
         }

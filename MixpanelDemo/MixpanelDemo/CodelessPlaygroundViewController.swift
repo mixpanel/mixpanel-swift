@@ -33,10 +33,7 @@ class CodelessPlaygroundViewController: UIViewController, UITableViewDelegate, U
         MixpanelTweaks.bind(MixpanelTweaks.intTweak, binding: { self.label2.text = "\($0)" })
         MixpanelTweaks.bind(MixpanelTweaks.stringTweak, binding: { self.label3.text = $0 })
 
-        if MixpanelTweaks.assign(MixpanelTweaks.boolTweak) {
-            self.label4.text = "SUCCESS"
-        }
-
+        self.label4.text = MixpanelTweaks.assign(MixpanelTweaks.boolTweak) ? "TRUE" : "FALSE"
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

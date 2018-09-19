@@ -309,6 +309,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #if DECIDE
             if !MixpanelInstance.isiOSAppExtension() {
                 automaticEvents.delegate = self
+                automaticEvents.mixpanel = self
                 automaticEvents.automaticPushTracking = automaticPushTracking
                 automaticEvents.initializeEvents()
                 decideInstance.inAppDelegate = self

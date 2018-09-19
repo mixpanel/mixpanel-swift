@@ -583,6 +583,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if !os(OSX)
     func IFA() -> String? {
         var ifa: String? = nil
+        #if !MIXPANEL_NO_IFA
         if let ASIdentifierManagerClass = NSClassFromString("ASIdentifierManager") {
             let sharedManagerSelector = NSSelectorFromString("sharedManager")
             if let sharedManagerIMP = ASIdentifierManagerClass.method(for: sharedManagerSelector) {
@@ -606,6 +607,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 }
             }
         }
+        #endif
         return ifa
     }
     #else
@@ -680,11 +682,24 @@ extension MixpanelInstance {
     /**
      Sets the distinct ID of the current user.
 
-     Mixpanel uses the IFV String (`UIDevice.current().identifierForVendor`)
-     as the default distinct ID. This ID will identify a user across all apps by the same
-     vendor, but cannot be used to link the same user across apps from different
-     vendors. If we are unable to get the IFV, we will fall back to generating a
-     random persistent UUID
+     Mixpanel will choose a default distinct ID based on whether you are using the
+     AdSupport.framework or not.
+     
+     If you are not using the AdSupport Framework (iAds), then we use the IFV String
+     (`UIDevice.current().identifierForVendor`) as the default distinct ID. This ID will
+     identify a user across all apps by the same vendor, but cannot be used to link the same
+     user across apps from different vendors. If we are unable to get the IFV, we will fall
+     back to generating a random persistent UUID
+     
+     If you are showing iAds in your application, you are allowed use the iOS ID
+     for Advertising (IFA) to identify users. If you have this framework in your
+     app, Mixpanel will use the IFA as the default distinct ID. If you have
+     AdSupport installed but still don't want to use the IFA, you can define the
+     <code>MIXPANEL_NO_IFA</code> flag in your <code>Active Compilation Conditions</code>
+     build settings, and Mixpanel will use the IFV as the default distinct ID.
+     
+     If we are unable to get an IFA or IFV, we will fall back to generating a
+     random persistent UUID.
 
      For tracking events, you do not need to call `identify:` if you
      want to use the default. However,

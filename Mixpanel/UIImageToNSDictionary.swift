@@ -45,7 +45,7 @@ import UIKit
         let images = image.images ?? [image]
         var imageDictionaries = [NSDictionary]()
         for img in images {
-            if let imageData = UIImagePNGRepresentation(img) {
+            if let imageData = img.pngData() {
                 let imageDataString = imageData.base64EncodedString(options: [.lineLength64Characters])
                 let imageDictionary = ["scale": image.scale,
                                        "mime_type": "image/png",
@@ -122,8 +122,8 @@ import UIKit
             }
 
             if let capInsets = capInsets {
-                if image != nil && !UIEdgeInsetsEqualToEdgeInsets(capInsets, UIEdgeInsets.zero) {
-                    if let resizingMode = dictionaryValue["resizingMode"] as? UIImageResizingMode {
+                if image != nil && !(capInsets == UIEdgeInsets.zero) {
+                    if let resizingMode = dictionaryValue["resizingMode"] as? UIImage.ResizingMode {
                         image = image?.resizableImage(withCapInsets: capInsets, resizingMode: resizingMode)
                     } else {
                         image = image?.resizableImage(withCapInsets: capInsets)

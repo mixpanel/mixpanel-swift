@@ -177,7 +177,7 @@ class ObjectFilter: CustomStringConvertible {
                 }
             }
         } else if let viewController = object as? UIViewController {
-            for child in viewController.childViewControllers {
+            for child in viewController.children {
                 if searchClass == nil || child.isKind(of: searchClass!) {
                     children.append(child)
                 }

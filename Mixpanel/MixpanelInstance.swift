@@ -138,7 +138,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     /// A unique identifier for this MixpanelInstance
-    open let name: String
+    public let name: String
 
     #if DECIDE
     /// Controls whether to enable the visual editor for codeless on mixpanel.com
@@ -242,7 +242,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let telephonyInfo = CTTelephonyNetworkInfo()
     #endif
     #if !os(OSX)
-    var taskId = UIBackgroundTaskInvalid
+    var taskId = UIBackgroundTaskIdentifier.invalid
     #endif // os(OSX)
     let sessionMetadata: SessionMetadata
     let flushInstance: Flush
@@ -254,7 +254,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // DECIDE
 
     #if !os(OSX)
-    init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String, automaticPushTracking: Bool = true, optOutTrackingByDefault: Bool = false) {
+    init(apiToken: String?, launchOptions: [UIApplication.LaunchOptionsKey : Any]?, flushInterval: Double, name: String, automaticPushTracking: Bool = true, optOutTrackingByDefault: Bool = false) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -315,7 +315,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 executeCachedVariants()
                 executeCachedCodelessBindings()
                 if let notification =
-                    launchOptions?[UIApplicationLaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
+                    launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
                     trackPushNotification(notification, event: "$app_open")
                 }
             }
@@ -372,29 +372,29 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if !MixpanelInstance.isiOSAppExtension() {
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationWillTerminate(_:)),
-                                           name: .UIApplicationWillTerminate,
+                                           name: UIApplication.willTerminateNotification,
                                            object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationWillResignActive(_:)),
-                                           name: .UIApplicationWillResignActive,
+                                           name: UIApplication.willResignActiveNotification,
                                            object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationDidBecomeActive(_:)),
-                                           name: .UIApplicationDidBecomeActive,
+                                           name: UIApplication.didBecomeActiveNotification,
                                            object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationDidEnterBackground(_:)),
-                                           name: .UIApplicationDidEnterBackground,
+                                           name: UIApplication.didEnterBackgroundNotification,
                                            object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationWillEnterForeground(_:)),
-                                           name: .UIApplicationWillEnterForeground,
+                                           name: UIApplication.willEnterForegroundNotification,
                                            object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(appLinksNotificationRaised(_:)),
                                            name: NSNotification.Name("com.parse.bolts.measurement_event"),
                                            object: nil)
-            #if os(iOS) && DECIDE
+            #if os(iOS) && DECIDE && DEBUG
                 initializeGestureRecognizer()
             #endif // os(iOS) && DECIDE
         }
@@ -508,7 +508,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         
         taskId = sharedApplication.beginBackgroundTask() {
-            self.taskId = UIBackgroundTaskInvalid
+            self.taskId = UIBackgroundTaskIdentifier.invalid
         }
 
         if flushOnBackground {
@@ -522,9 +522,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 self.decideInstance.decideFetched = false
             }
             #endif // DECIDE
-            if self.taskId != UIBackgroundTaskInvalid {
+            if self.taskId != UIBackgroundTaskIdentifier.invalid {
                 sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskInvalid
+                self.taskId = UIBackgroundTaskIdentifier.invalid
             }
         }
     }
@@ -535,9 +535,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         sessionMetadata.applicationWillEnterForeground()
         trackingQueue.async {
-            if self.taskId != UIBackgroundTaskInvalid {
+            if self.taskId != UIBackgroundTaskIdentifier.invalid {
                 sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskInvalid
+                self.taskId = UIBackgroundTaskIdentifier.invalid
                 #if os(iOS)
                     self.updateNetworkActivityIndicator(false)
                 #endif // os(iOS)
@@ -583,6 +583,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if !os(OSX)
     func IFA() -> String? {
         var ifa: String? = nil
+        #if !MIXPANEL_NO_IFA
         if let ASIdentifierManagerClass = NSClassFromString("ASIdentifierManager") {
             let sharedManagerSelector = NSSelectorFromString("sharedManager")
             if let sharedManagerIMP = ASIdentifierManagerClass.method(for: sharedManagerSelector) {
@@ -606,12 +607,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 }
             }
         }
+        #endif
         return ifa
     }
     #else
     static func macOSIdentifier() -> String? {
         let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"));
-        let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString!, kCFAllocatorDefault, 0);
+        let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0);
         IOObjectRelease(platformExpert);
         return (serialNumberAsCFString?.takeUnretainedValue() as? String)
     }
@@ -665,7 +667,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     @objc func connectGestureRecognized(gesture: UILongPressGestureRecognizer) {
-        if gesture.state == UIGestureRecognizerState.began && enableVisualEditorForCodeless {
+        if gesture.state == UIGestureRecognizer.State.began && enableVisualEditorForCodeless {
             connectToWebSocket()
         }
     }
@@ -680,11 +682,24 @@ extension MixpanelInstance {
     /**
      Sets the distinct ID of the current user.
 
-     Mixpanel uses the IFV String (`UIDevice.current().identifierForVendor`)
-     as the default distinct ID. This ID will identify a user across all apps by the same
-     vendor, but cannot be used to link the same user across apps from different
-     vendors. If we are unable to get the IFV, we will fall back to generating a
-     random persistent UUID
+     Mixpanel will choose a default distinct ID based on whether you are using the
+     AdSupport.framework or not.
+     
+     If you are not using the AdSupport Framework (iAds), then we use the IFV String
+     (`UIDevice.current().identifierForVendor`) as the default distinct ID. This ID will
+     identify a user across all apps by the same vendor, but cannot be used to link the same
+     user across apps from different vendors. If we are unable to get the IFV, we will fall
+     back to generating a random persistent UUID
+     
+     If you are showing iAds in your application, you are allowed use the iOS ID
+     for Advertising (IFA) to identify users. If you have this framework in your
+     app, Mixpanel will use the IFA as the default distinct ID. If you have
+     AdSupport installed but still don't want to use the IFA, you can define the
+     <code>MIXPANEL_NO_IFA</code> flag in your <code>Active Compilation Conditions</code>
+     build settings, and Mixpanel will use the IFV as the default distinct ID.
+     
+     If we are unable to get an IFA or IFV, we will fall back to generating a
+     random persistent UUID.
 
      For tracking events, you do not need to call `identify:` if you
      want to use the default. However,

@@ -90,7 +90,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
 
         let loopUntil = Date(timeIntervalSinceNow: 10)
         while !hasCompletedTask && loopUntil.timeIntervalSinceNow > 0 {
-            RunLoop.current.run(mode: RunLoopMode.defaultRunLoopMode, before: loopUntil)
+            RunLoop.current.run(mode: RunLoop.Mode.default, before: loopUntil)
         }
     }
 

@@ -12,7 +12,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
 
     var takeoverNotification: TakeoverNotification! {
         get {
-            return super.notification as! TakeoverNotification
+            return super.notification as? TakeoverNotification
         }
     }
     @IBOutlet weak var imageView: UIImageView!
@@ -34,12 +34,11 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
 
     static func notificationXibToLoad() -> String {
         var xibName = String(describing: TakeoverNotificationViewController.self)
-        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
+        guard MixpanelInstance.sharedUIApplication() != nil else {
             return xibName
         }
         if UIDevice.current.userInterfaceIdiom == UIUserInterfaceIdiom.phone {
-            let isLandscape = UIInterfaceOrientationIsLandscape(sharedApplication.statusBarOrientation)
-            if isLandscape {
+            if UIDevice.current.orientation.isLandscape {
                 xibName += "~iphonelandscape"
             } else {
                 xibName += "~iphoneportrait"
@@ -58,7 +57,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
             imageView.image = image
             if let width = imageView.image?.size.width, width / UIScreen.main.bounds.width <= 0.6, let height = imageView.image?.size.height,
                 height / UIScreen.main.bounds.height <= 0.3 {
-                imageView.contentMode = UIViewContentMode.center
+                imageView.contentMode = UIView.ContentMode.center
             }
         } else {
             Logger.error(message: "notification image failed to load from data")
@@ -66,17 +65,17 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
 
         if takeoverNotification.title == nil || takeoverNotification.body == nil {
             NSLayoutConstraint(item: titleLabel,
-                               attribute: NSLayoutAttribute.height,
-                               relatedBy: NSLayoutRelation.equal,
+                               attribute: NSLayoutConstraint.Attribute.height,
+                               relatedBy: NSLayoutConstraint.Relation.equal,
                                toItem: nil,
-                               attribute: NSLayoutAttribute.notAnAttribute,
+                               attribute: NSLayoutConstraint.Attribute.notAnAttribute,
                                multiplier: 1,
                                constant: 0).isActive = true
             NSLayoutConstraint(item: bodyLabel,
-                               attribute: NSLayoutAttribute.height,
-                               relatedBy: NSLayoutRelation.equal,
+                               attribute: NSLayoutConstraint.Attribute.height,
+                               relatedBy: NSLayoutConstraint.Relation.equal,
                                toItem: nil,
-                               attribute: NSLayoutAttribute.notAnAttribute,
+                               attribute: NSLayoutConstraint.Attribute.notAnAttribute,
                                multiplier: 1,
                                constant: 0).isActive = true
         } else {
@@ -89,11 +88,11 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         titleLabel.textColor = UIColor(MPHex: takeoverNotification.titleColor)
         bodyLabel.textColor = UIColor(MPHex: takeoverNotification.bodyColor)
 
-        let origImage = closeButton.image(for: UIControlState.normal)
-        let tintedImage = origImage?.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
-        closeButton.setImage(tintedImage, for: UIControlState.normal)
+        let origImage = closeButton.image(for: UIControl.State.normal)
+        let tintedImage = origImage?.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
+        closeButton.setImage(tintedImage, for: UIControl.State.normal)
         closeButton.tintColor = UIColor(MPHex: takeoverNotification.closeButtonColor)
-        closeButton.imageView?.contentMode = UIViewContentMode.scaleAspectFit
+        closeButton.imageView?.contentMode = UIView.ContentMode.scaleAspectFit
 
         if takeoverNotification.buttons.count >= 1 {
             setupButtonView(buttonView: firstButton, buttonModel: takeoverNotification.buttons[0], index: 0)
@@ -101,10 +100,10 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
                 setupButtonView(buttonView: secondButton, buttonModel: takeoverNotification.buttons[1], index: 1)
             } else {
                 NSLayoutConstraint(item: secondButtonContainer,
-                                   attribute: NSLayoutAttribute.width,
-                                   relatedBy: NSLayoutRelation.equal,
+                                   attribute: NSLayoutConstraint.Attribute.width,
+                                   relatedBy: NSLayoutConstraint.Relation.equal,
                                    toItem: nil,
-                                   attribute: NSLayoutAttribute.notAnAttribute,
+                                   attribute: NSLayoutConstraint.Attribute.notAnAttribute,
                                    multiplier: 1,
                                    constant: 0).isActive = true
             }
@@ -127,16 +126,16 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
     }
 
     func setupButtonView(buttonView: UIButton, buttonModel: InAppButton, index: Int) {
-        buttonView.setTitle(buttonModel.text, for: UIControlState.normal)
+        buttonView.setTitle(buttonModel.text, for: UIControl.State.normal)
         buttonView.titleLabel?.adjustsFontSizeToFitWidth = true
         buttonView.layer.cornerRadius = 5
         buttonView.layer.borderWidth = 2
-        buttonView.setTitleColor(UIColor(MPHex: buttonModel.textColor), for: UIControlState.normal)
-        buttonView.setTitleColor(UIColor(MPHex: buttonModel.textColor), for: UIControlState.highlighted)
-        buttonView.setTitleColor(UIColor(MPHex: buttonModel.textColor), for: UIControlState.selected)
+        buttonView.setTitleColor(UIColor(MPHex: buttonModel.textColor), for: UIControl.State.normal)
+        buttonView.setTitleColor(UIColor(MPHex: buttonModel.textColor), for: UIControl.State.highlighted)
+        buttonView.setTitleColor(UIColor(MPHex: buttonModel.textColor), for: UIControl.State.selected)
         buttonView.layer.borderColor = UIColor(MPHex: buttonModel.borderColor).cgColor
         buttonView.backgroundColor = UIColor(MPHex: buttonModel.backgroundColor)
-        buttonView.addTarget(self, action: #selector(buttonTapped(_:)), for: UIControlEvents.touchUpInside)
+        buttonView.addTarget(self, action: #selector(buttonTapped(_:)), for: UIControl.Event.touchUpInside)
         buttonView.tag = index
     }
 
@@ -147,7 +146,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
                                         height: UIScreen.main.bounds.size.height))
         if let window = window {
             window.alpha = 0
-            window.windowLevel = UIWindowLevelAlert
+            window.windowLevel = UIWindow.Level.alert
             window.rootViewController = self
             window.isHidden = false
         }

@@ -1,7 +1,7 @@
 language: objective-c
 before_install:
-  - gem install cocoapods -v 1.5.3
-osx_image: xcode9.3
+  - gem install cocoapods -v 1.4.0
+osx_image: xcode10
 before_script: cd MixpanelDemo
 podfile: MixpanelDemo/Podfile
 branches:
@@ -12,8 +12,8 @@ env:
   - WORKSPACE=MixpanelDemo.xcworkspace
   - SCHEME=MixpanelDemo
   matrix:
-    - DESTINATION="OS=10.0,name=iPhone 7"    SCHEME="$SCHEME"    RUN_TESTS="YES"     POD_LINT="YES"
-    - DESTINATION="OS=11.1,name=iPhone X"   SCHEME="$SCHEME"    RUN_TESTS="YES"     POD_LINT="NO"
+    - DESTINATION="OS=9.0,name=iPhone 6s"    SCHEME="$SCHEME"    RUN_TESTS="YES"     POD_LINT="YES"
+    - DESTINATION="OS=12.0,name=iPhone X"   SCHEME="$SCHEME"    RUN_TESTS="YES"     POD_LINT="YES"
 script:
   - set -o pipefail
   - xcodebuild -version
@@ -30,5 +30,5 @@ script:
 
   # Run `pod lib lint` if specified
   - if [ $POD_LINT == "YES" ]; then
-      cd .. && pod _1.5.3_ lib lint --allow-warnings && cd MixpanelDemo;
+      cd .. && pod _1.4.0_ lib lint --allow-warnings && cd MixpanelDemo;
     fi

@@ -101,10 +101,10 @@
             <a href="../Functions.html">Functions</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
-                <a href="../Functions.html#/s:8Mixpanel2eeoiSbAA5TweakVyxG_AEtAA13TweakableTypeRzlF">==(_:_:)</a>
+                <a href="../Functions.html#/s:8Mixpanel2eeoiySbAA5TweakVyxG_AEtAA13TweakableTypeRzlF">==(_:_:)</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Functions.html#/s:8Mixpanel2eeoiSbAA8AnyTweakV_ADtF">==(_:_:)</a>
+                <a href="../Functions.html#/s:8Mixpanel2eeoiySbAA8AnyTweakV_ADtF">==(_:_:)</a>
               </li>
             </ul>
           </li>
@@ -252,9 +252,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC6peopleSQyAA6PeopleCGvp"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC6peopleAA6PeopleCSgvp"></a>
                     <a name="//apple_ref/swift/Property/people" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC6peopleSQyAA6PeopleCGvp">people</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC6peopleAA6PeopleCSgvp">people</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -497,7 +497,7 @@ Useful if you need to proxy Mixpanel requests. Defaults to
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="k">let</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span></code></pre>
 
                         </div>
                       </div>
@@ -719,9 +719,9 @@ The default value is UINT64_MAX (no maximum session duration).</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC8identifyySS10distinctId_Sb9usePeopletF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC8identify10distinctId9usePeopleySS_SbtF"></a>
                     <a name="//apple_ref/swift/Method/identify(distinctId:usePeople:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8identifyySS10distinctId_Sb9usePeopletF">identify(distinctId:usePeople:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8identify10distinctId9usePeopleySS_SbtF">identify(distinctId:usePeople:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -731,11 +731,24 @@ The default value is UINT64_MAX (no maximum session duration).</p>
                       <div class="abstract">
                         <p>Sets the distinct ID of the current user.</p>
 
-<p>Mixpanel uses the IFV String (<code>UIDevice.current().identifierForVendor</code>)
-as the default distinct ID. This ID will identify a user across all apps by the same
-vendor, but cannot be used to link the same user across apps from different
-vendors. If we are unable to get the IFV, we will fall back to generating a
-random persistent UUID</p>
+<p>Mixpanel will choose a default distinct ID based on whether you are using the
+AdSupport.framework or not.</p>
+
+<p>If you are not using the AdSupport Framework (iAds), then we use the IFV String
+(<code>UIDevice.current().identifierForVendor</code>) as the default distinct ID. This ID will
+identify a user across all apps by the same vendor, but cannot be used to link the same
+user across apps from different vendors. If we are unable to get the IFV, we will fall
+back to generating a random persistent UUID</p>
+
+<p>If you are showing iAds in your application, you are allowed use the iOS ID
+for Advertising (IFA) to identify users. If you have this framework in your
+app, Mixpanel will use the IFA as the default distinct ID. If you have
+AdSupport installed but still don&rsquo;t want to use the IFA, you can define the
+<code>MIXPANEL_NO_IFA</code> flag in your <code>Active Compilation Conditions</code>
+build settings, and Mixpanel will use the IFV as the default distinct ID.</p>
+
+<p>If we are unable to get an IFA or IFV, we will fall back to generating a
+random persistent UUID.</p>
 
 <p>For tracking events, you do not need to call <code>identify:</code> if you
 want to use the default. However,
@@ -796,9 +809,9 @@ flushed once <code>identify:</code> is called.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC11createAliasySS_SS10distinctIdSb9usePeopletF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC11createAlias_10distinctId9usePeopleySS_SSSbtF"></a>
                     <a name="//apple_ref/swift/Method/createAlias(_:distinctId:usePeople:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11createAliasySS_SS10distinctIdSb9usePeopletF">createAlias(_:distinctId:usePeople:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11createAlias_10distinctId9usePeopleySS_SSSbtF">createAlias(_:distinctId:usePeople:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1001,9 +1014,9 @@ persisting data as needed.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC5flushyyycSg10completion_tF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC5flush10completionyyycSg_tF"></a>
                     <a name="//apple_ref/swift/Method/flush(completion:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC5flushyyycSg10completion_tF">flush(completion:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC5flush10completionyyycSg_tF">flush(completion:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1063,9 +1076,9 @@ method manually if you want to force a flush at a particular moment.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC5trackySSSg5event_s10DictionaryVySSAA0A4Type_pGSg10propertiestF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC5track5event10propertiesySSSg_SDySSAA0A4Type_pGSgtF"></a>
                     <a name="//apple_ref/swift/Method/track(event:properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC5trackySSSg5event_s10DictionaryVySSAA0A4Type_pGSg10propertiestF">track(event:properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC5track5event10propertiesySSSg_SDySSAA0A4Type_pGSgtF">track(event:properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1127,9 +1140,9 @@ If the event is being timed, the timer will stop and be added as a property.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC4timeySS5event_tF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC4time5eventySS_tF"></a>
                     <a name="//apple_ref/swift/Method/time(event:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC4timeySS5event_tF">time(event:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC4time5eventySS_tF">time(event:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1191,9 +1204,9 @@ mixpanelInstance.track(<q>Image Upload</q>)
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC16eventElapsedTimeSdSS0C0_tF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC16eventElapsedTime0C0SdSS_tF"></a>
                     <a name="//apple_ref/swift/Method/eventElapsedTime(event:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16eventElapsedTimeSdSS0C0_tF">eventElapsedTime(event:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16eventElapsedTime0C0SdSS_tF">eventElapsedTime(event:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1264,9 +1277,9 @@ mixpanelInstance.track(<q>Image Upload</q>)
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC22currentSuperPropertiess10DictionaryVySSypGyF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC22currentSuperPropertiesSDySSypGyF"></a>
                     <a name="//apple_ref/swift/Method/currentSuperProperties()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC22currentSuperPropertiess10DictionaryVySSypGyF">currentSuperProperties()</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC22currentSuperPropertiesSDySSypGyF">currentSuperProperties()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1322,9 +1335,9 @@ mixpanelInstance.track(<q>Image Upload</q>)
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC23registerSuperPropertiesys10DictionaryVySSAA0A4Type_pGF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC23registerSuperPropertiesyySDySSAA0A4Type_pGF"></a>
                     <a name="//apple_ref/swift/Method/registerSuperProperties(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC23registerSuperPropertiesys10DictionaryVySSAA0A4Type_pGF">registerSuperProperties(_:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC23registerSuperPropertiesyySDySSAA0A4Type_pGF">registerSuperProperties(_:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1374,9 +1387,9 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC27registerSuperPropertiesOnceys10DictionaryVySSAA0A4Type_pG_AaG_pSg12defaultValuetF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC27registerSuperPropertiesOnce_12defaultValueySDySSAA0A4Type_pG_AaF_pSgtF"></a>
                     <a name="//apple_ref/swift/Method/registerSuperPropertiesOnce(_:defaultValue:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC27registerSuperPropertiesOnceys10DictionaryVySSAA0A4Type_pG_AaG_pSg12defaultValuetF">registerSuperPropertiesOnce(_:defaultValue:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC27registerSuperPropertiesOnce_12defaultValueySDySSAA0A4Type_pG_AaF_pSgtF">registerSuperPropertiesOnce(_:defaultValue:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1437,9 +1450,9 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC23unregisterSuperPropertyySSF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC23unregisterSuperPropertyyySSF"></a>
                     <a name="//apple_ref/swift/Method/unregisterSuperProperty(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC23unregisterSuperPropertyySSF">unregisterSuperProperty(_:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC23unregisterSuperPropertyyySSF">unregisterSuperProperty(_:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1521,9 +1534,9 @@ to be sent back to the Mixpanel server.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC13optInTrackingySSSg10distinctId_s10DictionaryVySSAA0A4Type_pGSg10propertiestF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC13optInTracking10distinctId10propertiesySSSg_SDySSAA0A4Type_pGSgtF"></a>
                     <a name="//apple_ref/swift/Method/optInTracking(distinctId:properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC13optInTrackingySSSg10distinctId_s10DictionaryVySSAA0A4Type_pGSg10propertiestF">optInTracking(distinctId:properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC13optInTracking10distinctId10propertiesySSSg_SDySSAA0A4Type_pGSgtF">optInTracking(distinctId:properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1626,9 +1639,9 @@ sent to Mixpanel after using this method.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC15joinExperimentsyyycSg8callback_tF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC15joinExperiments8callbackyyycSg_tF"></a>
                     <a name="//apple_ref/swift/Method/joinExperiments(callback:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC15joinExperimentsyyycSg8callback_tF">joinExperiments(callback:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC15joinExperiments8callbackyyycSg_tF">joinExperiments(callback:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1719,9 +1732,9 @@ and join, any experiments are newly available for the current user.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC16showNotificationySS4type_tF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC16showNotification4typeySS_tF"></a>
                     <a name="//apple_ref/swift/Method/showNotification(type:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16showNotificationySS4type_tF">showNotification(type:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16showNotification4typeySS_tF">showNotification(type:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1770,9 +1783,9 @@ and join, any experiments are newly available for the current user.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC16showNotificationySi2ID_tF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC16showNotification2IDySi_tF"></a>
                     <a name="//apple_ref/swift/Method/showNotification(ID:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16showNotificationySi2ID_tF">showNotification(ID:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16showNotification2IDySi_tF">showNotification(ID:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1821,9 +1834,9 @@ and join, any experiments are newly available for the current user.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC24fetchNotificationPayloadyys10DictionaryVySSyXlGSgc10completion_tF"></a>
+                    <a name="/s:8Mixpanel0A8InstanceC24fetchNotificationPayload10completionyySDySSyXlGSgc_tF"></a>
                     <a name="//apple_ref/swift/Method/fetchNotificationPayload(completion:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC24fetchNotificationPayloadyys10DictionaryVySSyXlGSgc10completion_tF">fetchNotificationPayload(completion:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC24fetchNotificationPayload10completionyySDySSyXlGSgc_tF">fetchNotificationPayload(completion:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1855,7 +1868,7 @@ and join, any experiments are newly available for the current user.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2018 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2018-08-29)</p>
+          <p>&copy; 2018 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2018-09-20)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

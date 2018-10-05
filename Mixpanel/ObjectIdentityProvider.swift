@@ -8,7 +8,6 @@
 
 import Foundation
 
-
 class ObjectIdentityProvider {
     let objectToIdentifierMap: NSMapTable<AnyObject, NSString>
     let sequenceGenerator = SequenceGenerator()

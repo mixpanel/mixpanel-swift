@@ -8,6 +8,7 @@
 
 import Foundation
 
+
 class ObjectIdentityProvider {
     let objectToIdentifierMap: NSMapTable<AnyObject, NSString>
     let sequenceGenerator = SequenceGenerator()
@@ -32,13 +33,17 @@ class ObjectIdentityProvider {
 }
 
 class SequenceGenerator {
-    var value: Int32 = 0
-
+    private var queue = DispatchQueue(label: "com.mixpanel.sequence.generator")
+    private(set) var value: Int32 = 0
+    
     init() {
         value = 0
     }
-
+    
     func next() -> Int32 {
-        return OSAtomicAdd32(1, &value)
+        queue.sync {
+            value += 1
+        }
+        return value;
     }
 }

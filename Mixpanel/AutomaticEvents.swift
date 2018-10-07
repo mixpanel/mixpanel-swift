@@ -6,8 +6,10 @@
 //  Copyright © 2017 Mixpanel. All rights reserved.
 //
 
-protocol AEDelegate {
+protocol AEDelegate: class {
     func track(event: String?, properties: Properties?)
+    func setOnce(properties: Properties)
+    func increment(property: String, by: Double)
     #if DECIDE
         func trackPushNotification(_ userInfo: [AnyHashable: Any], event: String)
     #endif
@@ -20,7 +22,6 @@ import StoreKit
 import UserNotifications
 
 class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
-
     var _minimumSessionDuration: UInt64 = 10000
     var minimumSessionDuration: UInt64 {
         set {
@@ -41,7 +42,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     }
     var awaitingTransactions = [String: SKPaymentTransaction]()
     let defaults = UserDefaults(suiteName: "Mixpanel")
-    var delegate: AEDelegate?
+    weak var delegate: AEDelegate?
     var sessionLength: TimeInterval = 0
     var sessionStartTime: TimeInterval = Date().timeIntervalSince1970
     var hasAddedObserver = false
@@ -52,6 +53,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
             if !isExistingUser() {
                 delegate?.track(event: "$ae_first_open", properties: nil)
+                delegate?.setOnce(properties: ["$ae_first_app_open_date": Date()])
             }
             defaults.set(true, forKey: firstOpenKey)
             defaults.synchronize()
@@ -95,8 +97,9 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         sessionLength = roundOneDigit(num: Date().timeIntervalSince1970 - sessionStartTime)
         if sessionLength >= Double(minimumSessionDuration / 1000) &&
            sessionLength <= Double(maximumSessionDuration / 1000) {
-            let properties: Properties = ["$ae_session_length": sessionLength]
-            delegate?.track(event: "$ae_session", properties: properties)
+            delegate?.track(event: "$ae_session", properties: ["$ae_session_length": sessionLength])
+            delegate?.increment(property: "$ae_total_app_sessions", by: 1)
+            delegate?.increment(property: "$ae_total_app_session_length", by: sessionLength)
         }
     }
 

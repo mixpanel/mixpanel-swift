@@ -1317,6 +1317,15 @@ extension MixpanelInstance {
             self.archiveProperties()
         }
     }
+    
+    // MARK: - AEDelegate
+    func increment(property: String, by: Double) {
+        people?.increment(property: property, by: by)
+    }
+    
+    func setOnce(properties: Properties) {
+        people?.setOnce(properties: properties)
+    }
 }
 
 #if DECIDE

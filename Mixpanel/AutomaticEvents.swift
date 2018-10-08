@@ -284,7 +284,7 @@ extension NSObject {
         let originalSelector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")
         if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
             let swizzle = Swizzler.swizzles[originalMethod] {
-            typealias MyCFunction = @convention(c) (AnyObject, Selector, UNUserNotificationCenter, UNNotificationResponse, () -> Void) -> Void
+            typealias MyCFunction = @convention(c) (AnyObject, Selector, UNUserNotificationCenter, UNNotificationResponse, @escaping () -> Void) -> Void
             let curriedImplementation = unsafeBitCast(swizzle.originalMethod, to: MyCFunction.self)
             curriedImplementation(self, originalSelector, center, response, completionHandler)
 

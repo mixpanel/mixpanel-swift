@@ -22,7 +22,12 @@ class UIControlBinding: CodelessBinding {
         self.verified = NSHashTable(options: [NSHashTableWeakMemory, NSHashTableObjectPointerPersonality])
         self.appliedTo = NSHashTable(options: [NSHashTableWeakMemory, NSHashTableObjectPointerPersonality])
         super.init(eventName: eventName, path: path)
-        self.swizzleClass = UIControl.self
+        if #available(iOS 12.0, *) {
+            self.swizzleClass = path.range(of: "UITextField") != nil ? UITextField.self : UIControl.self
+        }
+        else {
+            self.swizzleClass = UIControl.self
+        }
     }
 
     convenience init?(object: [String: Any]) {
@@ -73,7 +78,6 @@ class UIControlBinding: CodelessBinding {
         aCoder.encode(verifyEvent.rawValue, forKey: "verifyEvent")
         super.encode(with: aCoder)
     }
-
 
     override func isEqual(_ object: Any?) -> Bool {
         guard let object = object as? UIControlBinding else {

@@ -1,5 +1,6 @@
 language: objective-c
 before_install:
+  - gem uninstall cocoapods --force -a -q -I -x
   - gem install cocoapods -v 1.4.0
 osx_image: xcode10
 before_script: cd MixpanelDemo

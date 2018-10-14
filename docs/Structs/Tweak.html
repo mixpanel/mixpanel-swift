@@ -173,9 +173,9 @@ If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel5TweakV9tweakName12defaultValue__ACyxGSS_xS2Stcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(tweakName:defaultValue:_:_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel5TweakV9tweakName12defaultValue__ACyxGSS_xS2Stcfc">init(tweakName:defaultValue:_:_:)</a>
+                    <a name="/s:8Mixpanel5TweakV9tweakName12defaultValueACyxGSS_xtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(tweakName:defaultValue:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5TweakV9tweakName12defaultValueACyxGSS_xtcfc">init(tweakName:defaultValue:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -190,7 +190,7 @@ If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">tweakName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="n">defaultValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">,</span> <span class="n">_</span> <span class="nv">collectionName</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"Mixpanel"</span><span class="p">,</span> <span class="n">_</span> <span class="nv">groupName</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"Mixpanel"</span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">tweakName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="n">defaultValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -222,30 +222,6 @@ If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
                                 </div>
                               </td>
                             </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>collectionName</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>the collection name of the tweak (do not set, optional)</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>groupName</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>the group name of the tweak (do not set, optional)</p>
-                                </div>
-                              </td>
-                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -259,9 +235,9 @@ If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel5TweakVAASLRzs13SignedNumericRzrlE9tweakName12defaultValue3min3max8stepSize__ACyxGSS_xxSgA2KS2Stcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(tweakName:defaultValue:min:max:stepSize:_:_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel5TweakVAASLRzs13SignedNumericRzrlE9tweakName12defaultValue3min3max8stepSize__ACyxGSS_xxSgA2KS2Stcfc">init(tweakName:defaultValue:min:max:stepSize:_:_:)</a>
+                    <a name="/s:8Mixpanel5TweakVAASLRzs13SignedNumericRzrlE9tweakName12defaultValue3min3max8stepSizeACyxGSS_xxSgA2Ktcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(tweakName:defaultValue:min:max:stepSize:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5TweakVAASLRzs13SignedNumericRzrlE9tweakName12defaultValue3min3max8stepSizeACyxGSS_xxSgA2Ktcfc">init(tweakName:defaultValue:min:max:stepSize:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -281,9 +257,7 @@ You can optionally provide a min / max / stepSize to restrict the bounds and beh
             <span class="n">defaultValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">,</span>
             <span class="n">min</span> <span class="nv">minimumValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
             <span class="n">max</span> <span class="nv">maximumValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-            <span class="nv">stepSize</span><span class="p">:</span> <span class="kt">T</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-            <span class="n">_</span> <span class="nv">collectionName</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"Mixpanel"</span><span class="p">,</span>
-            <span class="n">_</span> <span class="nv">groupName</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"Mixpanel"</span><span class="p">)</span></code></pre>
+            <span class="nv">stepSize</span><span class="p">:</span> <span class="kt">T</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -348,30 +322,6 @@ You can optionally provide a min / max / stepSize to restrict the bounds and beh
                               <td>
                                 <div>
                                   <p>step size for the tweak (do not set, optional)</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>collectionName</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>the collection name of the tweak (do not set, optional)</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>groupName</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>the group name of the tweak (do not set, optional)</p>
                                 </div>
                               </td>
                             </tr>
@@ -447,7 +397,7 @@ You can optionally provide a min / max / stepSize to restrict the bounds and beh
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2018 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2018-10-08)</p>
+          <p>&copy; 2018 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2018-10-14)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

@@ -54,8 +54,6 @@ extension Tweak {
 
      - parameter tweakName:      name of the tweak
      - parameter defaultValue:   the default value set for the tweak
-     - parameter collectionName: the collection name of the tweak (do not set, optional)
-     - parameter groupName:      the group name of the tweak (do not set, optional)
      */
 	public init(tweakName: String, defaultValue: T) {
 		self.init(

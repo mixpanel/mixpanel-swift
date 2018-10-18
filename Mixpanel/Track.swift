@@ -31,6 +31,8 @@ class Track {
                timedEvents: inout InternalProperties,
                superProperties: InternalProperties,
                distinctId: String,
+               anonymousId: String?,
+               userId: String?,
                epochInterval: Double) {
         var ev = event
         if ev == nil || ev!.isEmpty {
@@ -54,6 +56,12 @@ class Track {
             p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
         }
         p["distinct_id"] = distinctId
+        if anonymousId != nil {
+          p["$device_id"] = anonymousId
+        }
+        if userId != nil {
+          p["$user_id"] = userId
+        }
         p += superProperties
         if let properties = properties {
             p += properties
@@ -61,7 +69,7 @@ class Track {
 
         var trackEvent: InternalProperties = ["event": ev!, "properties": p]
         metadata.toDict().forEach { (k,v) in trackEvent[k] = v }
-        
+
         self.lock.write {
             eventsQueue.append(trackEvent)
             if eventsQueue.count > QueueConstants.queueSize {

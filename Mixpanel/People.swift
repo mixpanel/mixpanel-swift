@@ -66,8 +66,13 @@ open class People {
             }
             self.metadata.toDict(isEvent: false).forEach { (k,v) in r[k] = v }
 
+            if let anonymousId = Mixpanel.mainInstance().anonymousId {
+               r["$device_id"] = anonymousId
+            }
+
             if let distinctId = self.distinctId {
                 r["$distinct_id"] = distinctId
+                r["$user_id"] = distinctId
                 self.addPeopleObject(r)
             } else {
                 self.lock.write {

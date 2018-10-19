@@ -154,8 +154,13 @@ class MixpanelDemoTests: MixpanelBaseTests {
             XCTAssertEqual(mixpanel.distinctId,
                            mixpanel.defaultDistinctId(),
                            "mixpanel identify failed to set default distinct id")
+            XCTAssertEqual(mixpanel.anonymousId,
+                           mixpanel.defaultDistinctId(),
+                           "mixpanel failed to set default anonymous id")
             XCTAssertNil(mixpanel.people.distinctId,
                          "mixpanel people distinct id should default to nil")
+            XCTAssertNil(mixpanel.people.distinctId,
+                         "mixpanel user id should default to nil")
             mixpanel.track(event: "e1")
             waitForTrackingQueue()
             XCTAssertTrue(mixpanel.eventsQueue.count == 1,
@@ -175,10 +180,15 @@ class MixpanelDemoTests: MixpanelBaseTests {
             XCTAssertEqual(mixpanel.people.unidentifiedQueue.last?["$token"] as? String,
                            kTestToken,
                            "incorrect project token in people record")
+            let anonymousId = mixpanel.anonymousId
             mixpanel.identify(distinctId: distinctId)
             waitForTrackingQueue()
             XCTAssertEqual(mixpanel.distinctId, distinctId,
                            "mixpanel identify failed to set distinct id")
+            XCTAssertEqual(mixpanel.userId, distinctId,
+                           "mixpanel identify failed to set user id")
+            XCTAssertEqual(mixpanel.anonymousId, anonymousId,
+                          "mixpanel identify shouldn't change anonymousId")
             XCTAssertEqual(mixpanel.people.distinctId, distinctId,
                            "mixpanel identify failed to set people distinct id")
             XCTAssertTrue(mixpanel.people.unidentifiedQueue.isEmpty,
@@ -210,6 +220,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testPersistentIdentity() {
         stubTrack()
+        let anonymousId: String? = mixpanel.anonymousId
         let distinctId: String = "d1"
         let alias: String = "a1"
         mixpanel.identify(distinctId: distinctId)
@@ -217,17 +228,18 @@ class MixpanelDemoTests: MixpanelBaseTests {
         mixpanel.createAlias(alias, distinctId: mixpanel.distinctId)
         waitForTrackingQueue()
         var tuple = Persistence.restoreIdentity(token: mixpanel.apiToken)
-        XCTAssertTrue(distinctId == tuple.0 && distinctId == tuple.1 && alias == tuple.2)
+        XCTAssertTrue(distinctId == tuple.0 && distinctId == tuple.1 && anonymousId == tuple.2 && distinctId == tuple.3 && alias == tuple.4)
         mixpanel.archive()
         waitForTrackingQueue()
         mixpanel.unarchive()
         waitForTrackingQueue()
         tuple = Persistence.restoreIdentity(token: mixpanel.apiToken)
-        XCTAssertTrue(mixpanel.distinctId == tuple.0 && mixpanel.people.distinctId == tuple.1 && mixpanel.alias == tuple.2)
+        XCTAssertTrue(mixpanel.distinctId == tuple.0 && mixpanel.people.distinctId == tuple.1 && mixpanel.anonymousId == tuple.2 &&
+        mixpanel.userId == tuple.3 && mixpanel.alias == tuple.4)
         Persistence.deleteMPUserDefaultsData(token: mixpanel.apiToken)
         waitForTrackingQueue()
         tuple = Persistence.restoreIdentity(token: mixpanel.apiToken)
-        XCTAssertTrue("" == tuple.0 && nil == tuple.1 && nil == tuple.2)
+        XCTAssertTrue("" == tuple.0 && nil == tuple.1 && nil == tuple.2 && nil == tuple.3 && nil == tuple.4)
     }
 
     func testTrackWithDefaultProperties() {
@@ -534,7 +546,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(mixpanel.timedEvents.isEmpty,
                       "timedEvents is not empty")
     }
-    
+
     func testUnarchiveInconsistentData() {
         // corrupt file
         let fileManager = FileManager.default
@@ -554,7 +566,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.codelessBindings, token: kTestToken)!)
         NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.variants, token: kTestToken)!)
         NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.optOutStatus, token: kTestToken)!)
-    
+
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
         waitForTrackingQueue()
         XCTAssertTrue(!fileManager.fileExists(
@@ -603,7 +615,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         } catch {
             print("couldn't write data")
         }
-        
+
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
         waitForTrackingQueue()
         XCTAssertTrue(!fileManager.fileExists(
@@ -626,7 +638,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                       "properties archive file not removed")
         waitForTrackingQueue()
     }
-    
+
     func testMixpanelDelegate() {
         mixpanel.delegate = self
         mixpanel.identify(distinctId: "d1")

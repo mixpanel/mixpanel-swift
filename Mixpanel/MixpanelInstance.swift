@@ -52,6 +52,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// distinctId string that uniquely identifies the current user.
     open var distinctId = ""
 
+    /// anonymousId string that uniquely identifies the device.
+    open var anonymousId: String? = nil
+
+    /// userId string that identify is called with.
+    open var userId: String? = nil
+
     /// alias string that uniquely identifies the current user.
     open var alias: String? = nil
 
@@ -271,7 +277,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                               lock: self.readWriteLock,
                               metadata: sessionMetadata)
         networkQueue = DispatchQueue(label: label)
-        
+
         #if os(iOS)
             reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
             if let reachability = reachability {
@@ -301,11 +307,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         flushInstance._flushInterval = flushInterval
         setupListeners()
         unarchive()
-        
+
         if optOutTrackingByDefault {
             self.optOutTracking()
         }
-        
+
         #if DECIDE
             if !MixpanelInstance.isiOSAppExtension() {
                 automaticEvents.delegate = self
@@ -502,11 +508,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
         }
-        
+
         if self.hasOptedOutTracking() {
             return
         }
-        
+
         taskId = sharedApplication.beginBackgroundTask() {
             self.taskId = UIBackgroundTaskIdentifier.invalid
         }
@@ -684,20 +690,20 @@ extension MixpanelInstance {
 
      Mixpanel will choose a default distinct ID based on whether you are using the
      AdSupport.framework or not.
-     
+
      If you are not using the AdSupport Framework (iAds), then we use the IFV String
      (`UIDevice.current().identifierForVendor`) as the default distinct ID. This ID will
      identify a user across all apps by the same vendor, but cannot be used to link the same
      user across apps from different vendors. If we are unable to get the IFV, we will fall
      back to generating a random persistent UUID
-     
+
      If you are showing iAds in your application, you are allowed use the iOS ID
      for Advertising (IFA) to identify users. If you have this framework in your
      app, Mixpanel will use the IFA as the default distinct ID. If you have
      AdSupport installed but still don't want to use the IFA, you can define the
      <code>MIXPANEL_NO_IFA</code> flag in your <code>Active Compilation Conditions</code>
      build settings, and Mixpanel will use the IFV as the default distinct ID.
-     
+
      If we are unable to get an IFA or IFV, we will fall back to generating a
      random persistent UUID.
 
@@ -733,6 +739,7 @@ extension MixpanelInstance {
                 if distinctId != self.distinctId {
                     self.alias = nil
                     self.distinctId = distinctId
+                    self.userId = distinctId
                 }
                 if usePeople {
                     self.people.distinctId = distinctId
@@ -756,6 +763,8 @@ extension MixpanelInstance {
             Persistence.storeIdentity(token: self.apiToken,
                                       distinctID: self.distinctId,
                                       peopleDistinctID: self.people.distinctId,
+                                      anonymousID: self.anonymousId,
+                                      userID: self.userId,
                                       alias: self.alias)
         }
 
@@ -806,6 +815,8 @@ extension MixpanelInstance {
                 Persistence.storeIdentity(token: self.apiToken,
                                           distinctID: self.distinctId,
                                           peopleDistinctID: self.people.distinctId,
+                                          anonymousID: self.anonymousId,
+                                          userID: self.userId,
                                           alias: self.alias)
             }
             let properties = ["distinct_id": distinctId, "alias": alias]
@@ -828,6 +839,8 @@ extension MixpanelInstance {
                 self.readWriteLock.write {
                     Persistence.deleteMPUserDefaultsData(token: self.apiToken)
                     self.distinctId = self.defaultDistinctId()
+                    self.anonymousId = self.distinctId
+                    self.userId = nil
                     self.superProperties = InternalProperties()
                     self.eventsQueue = Queue()
                     self.timedEvents = InternalProperties()
@@ -870,6 +883,8 @@ extension MixpanelInstance {
             let properties = ArchivedProperties(superProperties: superProperties,
                                                 timedEvents: timedEvents,
                                                 distinctId: distinctId,
+                                                anonymousId: anonymousId,
+                                                userId: userId,
                                                 alias: alias,
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue,
@@ -900,6 +915,8 @@ extension MixpanelInstance {
             let properties = ArchivedProperties(superProperties: superProperties,
                                                 timedEvents: timedEvents,
                                                 distinctId: distinctId,
+                                                anonymousId: anonymousId,
+                                                userId: userId,
                                                 alias: alias,
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue)
@@ -918,6 +935,8 @@ extension MixpanelInstance {
          superProperties,
          timedEvents,
          distinctId,
+         anonymousId,
+         userId,
          alias,
          people.distinctId,
          people.unidentifiedQueue,
@@ -929,6 +948,8 @@ extension MixpanelInstance {
 
         if distinctId == "" {
             distinctId = defaultDistinctId()
+            anonymousId = distinctId
+            userId = nil
         }
     }
 
@@ -937,6 +958,8 @@ extension MixpanelInstance {
             let properties = ArchivedProperties(superProperties: superProperties,
                                                 timedEvents: timedEvents,
                                                 distinctId: distinctId,
+                                                anonymousId: anonymousId,
+                                                userId: userId,
                                                 alias: alias,
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue,
@@ -952,12 +975,16 @@ extension MixpanelInstance {
          superProperties,
          timedEvents,
          distinctId,
+         anonymousId,
+         userId,
          alias,
          people.distinctId,
          people.unidentifiedQueue) = Persistence.unarchive(token: apiToken)
 
         if distinctId == "" {
             distinctId = defaultDistinctId()
+            anonymousId = distinctId
+            userId = nil
         }
     }
 
@@ -966,6 +993,8 @@ extension MixpanelInstance {
             let properties = ArchivedProperties(superProperties: superProperties,
                                                 timedEvents: timedEvents,
                                                 distinctId: distinctId,
+                                                anonymousId: anonymousId,
+                                                userId: userId,
                                                 alias: alias,
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue)
@@ -1018,15 +1047,15 @@ extension MixpanelInstance {
                 if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
                     return
                 }
-                
+
                 self.readWriteLock.write {
                     self.flushEventsQueue = self.eventsQueue
                     self.people.flushPeopleQueue = self.people.peopleQueue
-                    
+
                     self.eventsQueue.removeAll()
                     self.people.peopleQueue.removeAll()
                 }
-                
+
                 #if DECIDE
                 self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
                                                     automaticEventsEnabled: self.decideInstance.automaticEventsEnabled)
@@ -1035,16 +1064,16 @@ extension MixpanelInstance {
                                                     automaticEventsEnabled: false)
                 #endif
                 self.flushInstance.flushPeopleQueue(&self.people.flushPeopleQueue)
-                
+
                 self.readWriteLock.write {
                     self.eventsQueue = self.flushEventsQueue + self.eventsQueue
                     self.people.peopleQueue = self.people.flushPeopleQueue + self.people.peopleQueue
                     self.flushEventsQueue.removeAll()
                     self.people.flushPeopleQueue.removeAll()
                 }
-                
+
                 self.archive()
-                
+
                 if let completion = completion {
                     DispatchQueue.main.async(execute: completion)
                 }
@@ -1079,6 +1108,8 @@ extension MixpanelInstance {
                                      timedEvents: &self.timedEvents,
                                      superProperties: self.superProperties,
                                      distinctId: self.distinctId,
+                                     anonymousId: self.anonymousId,
+                                     userId: self.userId,
                                      epochInterval: epochInterval)
             self.readWriteLock.read {
                 Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
@@ -1089,7 +1120,6 @@ extension MixpanelInstance {
             self.flush()
         }
     }
-
 
     #if DECIDE
     func trackPushNotification(_ userInfo: [AnyHashable: Any],
@@ -1244,10 +1274,10 @@ extension MixpanelInstance {
                                                        superProperties: &self.superProperties)
         }
     }
-    
+
     /**
      Opt out tracking.
-     
+
      This method is used to opt out tracking. This causes all events and people request no longer
      to be sent back to the Mixpanel server.
      */
@@ -1258,50 +1288,52 @@ extension MixpanelInstance {
                 self.people.peopleQueue = Queue()
             }
         }
-        
+
         if self.people.distinctId != nil {
             self.people.deleteUser()
             self.people.clearCharges()
             self.flush()
         }
-        
+
         trackingQueue.async {
             self.readWriteLock.write {
                 self.alias = nil
                 self.people.distinctId = nil
+                self.userId = nil
                 self.distinctId = self.defaultDistinctId()
+                self.anonymousId = self.distinctId
                 self.superProperties = InternalProperties()
                 self.people.unidentifiedQueue = Queue()
                 self.timedEvents = InternalProperties()
             }
             self.archive()
         }
-        
+
         self.optOutStatus = true
         Persistence.archiveOptOutStatus(self.optOutStatus, token: self.apiToken)
     }
-    
+
     /**
      Opt in tracking.
-     
+
      Use this method to opt in an already opted out user from tracking. People updates and track calls will be
      sent to Mixpanel after using this method.
-     
+
      This method will internally track an opt in event to your project.
-     
+
      - parameter distintId: an optional string to use as the distinct ID for events
      - parameter properties: an optional properties dictionary that could be passed to add properties to the opt-in event that is sent to Mixpanel
      */
     open func optInTracking(distinctId: String? = nil, properties: Properties? = nil) {
         self.optOutStatus = false
         Persistence.archiveOptOutStatus(self.optOutStatus, token: self.apiToken)
-        
+
         if let distinctId = distinctId {
             identify(distinctId: distinctId)
         }
         track(event: "$opt_in", properties: properties)
     }
-    
+
     /**
      Returns if the current user has opted out tracking.
 

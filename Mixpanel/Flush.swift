@@ -74,6 +74,10 @@ class Flush: AppLifecycle {
         flushQueue(type: .people, queue: &peopleQueue)
     }
 
+    func flushGroupsQueue(_ groupsQueue: inout Queue) {
+        flushQueue(type: .groups, queue: &groupsQueue)
+    }
+
     func flushQueue(type: FlushType, queue: inout Queue) {
         if flushRequest.requestNotAllowed() {
             return

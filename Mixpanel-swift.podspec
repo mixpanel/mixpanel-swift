@@ -17,6 +17,7 @@ Pod::Spec.new do |s|
     'Mixpanel/Logger.swift', 'Mixpanel/JSONHandler.swift', 'Mixpanel/Error.swift', 'Mixpanel/AutomaticProperties.swift',
     'Mixpanel/Constants.swift', 'Mixpanel/MixpanelType.swift', 'Mixpanel/Mixpanel.swift', 'Mixpanel/MixpanelInstance.swift',
     'Mixpanel/Persistence.swift', 'Mixpanel/Flush.swift','Mixpanel/Track.swift', 'Mixpanel/People.swift', 'Mixpanel/AutomaticEvents.swift',
+    'Mixpanel/Group.swift',
     'Mixpanel/ReadWriteLock.swift', 'Mixpanel/SessionMetadata.swift', 'Mixpanel/ExceptionWrapper.m', 'Mixpanel/ExceptionWrapper.h', 'Mixpanel/Mixpanel.h']
   s.tvos.deployment_target = '9.0'
   s.tvos.frameworks = 'UIKit', 'Foundation'

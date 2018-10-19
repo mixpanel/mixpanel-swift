@@ -23,6 +23,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         stubTrack()
         stubDecide()
         stubEngage()
+        stubGroups()
         LSNocilla.sharedInstance().start()
         mixpanelWillFlush = false
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
@@ -36,6 +37,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         stubTrack()
         stubDecide()
         stubEngage()
+        stubGroups()
         deleteOptOutSettings(mixpanelInstance: mixpanel)
         mixpanel.reset()
         waitForTrackingQueue()

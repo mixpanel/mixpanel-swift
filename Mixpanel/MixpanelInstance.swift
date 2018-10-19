@@ -68,6 +68,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Accessor to the Mixpanel People API object.
     open var people: People!
 
+    /// Accessor to the Mixpanel People API object.
+    var groups: [String: Group] = [:]
+
     /// Controls whether to show spinning network activity indicator when flushing
     /// data to the Mixpanel servers. Defaults to true.
     open var showNetworkActivityIndicator = true
@@ -242,6 +245,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var superProperties = InternalProperties()
     var eventsQueue = Queue()
     var flushEventsQueue = Queue()
+    var groupsQueue = Queue()
+    var flushGroupsQueue = Queue()
     var timedEvents = InternalProperties()
     var trackingQueue: DispatchQueue!
     var networkQueue: DispatchQueue!
@@ -932,6 +937,7 @@ extension MixpanelInstance {
                                                 automaticEventsEnabled: decideInstance.automaticEventsEnabled)
             Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
                                 peopleQueue: people.flushPeopleQueue + people.peopleQueue,
+                                groupsQueue: flushGroupsQueue + groupsQueue,
                                 properties: properties,
                                 codelessBindings: decideInstance.codelessInstance.codelessBindings,
                                 variants: decideInstance.ABTestingInstance.variants,
@@ -963,6 +969,7 @@ extension MixpanelInstance {
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue)
             Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
                                 peopleQueue: people.flushPeopleQueue + people.peopleQueue,
+                                groupsQueue: flushGroupsQueue + groupsQueue,
                                 properties: properties,
                                 token: apiToken)
         }
@@ -973,6 +980,7 @@ extension MixpanelInstance {
     func unarchive() {
         (eventsQueue,
          people.peopleQueue,
+         groupsQueue,
          superProperties,
          timedEvents,
          distinctId,
@@ -1016,6 +1024,7 @@ extension MixpanelInstance {
     func unarchive() {
         (eventsQueue,
          people.peopleQueue,
+         groupsQueue,
          superProperties,
          timedEvents,
          distinctId,
@@ -1102,9 +1111,10 @@ extension MixpanelInstance {
                 self.readWriteLock.write {
                     self.flushEventsQueue = self.eventsQueue
                     self.people.flushPeopleQueue = self.people.peopleQueue
-
+                    self.flushGroupsQueue = self.groupsQueue
                     self.eventsQueue.removeAll()
                     self.people.peopleQueue.removeAll()
+                    self.groupsQueue.removeAll()
                 }
 
                 #if DECIDE
@@ -1115,12 +1125,15 @@ extension MixpanelInstance {
                                                     automaticEventsEnabled: false)
                 #endif
                 self.flushInstance.flushPeopleQueue(&self.people.flushPeopleQueue)
+                self.flushInstance.flushGroupsQueue(&self.flushGroupsQueue)
 
                 self.readWriteLock.write {
                     self.eventsQueue = self.flushEventsQueue + self.eventsQueue
                     self.people.peopleQueue = self.people.flushPeopleQueue + self.people.peopleQueue
+                    self.groupsQueue = self.flushGroupsQueue + self.groupsQueue
                     self.flushEventsQueue.removeAll()
                     self.people.flushPeopleQueue.removeAll()
+                    self.flushGroupsQueue.removeAll()
                 }
 
                 self.archive()
@@ -1178,6 +1191,69 @@ extension MixpanelInstance {
         if MixpanelInstance.isiOSAppExtension() {
             flush()
         }
+    }
+
+    /**
+     Tracks an event with properties and to specific groups.
+     Properties and groups are optional and can be added only if needed.
+
+     Properties will allow you to segment your events in your Mixpanel reports.
+     Property and group keys must be String objects and the supported value types need to conform to MixpanelType.
+     MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
+     If the event is being timed, the timer will stop and be added as a property.
+
+     - parameter event:      event name
+     - parameter properties: properties dictionary
+     - parameter groups:     groups dictionary
+     */
+    open func trackWithGroups(event: String?, properties: Properties? = nil, groups: Properties?) {
+        if self.hasOptedOutTracking() {
+            return
+        }
+
+        guard let properties = properties else {
+            self.track(event: event, properties: groups)
+            return
+        }
+
+        guard let groups = groups else {
+            self.track(event: event, properties: properties)
+            return
+        }
+
+        var mergedProperties = properties
+        for (groupKey, groupID) in groups {
+            mergedProperties[groupKey] = groupID
+        }
+        self.track(event: event, properties: mergedProperties)
+    }
+
+
+    open func getGroup(groupKey: String, groupID: MixpanelType) -> Group {
+        let key = makeMapKey(groupKey: groupKey, groupID: groupID)
+
+        guard let group = groups[key] else {
+            groups[key] = Group(apiToken: apiToken, serialQueue: trackingQueue, lock: self.readWriteLock, groupKey: groupKey, groupID: groupID, metadata: sessionMetadata)
+            return groups[key]!
+        }
+
+        if !(group.groupKey == groupKey && group.groupID.equals(rhs: groupID)) {
+            // we somehow hit a collision on the map key, return a new group with the correct key and ID
+            Logger.info(message: "groups dictionary key collision: \(key)")
+            let newGroup = Group(apiToken: apiToken, serialQueue: trackingQueue, lock: self.readWriteLock, groupKey: groupKey, groupID: groupID, metadata: sessionMetadata)
+            groups[key] = newGroup
+            return newGroup
+        }
+
+        return group
+    }
+
+    func removeCachedGroup(groupKey: String, groupID: MixpanelType) {
+        groups.removeValue(forKey: makeMapKey(groupKey: groupKey, groupID: groupID))
+    }
+
+    func makeMapKey(groupKey: String, groupID: MixpanelType) -> String {
+        return "\(groupKey)_\(groupID)"
     }
 
     #if DECIDE
@@ -1344,6 +1420,114 @@ extension MixpanelInstance {
 
             self.trackInstance.unregisterSuperProperty(propertyName,
                                                        superProperties: &self.superProperties)
+        }
+    }
+
+    /**
+     Updates a superproperty atomically. The update function
+
+     - parameter update: closure to apply to superproperties
+     */
+    func updateSuperProperty(_ update: @escaping (_ superproperties: inout InternalProperties) -> Void) {
+        dispatchAndTrack() {
+            self.trackInstance.updateSuperProperty(update,
+                                                   superProperties: &self.superProperties)
+        }
+    }
+
+    /**
+     Convenience method to set a single group the user belongs to.
+
+     - parameter groupKey: The property name associated with this group type (must already have been set up).
+     - parameter groupID: The group the user belongs to.
+     */
+    open func setGroup(groupKey: String, groupID: MixpanelType) {
+        if self.hasOptedOutTracking() {
+            return
+        }
+
+        setGroup(groupKey: groupKey, groupIDs: [groupID])
+    }
+
+    /**
+     Set the groups this user belongs to.
+
+     - parameter groupKey: The property name associated with this group type (must already have been set up).
+     - parameter groupIDs: The list of groups the user belongs to.
+     */
+    open func setGroup(groupKey: String, groupIDs: [MixpanelType]) {
+        if self.hasOptedOutTracking() {
+            return
+        }
+
+        let properties = [groupKey: groupIDs]
+        self.registerSuperProperties(properties)
+        people.set(properties: properties)
+    }
+
+    /**
+     Add a group to this user's membership for a particular group key
+
+     - parameter groupKey: The property name associated with this group type (must already have been set up).
+     - parameter groupID: The new group the user belongs to.
+     */
+    open func addGroup(groupKey: String, groupID: MixpanelType) {
+        if self.hasOptedOutTracking() {
+            return
+        }
+
+        updateSuperProperty { (superProperties) -> Void in
+            guard let oldValue = superProperties[groupKey] else {
+                superProperties[groupKey] = [groupID]
+                self.people.set(properties: [groupKey: [groupID]])
+                return
+            }
+
+            if let oldValue = oldValue as? Array<MixpanelType> {
+                var vals = oldValue
+                if !vals.contains {$0.equals(rhs: groupID)} {
+                    vals.append(groupID)
+                    superProperties[groupKey] = vals
+                }
+            } else {
+                superProperties[groupKey] = [oldValue, groupID]
+            }
+
+            // This is a best effort--if the people property is not already a list, this call does nothing.
+            self.people.union(properties: [groupKey: [groupID]])
+        }
+    }
+
+    /**
+     Remove a group from this user's membership for a particular group key
+
+     - parameter groupKey: The property name associated with this group type (must already have been set up).
+     - parameter groupID: The group value to remove.
+     */
+    open func removeGroup(groupKey: String, groupID: MixpanelType) {
+        if self.hasOptedOutTracking() {
+            return
+        }
+
+        updateSuperProperty { (superProperties) -> Void in
+            guard let oldValue = superProperties[groupKey] else {
+                return
+            }
+
+            guard let vals = oldValue as? Array<MixpanelType> else {
+                superProperties.removeValue(forKey: groupKey)
+                self.people.unset(properties: [groupKey])
+                return
+            }
+
+            if vals.count < 2 {
+                superProperties.removeValue(forKey: groupKey)
+                self.people.unset(properties: [groupKey])
+                return
+            }
+
+            superProperties[groupKey] = vals.filter {!$0.equals(rhs: groupID)}
+            self.people.remove(properties: [groupKey: groupID])
         }
     }
 

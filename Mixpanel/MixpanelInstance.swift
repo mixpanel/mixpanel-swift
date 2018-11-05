@@ -497,9 +497,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             flush()
         }
 
-        networkQueue.async {
-            self.archive()
-        }
         #endif
     }
 
@@ -520,9 +517,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if flushOnBackground {
             flush()
         }
+        else {
+            // only need to archive if don't flush because flush archives at the end
+            networkQueue.async {
+                self.archive()
+            }
+        }
 
         networkQueue.async {
-            self.archive()
             #if DECIDE
             self.readWriteLock.write {
                 self.decideInstance.decideFetched = false
@@ -566,9 +568,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // os(OSX)
 
     @objc private func applicationWillTerminate(_ notification: Notification) {
-        networkQueue.async {
-            self.archive()
-        }
+        self.archive()
     }
 
     func defaultDistinctId() -> String {

@@ -58,6 +58,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// userId string that identify is called with.
     open var userId: String? = nil
 
+    /// hadPersistedDistinctId is a boolean value which specifies that the stored distinct_id
+    /// already exists in persistence
+    open var hadPersistedDistinctId: Bool? = nil
+
     /// alias string that uniquely identifies the current user.
     open var alias: String? = nil
 
@@ -733,6 +737,13 @@ extension MixpanelInstance {
         }
 
         trackingQueue.async {
+            // If there's no anonymousId assigned yet, that means distinctId is stored in the storage. Assigning already stored
+            // distinctId as anonymousId on identify and also setting a flag to notify that it might be previously logged in user
+            if self.anonymousId == nil{
+               self.anonymousId = self.distinctId
+               self.hadPersistedDistinctId = true
+            }
+
             // identify only changes the distinct id if it doesn't match either the existing or the alias;
             // if it's new, blow away the alias as well.
             if distinctId != self.alias {
@@ -741,6 +752,7 @@ extension MixpanelInstance {
                     self.distinctId = distinctId
                     self.userId = distinctId
                 }
+
                 if usePeople {
                     self.people.distinctId = distinctId
                     if !self.people.unidentifiedQueue.isEmpty {
@@ -765,7 +777,8 @@ extension MixpanelInstance {
                                       peopleDistinctID: self.people.distinctId,
                                       anonymousID: self.anonymousId,
                                       userID: self.userId,
-                                      alias: self.alias)
+                                      alias: self.alias,
+                                      hadPersistedDistinctId: self.hadPersistedDistinctId)
         }
 
         if MixpanelInstance.isiOSAppExtension() {
@@ -817,7 +830,8 @@ extension MixpanelInstance {
                                           peopleDistinctID: self.people.distinctId,
                                           anonymousID: self.anonymousId,
                                           userID: self.userId,
-                                          alias: self.alias)
+                                          alias: self.alias,
+                                          hadPersistedDistinctId: self.hadPersistedDistinctId)
             }
             let properties = ["distinct_id": distinctId, "alias": alias]
             track(event: "$create_alias", properties: properties)
@@ -840,6 +854,7 @@ extension MixpanelInstance {
                     Persistence.deleteMPUserDefaultsData(token: self.apiToken)
                     self.distinctId = self.defaultDistinctId()
                     self.anonymousId = self.distinctId
+                    self.hadPersistedDistinctId = nil
                     self.userId = nil
                     self.superProperties = InternalProperties()
                     self.eventsQueue = Queue()
@@ -886,6 +901,7 @@ extension MixpanelInstance {
                                                 anonymousId: anonymousId,
                                                 userId: userId,
                                                 alias: alias,
+                                                hadPersistedDistinctId: hadPersistedDistinctId,
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue,
                                                 shownNotifications: decideInstance.notificationsInstance.shownNotifications,
@@ -918,6 +934,7 @@ extension MixpanelInstance {
                                                 anonymousId: anonymousId,
                                                 userId: userId,
                                                 alias: alias,
+                                                hadPersistedDistinctId: hadPersistedDistinctId,
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue)
             Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
@@ -938,6 +955,7 @@ extension MixpanelInstance {
          anonymousId,
          userId,
          alias,
+         hadPersistedDistinctId,
          people.distinctId,
          people.unidentifiedQueue,
          decideInstance.notificationsInstance.shownNotifications,
@@ -949,6 +967,7 @@ extension MixpanelInstance {
         if distinctId == "" {
             distinctId = defaultDistinctId()
             anonymousId = distinctId
+            hadPersistedDistinctId = nil
             userId = nil
         }
     }
@@ -961,6 +980,7 @@ extension MixpanelInstance {
                                                 anonymousId: anonymousId,
                                                 userId: userId,
                                                 alias: alias,
+                                                hadPersistedDistinctId: hadPersistedDistinctId,
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue,
                                                 shownNotifications: decideInstance.notificationsInstance.shownNotifications,
@@ -978,12 +998,14 @@ extension MixpanelInstance {
          anonymousId,
          userId,
          alias,
+         hadPersistedDistinctId,
          people.distinctId,
          people.unidentifiedQueue) = Persistence.unarchive(token: apiToken)
 
         if distinctId == "" {
             distinctId = defaultDistinctId()
             anonymousId = distinctId
+            hadPersistedDistinctId = nil
             userId = nil
         }
     }
@@ -996,6 +1018,7 @@ extension MixpanelInstance {
                                                 anonymousId: anonymousId,
                                                 userId: userId,
                                                 alias: alias,
+                                                hadPersistedDistinctId: hadPersistedDistinctId,
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue)
             Persistence.archiveProperties(properties, token: apiToken)
@@ -1110,6 +1133,7 @@ extension MixpanelInstance {
                                      distinctId: self.distinctId,
                                      anonymousId: self.anonymousId,
                                      userId: self.userId,
+                                     hadPersistedDistinctId: self.hadPersistedDistinctId,
                                      epochInterval: epochInterval)
             self.readWriteLock.read {
                 Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
@@ -1302,6 +1326,7 @@ extension MixpanelInstance {
                 self.userId = nil
                 self.distinctId = self.defaultDistinctId()
                 self.anonymousId = self.distinctId
+                self.hadPersistedDistinctId = nil
                 self.superProperties = InternalProperties()
                 self.people.unidentifiedQueue = Queue()
                 self.timedEvents = InternalProperties()

@@ -15,6 +15,7 @@ struct ArchivedProperties {
     let anonymousId: String?
     let userId: String?
     let alias: String?
+    let hadPersistedDistinctId: Bool?
     let peopleDistinctId: String?
     let peopleUnidentifiedQueue: Queue
     #if DECIDE
@@ -104,6 +105,7 @@ class Persistence {
         p["anonymousId"] = properties.anonymousId
         p["userId"] = properties.userId
         p["alias"] = properties.alias
+        p["hadPersistedDistinctId"] = properties.hadPersistedDistinctId
         p["superProperties"] = properties.superProperties
         p["peopleDistinctId"] = properties.peopleDistinctId
         p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
@@ -164,6 +166,7 @@ class Persistence {
                                             anonymousId: String?,
                                             userId: String?,
                                             alias: String?,
+                                            hadPersistedDistinctId: Bool?,
                                             peopleDistinctId: String?,
                                             peopleUnidentifiedQueue: Queue,
                                             shownNotifications: Set<Int>,
@@ -183,6 +186,7 @@ class Persistence {
             anonymousId,
             userId,
             alias,
+            hadPersistedDistinctId,
             peopleDistinctId,
             peopleUnidentifiedQueue,
             shownNotifications,
@@ -196,6 +200,7 @@ class Persistence {
                 anonymousId,
                 userId,
                 alias,
+                hadPersistedDistinctId,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
                 shownNotifications,
@@ -213,6 +218,7 @@ class Persistence {
                                             anonymousId: String?,
                                             userId: String?,
                                             alias: String?,
+                                            hadPersistedDistinctId: Bool?,
                                             peopleDistinctId: String?,
                                             peopleUnidentifiedQueue: Queue) {
             let eventsQueue = unarchiveEvents(token: token)
@@ -224,6 +230,7 @@ class Persistence {
                 anonymousId,
                 userId,
                 alias,
+                hadPersistedDistinctId,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
                 _) = unarchiveProperties(token: token)
@@ -236,6 +243,7 @@ class Persistence {
                     anonymousId,
                     userId,
                     alias,
+                    hadPersistedDistinctId,
                     peopleDistinctId,
                     peopleUnidentifiedQueue)
     }
@@ -286,6 +294,7 @@ class Persistence {
                                                               String?,
                                                               String?,
                                                               String?,
+                                                              Bool?,
                                                               String?,
                                                               Queue,
                                                               Set<Int>,
@@ -297,6 +306,7 @@ class Persistence {
              anonymousId,
              userId,
              alias,
+             hadPersistedDistinctId,
              peopleDistinctId,
              peopleUnidentifiedQueue,
              automaticEventsEnabled) = unarchivePropertiesHelper(token: token)
@@ -309,6 +319,7 @@ class Persistence {
                 anonymousId,
                 userId,
                 alias,
+                hadPersistedDistinctId,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
                 shownNotifications,
@@ -334,6 +345,7 @@ class Persistence {
         String?,
         String?,
         String?,
+        Bool?,
         String?,
         Queue,
         Bool?) {
@@ -350,6 +362,8 @@ class Persistence {
                 properties?["userId"] as? String ?? nil
             var alias =
                 properties?["alias"] as? String ?? nil
+            var hadPersistedDistinctId =
+                properties?["hadPersistedDistinctId"] as? Bool ?? nil
             var peopleDistinctId =
                 properties?["peopleDistinctId"] as? String ?? nil
             let peopleUnidentifiedQueue =
@@ -358,7 +372,7 @@ class Persistence {
                 properties?["automaticEvents"] as? Bool ?? nil
 
             if properties == nil {
-                (distinctId, peopleDistinctId, anonymousId, userId, alias) = restoreIdentity(token: token)
+                (distinctId, peopleDistinctId, anonymousId, userId, alias, hadPersistedDistinctId) = restoreIdentity(token: token)
             }
 
             return (superProperties,
@@ -367,6 +381,7 @@ class Persistence {
                     anonymousId,
                     userId,
                     alias,
+                    hadPersistedDistinctId,
                     peopleDistinctId,
                     peopleUnidentifiedQueue,
                     automaticEventsEnabled)
@@ -399,7 +414,7 @@ class Persistence {
         return unarchivedData
     }
 
-    class func storeIdentity(token: String, distinctID: String, peopleDistinctID: String?, anonymousID: String?, userID: String?, alias: String?) {
+    class func storeIdentity(token: String, distinctID: String, peopleDistinctID: String?, anonymousID: String?, userID: String?, alias: String?, hadPersistedDistinctId: Bool?) {
         guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
             return
         }
@@ -409,19 +424,21 @@ class Persistence {
         defaults.set(anonymousID, forKey: prefix + "MPAnonymousId")
         defaults.set(userID, forKey: prefix + "MPUserId")
         defaults.set(alias, forKey: prefix + "MPAlias")
+        defaults.set(hadPersistedDistinctId, forKey: prefix + "MPHadPersistedDistinctId")
         defaults.synchronize()
     }
 
-    class func restoreIdentity(token: String) -> (String, String?, String?, String?, String?) {
+    class func restoreIdentity(token: String) -> (String, String?, String?, String?, String?, Bool?) {
         guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
-            return ("", nil, nil, nil, nil)
+            return ("", nil, nil, nil, nil, nil)
         }
         let prefix = "mixpanel-\(token)-"
         return (defaults.string(forKey: prefix + "MPDistinctID") ?? "",
                 defaults.string(forKey: prefix + "MPPeopleDistinctID"),
                 defaults.string(forKey: prefix + "MPAnonymousId"),
                 defaults.string(forKey: prefix + "MPUserId"),
-                defaults.string(forKey: prefix + "MPAlias"))
+                defaults.string(forKey: prefix + "MPAlias"),
+                defaults.bool(forKey: prefix + "MPHadPersistedDistinctId"))
     }
 
     class func deleteMPUserDefaultsData(token: String) {
@@ -434,6 +451,7 @@ class Persistence {
         defaults.removeObject(forKey: prefix + "MPAnonymousId")
         defaults.removeObject(forKey: prefix + "MPUserId")
         defaults.removeObject(forKey: prefix + "MPAlias")
+        defaults.removeObject(forKey: prefix + "MPHadPersistedDistinctId")
         defaults.synchronize()
     }
 

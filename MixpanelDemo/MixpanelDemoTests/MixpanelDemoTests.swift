@@ -242,6 +242,28 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue("" == tuple.0 && nil == tuple.1 && nil == tuple.2 && nil == tuple.3 && nil == tuple.4)
     }
 
+    func testHadPersistedDistinctId() {
+      stubTrack()
+      XCTAssertNotNil(mixpanel.anonymousId)
+      XCTAssertNotNil(mixpanel.distinctId)
+      let distinctId: String = "d1"
+      mixpanel.anonymousId = nil
+      mixpanel.userId = nil
+      mixpanel.alias = nil
+      mixpanel.distinctId = distinctId
+      mixpanel.archive()
+      
+      XCTAssertEqual(mixpanel.distinctId, distinctId)
+        
+      let userId: String = "u1"
+      mixpanel.identify(distinctId: userId)
+      waitForTrackingQueue()
+      XCTAssertEqual(mixpanel.anonymousId, distinctId)
+      XCTAssertEqual(mixpanel.userId, userId)
+      XCTAssertEqual(mixpanel.distinctId, userId)
+      XCTAssertTrue(mixpanel.hadPersistedDistinctId!)
+    }
+
     func testTrackWithDefaultProperties() {
         mixpanel.track(event: "Something Happened")
         waitForTrackingQueue()

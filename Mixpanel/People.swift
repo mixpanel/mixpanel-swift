@@ -69,10 +69,17 @@ open class People {
             if let anonymousId = Mixpanel.mainInstance().anonymousId {
                r["$device_id"] = anonymousId
             }
+            
+            if let userId = Mixpanel.mainInstance().userId {
+                r["$user_id"] = userId
+            }
+            
+            if let hadPersistedDistinctId = Mixpanel.mainInstance().hadPersistedDistinctId {
+                r["$had_persisted_distinct_id"] = hadPersistedDistinctId
+            }
 
             if let distinctId = self.distinctId {
                 r["$distinct_id"] = distinctId
-                r["$user_id"] = distinctId
                 self.addPeopleObject(r)
             } else {
                 self.lock.write {

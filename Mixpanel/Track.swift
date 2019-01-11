@@ -33,6 +33,7 @@ class Track {
                distinctId: String,
                anonymousId: String?,
                userId: String?,
+               hadPersistedDistinctId: Bool?,
                epochInterval: Double) {
         var ev = event
         if ev == nil || ev!.isEmpty {
@@ -62,6 +63,10 @@ class Track {
         if userId != nil {
           p["$user_id"] = userId
         }
+        if hadPersistedDistinctId != nil  {
+            p["$had_persisted_distinct_id"] = hadPersistedDistinctId
+        }
+        
         p += superProperties
         if let properties = properties {
             p += properties

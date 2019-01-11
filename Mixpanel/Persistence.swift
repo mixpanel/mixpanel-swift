@@ -233,6 +233,7 @@ class Persistence {
                 hadPersistedDistinctId,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
+                shownNotifications,
                 _) = unarchiveProperties(token: token)
 
             return (eventsQueue,
@@ -332,6 +333,7 @@ class Persistence {
         String?,
         String?,
         String?,
+        Bool?,
         String?,
         Queue,
         Bool?) {

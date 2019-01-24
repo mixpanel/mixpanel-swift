@@ -646,13 +646,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         trackingQueue.async {
             AutomaticProperties.automaticPropertiesLock.write {
-                [unowned self] in
+                [weak self] in
                 AutomaticProperties.properties["$radio"] = radio
-                if self.telephonyInfo.subscriberCellularProvider?.carrierName == nil {
+                if self?.telephonyInfo.subscriberCellularProvider?.carrierName == nil {
                     AutomaticProperties.properties["$carrier"] = ""
                 }
                 else {
-                    AutomaticProperties.properties["$carrier"] = self.telephonyInfo.subscriberCellularProvider?.carrierName
+                    AutomaticProperties.properties["$carrier"] = self?.telephonyInfo.subscriberCellularProvider?.carrierName
                 }
             }
         }

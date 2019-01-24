@@ -139,10 +139,16 @@ class Persistence {
             return
         }
 
-        if !NSKeyedArchiver.archiveRootObject(object, toFile: path) {
-            Logger.error(message: "failed to archive \(type.rawValue)")
+        ExceptionWrapper.try({
+            if !NSKeyedArchiver.archiveRootObject(object, toFile: path) {
+                Logger.error(message: "failed to archive \(type.rawValue)")
+                return
+            }
+        }, catch: { (error) in
+            Logger.error(message: "failed to archive \(type.rawValue) due to an uncaught exception")
             return
-        }
+        }, finally: {})
+        
         addSkipBackupAttributeToItem(at: path)
     }
 

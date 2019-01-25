@@ -50,7 +50,7 @@ public final class TweakStore {
 
     /// A method for adding Tweaks to the environment
     func addTweaks(_ tweaks: [TweakClusterType]) {
-        self.allTweaks.formUnion(Set(tweaks.reduce([]) { $0 + $1.tweakCluster }))
+        self.allTweaks.formUnion(Set(tweaks.reduce(into: []) { $0.append(contentsOf: $1.tweakCluster) }))
         self.allTweaks.forEach { tweak in
             // Find or create its TweakCollection
             var tweakCollection: TweakCollection
@@ -119,10 +119,12 @@ public final class TweakStore {
 		persistence.clearAllData()
 
 		// Go through all tweaks in our library, and call any bindings they're attached to.
-		tweakCollections.values.reduce([]) { $0 + $1.sortedTweakGroups.reduce([]) { $0 + $1.sortedTweaks } }
-			.forEach { updateBindingsForTweak($0)
+		tweakCollections.values.reduce(into: []) {
+			$0.append(contentsOf: $1.sortedTweakGroups.reduce(into: []) { 
+				$0.append(contentsOf: $1.sortedTweaks) 
+			})
 		}
-
+		.forEach { updateBindingsForTweak($0) }
 	}
 
 	internal func currentValueForTweak<T>(_ tweak: Tweak<T>) -> T {

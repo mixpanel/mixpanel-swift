@@ -47,12 +47,10 @@ class SSLSecurity {
     convenience init(usePublicKeys: Bool = false) {
         let paths = Bundle.main.paths(forResourcesOfType: "cer", inDirectory: ".")
 
-        let certs = paths.reduce([SSLCert]()) { (certs: [SSLCert], path: String) -> [SSLCert] in
-            var certs = certs
+        let certs = paths.reduce(into: [SSLCert]()) { (certs: inout [SSLCert], path: String) in
             if let data = NSData(contentsOfFile: path) {
                 certs.append(SSLCert(data: data as Data))
             }
-            return certs
         }
 
         self.init(certs: certs, usePublicKeys: usePublicKeys)
@@ -63,27 +61,23 @@ class SSLSecurity {
 
         if self.usePublicKeys {
             DispatchQueue.global(qos: .default).async {
-                let pubKeys = certs.reduce([SecKey]()) { (pubKeys: [SecKey], cert: SSLCert) -> [SecKey] in
-                    var pubKeys = pubKeys
+                let pubKeys = certs.reduce(into: [SecKey]()) { (pubKeys: inout [SecKey], cert: SSLCert) in
                     if let data = cert.certData, cert.key == nil {
                         cert.key = self.extractPublicKey(data)
                     }
                     if let key = cert.key {
                         pubKeys.append(key)
                     }
-                    return pubKeys
                 }
 
                 self.pubKeys = pubKeys
                 self.isReady = true
             }
         } else {
-            let certificates = certs.reduce([Data]()) { (certificates: [Data], cert: SSLCert) -> [Data] in
-                var certificates = certificates
+            let certificates = certs.reduce(into: [Data]()) { (certificates: inout [Data], cert: SSLCert) in
                 if let data = cert.certData {
                     certificates.append(data)
                 }
-                return certificates
             }
             self.certificates = certificates
             self.isReady = true
@@ -163,11 +157,9 @@ class SSLSecurity {
     }
 
     func certificateChain(_ trust: SecTrust) -> [Data] {
-        let certificates = (0..<SecTrustGetCertificateCount(trust)).reduce([Data]()) { (certificates: [Data], index: Int) -> [Data] in
-            var certificates = certificates
+        let certificates = (0..<SecTrustGetCertificateCount(trust)).reduce(into: [Data]()) { (certificates: inout [Data], index: Int) in
             let cert = SecTrustGetCertificateAtIndex(trust, index)
             certificates.append(SecCertificateCopyData(cert!) as Data)
-            return certificates
         }
 
         return certificates
@@ -175,14 +167,11 @@ class SSLSecurity {
 
     func publicKeyChain(_ trust: SecTrust) -> [SecKey] {
         let policy = SecPolicyCreateBasicX509()
-        let keys = (0..<SecTrustGetCertificateCount(trust)).reduce([SecKey]()) { (keys: [SecKey], index: Int) -> [SecKey] in
-            var keys = keys
+        let keys = (0..<SecTrustGetCertificateCount(trust)).reduce(into: [SecKey]()) { (keys: inout [SecKey], index: Int) in
             let cert = SecTrustGetCertificateAtIndex(trust, index)
             if let key = extractPublicKey(cert!, policy: policy) {
                 keys.append(key)
             }
-
-            return keys
         }
 
         return keys

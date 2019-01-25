@@ -34,8 +34,8 @@ extension TweakCollection {
 	/// A flat list of all the tweaks in a TweakCollection.
 	/// Used for sharing out the contents of a TweakStore.
 	internal var allTweaks: [AnyTweak] {
-		return sortedTweakGroups.reduce([]) {
-			$0 + $1.sortedTweaks
+		return sortedTweakGroups.reduce(into: []) {
+			$0.append(contentsOf: $1.sortedTweaks)
 		}
 	}
 }

@@ -8,6 +8,8 @@
 
 protocol AEDelegate {
     func track(event: String?, properties: Properties?)
+    func setOnce(properties: Properties)
+    func increment(property: String, by: Double)
     #if DECIDE
         func trackPushNotification(_ userInfo: [AnyHashable: Any], event: String)
     #endif
@@ -46,17 +48,17 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     var sessionStartTime: TimeInterval = Date().timeIntervalSince1970
     var hasAddedObserver = false
     var automaticPushTracking = true
+    var firstAppOpen = false
 
     func initializeEvents() {
         let firstOpenKey = "MPFirstOpen"
         if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
             if !isExistingUser() {
-                delegate?.track(event: "$ae_first_open", properties: nil)
+                firstAppOpen = true
             }
             defaults.set(true, forKey: firstOpenKey)
             defaults.synchronize()
         }
-
         if let defaults = defaults, let infoDict = Bundle.main.infoDictionary {
             let appVersionKey = "MPAppVersion"
             let appVersionValue = infoDict["CFBundleShortVersionString"]
@@ -95,13 +97,19 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         sessionLength = roundOneDigit(num: Date().timeIntervalSince1970 - sessionStartTime)
         if sessionLength >= Double(minimumSessionDuration / 1000) &&
            sessionLength <= Double(maximumSessionDuration / 1000) {
-            let properties: Properties = ["$ae_session_length": sessionLength]
-            delegate?.track(event: "$ae_session", properties: properties)
+            delegate?.track(event: "$ae_session", properties: ["$ae_session_length": sessionLength])
+            delegate?.increment(property: "$ae_total_app_sessions", by: 1)
+            delegate?.increment(property: "$ae_total_app_session_length", by: sessionLength)
         }
     }
 
     @objc private func appDidBecomeActive(_ notification: Notification) {
         sessionStartTime = Date().timeIntervalSince1970
+        if firstAppOpen {
+            delegate?.track(event: "$ae_first_open", properties: nil)
+            delegate?.setOnce(properties: ["$ae_first_app_open_date": Date()])
+            firstAppOpen = false
+        }
     }
 
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {

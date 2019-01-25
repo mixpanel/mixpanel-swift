@@ -99,13 +99,13 @@ open class Mixpanel {
      - returns: returns the main Mixpanel instance
      */
     open class func mainInstance() -> MixpanelInstance {
-        let instance = MixpanelManager.sharedInstance.getMainInstance()
-        if instance == nil {
-            fatalError("You have to call initialize(token:) before calling the main instance, " +
+        if let instance = MixpanelManager.sharedInstance.getMainInstance() {
+            return instance
+        } else {
+            assert(false, "You have to call initialize(token:) before calling the main instance, " +
                 "or define a new main instance if removing the main one")
+            return Mixpanel.initialize(token: "")
         }
-
-        return instance!
     }
 
     /**

@@ -43,55 +43,57 @@ open class People {
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
         let ignoreTimeCopy = ignoreTime
 
-        serialQueue.async() {
-            var r = InternalProperties()
-            var p = InternalProperties()
-            r["$token"] = self.apiToken
-            r["$time"] = epochMilliseconds
-            if ignoreTimeCopy {
-                r["$ignore_time"] = ignoreTimeCopy ? 1 : 0
-            }
-            if action == "$unset" {
-                // $unset takes an array of property names which is supplied to this method
-                // in the properties parameter under the key "$properties"
-                r[action] = properties["$properties"]
-            } else {
-                if action == "$set" || action == "$set_once" {
-                    AutomaticProperties.automaticPropertiesLock.read {
-                        p += AutomaticProperties.peopleProperties
-                    }
+        serialQueue.async() { [weak self] in
+            if let hasSelf = self {
+                var r = InternalProperties()
+                var p = InternalProperties()
+                r["$token"] = hasSelf.apiToken
+                r["$time"] = epochMilliseconds
+                if ignoreTimeCopy {
+                    r["$ignore_time"] = ignoreTimeCopy ? 1 : 0
                 }
-                p += properties
-                r[action] = p
-            }
-            self.metadata.toDict(isEvent: false).forEach { (k,v) in r[k] = v }
-
-            if let anonymousId = Mixpanel.mainInstance().anonymousId {
-               r["$device_id"] = anonymousId
-            }
-            
-            if let userId = Mixpanel.mainInstance().userId {
-                r["$user_id"] = userId
-            }
-            
-            if let hadPersistedDistinctId = Mixpanel.mainInstance().hadPersistedDistinctId {
-                r["$had_persisted_distinct_id"] = hadPersistedDistinctId
-            }
-
-            if let distinctId = self.distinctId {
-                r["$distinct_id"] = distinctId
-                self.addPeopleObject(r)
-            } else {
-                self.lock.write {
-                    self.unidentifiedQueue.append(r)
-                    if self.unidentifiedQueue.count > QueueConstants.queueSize {
-                        self.unidentifiedQueue.remove(at: 0)
+                if action == "$unset" {
+                    // $unset takes an array of property names which is supplied to this method
+                    // in the properties parameter under the key "$properties"
+                    r[action] = properties["$properties"]
+                } else {
+                    if action == "$set" || action == "$set_once" {
+                        AutomaticProperties.automaticPropertiesLock.read {
+                            p += AutomaticProperties.peopleProperties
+                        }
                     }
+                    p += properties
+                    r[action] = p
+                }
+                hasSelf.metadata.toDict(isEvent: false).forEach { (k,v) in r[k] = v }
+
+                if let anonymousId = Mixpanel.mainInstance().anonymousId {
+                   r["$device_id"] = anonymousId
                 }
 
-            }
-            self.lock.read{
-                Persistence.archivePeople(self.flushPeopleQueue + self.peopleQueue, token: self.apiToken)
+                if let userId = Mixpanel.mainInstance().userId {
+                    r["$user_id"] = userId
+                }
+
+                if let hadPersistedDistinctId = Mixpanel.mainInstance().hadPersistedDistinctId {
+                    r["$had_persisted_distinct_id"] = hadPersistedDistinctId
+                }
+
+                if let distinctId = hasSelf.distinctId {
+                    r["$distinct_id"] = distinctId
+                    hasSelf.addPeopleObject(r)
+                } else {
+                    hasSelf.lock.write {
+                        hasSelf.unidentifiedQueue.append(r)
+                        if hasSelf.unidentifiedQueue.count > QueueConstants.queueSize {
+                            hasSelf.unidentifiedQueue.remove(at: 0)
+                        }
+                    }
+
+                }
+                hasSelf.lock.read{
+                    Persistence.archivePeople(hasSelf.flushPeopleQueue + hasSelf.peopleQueue, token: hasSelf.apiToken)
+                }
             }
         }
 
@@ -101,7 +103,7 @@ open class People {
     }
 
     func addPeopleObject(_ r: InternalProperties) {
-        self.lock.write {
+        lock.write {
             peopleQueue.append(r)
             if peopleQueue.count > QueueConstants.queueSize {
                 peopleQueue.remove(at: 0)

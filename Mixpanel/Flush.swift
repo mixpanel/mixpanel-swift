@@ -84,12 +84,16 @@ class Flush: AppLifecycle {
     func startFlushTimer() {
         stopFlushTimer()
         if flushInterval > 0 {
-            DispatchQueue.main.async() {
-                self.timer = Timer.scheduledTimer(timeInterval: self.flushInterval,
-                                                  target: self,
-                                                  selector: #selector(self.flushSelector),
-                                                  userInfo: nil,
-                                                  repeats: true)
+            DispatchQueue.main.async() { [weak self] in
+                if let hasSelf = self {
+                    hasSelf.timer = Timer.scheduledTimer(timeInterval: hasSelf.flushInterval,
+                                                         target: hasSelf,
+                                                         selector: #selector(hasSelf.flushSelector),
+                                                         userInfo: nil,
+                                                         repeats: true)
+                } else {
+                    // Self was DNE when executed, rather than crash perhaps we should log it?
+                }
             }
         }
     }
@@ -100,9 +104,9 @@ class Flush: AppLifecycle {
 
     func stopFlushTimer() {
         if let timer = timer {
-            DispatchQueue.main.async() {
+            DispatchQueue.main.async() { [weak self, timer] in
                 timer.invalidate()
-                self.timer = nil
+                self?.timer = nil
             }
         }
     }

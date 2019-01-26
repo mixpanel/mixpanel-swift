@@ -514,8 +514,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             return
         }
 
-        taskId = sharedApplication.beginBackgroundTask() {
-            self.taskId = UIBackgroundTaskIdentifier.invalid
+        taskId = sharedApplication.beginBackgroundTask() { [weak self] in
+            self?.taskId = UIBackgroundTaskIdentifier.invalid
         }
 
         if flushOnBackground {
@@ -523,20 +523,24 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         else {
             // only need to archive if don't flush because flush archives at the end
-            networkQueue.async {
-                self.archive()
+            networkQueue.async { [weak self] in
+                self?.archive()
             }
         }
 
-        networkQueue.async {
-            #if DECIDE
-            self.readWriteLock.write {
-                self.decideInstance.decideFetched = false
-            }
-            #endif // DECIDE
-            if self.taskId != UIBackgroundTaskIdentifier.invalid {
-                sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskIdentifier.invalid
+        networkQueue.async { [weak self] in
+            if let hasSelf = self {
+                #if DECIDE
+                hasSelf.readWriteLock.write {
+                    hasSelf.decideInstance.decideFetched = false
+                }
+                #endif // DECIDE
+                if hasSelf.taskId != UIBackgroundTaskIdentifier.invalid {
+                    sharedApplication.endBackgroundTask(hasSelf.taskId)
+                    hasSelf.taskId = UIBackgroundTaskIdentifier.invalid
+                }
+            } else {
+                // Self DNE when async execution occured. Log it?
             }
         }
     }
@@ -546,13 +550,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             return
         }
         sessionMetadata.applicationWillEnterForeground()
-        trackingQueue.async {
-            if self.taskId != UIBackgroundTaskIdentifier.invalid {
-                sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskIdentifier.invalid
-                #if os(iOS)
-                    self.updateNetworkActivityIndicator(false)
-                #endif // os(iOS)
+        trackingQueue.async { [weak self] in
+            if let hasSelf = self {
+                if hasSelf.taskId != UIBackgroundTaskIdentifier.invalid {
+                    sharedApplication.endBackgroundTask(hasSelf.taskId)
+                    hasSelf.taskId = UIBackgroundTaskIdentifier.invalid
+                    #if os(iOS)
+                        hasSelf.updateNetworkActivityIndicator(false)
+                    #endif // os(iOS)
+                }
+            } else {
+                // Self DNE when async execution occured. Log it?
             }
         }
     }
@@ -632,7 +640,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if os(iOS)
     func updateNetworkActivityIndicator(_ on: Bool) {
         if showNetworkActivityIndicator {
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [on] in
                 MixpanelInstance.sharedUIApplication()?.isNetworkActivityIndicatorVisible = on
             }
         }
@@ -645,13 +653,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             radio = (radio as NSString).substring(from: prefix.count)
         }
         trackingQueue.async {
-            AutomaticProperties.automaticPropertiesLock.write {
-                [weak self] in
+            AutomaticProperties.automaticPropertiesLock.write { [weak self] in
+
                 AutomaticProperties.properties["$radio"] = radio
                 if self?.telephonyInfo.subscriberCellularProvider?.carrierName == nil {
                     AutomaticProperties.properties["$carrier"] = ""
-                }
-                else {
+
+                } else {
                     AutomaticProperties.properties["$carrier"] = self?.telephonyInfo.subscriberCellularProvider?.carrierName
                 }
             }
@@ -661,18 +669,20 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     #if DECIDE
     func initializeGestureRecognizer() {
-        DispatchQueue.main.async {
-            self.decideInstance.gestureRecognizer = UILongPressGestureRecognizer(target: self,
-                                                                                 action: #selector(self.connectGestureRecognized(gesture:)))
-            self.decideInstance.gestureRecognizer?.minimumPressDuration = 3
-            self.decideInstance.gestureRecognizer?.cancelsTouchesInView = false
-            #if (arch(i386) || arch(x86_64)) && DECIDE
-                self.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 2
-            #else
-                self.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 4
-            #endif // (arch(i386) || arch(x86_64)) && DECIDE
-            self.decideInstance.gestureRecognizer?.isEnabled = self.enableVisualEditorForCodeless
-            MixpanelInstance.sharedUIApplication()?.keyWindow?.addGestureRecognizer(self.decideInstance.gestureRecognizer!)
+        DispatchQueue.main.async { [weak self] in
+            if let hasSelf = self {
+                hasSelf.decideInstance.gestureRecognizer = UILongPressGestureRecognizer(target: hasSelf,
+                                                                                     action: #selector(hasSelf.connectGestureRecognized(gesture:)))
+                hasSelf.decideInstance.gestureRecognizer?.minimumPressDuration = 3
+                hasSelf.decideInstance.gestureRecognizer?.cancelsTouchesInView = false
+                #if (arch(i386) || arch(x86_64)) && DECIDE
+                    hasSelf.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 2
+                #else
+                    sehasSelflf.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 4
+                #endif // (arch(i386) || arch(x86_64)) && DECIDE
+                hasSelf.decideInstance.gestureRecognizer?.isEnabled = hasSelf.enableVisualEditorForCodeless
+                MixpanelInstance.sharedUIApplication()?.keyWindow?.addGestureRecognizer(hasSelf.decideInstance.gestureRecognizer!)
+            }
         }
     }
 
@@ -736,53 +746,56 @@ extension MixpanelInstance {
             return
         }
 
-        trackingQueue.async {
-            // If there's no anonymousId assigned yet, that means distinctId is stored in the storage. Assigning already stored
-            // distinctId as anonymousId on identify and also setting a flag to notify that it might be previously logged in user
-            if self.anonymousId == nil{
-               self.anonymousId = self.distinctId
-               self.hadPersistedDistinctId = true
-            }
+        trackingQueue.async { [weak self] in
 
-            // identify only changes the distinct id if it doesn't match either the existing or the alias;
-            // if it's new, blow away the alias as well.
-            if distinctId != self.alias {
-                if distinctId != self.distinctId {
-                    self.alias = nil
-                    self.distinctId = distinctId
-                    self.userId = distinctId
+            if let hasSelf = self {
+                // If there's no anonymousId assigned yet, that means distinctId is stored in the storage. Assigning already stored
+                // distinctId as anonymousId on identify and also setting a flag to notify that it might be previously logged in user
+                if hasSelf.anonymousId == nil {
+                   hasSelf.anonymousId = hasSelf.distinctId
+                   hasSelf.hadPersistedDistinctId = true
                 }
 
-                if usePeople {
-                    self.people.distinctId = distinctId
-                    if !self.people.unidentifiedQueue.isEmpty {
-                        self.readWriteLock.write {
-                            for var r in self.people.unidentifiedQueue {
-                                r["$distinct_id"] = self.distinctId
-                                self.people.peopleQueue.append(r)
-                            }
-                            self.people.unidentifiedQueue.removeAll()
-                        }
-                        self.readWriteLock.read {
-                            Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
-                        }
+                // identify only changes the distinct id if it doesn't match either the existing or the alias;
+                // if it's new, blow away the alias as well.
+                if distinctId != hasSelf.alias {
+                    if distinctId != hasSelf.distinctId {
+                        hasSelf.alias = nil
+                        hasSelf.distinctId = distinctId
+                        hasSelf.userId = distinctId
                     }
-                } else {
-                    self.people.distinctId = nil
+
+                    if usePeople {
+                        hasSelf.people.distinctId = distinctId
+                        if !hasSelf.people.unidentifiedQueue.isEmpty {
+                            hasSelf.readWriteLock.write {
+                                for var r in hasSelf.people.unidentifiedQueue {
+                                    r["$distinct_id"] = hasSelf.distinctId
+                                    hasSelf.people.peopleQueue.append(r)
+                                }
+                                hasSelf.people.unidentifiedQueue.removeAll()
+                            }
+                            hasSelf.readWriteLock.read {
+                                Persistence.archivePeople(hasSelf.people.peopleQueue, token: hasSelf.apiToken)
+                            }
+                        }
+                    } else {
+                        hasSelf.people.distinctId = nil
+                    }
                 }
+                hasSelf.archiveProperties()
+                Persistence.storeIdentity(token: hasSelf.apiToken,
+                                          distinctID: hasSelf.distinctId,
+                                          peopleDistinctID: hasSelf.people.distinctId,
+                                          anonymousID: hasSelf.anonymousId,
+                                          userID: hasSelf.userId,
+                                          alias: hasSelf.alias,
+                                          hadPersistedDistinctId: hasSelf.hadPersistedDistinctId)
             }
-            self.archiveProperties()
-            Persistence.storeIdentity(token: self.apiToken,
-                                      distinctID: self.distinctId,
-                                      peopleDistinctID: self.people.distinctId,
-                                      anonymousID: self.anonymousId,
-                                      userID: self.userId,
-                                      alias: self.alias,
-                                      hadPersistedDistinctId: self.hadPersistedDistinctId)
         }
 
         if MixpanelInstance.isiOSAppExtension() {
-            self.flush()
+            flush()
         }
     }
 
@@ -822,16 +835,18 @@ extension MixpanelInstance {
         }
 
         if alias != distinctId {
-            trackingQueue.async {
-                self.alias = alias
-                self.archiveProperties()
-                Persistence.storeIdentity(token: self.apiToken,
-                                          distinctID: self.distinctId,
-                                          peopleDistinctID: self.people.distinctId,
-                                          anonymousID: self.anonymousId,
-                                          userID: self.userId,
-                                          alias: self.alias,
-                                          hadPersistedDistinctId: self.hadPersistedDistinctId)
+            trackingQueue.async { [weak self] in
+                if let hasSelf = self {
+                    hasSelf.alias = alias
+                    hasSelf.archiveProperties()
+                    Persistence.storeIdentity(token: hasSelf.apiToken,
+                                              distinctID: hasSelf.distinctId,
+                                              peopleDistinctID: hasSelf.people.distinctId,
+                                              anonymousID: hasSelf.anonymousId,
+                                              userID: hasSelf.userId,
+                                              alias: hasSelf.alias,
+                                              hadPersistedDistinctId: hasSelf.hadPersistedDistinctId)
+                }
             }
             let properties = ["distinct_id": distinctId, "alias": alias]
             track(event: "$create_alias", properties: properties)
@@ -848,31 +863,33 @@ extension MixpanelInstance {
      */
     open func reset() {
         flush();
-        trackingQueue.async {
-            self.networkQueue.sync {
-                self.readWriteLock.write {
-                    Persistence.deleteMPUserDefaultsData(token: self.apiToken)
-                    self.distinctId = self.defaultDistinctId()
-                    self.anonymousId = self.distinctId
-                    self.hadPersistedDistinctId = nil
-                    self.userId = nil
-                    self.superProperties = InternalProperties()
-                    self.eventsQueue = Queue()
-                    self.timedEvents = InternalProperties()
-                    self.people.distinctId = nil
-                    self.alias = nil
-                    self.people.peopleQueue = Queue()
-                    self.people.unidentifiedQueue = Queue()
-                    #if DECIDE
-                    self.decideInstance.notificationsInstance.shownNotifications = Set()
-                    self.decideInstance.decideFetched = false
-                    self.decideInstance.ABTestingInstance.variants = Set()
-                    self.decideInstance.codelessInstance.codelessBindings = Set()
-                    self.connectIntegrations.reset()
-                    MixpanelTweaks.defaultStore.reset()
-                    #endif // DECIDE
+        trackingQueue.async { [weak self] in
+            self?.networkQueue.sync { [weak self] in
+                self?.readWriteLock.write { [weak self] in
+                    if let hasSelf = self {
+                        Persistence.deleteMPUserDefaultsData(token: hasSelf.apiToken)
+                        hasSelf.distinctId = hasSelf.defaultDistinctId()
+                        hasSelf.anonymousId = hasSelf.distinctId
+                        hasSelf.hadPersistedDistinctId = nil
+                        hasSelf.userId = nil
+                        hasSelf.superProperties = InternalProperties()
+                        hasSelf.eventsQueue = Queue()
+                        hasSelf.timedEvents = InternalProperties()
+                        hasSelf.people.distinctId = nil
+                        hasSelf.alias = nil
+                        hasSelf.people.peopleQueue = Queue()
+                        hasSelf.people.unidentifiedQueue = Queue()
+                        #if DECIDE
+                        hasSelf.decideInstance.notificationsInstance.shownNotifications = Set()
+                        hasSelf.decideInstance.decideFetched = false
+                        hasSelf.decideInstance.ABTestingInstance.variants = Set()
+                        hasSelf.decideInstance.codelessInstance.codelessBindings = Set()
+                        hasSelf.connectIntegrations.reset()
+                        MixpanelTweaks.defaultStore.reset()
+                        #endif // DECIDE
+                    }
                 }
-                self.archive()
+                self?.archive()
             }
         }
     }
@@ -1032,9 +1049,8 @@ extension MixpanelInstance {
         }
         let defaultsKey = "trackedKey"
         if !UserDefaults.standard.bool(forKey: defaultsKey) {
-            trackingQueue.async {
-                Network.trackIntegration(apiToken: self.apiToken, serverURL: BasePath.DefaultMixpanelAPI) {
-                    (success) in
+            trackingQueue.async { [apiToken] in
+                Network.trackIntegration(apiToken: apiToken, serverURL: BasePath.DefaultMixpanelAPI) { (success) in
                     if success {
                         UserDefaults.standard.set(true, forKey: defaultsKey)
                         UserDefaults.standard.synchronize()
@@ -1065,40 +1081,42 @@ extension MixpanelInstance {
             }
             return
         }
-        trackingQueue.async {
-            self.networkQueue.async {
-                if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
-                    return
-                }
+        trackingQueue.async { [weak self] in
+            self?.networkQueue.async { [weak self] in
+                if let hasSelf = self {
+                    if let shouldFlush = hasSelf.delegate?.mixpanelWillFlush(hasSelf), !shouldFlush {
+                        return
+                    }
 
-                self.readWriteLock.write {
-                    self.flushEventsQueue = self.eventsQueue
-                    self.people.flushPeopleQueue = self.people.peopleQueue
+                    hasSelf.readWriteLock.write {
+                        hasSelf.flushEventsQueue = hasSelf.eventsQueue
+                        hasSelf.people.flushPeopleQueue = hasSelf.people.peopleQueue
 
-                    self.eventsQueue.removeAll()
-                    self.people.peopleQueue.removeAll()
-                }
+                        hasSelf.eventsQueue.removeAll()
+                        hasSelf.people.peopleQueue.removeAll()
+                    }
 
-                #if DECIDE
-                self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
-                                                    automaticEventsEnabled: self.decideInstance.automaticEventsEnabled)
-                #else
-                self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
-                                                    automaticEventsEnabled: false)
-                #endif
-                self.flushInstance.flushPeopleQueue(&self.people.flushPeopleQueue)
+                    #if DECIDE
+                    hasSelf.flushInstance.flushEventsQueue(&hasSelf.flushEventsQueue,
+                                                        automaticEventsEnabled: hasSelf.decideInstance.automaticEventsEnabled)
+                    #else
+                    hasSelf.flushInstance.flushEventsQueue(&hasSelf.flushEventsQueue,
+                                                        automaticEventsEnabled: false)
+                    #endif
+                    hasSelf.flushInstance.flushPeopleQueue(&hasSelf.people.flushPeopleQueue)
 
-                self.readWriteLock.write {
-                    self.eventsQueue = self.flushEventsQueue + self.eventsQueue
-                    self.people.peopleQueue = self.people.flushPeopleQueue + self.people.peopleQueue
-                    self.flushEventsQueue.removeAll()
-                    self.people.flushPeopleQueue.removeAll()
-                }
+                    hasSelf.readWriteLock.write {
+                        hasSelf.eventsQueue = hasSelf.flushEventsQueue + hasSelf.eventsQueue
+                        hasSelf.people.peopleQueue = hasSelf.people.flushPeopleQueue + hasSelf.people.peopleQueue
+                        hasSelf.flushEventsQueue.removeAll()
+                        hasSelf.people.flushPeopleQueue.removeAll()
+                    }
 
-                self.archive()
+                    hasSelf.archive()
 
-                if let completion = completion {
-                    DispatchQueue.main.async(execute: completion)
+                    if let completion = completion {
+                        DispatchQueue.main.async(execute: completion)
+                    }
                 }
             }
         }}
@@ -1124,24 +1142,26 @@ extension MixpanelInstance {
             return
         }
         let epochInterval = Date().timeIntervalSince1970
-        trackingQueue.async {
-            self.trackInstance.track(event: event,
-                                     properties: properties,
-                                     eventsQueue: &self.eventsQueue,
-                                     timedEvents: &self.timedEvents,
-                                     superProperties: self.superProperties,
-                                     distinctId: self.distinctId,
-                                     anonymousId: self.anonymousId,
-                                     userId: self.userId,
-                                     hadPersistedDistinctId: self.hadPersistedDistinctId,
-                                     epochInterval: epochInterval)
-            self.readWriteLock.read {
-                Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
+        trackingQueue.async { [weak self] in
+            if let hasSelf = self {
+                hasSelf.trackInstance.track(event: event,
+                                            properties: properties,
+                                            eventsQueue: &hasSelf.eventsQueue,
+                                            timedEvents: &hasSelf.timedEvents,
+                                            superProperties: hasSelf.superProperties,
+                                            distinctId: hasSelf.distinctId,
+                                            anonymousId: hasSelf.anonymousId,
+                                            userId: hasSelf.userId,
+                                            hadPersistedDistinctId: hasSelf.hadPersistedDistinctId,
+                                            epochInterval: epochInterval)
+                hasSelf.readWriteLock.read {
+                    Persistence.archiveEvents(hasSelf.flushEventsQueue + hasSelf.eventsQueue, token: hasSelf.apiToken)
+                }
             }
         }
 
         if MixpanelInstance.isiOSAppExtension() {
-            self.flush()
+            flush()
         }
     }
 
@@ -1198,8 +1218,10 @@ extension MixpanelInstance {
      */
     open func time(event: String) {
         let startTime = Date().timeIntervalSince1970
-        trackingQueue.async {
-            self.trackInstance.time(event: event, timedEvents: &self.timedEvents, startTime: startTime)
+        trackingQueue.async { [weak self, startTime] in
+            if let hasSelf = self {
+                hasSelf.trackInstance.time(event: event, timedEvents: &hasSelf.timedEvents, startTime: startTime)
+            }
         }
     }
 
@@ -1219,8 +1241,10 @@ extension MixpanelInstance {
      Clears all current event timers.
      */
     open func clearTimedEvents() {
-        trackingQueue.async {
-            self.trackInstance.clearTimedEvents(&self.timedEvents)
+        trackingQueue.async { [weak self] in
+            if let hasSelf = self {
+                hasSelf.trackInstance.clearTimedEvents(&hasSelf.timedEvents)
+            }
         }
     }
 
@@ -1237,8 +1261,10 @@ extension MixpanelInstance {
      Clears all currently set super properties.
      */
     open func clearSuperProperties() {
-        dispatchAndTrack() {
-            self.trackInstance.clearSuperProperties(&self.superProperties)
+        dispatchAndTrack() { [weak self] in
+            if let hasSelf = self {
+                hasSelf.trackInstance.clearSuperProperties(&hasSelf.superProperties)
+            }
         }
     }
 
@@ -1254,9 +1280,11 @@ extension MixpanelInstance {
      - parameter properties: properties dictionary
      */
     open func registerSuperProperties(_ properties: Properties) {
-        dispatchAndTrack() {
-            self.trackInstance.registerSuperProperties(properties,
-                                                       superProperties: &self.superProperties)
+        dispatchAndTrack() { [weak self] in
+            if let hasSelf = self {
+                hasSelf.trackInstance.registerSuperProperties(properties,
+                                                              superProperties: &superProperties)
+            }
         }
     }
 
@@ -1272,10 +1300,12 @@ extension MixpanelInstance {
      */
     open func registerSuperPropertiesOnce(_ properties: Properties,
                                             defaultValue: MixpanelType? = nil) {
-        dispatchAndTrack() {
-            self.trackInstance.registerSuperPropertiesOnce(properties,
-                                                           superProperties: &self.superProperties,
-                                                           defaultValue: defaultValue)
+        dispatchAndTrack() { [weak self] in
+            if let hasSelf = self {
+                hasSelf.trackInstance.registerSuperPropertiesOnce(properties,
+                                                                  superProperties: &hasSelfsuperProperties,
+                                                                  defaultValue: defaultValue)
+            }
         }
     }
 
@@ -1293,9 +1323,11 @@ extension MixpanelInstance {
      - parameter propertyName: array of property name strings to remove
      */
     open func unregisterSuperProperty(_ propertyName: String) {
-        dispatchAndTrack() {
-            self.trackInstance.unregisterSuperProperty(propertyName,
-                                                       superProperties: &self.superProperties)
+        dispatchAndTrack() { [weak self] in
+            if let hasSelf = self {
+                hasSelf.trackInstance.unregisterSuperProperty(propertyName,
+                                                              superProperties: &hasSelf.superProperties)
+            }
         }
     }
 
@@ -1306,36 +1338,40 @@ extension MixpanelInstance {
      to be sent back to the Mixpanel server.
      */
     open func optOutTracking() {
-        trackingQueue.async {
-            self.readWriteLock.write {
-                self.eventsQueue = Queue()
-                self.people.peopleQueue = Queue()
+        trackingQueue.async { [weak self] in
+            if let hasSelf = self {
+                hasSelf.readWriteLock.write {
+                    hasSelf.eventsQueue = Queue()
+                    hasSelf.people.peopleQueue = Queue()
+                }
             }
         }
 
-        if self.people.distinctId != nil {
-            self.people.deleteUser()
-            self.people.clearCharges()
-            self.flush()
+        if people.distinctId != nil {
+            people.deleteUser()
+            people.clearCharges()
+            flush()
         }
 
-        trackingQueue.async {
-            self.readWriteLock.write {
-                self.alias = nil
-                self.people.distinctId = nil
-                self.userId = nil
-                self.distinctId = self.defaultDistinctId()
-                self.anonymousId = self.distinctId
-                self.hadPersistedDistinctId = nil
-                self.superProperties = InternalProperties()
-                self.people.unidentifiedQueue = Queue()
-                self.timedEvents = InternalProperties()
+        trackingQueue.async { [weak self] in
+            self?.readWriteLock.write { [weak self] in
+                if let hasSelf = self {
+                    hasSelf.alias = nil
+                    hasSelf.people.distinctId = nil
+                    hasSelf.userId = nil
+                    hasSelf.distinctId = hasSelf.defaultDistinctId()
+                    hasSelf.anonymousId = hasSelf.distinctId
+                    hasSelf.hadPersistedDistinctId = nil
+                    hasSelf.superProperties = InternalProperties()
+                    hasSelf.people.unidentifiedQueue = Queue()
+                    hasSelf.timedEvents = InternalProperties()
+                }
             }
-            self.archive()
+            self?.archive()
         }
 
-        self.optOutStatus = true
-        Persistence.archiveOptOutStatus(self.optOutStatus, token: self.apiToken)
+        optOutStatus = true
+        Persistence.archiveOptOutStatus(optOutStatus, token: apiToken)
     }
 
     /**
@@ -1350,8 +1386,8 @@ extension MixpanelInstance {
      - parameter properties: an optional properties dictionary that could be passed to add properties to the opt-in event that is sent to Mixpanel
      */
     open func optInTracking(distinctId: String? = nil, properties: Properties? = nil) {
-        self.optOutStatus = false
-        Persistence.archiveOptOutStatus(self.optOutStatus, token: self.apiToken)
+        optOutStatus = false
+        Persistence.archiveOptOutStatus(optOutStatus, token: apiToken)
 
         if let distinctId = distinctId {
             identify(distinctId: distinctId)
@@ -1365,13 +1401,13 @@ extension MixpanelInstance {
      - returns: the current super opted out tracking status
      */
     open func hasOptedOutTracking() -> Bool {
-        return self.optOutStatus
+        return optOutStatus
     }
 
     func dispatchAndTrack(closure: @escaping () -> Void) {
-        trackingQueue.async {
+        trackingQueue.async { [weak self, closure] in
             closure()
-            self.archiveProperties()
+            self?.archiveProperties()
         }
     }
     
@@ -1390,12 +1426,14 @@ extension MixpanelInstance: InAppNotificationsDelegate {
 
     // MARK: - Decide
     func checkDecide(forceFetch: Bool = false, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
-        self.trackingQueue.async {
-            self.networkQueue.async {
-                self.decideInstance.checkDecide(forceFetch: forceFetch,
-                                                distinctId: self.people.distinctId ?? self.distinctId,
-                                                token: self.apiToken,
-                                                completion: completion)
+        trackingQueue.async { [weak self, completion] in
+            self?.networkQueue.async { [weak self, completion] in
+                if let hasSelf = self {
+                    hasSelf.decideInstance.checkDecide(forceFetch: forceFetch,
+                                                       distinctId: hasSelf.people.distinctId ?? hasSelf.distinctId,
+                                                       token: hasSelf.apiToken,
+                                                       completion: completion)
+                }
             }
         }
     }
@@ -1417,13 +1455,13 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         Logger.info(message: "Marking variant \(variant.ID) shown for experiment \(variant.experimentID)")
         let shownVariant = ["\(variant.experimentID)": variant.ID]
         people.merge(properties: ["$experiments": shownVariant])
-        trackingQueue.async {
-            var superPropertiesCopy = self.superProperties
+        trackingQueue.async { [weak self] in
+            var superPropertiesCopy = self?.superProperties
             var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]
             shownVariants += shownVariant
             superPropertiesCopy += ["$experiments": shownVariants]
-            self.superProperties = superPropertiesCopy
-            self.archiveProperties()
+            self?.superProperties = superPropertiesCopy
+            self?.archiveProperties()
         }
         track(event: "$experiment_started", properties: ["$experiment_id": variant.experimentID,
                                                          "$variant_id": variant.ID])
@@ -1465,13 +1503,13 @@ extension MixpanelInstance: InAppNotificationsDelegate {
                 return
             }
 
-            DispatchQueue.main.sync {
+            DispatchQueue.main.async { [weak self, newVarients] in             // This was sync and seemed super dangerous, switched to async
                 for variant in newVariants {
                     variant.execute()
-                    self.markVariantRun(variant)
+                    self?.markVariantRun(variant)
                 }
             }
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [callBack] in
                 if let callback = callback {
                     callback()
                 }

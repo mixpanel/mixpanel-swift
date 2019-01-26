@@ -1283,7 +1283,7 @@ extension MixpanelInstance {
         dispatchAndTrack() { [weak self] in
             if let hasSelf = self {
                 hasSelf.trackInstance.registerSuperProperties(properties,
-                                                              superProperties: &superProperties)
+                                                              superProperties: &hasSelf.superProperties)
             }
         }
     }
@@ -1303,7 +1303,7 @@ extension MixpanelInstance {
         dispatchAndTrack() { [weak self] in
             if let hasSelf = self {
                 hasSelf.trackInstance.registerSuperPropertiesOnce(properties,
-                                                                  superProperties: &hasSelfsuperProperties,
+                                                                  superProperties: &hasSelf.superProperties,
                                                                   defaultValue: defaultValue)
             }
         }

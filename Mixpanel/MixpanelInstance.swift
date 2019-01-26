@@ -678,7 +678,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 #if (arch(i386) || arch(x86_64)) && DECIDE
                     hasSelf.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 2
                 #else
-                    sehasSelflf.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 4
+                    hasSelf.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 4
                 #endif // (arch(i386) || arch(x86_64)) && DECIDE
                 hasSelf.decideInstance.gestureRecognizer?.isEnabled = hasSelf.enableVisualEditorForCodeless
                 MixpanelInstance.sharedUIApplication()?.keyWindow?.addGestureRecognizer(hasSelf.decideInstance.gestureRecognizer!)

@@ -1456,12 +1456,14 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         let shownVariant = ["\(variant.experimentID)": variant.ID]
         people.merge(properties: ["$experiments": shownVariant])
         trackingQueue.async { [weak self] in
-            var superPropertiesCopy = self?.superProperties
-            var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]
-            shownVariants += shownVariant
-            superPropertiesCopy += ["$experiments": shownVariants]
-            self?.superProperties = superPropertiesCopy
-            self?.archiveProperties()
+            if let hasSelf = self {
+                var superPropertiesCopy = hasSelf.superProperties
+                var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]
+                shownVariants += shownVariant
+                superPropertiesCopy += ["$experiments": shownVariants]
+                hasSelf.superProperties = superPropertiesCopy
+                hasSelf.archiveProperties()
+            }
         }
         track(event: "$experiment_started", properties: ["$experiment_id": variant.experimentID,
                                                          "$variant_id": variant.ID])
@@ -1503,13 +1505,13 @@ extension MixpanelInstance: InAppNotificationsDelegate {
                 return
             }
 
-            DispatchQueue.main.async { [weak self, newVarients] in             // This was sync and seemed super dangerous, switched to async
+            DispatchQueue.main.async { [weak self, newVariants] in             // This was sync and seemed super dangerous, switched to async
                 for variant in newVariants {
                     variant.execute()
                     self?.markVariantRun(variant)
                 }
             }
-            DispatchQueue.main.async { [callBack] in
+            DispatchQueue.main.async { [callback] in
                 if let callback = callback {
                     callback()
                 }

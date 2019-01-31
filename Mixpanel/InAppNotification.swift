@@ -18,6 +18,7 @@ class InAppNotification {
         static let extras = "extras"
         static let backgroundColor = "bg_color"
         static let bodyColor = "body_color"
+        static let displayTriggers = "display_triggers"
     }
     
     let ID: Int
@@ -37,6 +38,7 @@ class InAppNotification {
     let bodyColor: UInt
     let type: String
     var body: String? = nil
+    var displayTriggers = [DisplayTrigger]()
 
     init?(JSONObject: [String: Any]?) {
         guard let object = JSONObject else {
@@ -55,7 +57,23 @@ class InAppNotification {
         }
 
         guard let extras = object[PayloadKey.extras] as? [String: Any] else {
-            Logger.error(message: "invalid notification extra section")
+            Logger.error(message: "invalid notification extra section \(object)")
+            return nil
+        }
+        
+        if let rawDisplayTriggers = object[PayloadKey.displayTriggers] as? [[String: Any]]? {
+            if let rawDisplayTriggers = rawDisplayTriggers {
+                for rawDisplayTrigger in rawDisplayTriggers {
+                    if let displayTrigger = DisplayTrigger(JSONObject: rawDisplayTrigger) {
+                        displayTriggers.append(displayTrigger)
+                    } else {
+                        Logger.error(message: "invalid display trigger \(rawDisplayTrigger)")
+                        return nil
+                    }
+                }
+            }
+        } else {
+            Logger.error(message: "invalid display triggers section \(object)")
             return nil
         }
 
@@ -100,6 +118,19 @@ class InAppNotification {
         self.type               = type
     }
     
+    func hasDisplayTriggers() -> Bool {
+        return displayTriggers.count > 0
+    }
+    
+    func matchesEvent(event: String?, properties: Properties? = nil) -> Bool {
+        for displayTrigger in displayTriggers {
+            if (displayTrigger.matchesEvent(eventName: event, properties: properties)) {
+                return true
+            }
+        }
+        return false
+    }
+    
     func payload() -> [String: AnyObject] {
         var payload = [String: AnyObject]()
         payload[PayloadKey.ID] = ID as AnyObject
@@ -110,6 +141,11 @@ class InAppNotification {
         payload[PayloadKey.bodyColor] = bodyColor as AnyObject
         payload[PayloadKey.type] = type as AnyObject
         payload[PayloadKey.body] = body as AnyObject
+        var pldDisplayTriggers = [[String: AnyObject]]()
+        for displayTrigger in displayTriggers {
+            pldDisplayTriggers.append(displayTrigger.payload())
+        }
+        payload[PayloadKey.displayTriggers] = pldDisplayTriggers as AnyObject
         
         return payload
     }

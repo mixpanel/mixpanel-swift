@@ -86,8 +86,15 @@ class Decide {
                 } else {
                     Logger.error(message: "in-app notifications check response format error")
                 }
-                self.notificationsInstance.inAppNotifications = parsedNotifications
-
+                
+                for parsedNotification in parsedNotifications {
+                    if (parsedNotification.hasDisplayTriggers()) {
+                        self.notificationsInstance.triggeredNotifications.append(parsedNotification)
+                    } else {
+                        self.notificationsInstance.inAppNotifications.append(parsedNotification)
+                    }
+                }
+                
                 var parsedCodelessBindings = Set<CodelessBinding>()
                 if let rawCodelessBindings = result["event_bindings"] as? [[String: Any]] {
                     for rawBinding in rawCodelessBindings {

@@ -1140,12 +1140,18 @@ extension MixpanelInstance {
             }
         }
 
+        #if DECIDE
+        
+        self.decideInstance.notificationsInstance.showNotification(event: event, properties: properties)
+        
+        #endif  // DECIDE
         if MixpanelInstance.isiOSAppExtension() {
             self.flush()
         }
     }
 
     #if DECIDE
+    
     func trackPushNotification(_ userInfo: [AnyHashable: Any],
                                       event: String = "$campaign_received") {
         if self.hasOptedOutTracking() {

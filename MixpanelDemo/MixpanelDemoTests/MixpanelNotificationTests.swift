@@ -42,7 +42,13 @@ class MixpanelNotificationTests: MixpanelBaseTests {
                             "buttons": buttons,
                             "extras": [
                                 "image_fade": false
-                            ]] as [String : Any]
+                            ],
+                            "display_triggers": [
+                                [
+                                    "event": "test_event",
+                                    "selector": [:] as [String: Any],
+                                ] as [String: Any]] as [[String: Any]],
+                           ] as [String : Any]
     }
 
     func testMalformedImageURL() {
@@ -63,6 +69,7 @@ class MixpanelNotificationTests: MixpanelBaseTests {
         let testingInApp = TakeoverNotification(JSONObject: ["gar": "bage"])
         XCTAssertNil(testingInApp)
         var testDict: [String: Any]!
+        var testNotif: TakeoverNotification?
         // invalid id
         testDict = notificationDict
         testDict["id"] = false
@@ -92,7 +99,11 @@ class MixpanelNotificationTests: MixpanelBaseTests {
         // invalid color
         testDict = notificationDict
         testDict["bg_color"] = false
+        
         XCTAssertNil(TakeoverNotification(JSONObject: testDict))
+        testNotif = TakeoverNotification(JSONObject: notificationDict)
+        XCTAssertNotNil(testNotif)
+        XCTAssertTrue(testNotif!.hasDisplayTriggers())
     }
 
     func testNoDoubleShowNotification() {

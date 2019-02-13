@@ -21,10 +21,15 @@ class SessionMetadata {
     
     func applicationWillEnterForeground() {
         trackingQueue.async { [weak self] in
-            self?.eventsCounter = 0
-            self?.peopleCounter = 0
-            self?.sessionID = String.randomId()
-            self?.sessionStartEpoch = UInt64(Date().timeIntervalSince1970)
+
+            guard let hasSelf = self else {
+                return /// Self DNE
+            }
+
+            hasSelf.eventsCounter = 0
+            hasSelf.peopleCounter = 0
+            hasSelf.sessionID = String.randomId()
+            hasSelf.sessionStartEpoch = UInt64(Date().timeIntervalSince1970)
         }
     }
 

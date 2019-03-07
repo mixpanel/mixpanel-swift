@@ -61,10 +61,10 @@ class InAppNotification {
             return nil
         }
         
-        if let rawDisplayTriggers = object[PayloadKey.displayTriggers] as? [[String: Any]]? {
-            if let rawDisplayTriggers = rawDisplayTriggers {
+        if let rawDisplayTriggersOpt = object[PayloadKey.displayTriggers] as? [[String: Any]]? {
+            if let rawDisplayTriggers = rawDisplayTriggersOpt {
                 for rawDisplayTrigger in rawDisplayTriggers {
-                    if let displayTrigger = DisplayTrigger(JSONObject: rawDisplayTrigger) {
+                    if let displayTrigger = DisplayTrigger(jsonObject: rawDisplayTrigger) {
                         displayTriggers.append(displayTrigger)
                     } else {
                         Logger.error(message: "invalid display trigger \(rawDisplayTrigger)")
@@ -141,11 +141,11 @@ class InAppNotification {
         payload[PayloadKey.bodyColor] = bodyColor as AnyObject
         payload[PayloadKey.type] = type as AnyObject
         payload[PayloadKey.body] = body as AnyObject
-        var pldDisplayTriggers = [[String: AnyObject]]()
+        var payloadDisplayTriggers = [[String: AnyObject]]()
         for displayTrigger in displayTriggers {
-            pldDisplayTriggers.append(displayTrigger.payload())
+            payloadDisplayTriggers.append(displayTrigger.payload())
         }
-        payload[PayloadKey.displayTriggers] = pldDisplayTriggers as AnyObject
+        payload[PayloadKey.displayTriggers] = payloadDisplayTriggers as AnyObject
         
         return payload
     }

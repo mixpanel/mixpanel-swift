@@ -17,10 +17,10 @@ class DisplayTrigger {
     static let ANY_EVENT = "$any_event"
     
     let event: String?
-    let selector: [String: Any]?
+    let selectorOpt: [String: Any]?
     
-    init?(JSONObject: [String: Any]?) {
-        guard let object = JSONObject else {
+    init?(jsonObject: [String: Any]?) {
+        guard let object = jsonObject else {
             Logger.error(message: "display trigger json object should not be nil")
             return nil
         }
@@ -36,13 +36,18 @@ class DisplayTrigger {
         }
         
         self.event = event
-        self.selector = selector
+        self.selectorOpt = selector
     }
     
     func matchesEvent(eventName: String?, properties: Properties? = nil) -> Bool {
         if let event = self.event {
-            if (eventName == DisplayTrigger.ANY_EVENT || eventName == "" || eventName?.caseInsensitiveCompare(event) == ComparisonResult.orderedSame) {
-                return true
+            if (eventName == DisplayTrigger.ANY_EVENT || eventName == "" || eventName?.compare(event) == ComparisonResult.orderedSame) {
+                if let selector = selectorOpt {
+                    if let value = SelectorEvaluator.evaluate(selector: selector, properties: properties) {
+                        return value
+                    }
+                    return false
+                }
             }
         }
         
@@ -52,7 +57,7 @@ class DisplayTrigger {
     func payload() -> [String: AnyObject] {
         var payload = [String: AnyObject]()
         payload[PayloadKey.event] = event as AnyObject
-        payload[PayloadKey.selector] = selector as AnyObject
+        payload[PayloadKey.selector] = selectorOpt as AnyObject
         
         return payload
     }

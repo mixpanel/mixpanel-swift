@@ -154,10 +154,17 @@ class Decide {
         decideResponse.unshownInAppNotifications = notificationsInstance.inAppNotifications.filter {
             !notificationsInstance.shownNotifications.contains($0.ID)
         }
+        
+        let unshownTriggeredInapps = notificationsInstance.triggeredNotifications.filter {
+            !notificationsInstance.shownNotifications.contains($0.ID)
+        }
 
         Logger.info(message: "decide check found \(decideResponse.unshownInAppNotifications.count) " +
             "available notifications out of " +
             "\(notificationsInstance.inAppNotifications.count) total")
+        Logger.info(message: "decide check found \(unshownTriggeredInapps.count) " +
+            "available triggered notifications out of " +
+            "\(notificationsInstance.triggeredNotifications.count) total")
         Logger.info(message: "decide check found \(decideResponse.newCodelessBindings.count) " +
             "new codeless bindings out of \(codelessInstance.codelessBindings)")
         Logger.info(message: "decide check found \(decideResponse.newVariants.count) " +

@@ -1,5 +1,5 @@
 //
-//  Selector.swift
+//  SelectorEvaluator.swift
 //  Mixpanel
 //
 //  Created by Madhu Palani on 3/1/19.

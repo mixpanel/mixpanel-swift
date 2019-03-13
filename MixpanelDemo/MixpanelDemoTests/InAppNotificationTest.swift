@@ -15,7 +15,7 @@ import XCTest
 class InAppNotificationTest : XCTestCase {
     
     func testMatchesEvent() {
-        let displayTriggers = [["event": "test_event_1", "selector": ["operator": "<", "children": [["property": "event", "value": "created_at"], ["property": "literal", "value": ["window": ["value": 1, "unit": "hour"]]]]]], ["event": "test_event_2", "selector": ["operator": "==", "children": [["property": "event", "value": "city"], ["property": "literal", "value": "San Francisco"]]]]]
+        let displayTriggers = [["event": "test_event_1", "selector": ["operator": "<", "children": [["property": "event", "value": "created_at"], ["property": "literal", "value": ["window": ["value": -1, "unit": "hour"]]]]]], ["event": "test_event_2", "selector": ["operator": "==", "children": [["property": "event", "value": "city"], ["property": "literal", "value": "San Francisco"]]]]]
         
         let inapp = InAppNotification(JSONObject: ["id": 1, "message_id": 1, "extras": [:], "display_triggers": displayTriggers, "bg_color": UInt(101), "body_color": UInt(101), "image_url": "https://www.test.com/test.jpg", "type": "mini"])
         let inappWithoutTriggers = InAppNotification(JSONObject: ["id": 1, "message_id": 1, "extras": [:], "bg_color": UInt(101), "body_color": UInt(101), "image_url": "https://www.test.com/test.jpg", "type": "mini"])

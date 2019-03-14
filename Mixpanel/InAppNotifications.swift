@@ -25,6 +25,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
     var showNotificationOnActive = true
     var miniNotificationPresentationTime = 6.0
     var shownNotifications = Set<Int>()
+    var triggeredNotifications = [InAppNotification]()
     var inAppNotifications = [InAppNotification]()
     var currentlyShowingNotification: InAppNotification?
     var delegate: InAppNotificationsDelegate?
@@ -33,6 +34,15 @@ class InAppNotifications: NotificationViewControllerDelegate {
         self.lock = lock
     }
 
+    func showNotification(event: String?, properties: Properties? = nil) {
+        for triggeredNotification in triggeredNotifications {
+            if (triggeredNotification.matchesEvent(event: event, properties: properties)) {
+                showNotification(triggeredNotification)
+                break;
+            }
+        }
+    }
+    
     func showNotification( _ notification: InAppNotification) {
         let notification = notification
         if notification.image != nil {
@@ -53,7 +63,11 @@ class InAppNotifications: NotificationViewControllerDelegate {
                 }
             }
         } else {
-            inAppNotifications = inAppNotifications.filter { $0.ID != notification.ID }
+            if (notification.hasDisplayTriggers()) {
+                triggeredNotifications = triggeredNotifications.filter { $0.ID != notification.ID }
+            } else {
+                inAppNotifications = inAppNotifications.filter { $0.ID != notification.ID }
+            }
         }
     }
 

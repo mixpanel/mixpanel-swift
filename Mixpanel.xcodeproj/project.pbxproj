@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		05A0200E2202724A00D04A3A /* DisplayTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A0200D2202724A00D04A3A /* DisplayTrigger.swift */; };
+		05D4C3E6222F322100D30FC2 /* SelectorEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D4C3E5222F322100D30FC2 /* SelectorEvaluator.swift */; };
 		51DD567C1D306B740045D3DB /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56791D306B740045D3DB /* Logger.swift */; };
 		51DD56831D306B7B0045D3DB /* PrintLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56801D306B7B0045D3DB /* PrintLogging.swift */; };
 		51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56811D306B7B0045D3DB /* FileLogging.swift */; };
@@ -148,6 +150,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		05A0200D2202724A00D04A3A /* DisplayTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayTrigger.swift; sourceTree = "<group>"; };
+		05D4C3E5222F322100D30FC2 /* SelectorEvaluator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectorEvaluator.swift; sourceTree = "<group>"; };
 		51DD56791D306B740045D3DB /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		51DD56801D306B7B0045D3DB /* PrintLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrintLogging.swift; sourceTree = "<group>"; };
 		51DD56811D306B7B0045D3DB /* FileLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileLogging.swift; sourceTree = "<group>"; };
@@ -510,10 +514,12 @@
 		E18C77A51E381ED00006CBB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				05D4C3E5222F322100D30FC2 /* SelectorEvaluator.swift */,
 				E19312661D5A7848007CE1E9 /* InAppNotification.swift */,
 				E118E9FF1E37E28400223C47 /* InAppButton.swift */,
 				E118E9FD1E37DE3B00223C47 /* TakeoverNotification.swift */,
 				E118EA011E37F3A700223C47 /* MiniNotification.swift */,
+				05A0200D2202724A00D04A3A /* DisplayTrigger.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -747,6 +753,7 @@
 				E142DBD11D75F86300F34C12 /* ObjectSerializer.swift in Sources */,
 				E115948E1D000709007F8B4F /* MixpanelInstance.swift in Sources */,
 				E15422191D6FBFA6009421A0 /* WebSocketWrapper.swift in Sources */,
+				05D4C3E6222F322100D30FC2 /* SelectorEvaluator.swift in Sources */,
 				E154222D1D71059D009421A0 /* BindingMessage.swift in Sources */,
 				E11801AE1D7F86320006DD2B /* NSAttributedStringToNSDictionary.swift in Sources */,
 				E174DAE51DA3373600FED703 /* TweakBinding.swift in Sources */,
@@ -786,6 +793,7 @@
 				E174DAE31DA3370300FED703 /* TweakableType.swift in Sources */,
 				E165228F1D6781DF000D5949 /* MixpanelType.swift in Sources */,
 				E19D12961D9C5E6600A8016D /* VariantTweak.swift in Sources */,
+				05A0200E2202724A00D04A3A /* DisplayTrigger.swift in Sources */,
 				E11801B01D7F92F10006DD2B /* UIFontToNSDictionary.swift in Sources */,
 				E118EA021E37F3A700223C47 /* MiniNotification.swift in Sources */,
 				E174DADD1DA336C000FED703 /* TweakLibrary.swift in Sources */,

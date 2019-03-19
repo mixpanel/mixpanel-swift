@@ -144,6 +144,16 @@ open class People {
     }
 
     /**
+     Unregister the given device to receive push notifications.
+
+     This will unset all of the push tokens saved to this people profile. This is useful
+     in conjunction with a call to `reset`, or when a user is logging out.
+     */
+    open func removeAllPushDeviceTokens() {
+        unset(properties: ["$ios_devices"])
+    }
+
+    /**
      Unregister a specific device token from the ability to receive push notifications.
 
      This will remove the provided push token saved to this people profile. This is useful

@@ -20,7 +20,9 @@ class SessionMetadata {
     }
     
     func applicationWillEnterForeground() {
-        trackingQueue.async {
+        trackingQueue.async { [weak self] in
+            guard let self = self else { return }
+
             self.eventsCounter = 0
             self.peopleCounter = 0
             self.sessionID = String.randomId()

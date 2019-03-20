@@ -44,14 +44,11 @@ open class People {
         let ignoreTimeCopy = ignoreTime
 
         serialQueue.async() { [weak self, action, properties] in
-
-            guard let hasSelf = self else {
-                return /// Self DNE
-            }
+            guard let self = self else { return }
 
             var r = InternalProperties()
             var p = InternalProperties()
-            r["$token"] = hasSelf.apiToken
+            r["$token"] = self.apiToken
             r["$time"] = epochMilliseconds
             if ignoreTimeCopy {
                 r["$ignore_time"] = ignoreTimeCopy ? 1 : 0
@@ -69,7 +66,7 @@ open class People {
                 p += properties
                 r[action] = p
             }
-            hasSelf.metadata.toDict(isEvent: false).forEach { (k,v) in r[k] = v }
+            self.metadata.toDict(isEvent: false).forEach { (k,v) in r[k] = v }
 
             if let anonymousId = Mixpanel.mainInstance().anonymousId {
                r["$device_id"] = anonymousId
@@ -83,20 +80,20 @@ open class People {
                 r["$had_persisted_distinct_id"] = hadPersistedDistinctId
             }
 
-            if let distinctId = hasSelf.distinctId {
+            if let distinctId = self.distinctId {
                 r["$distinct_id"] = distinctId
-                hasSelf.addPeopleObject(r)
+                self.addPeopleObject(r)
             } else {
-                hasSelf.lock.write {
-                    hasSelf.unidentifiedQueue.append(r)
-                    if hasSelf.unidentifiedQueue.count > QueueConstants.queueSize {
-                        hasSelf.unidentifiedQueue.remove(at: 0)
+                self.lock.write {
+                    self.unidentifiedQueue.append(r)
+                    if self.unidentifiedQueue.count > QueueConstants.queueSize {
+                        self.unidentifiedQueue.remove(at: 0)
                     }
                 }
 
             }
-            hasSelf.lock.read{
-                Persistence.archivePeople(hasSelf.flushPeopleQueue + hasSelf.peopleQueue, token: hasSelf.apiToken)
+            self.lock.read{
+                Persistence.archivePeople(self.flushPeopleQueue + self.peopleQueue, token: self.apiToken)
             }
         }
 

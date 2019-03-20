@@ -85,15 +85,16 @@ class Flush: AppLifecycle {
         stopFlushTimer()
         if flushInterval > 0 {
             DispatchQueue.main.async() { [weak self] in
-                if let hasSelf = self {
-                    hasSelf.timer = Timer.scheduledTimer(timeInterval: hasSelf.flushInterval,
-                                                         target: hasSelf,
-                                                         selector: #selector(hasSelf.flushSelector),
-                                                         userInfo: nil,
-                                                         repeats: true)
-                } else {
-                    // Self was DNE when executed, rather than crash perhaps we should log it?
+
+                guard let self = self else {
+                    return
                 }
+
+                self.timer = Timer.scheduledTimer(timeInterval: self.flushInterval,
+                                                     target: self,
+                                                     selector: #selector(self.flushSelector),
+                                                     userInfo: nil,
+                                                     repeats: true)
             }
         }
     }

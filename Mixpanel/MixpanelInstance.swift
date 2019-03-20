@@ -655,7 +655,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         trackingQueue.async {
             AutomaticProperties.automaticPropertiesLock.write { [weak self, radio] in
-
                 AutomaticProperties.properties["$radio"] = radio
 
                 guard let self = self else {
@@ -841,7 +840,6 @@ extension MixpanelInstance {
 
         if alias != distinctId {
             trackingQueue.async { [weak self, alias] in
-
                 guard let self = self else {
                     return
                 }
@@ -875,7 +873,6 @@ extension MixpanelInstance {
         trackingQueue.async { [weak self] in
             self?.networkQueue.sync { [weak self] in
                 self?.readWriteLock.write { [weak self] in
-
                     guard let self = self else {
                         return
                     }
@@ -1099,7 +1096,6 @@ extension MixpanelInstance {
         }
         trackingQueue.async { [weak self, completion] in
             self?.networkQueue.async { [weak self] in
-
                 guard let self = self else {
                     return
                 }
@@ -1167,17 +1163,17 @@ extension MixpanelInstance {
         let epochInterval = Date().timeIntervalSince1970
         trackingQueue.async { [weak self, event, properties, epochInterval] in
             guard let self = self else { return }
-
+            
             self.trackInstance.track(event: event,
-                                        properties: properties,
-                                        eventsQueue: &self.eventsQueue,
-                                        timedEvents: &self.timedEvents,
-                                        superProperties: self.superProperties,
-                                        distinctId: self.distinctId,
-                                        anonymousId: self.anonymousId,
-                                        userId: self.userId,
-                                        hadPersistedDistinctId: self.hadPersistedDistinctId,
-                                        epochInterval: epochInterval)
+                                     properties: properties,
+                                     eventsQueue: &self.eventsQueue,
+                                     timedEvents: &self.timedEvents,
+                                     superProperties: self.superProperties,
+                                     distinctId: self.distinctId,
+                                     anonymousId: self.anonymousId,
+                                     userId: self.userId,
+                                     hadPersistedDistinctId: self.hadPersistedDistinctId,
+                                     epochInterval: epochInterval)
             self.readWriteLock.read {
                 Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
             }
@@ -1716,7 +1712,6 @@ extension MixpanelInstance: InAppNotificationsDelegate {
             }
 
             DispatchQueue.main.async { [weak self, newVariants] in
-
                 guard let self = self else {
                     return
                 }

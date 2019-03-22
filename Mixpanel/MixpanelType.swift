@@ -33,13 +33,7 @@ extension String: MixpanelType {
         return false
     }
 }
-extension NSString: MixpanelType {
-    /**
-     Checks if this object has nested object types that Mixpanel supports.
-     Will always return true.
-     */
-    public func isValidNestedType() -> Bool { return true }
-}
+
 extension Int: MixpanelType {
     /**
      Checks if this object has nested object types that Mixpanel supports.
@@ -232,7 +226,6 @@ extension Dictionary: MixpanelType {
         return false
     }
 }
-
 
 func assertPropertyTypes(_ properties: Properties?) {
     if let properties = properties {

@@ -449,11 +449,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     static func isiOSAppExtension() -> Bool {
-        #if os(iOS) || WATCH_OS
-            return Bundle.main.bundlePath.hasSuffix(".appex")
-        #else
-            return false
-        #endif
+        return Bundle.main.bundlePath.hasSuffix(".appex")
     }
 
     #if !os(OSX) && !WATCH_OS
@@ -595,7 +591,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #elseif os(OSX)
         let distinctId = MixpanelInstance.macOSIdentifier()
         #else
-        var distinctId: String?
+        let distinctId: String? = nil
         #endif // os(OSX)
         guard let distId = distinctId else {
             return UUID().uuidString

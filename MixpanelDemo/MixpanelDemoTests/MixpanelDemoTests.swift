@@ -91,6 +91,25 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty, "people should have been flushed")
     }
 
+    func testFlushGroups() {
+        stubGroups()
+        mixpanel.identify(distinctId: "d1")
+        let groupKey = "test_key"
+        let groupValue = "test_value"
+        for i in 0..<50 {
+            mixpanel.getGroup(groupKey: groupKey, groupID: groupValue).set(property: "p1", to: "\(i)")
+        }
+        waitForTrackingQueue()
+        flushAndWaitForNetworkQueue()
+        XCTAssertTrue(mixpanel.groupsQueue.isEmpty, "groups should have been flushed")
+        for i in 0..<60 {
+            mixpanel.getGroup(groupKey: groupKey, groupID: groupValue).set(property: "p1", to: "\(i)")
+        }
+        waitForTrackingQueue()
+        flushAndWaitForNetworkQueue()
+        XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty, "groups should have been flushed")
+    }
+
     func testFlushNetworkFailure() {
         LSNocilla.sharedInstance().clearStubs()
         stubTrack().andFailWithError(
@@ -309,6 +328,31 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let trackDistinctId = (mixpanel.eventsQueue.last?["properties"] as? InternalProperties)?["distinct_id"] as? String
         XCTAssertEqual(trackToken, "t1", "user-defined distinct id not used in track.")
         XCTAssertEqual(trackDistinctId, "d1", "user-defined distinct id not used in track.")
+    }
+    
+    func testTrackWithGroups() {
+        let groupKey = "test_key"
+        let groupID = "test_id"
+        mixpanel.trackWithGroups(event: "Something Happened", properties: [groupKey: "some other value", "p1": "value"], groups: [groupKey: groupID])
+        waitForTrackingQueue()
+        var e: InternalProperties = mixpanel.eventsQueue.last!
+        XCTAssertEqual(e["event"] as? String, "Something Happened", "incorrect event name")
+        var p: InternalProperties = e["properties"] as! InternalProperties
+        XCTAssertNotNil(p["$app_build_number"], "$app_build_number not set")
+        XCTAssertNotNil(p["$app_version_string"], "$app_version_string not set")
+        XCTAssertNotNil(p["$lib_version"], "$lib_version not set")
+        XCTAssertNotNil(p["$model"], "$model not set")
+        XCTAssertNotNil(p["$os"], "$os not set")
+        XCTAssertNotNil(p["$os_version"], "$os_version not set")
+        XCTAssertNotNil(p["$screen_height"], "$screen_height not set")
+        XCTAssertNotNil(p["$screen_width"], "$screen_width not set")
+        XCTAssertNotNil(p["distinct_id"], "distinct_id not set")
+        XCTAssertNotNil(p["time"], "time not set")
+        XCTAssertEqual(p["$manufacturer"] as? String, "Apple", "incorrect $manufacturer")
+        XCTAssertEqual(p["mp_lib"] as? String, "swift", "incorrect mp_lib")
+        XCTAssertEqual(p["token"] as? String, kTestToken, "incorrect token")
+        XCTAssertEqual(p[groupKey] as? String, groupID, "incorrect group id")
+        XCTAssertEqual(p["p1"] as? String, "value", "incorrect group value")
     }
 
     func testRegisterSuperProperties() {
@@ -720,5 +764,77 @@ class MixpanelDemoTests: MixpanelBaseTests {
                 }
             }
         }
+    }
+    
+    func testSetGroup() {
+        stubTrack()
+        stubEngage()
+        mixpanel.identify(distinctId: "d1")
+        let groupKey = "test_key"
+        let groupValue = "test_value"
+        mixpanel.setGroup(groupKey: groupKey, groupIDs: [groupValue])
+        waitForTrackingQueue()
+        XCTAssertEqual(mixpanel.currentSuperProperties()[groupKey] as? [String], [groupValue])
+        let q = mixpanel.people.peopleQueue.last!["$set"] as! InternalProperties
+        XCTAssertEqual(q[groupKey] as? [String], [groupValue], "group value people property not queued")
+        assertDefaultPeopleProperties(q)
+    }
+    
+    func testAddGroup() {
+        stubTrack()
+        stubEngage()
+        mixpanel.identify(distinctId: "d1")
+        let groupKey = "test_key"
+        let groupValue = "test_value"
+        
+        mixpanel.addGroup(groupKey: groupKey, groupID: groupValue)
+        waitForMixpanelQueues()
+        XCTAssertEqual(mixpanel.currentSuperProperties()[groupKey] as? [String], [groupValue])
+        waitForMixpanelQueues()
+        let q = mixpanel.people.peopleQueue.last!["$set"] as! InternalProperties
+        XCTAssertEqual(q[groupKey] as? [String], [groupValue], "addGroup people update not queued")
+        assertDefaultPeopleProperties(q)
+        
+        mixpanel.addGroup(groupKey: groupKey, groupID: groupValue)
+        waitForMixpanelQueues()
+        XCTAssertEqual(mixpanel.currentSuperProperties()[groupKey] as? [String], [groupValue])
+        waitForMixpanelQueues()
+        let q2 = mixpanel.people.peopleQueue.last!["$union"] as! InternalProperties
+        XCTAssertEqual(q2[groupKey] as? [String], [groupValue], "addGroup people update not queued")
+
+        let newVal = "new_group"
+        mixpanel.addGroup(groupKey: groupKey, groupID: newVal)
+        waitForMixpanelQueues()
+        XCTAssertEqual(mixpanel.currentSuperProperties()[groupKey] as? [String], [groupValue, newVal])
+        waitForMixpanelQueues()
+        let q3 = mixpanel.people.peopleQueue.last!["$union"] as! InternalProperties
+        XCTAssertEqual(q3[groupKey] as? [String], [newVal], "addGroup people update not queued")
+    }
+    
+    func testRemoveGroup() {
+        stubTrack()
+        stubEngage()
+        mixpanel.identify(distinctId: "d1")
+        let groupKey = "test_key"
+        let groupValue = "test_value"
+        let newVal = "new_group"
+        
+        mixpanel.setGroup(groupKey: groupKey, groupIDs: [groupValue, newVal])
+        waitForTrackingQueue()
+        XCTAssertEqual(mixpanel.currentSuperProperties()[groupKey] as? [String], [groupValue, newVal])
+        
+        mixpanel.removeGroup(groupKey: groupKey, groupID: groupValue)
+        waitForTrackingQueue()
+        XCTAssertEqual(mixpanel.currentSuperProperties()[groupKey] as? [String], [newVal])
+        waitForTrackingQueue()
+        let q2 = mixpanel.people.peopleQueue.last!["$remove"] as! InternalProperties
+        XCTAssertEqual(q2[groupKey] as? String, groupValue, "removeGroup people update not queued")
+        
+        mixpanel.removeGroup(groupKey: groupKey, groupID: groupValue)
+        waitForTrackingQueue()
+        XCTAssertNil(mixpanel.currentSuperProperties()[groupKey])
+        waitForTrackingQueue()
+        let q3 = mixpanel.people.peopleQueue.last!["$unset"] as! [String]
+        XCTAssertEqual(q3, [groupKey], "removeGroup people update not queued")
     }
 }

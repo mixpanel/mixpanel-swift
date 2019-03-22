@@ -123,6 +123,12 @@ class Track {
             superProperties.removeAll()
         }
     }
+    
+    func updateSuperProperty(_ update: (_ superProperties: inout InternalProperties) -> Void, superProperties: inout InternalProperties) {
+        self.lock.write {
+            update(&superProperties)
+        }
+    }
 
     func time(event: String?, timedEvents: inout InternalProperties, startTime: Double) {
         if Mixpanel.mainInstance().hasOptedOutTracking() {

@@ -15,10 +15,15 @@ let kTestToken = "abc123"
 let kDefaultServerString = "https://api.mixpanel.com"
 let kDefaultServerTrackString = "https://api.mixpanel.com/track/"
 let kDefaultServerEngageString = "https://api.mixpanel.com/engage/"
+let kDefaultServerGroupsString = "https://api.mixpanel.com/groups/"
 let kDefaultServerDecideString = "^https://api.mixpanel.com/decide(.*?)".regex
 
 @discardableResult func stubEngage() -> LSStubRequestDSL {
     return stubRequest("POST", kDefaultServerEngageString as LSMatcheable).withHeader("Accept-Encoding", "gzip")!
+}
+
+@discardableResult func stubGroups() -> LSStubRequestDSL {
+    return stubRequest("POST", kDefaultServerGroupsString as LSMatcheable!).withHeader("Accept-Encoding", "gzip")!
 }
 
 @discardableResult func stubTrack() -> LSStubRequestDSL {

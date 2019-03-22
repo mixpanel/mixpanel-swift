@@ -18,7 +18,7 @@ import SystemConfiguration
 
 #if os(iOS)
 import CoreTelephony
-#endif // os(iOS
+#endif // os(iOS)
 
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
@@ -256,7 +256,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var reachability: SCNetworkReachability?
     let telephonyInfo = CTTelephonyNetworkInfo()
     #endif
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     var taskId = UIBackgroundTaskIdentifier.invalid
     #endif // os(OSX)
     let sessionMetadata: SessionMetadata
@@ -268,7 +268,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let connectIntegrations = ConnectIntegrations()
     #endif // DECIDE
 
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     init(apiToken: String?, launchOptions: [UIApplication.LaunchOptionsKey : Any]?, flushInterval: Double, name: String, automaticPushTracking: Bool = true, optOutTrackingByDefault: Bool = false) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
@@ -359,7 +359,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                         lock: self.readWriteLock,
                         metadata: sessionMetadata)
         flushInstance._flushInterval = flushInterval
+    #if !WATCH_OS
         setupListeners()
+    #endif
         unarchive()
         if optOutTrackingByDefault {
             self.optOutTracking()
@@ -367,7 +369,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
     #endif // os(OSX)
 
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
         trackIntegration()
@@ -414,7 +416,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             #endif // os(iOS) && DECIDE
         }
     }
-    #else
+    #elseif os(OSX)
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self,
@@ -434,7 +436,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     deinit {
         NotificationCenter.default.removeObserver(self)
-        #if os(iOS)
+        #if os(iOS) && !WATCH_OS
             if let reachability = reachability {
                 if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
                     Logger.error(message: "\(self) error unsetting reachability callback")
@@ -447,14 +449,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     static func isiOSAppExtension() -> Bool {
-        #if os(iOS)
+        #if os(iOS) || WATCH_OS
             return Bundle.main.bundlePath.hasSuffix(".appex")
         #else
             return false
         #endif
     }
 
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     static func sharedUIApplication() -> UIApplication? {
         guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue() as? UIApplication else {
             return nil
@@ -509,7 +511,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif
     }
 
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     @objc private func applicationDidEnterBackground(_ notification: Notification) {
         guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
@@ -585,13 +587,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     func defaultDistinctId() -> String {
-        #if !os(OSX)
+        #if !os(OSX) && !WATCH_OS
         var distinctId: String? = IFA()
         if distinctId == nil && NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString
         }
-        #else
+        #elseif os(OSX)
         let distinctId = MixpanelInstance.macOSIdentifier()
+        #else
+        var distinctId: String?
         #endif // os(OSX)
         guard let distId = distinctId else {
             return UUID().uuidString
@@ -599,7 +603,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         return distId
     }
 
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     func IFA() -> String? {
         var ifa: String? = nil
         #if !MIXPANEL_NO_IFA
@@ -629,7 +633,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif
         return ifa
     }
-    #else
+    #elseif os(OSX)
     static func macOSIdentifier() -> String? {
         let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"));
         let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0);

@@ -24,20 +24,23 @@ class AutomaticProperties {
     static var properties: InternalProperties = {
         objc_sync_enter(AutomaticProperties.self); defer { objc_sync_exit(AutomaticProperties.self) }
         var p = InternalProperties()
-        #if !os(OSX)
+        #if !os(OSX) && !WATCH_OS
         let size = UIScreen.main.bounds.size
         p["$screen_height"]     = Int(size.height)
         p["$screen_width"]      = Int(size.width)
         p["$os"]                = UIDevice.current.systemName
         p["$os_version"]        = UIDevice.current.systemVersion
 
-        #else
+        #elseif os(OSX)
         if let size = NSScreen.main?.frame.size {
             p["$screen_height"]     = Int(size.height)
             p["$screen_width"]      = Int(size.width)
         }
         p["$os"]                = "macOS"
         p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
+        
+        #else
+        p["$os"]                = "watchOS"
         #endif // os(OSX)
 
         let infoDict = Bundle.main.infoDictionary
@@ -61,7 +64,7 @@ class AutomaticProperties {
             p["$ios_app_release"] = infoDict["CFBundleShortVersionString"]
         }
         p["$ios_device_model"]  = AutomaticProperties.deviceModel()
-        #if !os(OSX)
+        #if !os(OSX) && !WATCH_OS
         p["$ios_version"]       = UIDevice.current.systemVersion
         #else
         p["$ios_version"]       = ProcessInfo.processInfo.operatingSystemVersionString

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Tweak Structure Reference</title>
+    <title>Group Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Struct/Tweak" class="dashAnchor"></a>
-    <a title="Tweak Structure Reference"></a>
+    <a name="//apple_ref/swift/Class/Group" class="dashAnchor"></a>
+    <a title="Group Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">Mixpanel Docs</a> (91% documented)</p>
@@ -22,7 +22,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">Mixpanel Reference</a>
         <img id="carat" src="../img/carat.png" />
-        Tweak Structure Reference
+        Group Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -158,27 +158,33 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>Tweak</h1>
+            <h1>Group</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">Tweak</span><span class="o">&lt;</span><span class="kt">T</span><span class="p">:</span> <span class="kt"><a href="../Protocols/TweakableType.html">TweakableType</a></span><span class="o">&gt;</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">Group</span></code></pre>
 
                 </div>
               </div>
-            <p>Tweaks let you adjust things on the fly.
-Because each T needs a UI component, we have to restrict what T can be - hence T: TweakableType.
-If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
+            <p>Access to the Mixpanel Groups API, available through the getGroup function from
+the main Mixpanel instance.</p>
 
           </section>
           <section class="section task-group-section">
             <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Group"></a>
+                <a name="//apple_ref/swift/Section/Group" class="dashAnchor"></a>
+                <a href="#/Group">
+                  <h3 class="section-name">Group</h3>
+                </a>
+              </div>
               <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel5TweakV9tweakName12defaultValueACyxGSS_xtcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(tweakName:defaultValue:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel5TweakV9tweakName12defaultValueACyxGSS_xtcfc">init(tweakName:defaultValue:)</a>
+                    <a name="/s:8Mixpanel5GroupC3set10propertiesySDySSAA0A4Type_pG_tF"></a>
+                    <a name="//apple_ref/swift/Method/set(properties:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC3set10propertiesySDySSAA0A4Type_pG_tF">set(properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -186,14 +192,19 @@ If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Initializer for a Tweak for A/B Testing</p>
+                        <p>Sets properties on this group.</p>
+
+<p>Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
+If the existing group record on the server already has a value for a given property, the old
+value is overwritten. Other existing properties will not be affected.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">tweakName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="n">defaultValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -204,24 +215,12 @@ If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
                             <tr>
                               <td>
                                 <code>
-                                <em>tweakName</em>
+                                <em>properties</em>
                                 </code>
                               </td>
                               <td>
                                 <div>
-                                  <p>name of the tweak</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>defaultValue</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>the default value set for the tweak</p>
+                                  <p>properties dictionary</p>
                                 </div>
                               </td>
                             </tr>
@@ -231,16 +230,12 @@ If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel5TweakVAASLRzs13SignedNumericRzrlE9tweakName12defaultValue3min3max8stepSizeACyxGSS_xxSgA2Ktcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(tweakName:defaultValue:min:max:stepSize:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel5TweakVAASLRzs13SignedNumericRzrlE9tweakName12defaultValue3min3max8stepSizeACyxGSS_xxSgA2Ktcfc">init(tweakName:defaultValue:min:max:stepSize:)</a>
+                    <a name="/s:8Mixpanel5GroupC3set8property2toySS_AA0A4Type_ptF"></a>
+                    <a name="//apple_ref/swift/Method/set(property:to:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC3set8property2toySS_AA0A4Type_ptF">set(property:to:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -248,19 +243,17 @@ If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a Tweak<T> where T: SignedNumberType
-You can optionally provide a min / max / stepSize to restrict the bounds and behavior of a tweak.</p>
+                        <p>Convenience method for setting a single property in Mixpanel Groups.</p>
+
+<p>Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">tweakName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
-            <span class="n">defaultValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">,</span>
-            <span class="n">min</span> <span class="nv">minimumValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-            <span class="n">max</span> <span class="nv">maximumValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-            <span class="nv">stepSize</span><span class="p">:</span> <span class="kt">T</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">property</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">to</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -271,60 +264,24 @@ You can optionally provide a min / max / stepSize to restrict the bounds and beh
                             <tr>
                               <td>
                                 <code>
-                                <em>tweakName</em>
+                                <em>property</em>
                                 </code>
                               </td>
                               <td>
                                 <div>
-                                  <p>name of the tweak</p>
+                                  <p>property name</p>
                                 </div>
                               </td>
                             </tr>
                             <tr>
                               <td>
                                 <code>
-                                <em>defaultValue</em>
+                                <em>to</em>
                                 </code>
                               </td>
                               <td>
                                 <div>
-                                  <p>the default value set for the tweak</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>minimumValue</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>minimum value to allow for the tweak</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>maximumValue</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>maximum value to allow for the tweak</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>stepSize</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>step size for the tweak (do not set, optional)</p>
+                                  <p>property value</p>
                                 </div>
                               </td>
                             </tr>
@@ -334,16 +291,12 @@ You can optionally provide a min / max / stepSize to restrict the bounds and beh
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel5TweakV9hashValueSivp"></a>
-                    <a name="//apple_ref/swift/Property/hashValue" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel5TweakV9hashValueSivp">hashValue</a>
+                    <a name="/s:8Mixpanel5GroupC7setOnce10propertiesySDySSAA0A4Type_pG_tF"></a>
+                    <a name="//apple_ref/swift/Method/setOnce(properties:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC7setOnce10propertiesySDySSAA0A4Type_pG_tF">setOnce(properties:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -351,30 +304,50 @@ You can optionally provide a min / max / stepSize to restrict the bounds and beh
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Hashing for a Tweak for A/B Testing in order for it to be stored.</p>
+                        <p>Sets properties on the current Mixpanel Group, but doesn&rsquo;t overwrite if
+there is an existing value.</p>
+
+<p>This method is identical to <code>set:</code> except it will only set
+properties that are not already set. It is particularly useful for collecting
+data about dates representing the first time something happened.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">hashValue</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">setOnce</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">)</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>properties dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel16TweakClusterTypeP05tweakC0SayAA03AnyB0VGvp"></a>
-                    <a name="//apple_ref/swift/Property/tweakCluster" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel16TweakClusterTypeP05tweakC0SayAA03AnyB0VGvp">tweakCluster</a>
+                    <a name="/s:8Mixpanel5GroupC5unset8propertyySS_tF"></a>
+                    <a name="//apple_ref/swift/Method/unset(property:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC5unset8propertyySS_tF">unset(property:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -382,13 +355,159 @@ You can optionally provide a min / max / stepSize to restrict the bounds and beh
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        
+                        <p>Remove a property and its value from a group&rsquo;s profile in Mixpanel Groups.</p>
+
+<p>For properties that don&rsquo;t exist there will be no effect.</p>
+
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">tweakCluster</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Structs/AnyTweak.html">AnyTweak</a></span><span class="p">]</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">unset</span><span class="p">(</span><span class="nv">property</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>property</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>name of the property to unset</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel5GroupC6remove3key5valueySS_AA0A4Type_ptF"></a>
+                    <a name="//apple_ref/swift/Method/remove(key:value:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC6remove3key5valueySS_AA0A4Type_ptF">remove(key:value:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Removes list properties.</p>
+
+<p>Property keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">remove</span><span class="p">(</span><span class="nv">key</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">value</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>mapping of list property names to values to remove</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel5GroupC5union3key6valuesySS_SayAA0A4Type_pGtF"></a>
+                    <a name="//apple_ref/swift/Method/union(key:values:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC5union3key6valuesySS_SayAA0A4Type_pGtF">union(key:values:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Union list properties.</p>
+
+<p>Property values must be array objects.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">union</span><span class="p">(</span><span class="nv">key</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">values</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>mapping of list property names to lists to union</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel5GroupC06deleteB0yyF"></a>
+                    <a name="//apple_ref/swift/Method/deleteGroup()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC06deleteB0yyF">deleteGroup()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Delete group&rsquo;s record from Mixpanel Groups.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">deleteGroup</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>

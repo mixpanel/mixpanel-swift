@@ -14,7 +14,7 @@
     <a title="MixpanelInstance Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel Docs</a> (99% documented)</p>
+        <p><a href="../index.html">Mixpanel Docs</a> (91% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png"/>View on GitHub</a></p>
       </div>
     </header>
@@ -31,6 +31,9 @@
           <li class="nav-group-name">
             <a href="../Classes.html">Classes</a>
             <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/Group.html">Group</a>
+              </li>
               <li class="nav-group-task">
                 <a href="../Classes/Mixpanel.html">Mixpanel</a>
               </li>
@@ -82,9 +85,6 @@
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/NSNull.html">NSNull</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/NSString.html">NSString</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/String.html">String</a>
@@ -1225,6 +1225,109 @@ If the event is being timed, the timer will stop and be added as a property.</p>
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:8Mixpanel0A8InstanceC15trackWithGroups5event10properties6groupsySSSg_SDySSAA0A4Type_pGSgAKtF"></a>
+                    <a name="//apple_ref/swift/Method/trackWithGroups(event:properties:groups:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC15trackWithGroups5event10properties6groupsySSSg_SDySSAA0A4Type_pGSgAKtF">trackWithGroups(event:properties:groups:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Tracks an event with properties and to specific groups.
+Properties and groups are optional and can be added only if needed.</p>
+
+<p>Properties will allow you to segment your events in your Mixpanel reports.
+Property and group keys must be String objects and the supported value types need to conform to MixpanelType.
+MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
+If the event is being timed, the timer will stop and be added as a property.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">trackWithGroups</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">?,</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span> <span class="nv">groups</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>event</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>event name</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>properties dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>groups</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>groups dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A8InstanceC8getGroup8groupKey0E2IDAA0D0CSS_AA0A4Type_ptF"></a>
+                    <a name="//apple_ref/swift/Method/getGroup(groupKey:groupID:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8getGroup8groupKey0E2IDAA0D0CSS_AA0A4Type_ptF">getGroup(groupKey:groupID:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">getGroup</span><span class="p">(</span><span class="nv">groupKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">groupID</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/Group.html">Group</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:8Mixpanel0A8InstanceC4time5eventySS_tF"></a>
                     <a name="//apple_ref/swift/Method/time(event:)" class="dashAnchor"></a>
                     <a class="token" href="#/s:8Mixpanel0A8InstanceC4time5eventySS_tF">time(event:)</a>
@@ -1577,6 +1680,238 @@ registered.</p>
                               <td>
                                 <div>
                                   <p>array of property name strings to remove</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A8InstanceC8setGroup8groupKey0E2IDySS_AA0A4Type_ptF"></a>
+                    <a name="//apple_ref/swift/Method/setGroup(groupKey:groupID:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8setGroup8groupKey0E2IDySS_AA0A4Type_ptF">setGroup(groupKey:groupID:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Convenience method to set a single group the user belongs to.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">setGroup</span><span class="p">(</span><span class="nv">groupKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">groupID</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>groupKey</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The property name associated with this group type (must already have been set up).</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>groupID</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The group the user belongs to.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A8InstanceC8setGroup8groupKey0E3IDsySS_SayAA0A4Type_pGtF"></a>
+                    <a name="//apple_ref/swift/Method/setGroup(groupKey:groupIDs:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8setGroup8groupKey0E3IDsySS_SayAA0A4Type_pGtF">setGroup(groupKey:groupIDs:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Set the groups this user belongs to.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">setGroup</span><span class="p">(</span><span class="nv">groupKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">groupIDs</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>groupKey</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The property name associated with this group type (must already have been set up).</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>groupIDs</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The list of groups the user belongs to.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A8InstanceC8addGroup8groupKey0E2IDySS_AA0A4Type_ptF"></a>
+                    <a name="//apple_ref/swift/Method/addGroup(groupKey:groupID:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8addGroup8groupKey0E2IDySS_AA0A4Type_ptF">addGroup(groupKey:groupID:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Add a group to this user&rsquo;s membership for a particular group key</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">addGroup</span><span class="p">(</span><span class="nv">groupKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">groupID</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>groupKey</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The property name associated with this group type (must already have been set up).</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>groupID</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The new group the user belongs to.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A8InstanceC11removeGroup8groupKey0E2IDySS_AA0A4Type_ptF"></a>
+                    <a name="//apple_ref/swift/Method/removeGroup(groupKey:groupID:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11removeGroup8groupKey0E2IDySS_AA0A4Type_ptF">removeGroup(groupKey:groupID:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Remove a group from this user&rsquo;s membership for a particular group key</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">removeGroup</span><span class="p">(</span><span class="nv">groupKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">groupID</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>groupKey</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The property name associated with this group type (must already have been set up).</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>groupID</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The group value to remove.</p>
                                 </div>
                               </td>
                             </tr>
@@ -1953,7 +2288,7 @@ and join, any experiments are newly available for the current user.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2019-03-14)</p>
+          <p>&copy; 2019 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2019-03-22)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

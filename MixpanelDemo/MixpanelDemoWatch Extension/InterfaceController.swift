@@ -11,11 +11,14 @@ import Foundation
 import Mixpanel
 
 class InterfaceController: WKInterfaceController {
+    
+    
+    @IBOutlet weak var timeSomethingButton: WKInterfaceButton!
+    
+    var currentlyTiming = false
 
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
-        
-        // Configure interface objects here.
     }
     
     override func willActivate() {
@@ -24,17 +27,25 @@ class InterfaceController: WKInterfaceController {
     }
     
     @IBAction func trackButtonTapped() {
-        print("trackButtonTapped")
         Mixpanel.mainInstance().track(event: "trackButtonTapped")
     }
     
     
     @IBAction func timeButtonTapped() {
-        print("timeButtonTapped")
+        if !currentlyTiming {
+            Mixpanel.mainInstance().time(event: "time something")
+            timeSomethingButton.setTitle("Finish Timing")
+        } else {
+            Mixpanel.mainInstance().track(event: "time something")
+            timeSomethingButton.setTitle("Time Something")
+        }
+        currentlyTiming = !currentlyTiming
     }
     
     @IBAction func identifyButtonTapped() {
-        print("identifyButtonTapped")
+        let watchName = WKInterfaceDevice.current().systemName
+        Mixpanel.mainInstance().people.set(properties: ["watch": watchName])
+        Mixpanel.mainInstance().identify(distinctId: Mixpanel.mainInstance().distinctId)
     }
     
     override func didDeactivate() {

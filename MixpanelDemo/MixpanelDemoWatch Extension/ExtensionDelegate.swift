@@ -16,7 +16,7 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
         Mixpanel.initialize(token: "MIXPANEL_TOKEN")
         Mixpanel.mainInstance().loggingEnabled = true
-         Mixpanel.mainInstance().registerSuperProperties(["super watch": 1]);
+         Mixpanel.mainInstance().registerSuperProperties(["super watch properties": 1]);
         // Perform any final initialization of your application.
     }
 

@@ -33,6 +33,9 @@
                             </connections>
                         </button>
                     </items>
+                    <connections>
+                        <outlet property="timeSomethingButton" destination="dBb-vk-X8I" id="V2h-i2-Hd2"/>
+                    </connections>
                 </controller>
             </objects>
             <point key="canvasLocation" x="220" y="345"/>

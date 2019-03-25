@@ -250,7 +250,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var timedEvents = InternalProperties()
     var trackingQueue: DispatchQueue!
     var networkQueue: DispatchQueue!
-    var optOutStatus = false
+    var optOutStatus: Bool?
     let readWriteLock: ReadWriteLock
     #if os(iOS)
     var reachability: SCNetworkReachability?
@@ -317,8 +317,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         setupListeners()
         unarchive()
 
-        if optOutTrackingByDefault {
-            self.optOutTracking()
+        // check whether we should opt out by default
+        // note: we don't override opt out persistence here since opt-out default state is often
+        // used as an initial state while GDPR information is being collected
+        if optOutTrackingByDefault && (hasOptedOutTracking() || optOutStatus == nil) {
+            optOutTracking()
         }
 
         #if DECIDE
@@ -361,8 +364,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         flushInstance._flushInterval = flushInterval
         setupListeners()
         unarchive()
-        if optOutTrackingByDefault {
-            self.optOutTracking()
+        // check whether we should opt out by default
+        // note: we don't override opt out persistence here since opt-out default state is often
+        // used as an initial state while GDPR information is being collected
+        if optOutTrackingByDefault && (hasOptedOutTracking() || optOutStatus == nil) {
+            optOutTracking()
         }
     }
     #endif // os(OSX)
@@ -515,7 +521,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             return
         }
 
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             return
         }
 
@@ -744,7 +750,7 @@ extension MixpanelInstance {
                             This should only be set to false if you wish to prevent people profile updates for that user.
      */
     open func identify(distinctId: String, usePeople: Bool = true) {
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             return
         }
         if distinctId.isEmpty {
@@ -826,7 +832,7 @@ extension MixpanelInstance {
      This should only be set to false if you wish to prevent people profile updates for that user.
      */
     open func createAlias(_ alias: String, distinctId: String, usePeople: Bool = true) {
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             return
         }
         if distinctId.isEmpty {
@@ -1060,7 +1066,7 @@ extension MixpanelInstance {
     #endif // DECIDE
 
     func trackIntegration() {
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             return
         }
         let defaultsKey = "trackedKey"
@@ -1091,7 +1097,7 @@ extension MixpanelInstance {
      - parameter completion: an optional completion handler for when the flush has completed.
      */
     open func flush(completion: (() -> Void)? = nil) {
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
             }
@@ -1161,7 +1167,7 @@ extension MixpanelInstance {
      - parameter properties: properties dictionary
      */
     open func track(event: String?, properties: Properties? = nil) {
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             return
         }
         let epochInterval = Date().timeIntervalSince1970
@@ -1207,7 +1213,7 @@ extension MixpanelInstance {
      - parameter groups:     groups dictionary
      */
     open func trackWithGroups(event: String?, properties: Properties? = nil, groups: Properties?) {
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             return
         }
 
@@ -1260,7 +1266,7 @@ extension MixpanelInstance {
     
     func trackPushNotification(_ userInfo: [AnyHashable: Any],
                                       event: String = "$campaign_received") {
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             return
         }
         if let mpPayload = userInfo["mp"] as? InternalProperties {
@@ -1442,7 +1448,7 @@ extension MixpanelInstance {
      - parameter groupID: The group the user belongs to.
      */
     open func setGroup(groupKey: String, groupID: MixpanelType) {
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             return
         }
 
@@ -1456,7 +1462,7 @@ extension MixpanelInstance {
      - parameter groupIDs: The list of groups the user belongs to.
      */
     open func setGroup(groupKey: String, groupIDs: [MixpanelType]) {
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             return
         }
 
@@ -1472,7 +1478,7 @@ extension MixpanelInstance {
      - parameter groupID: The new group the user belongs to.
      */
     open func addGroup(groupKey: String, groupID: MixpanelType) {
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             return
         }
 
@@ -1505,7 +1511,7 @@ extension MixpanelInstance {
      - parameter groupID: The group value to remove.
      */
     open func removeGroup(groupKey: String, groupID: MixpanelType) {
-        if self.hasOptedOutTracking() {
+        if hasOptedOutTracking() {
             return
         }
 
@@ -1576,7 +1582,7 @@ extension MixpanelInstance {
         }
 
         optOutStatus = true
-        Persistence.archiveOptOutStatus(optOutStatus, token: apiToken)
+        Persistence.archiveOptOutStatus(optOutStatus!, token: apiToken)
     }
 
     /**
@@ -1592,7 +1598,7 @@ extension MixpanelInstance {
      */
     open func optInTracking(distinctId: String? = nil, properties: Properties? = nil) {
         optOutStatus = false
-        Persistence.archiveOptOutStatus(optOutStatus, token: apiToken)
+        Persistence.archiveOptOutStatus(optOutStatus!, token: apiToken)
 
         if let distinctId = distinctId {
             identify(distinctId: distinctId)
@@ -1606,7 +1612,7 @@ extension MixpanelInstance {
      - returns: the current super opted out tracking status
      */
     open func hasOptedOutTracking() -> Bool {
-        return optOutStatus
+        return optOutStatus ?? false
     }
 
     func dispatchAndTrack(closure: @escaping () -> Void) {

@@ -190,7 +190,7 @@ class Persistence {
                                             shownNotifications: Set<Int>,
                                             codelessBindings: Set<CodelessBinding>,
                                             variants: Set<Variant>,
-                                            optOutStatus: Bool,
+                                            optOutStatus: Bool?,
                                             automaticEventsEnabled: Bool?) {
         let eventsQueue = unarchiveEvents(token: token)
         let peopleQueue = unarchivePeople(token: token)
@@ -310,9 +310,8 @@ class Persistence {
         return data as? Queue ?? []
     }
 
-    class private func unarchiveOptOutStatus(token: String) -> Bool {
-        let data = unarchiveWithType(.optOutStatus, token: token) as? Bool
-        return data ?? false
+    class private func unarchiveOptOutStatus(token: String) -> Bool? {
+        return unarchiveWithType(.optOutStatus, token: token) as? Bool
     }
 
     #if DECIDE

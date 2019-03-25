@@ -24,8 +24,16 @@
 		86F86EA122440C5F00B69832 /* NotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F86EA022440C5F00B69832 /* NotificationController.swift */; };
 		86F86EA322440C6000B69832 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 86F86EA222440C6000B69832 /* Assets.xcassets */; };
 		86F86EA822440C6000B69832 /* MixpanelDemoWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 86F86E8B22440C5C00B69832 /* MixpanelDemoWatch.app */; };
-		86F86ECC22443D8B00B69832 /* Mixpanel_watchOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86F86EB122440C6000B69832 /* Mixpanel_watchOS.framework */; };
-		86F86ECD22443D8B00B69832 /* Mixpanel_watchOS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 86F86EB122440C6000B69832 /* Mixpanel_watchOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		86F86ECC22443D8B00B69832 /* Mixpanel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86F86EB122440C6000B69832 /* Mixpanel.framework */; };
+		86F86ECD22443D8B00B69832 /* Mixpanel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 86F86EB122440C6000B69832 /* Mixpanel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		86F86F0422460B3000B69832 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F86F0322460B3000B69832 /* AppDelegate.swift */; };
+		86F86F0622460B3000B69832 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F86F0522460B3000B69832 /* ViewController.swift */; };
+		86F86F0922460B3000B69832 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 86F86F0722460B3000B69832 /* Main.storyboard */; };
+		86F86F0B22460B3200B69832 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 86F86F0A22460B3200B69832 /* Assets.xcassets */; };
+		86F86F1622460B3200B69832 /* MixpanelDemoTVTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F86F1522460B3200B69832 /* MixpanelDemoTVTests.swift */; };
+		86F86F2122460B3300B69832 /* MixpanelDemoTVUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F86F2022460B3300B69832 /* MixpanelDemoTVUITests.swift */; };
+		86F86F2E22460B4F00B69832 /* Mixpanel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E16C35E41D872045003500AC /* Mixpanel.framework */; };
+		86F86F2F22460B4F00B69832 /* Mixpanel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E16C35E41D872045003500AC /* Mixpanel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E1016E361D3D46DF00075BB7 /* ActionCompleteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1016E351D3D46DF00075BB7 /* ActionCompleteViewController.swift */; };
 		E12406201D249B2500383635 /* MixpanelBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E124061F1D249B2500383635 /* MixpanelBaseTests.swift */; };
 		E12BD0371D89FE6A008989C9 /* MixpanelCodelessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */; };
@@ -81,6 +89,27 @@
 			proxyType = 1;
 			remoteGlobalIDString = 86F86E80224404BD00B69832;
 			remoteInfo = Mixpanel_watchOS;
+		};
+		86F86F1222460B3200B69832 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15FF7CB1D0461130076CDE3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 86F86F0022460B3000B69832;
+			remoteInfo = MixpanelDemoTV;
+		};
+		86F86F1D22460B3200B69832 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15FF7CB1D0461130076CDE3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 86F86F0022460B3000B69832;
+			remoteInfo = MixpanelDemoTV;
+		};
+		86F86F3022460B4F00B69832 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = E12782B21D4AB4B30025FB05;
+			remoteInfo = Mixpanel_tvOS;
 		};
 		E12CE4151E9E1C370023AA2D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -148,7 +177,18 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				86F86ECD22443D8B00B69832 /* Mixpanel_watchOS.framework in Embed Frameworks */,
+				86F86ECD22443D8B00B69832 /* Mixpanel.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86F86F3222460B4F00B69832 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				86F86F2F22460B4F00B69832 /* Mixpanel.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -188,6 +228,18 @@
 		86F86EA222440C6000B69832 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		86F86EA422440C6000B69832 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		86F86EA522440C6000B69832 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
+		86F86F0122460B3000B69832 /* MixpanelDemoTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MixpanelDemoTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		86F86F0322460B3000B69832 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		86F86F0522460B3000B69832 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		86F86F0822460B3000B69832 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		86F86F0A22460B3200B69832 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		86F86F0C22460B3200B69832 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		86F86F1122460B3200B69832 /* MixpanelDemoTVTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MixpanelDemoTVTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		86F86F1522460B3200B69832 /* MixpanelDemoTVTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelDemoTVTests.swift; sourceTree = "<group>"; };
+		86F86F1722460B3200B69832 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		86F86F1C22460B3200B69832 /* MixpanelDemoTVUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MixpanelDemoTVUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		86F86F2022460B3300B69832 /* MixpanelDemoTVUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelDemoTVUITests.swift; sourceTree = "<group>"; };
+		86F86F2222460B3300B69832 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9233A000BB35A654EEC9A9D6 /* Pods-MixpanelDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MixpanelDemoTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		E1016E351D3D46DF00075BB7 /* ActionCompleteViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionCompleteViewController.swift; sourceTree = "<group>"; };
 		E124061F1D249B2500383635 /* MixpanelBaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelBaseTests.swift; sourceTree = "<group>"; };
@@ -225,7 +277,29 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				86F86ECC22443D8B00B69832 /* Mixpanel_watchOS.framework in Frameworks */,
+				86F86ECC22443D8B00B69832 /* Mixpanel.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86F86EFE22460B3000B69832 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86F86F2E22460B4F00B69832 /* Mixpanel.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86F86F0E22460B3200B69832 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86F86F1922460B3200B69832 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -292,6 +366,36 @@
 			path = "MixpanelDemoWatch Extension";
 			sourceTree = "<group>";
 		};
+		86F86F0222460B3000B69832 /* MixpanelDemoTV */ = {
+			isa = PBXGroup;
+			children = (
+				86F86F0322460B3000B69832 /* AppDelegate.swift */,
+				86F86F0522460B3000B69832 /* ViewController.swift */,
+				86F86F0722460B3000B69832 /* Main.storyboard */,
+				86F86F0A22460B3200B69832 /* Assets.xcassets */,
+				86F86F0C22460B3200B69832 /* Info.plist */,
+			);
+			path = MixpanelDemoTV;
+			sourceTree = "<group>";
+		};
+		86F86F1422460B3200B69832 /* MixpanelDemoTVTests */ = {
+			isa = PBXGroup;
+			children = (
+				86F86F1522460B3200B69832 /* MixpanelDemoTVTests.swift */,
+				86F86F1722460B3200B69832 /* Info.plist */,
+			);
+			path = MixpanelDemoTVTests;
+			sourceTree = "<group>";
+		};
+		86F86F1F22460B3200B69832 /* MixpanelDemoTVUITests */ = {
+			isa = PBXGroup;
+			children = (
+				86F86F2022460B3300B69832 /* MixpanelDemoTVUITests.swift */,
+				86F86F2222460B3300B69832 /* Info.plist */,
+			);
+			path = MixpanelDemoTVUITests;
+			sourceTree = "<group>";
+		};
 		E12BD03A1D8A14D6008989C9 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -323,6 +427,9 @@
 				E15FF7EA1D0461130076CDE3 /* MixpanelDemoTests */,
 				86F86E8C22440C5C00B69832 /* MixpanelDemoWatch */,
 				86F86E9B22440C5F00B69832 /* MixpanelDemoWatch Extension */,
+				86F86F0222460B3000B69832 /* MixpanelDemoTV */,
+				86F86F1422460B3200B69832 /* MixpanelDemoTVTests */,
+				86F86F1F22460B3200B69832 /* MixpanelDemoTVUITests */,
 				E15FF7D41D0461130076CDE3 /* Products */,
 				28127E0746D6CC818BA7B834 /* Pods */,
 				773080F90ECB3A0D67A6E636 /* Frameworks */,
@@ -336,6 +443,9 @@
 				E15FF7E71D0461130076CDE3 /* MixpanelDemoTests.xctest */,
 				86F86E8B22440C5C00B69832 /* MixpanelDemoWatch.app */,
 				86F86E9722440C5F00B69832 /* MixpanelDemoWatch Extension.appex */,
+				86F86F0122460B3000B69832 /* MixpanelDemoTV.app */,
+				86F86F1122460B3200B69832 /* MixpanelDemoTVTests.xctest */,
+				86F86F1C22460B3200B69832 /* MixpanelDemoTVUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -385,7 +495,7 @@
 				E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */,
 				E16C35E41D872045003500AC /* Mixpanel.framework */,
 				E12CE4161E9E1C370023AA2D /* Mixpanel.framework */,
-				86F86EB122440C6000B69832 /* Mixpanel_watchOS.framework */,
+				86F86EB122440C6000B69832 /* Mixpanel.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -428,6 +538,61 @@
 			productName = "MixpanelDemoWatch Extension";
 			productReference = 86F86E9722440C5F00B69832 /* MixpanelDemoWatch Extension.appex */;
 			productType = "com.apple.product-type.watchkit2-extension";
+		};
+		86F86F0022460B3000B69832 /* MixpanelDemoTV */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 86F86F2B22460B3300B69832 /* Build configuration list for PBXNativeTarget "MixpanelDemoTV" */;
+			buildPhases = (
+				86F86EFD22460B3000B69832 /* Sources */,
+				86F86EFE22460B3000B69832 /* Frameworks */,
+				86F86EFF22460B3000B69832 /* Resources */,
+				86F86F3222460B4F00B69832 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				86F86F3122460B4F00B69832 /* PBXTargetDependency */,
+			);
+			name = MixpanelDemoTV;
+			productName = MixpanelDemoTV;
+			productReference = 86F86F0122460B3000B69832 /* MixpanelDemoTV.app */;
+			productType = "com.apple.product-type.application";
+		};
+		86F86F1022460B3200B69832 /* MixpanelDemoTVTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 86F86F2C22460B3300B69832 /* Build configuration list for PBXNativeTarget "MixpanelDemoTVTests" */;
+			buildPhases = (
+				86F86F0D22460B3200B69832 /* Sources */,
+				86F86F0E22460B3200B69832 /* Frameworks */,
+				86F86F0F22460B3200B69832 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				86F86F1322460B3200B69832 /* PBXTargetDependency */,
+			);
+			name = MixpanelDemoTVTests;
+			productName = MixpanelDemoTVTests;
+			productReference = 86F86F1122460B3200B69832 /* MixpanelDemoTVTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		86F86F1B22460B3200B69832 /* MixpanelDemoTVUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 86F86F2D22460B3300B69832 /* Build configuration list for PBXNativeTarget "MixpanelDemoTVUITests" */;
+			buildPhases = (
+				86F86F1822460B3200B69832 /* Sources */,
+				86F86F1922460B3200B69832 /* Frameworks */,
+				86F86F1A22460B3200B69832 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				86F86F1E22460B3200B69832 /* PBXTargetDependency */,
+			);
+			name = MixpanelDemoTVUITests;
+			productName = MixpanelDemoTVUITests;
+			productReference = 86F86F1C22460B3200B69832 /* MixpanelDemoTVUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		E15FF7D21D0461130076CDE3 /* MixpanelDemo */ = {
 			isa = PBXNativeTarget;
@@ -490,6 +655,23 @@
 						DevelopmentTeam = E8FVX7QLET;
 						ProvisioningStyle = Automatic;
 					};
+					86F86F0022460B3000B69832 = {
+						CreatedOnToolsVersion = 10.1;
+						DevelopmentTeam = E8FVX7QLET;
+						ProvisioningStyle = Automatic;
+					};
+					86F86F1022460B3200B69832 = {
+						CreatedOnToolsVersion = 10.1;
+						DevelopmentTeam = E8FVX7QLET;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 86F86F0022460B3000B69832;
+					};
+					86F86F1B22460B3200B69832 = {
+						CreatedOnToolsVersion = 10.1;
+						DevelopmentTeam = E8FVX7QLET;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 86F86F0022460B3000B69832;
+					};
 					E15FF7D21D0461130076CDE3 = {
 						CreatedOnToolsVersion = 7.3.1;
 						DevelopmentTeam = E8FVX7QLET;
@@ -538,15 +720,18 @@
 				E15FF7E61D0461130076CDE3 /* MixpanelDemoTests */,
 				86F86E8A22440C5C00B69832 /* MixpanelDemoWatch */,
 				86F86E9622440C5F00B69832 /* MixpanelDemoWatch Extension */,
+				86F86F0022460B3000B69832 /* MixpanelDemoTV */,
+				86F86F1022460B3200B69832 /* MixpanelDemoTVTests */,
+				86F86F1B22460B3200B69832 /* MixpanelDemoTVUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		86F86EB122440C6000B69832 /* Mixpanel_watchOS.framework */ = {
+		86F86EB122440C6000B69832 /* Mixpanel.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			path = Mixpanel_watchOS.framework;
+			path = Mixpanel.framework;
 			remoteRef = 86F86EB022440C6000B69832 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -588,6 +773,29 @@
 			buildActionMask = 2147483647;
 			files = (
 				86F86EA322440C6000B69832 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86F86EFF22460B3000B69832 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86F86F0B22460B3200B69832 /* Assets.xcassets in Resources */,
+				86F86F0922460B3000B69832 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86F86F0F22460B3200B69832 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86F86F1A22460B3200B69832 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -665,6 +873,31 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		86F86EFD22460B3000B69832 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86F86F0622460B3000B69832 /* ViewController.swift in Sources */,
+				86F86F0422460B3000B69832 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86F86F0D22460B3200B69832 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86F86F1622460B3200B69832 /* MixpanelDemoTVTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86F86F1822460B3200B69832 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86F86F2122460B3300B69832 /* MixpanelDemoTVUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E15FF7CF1D0461130076CDE3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -718,6 +951,21 @@
 			name = Mixpanel_watchOS;
 			targetProxy = 86F86ECE22443D8B00B69832 /* PBXContainerItemProxy */;
 		};
+		86F86F1322460B3200B69832 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 86F86F0022460B3000B69832 /* MixpanelDemoTV */;
+			targetProxy = 86F86F1222460B3200B69832 /* PBXContainerItemProxy */;
+		};
+		86F86F1E22460B3200B69832 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 86F86F0022460B3000B69832 /* MixpanelDemoTV */;
+			targetProxy = 86F86F1D22460B3200B69832 /* PBXContainerItemProxy */;
+		};
+		86F86F3122460B4F00B69832 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Mixpanel_tvOS;
+			targetProxy = 86F86F3022460B4F00B69832 /* PBXContainerItemProxy */;
+		};
 		E15FF7E91D0461130076CDE3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E15FF7D21D0461130076CDE3 /* MixpanelDemo */;
@@ -737,6 +985,14 @@
 				86F86E8E22440C5C00B69832 /* Base */,
 			);
 			name = Interface.storyboard;
+			sourceTree = "<group>";
+		};
+		86F86F0722460B3000B69832 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				86F86F0822460B3000B69832 /* Base */,
+			);
+			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
 		E15FF7DA1D0461130076CDE3 /* Main.storyboard */ = {
@@ -863,6 +1119,167 @@
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 4;
 				WATCHOS_DEPLOYMENT_TARGET = 5.1;
+			};
+			name = Release;
+		};
+		86F86F2322460B3300B69832 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = E8FVX7QLET;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = MixpanelDemoTV/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.MixpanelDemoTV;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 12.1;
+			};
+			name = Debug;
+		};
+		86F86F2422460B3300B69832 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = E8FVX7QLET;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = MixpanelDemoTV/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.MixpanelDemoTV;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 12.1;
+			};
+			name = Release;
+		};
+		86F86F2522460B3300B69832 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = E8FVX7QLET;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = MixpanelDemoTVTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.MixpanelDemoTVTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = 3;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MixpanelDemoTV.app/MixpanelDemoTV";
+				TVOS_DEPLOYMENT_TARGET = 12.1;
+			};
+			name = Debug;
+		};
+		86F86F2622460B3300B69832 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = E8FVX7QLET;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = MixpanelDemoTVTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.MixpanelDemoTVTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = 3;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MixpanelDemoTV.app/MixpanelDemoTV";
+				TVOS_DEPLOYMENT_TARGET = 12.1;
+			};
+			name = Release;
+		};
+		86F86F2722460B3300B69832 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = E8FVX7QLET;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = MixpanelDemoTVUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.MixpanelDemoTVUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = 3;
+				TEST_TARGET_NAME = MixpanelDemoTV;
+				TVOS_DEPLOYMENT_TARGET = 12.1;
+			};
+			name = Debug;
+		};
+		86F86F2822460B3300B69832 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = E8FVX7QLET;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = MixpanelDemoTVUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.MixpanelDemoTVUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = 3;
+				TEST_TARGET_NAME = MixpanelDemoTV;
+				TVOS_DEPLOYMENT_TARGET = 12.1;
 			};
 			name = Release;
 		};
@@ -1083,6 +1500,33 @@
 			buildConfigurations = (
 				86F86EA922440C6000B69832 /* Debug */,
 				86F86EAA22440C6000B69832 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		86F86F2B22460B3300B69832 /* Build configuration list for PBXNativeTarget "MixpanelDemoTV" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				86F86F2322460B3300B69832 /* Debug */,
+				86F86F2422460B3300B69832 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		86F86F2C22460B3300B69832 /* Build configuration list for PBXNativeTarget "MixpanelDemoTVTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				86F86F2522460B3300B69832 /* Debug */,
+				86F86F2622460B3300B69832 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		86F86F2D22460B3300B69832 /* Build configuration list for PBXNativeTarget "MixpanelDemoTVUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				86F86F2722460B3300B69832 /* Debug */,
+				86F86F2822460B3300B69832 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -34,7 +34,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
         self.lock = lock
     }
 
-    func showNotification(event: String?, properties: Properties? = nil) {
+    func showNotification(event: String?, properties: InternalProperties) {
         for triggeredNotification in triggeredNotifications {
             if (triggeredNotification.matchesEvent(event: event, properties: properties)) {
                 showNotification(triggeredNotification)

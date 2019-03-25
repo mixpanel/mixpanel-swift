@@ -23,7 +23,7 @@ class InAppNotificationTest : XCTestCase {
         XCTAssertNotNil(inapp?.payload()["display_triggers"] as? [Any])
         XCTAssertNotNil(inappWithoutTriggers?.payload()["display_triggers"] as? [Any])
         
-        XCTAssertFalse(inappWithoutTriggers!.matchesEvent(event: "test_event_1", properties: nil))
+        XCTAssertFalse(inappWithoutTriggers!.matchesEvent(event: "test_event_1", properties: InternalProperties()))
         XCTAssertTrue(inapp!.matchesEvent(event: "test_event_1", properties: ["created_at": Date()]))
         XCTAssertFalse(inapp!.matchesEvent(event: "test_event_1", properties: ["created_at": Date().addingTimeInterval(2*60*60)]))
         XCTAssertFalse(inapp!.matchesEvent(event: "test_event_1", properties: ["city": "San Francisco"]))

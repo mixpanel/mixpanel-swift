@@ -24,7 +24,7 @@ class Track {
         self.lock = lock
         self.metadata = metadata
     }
-
+    
     func track(event: String?,
                properties: Properties? = nil,
                eventsQueue: inout Queue,
@@ -34,13 +34,12 @@ class Track {
                anonymousId: String?,
                userId: String?,
                hadPersistedDistinctId: Bool?,
-               epochInterval: Double) {
+               epochInterval: Double) -> InternalProperties {
         var ev = event
         if ev == nil || ev!.isEmpty {
             Logger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")
             ev = "mp_event"
         }
-
         assertPropertyTypes(properties)
         let epochSeconds = Int(round(epochInterval))
         let eventStartTime = timedEvents[ev!] as? Double
@@ -58,10 +57,10 @@ class Track {
         }
         p["distinct_id"] = distinctId
         if anonymousId != nil {
-          p["$device_id"] = anonymousId
+            p["$device_id"] = anonymousId
         }
         if userId != nil {
-          p["$user_id"] = userId
+            p["$user_id"] = userId
         }
         if hadPersistedDistinctId != nil  {
             p["$had_persisted_distinct_id"] = hadPersistedDistinctId
@@ -74,14 +73,15 @@ class Track {
 
         var trackEvent: InternalProperties = ["event": ev!, "properties": p]
         metadata.toDict().forEach { (k,v) in trackEvent[k] = v }
-
+        
         self.lock.write {
             eventsQueue.append(trackEvent)
             if eventsQueue.count > QueueConstants.queueSize {
                 eventsQueue.remove(at: 0)
             }
         }
-
+        
+        return p
     }
 
     func registerSuperProperties(_ properties: Properties, superProperties: inout InternalProperties) {

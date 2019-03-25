@@ -1177,27 +1177,26 @@ extension MixpanelInstance {
         let epochInterval = Date().timeIntervalSince1970
         trackingQueue.async { [weak self, event, properties, epochInterval] in
             guard let self = self else { return }
-            
-            self.trackInstance.track(event: event,
-                                     properties: properties,
-                                     eventsQueue: &self.eventsQueue,
-                                     timedEvents: &self.timedEvents,
-                                     superProperties: self.superProperties,
-                                     distinctId: self.distinctId,
-                                     anonymousId: self.anonymousId,
-                                     userId: self.userId,
-                                     hadPersistedDistinctId: self.hadPersistedDistinctId,
-                                     epochInterval: epochInterval)
+
+            let mergedProperties = self.trackInstance.track(event: event,
+                                        properties: properties,
+                                        eventsQueue: &self.eventsQueue,
+                                        timedEvents: &self.timedEvents,
+                                        superProperties: self.superProperties,
+                                        distinctId: self.distinctId,
+                                        anonymousId: self.anonymousId,
+                                        userId: self.userId,
+                                        hadPersistedDistinctId: self.hadPersistedDistinctId,
+                                        epochInterval: epochInterval)
+
             self.readWriteLock.read {
                 Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
             }
+            #if DECIDE
+            self.decideInstance.notificationsInstance.showNotification(event: event, properties: mergedProperties)
+            #endif  // DECIDE
         }
-
-        #if DECIDE
         
-        self.decideInstance.notificationsInstance.showNotification(event: event, properties: properties)
-        
-        #endif  // DECIDE
         if MixpanelInstance.isiOSAppExtension() {
             flush()
         }

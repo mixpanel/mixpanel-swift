@@ -38,7 +38,7 @@ class AutomaticProperties {
         p["$os"]                = "macOS"
         p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
 
-        #else
+        #elseif WATCH_OS
         let watchDevice = WKInterfaceDevice.current()
         p["$os"]                = watchDevice.systemName
         p["$os_version"]        = watchDevice.systemVersion

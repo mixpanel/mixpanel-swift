@@ -26,6 +26,9 @@
                                 <rect key="frame" x="1298" y="324" width="432" height="432"/>
                                 <inset key="contentEdgeInsets" minX="40" minY="20" maxX="40" maxY="20"/>
                                 <state key="normal" title="People"/>
+                                <connections>
+                                    <action selector="peopleClicked:" destination="BYZ-38-t0r" eventType="primaryActionTriggered" id="wvY-cp-kKQ"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0kY-ru-DRg">
                                 <rect key="frame" x="190" y="324" width="432" height="432"/>
@@ -34,11 +37,17 @@
                                 </constraints>
                                 <inset key="contentEdgeInsets" minX="40" minY="20" maxX="40" maxY="20"/>
                                 <state key="normal" title="Time Event"/>
+                                <connections>
+                                    <action selector="timeEventClicked:" destination="BYZ-38-t0r" eventType="primaryActionTriggered" id="5oT-jl-zIb"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ajg-5f-Ssi">
                                 <rect key="frame" x="744" y="324" width="432" height="432"/>
                                 <inset key="contentEdgeInsets" minX="40" minY="20" maxX="40" maxY="20"/>
                                 <state key="normal" title="Track"/>
+                                <connections>
+                                    <action selector="TrackEventClicked:" destination="BYZ-38-t0r" eventType="primaryActionTriggered" id="MR4-d1-rDT"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
@@ -50,6 +59,8 @@
                             <constraint firstItem="Ajg-5f-Ssi" firstAttribute="centerY" secondItem="0kY-ru-DRg" secondAttribute="centerY" id="Kgi-M8-fmi"/>
                             <constraint firstItem="8EN-q4-Pdn" firstAttribute="centerY" secondItem="Ajg-5f-Ssi" secondAttribute="centerY" id="V51-tK-gRy"/>
                             <constraint firstItem="0kY-ru-DRg" firstAttribute="leading" secondItem="wu6-TO-1qx" secondAttribute="leading" constant="100" id="Vra-YC-jIs"/>
+                            <constraint firstItem="8EN-q4-Pdn" firstAttribute="leading" relation="lessThanOrEqual" secondItem="Ajg-5f-Ssi" secondAttribute="trailing" constant="122" id="bFL-PO-gbc"/>
+                            <constraint firstItem="Ajg-5f-Ssi" firstAttribute="leading" relation="lessThanOrEqual" secondItem="0kY-ru-DRg" secondAttribute="trailing" constant="122" id="c9h-Ep-5yv"/>
                             <constraint firstItem="wu6-TO-1qx" firstAttribute="trailing" secondItem="8EN-q4-Pdn" secondAttribute="trailing" constant="100" id="fgx-an-XTD"/>
                             <constraint firstItem="Ajg-5f-Ssi" firstAttribute="width" secondItem="0kY-ru-DRg" secondAttribute="width" id="hlV-eP-VLx"/>
                             <constraint firstItem="Ajg-5f-Ssi" firstAttribute="centerX" secondItem="wu6-TO-1qx" secondAttribute="centerX" id="irl-kx-Tt8"/>

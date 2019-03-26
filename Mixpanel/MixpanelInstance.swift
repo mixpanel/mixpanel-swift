@@ -266,6 +266,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let decideInstance: Decide
     let automaticEvents = AutomaticEvents()
     let connectIntegrations = ConnectIntegrations()
+    #elseif AUTO_TV_EVENTS
+        let automaticEvents = AutomaticEvents()
     #endif // DECIDE
 
     #if !os(OSX) && !WATCH_OS
@@ -320,12 +322,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if optOutTrackingByDefault {
             self.optOutTracking()
         }
-
-        #if DECIDE
+        
+        #if DECIDE || AUTO_TV_EVENTS
             if !MixpanelInstance.isiOSAppExtension() {
                 automaticEvents.delegate = self
                 automaticEvents.automaticPushTracking = automaticPushTracking
                 automaticEvents.initializeEvents()
+                #if DECIDE
                 decideInstance.inAppDelegate = self
                 executeCachedVariants()
                 executeCachedCodelessBindings()
@@ -333,8 +336,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
                     trackPushNotification(notification, event: "$app_open")
                 }
+                #endif
             }
+            #if DECIDE
             connectIntegrations.mixpanel = self
+            #endif
         #endif // DECIDE
     }
     #else
@@ -1114,12 +1120,14 @@ extension MixpanelInstance {
                 }
 
                 #if DECIDE
-                self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
-                                                    automaticEventsEnabled: self.decideInstance.automaticEventsEnabled)
+                let automaticEventsEnabled = self.decideInstance.automaticEventsEnabled
+                #elseif AUTO_TV_EVENTS
+                let automaticEventsEnabled = true
                 #else
-                self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
-                                                    automaticEventsEnabled: false)
+                let automaticEventsEnabled = false
                 #endif
+                self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
+                                                    automaticEventsEnabled: automaticEventsEnabled)
                 self.flushInstance.flushPeopleQueue(&self.people.flushPeopleQueue)
                 self.flushInstance.flushGroupsQueue(&self.flushGroupsQueue)
 
@@ -1643,7 +1651,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
             }
         }
     }
-
+    
     // MARK: - WebSocket
     func connectToWebSocket() {
         decideInstance.connectToWebSocket(token: apiToken, mixpanelInstance: self)

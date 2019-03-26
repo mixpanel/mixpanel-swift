@@ -48,6 +48,20 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         XCTAssertTrue(self.mixpanel.eventsQueue.count == 0, "When initialize with opted out flag set to YES, no event should be queued")
     }
 
+    func testAutoTrackEventsShouldBeQueuedDuringInitializedWithOptedOutYESAndOptInLater()
+    {
+        let launchOptions = [UIApplication.LaunchOptionsKey.remoteNotification:
+            ["mp":["m":"the_message_id","c": "the_campaign_id",
+                   "journey_id": 123456]
+            ]]
+        let tokenId = randomId()
+        mixpanel = Mixpanel.initialize(token: tokenId, launchOptions: launchOptions, optOutTrackingByDefault: true)
+        mixpanel.optInTracking()
+        mixpanel = Mixpanel.initialize(token: tokenId, launchOptions: launchOptions, optOutTrackingByDefault: true)
+        waitForMixpanelQueues()
+        XCTAssertTrue(self.mixpanel.eventsQueue.count == 1, "When initialize with opted out flag set to YES, event should be queued")
+    }
+    
     func testAutoTrackShouldBeTriggeredDuringInitializedWithOptedOutNO()
     {
         let launchOptions = [UIApplication.LaunchOptionsKey.remoteNotification:

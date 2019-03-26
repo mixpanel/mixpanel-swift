@@ -12,6 +12,9 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '8.0'
   s.ios.resources = ['Mixpanel/**/*.{png,xib,storyboard}']
   s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
+  s.ios.pod_target_xcconfig = {
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) IOS'
+  }
   s.default_subspec = 'Complete'
   base_source_files = ['Mixpanel/Network.swift', 'Mixpanel/FlushRequest.swift', 'Mixpanel/PrintLogging.swift', 'Mixpanel/FileLogging.swift',
     'Mixpanel/Logger.swift', 'Mixpanel/JSONHandler.swift', 'Mixpanel/Error.swift', 'Mixpanel/AutomaticProperties.swift',
@@ -22,12 +25,18 @@ Pod::Spec.new do |s|
   s.tvos.deployment_target = '9.0'
   s.tvos.frameworks = 'UIKit', 'Foundation'
   s.tvos.pod_target_xcconfig = {
-    'OTHER_SWIFT_FLAGS' => '$(inherited) -D TV_OS'
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) TV_OS TV_AUTO_EVENTS'
   }
   s.osx.deployment_target = '10.10'
   s.osx.frameworks = 'Cocoa', 'Foundation'
   s.osx.pod_target_xcconfig = {
-    'OTHER_SWIFT_FLAGS' => '$(inherited) -D MAC_OS'
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) MAC_OS'
+  }
+
+  s.watchos.deployment_target = '3.0'
+  s.watchos.frameworks = 'WatchKit', 'Foundation'
+  s.watchos.pod_target_xcconfig = {
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) WATCH_OS'
   }
 
   s.subspec 'Complete' do |ss|
@@ -37,11 +46,13 @@ Pod::Spec.new do |s|
     ss.ios.source_files = ['Mixpanel/*.swift', 'Mixpanel/ExceptionWrapper.m', 'Mixpanel/ExceptionWrapper.h', 'Mixpanel/Mixpanel.h']
     ss.tvos.source_files = base_source_files
     ss.osx.source_files = base_source_files
+    ss.watchos.source_files = base_source_files
   end
 
   s.subspec 'Core' do |ss|
     ss.ios.source_files = base_source_files
     ss.tvos.source_files = base_source_files
     ss.osx.source_files = base_source_files
+    ss.watchos.source_files = base_source_files
   end
 end

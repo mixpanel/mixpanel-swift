@@ -18,7 +18,7 @@ import SystemConfiguration
 
 #if os(iOS)
 import CoreTelephony
-#endif // os(iOS
+#endif // os(iOS)
 
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
@@ -256,7 +256,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var reachability: SCNetworkReachability?
     let telephonyInfo = CTTelephonyNetworkInfo()
     #endif
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     var taskId = UIBackgroundTaskIdentifier.invalid
     #endif // os(OSX)
     let sessionMetadata: SessionMetadata
@@ -266,9 +266,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let decideInstance: Decide
     let automaticEvents = AutomaticEvents()
     let connectIntegrations = ConnectIntegrations()
+    #elseif TV_AUTO_EVENTS
+        let automaticEvents = AutomaticEvents()
     #endif // DECIDE
 
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     init(apiToken: String?, launchOptions: [UIApplication.LaunchOptionsKey : Any]?, flushInterval: Double, name: String, automaticPushTracking: Bool = true, optOutTrackingByDefault: Bool = false) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
@@ -323,12 +325,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if optOutTrackingByDefault && (hasOptedOutTracking() || optOutStatus == nil) {
             optOutTracking()
         }
-
-        #if DECIDE
+        
+        #if DECIDE || TV_AUTO_EVENTS
             if !MixpanelInstance.isiOSAppExtension() {
                 automaticEvents.delegate = self
                 automaticEvents.automaticPushTracking = automaticPushTracking
                 automaticEvents.initializeEvents()
+                #if DECIDE
                 decideInstance.inAppDelegate = self
                 executeCachedVariants()
                 executeCachedCodelessBindings()
@@ -336,8 +339,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
                     trackPushNotification(notification, event: "$app_open")
                 }
+                #endif
             }
+            #if DECIDE
             connectIntegrations.mixpanel = self
+            #endif
         #endif // DECIDE
     }
     #else
@@ -362,7 +368,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                         lock: self.readWriteLock,
                         metadata: sessionMetadata)
         flushInstance._flushInterval = flushInterval
+    #if !WATCH_OS
         setupListeners()
+    #endif
         unarchive()
         // check whether we should opt out by default
         // note: we don't override opt out persistence here since opt-out default state is often
@@ -373,7 +381,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
     #endif // os(OSX)
 
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
         trackIntegration()
@@ -420,7 +428,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             #endif // os(iOS) && DECIDE
         }
     }
-    #else
+    #elseif os(OSX)
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self,
@@ -440,7 +448,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     deinit {
         NotificationCenter.default.removeObserver(self)
-        #if os(iOS)
+        #if os(iOS) && !WATCH_OS
             if let reachability = reachability {
                 if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
                     Logger.error(message: "\(self) error unsetting reachability callback")
@@ -453,14 +461,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     static func isiOSAppExtension() -> Bool {
-        #if os(iOS)
-            return Bundle.main.bundlePath.hasSuffix(".appex")
-        #else
-            return false
-        #endif
+        return Bundle.main.bundlePath.hasSuffix(".appex")
     }
 
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     static func sharedUIApplication() -> UIApplication? {
         guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue() as? UIApplication else {
             return nil
@@ -515,7 +519,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif
     }
 
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     @objc private func applicationDidEnterBackground(_ notification: Notification) {
         guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
@@ -591,13 +595,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     func defaultDistinctId() -> String {
-        #if !os(OSX)
+        #if !os(OSX) && !WATCH_OS
         var distinctId: String? = IFA()
         if distinctId == nil && NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString
         }
-        #else
+        #elseif os(OSX)
         let distinctId = MixpanelInstance.macOSIdentifier()
+        #else
+        let distinctId: String? = nil
         #endif // os(OSX)
         guard let distId = distinctId else {
             return UUID().uuidString
@@ -605,7 +611,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         return distId
     }
 
-    #if !os(OSX)
+    #if !os(OSX) && !WATCH_OS
     func IFA() -> String? {
         var ifa: String? = nil
         #if !MIXPANEL_NO_IFA
@@ -635,7 +641,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif
         return ifa
     }
-    #else
+    #elseif os(OSX)
     static func macOSIdentifier() -> String? {
         let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"));
         let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0);
@@ -661,7 +667,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         trackingQueue.async {
             AutomaticProperties.automaticPropertiesLock.write { [weak self, radio] in
-
                 AutomaticProperties.properties["$radio"] = radio
 
                 guard let self = self else {
@@ -847,7 +852,6 @@ extension MixpanelInstance {
 
         if alias != distinctId {
             trackingQueue.async { [weak self, alias] in
-
                 guard let self = self else {
                     return
                 }
@@ -881,7 +885,6 @@ extension MixpanelInstance {
         trackingQueue.async { [weak self] in
             self?.networkQueue.sync { [weak self] in
                 self?.readWriteLock.write { [weak self] in
-
                     guard let self = self else {
                         return
                     }
@@ -1105,7 +1108,6 @@ extension MixpanelInstance {
         }
         trackingQueue.async { [weak self, completion] in
             self?.networkQueue.async { [weak self] in
-
                 guard let self = self else {
                     return
                 }
@@ -1124,12 +1126,14 @@ extension MixpanelInstance {
                 }
 
                 #if DECIDE
-                self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
-                                                    automaticEventsEnabled: self.decideInstance.automaticEventsEnabled)
+                let automaticEventsEnabled = self.decideInstance.automaticEventsEnabled
+                #elseif TV_AUTO_EVENTS
+                let automaticEventsEnabled = true
                 #else
-                self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
-                                                    automaticEventsEnabled: false)
+                let automaticEventsEnabled = false
                 #endif
+                self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
+                                                    automaticEventsEnabled: automaticEventsEnabled)
                 self.flushInstance.flushPeopleQueue(&self.people.flushPeopleQueue)
                 self.flushInstance.flushGroupsQueue(&self.flushGroupsQueue)
 
@@ -1173,17 +1177,17 @@ extension MixpanelInstance {
         let epochInterval = Date().timeIntervalSince1970
         trackingQueue.async { [weak self, event, properties, epochInterval] in
             guard let self = self else { return }
-
+            
             self.trackInstance.track(event: event,
-                                        properties: properties,
-                                        eventsQueue: &self.eventsQueue,
-                                        timedEvents: &self.timedEvents,
-                                        superProperties: self.superProperties,
-                                        distinctId: self.distinctId,
-                                        anonymousId: self.anonymousId,
-                                        userId: self.userId,
-                                        hadPersistedDistinctId: self.hadPersistedDistinctId,
-                                        epochInterval: epochInterval)
+                                     properties: properties,
+                                     eventsQueue: &self.eventsQueue,
+                                     timedEvents: &self.timedEvents,
+                                     superProperties: self.superProperties,
+                                     distinctId: self.distinctId,
+                                     anonymousId: self.anonymousId,
+                                     userId: self.userId,
+                                     hadPersistedDistinctId: self.hadPersistedDistinctId,
+                                     epochInterval: epochInterval)
             self.readWriteLock.read {
                 Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
             }
@@ -1653,7 +1657,7 @@ extension MixpanelInstance: InAppNotificationsDelegate {
             }
         }
     }
-
+    
     // MARK: - WebSocket
     func connectToWebSocket() {
         decideInstance.connectToWebSocket(token: apiToken, mixpanelInstance: self)
@@ -1722,7 +1726,6 @@ extension MixpanelInstance: InAppNotificationsDelegate {
             }
 
             DispatchQueue.main.async { [weak self, newVariants] in
-
                 guard let self = self else {
                     return
                 }

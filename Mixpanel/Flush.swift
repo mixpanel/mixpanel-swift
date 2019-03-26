@@ -89,7 +89,6 @@ class Flush: AppLifecycle {
         stopFlushTimer()
         if flushInterval > 0 {
             DispatchQueue.main.async() { [weak self] in
-
                 guard let self = self else {
                     return
                 }

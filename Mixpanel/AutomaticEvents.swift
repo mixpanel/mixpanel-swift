@@ -15,7 +15,7 @@ protocol AEDelegate {
     #endif
 }
 
-#if DECIDE
+#if DECIDE || TV_AUTO_EVENTS
 import Foundation
 import UIKit
 import StoreKit
@@ -85,12 +85,15 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                                                name: UIApplication.didBecomeActiveNotification,
                                                object: nil)
 
+        #if DECIDE
         SKPaymentQueue.default().add(self)
+        
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
             self.setupAutomaticPushTracking()
         }
+        #endif
     }
 
     @objc func appWillResignActive(_ notification: Notification) {
@@ -157,6 +160,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         return false
     }
 
+
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         objc_sync_enter(awaitingTransactions)
         for product in response.products {
@@ -170,6 +174,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         objc_sync_exit(awaitingTransactions)
     }
 
+    #if DECIDE
     func setupAutomaticPushTracking() {
         guard let appDelegate = MixpanelInstance.sharedUIApplication()?.delegate else {
             return
@@ -241,8 +246,10 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             UNUserNotificationCenter.current().removeDelegateObserver(ae: self)
         }
     }
+    #endif // DECIDE
 }
 
+#if DECIDE
 @available(iOS 10.0, *)
 extension UNUserNotificationCenter {
     func addDelegateObserver(ae: AutomaticEvents) {
@@ -302,5 +309,6 @@ extension NSObject {
         }
     }
 }
+#endif // DECIDE
 
 #endif

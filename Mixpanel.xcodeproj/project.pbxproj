@@ -21,9 +21,32 @@
 		86EE92CB21370CA600D55487 /* ExceptionWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 86EE92C721370CA600D55487 /* ExceptionWrapper.m */; };
 		86EE92CC21370CA600D55487 /* ExceptionWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 86EE92C721370CA600D55487 /* ExceptionWrapper.m */; };
 		86EE92CD21370CA600D55487 /* ExceptionWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 86EE92C721370CA600D55487 /* ExceptionWrapper.m */; };
+		86F86EB7224439D300B69832 /* Mixpanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115948A1CFF1538007F8B4F /* Mixpanel.swift */; };
+		86F86EB8224439D300B69832 /* MixpanelInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115948D1D000709007F8B4F /* MixpanelInstance.swift */; };
+		86F86EB9224439DC00B69832 /* AutomaticProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */; };
+		86F86EBA224439E300B69832 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56791D306B740045D3DB /* Logger.swift */; };
+		86F86EBB224439EB00B69832 /* FlushRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CB1D303A0D00E68E12 /* FlushRequest.swift */; };
+		86F86EBC224439F100B69832 /* PrintLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56801D306B7B0045D3DB /* PrintLogging.swift */; };
+		86F86EBD224439F500B69832 /* Flush.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115949E1D01BE14007F8B4F /* Flush.swift */; };
+		86F86EBE224439FA00B69832 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594961D006022007F8B4F /* Network.swift */; };
+		86F86EBF22443A0000B69832 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594921D0036E1007F8B4F /* Persistence.swift */; };
+		86F86EC022443A0800B69832 /* MixpanelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E165228E1D6781DF000D5949 /* MixpanelType.swift */; };
+		86F86EC122443A0E00B69832 /* JSONHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594981D01689F007F8B4F /* JSONHandler.swift */; };
+		86F86EC222443A1300B69832 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594A01D01C597007F8B4F /* Track.swift */; };
+		86F86EC322443A1A00B69832 /* ExceptionWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 86EE92C721370CA600D55487 /* ExceptionWrapper.m */; };
+		86F86EC422443A2300B69832 /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
+		86F86EC522443A2C00B69832 /* People.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7C71D0435670076CDE3 /* People.swift */; };
+		86F86EC622443A3100B69832 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1982BFE1D0AC2E2006B7330 /* Error.swift */; };
+		86F86EC722443A3C00B69832 /* FileLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56811D306B7B0045D3DB /* FileLogging.swift */; };
+		86F86EC922443A4700B69832 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CD1D30578E00E68E12 /* Constants.swift */; };
+		86F86ECA22443A4C00B69832 /* SessionMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = E190522C1F9FC1BC00900E5D /* SessionMetadata.swift */; };
+		86F86ED32244411800B69832 /* Mixpanel.h in Headers */ = {isa = PBXBuildFile; fileRef = E11594801CFF1491007F8B4F /* Mixpanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		86F86ED42244411B00B69832 /* ExceptionWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 86EE92C621370CA600D55487 /* ExceptionWrapper.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		86F86EF7224554B900B69832 /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
+		86F86F3622497F1200B69832 /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
+		86F86F3722497F2900B69832 /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		BB9614171F3BB87700C3EF3E /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
 		E10D118D1EC0F30900195CCD /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
-		E10D118F1EC0F30B00195CCD /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		E115234D1D7A59AF00657E80 /* UIImageToNSDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115234C1D7A59AF00657E80 /* UIImageToNSDictionary.swift */; };
 		E115234F1D7F58B000657E80 /* CGSizeToNSDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115234E1D7F58B000657E80 /* CGSizeToNSDictionary.swift */; };
 		E11523511D7F5C7500657E80 /* UIEdgeInsetsToNSDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11523501D7F5C7500657E80 /* UIEdgeInsetsToNSDictionary.swift */; };
@@ -161,6 +184,7 @@
 		673ABE3921360CBE00B1784B /* Group.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
 		86EE92C621370CA600D55487 /* ExceptionWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExceptionWrapper.h; sourceTree = "<group>"; };
 		86EE92C721370CA600D55487 /* ExceptionWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExceptionWrapper.m; sourceTree = "<group>"; };
+		86F86E81224404BD00B69832 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadWriteLock.swift; sourceTree = "<group>"; };
 		E115234C1D7A59AF00657E80 /* UIImageToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageToNSDictionary.swift; sourceTree = "<group>"; };
 		E115234E1D7F58B000657E80 /* CGSizeToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGSizeToNSDictionary.swift; sourceTree = "<group>"; };
@@ -257,6 +281,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		86F86E7E224404BD00B69832 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E11594791CFF1491007F8B4F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -314,6 +345,7 @@
 				E115947D1CFF1491007F8B4F /* Mixpanel.framework */,
 				E12782B31D4AB4B30025FB05 /* Mixpanel.framework */,
 				E1F15FC91E64A10700391AE3 /* Mixpanel.framework */,
+				86F86E81224404BD00B69832 /* Mixpanel.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -584,6 +616,15 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		86F86E7C224404BD00B69832 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86F86ED42244411B00B69832 /* ExceptionWrapper.h in Headers */,
+				86F86ED32244411800B69832 /* Mixpanel.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E115947A1CFF1491007F8B4F /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -614,6 +655,24 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		86F86E80224404BD00B69832 /* Mixpanel_watchOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 86F86E88224404BD00B69832 /* Build configuration list for PBXNativeTarget "Mixpanel_watchOS" */;
+			buildPhases = (
+				86F86E7C224404BD00B69832 /* Headers */,
+				86F86E7D224404BD00B69832 /* Sources */,
+				86F86E7E224404BD00B69832 /* Frameworks */,
+				86F86E7F224404BD00B69832 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Mixpanel_watchOS;
+			productName = Mixpanel_watchOS;
+			productReference = 86F86E81224404BD00B69832 /* Mixpanel.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		E115947C1CFF1491007F8B4F /* Mixpanel */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E11594851CFF1491007F8B4F /* Build configuration list for PBXNativeTarget "Mixpanel" */;
@@ -677,6 +736,10 @@
 				LastUpgradeCheck = 1000;
 				ORGANIZATIONNAME = Mixpanel;
 				TargetAttributes = {
+					86F86E80224404BD00B69832 = {
+						CreatedOnToolsVersion = 10.1;
+						ProvisioningStyle = Manual;
+					};
 					E115947C1CFF1491007F8B4F = {
 						CreatedOnToolsVersion = 7.3.1;
 						DevelopmentTeam = E8FVX7QLET;
@@ -711,11 +774,19 @@
 				E115947C1CFF1491007F8B4F /* Mixpanel */,
 				E12782B21D4AB4B30025FB05 /* Mixpanel_tvOS */,
 				E1F15FC81E64A10700391AE3 /* Mixpanel_macOS */,
+				86F86E80224404BD00B69832 /* Mixpanel_watchOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		86F86E7F224404BD00B69832 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E115947B1CFF1491007F8B4F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -748,6 +819,34 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		86F86E7D224404BD00B69832 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86F86EF7224554B900B69832 /* Group.swift in Sources */,
+				86F86ECA22443A4C00B69832 /* SessionMetadata.swift in Sources */,
+				86F86EC922443A4700B69832 /* Constants.swift in Sources */,
+				86F86EC722443A3C00B69832 /* FileLogging.swift in Sources */,
+				86F86EC622443A3100B69832 /* Error.swift in Sources */,
+				86F86EC522443A2C00B69832 /* People.swift in Sources */,
+				86F86EC422443A2300B69832 /* ReadWriteLock.swift in Sources */,
+				86F86EC322443A1A00B69832 /* ExceptionWrapper.m in Sources */,
+				86F86EC222443A1300B69832 /* Track.swift in Sources */,
+				86F86EC122443A0E00B69832 /* JSONHandler.swift in Sources */,
+				86F86EC022443A0800B69832 /* MixpanelType.swift in Sources */,
+				86F86EBF22443A0000B69832 /* Persistence.swift in Sources */,
+				86F86EBE224439FA00B69832 /* Network.swift in Sources */,
+				86F86EBD224439F500B69832 /* Flush.swift in Sources */,
+				86F86EBC224439F100B69832 /* PrintLogging.swift in Sources */,
+				86F86EBB224439EB00B69832 /* FlushRequest.swift in Sources */,
+				86F86EBA224439E300B69832 /* Logger.swift in Sources */,
+				86F86EB9224439DC00B69832 /* AutomaticProperties.swift in Sources */,
+				86F86F3722497F2900B69832 /* AutomaticEvents.swift in Sources */,
+				86F86EB7224439D300B69832 /* Mixpanel.swift in Sources */,
+				86F86EB8224439D300B69832 /* MixpanelInstance.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E11594781CFF1491007F8B4F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -891,7 +990,7 @@
 				E1F15FE41E64B60D00391AE3 /* People.swift in Sources */,
 				E1F15FDB1E64B60A00391AE3 /* Error.swift in Sources */,
 				E1F15FD81E64B60200391AE3 /* FileLogging.swift in Sources */,
-				E10D118F1EC0F30B00195CCD /* AutomaticEvents.swift in Sources */,
+				86F86F3622497F1200B69832 /* AutomaticEvents.swift in Sources */,
 				E1F15FDD1E64B60A00391AE3 /* Constants.swift in Sources */,
 				E1ECD00C1FA001AD002104E8 /* SessionMetadata.swift in Sources */,
 			);
@@ -900,6 +999,76 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		86F86E86224404BD00B69832 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = Mixpanel/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				NEW_SETTING = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
+				PRODUCT_NAME = Mixpanel;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG WATCH_OS";
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 3.0;
+			};
+			name = Debug;
+		};
+		86F86E87224404BD00B69832 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = Mixpanel/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_FAST_MATH = YES;
+				NEW_SETTING = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
+				PRODUCT_NAME = Mixpanel;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = WATCH_OS;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 3.0;
+			};
+			name = Release;
+		};
 		E11594831CFF1491007F8B4F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1035,7 +1204,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "IOS DEBUG";
 				SWIFT_INCLUDE_PATHS = "${SRCROOT}";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1066,6 +1235,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = IOS;
 				SWIFT_INCLUDE_PATHS = "${SRCROOT}";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -1090,13 +1260,12 @@
 				INFOPLIST_FILE = Mixpanel/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				OTHER_SWIFT_FLAGS = "-D TV_OS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = Mixpanel;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG TV_OS TV_AUTO_EVENTS";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 3;
@@ -1118,12 +1287,12 @@
 				INFOPLIST_FILE = Mixpanel/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				OTHER_SWIFT_FLAGS = "-D TV_OS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = Mixpanel;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "TV_OS TV_AUTO_EVENTS";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 4.2;
@@ -1150,13 +1319,12 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				OTHER_SWIFT_FLAGS = "-D MAC_OS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = Mixpanel;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG MAC_OS";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 4.2;
 			};
@@ -1180,12 +1348,12 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				OTHER_SWIFT_FLAGS = "-D MAC_OS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = Mixpanel;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = MAC_OS;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 4.2;
@@ -1195,6 +1363,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		86F86E88224404BD00B69832 /* Build configuration list for PBXNativeTarget "Mixpanel_watchOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				86F86E86224404BD00B69832 /* Debug */,
+				86F86E87224404BD00B69832 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E11594771CFF1491007F8B4F /* Build configuration list for PBXProject "Mixpanel" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

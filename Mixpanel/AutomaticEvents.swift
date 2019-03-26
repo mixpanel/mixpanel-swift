@@ -15,7 +15,7 @@ protocol AEDelegate {
     #endif
 }
 
-#if DECIDE || AUTO_TV_EVENTS
+#if DECIDE || TV_AUTO_EVENTS
 import Foundation
 import UIKit
 import StoreKit

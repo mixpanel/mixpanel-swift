@@ -266,7 +266,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let decideInstance: Decide
     let automaticEvents = AutomaticEvents()
     let connectIntegrations = ConnectIntegrations()
-    #elseif AUTO_TV_EVENTS
+    #elseif TV_AUTO_EVENTS
         let automaticEvents = AutomaticEvents()
     #endif // DECIDE
 
@@ -323,7 +323,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             self.optOutTracking()
         }
         
-        #if DECIDE || AUTO_TV_EVENTS
+        #if DECIDE || TV_AUTO_EVENTS
             if !MixpanelInstance.isiOSAppExtension() {
                 automaticEvents.delegate = self
                 automaticEvents.automaticPushTracking = automaticPushTracking
@@ -1121,7 +1121,7 @@ extension MixpanelInstance {
 
                 #if DECIDE
                 let automaticEventsEnabled = self.decideInstance.automaticEventsEnabled
-                #elseif AUTO_TV_EVENTS
+                #elseif TV_AUTO_EVENTS
                 let automaticEventsEnabled = true
                 #else
                 let automaticEventsEnabled = false

@@ -76,6 +76,9 @@ class InAppNotifications: NotificationViewControllerDelegate {
             Logger.info(message: "marking notification as seen: \(notification.ID)")
             currentlyShowingNotification = notification
             shownNotifications.insert(notification.ID)
+            if (notification.hasDisplayTriggers()) {
+                triggeredNotifications = triggeredNotifications.filter { $0.ID != notification.ID }
+            }
         }
     }
 

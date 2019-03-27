@@ -171,6 +171,7 @@ class SelectorEvaluatorTests: XCTestCase {
         XCTAssertEqual(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": [["property": "event", "value": "prop"]]], properties: ["prop": [:]]), "{}")
         XCTAssertEqual(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": [["property": "event", "value": "prop"]]], properties: ["prop": ["a":"b"]]), "{\"a\":\"b\"}")
         XCTAssertEqual(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": [["property": "event", "value": "prop"]]], properties: ["prop": true]), "true")
+        XCTAssertEqual(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": [["property": "event", "value": "prop"]]], properties: ["prop": "blah"]), "blah")
     }
     
     func testEvaluateAnd() {

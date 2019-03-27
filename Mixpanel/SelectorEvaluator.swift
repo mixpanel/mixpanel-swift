@@ -218,6 +218,8 @@ class SelectorEvaluator {
                 return jsonStringify(value: arr)
             case let obj as [String: Any]:
                 return jsonStringify(value: obj)
+            case let str as String:
+                return str
             default:
                 return nil
             }

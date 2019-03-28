@@ -39,7 +39,7 @@ class DisplayTrigger {
         self.selectorOpt = selector
     }
     
-    func matchesEvent(eventName: String?, properties: Properties? = nil) -> Bool {
+    func matchesEvent(eventName: String?, properties: InternalProperties) -> Bool {
         if let event = self.event {
             if (eventName == DisplayTrigger.ANY_EVENT || eventName == "" || eventName?.compare(event) == ComparisonResult.orderedSame) {
                 if let selector = selectorOpt {
@@ -48,9 +48,9 @@ class DisplayTrigger {
                     }
                     return false
                 }
+                return true
             }
         }
-        
         return false
     }
     

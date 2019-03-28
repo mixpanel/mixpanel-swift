@@ -34,7 +34,7 @@ class InAppNotifications: NotificationViewControllerDelegate {
         self.lock = lock
     }
 
-    func showNotification(event: String?, properties: Properties? = nil) {
+    func showNotification(event: String?, properties: InternalProperties) {
         for triggeredNotification in triggeredNotifications {
             if (triggeredNotification.matchesEvent(event: event, properties: properties)) {
                 showNotification(triggeredNotification)
@@ -76,6 +76,9 @@ class InAppNotifications: NotificationViewControllerDelegate {
             Logger.info(message: "marking notification as seen: \(notification.ID)")
             currentlyShowingNotification = notification
             shownNotifications.insert(notification.ID)
+            if (notification.hasDisplayTriggers()) {
+                triggeredNotifications = triggeredNotifications.filter { $0.ID != notification.ID }
+            }
         }
     }
 

@@ -53,15 +53,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateNumber() {
-        XCTAssertNil(SelectorEvaluator.evaluateNumber(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateNumber(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: number")
-        XCTAssertNil(SelectorEvaluator.evaluateNumber(node: ["operator": "or"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateNumber(node: ["operator": "or"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: number")
-        XCTAssertNil(SelectorEvaluator.evaluateNumber(node: ["operator": "number"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateNumber(node: ["operator": "number"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: number")
-        XCTAssertNil(SelectorEvaluator.evaluateNumber(node: ["operator": "number", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateNumber(node: ["operator": "number", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: number")
-        XCTAssertNil(SelectorEvaluator.evaluateNumber(node: ["operator": "number", "children": [[], []]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateNumber(node: ["operator": "number", "children": [[], []]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: number")
         
         XCTAssertEqual(SelectorEvaluator.evaluateNumber(node: ["operator": "number", "children": [["property": "event", "value": "prop"]]], properties: ["prop": Date(timeIntervalSince1970: 1)]), 1)
@@ -79,15 +79,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateBoolean() {
-        XCTAssertNil(SelectorEvaluator.evaluateBoolean(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateBoolean(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: boolean")
-        XCTAssertNil(SelectorEvaluator.evaluateBoolean(node: ["operator": "or"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateBoolean(node: ["operator": "or"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: boolean")
-        XCTAssertNil(SelectorEvaluator.evaluateBoolean(node: ["operator": "boolean"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateBoolean(node: ["operator": "boolean"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: boolean")
-        XCTAssertNil(SelectorEvaluator.evaluateBoolean(node: ["operator": "boolean", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateBoolean(node: ["operator": "boolean", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: boolean")
-        XCTAssertNil(SelectorEvaluator.evaluateBoolean(node: ["operator": "boolean", "children": [[], []]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateBoolean(node: ["operator": "boolean", "children": [[], []]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: boolean")
         
         XCTAssertFalse(SelectorEvaluator.evaluateBoolean(node: ["operator": "boolean", "children": [["property": "event", "value": "prop"]]], properties: [:])!)
@@ -106,15 +106,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateDatetime() {
-        XCTAssertNil(SelectorEvaluator.evaluateDateTime(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateDateTime(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: datetime")
-        XCTAssertNil(SelectorEvaluator.evaluateDateTime(node: ["operator": "or"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateDateTime(node: ["operator": "or"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: datetime")
-        XCTAssertNil(SelectorEvaluator.evaluateDateTime(node: ["operator": "datetime"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateDateTime(node: ["operator": "datetime"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: datetime")
-        XCTAssertNil(SelectorEvaluator.evaluateDateTime(node: ["operator": "datetime", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateDateTime(node: ["operator": "datetime", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: datetime")
-        XCTAssertNil(SelectorEvaluator.evaluateDateTime(node: ["operator": "datetime", "children": [[], []]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateDateTime(node: ["operator": "datetime", "children": [[], []]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: datetime")
         
         XCTAssertNil(SelectorEvaluator.evaluateDateTime(node: ["operator": "datetime", "children": [["property": "event", "value": "prop"]]], properties: [:]))
@@ -129,15 +129,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateList() {
-        XCTAssertNil(SelectorEvaluator.evaluateList(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateList(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: list")
-        XCTAssertNil(SelectorEvaluator.evaluateList(node: ["operator": "or"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateList(node: ["operator": "or"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: list")
-        XCTAssertNil(SelectorEvaluator.evaluateList(node: ["operator": "list"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateList(node: ["operator": "list"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: list")
-        XCTAssertNil(SelectorEvaluator.evaluateList(node: ["operator": "list", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateList(node: ["operator": "list", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: list")
-        XCTAssertNil(SelectorEvaluator.evaluateList(node: ["operator": "list", "children": [[], []]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateList(node: ["operator": "list", "children": [[], []]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: list")
         
         XCTAssertNil(SelectorEvaluator.evaluateList(node: ["operator": "list", "children": [["property": "event", "value": "prop"]]], properties: [:]))
@@ -150,15 +150,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateString() {
-        XCTAssertNil(SelectorEvaluator.evaluateString(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateString(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: string")
-        XCTAssertNil(SelectorEvaluator.evaluateString(node: ["operator": "or"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateString(node: ["operator": "or"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: string")
-        XCTAssertNil(SelectorEvaluator.evaluateString(node: ["operator": "string"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateString(node: ["operator": "string"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: string")
-        XCTAssertNil(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: string")
-        XCTAssertNil(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": [[], []]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": [[], []]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: string")
         
         let df = DateFormatter.formatterForJSONDate()
@@ -171,18 +171,19 @@ class SelectorEvaluatorTests: XCTestCase {
         XCTAssertEqual(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": [["property": "event", "value": "prop"]]], properties: ["prop": [:]]), "{}")
         XCTAssertEqual(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": [["property": "event", "value": "prop"]]], properties: ["prop": ["a":"b"]]), "{\"a\":\"b\"}")
         XCTAssertEqual(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": [["property": "event", "value": "prop"]]], properties: ["prop": true]), "true")
+        XCTAssertEqual(SelectorEvaluator.evaluateString(node: ["operator": "string", "children": [["property": "event", "value": "prop"]]], properties: ["prop": "blah"]), "blah")
     }
     
     func testEvaluateAnd() {
-        XCTAssertNil(SelectorEvaluator.evaluateAnd(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateAnd(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: and")
-        XCTAssertNil(SelectorEvaluator.evaluateAnd(node: ["operator": "or"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateAnd(node: ["operator": "or"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: and")
-        XCTAssertNil(SelectorEvaluator.evaluateAnd(node: ["operator": "and"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateAnd(node: ["operator": "and"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: and")
-        XCTAssertNil(SelectorEvaluator.evaluateAnd(node: ["operator": "and", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateAnd(node: ["operator": "and", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: and")
-        XCTAssertNil(SelectorEvaluator.evaluateAnd(node: ["operator": "and", "children": [[]]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateAnd(node: ["operator": "and", "children": [[]]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: and")
         
         XCTAssertTrue(SelectorEvaluator.evaluateAnd(node: ["operator": "and", "children": [["property": "event", "value": "prop1"], ["property": "event", "value": "prop2"]]], properties: ["prop1": true, "prop2": true])!)
@@ -192,15 +193,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateOr() {
-        XCTAssertNil(SelectorEvaluator.evaluateOr(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOr(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: or")
-        XCTAssertNil(SelectorEvaluator.evaluateOr(node: ["operator": "and"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOr(node: ["operator": "and"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: or")
-        XCTAssertNil(SelectorEvaluator.evaluateOr(node: ["operator": "or"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOr(node: ["operator": "or"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: or")
-        XCTAssertNil(SelectorEvaluator.evaluateOr(node: ["operator": "or", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOr(node: ["operator": "or", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: or")
-        XCTAssertNil(SelectorEvaluator.evaluateOr(node: ["operator": "or", "children": [[]]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOr(node: ["operator": "or", "children": [[]]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: or")
         
         XCTAssertTrue(SelectorEvaluator.evaluateOr(node: ["operator": "or", "children": [["property": "event", "value": "prop1"], ["property": "event", "value": "prop2"]]], properties: ["prop1": true, "prop2": true])!)
@@ -210,15 +211,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateIn() {
-        XCTAssertNil(SelectorEvaluator.evaluateIn(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateIn(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: in")
-        XCTAssertNil(SelectorEvaluator.evaluateIn(node: ["operator": "and"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateIn(node: ["operator": "and"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: in")
-        XCTAssertNil(SelectorEvaluator.evaluateIn(node: ["operator": "in"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateIn(node: ["operator": "in"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: in")
-        XCTAssertNil(SelectorEvaluator.evaluateIn(node: ["operator": "in", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateIn(node: ["operator": "in", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: in")
-        XCTAssertNil(SelectorEvaluator.evaluateIn(node: ["operator": "in", "children": [[]]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateIn(node: ["operator": "in", "children": [[]]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: in")
         
         XCTAssertTrue(SelectorEvaluator.evaluateIn(node: ["operator": "in", "children": [["property": "event", "value": "prop1"], ["property": "event", "value": "prop2"]]], properties: ["prop1": 1, "prop2": [1,2]])!)
@@ -233,15 +234,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluatePlus() {
-        XCTAssertNil(SelectorEvaluator.evaluatePlus(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluatePlus(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: +")
-        XCTAssertNil(SelectorEvaluator.evaluatePlus(node: ["operator": "and"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluatePlus(node: ["operator": "and"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: +")
-        XCTAssertNil(SelectorEvaluator.evaluatePlus(node: ["operator": "+"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluatePlus(node: ["operator": "+"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: +")
-        XCTAssertNil(SelectorEvaluator.evaluatePlus(node: ["operator": "+", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluatePlus(node: ["operator": "+", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: +")
-        XCTAssertNil(SelectorEvaluator.evaluatePlus(node: ["operator": "+", "children": [[]]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluatePlus(node: ["operator": "+", "children": [[]]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: +")
         
         XCTAssertNil(SelectorEvaluator.evaluatePlus(node: ["operator": "+", "children": [["property": "event", "value": "prop1"], ["property": "event", "value": "prop2"]]], properties: ["prop1": 1, "prop2": [1,2]]))
@@ -250,15 +251,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateArithmetic() {
-        XCTAssertNil(SelectorEvaluator.evaluateArithmetic(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateArithmetic(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid arithmetic operator")
-        XCTAssertNil(SelectorEvaluator.evaluateArithmetic(node: ["operator": "and"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateArithmetic(node: ["operator": "and"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid arithmetic operator")
-        XCTAssertNil(SelectorEvaluator.evaluateArithmetic(node: ["operator": "-"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateArithmetic(node: ["operator": "-"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid arithmetic operator")
-        XCTAssertNil(SelectorEvaluator.evaluateArithmetic(node: ["operator": "-", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateArithmetic(node: ["operator": "-", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid arithmetic operator")
-        XCTAssertNil(SelectorEvaluator.evaluateArithmetic(node: ["operator": "-", "children": [[]]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateArithmetic(node: ["operator": "-", "children": [[]]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid arithmetic operator")
         
         XCTAssertEqual(SelectorEvaluator.evaluateArithmetic(node: ["operator": "-", "children": [["property": "event", "value": "prop1"], ["property": "event", "value": "prop2"]]], properties: ["prop1": 1, "prop2": 2]), -1)
@@ -273,15 +274,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateEquality() {
-        XCTAssertNil(SelectorEvaluator.evaluateEquality(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateEquality(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid (not) equality operator")
-        XCTAssertNil(SelectorEvaluator.evaluateEquality(node: ["operator": "and"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateEquality(node: ["operator": "and"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid (not) equality operator")
-        XCTAssertNil(SelectorEvaluator.evaluateEquality(node: ["operator": "=="], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateEquality(node: ["operator": "=="], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid (not) equality operator")
-        XCTAssertNil(SelectorEvaluator.evaluateEquality(node: ["operator": "==", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateEquality(node: ["operator": "==", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid (not) equality operator")
-        XCTAssertNil(SelectorEvaluator.evaluateEquality(node: ["operator": "==", "children": [[]]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateEquality(node: ["operator": "==", "children": [[]]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid (not) equality operator")
         
         XCTAssertTrue(SelectorEvaluator.evaluateEquality(node: ["operator": "==", "children": [["property": "event", "value": "prop1"], ["property": "event", "value": "prop2"]]], properties: [:])!)
@@ -328,15 +329,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateComparison() {
-        XCTAssertNil(SelectorEvaluator.evaluateComparison(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateComparison(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid comparison operator")
-        XCTAssertNil(SelectorEvaluator.evaluateComparison(node: ["operator": "and"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateComparison(node: ["operator": "and"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid comparison operator")
-        XCTAssertNil(SelectorEvaluator.evaluateComparison(node: ["operator": "<"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateComparison(node: ["operator": "<"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid comparison operator")
-        XCTAssertNil(SelectorEvaluator.evaluateComparison(node: ["operator": "<", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateComparison(node: ["operator": "<", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid comparison operator")
-        XCTAssertNil(SelectorEvaluator.evaluateComparison(node: ["operator": "<", "children": [[]]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateComparison(node: ["operator": "<", "children": [[]]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid comparison operator")
         
         XCTAssertFalse(SelectorEvaluator.evaluateComparison(node: ["operator": ">", "children": [["property": "event", "value": "prop1"], ["property": "event", "value": "prop2"]]], properties: ["prop1": 1, "prop2": 1])!)
@@ -376,15 +377,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateDefined() {
-        XCTAssertNil(SelectorEvaluator.evaluateDefined(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateDefined(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: (not) defined")
-        XCTAssertNil(SelectorEvaluator.evaluateDefined(node: ["operator": "or"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateDefined(node: ["operator": "or"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: (not) defined")
-        XCTAssertNil(SelectorEvaluator.evaluateDefined(node: ["operator": "defined"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateDefined(node: ["operator": "defined"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: (not) defined")
-        XCTAssertNil(SelectorEvaluator.evaluateDefined(node: ["operator": "defined", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateDefined(node: ["operator": "defined", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: (not) defined")
-        XCTAssertNil(SelectorEvaluator.evaluateDefined(node: ["operator": "defined", "children": [[], []]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateDefined(node: ["operator": "defined", "children": [[], []]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: (not) defined")
         
         XCTAssertFalse(SelectorEvaluator.evaluateDefined(node: ["operator": "defined", "children": [["property": "event", "value": "prop"]]], properties: [:])!)
@@ -395,15 +396,15 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateNot() {
-        XCTAssertNil(SelectorEvaluator.evaluateNot(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateNot(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: not")
-        XCTAssertNil(SelectorEvaluator.evaluateNot(node: ["operator": "or"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateNot(node: ["operator": "or"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: not")
-        XCTAssertNil(SelectorEvaluator.evaluateNot(node: ["operator": "not"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateNot(node: ["operator": "not"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: not")
-        XCTAssertNil(SelectorEvaluator.evaluateNot(node: ["operator": "not", "children": []], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateNot(node: ["operator": "not", "children": []], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: not")
-        XCTAssertNil(SelectorEvaluator.evaluateNot(node: ["operator": "not", "children": [[], []]], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateNot(node: ["operator": "not", "children": [[], []]], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator: not")
         
         XCTAssertTrue(SelectorEvaluator.evaluateNot(node: ["operator": "not", "children": [["property": "event", "value": "prop"]]], properties: [:])!)
@@ -435,13 +436,13 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateOperand() {
-        XCTAssertNil(SelectorEvaluator.evaluateOperand(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOperand(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "missing key property")
-        XCTAssertNil(SelectorEvaluator.evaluateOperand(node: ["property": 1], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOperand(node: ["property": 1], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "missing key property")
-        XCTAssertNil(SelectorEvaluator.evaluateOperand(node: ["property": "event"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOperand(node: ["property": "event"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "missing key value")
-        XCTAssertNil(SelectorEvaluator.evaluateOperand(node: ["property": "event", "value": 1], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOperand(node: ["property": "event", "value": 1], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "unexpected type for event property")
         
         XCTAssertEqual(SelectorEvaluator.evaluateOperand(node: ["property": "event", "value": "prop"], properties: ["prop": Double(100)]) as? Double, 100)
@@ -451,11 +452,11 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluateOperator() {
-        XCTAssertNil(SelectorEvaluator.evaluateOperator(node: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOperator(node: [:], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator key")
-        XCTAssertNil(SelectorEvaluator.evaluateOperator(node: ["operator": 1], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOperator(node: ["operator": 1], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "invalid operator key")
-        XCTAssertNil(SelectorEvaluator.evaluateOperator(node: ["operator": "blah"], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluateOperator(node: ["operator": "blah"], properties: InternalProperties()))
         XCTAssertEqual(logger.logMessage?.text, "Unknown operator blah")
         
         XCTAssertTrue(SelectorEvaluator.evaluateOperator(node: ["operator": "and", "children": [["property": "event", "value": "prop1"], ["property": "event", "value": "prop2"]]], properties: ["prop1": true, "prop2": true]) as! Bool)
@@ -487,7 +488,7 @@ class SelectorEvaluatorTests: XCTestCase {
     }
     
     func testEvaluate() {
-        XCTAssertNil(SelectorEvaluator.evaluate(selector: [:], properties: nil))
+        XCTAssertNil(SelectorEvaluator.evaluate(selector: [:], properties: InternalProperties()))
         XCTAssertNil(SelectorEvaluator.evaluate(selector: ["operator": "unknown"], properties: ["prop": 1]))
         let value = SelectorEvaluator.evaluate(selector: ["operator": ">", "children": [["property": "event", "value": "prop1"], ["property": "literal", "value": ["window": ["value": 1, "unit": "hour"]]]]], properties: ["prop1": Date()])
         XCTAssertNotNil(value)

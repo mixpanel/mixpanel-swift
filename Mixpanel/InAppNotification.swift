@@ -122,7 +122,7 @@ class InAppNotification {
         return displayTriggers.count > 0
     }
     
-    func matchesEvent(event: String?, properties: Properties? = nil) -> Bool {
+    func matchesEvent(event: String?, properties: InternalProperties) -> Bool {
         for displayTrigger in displayTriggers {
             if (displayTrigger.matchesEvent(eventName: event, properties: properties)) {
                 return true

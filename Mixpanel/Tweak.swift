@@ -143,9 +143,9 @@ extension Tweak: Hashable {
     /**
      Hashing for a Tweak for A/B Testing in order for it to be stored.
      */
-    public var hashValue: Int {
-		return tweakIdentifier.hashValue
-	}
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(tweakIdentifier.hashValue)
+    }
 }
 
 /**

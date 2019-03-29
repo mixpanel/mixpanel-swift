@@ -76,7 +76,7 @@ class SnapshotRequest: BaseWebSocketMessage {
                 DispatchQueue.main.sync {
                     serializedObjects = serializer.getObjectHierarchyForWindow(at: 0)
                 }
-                connection.setSessionObjectSynchronized(with: serializedObjects, for: "snapshot_hierarchy")
+                connection.setSessionObjectSynchronized(with: serializedObjects!, for: "snapshot_hierarchy")
             }
 
             response.serializedObjects = serializedObjects

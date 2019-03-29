@@ -353,7 +353,7 @@ struct BytesSequence<D: RandomAccessCollection>: Sequence where D.Iterator.Eleme
 extension Data {
     func md5() -> Data {
         let result = Digest.md5(self.bytes)
-        return Data(bytes: result)
+        return Data(_: result)
     }
 }
 

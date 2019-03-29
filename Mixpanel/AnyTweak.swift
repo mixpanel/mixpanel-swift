@@ -46,9 +46,9 @@ extension TweakType {
 }
 
 extension AnyTweak: Hashable {
-    public var hashValue: Int {
-		return tweakIdentifier.hashValue
-	}
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(tweakIdentifier.hashValue)
+    }
 }
 
 /**

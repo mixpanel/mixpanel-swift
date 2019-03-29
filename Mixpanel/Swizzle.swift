@@ -120,7 +120,7 @@ class Swizzle: CustomStringConvertible {
     var description: String {
         var retValue = "Swizzle on \(NSStringFromClass(type(of: self)))::\(NSStringFromSelector(selector)) ["
         for (key, value) in blocks {
-            retValue += "\t\(key) : \(value)\n"
+            retValue += "\t\(key) : \(String(describing: value))\n"
         }
         return retValue + "]"
     }

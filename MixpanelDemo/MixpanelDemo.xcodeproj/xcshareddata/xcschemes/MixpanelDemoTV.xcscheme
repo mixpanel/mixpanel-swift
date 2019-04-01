@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E15FF7D21D0461130076CDE3"
-               BuildableName = "MixpanelDemo.app"
-               BlueprintName = "MixpanelDemo"
+               BlueprintIdentifier = "86F86F0022460B3000B69832"
+               BuildableName = "MixpanelDemoTV.app"
+               BlueprintName = "MixpanelDemoTV"
                ReferencedContainer = "container:MixpanelDemo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,19 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E15FF7E61D0461130076CDE3"
-               BuildableName = "MixpanelDemoTests.xctest"
-               BlueprintName = "MixpanelDemoTests"
+               BlueprintIdentifier = "86F86F1022460B3200B69832"
+               BuildableName = "MixpanelDemoTVTests.xctest"
+               BlueprintName = "MixpanelDemoTVTests"
+               ReferencedContainer = "container:MixpanelDemo.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "86F86F1B22460B3200B69832"
+               BuildableName = "MixpanelDemoTVUITests.xctest"
+               BlueprintName = "MixpanelDemoTVUITests"
                ReferencedContainer = "container:MixpanelDemo.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -42,9 +52,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E15FF7D21D0461130076CDE3"
-            BuildableName = "MixpanelDemo.app"
-            BlueprintName = "MixpanelDemo"
+            BlueprintIdentifier = "86F86F0022460B3000B69832"
+            BuildableName = "MixpanelDemoTV.app"
+            BlueprintName = "MixpanelDemoTV"
             ReferencedContainer = "container:MixpanelDemo.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -65,19 +75,12 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E15FF7D21D0461130076CDE3"
-            BuildableName = "MixpanelDemo.app"
-            BlueprintName = "MixpanelDemo"
+            BlueprintIdentifier = "86F86F0022460B3000B69832"
+            BuildableName = "MixpanelDemoTV.app"
+            BlueprintName = "MixpanelDemoTV"
             ReferencedContainer = "container:MixpanelDemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "OS_ACTIVITY_MODE"
-            value = "disable"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -91,9 +94,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E15FF7D21D0461130076CDE3"
-            BuildableName = "MixpanelDemo.app"
-            BlueprintName = "MixpanelDemo"
+            BlueprintIdentifier = "86F86F0022460B3000B69832"
+            BuildableName = "MixpanelDemoTV.app"
+            BlueprintName = "MixpanelDemoTV"
             ReferencedContainer = "container:MixpanelDemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

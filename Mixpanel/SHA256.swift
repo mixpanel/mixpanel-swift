@@ -321,7 +321,7 @@ extension Int {
 extension Data {
     func sha256() -> Data? {
         let result = Digest.sha256(self.bytes)
-        return Data(bytes: result)
+        return Data(result)
     }
 }
 

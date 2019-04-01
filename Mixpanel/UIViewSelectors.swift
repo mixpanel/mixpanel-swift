@@ -115,7 +115,7 @@ extension UIView {
                 data4[i] = UInt8(part1 | part2 | part3 | part4)
             }
             let arr = Array(UnsafeBufferPointer(start: data4, count: 32))
-            result = Data(bytes: arr).base64EncodedString()
+            result = Data(arr).base64EncodedString()
         }
         return result
     }
@@ -133,7 +133,7 @@ extension UIView {
                     let ignoreActions = ["preVerify:forEvent:", "execute:forEvent:"]
                     if let actions = control.actions(forTarget: target, forControlEvent: controlEvent) {
                         for action in actions {
-                            if ignoreActions.index(of: action) == nil {
+                            if ignoreActions.firstIndex(of: action) == nil {
                                 targetActions.append("\(event)/\(action)")
                             }
                         }

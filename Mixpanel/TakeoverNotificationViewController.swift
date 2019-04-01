@@ -64,14 +64,14 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         }
 
         if takeoverNotification.title == nil || takeoverNotification.body == nil {
-            NSLayoutConstraint(item: titleLabel,
+            NSLayoutConstraint(item: titleLabel!,
                                attribute: NSLayoutConstraint.Attribute.height,
                                relatedBy: NSLayoutConstraint.Relation.equal,
                                toItem: nil,
                                attribute: NSLayoutConstraint.Attribute.notAnAttribute,
                                multiplier: 1,
                                constant: 0).isActive = true
-            NSLayoutConstraint(item: bodyLabel,
+            NSLayoutConstraint(item: bodyLabel!,
                                attribute: NSLayoutConstraint.Attribute.height,
                                relatedBy: NSLayoutConstraint.Relation.equal,
                                toItem: nil,
@@ -99,7 +99,7 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
             if takeoverNotification.buttons.count == 2 {
                 setupButtonView(buttonView: secondButton, buttonModel: takeoverNotification.buttons[1], index: 1)
             } else {
-                NSLayoutConstraint(item: secondButtonContainer,
+                NSLayoutConstraint(item: secondButtonContainer!,
                                    attribute: NSLayoutConstraint.Attribute.width,
                                    relatedBy: NSLayoutConstraint.Relation.equal,
                                    toItem: nil,

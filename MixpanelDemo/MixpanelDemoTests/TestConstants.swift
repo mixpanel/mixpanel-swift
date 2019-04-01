@@ -23,7 +23,7 @@ let kDefaultServerDecideString = "^https://api.mixpanel.com/decide(.*?)".regex
 }
 
 @discardableResult func stubGroups() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerGroupsString as LSMatcheable!).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("POST", kDefaultServerGroupsString as LSMatcheable?).withHeader("Accept-Encoding", "gzip")!
 }
 
 @discardableResult func stubTrack() -> LSStubRequestDSL {

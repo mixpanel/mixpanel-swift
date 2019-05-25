@@ -50,6 +50,10 @@ class JSONHandler {
 
     private class func makeObjectSerializable(_ obj: MPObjectToParse) -> MPObjectToParse {
         switch obj {
+        case let obj as Double where !obj.isFinite:
+            Logger.info(message: "enforcing string on non-finite numbers")
+            return String(describing: obj)
+
         case is String, is Int, is UInt, is UInt64, is Double, is Float, is Bool:
             return obj
 

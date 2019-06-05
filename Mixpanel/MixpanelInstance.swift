@@ -1322,7 +1322,9 @@ extension MixpanelInstance {
         trackingQueue.async { [weak self, startTime, event] in
             guard let self = self else { return }
 
-            self.trackInstance.time(event: event, timedEvents: &self.timedEvents, startTime: startTime)
+            self.readWriteLock.write {
+                self.timedEvents = self.trackInstance.time(event: event, timedEvents: self.timedEvents, startTime: startTime)
+            }
         }
     }
 
@@ -1344,8 +1346,9 @@ extension MixpanelInstance {
     open func clearTimedEvents() {
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
-
-            self.trackInstance.clearTimedEvents(&self.timedEvents)
+            self.readWriteLock.write {
+                self.timedEvents = self.trackInstance.clearTimedEvents(self.timedEvents)
+            }
         }
     }
 
@@ -1355,7 +1358,11 @@ extension MixpanelInstance {
      - returns: the current super properties
      */
     open func currentSuperProperties() -> [String: Any] {
-        return superProperties
+        var properties = InternalProperties()
+        self.readWriteLock.read {
+            properties = superProperties
+        }
+        return properties
     }
 
     /**
@@ -1364,8 +1371,9 @@ extension MixpanelInstance {
     open func clearSuperProperties() {
         dispatchAndTrack() { [weak self] in
             guard let self = self else { return }
-
-            self.trackInstance.clearSuperProperties(&self.superProperties)
+            self.readWriteLock.write {
+                self.superProperties = self.trackInstance.clearSuperProperties(self.superProperties)
+            }
         }
     }
 
@@ -1383,9 +1391,10 @@ extension MixpanelInstance {
     open func registerSuperProperties(_ properties: Properties) {
         dispatchAndTrack() { [weak self] in
             guard let self = self else { return }
-
-            self.trackInstance.registerSuperProperties(properties,
-                                                       superProperties: &self.superProperties)
+            self.readWriteLock.write {
+                self.superProperties = self.trackInstance.registerSuperProperties(properties,
+                                                       superProperties: self.superProperties)
+            }
         }
     }
 
@@ -1403,10 +1412,11 @@ extension MixpanelInstance {
                                             defaultValue: MixpanelType? = nil) {
         dispatchAndTrack() { [weak self] in
             guard let self = self else { return }
-
-            self.trackInstance.registerSuperPropertiesOnce(properties,
-                                                           superProperties: &self.superProperties,
+            self.readWriteLock.write {
+                self.superProperties = self.trackInstance.registerSuperPropertiesOnce(properties,
+                                                           superProperties: self.superProperties,
                                                            defaultValue: defaultValue)
+            }
         }
     }
 
@@ -1426,9 +1436,10 @@ extension MixpanelInstance {
     open func unregisterSuperProperty(_ propertyName: String) {
         dispatchAndTrack() { [weak self] in
             guard let self = self else { return }
-
-            self.trackInstance.unregisterSuperProperty(propertyName,
-                                                       superProperties: &self.superProperties)
+            self.readWriteLock.write {
+                self.superProperties = self.trackInstance.unregisterSuperProperty(propertyName,
+                                                       superProperties: self.superProperties)
+            }
         }
     }
 

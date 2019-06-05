@@ -84,68 +84,73 @@ class Track {
         return p
     }
 
-    func registerSuperProperties(_ properties: Properties, superProperties: inout InternalProperties) {
+    func registerSuperProperties(_ properties: Properties,
+                                 superProperties: InternalProperties) -> InternalProperties {
         if Mixpanel.mainInstance().hasOptedOutTracking() {
-            return
+            return superProperties
         }
-        self.lock.write {
-            assertPropertyTypes(properties)
-            superProperties += properties
-        }
+
+        var updatedSuperProperties = superProperties
+        assertPropertyTypes(properties)
+        updatedSuperProperties += properties
+        
+        return updatedSuperProperties
     }
 
     func registerSuperPropertiesOnce(_ properties: Properties,
-                                     superProperties: inout InternalProperties,
-                                     defaultValue: MixpanelType?) {
+                                     superProperties: InternalProperties,
+                                     defaultValue: MixpanelType?) -> InternalProperties {
         if Mixpanel.mainInstance().hasOptedOutTracking() {
-            return
+            return superProperties
         }
-        self.lock.write {
-            assertPropertyTypes(properties)
-                _ = properties.map() {
-                    let val = superProperties[$0.key]
-                    if val == nil ||
-                        (defaultValue != nil && (val as? NSObject == defaultValue as? NSObject)) {
-                        superProperties[$0.key] = $0.value
-                    }
-                }
+
+        var updatedSuperProperties = superProperties
+        assertPropertyTypes(properties)
+        _ = properties.map() {
+            let val = updatedSuperProperties[$0.key]
+            if val == nil ||
+                (defaultValue != nil && (val as? NSObject == defaultValue as? NSObject)) {
+                updatedSuperProperties[$0.key] = $0.value
+            }
         }
+        
+        return updatedSuperProperties
     }
 
-    func unregisterSuperProperty(_ propertyName: String, superProperties: inout InternalProperties) {
-        self.lock.write {
-            superProperties.removeValue(forKey: propertyName)
-        }
+    func unregisterSuperProperty(_ propertyName: String,
+                                 superProperties: InternalProperties) -> InternalProperties {
+        
+        var updatedSuperProperties = superProperties
+        updatedSuperProperties.removeValue(forKey: propertyName)
+        return updatedSuperProperties
     }
 
-    func clearSuperProperties(_ superProperties: inout InternalProperties) {
-        self.lock.write {
-            superProperties.removeAll()
-        }
+    func clearSuperProperties(_ superProperties: InternalProperties) -> InternalProperties {
+        var updatedSuperProperties = superProperties
+        updatedSuperProperties.removeAll()
+        return updatedSuperProperties
     }
     
     func updateSuperProperty(_ update: (_ superProperties: inout InternalProperties) -> Void, superProperties: inout InternalProperties) {
-        self.lock.write {
-            update(&superProperties)
-        }
+        update(&superProperties)
     }
 
-    func time(event: String?, timedEvents: inout InternalProperties, startTime: Double) {
+    func time(event: String?, timedEvents: InternalProperties, startTime: Double) -> InternalProperties {
         if Mixpanel.mainInstance().hasOptedOutTracking() {
-            return
+            return timedEvents
         }
-        self.lock.write {
-            guard let event = event, !event.isEmpty else {
-                Logger.error(message: "mixpanel cannot time an empty event")
-                return
-            }
-            timedEvents[event] = startTime
+        var updatedTimedEvents = timedEvents
+        guard let event = event, !event.isEmpty else {
+            Logger.error(message: "mixpanel cannot time an empty event")
+            return updatedTimedEvents
         }
+        updatedTimedEvents[event] = startTime
+        return updatedTimedEvents
     }
 
-    func clearTimedEvents(_ timedEvents: inout InternalProperties) {
-        self.lock.write {
-            timedEvents.removeAll()
-        }
+    func clearTimedEvents(_ timedEvents: InternalProperties) -> InternalProperties {
+        var updatedTimedEvents = timedEvents
+        updatedTimedEvents.removeAll()
+        return updatedTimedEvents
     }
 }

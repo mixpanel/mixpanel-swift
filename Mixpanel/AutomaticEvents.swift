@@ -195,13 +195,13 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             class_getInstanceMethod(newClass,
                 NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")) != nil {
             selector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")
-            newSelector = #selector(NSObject.userNotificationCenter(_:newDidReceive:withCompletionHandler:))
+            newSelector = #selector(NSObject.mp_userNotificationCenter(_:newDidReceive:withCompletionHandler:))
         } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")) != nil {
             selector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
-            newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:))
+            newSelector = #selector(UIResponder.mp_application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:))
         } else if class_getInstanceMethod(aClass, NSSelectorFromString("application:didReceiveRemoteNotification:")) != nil {
             selector = NSSelectorFromString("application:didReceiveRemoteNotification:")
-            newSelector = #selector(UIResponder.application(_:newDidReceiveRemoteNotification:))
+            newSelector = #selector(UIResponder.mp_application(_:newDidReceiveRemoteNotification:))
         }
 
         if let selector = selector, let newSelector = newSelector {
@@ -226,7 +226,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             if class_getInstanceMethod(delegateClass,
                     NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")) != nil {
                 let selector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")
-                let newSelector = #selector(NSObject.userNotificationCenter(_:newDidReceive:withCompletionHandler:))
+                let newSelector = #selector(NSObject.mp_userNotificationCenter(_:newDidReceive:withCompletionHandler:))
                 let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
                     if let param2 = param2 as? [AnyHashable: Any] {
                         self.delegate?.trackPushNotification(param2, event: "$campaign_received")
@@ -262,7 +262,7 @@ extension UNUserNotificationCenter {
 }
 
 extension UIResponder {
-    @objc func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Swift.Void) {
+    @objc func mp_application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Swift.Void) {
         let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
         if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
             let swizzle = Swizzler.swizzles[originalMethod] {
@@ -276,7 +276,7 @@ extension UIResponder {
         }
     }
 
-    @objc func application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+    @objc func mp_application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
         let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:")
         if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
             let swizzle = Swizzler.swizzles[originalMethod] {
@@ -293,7 +293,7 @@ extension UIResponder {
 
 @available(iOS 10.0, *)
 extension NSObject {
-    @objc func userNotificationCenter(_ center: UNUserNotificationCenter,
+    @objc func mp_userNotificationCenter(_ center: UNUserNotificationCenter,
                                       newDidReceive response: UNNotificationResponse,
                                       withCompletionHandler completionHandler: @escaping () -> Void) {
         let originalSelector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")

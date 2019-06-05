@@ -92,7 +92,7 @@ open class People {
                 }
 
             }
-            self.lock.read{
+            self.lock.read {
                 Persistence.archivePeople(self.flushPeopleQueue + self.peopleQueue, token: self.apiToken)
             }
         }

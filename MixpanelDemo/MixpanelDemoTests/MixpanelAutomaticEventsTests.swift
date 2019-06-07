@@ -28,7 +28,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         self.mixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         self.waitForTrackingQueue()
-        let event = self.mixpanel.eventsQueue.last
+        let event = self.mixpanel.eventsQueue.first
         let people1 = self.mixpanel.people.peopleQueue[0]["$add"] as! InternalProperties
         let people2 = self.mixpanel.people.peopleQueue[1]["$add"] as! InternalProperties
         XCTAssertEqual(people1["$ae_total_app_sessions"] as? Double, 1, "total app sessions should be added by 1")

@@ -595,7 +595,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     func defaultDistinctId() -> String {
-        #if !os(OSX) && !WATCH_OS
+        #if MIXPANEL_RANDOM_DISTINCT_ID
+        let distinctId: String? = UUID().uuidString
+        #elseif !os(OSX) && !WATCH_OS
         var distinctId: String? = IFA()
         if distinctId == nil && NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString
@@ -736,7 +738,9 @@ extension MixpanelInstance {
      build settings, and Mixpanel will use the IFV as the default distinct ID.
 
      If we are unable to get an IFA or IFV, we will fall back to generating a
-     random persistent UUID.
+     random persistent UUID. If you want to always use a random persistent UUID
+     you can define the <code>MIXPANEL_RANDOM_DISTINCT_ID</code> preprocessor flag
+     in your build settings.
 
      For tracking events, you do not need to call `identify:` if you
      want to use the default. However,
@@ -777,9 +781,11 @@ extension MixpanelInstance {
             // if it's new, blow away the alias as well.
             if distinctId != self.alias {
                 if distinctId != self.distinctId {
+                    let oldDistinctId = self.distinctId
                     self.alias = nil
                     self.distinctId = distinctId
                     self.userId = distinctId
+                    self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
                 }
 
                 if usePeople {

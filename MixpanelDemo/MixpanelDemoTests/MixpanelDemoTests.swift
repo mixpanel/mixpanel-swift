@@ -114,7 +114,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         LSNocilla.sharedInstance().clearStubs()
         stubTrack().andFailWithError(
             NSError(domain: "com.mixpanel.sdk.testing", code: 1, userInfo: nil))
-        mixpanel.identify(distinctId: "d1")
         for i in 0..<50 {
             mixpanel.track(event: "event \(UInt(i))")
         }
@@ -129,7 +128,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testAddingEventsAfterFlush() {
         stubTrack()
-        mixpanel.identify(distinctId: "d1")
         for i in 0..<10 {
             mixpanel.track(event: "event \(UInt(i))")
         }
@@ -232,6 +230,56 @@ class MixpanelDemoTests: MixpanelBaseTests {
             let newDistinctId = (mixpanel.eventsQueue.last?["properties"] as? InternalProperties)?["distinct_id"] as? String
             XCTAssertEqual(newDistinctId, distinctId,
                            "events should use new distinct id after identify:")
+            mixpanel.reset()
+            waitForTrackingQueue()
+        }
+    }
+
+    func testIdentifyTrack() {
+        stubTrack()
+        stubEngage()
+
+        let distinctIdBeforeIdentify: String? = mixpanel.distinctId
+        let distinctId = "testIdentifyTrack"
+
+        mixpanel.identify(distinctId: distinctId)
+        mixpanel.identify(distinctId: distinctId)
+        waitForTrackingQueue()
+        waitForTrackingQueue()
+
+        var e: InternalProperties = mixpanel.eventsQueue.last!
+        XCTAssertEqual(e["event"] as? String, "$identify", "incorrect event name")
+        var p: InternalProperties = e["properties"] as! InternalProperties
+        XCTAssertEqual(p["distinct_id"] as? String, distinctId, "wrong distinct_id")
+        XCTAssertEqual(p["$anon_distinct_id"] as? String, distinctIdBeforeIdentify, "wrong $anon_distinct_id")
+    }
+
+    func testIdentifyResetTrack() {
+        stubTrack()
+        stubEngage()
+
+        let originalDistinctId: String? = mixpanel.distinctId
+        let distinctId = "testIdentifyTrack"
+        mixpanel.reset()
+        waitForTrackingQueue()
+
+        for i in 1...3 {
+            let prevDistinctId: String? = mixpanel.distinctId
+            let newDistinctId = distinctId + String(i)
+            mixpanel.identify(distinctId: newDistinctId)
+            waitForTrackingQueue()
+            waitForTrackingQueue()
+
+            var e: InternalProperties = mixpanel.eventsQueue.last!
+            XCTAssertEqual(e["event"] as? String, "$identify", "incorrect event name")
+            var p: InternalProperties = e["properties"] as! InternalProperties
+            XCTAssertEqual(p["distinct_id"] as? String, newDistinctId, "wrong distinct_id")
+            XCTAssertEqual(p["$anon_distinct_id"] as? String, prevDistinctId, "wrong $anon_distinct_id")
+            #if MIXPANEL_RANDOM_DISTINCT_ID
+            XCTAssertNotEqual(prevDistinctId, originalDistinctId, "After reset, UUID will be used - never the same");
+            #else
+            XCTAssertEqual(prevDistinctId, originalDistinctId, "After reset, IFA/UIDevice id will be used - always the same");
+            #endif
             mixpanel.reset()
             waitForTrackingQueue()
         }
@@ -541,7 +589,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertEqual(mixpanel.distinctId, "d1", "custom distinct archive failed")
         XCTAssertTrue(mixpanel.currentSuperProperties().count == 1,
                       "custom super properties archive failed")
-        XCTAssertEqual(mixpanel.eventsQueue.last?["event"] as? String, "e1",
+        XCTAssertEqual(mixpanel.eventsQueue[mixpanel.eventsQueue.count - 2]["event"] as? String, "e1",
                        "event was not successfully archived/unarchived")
         XCTAssertEqual(mixpanel.people.distinctId, "d1",
                        "custom people distinct id archive failed")
@@ -563,7 +611,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(mixpanel.currentSuperProperties().count == 1,
                       "default super properties expected to have 1 item")
         XCTAssertNotNil(mixpanel.eventsQueue, "default events queue from no file is nil")
-        XCTAssertTrue(mixpanel.eventsQueue.count == 1, "default events queue expecting 1 item")
+        XCTAssertTrue(mixpanel.eventsQueue.count == 2, "default events queue expecting 2 items ($identify call added)")
         XCTAssertNotNil(mixpanel.people.distinctId,
                         "default people distinct id from no file failed")
         XCTAssertNotNil(mixpanel.people.peopleQueue, "default people queue from no file is nil")
@@ -712,7 +760,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         mixpanel.people.set(property: "p1", to: "a")
         waitForTrackingQueue()
         flushAndWaitForNetworkQueue()
-        XCTAssertTrue(mixpanel.eventsQueue.count == 1, "delegate should have stopped flush")
+        XCTAssertTrue(mixpanel.eventsQueue.count == 2, "delegate should have stopped flush")
         XCTAssertTrue(mixpanel.people.peopleQueue.count == 1, "delegate should have stopped flush")
     }
 

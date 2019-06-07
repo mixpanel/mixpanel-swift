@@ -133,9 +133,10 @@ class Flush: AppLifecycle {
                 flushRequest.sendRequest(requestData,
                                          type: type,
                                          useIP: useIPAddressForGeoLocation,
-                                         completion: { success in
+                                         completion: { [weak self, semaphore, range] success in
                                             #if os(iOS)
                                                 if !MixpanelInstance.isiOSAppExtension() {
+                                                    guard let self = self else { return }
                                                     self.delegate?.updateNetworkActivityIndicator(false)
                                                 }
                                             #endif // os(iOS)

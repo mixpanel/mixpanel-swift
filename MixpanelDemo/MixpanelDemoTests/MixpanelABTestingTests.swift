@@ -224,11 +224,17 @@ class MixpanelABTestingTests: MixpanelBaseTests {
             XCTAssertNotNil(self.mixpanel.superProperties["$experiments"], "$experiments super property should not be nil")
             let experiments = self.mixpanel.superProperties["$experiments"] as! [String: Any]
             XCTAssert(experiments["1"] as! Int == 1, "super properties should have { 1: 1 }")
-            XCTAssertTrue(self.mixpanel.eventsQueue.count == 2, "$experiment_started events not tracked")
+            XCTAssertTrue(self.mixpanel.eventsQueue.count == 3, "$experiment_started events not tracked")
+            var index : Int = 0
             for event: [AnyHashable: Any] in self.mixpanel.eventsQueue {
-                XCTAssertTrue(((event["event"] as! String) == "$experiment_started"), "incorrect event name")
-                let properties = event["properties"] as! [String: Any]
-                XCTAssertNotNil(properties["$experiments"], "$experiments super-property not set on $experiment_started event")
+                if index == 0 {
+                    XCTAssertTrue(((event["event"] as! String) == "$identify"), "incorrect event name")
+                } else {
+                    XCTAssertTrue(((event["event"] as! String) == "$experiment_started"), "incorrect event name")
+                    let properties = event["properties"] as! [String: Any]
+                    XCTAssertNotNil(properties["$experiments"], "$experiments super-property not set on $experiment_started event")
+                }
+                index += 1
             }
             expect.fulfill()
         }

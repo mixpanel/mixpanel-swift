@@ -235,6 +235,56 @@ class MixpanelDemoTests: MixpanelBaseTests {
         }
     }
 
+    func testIdentifyTrack() {
+        stubTrack()
+        stubEngage()
+
+        let distinctIdBeforeIdentify: String? = mixpanel.distinctId
+        let distinctId = "testIdentifyTrack"
+
+        mixpanel.identify(distinctId: distinctId)
+        mixpanel.identify(distinctId: distinctId)
+        waitForTrackingQueue()
+        waitForTrackingQueue()
+
+        var e: InternalProperties = mixpanel.eventsQueue.last!
+        XCTAssertEqual(e["event"] as? String, "$identify", "incorrect event name")
+        var p: InternalProperties = e["properties"] as! InternalProperties
+        XCTAssertEqual(p["distinct_id"] as? String, distinctId, "wrong distinct_id")
+        XCTAssertEqual(p["$anon_distinct_id"] as? String, distinctIdBeforeIdentify, "wrong $anon_distinct_id")
+    }
+
+    func testIdentifyResetTrack() {
+        stubTrack()
+        stubEngage()
+
+        let originalDistinctId: String? = mixpanel.distinctId
+        let distinctId = "testIdentifyTrack"
+        mixpanel.reset()
+        waitForTrackingQueue()
+
+        for i in 1...3 {
+            let prevDistinctId: String? = mixpanel.distinctId
+            let newDistinctId = distinctId + String(i)
+            mixpanel.identify(distinctId: newDistinctId)
+            waitForTrackingQueue()
+            waitForTrackingQueue()
+
+            var e: InternalProperties = mixpanel.eventsQueue.last!
+            XCTAssertEqual(e["event"] as? String, "$identify", "incorrect event name")
+            var p: InternalProperties = e["properties"] as! InternalProperties
+            XCTAssertEqual(p["distinct_id"] as? String, newDistinctId, "wrong distinct_id")
+            XCTAssertEqual(p["$anon_distinct_id"] as? String, prevDistinctId, "wrong $anon_distinct_id")
+            #if MIXPANEL_RANDOM_DISTINCT_ID
+            XCTAssertNotEqual(prevDistinctId, originalDistinctId, "After reset, UUID will be used - never the same");
+            #else
+            XCTAssertEqual(prevDistinctId, originalDistinctId, "After reset, IFA/UIDevice id will be used - always the same");
+            #endif
+            mixpanel.reset()
+            waitForTrackingQueue()
+        }
+    }
+
     func testPersistentIdentity() {
         stubTrack()
         let anonymousId: String? = mixpanel.anonymousId

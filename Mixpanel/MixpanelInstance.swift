@@ -596,7 +596,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     func defaultDistinctId() -> String {
         #if MIXPANEL_RANDOM_DISTINCT_ID
-        return UUID().uuidString
+        let distinctId: String? = UUID().uuidString
         #elseif !os(OSX) && !WATCH_OS
         var distinctId: String? = IFA()
         if distinctId == nil && NSClassFromString("UIDevice") != nil {

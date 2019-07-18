@@ -90,8 +90,9 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-
-            self.setupAutomaticPushTracking()
+            if self.automaticPushTracking {
+                self.setupAutomaticPushTracking()
+            }
         }
         #endif
     }

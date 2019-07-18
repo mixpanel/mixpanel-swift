@@ -130,9 +130,8 @@ class Decide {
 
                 let runningVariants = Set(self.ABTestingInstance.variants.filter { return $0.running })
                 decideResponse.toFinishVariants = runningVariants.subtracting(parsedVariants)
-                let newVariants = parsedVariants.subtracting(runningVariants)
-                decideResponse.newVariants = newVariants
-                self.ABTestingInstance.variants = newVariants.union(runningVariants)
+                decideResponse.newVariants = parsedVariants.subtracting(runningVariants)
+                self.ABTestingInstance.variants = parsedVariants.subtracting(runningVariants).union(runningVariants)
 
                 if let automaticEvents = result["automatic_events"] as? Bool {
                     self.automaticEventsEnabled = automaticEvents

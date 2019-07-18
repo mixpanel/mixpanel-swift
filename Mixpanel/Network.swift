@@ -65,10 +65,14 @@ class Network {
             return
         }
 
-        let session = URLSession.shared
-        session.dataTask(with: request) { (data, response, error) -> Void in
+        URLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
             guard let httpResponse = response as? HTTPURLResponse else {
-                failure(.other(error!), data, response)
+
+                if let hasError = error {
+                    failure(.other(hasError), data, response)
+                } else {
+                    failure(.noData, data, response)
+                }
                 return
             }
             guard httpResponse.statusCode == 200 else {

@@ -254,7 +254,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let readWriteLock: ReadWriteLock
     #if os(iOS)
     var reachability: SCNetworkReachability?
-    let telephonyInfo = CTTelephonyNetworkInfo()
+    static let telephonyInfo = CTTelephonyNetworkInfo()
     #endif
     #if !os(OSX) && !WATCH_OS
     var taskId = UIBackgroundTaskIdentifier.invalid
@@ -662,7 +662,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
     #if os(iOS)
     @objc func setCurrentRadio() {
-        var radio = telephonyInfo.currentRadioAccessTechnology ?? "None"
+        var radio = MixpanelInstance.telephonyInfo.currentRadioAccessTechnology ?? "None"
         let prefix = "CTRadioAccessTechnology"
         if radio.hasPrefix(prefix) {
             radio = (radio as NSString).substring(from: prefix.count)
@@ -671,11 +671,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             AutomaticProperties.automaticPropertiesLock.write { [weak self, radio] in
                 AutomaticProperties.properties["$radio"] = radio
 
-                guard let self = self else {
+                guard self != nil else {
                     return
                 }
 
-                if let carrierName = self.telephonyInfo.subscriberCellularProvider?.carrierName {
+                if let carrierName = MixpanelInstance.telephonyInfo.subscriberCellularProvider?.carrierName {
                     AutomaticProperties.properties["$carrier"] = carrierName
 
                 } else {

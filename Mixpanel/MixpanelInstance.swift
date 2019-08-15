@@ -1181,19 +1181,24 @@ extension MixpanelInstance {
             return
         }
         let epochInterval = Date().timeIntervalSince1970
+
         trackingQueue.async { [weak self, event, properties, epochInterval] in
             guard let self = self else { return }
 
-            let mergedProperties = self.trackInstance.track(event: event,
-                                        properties: properties,
-                                        eventsQueue: &self.eventsQueue,
-                                        timedEvents: &self.timedEvents,
-                                        superProperties: self.superProperties,
-                                        distinctId: self.distinctId,
-                                        anonymousId: self.anonymousId,
-                                        userId: self.userId,
-                                        hadPersistedDistinctId: self.hadPersistedDistinctId,
-                                        epochInterval: epochInterval)
+            let (eventsQueue, timedEvents, mergedProperties) = self.trackInstance.track(event: event,
+                                                                                        properties: properties,
+                                                                                        eventsQueue: self.eventsQueue,
+                                                                                        timedEvents: self.timedEvents,
+                                                                                        superProperties: self.superProperties,
+                                                                                        distinctId: self.distinctId,
+                                                                                        anonymousId: self.anonymousId,
+                                                                                        userId: self.userId,
+                                                                                        hadPersistedDistinctId: self.hadPersistedDistinctId,
+                                                                                        epochInterval: epochInterval)
+            self.readWriteLock.write {
+                self.eventsQueue = eventsQueue
+                self.timedEvents = timedEvents
+            }
 
             self.readWriteLock.read {
                 Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)

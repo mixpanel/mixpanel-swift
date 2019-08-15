@@ -589,7 +589,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertEqual(mixpanel.distinctId, "d1", "custom distinct archive failed")
         XCTAssertTrue(mixpanel.currentSuperProperties().count == 1,
                       "custom super properties archive failed")
-        XCTAssertEqual(mixpanel.eventsQueue[mixpanel.eventsQueue.count - 1]["event"] as? String, "e1",
+        XCTAssertEqual(mixpanel.eventsQueue[0]["event"] as? String, "e1",
                        "event was not successfully archived/unarchived")
         XCTAssertEqual(mixpanel.people.distinctId, "d1",
                        "custom people distinct id archive failed")

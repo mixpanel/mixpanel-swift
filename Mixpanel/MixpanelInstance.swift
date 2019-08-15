@@ -253,7 +253,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var optOutStatus: Bool?
     let readWriteLock: ReadWriteLock
     #if os(iOS)
-    var reachability: SCNetworkReachability?
+    static let reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
     static let telephonyInfo = CTTelephonyNetworkInfo()
     #endif
     #if !os(OSX) && !WATCH_OS
@@ -290,8 +290,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         networkQueue = DispatchQueue(label: label)
 
         #if os(iOS)
-            reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
-            if let reachability = reachability {
+            if let reachability = MixpanelInstance.reachability {
                 var context = SCNetworkReachabilityContext(version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
                 func reachabilityCallback(reachability: SCNetworkReachability, flags: SCNetworkReachabilityFlags, unsafePointer: UnsafeMutableRawPointer?) -> Void {
                     let wifi = flags.contains(SCNetworkReachabilityFlags.reachable) && !flags.contains(SCNetworkReachabilityFlags.isWWAN)
@@ -449,7 +448,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     deinit {
         NotificationCenter.default.removeObserver(self)
         #if os(iOS) && !WATCH_OS
-            if let reachability = reachability {
+            if let reachability = MixpanelInstance.reachability {
                 if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
                     Logger.error(message: "\(self) error unsetting reachability callback")
                 }

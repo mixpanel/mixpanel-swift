@@ -578,8 +578,17 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty, "default people queue archive failed")
         let p: Properties = ["p1": "a"]
         mixpanel.identify(distinctId: "d1")
+        sleep(1)
         mixpanel.registerSuperProperties(p)
         mixpanel.track(event: "e1")
+        mixpanel.track(event: "e3")
+        mixpanel.track(event: "e4")
+        mixpanel.track(event: "e5")
+        mixpanel.track(event: "e6")
+        mixpanel.track(event: "e7")
+        mixpanel.track(event: "e8")
+        mixpanel.track(event: "e9")
+        mixpanel.track(event: "e10")
         mixpanel.people.set(properties: p)
         mixpanel.timedEvents["e2"] = 5.0
         waitForTrackingQueue()
@@ -589,8 +598,24 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertEqual(mixpanel.distinctId, "d1", "custom distinct archive failed")
         XCTAssertTrue(mixpanel.currentSuperProperties().count == 1,
                       "custom super properties archive failed")
-        XCTAssertEqual(mixpanel.eventsQueue[0]["event"] as? String, "e1",
+        XCTAssertEqual(mixpanel.eventsQueue[1]["event"] as? String, "e1",
                        "event was not successfully archived/unarchived")
+        XCTAssertEqual(mixpanel.eventsQueue[2]["event"] as? String, "e3",
+                       "event was not successfully archived/unarchived or order is incorrect")
+        XCTAssertEqual(mixpanel.eventsQueue[3]["event"] as? String, "e4",
+                       "event was not successfully archived/unarchived or order is incorrect")
+        XCTAssertEqual(mixpanel.eventsQueue[4]["event"] as? String, "e5",
+                       "event was not successfully archived/unarchived or order is incorrect")
+        XCTAssertEqual(mixpanel.eventsQueue[5]["event"] as? String, "e6",
+                       "event was not successfully archived/unarchived or order is incorrect")
+        XCTAssertEqual(mixpanel.eventsQueue[6]["event"] as? String, "e7",
+                       "event was not successfully archived/unarchived or order is incorrect")
+        XCTAssertEqual(mixpanel.eventsQueue[7]["event"] as? String, "e8",
+                       "event was not successfully archived/unarchived or order is incorrect")
+        XCTAssertEqual(mixpanel.eventsQueue[8]["event"] as? String, "e9",
+                       "event was not successfully archived/unarchived or order is incorrect")
+        XCTAssertEqual(mixpanel.eventsQueue[9]["event"] as? String, "e10",
+                       "event was not successfully archived/unarchived or order is incorrect")
         XCTAssertEqual(mixpanel.people.distinctId, "d1",
                        "custom people distinct id archive failed")
         XCTAssertTrue(mixpanel.people.peopleQueue.count == 1, "pending people queue archive failed")
@@ -611,7 +636,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(mixpanel.currentSuperProperties().count == 1,
                       "default super properties expected to have 1 item")
         XCTAssertNotNil(mixpanel.eventsQueue, "default events queue from no file is nil")
-        XCTAssertTrue(mixpanel.eventsQueue.count == 2, "default events queue expecting 2 items ($identify call added)")
+        XCTAssertTrue(mixpanel.eventsQueue.count == 10, "default events queue expecting 10 items ($identify call added)")
         XCTAssertNotNil(mixpanel.people.distinctId,
                         "default people distinct id from no file failed")
         XCTAssertNotNil(mixpanel.people.peopleQueue, "default people queue from no file is nil")

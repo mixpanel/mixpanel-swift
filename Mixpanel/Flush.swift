@@ -54,22 +54,23 @@ class Flush: AppLifecycle {
         }
         return mutableEventsQueue
     }
-
-    func orderAutomaticEvents(queue: Queue, automaticEventsEnabled: Bool?) -> (automaticEventQueue: Queue?, eventsQueue: Queue) {
-        var eventsQueue = queue
-        if automaticEventsEnabled == nil || !automaticEventsEnabled! {
-            var discardedItems = Queue()
-            for (i, ev) in eventsQueue.enumerated().reversed() {
-                if let eventName = ev["event"] as? String, eventName.hasPrefix("$ae_") {
-                    discardedItems.append(ev)
-                    eventsQueue.remove(at: i)
+    
+    func orderAutomaticEvents(queue: Queue, automaticEventsEnabled: Bool?) ->
+        (automaticEventQueue: Queue?, eventsQueue: Queue) {
+            var eventsQueue = queue
+            if automaticEventsEnabled == nil || !automaticEventsEnabled! {
+                var discardedItems = Queue()
+                for (i, ev) in eventsQueue.enumerated().reversed() {
+                    if let eventName = ev["event"] as? String, eventName.hasPrefix("$ae_") {
+                        discardedItems.append(ev)
+                        eventsQueue.remove(at: i)
+                    }
+                }
+                if automaticEventsEnabled == nil {
+                    return (discardedItems, eventsQueue)
                 }
             }
-            if automaticEventsEnabled == nil {
-                return (discardedItems, eventsQueue)
-            }
-        }
-        return (nil, eventsQueue)
+            return (nil, eventsQueue)
     }
 
     func flushPeopleQueue(_ peopleQueue: Queue) -> Queue? {

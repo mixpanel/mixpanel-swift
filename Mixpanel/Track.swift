@@ -49,9 +49,9 @@ class Track {
         }
         p["token"] = apiToken
         p["time"] = epochSeconds
-        var timedEvents = timedEvents
+        var shadowTimedEvents = timedEvents
         if let eventStartTime = eventStartTime {
-            timedEvents.removeValue(forKey: ev!)
+            shadowTimedEvents.removeValue(forKey: ev!)
             p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
         }
         p["distinct_id"] = distinctId
@@ -69,17 +69,17 @@ class Track {
         if let properties = properties {
             p += properties
         }
-        
+
         var trackEvent: InternalProperties = ["event": ev!, "properties": p]
         metadata.toDict().forEach { (k,v) in trackEvent[k] = v }
-        var eventsQueue = eventsQueue
+        var shadowEventsQueue = eventsQueue
         
-        eventsQueue.append(trackEvent)
-        if eventsQueue.count > QueueConstants.queueSize {
-            eventsQueue.remove(at: 0)
+        shadowEventsQueue.append(trackEvent)
+        if shadowEventsQueue.count > QueueConstants.queueSize {
+            shadowEventsQueue.remove(at: 0)
         }
         
-        return (eventsQueue, timedEvents, p)
+        return (shadowEventsQueue, shadowTimedEvents, p)
     }
 
     func registerSuperProperties(_ properties: Properties,

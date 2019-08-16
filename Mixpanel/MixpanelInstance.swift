@@ -1137,15 +1137,31 @@ extension MixpanelInstance {
                 #else
                 let automaticEventsEnabled = false
                 #endif
-                self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
-                                                    automaticEventsEnabled: automaticEventsEnabled)
-                self.flushInstance.flushPeopleQueue(&self.people.flushPeopleQueue)
-                self.flushInstance.flushGroupsQueue(&self.flushGroupsQueue)
 
+                let flushEventsQueue = self.flushInstance.flushEventsQueue(self.flushEventsQueue,
+                                                                           automaticEventsEnabled: automaticEventsEnabled)
+                let flushPeopleQueue = self.flushInstance.flushPeopleQueue(self.people.flushPeopleQueue)
+                let flushGroupsQueue = self.flushInstance.flushGroupsQueue(self.flushGroupsQueue)
+                
+                var shadowEventsQueue = Queue()
+                var shadowPeopleQueue = Queue()
+                var shadowGroupsQueue = Queue()
+
+                self.readWriteLock.read {
+                    shadowEventsQueue = self.eventsQueue
+                    shadowPeopleQueue = self.people.peopleQueue
+                    shadowGroupsQueue = self.groupsQueue
+                }
                 self.readWriteLock.write {
-                    self.eventsQueue = self.flushEventsQueue + self.eventsQueue
-                    self.people.peopleQueue = self.people.flushPeopleQueue + self.people.peopleQueue
-                    self.groupsQueue = self.flushGroupsQueue + self.groupsQueue
+                    if let flushEventsQueue = flushEventsQueue {
+                        self.eventsQueue = flushEventsQueue + shadowEventsQueue
+                    }
+                    if let flushPeopleQueue = flushPeopleQueue {
+                        self.people.peopleQueue = flushPeopleQueue + shadowPeopleQueue
+                    }
+                    if let flushGroupsQueue = flushGroupsQueue {
+                        self.groupsQueue = flushGroupsQueue + shadowGroupsQueue
+                    }
                     self.flushEventsQueue.removeAll()
                     self.people.flushPeopleQueue.removeAll()
                     self.flushGroupsQueue.removeAll()

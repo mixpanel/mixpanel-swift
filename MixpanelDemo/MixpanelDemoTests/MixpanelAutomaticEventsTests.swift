@@ -25,10 +25,11 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
     func testSession() {
         self.mixpanel.minimumSessionDuration = 0;
         self.mixpanel.identify(distinctId: "d1")
+        sleep(1)
         self.mixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
-        self.waitForTrackingQueue()
-        let event = self.mixpanel.eventsQueue.first
+        self.waitForMixpanelQueues()
+        let event = self.mixpanel.eventsQueue.last
         let people1 = self.mixpanel.people.peopleQueue[0]["$add"] as! InternalProperties
         let people2 = self.mixpanel.people.peopleQueue[1]["$add"] as! InternalProperties
         XCTAssertEqual(people1["$ae_total_app_sessions"] as? Double, 1, "total app sessions should be added by 1")

@@ -253,8 +253,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var optOutStatus: Bool?
     let readWriteLock: ReadWriteLock
     #if os(iOS)
-    var reachability: SCNetworkReachability?
-    let telephonyInfo = CTTelephonyNetworkInfo()
+    static let reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
+    static let telephonyInfo = CTTelephonyNetworkInfo()
     #endif
     #if !os(OSX) && !WATCH_OS
     var taskId = UIBackgroundTaskIdentifier.invalid
@@ -290,8 +290,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         networkQueue = DispatchQueue(label: label)
 
         #if os(iOS)
-            reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
-            if let reachability = reachability {
+            if let reachability = MixpanelInstance.reachability {
                 var context = SCNetworkReachabilityContext(version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
                 func reachabilityCallback(reachability: SCNetworkReachability, flags: SCNetworkReachabilityFlags, unsafePointer: UnsafeMutableRawPointer?) -> Void {
                     let wifi = flags.contains(SCNetworkReachabilityFlags.reachable) && !flags.contains(SCNetworkReachabilityFlags.isWWAN)
@@ -449,7 +448,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     deinit {
         NotificationCenter.default.removeObserver(self)
         #if os(iOS) && !WATCH_OS
-            if let reachability = reachability {
+            if let reachability = MixpanelInstance.reachability {
                 if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
                     Logger.error(message: "\(self) error unsetting reachability callback")
                 }
@@ -662,7 +661,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
     #if os(iOS)
     @objc func setCurrentRadio() {
-        var radio = telephonyInfo.currentRadioAccessTechnology ?? "None"
+        var radio = MixpanelInstance.telephonyInfo.currentRadioAccessTechnology ?? "None"
         let prefix = "CTRadioAccessTechnology"
         if radio.hasPrefix(prefix) {
             radio = (radio as NSString).substring(from: prefix.count)
@@ -671,11 +670,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             AutomaticProperties.automaticPropertiesLock.write { [weak self, radio] in
                 AutomaticProperties.properties["$radio"] = radio
 
-                guard let self = self else {
+                guard self != nil else {
                     return
                 }
 
-                if let carrierName = self.telephonyInfo.subscriberCellularProvider?.carrierName {
+                if let carrierName = MixpanelInstance.telephonyInfo.subscriberCellularProvider?.carrierName {
                     AutomaticProperties.properties["$carrier"] = carrierName
 
                 } else {
@@ -1138,15 +1137,31 @@ extension MixpanelInstance {
                 #else
                 let automaticEventsEnabled = false
                 #endif
-                self.flushInstance.flushEventsQueue(&self.flushEventsQueue,
-                                                    automaticEventsEnabled: automaticEventsEnabled)
-                self.flushInstance.flushPeopleQueue(&self.people.flushPeopleQueue)
-                self.flushInstance.flushGroupsQueue(&self.flushGroupsQueue)
 
+                let flushEventsQueue = self.flushInstance.flushEventsQueue(self.flushEventsQueue,
+                                                                           automaticEventsEnabled: automaticEventsEnabled)
+                let flushPeopleQueue = self.flushInstance.flushPeopleQueue(self.people.flushPeopleQueue)
+                let flushGroupsQueue = self.flushInstance.flushGroupsQueue(self.flushGroupsQueue)
+                
+                var shadowEventsQueue = Queue()
+                var shadowPeopleQueue = Queue()
+                var shadowGroupsQueue = Queue()
+
+                self.readWriteLock.read {
+                    shadowEventsQueue = self.eventsQueue
+                    shadowPeopleQueue = self.people.peopleQueue
+                    shadowGroupsQueue = self.groupsQueue
+                }
                 self.readWriteLock.write {
-                    self.eventsQueue = self.flushEventsQueue + self.eventsQueue
-                    self.people.peopleQueue = self.people.flushPeopleQueue + self.people.peopleQueue
-                    self.groupsQueue = self.flushGroupsQueue + self.groupsQueue
+                    if let flushEventsQueue = flushEventsQueue {
+                        self.eventsQueue = flushEventsQueue + shadowEventsQueue
+                    }
+                    if let flushPeopleQueue = flushPeopleQueue {
+                        self.people.peopleQueue = flushPeopleQueue + shadowPeopleQueue
+                    }
+                    if let flushGroupsQueue = flushGroupsQueue {
+                        self.groupsQueue = flushGroupsQueue + shadowGroupsQueue
+                    }
                     self.flushEventsQueue.removeAll()
                     self.people.flushPeopleQueue.removeAll()
                     self.flushGroupsQueue.removeAll()
@@ -1181,19 +1196,24 @@ extension MixpanelInstance {
             return
         }
         let epochInterval = Date().timeIntervalSince1970
+
         trackingQueue.async { [weak self, event, properties, epochInterval] in
             guard let self = self else { return }
 
-            let mergedProperties = self.trackInstance.track(event: event,
-                                        properties: properties,
-                                        eventsQueue: &self.eventsQueue,
-                                        timedEvents: &self.timedEvents,
-                                        superProperties: self.superProperties,
-                                        distinctId: self.distinctId,
-                                        anonymousId: self.anonymousId,
-                                        userId: self.userId,
-                                        hadPersistedDistinctId: self.hadPersistedDistinctId,
-                                        epochInterval: epochInterval)
+            let (eventsQueue, timedEvents, mergedProperties) = self.trackInstance.track(event: event,
+                                                                                        properties: properties,
+                                                                                        eventsQueue: self.eventsQueue,
+                                                                                        timedEvents: self.timedEvents,
+                                                                                        superProperties: self.superProperties,
+                                                                                        distinctId: self.distinctId,
+                                                                                        anonymousId: self.anonymousId,
+                                                                                        userId: self.userId,
+                                                                                        hadPersistedDistinctId: self.hadPersistedDistinctId,
+                                                                                        epochInterval: epochInterval)
+            self.readWriteLock.write {
+                self.eventsQueue = eventsQueue
+                self.timedEvents = timedEvents
+            }
 
             self.readWriteLock.read {
                 Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)

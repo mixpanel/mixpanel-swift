@@ -27,14 +27,14 @@ class Track {
     
     func track(event: String?,
                properties: Properties? = nil,
-               eventsQueue: inout Queue,
-               timedEvents: inout InternalProperties,
+               eventsQueue: Queue,
+               timedEvents: InternalProperties,
                superProperties: InternalProperties,
                distinctId: String,
                anonymousId: String?,
                userId: String?,
                hadPersistedDistinctId: Bool?,
-               epochInterval: Double) -> InternalProperties {
+               epochInterval: Double) -> (eventsQueque: Queue, timedEvents: InternalProperties, properties: InternalProperties) {
         var ev = event
         if ev == nil || ev!.isEmpty {
             Logger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")
@@ -49,10 +49,9 @@ class Track {
         }
         p["token"] = apiToken
         p["time"] = epochSeconds
+        var shadowTimedEvents = timedEvents
         if let eventStartTime = eventStartTime {
-            self.lock.write {
-                timedEvents.removeValue(forKey: ev!)
-            }
+            shadowTimedEvents.removeValue(forKey: ev!)
             p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
         }
         p["distinct_id"] = distinctId
@@ -73,15 +72,14 @@ class Track {
 
         var trackEvent: InternalProperties = ["event": ev!, "properties": p]
         metadata.toDict().forEach { (k,v) in trackEvent[k] = v }
+        var shadowEventsQueue = eventsQueue
         
-        self.lock.write {
-            eventsQueue.append(trackEvent)
-            if eventsQueue.count > QueueConstants.queueSize {
-                eventsQueue.remove(at: 0)
-            }
+        shadowEventsQueue.append(trackEvent)
+        if shadowEventsQueue.count > QueueConstants.queueSize {
+            shadowEventsQueue.remove(at: 0)
         }
         
-        return p
+        return (shadowEventsQueue, shadowTimedEvents, p)
     }
 
     func registerSuperProperties(_ properties: Properties,

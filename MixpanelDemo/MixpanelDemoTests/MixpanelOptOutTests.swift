@@ -119,7 +119,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             "$app_version": "override"]
         mixpanel.optInTracking(distinctId: "testDistinctId", properties: testProperties)
         waitForTrackingQueue()
-        let props = mixpanel.eventsQueue.last!["properties"] as? InternalProperties
+        let props = mixpanel.eventsQueue.first!["properties"] as? InternalProperties
         XCTAssertEqual(props!["string"] as? String, "yello")
         XCTAssertEqual(props!["number"] as? NSNumber, 3)
         XCTAssertEqual(props!["date"] as? Date, now)

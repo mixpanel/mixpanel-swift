@@ -114,6 +114,7 @@ class MixpanelNotificationTests: MixpanelBaseTests {
         mixpanel.decideInstance.notificationsInstance.showNotification(notif!)
         //wait for notifs to be shown from main queue
         waitForAsyncTasks()
+        waitForMixpanelQueues()
         XCTAssertTrue(UIApplication.shared.windows.count == numberOfWindows + 1, "Notification was not presented")
         XCTAssertTrue(mixpanel.eventsQueue.count == 1, "should only show same notification once (and track 1 notif shown event)")
         XCTAssertEqual(mixpanel.eventsQueue.last?["event"] as? String, "$campaign_delivery", "last event should be campaign delivery")

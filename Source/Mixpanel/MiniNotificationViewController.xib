@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16E144f" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="MiniNotificationViewController" customModule="Mixpanel" customModuleProvider="target">
+            <connections>
+                <outlet property="bodyLabel" destination="rjA-3G-jOY" id="Yfq-cQ-MDe"/>
+                <outlet property="imageView" destination="uzp-I3-TLs" id="1lo-qP-NlQ"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="379" height="65"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="uzp-I3-TLs">
+                    <rect key="frame" x="12.5" y="12.5" width="40" height="40"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="40" id="Pam-oK-Tte"/>
+                        <constraint firstAttribute="width" constant="40" id="fPX-II-eWi"/>
+                    </constraints>
+                </imageView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rjA-3G-jOY">
+                    <rect key="frame" x="65" y="24" width="301.5" height="17"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.90099999999999991" colorSpace="calibratedRGB"/>
+            <constraints>
+                <constraint firstItem="uzp-I3-TLs" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="12.5" id="BmC-Mw-cEv"/>
+                <constraint firstItem="rjA-3G-jOY" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="65" id="SJa-et-Ea2"/>
+                <constraint firstAttribute="trailing" secondItem="rjA-3G-jOY" secondAttribute="trailing" constant="12.5" id="UQk-P7-iEP"/>
+                <constraint firstItem="uzp-I3-TLs" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="12.5" id="YKd-bC-Oc9"/>
+                <constraint firstItem="rjA-3G-jOY" firstAttribute="centerY" secondItem="uzp-I3-TLs" secondAttribute="centerY" id="YtT-ZR-dvM"/>
+                <constraint firstAttribute="bottom" secondItem="uzp-I3-TLs" secondAttribute="bottom" constant="12.5" id="bYr-T0-sIg"/>
+            </constraints>
+            <nil key="simulatedStatusBarMetrics"/>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <point key="canvasLocation" x="-497.5" y="-50.5"/>
+        </view>
+    </objects>
+</document>

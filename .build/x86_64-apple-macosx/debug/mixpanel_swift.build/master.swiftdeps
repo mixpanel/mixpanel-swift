@@ -1,0 +1,5 @@
+version: "Apple Swift version 5.0.1 (swiftlang-1001.0.82.4 clang-1001.0.46.5)"
+options: "4b97c0df9d8b18f8639f8865dc1421d4"
+build_time: [1567496434, 134234000]
+inputs:
+  "/Users/MarcZhao/Desktop/mixpanel-swift/Sources/mixpanel-swift/mixpanel_swift.swift": [1567496408, 793751685]

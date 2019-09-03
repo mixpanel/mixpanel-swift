@@ -1,0 +1,11 @@
+{
+  "": {
+    "swift-dependencies": "/Users/MarcZhao/Desktop/mixpanel-swift/.build/x86_64-apple-macosx/debug/mixpanel_swift.build/master.swiftdeps"
+  },
+  "/Users/MarcZhao/Desktop/mixpanel-swift/Sources/mixpanel-swift/mixpanel_swift.swift": {
+    "dependencies": "/Users/MarcZhao/Desktop/mixpanel-swift/.build/x86_64-apple-macosx/debug/mixpanel_swift.build/mixpanel_swift.d",
+    "object": "/Users/MarcZhao/Desktop/mixpanel-swift/.build/x86_64-apple-macosx/debug/mixpanel_swift.build/mixpanel_swift.swift.o",
+    "swiftmodule": "/Users/MarcZhao/Desktop/mixpanel-swift/.build/x86_64-apple-macosx/debug/mixpanel_swift.build/mixpanel_swift~partial.swiftmodule",
+    "swift-dependencies": "/Users/MarcZhao/Desktop/mixpanel-swift/.build/x86_64-apple-macosx/debug/mixpanel_swift.build/mixpanel_swift.swiftdeps"
+  }
+}

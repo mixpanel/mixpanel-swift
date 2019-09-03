@@ -1,0 +1,21 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "mixpanel_swift"
+provides-nominal:
+- "14mixpanel_swiftAAV"
+provides-member:
+- ["14mixpanel_swiftAAV", ""]
+provides-dynamic-lookup:
+depends-top-level:
+- "StringLiteralType"
+- "mixpanel_swift"
+depends-member:
+- ["14mixpanel_swiftAAV", "init"]
+- ["14mixpanel_swiftAAV", "text"]
+depends-nominal:
+- "14mixpanel_swiftAAV"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+interface-hash: "bbaca02fb69738d9d94eb4613c3215e5"

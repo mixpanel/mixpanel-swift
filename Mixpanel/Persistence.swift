@@ -26,6 +26,9 @@ struct ArchivedProperties {
 
 class Persistence {
 
+    private static let archiveQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.archiveQueue",
+                                                                   qos: .utility)
+
     enum ArchiveType: String {
         case events
         case people
@@ -86,80 +89,77 @@ class Persistence {
     #endif // DECIDE
 
     class func archiveEvents(_ eventsQueue: Queue, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.events, object: eventsQueue, token: token)
-        objc_sync_exit(self)
+        archiveQueue.async { [eventsQueue, token] in
+            _archiveToFile(.events, object: eventsQueue, token: token)
+        }
     }
 
     class func archivePeople(_ peopleQueue: Queue, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.people, object: peopleQueue, token: token)
-        objc_sync_exit(self)
+        archiveQueue.async { [peopleQueue, token] in
+            _archiveToFile(.people, object: peopleQueue, token: token)
+        }
     }
 
     class func archiveGroups(_ groupsQueue: Queue, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.groups, object: groupsQueue, token: token)
-        objc_sync_exit(self)
+        archiveQueue.async { [groupsQueue, token] in
+            _archiveToFile(.groups, object: groupsQueue, token: token)
+        }
     }
 
     class func archiveOptOutStatus(_ optOutStatus: Bool, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.optOutStatus, object: optOutStatus, token: token)
-        objc_sync_exit(self)
+        archiveQueue.async { [optOutStatus, token] in
+            _archiveToFile(.optOutStatus, object: optOutStatus, token: token)
+        }
     }
 
     class func archiveProperties(_ properties: ArchivedProperties, token: String) {
-        objc_sync_enter(self)
-        var p = InternalProperties()
-        p["distinctId"] = properties.distinctId
-        p["anonymousId"] = properties.anonymousId
-        p["userId"] = properties.userId
-        p["alias"] = properties.alias
-        p["hadPersistedDistinctId"] = properties.hadPersistedDistinctId
-        p["superProperties"] = properties.superProperties
-        p["peopleDistinctId"] = properties.peopleDistinctId
-        p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
-        p["timedEvents"] = properties.timedEvents
-        #if DECIDE
-        p["shownNotifications"] = properties.shownNotifications
-        p["automaticEvents"] = properties.automaticEventsEnabled
-        #endif // DECIDE
-        archiveToFile(.properties, object: p, token: token)
-        objc_sync_exit(self)
+        archiveQueue.async { [properties, token] in
+            var p = InternalProperties()
+            p["distinctId"] = properties.distinctId
+            p["anonymousId"] = properties.anonymousId
+            p["userId"] = properties.userId
+            p["alias"] = properties.alias
+            p["hadPersistedDistinctId"] = properties.hadPersistedDistinctId
+            p["superProperties"] = properties.superProperties
+            p["peopleDistinctId"] = properties.peopleDistinctId
+            p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
+            p["timedEvents"] = properties.timedEvents
+            #if DECIDE
+            p["shownNotifications"] = properties.shownNotifications
+            p["automaticEvents"] = properties.automaticEventsEnabled
+            #endif // DECIDE
+            _archiveToFile(.properties, object: p, token: token)
+        }
     }
 
     #if DECIDE
     class func archiveVariants(_ variants: Set<Variant>, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.variants, object: variants, token: token)
-        objc_sync_exit(self)
+        archiveQueue.async { [variants, token] in
+            _archiveToFile(.variants, object: variants, token: token)
+        }
     }
 
     class func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.codelessBindings, object: codelessBindings, token: token)
-        objc_sync_exit(self)
+        archiveQueue.async { [codelessBindings, token] in
+            _archiveToFile(.codelessBindings, object: codelessBindings, token: token)
+        }
     }
     #endif // DECIDE
 
-    class private func archiveToFile(_ type: ArchiveType, object: Any, token: String) {
+    /// WARNING: Only call from archiveQueue!
+    class private func _archiveToFile(_ type: ArchiveType, object: Any, token: String) {
         let filePath = filePathWithType(type, token: token)
+
         guard let path = filePath else {
             Logger.error(message: "bad file path, cant fetch file")
             return
         }
 
-        ExceptionWrapper.try({ [cObject = object, cPath = path, cType = type] in
-            if !NSKeyedArchiver.archiveRootObject(cObject, toFile: cPath) {
-                Logger.error(message: "failed to archive \(cType.rawValue)")
-                return
-            }
-        }, catch: { [cType = type] (error) in
-            Logger.error(message: "failed to archive \(cType.rawValue) due to an uncaught exception")
+        guard NSKeyedArchiver.archiveRootObject(object, toFile: path) else {
+            Logger.error(message: "failed to archive \(type.rawValue)")
             return
-        }, finally: {})
-        
+        }
+
         addSkipBackupAttributeToItem(at: path)
     }
 

@@ -156,7 +156,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
             mixpanel.track(event: "event", properties: ["i": 5000 + i])
         }
         waitForTrackingQueue()
-        var e: InternalProperties = mixpanel.eventsQueue.last!
+        let e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertTrue(mixpanel.eventsQueue.count == 5000)
         XCTAssertEqual((e["properties"] as? InternalProperties)?["i"] as? Int, 5004)
     }
@@ -216,7 +216,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                            kTestToken, "incorrect project token in people record")
             XCTAssertEqual(mixpanel.people.peopleQueue.last?["$distinct_id"] as? String,
                            distinctId, "distinct id not set properly on unidentified people record")
-            var p: InternalProperties = mixpanel.people.peopleQueue.last?["$set"] as! InternalProperties
+            let p: InternalProperties = mixpanel.people.peopleQueue.last?["$set"] as! InternalProperties
             XCTAssertEqual(p["p1"] as? String, "a", "custom people property not queued")
             assertDefaultPeopleProperties(p)
             mixpanel.people.set(property: "p1", to: "a")
@@ -247,9 +247,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
         waitForTrackingQueue()
         waitForTrackingQueue()
 
-        var e: InternalProperties = mixpanel.eventsQueue.last!
+        let e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertEqual(e["event"] as? String, "$identify", "incorrect event name")
-        var p: InternalProperties = e["properties"] as! InternalProperties
+        let p: InternalProperties = e["properties"] as! InternalProperties
         XCTAssertEqual(p["distinct_id"] as? String, distinctId, "wrong distinct_id")
         XCTAssertEqual(p["$anon_distinct_id"] as? String, distinctIdBeforeIdentify, "wrong $anon_distinct_id")
     }
@@ -270,9 +270,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
             waitForTrackingQueue()
             waitForTrackingQueue()
 
-            var e: InternalProperties = mixpanel.eventsQueue.last!
+            let e: InternalProperties = mixpanel.eventsQueue.last!
             XCTAssertEqual(e["event"] as? String, "$identify", "incorrect event name")
-            var p: InternalProperties = e["properties"] as! InternalProperties
+            let p: InternalProperties = e["properties"] as! InternalProperties
             XCTAssertEqual(p["distinct_id"] as? String, newDistinctId, "wrong distinct_id")
             XCTAssertEqual(p["$anon_distinct_id"] as? String, prevDistinctId, "wrong $anon_distinct_id")
             #if MIXPANEL_RANDOM_DISTINCT_ID
@@ -334,9 +334,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
     func testTrackWithDefaultProperties() {
         mixpanel.track(event: "Something Happened")
         waitForTrackingQueue()
-        var e: InternalProperties = mixpanel.eventsQueue.last!
+        let e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertEqual(e["event"] as? String, "Something Happened", "incorrect event name")
-        var p: InternalProperties = e["properties"] as! InternalProperties
+        let p: InternalProperties = e["properties"] as! InternalProperties
         XCTAssertNotNil(p["$app_build_number"], "$app_build_number not set")
         XCTAssertNotNil(p["$app_version_string"], "$app_version_string not set")
         XCTAssertNotNil(p["$lib_version"], "$lib_version not set")
@@ -360,7 +360,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                              "$app_version": "override"]
         mixpanel.track(event: "Something Happened", properties: p)
         waitForTrackingQueue()
-        var props: InternalProperties = mixpanel.eventsQueue.last?["properties"] as! InternalProperties
+        let props: InternalProperties = mixpanel.eventsQueue.last?["properties"] as! InternalProperties
         XCTAssertEqual(props["string"] as? String, "yello")
         XCTAssertEqual(props["number"] as? Int, 3)
         XCTAssertEqual(props["date"] as? Date, now)
@@ -383,9 +383,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let groupID = "test_id"
         mixpanel.trackWithGroups(event: "Something Happened", properties: [groupKey: "some other value", "p1": "value"], groups: [groupKey: groupID])
         waitForTrackingQueue()
-        var e: InternalProperties = mixpanel.eventsQueue.last!
+        let e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertEqual(e["event"] as? String, "Something Happened", "incorrect event name")
-        var p: InternalProperties = e["properties"] as! InternalProperties
+        let p: InternalProperties = e["properties"] as! InternalProperties
         XCTAssertNotNil(p["$app_build_number"], "$app_build_number not set")
         XCTAssertNotNil(p["$app_version_string"], "$app_version_string not set")
         XCTAssertNotNil(p["$lib_version"], "$lib_version not set")
@@ -486,9 +486,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
                                        launchOptions: launchOptions,
                                        flushInterval: 60)
         waitForTrackingQueue()
-        var e: InternalProperties = mixpanel.eventsQueue.last!
+        let e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertEqual(e["event"] as? String, "$app_open", "incorrect event name")
-        var p: InternalProperties = e["properties"] as! InternalProperties
+        let p: InternalProperties = e["properties"] as! InternalProperties
         XCTAssertEqual(p["campaign_id"] as? Int, 54321, "campaign_id not equal")
         XCTAssertEqual(p["message_id"] as? Int, 12345, "message_id not equal")
         XCTAssertEqual(p["journey_id"] as? Int, 1, "journey_id not equal")
@@ -500,9 +500,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let nsJourneyId: NSNumber = 1
         mixpanel.trackPushNotification(["mp": ["m": 98765, "c": 56789, "journey_id": nsJourneyId, "additional_param": "abcd"]])
         waitForTrackingQueue()
-        var e: InternalProperties = mixpanel.eventsQueue.last!
+        let e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertEqual(e["event"] as? String, "$campaign_received", "incorrect event name")
-        var p: InternalProperties = e["properties"] as! InternalProperties
+        let p: InternalProperties = e["properties"] as! InternalProperties
         XCTAssertEqual(p["campaign_id"] as? Int, 56789, "campaign_id not equal")
         XCTAssertEqual(p["message_id"] as? Int, 98765, "message_id not equal")
         XCTAssertEqual(p["journey_id"] as? Int, 1, "journey_id not equal")
@@ -567,8 +567,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testArchive() {
-        mixpanel.archive()
-        mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
+        let testToken = randomId()
+        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
         XCTAssertEqual(mixpanel.distinctId, mixpanel.defaultDistinctId(),
                        "default distinct id archive failed")
         XCTAssertTrue(mixpanel.currentSuperProperties().isEmpty,
@@ -578,8 +578,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty, "default people queue archive failed")
         let p: Properties = ["p1": "a"]
         mixpanel.identify(distinctId: "d1")
-        sleep(1)
         mixpanel.registerSuperProperties(p)
+        sleep(2)
         mixpanel.track(event: "e1")
         mixpanel.track(event: "e3")
         mixpanel.track(event: "e4")
@@ -590,10 +590,11 @@ class MixpanelDemoTests: MixpanelBaseTests {
         mixpanel.track(event: "e9")
         mixpanel.track(event: "e10")
         mixpanel.people.set(properties: p)
-        mixpanel.timedEvents["e2"] = 5.0
-        waitForTrackingQueue()
+        mixpanel.timedEvents["e2"] = 5
         mixpanel.archive()
-        mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
+        waitForTrackingQueue()
+        
+        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
         waitForTrackingQueue()
         XCTAssertEqual(mixpanel.distinctId, "d1", "custom distinct archive failed")
         XCTAssertTrue(mixpanel.currentSuperProperties().count == 1,
@@ -623,15 +624,15 @@ class MixpanelDemoTests: MixpanelBaseTests {
                        "timedEvents archive failed")
         let fileManager = FileManager.default
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.events, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.events, token: testToken)!),
                       "events archive file not removed")
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.people, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.people, token: testToken)!),
                       "people archive file not removed")
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.properties, token: testToken)!),
                       "properties archive file not removed")
-        mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
+        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
         XCTAssertEqual(mixpanel.distinctId, "d1", "expecting d1 as distinct id as initialised")
         XCTAssertTrue(mixpanel.currentSuperProperties().count == 1,
                       "default super properties expected to have 1 item")
@@ -646,28 +647,28 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let garbage = "garbage".data(using: String.Encoding.utf8)!
         do {
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.events, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.events, token: testToken)!),
                               options: [])
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.people, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.people, token: testToken)!),
                               options: [])
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.properties, token: testToken)!),
                               options: [])
         } catch {
             print("couldn't write data")
         }
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.events, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.events, token: testToken)!),
                       "events archive file not removed")
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.people, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.people, token: testToken)!),
                       "people archive file not removed")
         XCTAssertTrue(fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.properties, token: testToken)!),
                       "properties archive file not removed")
-        Persistence.deleteMPUserDefaultsData(token: kTestToken)
-        mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
+        Persistence.deleteMPUserDefaultsData(token: testToken)
+        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
         waitForTrackingQueue()
         XCTAssertEqual(mixpanel.distinctId, mixpanel.defaultDistinctId(),
                        "default distinct id from garbage failed")
@@ -689,6 +690,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     func testUnarchiveInconsistentData() {
         // corrupt file
         let fileManager = FileManager.default
+        let testToken = randomId()
         // Prior 2.1.7 we used to share every class between main target and extension target(appex). For serialization, this will cause problem.
         // Because if the archive is triggered in extension, the class object will be saved as [Target Name].[Class name] for the key. Since in later version,
         // we removed extension target. If the archive happened in 2.1.6, and unarchive happened in 2.4.4 (this is the case for upgrading the sdk), it will trigger a crash
@@ -699,32 +701,33 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let object = try! JSONSerialization.jsonObject(with: data, options: [])
         let variant = Variant(JSONObject: object as? [String: Any])
         NSKeyedArchiver.setClassName("Extension.Variant", for: Variant.self)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.events, token: kTestToken)!)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.people, token: kTestToken)!)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.properties, token: kTestToken)!)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.codelessBindings, token: kTestToken)!)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.variants, token: kTestToken)!)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.optOutStatus, token: kTestToken)!)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.events, token: testToken)!)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.people, token: testToken)!)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.properties, token: testToken)!)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.codelessBindings, token: testToken)!)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.variants, token: testToken)!)
+        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.optOutStatus, token: testToken)!)
 
-        mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
+        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
         waitForTrackingQueue()
+       // waitForArchive()
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.events, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.events, token: testToken)!),
                       "events archive file not removed")
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.people, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.people, token: testToken)!),
                       "people archive file not removed")
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.properties, token: testToken)!),
                       "properties archive file not removed")
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.codelessBindings, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.codelessBindings, token: testToken)!),
                       "properties archive file not removed")
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.variants, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.variants, token: testToken)!),
                       "properties archive file not removed")
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.optOutStatus, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.optOutStatus, token: testToken)!),
                       "properties archive file not removed")
     }
 
@@ -732,48 +735,52 @@ class MixpanelDemoTests: MixpanelBaseTests {
         // corrupt file
         let fileManager = FileManager.default
         let garbage = "garbage".data(using: String.Encoding.utf8)!
+        let testToken = randomId()
+
         do {
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.events, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.events, token: testToken)!),
                               options: [])
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.people, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.people, token: testToken)!),
                               options: [])
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.properties, token: testToken)!),
                               options: [])
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.codelessBindings, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.codelessBindings, token: testToken)!),
                               options: [])
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.variants, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.variants, token: testToken)!),
                               options: [])
             try garbage.write(to: URL(
-                fileURLWithPath: Persistence.filePathWithType(.optOutStatus, token: kTestToken)!),
+                fileURLWithPath: Persistence.filePathWithType(.optOutStatus, token: testToken)!),
                               options: [])
         } catch {
             print("couldn't write data")
         }
 
-        mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
+        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
         waitForTrackingQueue()
+        
+        
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.events, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.events, token: testToken)!),
                       "events archive file not removed")
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.people, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.people, token: testToken)!),
                       "people archive file not removed")
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.properties, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.properties, token: testToken)!),
                       "properties archive file not removed")
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.codelessBindings, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.codelessBindings, token: testToken)!),
                       "properties archive file not removed")
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.variants, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.variants, token: testToken)!),
                       "properties archive file not removed")
         XCTAssertTrue(!fileManager.fileExists(
-            atPath: Persistence.filePathWithType(.optOutStatus, token: kTestToken)!),
+            atPath: Persistence.filePathWithType(.optOutStatus, token: testToken)!),
                       "properties archive file not removed")
         waitForTrackingQueue()
     }

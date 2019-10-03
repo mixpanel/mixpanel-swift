@@ -10,10 +10,6 @@ import XCTest
 @testable import Mixpanel
 
 class MixpanelOptOutTests: MixpanelBaseTests {
-    func randomId() -> String
-    {
-        return String(format: "%08x%08x", arc4random(), arc4random())
-    }
     
     func testHasOptOutTrackingFlagBeingSetProperlyAfterInitializedWithOptedOutYES()
     {

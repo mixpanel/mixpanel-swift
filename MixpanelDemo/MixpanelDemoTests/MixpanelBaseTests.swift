@@ -70,6 +70,11 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         }
     }
     
+    func randomId() -> String
+    {
+        return String(format: "%08x%08x", arc4random(), arc4random())
+    }
+    
     func waitForMixpanelQueues() {
         mixpanel.trackingQueue.sync() {
             mixpanel.networkQueue.sync() {

@@ -282,12 +282,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             decideInstance = Decide(basePathIdentifier: name, lock: self.readWriteLock)
         #endif // DECIDE
         let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: label)
+        trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
                               metadata: sessionMetadata)
-        networkQueue = DispatchQueue(label: label)
+        networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
 
         #if os(iOS)
             if let reachability = MixpanelInstance.reachability {
@@ -1197,14 +1197,25 @@ extension MixpanelInstance {
         }
         let epochInterval = Date().timeIntervalSince1970
 
+
+       // }
+
         trackingQueue.async { [weak self, event, properties, epochInterval] in
             guard let self = self else { return }
-
+            var shadowEventsQueue = Queue()
+            var shadowTimedEvents = InternalProperties()
+            var shadowSuperProperties = InternalProperties()
+            
+            self.readWriteLock.read {
+                shadowEventsQueue = self.eventsQueue
+                shadowTimedEvents = self.timedEvents
+                shadowSuperProperties = self.superProperties
+            }
             let (eventsQueue, timedEvents, mergedProperties) = self.trackInstance.track(event: event,
                                                                                         properties: properties,
-                                                                                        eventsQueue: self.eventsQueue,
-                                                                                        timedEvents: self.timedEvents,
-                                                                                        superProperties: self.superProperties,
+                                                                                        eventsQueue: shadowEventsQueue,
+                                                                                        timedEvents: shadowTimedEvents,
+                                                                                        superProperties: shadowSuperProperties,
                                                                                         distinctId: self.distinctId,
                                                                                         anonymousId: self.anonymousId,
                                                                                         userId: self.userId,
@@ -1222,7 +1233,7 @@ extension MixpanelInstance {
             self.decideInstance.notificationsInstance.showNotification(event: event, properties: mergedProperties)
             #endif  // DECIDE
         }
-        
+
         if MixpanelInstance.isiOSAppExtension() {
             flush()
         }

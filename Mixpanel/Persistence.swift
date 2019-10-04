@@ -25,6 +25,13 @@ struct ArchivedProperties {
 }
 
 class Persistence {
+    private static let archiveEventQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.event.archive", qos: .utility)
+    private static let archivePeopleQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.people.archive", qos: .utility)
+    private static let archiveGroupsQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.groups.archive", qos: .utility)
+    private static let archiveOptOutStatusQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.optout.archive", qos: .utility)
+    private static let archiveCodelessQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.codeless.archive", qos: .utility)
+    private static let archivePropertiesQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.properties.archive", qos: .utility)
+    private static let archiveVariantQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.variant.archive", qos: .utility)
 
     enum ArchiveType: String {
         case events
@@ -86,60 +93,60 @@ class Persistence {
     #endif // DECIDE
 
     class func archiveEvents(_ eventsQueue: Queue, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.events, object: eventsQueue, token: token)
-        objc_sync_exit(self)
+        archiveEventQueue.sync { [eventsQueue, token] in
+            archiveToFile(.events, object: eventsQueue, token: token)
+        }
     }
 
     class func archivePeople(_ peopleQueue: Queue, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.people, object: peopleQueue, token: token)
-        objc_sync_exit(self)
+        archivePeopleQueue.sync { [peopleQueue, token] in
+            archiveToFile(.people, object: peopleQueue, token: token)
+        }
     }
 
     class func archiveGroups(_ groupsQueue: Queue, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.groups, object: groupsQueue, token: token)
-        objc_sync_exit(self)
+        archiveGroupsQueue.sync { [groupsQueue, token] in
+            archiveToFile(.groups, object: groupsQueue, token: token)
+        }
     }
 
     class func archiveOptOutStatus(_ optOutStatus: Bool, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.optOutStatus, object: optOutStatus, token: token)
-        objc_sync_exit(self)
+        archiveOptOutStatusQueue.sync { [optOutStatus, token] in
+            archiveToFile(.optOutStatus, object: optOutStatus, token: token)
+        }
     }
 
     class func archiveProperties(_ properties: ArchivedProperties, token: String) {
-        objc_sync_enter(self)
-        var p = InternalProperties()
-        p["distinctId"] = properties.distinctId
-        p["anonymousId"] = properties.anonymousId
-        p["userId"] = properties.userId
-        p["alias"] = properties.alias
-        p["hadPersistedDistinctId"] = properties.hadPersistedDistinctId
-        p["superProperties"] = properties.superProperties
-        p["peopleDistinctId"] = properties.peopleDistinctId
-        p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
-        p["timedEvents"] = properties.timedEvents
-        #if DECIDE
-        p["shownNotifications"] = properties.shownNotifications
-        p["automaticEvents"] = properties.automaticEventsEnabled
-        #endif // DECIDE
-        archiveToFile(.properties, object: p, token: token)
-        objc_sync_exit(self)
+        archivePropertiesQueue.sync { [properties, token] in
+            var p = InternalProperties()
+            p["distinctId"] = properties.distinctId
+            p["anonymousId"] = properties.anonymousId
+            p["userId"] = properties.userId
+            p["alias"] = properties.alias
+            p["hadPersistedDistinctId"] = properties.hadPersistedDistinctId
+            p["superProperties"] = properties.superProperties
+            p["peopleDistinctId"] = properties.peopleDistinctId
+            p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
+            p["timedEvents"] = properties.timedEvents
+            #if DECIDE
+            p["shownNotifications"] = properties.shownNotifications
+            p["automaticEvents"] = properties.automaticEventsEnabled
+            #endif // DECIDE
+            archiveToFile(.properties, object: p, token: token)
+        }
     }
 
     #if DECIDE
     class func archiveVariants(_ variants: Set<Variant>, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.variants, object: variants, token: token)
-        objc_sync_exit(self)
+        archiveVariantQueue.sync { [variants, token] in
+            archiveToFile(.variants, object: variants, token: token)
+        }
     }
 
     class func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
-        objc_sync_enter(self)
-        archiveToFile(.codelessBindings, object: codelessBindings, token: token)
-        objc_sync_exit(self)
+        archiveCodelessQueue.sync { [codelessBindings, token] in
+            archiveToFile(.codelessBindings, object: codelessBindings, token: token)
+        }
     }
     #endif // DECIDE
 

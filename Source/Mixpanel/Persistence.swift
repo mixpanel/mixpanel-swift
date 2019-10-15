@@ -7,7 +7,9 @@
 //
 
 import Foundation
-import Mixpanel_ObjC
+#if SWIFT_PACKAGE
+import ExceptionWrapper
+#endif
 
 struct ArchivedProperties {
     let superProperties: InternalProperties

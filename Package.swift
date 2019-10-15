@@ -8,7 +8,7 @@ let package = Package(
         .library(name: "Mixpanel", targets: ["Mixpanel"])
     ],
     targets: [
-        .target(name: "Mixpanel", dependencies: ["Mixpanel-ObjC"]),
-        .target(name: "Mixpanel-ObjC")
+        .target(name: "Mixpanel", dependencies: ["ExceptionWrapper"]),
+        .target(name: "ExceptionWrapper")
     ]
 )

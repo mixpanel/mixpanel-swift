@@ -34,7 +34,6 @@ Pod::Spec.new do |s|
   }
 
   s.watchos.deployment_target = '3.0'
-  s.watchos.frameworks = 'WatchKit', 'Foundation'
   s.watchos.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) WATCH_OS'
   }

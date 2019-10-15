@@ -19,6 +19,7 @@ profile
 *.cer
 *.p12
 *.mobileprovision
+.swiftpm/
 
 # AppCode
 .idea

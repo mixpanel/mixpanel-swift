@@ -320,7 +320,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
             sel = ObjectSelector(string: "/UITableViewController/UITableView/" +
                 "UITableViewCell[0]/UITableViewCellContentView/UILabel")
         }
-        var selected = sel.selectFrom(root: UIApplication.shared.keyWindow?.rootViewController!)
+        let selected = sel.selectFrom(root: UIApplication.shared.keyWindow?.rootViewController!)
         XCTAssertEqual(selected.count, 1, "Should have selected one object")
         XCTAssert((selected[0] is UILabel), "object should be UITableViewCell")
         XCTAssert(((selected[0] as! UILabel).text! == "Tracking"),
@@ -369,7 +369,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
         XCTAssert(image.size.equalTo(CGSize(width: 2.0, height: 2.0)), "Image should be 2x2")
         // Serialize a blank image.
         let nilImage = UIImage()
-        var nilImgDict = UIImageToNSDictionary().transformedValue(nilImage) as! [String: Any]
+        let nilImgDict = UIImageToNSDictionary().transformedValue(nilImage) as! [String: Any]
         let nilImagesArr = nilImgDict["images"] as? [[String: Any]]
         XCTAssertEqual(nilImagesArr?.count, 0)
     }

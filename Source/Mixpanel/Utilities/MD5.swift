@@ -66,7 +66,7 @@ final class MD5 {
                              currentHash: inout Array<UInt32>) where C.Iterator.Element == UInt8, C.Index == Int {
 
         // break chunk into sixteen 32-bit words M[j], 0 ≤ j ≤ 15
-        var M = chunk.toUInt32Array()
+        let M = chunk.toUInt32Array()
         assert(M.count == 16, "Invalid array")
 
         // Initialize hash value for this chunk:

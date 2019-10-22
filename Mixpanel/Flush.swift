@@ -83,7 +83,7 @@ class Flush: AppLifecycle {
 
     func flushQueue(type: FlushType, queue: Queue) -> Queue? {
         if flushRequest.requestNotAllowed() {
-            return nil
+            return queue
         }
         return flushQueueInBatches(queue, type: type)
     }

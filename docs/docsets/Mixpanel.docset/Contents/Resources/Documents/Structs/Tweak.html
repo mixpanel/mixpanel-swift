@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Tweak Structure Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Struct/Tweak" class="dashAnchor"></a>
+    <a title="Tweak Structure Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">Mixpanel 2.6.7 Docs</a> (91% documented)</p>
+        <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png"/>View on GitHub</a></p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">Mixpanel Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        Tweak Structure Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/Group.html">Group</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Mixpanel.html">Mixpanel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MixpanelInstance.html">MixpanelInstance</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/People.html">People</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes.html#/s:8Mixpanel10TweakStoreC">TweakStore</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Enums/TweakViewDataType.html">TweakViewDataType</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/Array.html">Array</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Bool.html">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/CGFloat.html">CGFloat</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Date.html">Date</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Dictionary.html">Dictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Double.html">Double</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Float.html">Float</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Int.html">Int</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/NSNull.html">NSNull</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/String.html">String</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UIColor.html">UIColor</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UInt.html">UInt</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/URL.html">URL</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Functions.html#/s:8Mixpanel2eeoiySbAA5TweakVyxG_AEtAA13TweakableTypeRzlF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Functions.html#/s:8Mixpanel2eeoiySbAA8AnyTweakV_ADtF">==(_:_:)</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelDelegate.html">MixpanelDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelType.html">MixpanelType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/TweakClusterType.html">TweakClusterType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/TweakLibraryType.html">TweakLibraryType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/TweakableType.html">TweakableType</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/AnyTweak.html">AnyTweak</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MixpanelTweaks.html">MixpanelTweaks</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Tweak.html">Tweak</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>Tweak</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">Tweak</span><span class="o">&lt;</span><span class="kt">T</span><span class="o">&gt;</span> <span class="k">where</span> <span class="kt">T</span> <span class="p">:</span> <span class="kt"><a href="../Protocols/TweakableType.html">TweakableType</a></span></code></pre>
+<pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">Tweak</span><span class="p">:</span> <span class="kt">Hashable</span></code></pre>
+<pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">Tweak</span><span class="p">:</span> <span class="kt"><a href="../Protocols/TweakClusterType.html">TweakClusterType</a></span></code></pre>
+
+                </div>
+              </div>
+            <p>Tweaks let you adjust things on the fly.
+Because each T needs a UI component, we have to restrict what T can be - hence T: TweakableType.
+If T: SignedNumberType, you can declare a min / max for a Tweak.</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel5TweakV9tweakName12defaultValueACyxGSS_xtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(tweakName:defaultValue:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5TweakV9tweakName12defaultValueACyxGSS_xtcfc">init(tweakName:defaultValue:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Initializer for a Tweak for A/B Testing</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">tweakName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="n">defaultValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>tweakName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>name of the tweak</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>defaultValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the default value set for the tweak</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel5TweakV4hash4intoys6HasherVz_tF"></a>
+                    <a name="//apple_ref/swift/Method/hash(into:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5TweakV4hash4intoys6HasherVz_tF">hash(into:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Hashing for a Tweak for A/B Testing in order for it to be stored.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">hash</span><span class="p">(</span><span class="n">into</span> <span class="nv">hasher</span><span class="p">:</span> <span class="k">inout</span> <span class="kt">Hasher</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel16TweakClusterTypeP05tweakC0SayAA03AnyB0VGvp"></a>
+                    <a name="//apple_ref/swift/Property/tweakCluster" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel16TweakClusterTypeP05tweakC0SayAA03AnyB0VGvp">tweakCluster</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">tweakCluster</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Structs/AnyTweak.html">AnyTweak</a></span><span class="p">]</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Available%20where%20%60T%60:%20%60SignedNumeric%60%20&amp;%20%60Comparable%60"></a>
+                <a name="//apple_ref/swift/Section/Available where `T`: `SignedNumeric` &amp; `Comparable`" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Available%20where%20%60T%60:%20%60SignedNumeric%60%20&amp;%20%60Comparable%60"></a>
+                  <h3 class="section-name"><p>Available where <code>T</code>: <code>SignedNumeric</code> &amp; <code>Comparable</code></p>
+</h3>
+                </div>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel5TweakVAASLRzs13SignedNumericRzrlE9tweakName12defaultValue3min3max8stepSizeACyxGSS_xxSgA2Ktcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(tweakName:defaultValue:min:max:stepSize:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel5TweakVAASLRzs13SignedNumericRzrlE9tweakName12defaultValue3min3max8stepSizeACyxGSS_xxSgA2Ktcfc">init(tweakName:defaultValue:min:max:stepSize:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Creates a Tweak<T> where T: SignedNumberType
+You can optionally provide a min / max / stepSize to restrict the bounds and behavior of a tweak.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">tweakName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+            <span class="n">defaultValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">,</span>
+            <span class="n">min</span> <span class="nv">minimumValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+            <span class="n">max</span> <span class="nv">maximumValue</span><span class="p">:</span> <span class="kt">T</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+            <span class="nv">stepSize</span><span class="p">:</span> <span class="kt">T</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>tweakName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>name of the tweak</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>defaultValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the default value set for the tweak</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>minimumValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>minimum value to allow for the tweak</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>maximumValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>maximum value to allow for the tweak</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>stepSize</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>step size for the tweak (do not set, optional)</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2019 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2019-12-18)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.0</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

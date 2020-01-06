@@ -907,7 +907,21 @@ extension MixpanelInstance {
                     self.people.peopleQueue = Queue()
                     self.people.unidentifiedQueue = Queue()
                     #if DECIDE
-                    self.decideInstance.notificationsInstance.shownNotifications = Set()
+                    /*
+                     * TODO: Index `shownNotifications` on token+distinctId and never clear.
+                     *
+                     * Currently, are options are:
+                     *  1.  Clear `shownNotifications` on reset. This can result in a user seeing a duplicate notification if
+                     *      there is a data delay and they logout and back in.
+                     *  2.  Not clear `showNotifications` on reset. This can result in a notification not being shown to
+                     *      subsequent user in multi-user, same device scenarios.
+                     *
+                     *  The multi-user, same device scenario seems more of an edgecase thus justifying the change to not
+                     *  clear `shownNotifications` on logout.
+                     *
+                     */
+                    // self.decideInstance.notificationsInstance.shownNotifications = Set()
+
                     self.decideInstance.decideFetched = false
                     self.decideInstance.ABTestingInstance.variants = Set()
                     self.decideInstance.codelessInstance.codelessBindings = Set()

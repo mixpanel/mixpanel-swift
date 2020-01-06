@@ -78,6 +78,8 @@ class InAppNotifications: NotificationViewControllerDelegate {
             shownNotifications.insert(notification.ID)
             if (notification.hasDisplayTriggers()) {
                 triggeredNotifications = triggeredNotifications.filter { $0.ID != notification.ID }
+            } else {
+                inAppNotifications = inAppNotifications.filter { $0.ID != notification.ID }
             }
         }
     }

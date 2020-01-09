@@ -15,6 +15,7 @@
 		673ABE3A21360CBE00B1784B /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		67FF65E421878414005161FA /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		67FF65E521878416005161FA /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
+		864D32C123C7B34100BCC4DA /* Mixpanel-swift.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 864D32C023C7B27000BCC4DA /* Mixpanel-swift.xcconfig */; };
 		86EE92C821370CA600D55487 /* ExceptionWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 86EE92C621370CA600D55487 /* ExceptionWrapper.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		86EE92C921370CA600D55487 /* ExceptionWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 86EE92C621370CA600D55487 /* ExceptionWrapper.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		86EE92CA21370CA600D55487 /* ExceptionWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 86EE92C621370CA600D55487 /* ExceptionWrapper.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -182,6 +183,7 @@
 		51DD56801D306B7B0045D3DB /* PrintLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrintLogging.swift; sourceTree = "<group>"; };
 		51DD56811D306B7B0045D3DB /* FileLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileLogging.swift; sourceTree = "<group>"; };
 		673ABE3921360CBE00B1784B /* Group.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
+		864D32C023C7B27000BCC4DA /* Mixpanel-swift.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Mixpanel-swift.xcconfig"; sourceTree = "<group>"; };
 		86EE92C621370CA600D55487 /* ExceptionWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExceptionWrapper.h; sourceTree = "<group>"; };
 		86EE92C721370CA600D55487 /* ExceptionWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExceptionWrapper.m; sourceTree = "<group>"; };
 		86F86E81224404BD00B69832 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -334,6 +336,7 @@
 		E11594731CFF1491007F8B4F = {
 			isa = PBXGroup;
 			children = (
+				864D32C023C7B27000BCC4DA /* Mixpanel-swift.xcconfig */,
 				E115947F1CFF1491007F8B4F /* Mixpanel */,
 				E115947E1CFF1491007F8B4F /* Products */,
 			);
@@ -797,6 +800,7 @@
 				E158C6F11D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib in Resources */,
 				E19087BF1E53985300023FCC /* placeholder-image.png in Resources */,
 				E158C6F21D5D39A100651465 /* TakeoverNotificationViewController~iphoneportrait.xib in Resources */,
+				864D32C123C7B34100BCC4DA /* Mixpanel-swift.xcconfig in Resources */,
 				E158C6E81D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib in Resources */,
 				E158C6F81D5D3AAE00651465 /* MPCloseButton@2x.png in Resources */,
 				E193126C1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib in Resources */,
@@ -1072,6 +1076,7 @@
 		};
 		E11594831CFF1491007F8B4F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 864D32C023C7B27000BCC4DA /* Mixpanel-swift.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -1134,6 +1139,7 @@
 		};
 		E11594841CFF1491007F8B4F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 864D32C023C7B27000BCC4DA /* Mixpanel-swift.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -1189,8 +1195,9 @@
 		};
 		E11594861CFF1491007F8B4F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 864D32C023C7B27000BCC4DA /* Mixpanel-swift.xcconfig */;
 			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
+				APPLICATION_EXTENSION_API_ONLY = NO;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_ASSIGN_ENUM = YES;
@@ -1224,7 +1231,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "IOS DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "${inherited} IOS DEBUG";
 				SWIFT_INCLUDE_PATHS = "${SRCROOT}";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1237,8 +1244,9 @@
 		};
 		E11594871CFF1491007F8B4F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 864D32C023C7B27000BCC4DA /* Mixpanel-swift.xcconfig */;
 			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
+				APPLICATION_EXTENSION_API_ONLY = NO;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_ASSIGN_ENUM = YES;
@@ -1272,7 +1280,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = IOS;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "${inherited} IOS";
 				SWIFT_INCLUDE_PATHS = "${SRCROOT}";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";

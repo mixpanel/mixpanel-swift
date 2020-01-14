@@ -95,14 +95,14 @@ public class MixpanelPushNotifications {
                 return
             }
 
-//            UIApplication.shared.open(url, options: [:], completionHandler: { success in
-//                if success {
-//                    NSLog("Successfully loaded url: \(url)")
-//                } else {
-//                    NSLog("failed to load url: \(url)")
-//                }
-//                completionHandler();
-//            })
+            UIApplication.shared.open(url, options: [:], completionHandler: { success in
+                if success {
+                    NSLog("Successfully loaded url: \(url)")
+                } else {
+                    NSLog("Failed to load url: \(url)")
+                }
+                completionHandler();
+            })
         } else {
             NSLog("Unexpected value for type: \(type)")
             completionHandler();

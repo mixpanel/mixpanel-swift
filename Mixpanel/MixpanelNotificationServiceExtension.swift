@@ -72,12 +72,12 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
         
         loadAttachment(mediaUrlStr: mediaUrlStr, fileType: fileType, completionHandler: { attachment in
             guard let attachment = attachment else {
-                NSLog("maybeAttachMedia: Unable to load media attachment.")
+                NSLog("maybeAttachMedia: Unable to load media attachment")
                 completionHandler()
                 return
             }
             
-            NSLog("maybeAttachMedia: Attaching media from \(mediaUrlStr).")
+            NSLog("maybeAttachMedia: Attaching media from \(mediaUrlStr)")
             bestAttemptContent.attachments = [attachment]
             completionHandler()
         })
@@ -85,7 +85,7 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
     
     func loadAttachment(mediaUrlStr: String, fileType: String, completionHandler: @escaping (UNNotificationAttachment?) -> Void) {
         guard let mediaUrl = URL(string: mediaUrlStr) else {
-            NSLog("Unable to convert mediaUrlStr to URL type")
+            NSLog("Unable to convert mediaUrlStr \"\(mediaUrlStr)\" to URL")
             completionHandler(nil)
             return
         }
@@ -99,6 +99,7 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
                 } else {
                     NSLog("Unknown error downloading the media attachment")
                 }
+                completionHandler(nil)
                 return
             }
             
@@ -108,7 +109,8 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
             do {
                 try fileManager.moveItem(at: temporaryFileLocation, to: localURL)
             } catch let moveError {
-                NSLog("Failed to move file: %@", moveError.localizedDescription)
+                NSLog("Failed to move file: \(moveError.localizedDescription)")
+                completionHandler(nil)
                 return
             }
             
@@ -118,7 +120,8 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
                 attachment = try UNNotificationAttachment(identifier: "", url: localURL, options: nil)
                 completionHandler(attachment)
             } catch let attachmentError {
-                NSLog("Unable to add attchment: %@", attachmentError.localizedDescription)
+                NSLog("Unable to add attchment: \(attachmentError.localizedDescription)")
+                completionHandler(nil)
             }
         })).resume()
     }

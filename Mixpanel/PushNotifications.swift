@@ -107,6 +107,9 @@ public class MixpanelPushNotifications {
             NSLog("Unexpected value for type: \(type)")
             completionHandler();
         }
+#else
+        NSLog("BUILDING_FOR_APP_EXTENSION was true, not handling response")
+        completionHandler()
 #endif
     }
 }

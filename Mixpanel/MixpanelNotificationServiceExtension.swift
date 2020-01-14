@@ -1,139 +1,130 @@
-
-private let kDynamicCategoryIdentifier = "MP_DYNAMIC"
+private let dynamicCategoryIdentifier = "MP_DYNAMIC"
 private let mediaUrlKey = "mp_media_url"
 
-@available(iOS 10.0, *)
+import UserNotifications
+
+@available(iOSApplicationExtension 11.0, *)
 open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension {
-    private var richContentTaskComplete = false
-    private var notificationCategoriesTaskComplete = false
 
-    
     var contentHandler: ((UNNotificationContent) -> Void)?
-    var bestAttemptContent: UNMutableNotificationContent?
+    var originalContent: UNNotificationContent?
 
-    override open func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-        self.contentHandler = contentHandler
-        bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
+    open override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         
-        if let bestAttemptContent = bestAttemptContent {
-            let userInfo = request.content.userInfo
-
-            let buttons = userInfo["mp_buttons"] as? [[String:String]]
-            if buttons != nil {
-                registerDynamicCategory(userInfo, withButtons: buttons!)
-            } else {
-            #if DEBUG
-                Logger.info(message: "No action buttons specified, not adding dynamic category")
-            #endif
-            }
-
-            let mediaUrl = userInfo[mediaUrlKey] as? String
-            if mediaUrl != nil {
-                attachRichMedia(userInfo, withMediaUrl: mediaUrl!)
-            } else {
-            #if DEBUG
-                Logger.info(message: "No media url specified, not attatching rich media")
-            #endif
-            }
+        guard let bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent) else {
+            contentHandler(request.content)
+            return
         }
-    }
-    
-    override open func serviceExtensionTimeWillExpire() {
-        sendContent()
-    }
-
-    func taskComplete() {
-        if richContentTaskComplete && notificationCategoriesTaskComplete {
-            sendContent()
-        }
-    }
-
-    func sendContent() {
-        if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
-            contentHandler(bestAttemptContent)
-        }
-    }
-
-    func registerDynamicCategory(_ userInfo: [AnyHashable : Any]?, withButtons buttons: [[String:String]]) {
-        let center = UNUserNotificationCenter.current()
-        center.getNotificationCategories(completionHandler: { categories in
-            
-            var actions: [UNNotificationAction] = []
-            for (idx, button) in buttons.enumerated() {
-                let action = UNNotificationAction(identifier: String(format: "MP_ACTION_%lu", idx), title: button["lbl"]!, options: .foreground)
-                actions.append(action)
-            }
-         
-            let dynamicMixpanelCategory = UNNotificationCategory(identifier: kDynamicCategoryIdentifier, actions: actions, intentIdentifiers: [], options: [])
-            let mixpanelCategories: Set = [dynamicMixpanelCategory]
-            let nonMixpanelCategories = categories.filter { (category) -> Bool in
-                return !category.identifier.contains(kDynamicCategoryIdentifier)
-            }
-            center.setNotificationCategories(nonMixpanelCategories.union(mixpanelCategories))
-
-            self.notificationCategoriesTaskComplete = true
-
-            self.taskComplete()
+        
+        self.maybeAttachButtons(bestAttemptContent: bestAttemptContent, completionHandler: {
+            self.maybeAttachMedia(bestAttemptContent: bestAttemptContent, completionHandler: {
+                contentHandler(bestAttemptContent)
+            })
         })
     }
+    
+    func maybeAttachButtons(bestAttemptContent: UNMutableNotificationContent, completionHandler: @escaping () -> Void) {
+        guard let buttons = bestAttemptContent.userInfo["mp_buttons"] as? [[AnyHashable: Any]] else {
+            NSLog("maybeAttachButtons: No action buttons found in the push notification payload.")
+            completionHandler()
+            return
+        }
+        
+        // build actions from buttons payload
+        var actions: [UNNotificationAction] = []
+        for (idx, button) in buttons.enumerated() {
+            let identifier = String(format: "MP_ACTION_%lu", idx)
+            let title = button["lbl"] as! String
+            let action = UNNotificationAction(identifier: identifier, title: title, options: .foreground)
+            actions.append(action)
+        }
 
-    func attachRichMedia(_ userInfo: [AnyHashable : Any]?, withMediaUrl mediaUrl: String) {
-        let mediaType = URL(fileURLWithPath: mediaUrl).pathExtension
-
-        if mediaUrl == nil || mediaType == nil {
-            if mediaUrl == nil {
-                Logger.info(message: "Unable to add attachment: %@ is nil", mediaUrlKey)
+        // create the dynamic category
+        let mpDynamicCategory =
+              UNNotificationCategory(identifier: dynamicCategoryIdentifier,
+              actions: actions,
+              intentIdentifiers: [],
+              hiddenPreviewsBodyPlaceholder: "",
+              options: .customDismissAction)
+                
+        // add or replace the mixpanel dynamic category
+        UNUserNotificationCenter.current().getNotificationCategories(completionHandler: { categories in
+            var updatedCategories = categories.filter { (category) -> Bool in
+                return !category.identifier.contains(dynamicCategoryIdentifier)
             }
-
-            if mediaType == nil {
-                Logger.info(message: "Unable to add attachment: extension is nil")
+            updatedCategories.insert(mpDynamicCategory)
+            UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
+            
+            // TODO: understand this further -- for some reason, if we don't
+            // re-fetch the categories here the category changes don't seem
+            // to be applied.
+            // possibly related to this person's issue:
+            // https://github.com/lionheart/openradar-mirror/issues/20575
+            UNUserNotificationCenter.current().getNotificationCategories(completionHandler: { categories in
+                completionHandler()
+            })
+        })
+    }
+    
+    func maybeAttachMedia(bestAttemptContent: UNMutableNotificationContent, completionHandler: @escaping () -> Void) {
+        guard let mediaUrlStr = (bestAttemptContent.userInfo[mediaUrlKey] as? String) else {
+            NSLog("maybeAttachMedia: No media url specified.")
+            completionHandler()
+            return
+        }
+        
+        let fileType = URL(fileURLWithPath: mediaUrlStr).pathExtension
+        
+        loadAttachment(mediaUrlStr: mediaUrlStr, fileType: fileType, completionHandler: { attachment in
+            guard let attachment = attachment else {
+                NSLog("maybeAttachMedia: Unable to load media attachment.")
+                completionHandler()
+                return
             }
-            richContentTaskComplete = true
-            taskComplete()
+            
+            NSLog("maybeAttachMedia: Attaching media from \(mediaUrlStr).")
+            bestAttemptContent.attachments = [attachment]
+            completionHandler()
+        })
+    }
+    
+    func loadAttachment(mediaUrlStr: String, fileType: String, completionHandler: @escaping (UNNotificationAttachment?) -> Void) {
+        guard let mediaUrl = URL(string: mediaUrlStr) else {
+            NSLog("Unable to convert mediaUrlStr to URL type")
+            completionHandler(nil)
             return
         }
 
-        // load the attachment
-        loadAttachment(forUrlString: mediaUrl, withType: mediaType, completionHandler: { attachment in
-            if attachment != nil {
-                self.bestAttemptContent?.attachments = [attachment!]
+        // Download the file from URL to disk
+        let session = URLSession(configuration: URLSessionConfiguration.default)
+        (session.downloadTask(with: mediaUrl, completionHandler: { temporaryFileLocation, response, error in
+            guard let temporaryFileLocation = temporaryFileLocation else {
+                if let error = error {
+                    NSLog("Error downloading the media attachment: \(error.localizedDescription)")
+                } else {
+                    NSLog("Unknown error downloading the media attachment")
+                }
+                return
             }
-            self.richContentTaskComplete = true
-            self.taskComplete()
-        })
-    }
-
-    func loadAttachment(forUrlString urlString: String?, withType type: String?, completionHandler: @escaping (UNNotificationAttachment?) -> Void) {
+            
+            // Move the downloaded file to temp folder
+            let fileManager = FileManager.default
+            let localURL = URL(fileURLWithPath: temporaryFileLocation.path + "." + fileType)
+            do {
+                try fileManager.moveItem(at: temporaryFileLocation, to: localURL)
+            } catch let moveError {
+                NSLog("Failed to move file: %@", moveError.localizedDescription)
+                return
+            }
+            
+            // Create the notification attachment from the file
             var attachment: UNNotificationAttachment? = nil
-            let attachmentURL = URL(string: urlString ?? "")
-            let fileExt = "." + (type ?? "")
-
-            let session = URLSession(configuration: URLSessionConfiguration.default)
-            if let attachmentURL = attachmentURL {
-                (session.downloadTask(with: attachmentURL, completionHandler: { temporaryFileLocation, response, error in
-                    if error != nil {
-                        Logger.info(message: "Unable to add attachment: %@", error?.localizedDescription ?? "")
-                    } else {
-                        let fileManager = FileManager.default
-                        let localURL = URL(fileURLWithPath: temporaryFileLocation?.path ?? "" + (fileExt))
-                        do {
-                            if let temporaryFileLocation = temporaryFileLocation {
-                                try fileManager.moveItem(at: temporaryFileLocation, to: localURL)
-                            }
-                        } catch {
-                        }
-
-                        var attachmentError: Error? = nil
-                        do {
-                            attachment = try UNNotificationAttachment(identifier: "", url: localURL, options: nil)
-                        } catch let attachmentError {
-                        }
-                        if attachmentError != nil || attachment == nil {
-                            Logger.info(message: "Unable to add attchment: %@", attachmentError?.localizedDescription ?? "")
-                        }
-                    }
-                    completionHandler(attachment)
-                })).resume()
+            do {
+                attachment = try UNNotificationAttachment(identifier: "", url: localURL, options: nil)
+                completionHandler(attachment)
+            } catch let attachmentError {
+                NSLog("Unable to add attchment: %@", attachmentError.localizedDescription)
             }
-        }
+        })).resume()
     }
+}

@@ -18,19 +18,19 @@ public class MixpanelPushNotifications {
         }
         
         let userInfo = response.notification.request.content.userInfo
-        let isButtonTarget = response.actionIdentifier.starts(with: "MP_ACTION_")
+        let didTapOnActionButton = response.actionIdentifier.starts(with: "MP_ACTION_")
         
-        let mpMetaData = userInfo["mp"] as? [AnyHashable: Any]
+        // Initialize properties to track to Mixpanel
         var trackingProps: Properties = [:]
-        
+        let mpMetaData = userInfo["mp"] as? [AnyHashable: Any]
         if mpMetaData != nil {
             trackingProps["campaign_id"] = mpMetaData!["c"] as! Int
             trackingProps["message_id"] = mpMetaData!["m"] as! Int
         }
         
+        // The ontap behavior definition location depends on what was tapped: an action button or the notification itself
         var ontap: [AnyHashable: Any]? = nil
-        
-        if (isButtonTarget) {
+        if (didTapOnActionButton) {
             guard let buttons = userInfo["mp_buttons"] as? [[AnyHashable: Any]] else {
                 NSLog("Expected 'mp_buttons' prop in userInfo dict")
                 completionHandler();
@@ -60,18 +60,18 @@ public class MixpanelPushNotifications {
             ontap = (userInfo["mp_ontap"] as? [AnyHashable: Any])!
         }
 
-        
-        guard ontap != nil else {
-            completionHandler()
-            return
-        }
-
         // Track tap event to all Mixpanel instances
         for instance in Mixpanel.allInstances() {
             instance.track(event:"$push_notification_tap", properties:trackingProps)
         }
-        
+    
         // Perform the specified action
+        guard ontap != nil else {
+            NSLog("Unable to determine tap behavior")
+            completionHandler()
+            return
+        }
+        
         guard let type = ontap!["type"] as? String else {
             NSLog("Expected 'type' in ontap dict")
             completionHandler()

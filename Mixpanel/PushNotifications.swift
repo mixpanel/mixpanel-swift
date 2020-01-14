@@ -90,7 +90,7 @@ public class MixpanelPushNotifications {
             }
             
             guard let url = URL(string: urlStr) else {
-                NSLog("Failed to conver urlStr to url")
+                NSLog("Failed to convert urlStr \"\(urlStr)\" to url")
                 completionHandler()
                 return
             }

@@ -1,26 +1,21 @@
+import UserNotifications
+
 private let dynamicCategoryIdentifier = "MP_DYNAMIC"
 private let mediaUrlKey = "mp_media_url"
 
-import UserNotifications
-
-@available(iOSApplicationExtension 11.0, *)
+@available(iOS 11.0, *)
 open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension {
-
-    var contentHandler: ((UNNotificationContent) -> Void)?
-    var originalContent: UNNotificationContent?
-
     open override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-        
         guard let bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent) else {
             contentHandler(request.content)
             return
         }
         
-        self.maybeAttachButtons(bestAttemptContent: bestAttemptContent, completionHandler: {
-            self.maybeAttachMedia(bestAttemptContent: bestAttemptContent, completionHandler: {
+        self.maybeAttachButtons(bestAttemptContent: bestAttemptContent) {
+            self.maybeAttachMedia(bestAttemptContent: bestAttemptContent) {
                 contentHandler(bestAttemptContent)
-            })
-        })
+            }
+        }
     }
     
     func maybeAttachButtons(bestAttemptContent: UNMutableNotificationContent, completionHandler: @escaping () -> Void) {

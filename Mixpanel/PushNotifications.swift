@@ -110,6 +110,3 @@ public class MixpanelPushNotifications {
 #endif
     }
 }
-
-
-

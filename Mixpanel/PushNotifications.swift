@@ -13,6 +13,7 @@ public class MixpanelPushNotifications {
 
 #if !BUILDING_FOR_APP_EXTENSION
         guard self.isMixpanelPushNotification(response.notification) else {
+            NSLog("Calling MixpanelPushNotifications.handleResponse on a non-Mixpanel push notification is a noop...")
             completionHandler()
             return
         }
@@ -62,6 +63,7 @@ public class MixpanelPushNotifications {
 
         // Track tap event to all Mixpanel instances
         for instance in Mixpanel.allInstances() {
+            NSLog("Tracking \"$push_notification_tap\" to \(instance.apiToken)")
             instance.track(event:"$push_notification_tap", properties:trackingProps)
         }
     

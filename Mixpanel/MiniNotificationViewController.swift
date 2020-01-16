@@ -47,14 +47,13 @@ class MiniNotificationViewController: BaseNotificationViewController {
     }
 
     override func show(animated: Bool) {
-#if !BUILDING_FOR_APP_EXTENSION
-        guard MixpanelInstance.sharedUIApplication() != nil else {
+        guard let sharedUIApplication = MixpanelInstance.sharedUIApplication() else {
             return
         }
         canPan = false
         var bounds: CGRect
         if #available(iOS 13.0, *) {
-            let windowScene = UIApplication.shared
+            let windowScene = sharedUIApplication
                            .connectedScenes
                            .filter { $0.activationState == .foregroundActive }
                            .first
@@ -64,7 +63,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
             bounds = UIScreen.main.bounds
         }
         let frame: CGRect
-        if UIApplication.shared.statusBarOrientation.isPortrait
+        if sharedUIApplication.statusBarOrientation.isPortrait
             && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiom.phone {
             frame = CGRect(x: InAppNotificationsConstants.miniSidePadding,
                            y: bounds.size.height,
@@ -77,7 +76,7 @@ class MiniNotificationViewController: BaseNotificationViewController {
                            height: InAppNotificationsConstants.miniInAppHeight)
         }
         if #available(iOS 13.0, *) {
-            let windowScene = UIApplication.shared
+            let windowScene = sharedUIApplication
                 .connectedScenes
                 .filter { $0.activationState == .foregroundActive }
                 .first
@@ -106,7 +105,6 @@ class MiniNotificationViewController: BaseNotificationViewController {
             }, completion: { _ in
                 self.position = self.window?.layer.position
         })
-#endif
     }
 
     override func hide(animated: Bool, completion: @escaping () -> Void) {

@@ -140,9 +140,11 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
     }
 
     override func show(animated: Bool) {
-#if !BUILDING_FOR_APP_EXTENSION
+        guard let sharedUIApplication = MixpanelInstance.sharedUIApplication() else {
+            return
+        }
         if #available(iOS 13.0, *) {
-            let windowScene = UIApplication.shared
+            let windowScene = sharedUIApplication
                 .connectedScenes
                 .filter { $0.activationState == .foregroundActive }
                 .first
@@ -168,7 +170,6 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
             self.window?.alpha = 1
             }, completion: { _ in
         })
-#endif
     }
 
     override func hide(animated: Bool, completion: @escaping () -> Void) {

@@ -6,12 +6,12 @@ public class MixpanelPushNotifications {
     public static func isMixpanelPushNotification(_ notification: UNNotification) -> Bool {
         return notification.request.content.userInfo["mp"] != nil
     }
-    
+
+    @available(iOSApplicationExtension, unavailable)
     public static func handleResponse(response: UNNotificationResponse,
            withCompletionHandler completionHandler:
              @escaping () -> Void) {
 
-#if !BUILDING_FOR_APP_EXTENSION
         guard self.isMixpanelPushNotification(response.notification) else {
             NSLog("Calling MixpanelPushNotifications.handleResponse on a non-Mixpanel push notification is a noop...")
             completionHandler()
@@ -109,9 +109,5 @@ public class MixpanelPushNotifications {
             NSLog("Unexpected value for type: \(type)")
             completionHandler();
         }
-#else
-        NSLog("BUILDING_FOR_APP_EXTENSION was true, not handling response")
-        completionHandler()
-#endif
     }
 }

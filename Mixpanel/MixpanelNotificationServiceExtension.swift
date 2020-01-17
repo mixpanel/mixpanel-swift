@@ -1,8 +1,5 @@
 import UserNotifications
 
-private let dynamicCategoryIdentifier = "MP_DYNAMIC"
-private let mediaUrlKey = "mp_media_url"
-
 @available(iOS 11.0, *)
 open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension {
     open override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
@@ -11,17 +8,32 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
             return
         }
         
-        self.maybeAttachButtons(bestAttemptContent: bestAttemptContent) {
-            self.maybeAttachMedia(bestAttemptContent: bestAttemptContent) {
+        self.getCategoryIdentifier(content: request.content) { categoryIdentifier in
+            if let categoryIdentifier = categoryIdentifier {
+                NSLog("Using categoryIdentifer: \(categoryIdentifier)")
+                bestAttemptContent.categoryIdentifier = categoryIdentifier
+            }
+            self.buildAttachments(content: request.content) { attachments in
+                if attachments != nil {
+                    NSLog("Adding \(attachments?.count ?? 0) attachment(s)")
+                    bestAttemptContent.attachments = attachments!
+                }
                 contentHandler(bestAttemptContent)
             }
         }
     }
     
-    func maybeAttachButtons(bestAttemptContent: UNMutableNotificationContent, completionHandler: @escaping () -> Void) {
-        guard let buttons = bestAttemptContent.userInfo["mp_buttons"] as? [[AnyHashable: Any]] else {
-            NSLog("maybeAttachButtons: No action buttons found in the push notification payload.")
-            completionHandler()
+    func getCategoryIdentifier(content: UNNotificationContent, completionHandler: @escaping (String?) -> Void) {
+
+        guard content.categoryIdentifier != "" else {
+            NSLog("getCategoryIdentifier: explicit categoryIdentifer included in payload.")
+            completionHandler(content.categoryIdentifier)
+            return
+        }
+
+        guard let buttons = content.userInfo["mp_buttons"] as? [[AnyHashable: Any]] else {
+            NSLog("getCategoryIdentifier: No action buttons found in the push notification payload.")
+            completionHandler(nil)
             return
         }
         
@@ -34,37 +46,29 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
             actions.append(action)
         }
 
-        // create the dynamic category
+        let categoryId = NSNumber(value: NSDate().timeIntervalSince1970).stringValue
+
+        // create the category to contain the custom action buttons
         let mpDynamicCategory =
-              UNNotificationCategory(identifier: dynamicCategoryIdentifier,
+              UNNotificationCategory(identifier: categoryId,
               actions: actions,
               intentIdentifiers: [],
               hiddenPreviewsBodyPlaceholder: "",
               options: .customDismissAction)
                 
-        // add or replace the mixpanel dynamic category
+        // add the new category
         UNUserNotificationCenter.current().getNotificationCategories(completionHandler: { categories in
-            var updatedCategories = categories.filter { (category) -> Bool in
-                return !category.identifier.contains(dynamicCategoryIdentifier)
-            }
+            var updatedCategories = categories
             updatedCategories.insert(mpDynamicCategory)
             UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
-            
-            // TODO: understand this further -- for some reason, if we don't
-            // re-fetch the categories here the category changes don't seem
-            // to be applied.
-            // possibly related to this person's issue:
-            // https://github.com/lionheart/openradar-mirror/issues/20575
-            UNUserNotificationCenter.current().getNotificationCategories(completionHandler: { categories in
-                completionHandler()
-            })
+            completionHandler(categoryId)
         })
     }
     
-    func maybeAttachMedia(bestAttemptContent: UNMutableNotificationContent, completionHandler: @escaping () -> Void) {
-        guard let mediaUrlStr = (bestAttemptContent.userInfo[mediaUrlKey] as? String) else {
+    func buildAttachments(content: UNNotificationContent, completionHandler: @escaping ([UNNotificationAttachment]?) -> Void) {
+        guard let mediaUrlStr = (content.userInfo["mp_media_url"] as? String) else {
             NSLog("maybeAttachMedia: No media url specified.")
-            completionHandler()
+            completionHandler(nil)
             return
         }
         
@@ -73,13 +77,11 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
         loadAttachment(mediaUrlStr: mediaUrlStr, fileType: fileType, completionHandler: { attachment in
             guard let attachment = attachment else {
                 NSLog("maybeAttachMedia: Unable to load media attachment")
-                completionHandler()
+                completionHandler(nil)
                 return
             }
-            
-            NSLog("maybeAttachMedia: Attaching media from \(mediaUrlStr)")
-            bestAttemptContent.attachments = [attachment]
-            completionHandler()
+            NSLog("maybeAttachMedia: Built attachment from \(mediaUrlStr)")
+            completionHandler([attachment])
         })
     }
     

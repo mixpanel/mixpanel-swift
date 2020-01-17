@@ -475,36 +475,35 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     @objc private func applicationDidBecomeActive(_ notification: Notification) {
         flushInstance.applicationDidBecomeActive()
         #if DECIDE
-            if checkForVariantsOnActive || checkForNotificationOnActive {
-                checkDecide { decideResponse in
-                    if let decideResponse = decideResponse {
-                        DispatchQueue.main.sync {
-                            decideResponse.toFinishVariants.forEach { $0.finish() }
-                        }
+        checkDecide { decideResponse in
+            if let decideResponse = decideResponse {
+                DispatchQueue.main.sync {
+                    decideResponse.toFinishVariants.forEach { $0.finish() }
+                }
 
-                        if self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
-                            self.decideInstance.notificationsInstance.showNotification(decideResponse.unshownInAppNotifications.first!)
-                        }
+                if self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
+                    self.decideInstance.notificationsInstance.showNotification(decideResponse.unshownInAppNotifications.first!)
+                }
 
-                        DispatchQueue.main.sync {
-                            for binding in decideResponse.newCodelessBindings {
-                                binding.execute()
-                            }
-                        }
-
-                        DispatchQueue.main.sync {
-                            for variant in decideResponse.newVariants {
-                                variant.execute()
-                                self.markVariantRun(variant)
-                            }
-                        }
-
-                        if decideResponse.integrations.count > 0 {
-                            self.connectIntegrations.setupIntegrations(decideResponse.integrations)
-                        }
+                DispatchQueue.main.sync {
+                    for binding in decideResponse.newCodelessBindings {
+                        binding.execute()
                     }
                 }
+
+                DispatchQueue.main.sync {
+                    for variant in decideResponse.newVariants {
+                        variant.execute()
+                        self.markVariantRun(variant)
+                    }
+                }
+
+                if decideResponse.integrations.count > 0 {
+                    self.connectIntegrations.setupIntegrations(decideResponse.integrations)
+                }
             }
+        }
+
         #endif // DECIDE
     }
 

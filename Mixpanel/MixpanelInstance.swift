@@ -481,7 +481,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     decideResponse.toFinishVariants.forEach { $0.finish() }
                 }
 
-                if self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
+                if self.checkForNotificationOnActive && self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
                     self.decideInstance.notificationsInstance.showNotification(decideResponse.unshownInAppNotifications.first!)
                 }
 
@@ -491,10 +491,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     }
                 }
 
-                DispatchQueue.main.sync {
-                    for variant in decideResponse.newVariants {
-                        variant.execute()
-                        self.markVariantRun(variant)
+                if self.checkForVariantsOnActive {
+                    DispatchQueue.main.sync {
+                        for variant in decideResponse.newVariants {
+                            variant.execute()
+                            self.markVariantRun(variant)
+                        }
                     }
                 }
 

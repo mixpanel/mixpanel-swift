@@ -9,7 +9,7 @@
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1292,
+      "line": 1291,
       "symbol": "MixpanelInstance.getGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"

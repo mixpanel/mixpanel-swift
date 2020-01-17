@@ -25,8 +25,8 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
     
     func getCategoryIdentifier(content: UNNotificationContent, completionHandler: @escaping (String?) -> Void) {
 
-        guard content.categoryIdentifier != "" else {
-            NSLog("getCategoryIdentifier: explicit categoryIdentifer included in payload.")
+        guard content.categoryIdentifier.isEmpty else {
+            NSLog("getCategoryIdentifier: explicit categoryIdentifer included in payload: \(content.categoryIdentifier)")
             completionHandler(content.categoryIdentifier)
             return
         }

@@ -51,8 +51,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        debugPrint("did register for remote notification with token")
         Mixpanel.mainInstance().people.addPushDeviceToken(deviceToken)
+
+        let tokenChars = (deviceToken as NSData).bytes.assumingMemoryBound(to: CChar.self)
+        var tokenString = ""
+        for i in 0..<deviceToken.count {
+            tokenString += String(format: "%02.2hhx", arguments: [tokenChars[i]])
+        }
+        debugPrint("did register for remote notification with device token: \(tokenString)")
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
@@ -77,7 +83,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        completionHandler()
+        if MixpanelPushNotifications.isMixpanelPushNotification(response.notification.request.content) {
+            debugPrint("Handling Mixpanel push notification response...")
+            MixpanelPushNotifications.handleResponse(response: response, withCompletionHandler: completionHandler)
+        } else {
+            // not a Mixpanel push notification
+            debugPrint("Not a Mixpanel push notification.")
+            completionHandler()
+        }
     }
 
 }

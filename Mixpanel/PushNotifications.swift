@@ -1,10 +1,17 @@
 import UIKit
 import UserNotifications
 
+enum PushTapActionType: String {
+    case browser = "browser"
+    case deeplink = "deeplink"
+    case homescreen = "homescreen"
+}
+
 @available(iOS 10.0, *)
 public class MixpanelPushNotifications {
-    public static func isMixpanelPushNotification(_ notification: UNNotification) -> Bool {
-        return notification.request.content.userInfo["mp"] != nil
+
+    public static func isMixpanelPushNotification(_ content: UNNotificationContent) -> Bool {
+        return content.userInfo["mp"] != nil
     }
 
     @available(iOSApplicationExtension, unavailable)
@@ -12,14 +19,13 @@ public class MixpanelPushNotifications {
            withCompletionHandler completionHandler:
              @escaping () -> Void) {
 
-        guard self.isMixpanelPushNotification(response.notification) else {
-            NSLog("Calling MixpanelPushNotifications.handleResponse on a non-Mixpanel push notification is a noop...")
+        guard self.isMixpanelPushNotification(response.notification.request.content) else {
+            Logger.debug(message: "Calling MixpanelPushNotifications.handleResponse on a non-Mixpanel push notification is a noop...")
             completionHandler()
             return
         }
         
         let userInfo = response.notification.request.content.userInfo
-        let didTapOnActionButton = response.actionIdentifier.starts(with: "MP_ACTION_")
         
         // Initialize properties to track to Mixpanel
         var trackingProps: Properties = [:]
@@ -28,86 +34,116 @@ public class MixpanelPushNotifications {
             trackingProps["campaign_id"] = mpMetaData!["c"] as! Int
             trackingProps["message_id"] = mpMetaData!["m"] as! Int
         }
-        
-        // The ontap behavior definition location depends on what was tapped: an action button or the notification itself
+
+
+        Logger.debug(message: "%@ didReceiveNotificationResponse action: \(response.actionIdentifier)");
+
+        // If the notification was dismissed, just track and return
+        if response.actionIdentifier == UNNotificationDismissActionIdentifier {
+            for instance in Mixpanel.allInstances() {
+                instance.track(event:"$push_notification_dismissed", properties:trackingProps)
+                instance.flush()
+            }
+            completionHandler();
+            return;
+        }
+
         var ontap: [AnyHashable: Any]? = nil
-        if (didTapOnActionButton) {
-            guard let buttons = userInfo["mp_buttons"] as? [[AnyHashable: Any]] else {
-                NSLog("Expected 'mp_buttons' prop in userInfo dict")
-                completionHandler();
-                return
+
+        if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
+            // The action that indicates the user opened the app from the notification interface.
+            trackingProps["tap_target"] = "notification";
+
+            if (userInfo["mp_ontap"] != nil) {
+                ontap = (userInfo["mp_ontap"] as? [AnyHashable: Any])!
             }
-            
-            guard let idx = Int(response.actionIdentifier.replacingOccurrences(of: "MP_ACTION_", with: "")) else {
-                NSLog("unable to parse button index in \(response.actionIdentifier)")
-                completionHandler();
-                return
+        } else {
+            // Non-default, non-dismiss action -- probably a button tap
+            let wasButtonTapped = response.actionIdentifier.contains("MP_ACTION_")
+
+            if wasButtonTapped {
+                guard let buttons = userInfo["mp_buttons"] as? [[AnyHashable: Any]] else {
+                    Logger.debug(message: "Expected 'mp_buttons' prop in userInfo dict")
+                    completionHandler();
+                    return
+                }
+
+                guard let idx = Int(response.actionIdentifier.replacingOccurrences(of: "MP_ACTION_", with: "")) else {
+                    Logger.debug(message: "unable to parse button index in \(response.actionIdentifier)")
+                    completionHandler();
+                    return
+                }
+
+                let button = buttons[idx]
+
+                guard let buttonOnTap = button["ontap"] as? [AnyHashable: Any] else {
+                    Logger.debug(message: "Expected 'ontap' property in button dict")
+                    completionHandler();
+                    return
+                }
+
+                ontap = buttonOnTap
+
+                trackingProps["tap_target"] = "button"
+                trackingProps["button_id"] = button["id"] as! String
+                trackingProps["button_label"] = button["lbl"] as! String
             }
-            
-            let button = buttons[idx]
-            
-            guard let buttonOnTap = button["ontap"] as? [AnyHashable: Any] else {
-                NSLog("Expected 'ontap' property in button dict")
-                completionHandler();
-                return
-            }
-            
-            ontap = buttonOnTap
-            
-            trackingProps["button_id"] = button["id"] as! String
-            trackingProps["button_label"] = button["lbl"] as! String
-            
-        } else if (userInfo["mp_ontap"] != nil) {
-            ontap = (userInfo["mp_ontap"] as? [AnyHashable: Any])!
         }
 
         // Track tap event to all Mixpanel instances
         for instance in Mixpanel.allInstances() {
-            NSLog("Tracking \"$push_notification_tap\" to \(instance.apiToken)")
             instance.track(event:"$push_notification_tap", properties:trackingProps)
+            instance.flush()
         }
-    
+
         // Perform the specified action
-        guard ontap != nil else {
-            NSLog("Unable to determine tap behavior")
+        guard let tapAction = ontap else {
+            Logger.debug(message: "Unable to determine tap behavior")
             completionHandler()
             return
         }
         
-        guard let type = ontap!["type"] as? String else {
-            NSLog("Expected 'type' in ontap dict")
+        guard let actionTypeStr = tapAction["type"] as? String else {
+            Logger.debug(message: "Expected 'type' in ontap dict")
             completionHandler()
             return
         }
 
-        if (type == "homescreen") {
-            // do nothing, already going to be at homescreen
+        guard let actionType = PushTapActionType(rawValue: actionTypeStr) else {
+            Logger.debug(message: "Unexpected value for push notification tap action type: \(actionTypeStr)")
+            completionHandler()
+            return
+        }
+
+        switch(actionType) {
+
+        case .homescreen:
+            // Do nothing, already going to be at homescreen
             completionHandler();
-        } else if (type == "browser" || type == "deeplink") {
-            
-            guard let urlStr = ontap!["uri"] as? String else {
-                NSLog("Expected 'uri' in ontap dict")
+
+        case .browser, .deeplink:
+            guard let urlStr = tapAction["uri"] as? String else {
+                Logger.debug(message: "Expected 'uri' in ontap dict")
                 completionHandler()
                 return
             }
-            
+
             guard let url = URL(string: urlStr) else {
-                NSLog("Failed to convert urlStr \"\(urlStr)\" to url")
+                Logger.debug(message: "Failed to convert urlStr \"\(urlStr)\" to url")
                 completionHandler()
                 return
             }
 
             UIApplication.shared.open(url, options: [:], completionHandler: { success in
                 if success {
-                    NSLog("Successfully loaded url: \(url)")
+                    Logger.debug(message: "Successfully loaded url: \(url)")
                 } else {
-                    NSLog("Failed to load url: \(url)")
+                    Logger.debug(message: "Failed to load url: \(url)")
                 }
                 completionHandler();
             })
-        } else {
-            NSLog("Unexpected value for type: \(type)")
-            completionHandler();
+
         }
+
     }
 }

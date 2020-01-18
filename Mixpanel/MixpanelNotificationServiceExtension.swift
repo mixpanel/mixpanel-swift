@@ -2,17 +2,39 @@ import UserNotifications
 
 @available(iOS 11.0, *)
 open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension {
+
+    var contentHandler: ((UNNotificationContent) -> Void)?
+    var bestAttemptContent: UNMutableNotificationContent?
+
     open override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+
+        NSLog("%@ MPNotificationServiceExtension didReceiveNotificationRequest", self);
+
+        guard MixpanelPushNotifications.isMixpanelPushNotification(request.content) else {
+            NSLog("%@ Not a Mixpanel push notification, returning original content", self);
+            contentHandler(request.content);
+            return;
+        }
+
         guard let bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent) else {
             contentHandler(request.content)
             return
         }
-        
+
+        // Store a reference to the mutable content and the contentHandler on the class so we
+        // can use them in serviceExtensionTimeWillExpire if needed
+        self.contentHandler = contentHandler
+        self.bestAttemptContent = bestAttemptContent
+
+        // Setup the category first since it's faster and less likely to cause time to expire
         self.getCategoryIdentifier(content: request.content) { categoryIdentifier in
+
             if let categoryIdentifier = categoryIdentifier {
                 NSLog("Using categoryIdentifer: \(categoryIdentifier)")
                 bestAttemptContent.categoryIdentifier = categoryIdentifier
             }
+
+            // Download rich media and create an attachment
             self.buildAttachments(content: request.content) { attachments in
                 if attachments != nil {
                     NSLog("Adding \(attachments?.count ?? 0) attachment(s)")
@@ -22,22 +44,40 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
             }
         }
     }
+
+    open override func serviceExtensionTimeWillExpire() {
+        NSLog("%@ contentHandler not called in time, returning bestAttemptContent", self);
+
+        guard let contentHandler = self.contentHandler else {
+            return;
+        }
+
+        guard let bestAttemptContent = self.bestAttemptContent else {
+            return;
+        }
+
+        contentHandler(bestAttemptContent);
+    }
     
     func getCategoryIdentifier(content: UNNotificationContent, completionHandler: @escaping (String?) -> Void) {
 
+        // If the payload explicitly specifies a category, use it
         guard content.categoryIdentifier.isEmpty else {
             NSLog("getCategoryIdentifier: explicit categoryIdentifer included in payload: \(content.categoryIdentifier)")
             completionHandler(content.categoryIdentifier)
             return
         }
 
-        guard let buttons = content.userInfo["mp_buttons"] as? [[AnyHashable: Any]] else {
+        // Generate unique cateogry id from timestamp
+        let categoryId = NSNumber(value: NSDate().timeIntervalSince1970).stringValue
+
+        // Get buttons if they are specified
+        let buttons = content.userInfo["mp_buttons"] as? [[AnyHashable: Any]] ?? []
+        if (buttons.count == 0) {
             NSLog("getCategoryIdentifier: No action buttons found in the push notification payload.")
-            completionHandler(nil)
-            return
         }
         
-        // build actions from buttons payload
+        // Build a list of actions from the buttons data
         var actions: [UNNotificationAction] = []
         for (idx, button) in buttons.enumerated() {
             let identifier = String(format: "MP_ACTION_%lu", idx)
@@ -46,9 +86,7 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
             actions.append(action)
         }
 
-        let categoryId = NSNumber(value: NSDate().timeIntervalSince1970).stringValue
-
-        // create the category to contain the custom action buttons
+        // Create a new category with custom dismiss action set to true and any action buttons specified
         let mpDynamicCategory =
               UNNotificationCategory(identifier: categoryId,
               actions: actions,
@@ -56,7 +94,7 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
               hiddenPreviewsBodyPlaceholder: "",
               options: .customDismissAction)
                 
-        // add the new category
+        // Add the new category
         UNUserNotificationCenter.current().getNotificationCategories(completionHandler: { categories in
             var updatedCategories = categories
             updatedCategories.insert(mpDynamicCategory)

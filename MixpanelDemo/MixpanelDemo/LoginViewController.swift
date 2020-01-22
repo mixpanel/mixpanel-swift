@@ -10,6 +10,9 @@ class LoginViewController: UIViewController {
     @IBOutlet weak var distinctIdTextField: UITextField!
 
     @IBOutlet weak var nameTextField: UITextField!
+
+    @IBOutlet weak var startButton: UIButton!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         let token = Mixpanel.mainInstance().apiToken
@@ -17,6 +20,14 @@ class LoginViewController: UIViewController {
 
         distinctIdTextField.text = "demo_user"
         nameTextField.text = "Demo User"
+    }
+
+    open func goToMainView() {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "mainNav") {
+           self.view.window?.rootViewController = vc
+       } else {
+           NSLog("Unable to find view controller with name \"mainView\"")
+       }
     }
 
     func registerDeviceForPush() {
@@ -43,5 +54,7 @@ class LoginViewController: UIViewController {
         Mixpanel.mainInstance().flush()
 
         registerDeviceForPush()
+
+        goToMainView()
     }
 }

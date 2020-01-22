@@ -13,6 +13,8 @@ import UserNotifications
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
+    var pushDeviceToken: Data?
+
     var window: UIWindow?
 
     func application(_ application: UIApplication,
@@ -44,21 +46,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             }
         }
 
-        Mixpanel.mainInstance().identify(
-            distinctId: Mixpanel.mainInstance().distinctId)
-        Mixpanel.mainInstance().people.set(properties: ["$name": "Max Panelle"])
         return true
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        Mixpanel.mainInstance().people.addPushDeviceToken(deviceToken)
-
-        let tokenChars = (deviceToken as NSData).bytes.assumingMemoryBound(to: CChar.self)
-        var tokenString = ""
-        for i in 0..<deviceToken.count {
-            tokenString += String(format: "%02.2hhx", arguments: [tokenChars[i]])
-        }
-        debugPrint("did register for remote notification with device token: \(tokenString)")
+        pushDeviceToken = deviceToken
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {

@@ -11,6 +11,7 @@
 		05D4C3E2222E1C6800D30FC2 /* SelectorEvaluaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D4C3E1222E1C6800D30FC2 /* SelectorEvaluaterTests.swift */; };
 		05D4C3E82230A8AD00D30FC2 /* InAppNotificationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D4C3E72230A8AD00D30FC2 /* InAppNotificationTest.swift */; };
 		51DD568A1D3077390045D3DB /* LoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56891D3077390045D3DB /* LoggerTests.swift */; };
+		60CB587123D77F9200F1632B /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60CB587023D77F9200F1632B /* LoginViewController.swift */; };
 		60DDD14A23D39621004F7CBB /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60DDD14923D39620004F7CBB /* NotificationService.swift */; };
 		60DDD14E23D39621004F7CBB /* NotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 60DDD14723D39620004F7CBB /* NotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		60DDD15323D396CA004F7CBB /* Mixpanel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */; };
@@ -245,6 +246,7 @@
 		37433CF0620BC6A0A5EFC541 /* Pods_MixpanelDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MixpanelDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		51DD56891D3077390045D3DB /* LoggerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoggerTests.swift; sourceTree = "<group>"; };
 		5609994314AFCE2B8FF1705B /* Pods-MixpanelDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MixpanelDemoTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests.release.xcconfig"; sourceTree = "<group>"; };
+		60CB587023D77F9200F1632B /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		60DDD14723D39620004F7CBB /* NotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		60DDD14923D39620004F7CBB /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		60DDD14B23D39621004F7CBB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -514,6 +516,7 @@
 				E146F1931D398D0A00D75B49 /* TrackingViewController.swift */,
 				E146F1951D398D1600D75B49 /* PeopleViewController.swift */,
 				671EECAE21432E5F006DD9FA /* GroupsViewController.swift */,
+				60CB587023D77F9200F1632B /* LoginViewController.swift */,
 				E146F1991D399AF300D75B49 /* UtilityViewController.swift */,
 				E1016E351D3D46DF00075BB7 /* ActionCompleteViewController.swift */,
 				E16C35E01D872044003500AC /* CodelessPlaygroundViewController.swift */,
@@ -999,6 +1002,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				60CB587123D77F9200F1632B /* LoginViewController.swift in Sources */,
 				E146F1941D398D0A00D75B49 /* TrackingViewController.swift in Sources */,
 				E146F1961D398D1600D75B49 /* PeopleViewController.swift in Sources */,
 				E146F19A1D399AF300D75B49 /* UtilityViewController.swift in Sources */,

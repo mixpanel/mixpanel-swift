@@ -29,12 +29,14 @@ public class MixpanelPushNotifications {
         
         // Initialize properties to track to Mixpanel
         var trackingProps: Properties = [:]
-        let mpMetaData = userInfo["mp"] as? [AnyHashable: Any]
-        if mpMetaData != nil {
-            trackingProps["campaign_id"] = mpMetaData!["c"] as! Int
-            trackingProps["message_id"] = mpMetaData!["m"] as! Int
+        if let mpMetaData = userInfo["mp"] as? [AnyHashable: Any] {
+            if let campaign_id =  mpMetaData["c"] as? Int {
+               trackingProps["campaign_id"] = campaign_id
+            }
+            if let message_id =  mpMetaData["m"] as? Int {
+               trackingProps["message_id"] = message_id
+            }
         }
-
 
         Logger.debug(message: "didReceiveNotificationResponse action: \(response.actionIdentifier)");
 
@@ -85,8 +87,18 @@ public class MixpanelPushNotifications {
                 ontap = buttonOnTap
 
                 trackingProps["tap_target"] = "button"
-                trackingProps["button_id"] = button["id"] as! String
-                trackingProps["button_label"] = button["lbl"] as! String
+
+                if let buttonId = button["id"] as? String {
+                    trackingProps["button_id"] = buttonId
+                } else {
+                    NSLog("Failed to get button id for tracking")
+                }
+
+                if let buttonLabel = button["lbl"] as? String {
+                    trackingProps["button_label"] = buttonLabel
+                } else {
+                    NSLog("Failed to get button label for tracking")
+                }
             }
         }
 

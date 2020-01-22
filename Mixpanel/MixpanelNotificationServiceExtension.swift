@@ -7,7 +7,6 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
     var bestAttemptContent: UNMutableNotificationContent?
 
     open override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-
         NSLog("%@ MPNotificationServiceExtension didReceiveNotificationRequest", self);
 
         guard MixpanelPushNotifications.isMixpanelPushNotification(request.content) else {
@@ -28,7 +27,6 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
 
         // Setup the category first since it's faster and less likely to cause time to expire
         self.getCategoryIdentifier(content: request.content) { categoryIdentifier in
-
             if let categoryIdentifier = categoryIdentifier {
                 NSLog("Using categoryIdentifer: \(categoryIdentifier)")
                 bestAttemptContent.categoryIdentifier = categoryIdentifier
@@ -36,9 +34,9 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
 
             // Download rich media and create an attachment
             self.buildAttachments(content: request.content) { attachments in
-                if attachments != nil {
-                    NSLog("Adding \(attachments?.count ?? 0) attachment(s)")
-                    bestAttemptContent.attachments = attachments!
+                if let attachments = attachments {
+                    NSLog("Adding \(attachments.count) attachment(s)")
+                    bestAttemptContent.attachments = attachments
                 }
                 contentHandler(bestAttemptContent)
             }
@@ -60,7 +58,6 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
     }
     
     func getCategoryIdentifier(content: UNNotificationContent, completionHandler: @escaping (String?) -> Void) {
-
         // If the payload explicitly specifies a category, use it
         guard content.categoryIdentifier.isEmpty else {
             NSLog("getCategoryIdentifier: explicit categoryIdentifer included in payload: \(content.categoryIdentifier)")
@@ -81,9 +78,10 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
         var actions: [UNNotificationAction] = []
         for (idx, button) in buttons.enumerated() {
             let identifier = String(format: "MP_ACTION_%lu", idx)
-            let title = button["lbl"] as! String
-            let action = UNNotificationAction(identifier: identifier, title: title, options: .foreground)
-            actions.append(action)
+            if let title = button["lbl"] as? String {
+                let action = UNNotificationAction(identifier: identifier, title: title, options: .foreground)
+                actions.append(action)
+            }
         }
 
         // Create a new category with custom dismiss action set to true and any action buttons specified
@@ -107,8 +105,6 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
                 completionHandler(categoryId)
             }
         })
-
-
     }
 
     func waitForCategoryExistence(categoryIdentifier: String, completionHandler: @escaping () -> Void) {

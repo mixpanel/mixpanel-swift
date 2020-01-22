@@ -99,9 +99,29 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
             var updatedCategories = categories
             updatedCategories.insert(mpDynamicCategory)
             UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
+        })
+
+        // In testing, it's clear that setNotificationCategories is not a synchronous action
+        // or there is caching going on. We need to wait until the category is available.
+        waitForCategoryExistence(categoryIdentifier: categoryId) {
+            NSLog("waitForCategoryExistence: Category \"\(categoryId)\" found, returning.")
             completionHandler(categoryId)
+        }
+    }
+
+    func waitForCategoryExistence(categoryIdentifier: String, completionHandler: @escaping () -> Void) {
+        NSLog("Checking for the existence of category \"\(categoryIdentifier)\"...")
+        UNUserNotificationCenter.current().getNotificationCategories(completionHandler: { categories in
+            for category in categories {
+                if (category.identifier == categoryIdentifier) {
+                    completionHandler()
+                    return
+                }
+            }
+            self.waitForCategoryExistence(categoryIdentifier: categoryIdentifier, completionHandler: completionHandler);
         })
     }
+
     
     func buildAttachments(content: UNNotificationContent, completionHandler: @escaping ([UNNotificationAttachment]?) -> Void) {
         guard let mediaUrlStr = (content.userInfo["mp_media_url"] as? String) else {

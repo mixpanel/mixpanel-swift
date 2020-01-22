@@ -36,7 +36,7 @@ public class MixpanelPushNotifications {
         }
 
 
-        Logger.debug(message: "%@ didReceiveNotificationResponse action: \(response.actionIdentifier)");
+        Logger.debug(message: "didReceiveNotificationResponse action: \(response.actionIdentifier)");
 
         // If the notification was dismissed, just track and return
         if response.actionIdentifier == UNNotificationDismissActionIdentifier {
@@ -69,7 +69,7 @@ public class MixpanelPushNotifications {
                 }
 
                 guard let idx = Int(response.actionIdentifier.replacingOccurrences(of: "MP_ACTION_", with: "")) else {
-                    Logger.debug(message: "unable to parse button index in \(response.actionIdentifier)")
+                    Logger.debug(message: "Unable to parse button index in \(response.actionIdentifier)")
                     completionHandler();
                     return
                 }

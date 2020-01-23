@@ -109,6 +109,15 @@ open class Mixpanel {
     }
 
     /**
+     Returns the all Mixpanel instances that have been initialized
+
+     - returns: returns all Mixpanel instances
+     */
+    open class func allInstances() -> [MixpanelInstance] {
+        return MixpanelManager.sharedInstance.getAllInstances()
+    }
+
+    /**
      Sets the main instance based on the instance name
 
      - parameter name: the instance name
@@ -125,7 +134,6 @@ open class Mixpanel {
     open class func removeInstance(name: String) {
         MixpanelManager.sharedInstance.removeInstance(name: name)
     }
-
 }
 
 class MixpanelManager {
@@ -179,6 +187,10 @@ class MixpanelManager {
             return nil
         }
         return instance
+    }
+
+    func getAllInstances() -> [MixpanelInstance] {
+        return Array(instances.values)
     }
 
     func getMainInstance() -> MixpanelInstance? {

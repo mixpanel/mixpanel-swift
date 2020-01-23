@@ -45,6 +45,8 @@ protocol AppLifecycle {
 
 /// The class that represents the Mixpanel Instance
 open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate {
+    /// apiToken string that identifies the project to track data to
+    open var apiToken = ""
 
     /// The a MixpanelDelegate object that gives control over Mixpanel network activity.
     open var delegate: MixpanelDelegate?
@@ -241,7 +243,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
     #endif // DECIDE
 
-    var apiToken = ""
     var superProperties = InternalProperties()
     var eventsQueue = Queue()
     var flushEventsQueue = Queue()

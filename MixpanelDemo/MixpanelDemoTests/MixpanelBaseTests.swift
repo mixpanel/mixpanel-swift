@@ -29,6 +29,13 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
         mixpanel.reset()
         waitForTrackingQueue()
+
+        if let loginView = self.topViewController() as? LoginViewController {
+            loginView.goToMainView()
+        } else {
+            NSLog("Expected login screen but not found.")
+        }
+
         NSLog("finished test setup")
     }
 

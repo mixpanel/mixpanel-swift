@@ -12,6 +12,8 @@
 		51DD567C1D306B740045D3DB /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56791D306B740045D3DB /* Logger.swift */; };
 		51DD56831D306B7B0045D3DB /* PrintLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56801D306B7B0045D3DB /* PrintLogging.swift */; };
 		51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56811D306B7B0045D3DB /* FileLogging.swift */; };
+		60FF895A23CD34E300628249 /* PushNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60FF895923CD34E300628249 /* PushNotifications.swift */; };
+		60FF895F23CE587C00628249 /* MixpanelNotificationServiceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60FF895E23CE587C00628249 /* MixpanelNotificationServiceExtension.swift */; };
 		673ABE3A21360CBE00B1784B /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		67FF65E421878414005161FA /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		67FF65E521878416005161FA /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
@@ -181,6 +183,8 @@
 		51DD56791D306B740045D3DB /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		51DD56801D306B7B0045D3DB /* PrintLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrintLogging.swift; sourceTree = "<group>"; };
 		51DD56811D306B7B0045D3DB /* FileLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileLogging.swift; sourceTree = "<group>"; };
+		60FF895923CD34E300628249 /* PushNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotifications.swift; sourceTree = "<group>"; };
+		60FF895E23CE587C00628249 /* MixpanelNotificationServiceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelNotificationServiceExtension.swift; sourceTree = "<group>"; };
 		673ABE3921360CBE00B1784B /* Group.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
 		86EE92C621370CA600D55487 /* ExceptionWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExceptionWrapper.h; sourceTree = "<group>"; };
 		86EE92C721370CA600D55487 /* ExceptionWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExceptionWrapper.m; sourceTree = "<group>"; };
@@ -331,6 +335,15 @@
 			name = Logging;
 			sourceTree = "<group>";
 		};
+		60FF895D23CE584800628249 /* PushNotifications */ = {
+			isa = PBXGroup;
+			children = (
+				60FF895923CD34E300628249 /* PushNotifications.swift */,
+				60FF895E23CE587C00628249 /* MixpanelNotificationServiceExtension.swift */,
+			);
+			name = PushNotifications;
+			sourceTree = "<group>";
+		};
 		E11594731CFF1491007F8B4F = {
 			isa = PBXGroup;
 			children = (
@@ -363,6 +376,7 @@
 		E11594881CFF14D3007F8B4F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				60FF895D23CE584800628249 /* PushNotifications */,
 				E189D8FB1D5A6943007F3F29 /* Networking */,
 				E189D8F91D5A6908007F3F29 /* Decide */,
 				51DD56771D306B620045D3DB /* Log */,
@@ -852,6 +866,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				60FF895F23CE587C00628249 /* MixpanelNotificationServiceExtension.swift in Sources */,
 				E19D12921D9C580400A8016D /* Variant.swift in Sources */,
 				51DD56831D306B7B0045D3DB /* PrintLogging.swift in Sources */,
 				E15422251D71056C009421A0 /* DeviceInfoMessage.swift in Sources */,
@@ -878,6 +893,7 @@
 				E15422331D74CB2B009421A0 /* ObjectSerializerConfig.swift in Sources */,
 				E15422131D6E5A9F009421A0 /* ObjectFilter.swift in Sources */,
 				E11594971D006022007F8B4F /* Network.swift in Sources */,
+				60FF895A23CD34E300628249 /* PushNotifications.swift in Sources */,
 				E11523511D7F5C7500657E80 /* UIEdgeInsetsToNSDictionary.swift in Sources */,
 				E174DAEF1DA337CB00FED703 /* TweakViewData.swift in Sources */,
 				E11523531D7F63E400657E80 /* IdentityTransformer.swift in Sources */,

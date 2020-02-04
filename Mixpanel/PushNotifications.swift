@@ -29,7 +29,7 @@ public class MixpanelPushNotifications {
         
         // Initialize properties to track to Mixpanel
         var extraTrackingProps: Properties = [
-            "notification_id": response.notification.request.identifier,
+            "ios_notification_id": response.notification.request.identifier,
         ]
         Logger.debug(message: "didReceiveNotificationResponse action: \(response.actionIdentifier)");
 

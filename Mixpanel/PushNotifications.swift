@@ -113,19 +113,19 @@ public class MixpanelPushNotifications {
 
         // Perform the specified action
         guard let tapAction = ontap else {
-            Logger.debug(message: "Unable to determine tap behavior")
+            Logger.debug(message: "No tap behavior specified, delegating to app default")
             completionHandler()
             return
         }
         
         guard let actionTypeStr = tapAction["type"] as? String else {
-            Logger.debug(message: "Expected 'type' in ontap dict")
+            Logger.debug(message: "Expected 'type' in ontap dict, delegating to app default")
             completionHandler()
             return
         }
 
         guard let actionType = PushTapActionType(rawValue: actionTypeStr) else {
-            Logger.debug(message: "Unexpected value for push notification tap action type: \(actionTypeStr)")
+            Logger.debug(message: "Unexpected value for push notification tap action type: \(actionTypeStr), delegating to app default")
             completionHandler()
             return
         }
@@ -138,13 +138,13 @@ public class MixpanelPushNotifications {
 
         case .browser, .deeplink:
             guard let urlStr = tapAction["uri"] as? String else {
-                Logger.debug(message: "Expected 'uri' in ontap dict")
+                Logger.debug(message: "Expected 'uri' in ontap dict, delegating to app default")
                 completionHandler()
                 return
             }
 
             guard let url = URL(string: urlStr) else {
-                Logger.debug(message: "Failed to convert urlStr \"\(urlStr)\" to url")
+                Logger.debug(message: "Failed to convert urlStr \"\(urlStr)\" to url, delegating to app default")
                 completionHandler()
                 return
             }

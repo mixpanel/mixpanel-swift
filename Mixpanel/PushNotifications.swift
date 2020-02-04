@@ -24,26 +24,19 @@ public class MixpanelPushNotifications {
             completionHandler()
             return
         }
-        
+
         let userInfo = response.notification.request.content.userInfo
         
         // Initialize properties to track to Mixpanel
-        var trackingProps: Properties = [:]
-        if let mpMetaData = userInfo["mp"] as? [AnyHashable: Any] {
-            if let campaign_id =  mpMetaData["c"] as? Int {
-               trackingProps["campaign_id"] = campaign_id
-            }
-            if let message_id =  mpMetaData["m"] as? Int {
-               trackingProps["message_id"] = message_id
-            }
-        }
-
+        var extraTrackingProps: Properties = [
+            "notification_id": response.notification.request.identifier,
+        ]
         Logger.debug(message: "didReceiveNotificationResponse action: \(response.actionIdentifier)");
 
         // If the notification was dismissed, just track and return
         if response.actionIdentifier == UNNotificationDismissActionIdentifier {
             for instance in Mixpanel.allInstances() {
-                instance.track(event:"$push_notification_dismissed", properties:trackingProps)
+                instance.trackPushNotification(userInfo, event:"$push_notification_dismissed", properties:extraTrackingProps)
                 instance.flush()
             }
             completionHandler();
@@ -54,7 +47,7 @@ public class MixpanelPushNotifications {
 
         if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
             // The action that indicates the user opened the app from the notification interface.
-            trackingProps["tap_target"] = "notification";
+            extraTrackingProps["tap_target"] = "notification";
 
             if (userInfo["mp_ontap"] != nil) {
                 ontap = (userInfo["mp_ontap"] as? [AnyHashable: Any])!
@@ -86,25 +79,35 @@ public class MixpanelPushNotifications {
 
                 ontap = buttonOnTap
 
-                trackingProps["tap_target"] = "button"
+                extraTrackingProps["tap_target"] = "button"
 
                 if let buttonId = button["id"] as? String {
-                    trackingProps["button_id"] = buttonId
+                    extraTrackingProps["button_id"] = buttonId
                 } else {
                     NSLog("Failed to get button id for tracking")
                 }
 
                 if let buttonLabel = button["lbl"] as? String {
-                    trackingProps["button_label"] = buttonLabel
+                    extraTrackingProps["button_label"] = buttonLabel
                 } else {
                     NSLog("Failed to get button label for tracking")
                 }
             }
         }
 
+        // Add additional tracking props
+        if let tapAction = ontap {
+            if let tapActionType = tapAction["type"] as? String {
+                extraTrackingProps["tap_action_type"] = tapActionType
+            }
+            if let tapActionUri = tapAction["uri"] as? String {
+                extraTrackingProps["tap_action_uri"] = tapActionUri
+            }
+        }
+
         // Track tap event to all Mixpanel instances
         for instance in Mixpanel.allInstances() {
-            instance.track(event:"$push_notification_tap", properties:trackingProps)
+            instance.trackPushNotification(userInfo, event:"$push_notification_tap", properties:extraTrackingProps)
             instance.flush()
         }
 

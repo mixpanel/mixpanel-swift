@@ -11,7 +11,7 @@ protocol AEDelegate {
     func setOnce(properties: Properties)
     func increment(property: String, by: Double)
     #if DECIDE
-        func trackPushNotification(_ userInfo: [AnyHashable: Any], event: String)
+    func trackPushNotification(_ userInfo: [AnyHashable: Any], event: String, properties: Properties)
     #endif
 }
 
@@ -208,7 +208,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         if let selector = selector, let newSelector = newSelector {
             let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
                 if let param2 = param2 as? [AnyHashable: Any] {
-                    self.delegate?.trackPushNotification(param2, event: "$campaign_received")
+                    self.delegate?.trackPushNotification(param2, event: "$campaign_received", properties: [:])
                 }
             }
             Swizzler.swizzleSelector(selector,
@@ -230,7 +230,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                 let newSelector = #selector(NSObject.mp_userNotificationCenter(_:newDidReceive:withCompletionHandler:))
                 let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
                     if let param2 = param2 as? [AnyHashable: Any] {
-                        self.delegate?.trackPushNotification(param2, event: "$campaign_received")
+                        self.delegate?.trackPushNotification(param2, event: "$campaign_received", properties: [:])
                     }
                 }
                 Swizzler.swizzleSelector(selector,

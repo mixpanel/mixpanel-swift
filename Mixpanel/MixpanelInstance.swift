@@ -1320,13 +1320,14 @@ extension MixpanelInstance {
     #if DECIDE
     
     func trackPushNotification(_ userInfo: [AnyHashable: Any],
-                                      event: String = "$campaign_received") {
+                                      event: String = "$campaign_received",
+                                      properties: Properties = [:]) {
         if hasOptedOutTracking() {
             return
         }
         if let mpPayload = userInfo["mp"] as? InternalProperties {
             if let m = mpPayload["m"], let c = mpPayload["c"] {
-                var properties = Properties()
+                var properties = properties
                 for (key, value) in mpPayload {
                     if key != "m" && key != "c" {
                         // Check Int first, since a number in the push payload is parsed as __NCSFNumber

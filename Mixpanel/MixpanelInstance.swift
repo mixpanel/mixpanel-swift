@@ -1318,7 +1318,6 @@ extension MixpanelInstance {
     }
 
     #if DECIDE
-    
     func trackPushNotification(_ userInfo: [AnyHashable: Any],
                                       event: String = "$campaign_received",
                                       properties: Properties = [:]) {

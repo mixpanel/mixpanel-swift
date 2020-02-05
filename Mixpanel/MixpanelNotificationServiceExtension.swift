@@ -26,7 +26,7 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
         self.bestAttemptContent = bestAttemptContent
 
         // Track $push_notification_received event
-        self.trackNotificationReceived(content: request.content)
+        MixpanelPushNotifications.trackEvent("$push_notification_received", properties: [:], request: request)
 
         // Setup the category first since it's faster and less likely to cause time to expire
         self.getCategoryIdentifier(content: request.content) { categoryIdentifier in
@@ -60,26 +60,6 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
         contentHandler(bestAttemptContent);
     }
 
-    func trackNotificationReceived(content: UNNotificationContent) {
-        guard let mpPayload = content.userInfo["mp"] as? InternalProperties else {
-            Logger.info(message: "Malformed mixpanel push payload, not tracking $push_notification_received")
-            return
-        }
-
-        guard let distinctId = mpPayload["distinct_id"] as? String else {
-            Logger.info(message: "\"distinct_id\" not found in mixpanel push payload, not tracking $push_notification_received")
-            return
-        }
-
-        guard let projectToken = mpPayload["token"] as? String else {
-            Logger.info(message: "\"token\" not found in mixpanel push payload, not tracking $push_notification_received")
-            return
-        }
-
-        let mixpanel = Mixpanel.initialize(token: projectToken)
-        mixpanel.trackPushNotification(content.userInfo, event: "$push_notification_received", properties: ["distinct_id": distinctId])
-    }
-    
     func getCategoryIdentifier(content: UNNotificationContent, completionHandler: @escaping (String?) -> Void) {
         // If the payload explicitly specifies a category, use it
         guard content.categoryIdentifier.isEmpty else {

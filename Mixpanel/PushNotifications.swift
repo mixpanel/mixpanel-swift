@@ -25,7 +25,8 @@ public class MixpanelPushNotifications {
             return
         }
 
-        let userInfo = response.notification.request.content.userInfo
+        let request = response.notification.request
+        let userInfo = request.content.userInfo
         
         // Initialize properties to track to Mixpanel
         var extraTrackingProps: Properties = [
@@ -34,11 +35,9 @@ public class MixpanelPushNotifications {
         Logger.debug(message: "didReceiveNotificationResponse action: \(response.actionIdentifier)");
 
         // If the notification was dismissed, just track and return
+
         if response.actionIdentifier == UNNotificationDismissActionIdentifier {
-            for instance in Mixpanel.allInstances() {
-                instance.trackPushNotification(userInfo, event:"$push_notification_dismissed", properties:extraTrackingProps)
-                instance.flush()
-            }
+            MixpanelPushNotifications.trackEvent("$push_notification_dismissed", properties: [:], request: request)
             completionHandler();
             return;
         }
@@ -105,11 +104,8 @@ public class MixpanelPushNotifications {
             }
         }
 
-        // Track tap event to all Mixpanel instances
-        for instance in Mixpanel.allInstances() {
-            instance.trackPushNotification(userInfo, event:"$push_notification_tap", properties:extraTrackingProps)
-            instance.flush()
-        }
+        // Track tap event
+        MixpanelPushNotifications.trackEvent("$push_notification_tap", properties:extraTrackingProps, request:request)
 
         // Perform the specified action
         guard let tapAction = ontap else {
@@ -159,6 +155,35 @@ public class MixpanelPushNotifications {
             })
 
         }
-
     }
+
+    public static func trackEvent(_ event: String, properties: Dictionary<String, MixpanelType>, request:UNNotificationRequest) {
+
+        let userInfo = request.content.userInfo;
+
+        guard let mpPayload = userInfo["mp"] as? InternalProperties else {
+            Logger.info(message: "Malformed mixpanel push payload, not tracking: \(event)")
+            return
+        }
+
+        guard let distinctId = mpPayload["distinct_id"] as? String else {
+            Logger.info(message: "\"distinct_id\" not found in mixpanel push payload, not tracking: \(event)")
+            return
+        }
+
+        guard let projectToken = mpPayload["token"] as? String else {
+            Logger.info(message: "\"token\" not found in mixpanel push payload, not tracking: \(event)")
+            return
+        }
+
+        var properties = properties
+        properties["distinct_id"] = distinctId
+        properties["ios_notification_id"] = request.identifier
+
+        // Track using project token and distinct_id from push payload
+        let mixpanel = Mixpanel.initialize(token: projectToken)
+        mixpanel.trackPushNotification(userInfo, event: event, properties: properties)
+        mixpanel.flush()
+    }
+
 }

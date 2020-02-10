@@ -181,7 +181,7 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
                 attachment = try UNNotificationAttachment(identifier: "", url: localURL, options: nil)
                 completionHandler(attachment)
             } catch let attachmentError {
-                NSLog("Unable to add attchment: \(attachmentError.localizedDescription)")
+                NSLog("Unable to add attachment: \(attachmentError.localizedDescription)")
                 completionHandler(nil)
             }
         })).resume()

@@ -29,9 +29,7 @@ public class MixpanelPushNotifications {
         let userInfo = request.content.userInfo
         
         // Initialize properties to track to Mixpanel
-        var extraTrackingProps: Properties = [
-            "ios_notification_id": response.notification.request.identifier,
-        ]
+        var extraTrackingProps: Properties = [:]
         Logger.debug(message: "didReceiveNotificationResponse action: \(response.actionIdentifier)");
 
         // If the notification was dismissed, just track and return
@@ -46,7 +44,7 @@ public class MixpanelPushNotifications {
 
         if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
             // The action that indicates the user opened the app from the notification interface.
-            extraTrackingProps["tap_target"] = "notification";
+            extraTrackingProps["$tap_target"] = "notification";
 
             if (userInfo["mp_ontap"] != nil) {
                 ontap = (userInfo["mp_ontap"] as? [AnyHashable: Any])!
@@ -78,16 +76,16 @@ public class MixpanelPushNotifications {
 
                 ontap = buttonOnTap
 
-                extraTrackingProps["tap_target"] = "button"
+                extraTrackingProps["$tap_target"] = "button"
 
                 if let buttonId = button["id"] as? String {
-                    extraTrackingProps["button_id"] = buttonId
+                    extraTrackingProps["$button_id"] = buttonId
                 } else {
                     NSLog("Failed to get button id for tracking")
                 }
 
                 if let buttonLabel = button["lbl"] as? String {
-                    extraTrackingProps["button_label"] = buttonLabel
+                    extraTrackingProps["$button_label"] = buttonLabel
                 } else {
                     NSLog("Failed to get button label for tracking")
                 }
@@ -97,10 +95,10 @@ public class MixpanelPushNotifications {
         // Add additional tracking props
         if let tapAction = ontap {
             if let tapActionType = tapAction["type"] as? String {
-                extraTrackingProps["tap_action_type"] = tapActionType
+                extraTrackingProps["$tap_action_type"] = tapActionType
             }
             if let tapActionUri = tapAction["uri"] as? String {
-                extraTrackingProps["tap_action_uri"] = tapActionUri
+                extraTrackingProps["$tap_action_uri"] = tapActionUri
             }
         }
 

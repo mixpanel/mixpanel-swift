@@ -1328,7 +1328,10 @@ extension MixpanelInstance {
             if let m = mpPayload["m"], let c = mpPayload["c"] {
                 var properties = properties
                 for (key, value) in mpPayload {
-                    if key != "m" && key != "c" {
+                    // "token" and "distinct_id" are sent with the Mixpanel push payload but we don't need to track them
+                    // they are handled upstream to initialize the mixpanel instance and "distinct_id" will be passed in
+                    // explicitly in "additionalProperties"
+                    if !["m", "c", "token", "distinct_id"].contains(key) {
                         // https://stackoverflow.com/questions/53547595/type-checks-on-int-and-bool-values-are-returning-incorrectly-in-swift-4-2
                         if let typedValue = value as? NSNumber {
                             if (typedValue === kCFBooleanTrue) {

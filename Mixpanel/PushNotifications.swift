@@ -178,7 +178,7 @@ public class MixpanelPushNotifications {
 
         var properties = properties
         properties["distinct_id"] = distinctId
-        properties["ios_notification_id"] = request.identifier
+        properties["$ios_notification_id"] = request.identifier
 
         // Track using project token and distinct_id from push payload
         let mixpanel = Mixpanel.initialize(token: projectToken)

@@ -498,7 +498,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testTrackPushNotification() {
         let nsJourneyId: NSNumber = 1
-        mixpanel.trackPushNotification(["mp": ["m": 98765, "c": 56789, "journey_id": nsJourneyId, "additional_param": "abcd"]])
+        mixpanel.trackPushNotification(["mp": ["m": 98765, "c": 56789, "journey_id": nsJourneyId, "additional_param": "abcd", "from_preview": true]])
         waitForTrackingQueue()
         let e: InternalProperties = mixpanel.eventsQueue.last!
         XCTAssertEqual(e["event"] as? String, "$campaign_received", "incorrect event name")
@@ -506,6 +506,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertEqual(p["campaign_id"] as? Int, 56789, "campaign_id not equal")
         XCTAssertEqual(p["message_id"] as? Int, 98765, "message_id not equal")
         XCTAssertEqual(p["journey_id"] as? Int, 1, "journey_id not equal")
+        XCTAssertEqual(p["from_preview"] as? Bool, true, "from_preview0 not equal")
         XCTAssertEqual(p["additional_param"] as? String, "abcd", "additional_param not equal")
         XCTAssertEqual(p["message_type"] as? String, "push", "type does not equal inapp")
     }

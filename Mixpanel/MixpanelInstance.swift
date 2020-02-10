@@ -1329,8 +1329,16 @@ extension MixpanelInstance {
                 var properties = properties
                 for (key, value) in mpPayload {
                     if key != "m" && key != "c" {
-                        if let typedValue = value as? Bool { properties[key] = typedValue }
-                        else if let typedValue = value as? Int { properties[key] = typedValue }
+                        // https://stackoverflow.com/questions/53547595/type-checks-on-int-and-bool-values-are-returning-incorrectly-in-swift-4-2
+                        if let typedValue = value as? NSNumber {
+                            if (typedValue === kCFBooleanTrue) {
+                                properties[key] = typedValue.boolValue
+                            } else if (typedValue === kCFBooleanFalse) {
+                                properties[key] = typedValue.boolValue
+                            } else {
+                                properties[key] = typedValue.intValue
+                            }
+                        }
                         else if let typedValue = value as? String { properties[key] = typedValue }
                         else if let typedValue = value as? MixpanelType { properties[key] = typedValue }
                     }

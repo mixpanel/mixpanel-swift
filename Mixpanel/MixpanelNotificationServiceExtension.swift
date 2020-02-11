@@ -25,6 +25,9 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
         self.contentHandler = contentHandler
         self.bestAttemptContent = bestAttemptContent
 
+        // Track $push_notification_received event
+        MixpanelPushNotifications.trackEvent("$push_notification_received", properties: [:], request: request)
+
         // Setup the category first since it's faster and less likely to cause time to expire
         self.getCategoryIdentifier(content: request.content) { categoryIdentifier in
             if let categoryIdentifier = categoryIdentifier {
@@ -56,7 +59,7 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
 
         contentHandler(bestAttemptContent);
     }
-    
+
     func getCategoryIdentifier(content: UNNotificationContent, completionHandler: @escaping (String?) -> Void) {
         // If the payload explicitly specifies a category, use it
         guard content.categoryIdentifier.isEmpty else {
@@ -178,7 +181,7 @@ open class MixpanelNotificationServiceExtension: UNNotificationServiceExtension 
                 attachment = try UNNotificationAttachment(identifier: "", url: localURL, options: nil)
                 completionHandler(attachment)
             } catch let attachmentError {
-                NSLog("Unable to add attchment: \(attachmentError.localizedDescription)")
+                NSLog("Unable to add attachment: \(attachmentError.localizedDescription)")
                 completionHandler(nil)
             }
         })).resume()

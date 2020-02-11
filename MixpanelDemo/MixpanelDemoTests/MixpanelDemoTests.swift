@@ -506,7 +506,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertEqual(p["campaign_id"] as? Int, 56789, "campaign_id not equal")
         XCTAssertEqual(p["message_id"] as? Int, 98765, "message_id not equal")
         XCTAssertEqual(p["journey_id"] as? Int, 1, "journey_id not equal")
-        XCTAssertEqual(p["from_preview"] as? Bool, true, "from_preview0 not equal")
+        XCTAssertEqual(p["from_preview"] as? Bool, true, "from_preview not equal")
         XCTAssertEqual(p["additional_param"] as? String, "abcd", "additional_param not equal")
         XCTAssertEqual(p["message_type"] as? String, "push", "type does not equal inapp")
     }

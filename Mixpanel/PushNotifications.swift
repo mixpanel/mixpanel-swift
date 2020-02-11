@@ -33,7 +33,6 @@ public class MixpanelPushNotifications {
         Logger.debug(message: "didReceiveNotificationResponse action: \(response.actionIdentifier)");
 
         // If the notification was dismissed, just track and return
-
         if response.actionIdentifier == UNNotificationDismissActionIdentifier {
             MixpanelPushNotifications.trackEvent("$push_notification_dismissed", properties: [:], request: request)
             completionHandler();

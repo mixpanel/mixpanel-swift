@@ -156,7 +156,6 @@ public class MixpanelPushNotifications {
     }
 
     public static func trackEvent(_ event: String, properties: Dictionary<String, MixpanelType>, request:UNNotificationRequest) {
-
         let userInfo = request.content.userInfo;
 
         guard let mpPayload = userInfo["mp"] as? InternalProperties else {

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>MixpanelType Protocol Reference</title>
+    <title>MixpanelNotificationServiceExtension Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Protocol/MixpanelType" class="dashAnchor"></a>
-    <a title="MixpanelType Protocol Reference"></a>
+    <a name="//apple_ref/swift/Class/MixpanelNotificationServiceExtension" class="dashAnchor"></a>
+    <a title="MixpanelNotificationServiceExtension Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">Mixpanel 2.6.12 Docs</a> (88% documented)</p>
@@ -22,7 +22,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">Mixpanel Reference</a>
         <img id="carat" src="../img/carat.png" />
-        MixpanelType Protocol Reference
+        MixpanelNotificationServiceExtension Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -164,15 +164,14 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>MixpanelType</h1>
+            <h1>MixpanelNotificationServiceExtension</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">MixpanelType</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">MixpanelNotificationServiceExtension</span> <span class="p">:</span> <span class="kt">UNNotificationServiceExtension</span></code></pre>
 
                 </div>
               </div>
-            <p>Property keys must be String objects and the supported value types need to conform to MixpanelType.
-MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
+            <p>Undocumented</p>
 
           </section>
           <section class="section task-group-section">
@@ -181,36 +180,9 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A4TypeP013isValidNestedB0SbyF"></a>
-                    <a name="//apple_ref/swift/Method/isValidNestedType()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A4TypeP013isValidNestedB0SbyF">isValidNestedType()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Checks if this object has nested object types that Mixpanel supports.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">isValidNestedType</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A4TypeP6equals3rhsSbAaB_p_tF"></a>
-                    <a name="//apple_ref/swift/Method/equals(rhs:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A4TypeP6equals3rhsSbAaB_p_tF">equals(rhs:)</a>
+                    <a name="/c:@M@Mixpanel@objc(cs)MixpanelNotificationServiceExtension(im)didReceiveNotificationRequest:withContentHandler:"></a>
+                    <a name="//apple_ref/swift/Method/didReceive(_:withContentHandler:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Mixpanel@objc(cs)MixpanelNotificationServiceExtension(im)didReceiveNotificationRequest:withContentHandler:">didReceive(_:withContentHandler:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -225,7 +197,34 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">equals</span><span class="p">(</span><span class="nv">rhs</span><span class="p">:</span> <span class="kt">MixpanelType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="k">override</span> <span class="kd">func</span> <span class="nf">didReceive</span><span class="p">(</span><span class="n">_</span> <span class="nv">request</span><span class="p">:</span> <span class="kt">UNNotificationRequest</span><span class="p">,</span> <span class="n">withContentHandler</span> <span class="nv">contentHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">UNNotificationContent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Mixpanel@objc(cs)MixpanelNotificationServiceExtension(im)serviceExtensionTimeWillExpire"></a>
+                    <a name="//apple_ref/swift/Method/serviceExtensionTimeWillExpire()" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Mixpanel@objc(cs)MixpanelNotificationServiceExtension(im)serviceExtensionTimeWillExpire">serviceExtensionTimeWillExpire()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="k">override</span> <span class="kd">func</span> <span class="nf">serviceExtensionTimeWillExpire</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>

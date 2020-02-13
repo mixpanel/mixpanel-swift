@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>MixpanelType Protocol Reference</title>
+    <title>MixpanelPushNotifications Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Protocol/MixpanelType" class="dashAnchor"></a>
-    <a title="MixpanelType Protocol Reference"></a>
+    <a name="//apple_ref/swift/Class/MixpanelPushNotifications" class="dashAnchor"></a>
+    <a title="MixpanelPushNotifications Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">Mixpanel 2.6.12 Docs</a> (88% documented)</p>
@@ -22,7 +22,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">Mixpanel Reference</a>
         <img id="carat" src="../img/carat.png" />
-        MixpanelType Protocol Reference
+        MixpanelPushNotifications Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -164,15 +164,14 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>MixpanelType</h1>
+            <h1>MixpanelPushNotifications</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">MixpanelType</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">MixpanelPushNotifications</span></code></pre>
 
                 </div>
               </div>
-            <p>Property keys must be String objects and the supported value types need to conform to MixpanelType.
-MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
+            <p>Undocumented</p>
 
           </section>
           <section class="section task-group-section">
@@ -181,36 +180,9 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A4TypeP013isValidNestedB0SbyF"></a>
-                    <a name="//apple_ref/swift/Method/isValidNestedType()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A4TypeP013isValidNestedB0SbyF">isValidNestedType()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Checks if this object has nested object types that Mixpanel supports.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">isValidNestedType</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A4TypeP6equals3rhsSbAaB_p_tF"></a>
-                    <a name="//apple_ref/swift/Method/equals(rhs:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A4TypeP6equals3rhsSbAaB_p_tF">equals(rhs:)</a>
+                    <a name="/s:8Mixpanel0A17PushNotificationsC02isaB12NotificationySbSo21UNNotificationContentCFZ"></a>
+                    <a name="//apple_ref/swift/Method/isMixpanelPushNotification(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A17PushNotificationsC02isaB12NotificationySbSo21UNNotificationContentCFZ">isMixpanelPushNotification(_:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -225,7 +197,34 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">equals</span><span class="p">(</span><span class="nv">rhs</span><span class="p">:</span> <span class="kt">MixpanelType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">isMixpanelPushNotification</span><span class="p">(</span><span class="n">_</span> <span class="nv">content</span><span class="p">:</span> <span class="kt">UNNotificationContent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A17PushNotificationsC10trackEvent_10properties7requestySS_SDySSAA0A4Type_pGSo21UNNotificationRequestCtFZ"></a>
+                    <a name="//apple_ref/swift/Method/trackEvent(_:properties:request:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A17PushNotificationsC10trackEvent_10properties7requestySS_SDySSAA0A4Type_pGSo21UNNotificationRequestCtFZ">trackEvent(_:properties:request:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">trackEvent</span><span class="p">(</span><span class="n">_</span> <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt">Dictionary</span><span class="o">&lt;</span><span class="kt">String</span><span class="p">,</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="o">&gt;</span><span class="p">,</span> <span class="nv">request</span><span class="p">:</span> <span class="kt">UNNotificationRequest</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>

@@ -99,6 +99,8 @@ class Network {
             return nil
         }
 
+        Logger.debug(message: "Fetching URL");
+        Logger.debug(message: url.absoluteURL);
         var request = URLRequest(url: url)
         request.httpMethod = resource.method.rawValue
         request.httpBody = resource.requestBody

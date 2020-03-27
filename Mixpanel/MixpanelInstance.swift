@@ -827,7 +827,9 @@ extension MixpanelInstance {
 
 
      `mixpanelInstance.createAlias("New ID", distinctId: mixpanelInstance.distinctId)`
+
      You can add multiple id aliases to the existing id
+
      `mixpanelInstance.createAlias("Newer ID", distinctId: mixpanelInstance.distinctId)`
 
 

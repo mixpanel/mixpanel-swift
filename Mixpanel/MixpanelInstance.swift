@@ -722,30 +722,29 @@ extension MixpanelInstance {
     /**
      Sets the distinct ID of the current user.
 
-     Mixpanel will choose a default distinct ID based on whether you are using the
+     Mixpanel will choose a default local distinct ID based on whether you are using the
      AdSupport.framework or not.
 
      If you are not using the AdSupport Framework (iAds), then we use the IFV String
-     (`UIDevice.current().identifierForVendor`) as the default distinct ID. This ID will
+     (`UIDevice.current().identifierForVendor`) as the default local distinct ID. This ID will
      identify a user across all apps by the same vendor, but cannot be used to link the same
      user across apps from different vendors. If we are unable to get the IFV, we will fall
      back to generating a random persistent UUID
 
      If you are showing iAds in your application, you are allowed use the iOS ID
      for Advertising (IFA) to identify users. If you have this framework in your
-     app, Mixpanel will use the IFA as the default distinct ID. If you have
+     app, Mixpanel will use the IFA as the default local distinct ID. If you have
      AdSupport installed but still don't want to use the IFA, you can define the
      <code>MIXPANEL_NO_IFA</code> flag in your <code>Active Compilation Conditions</code>
-     build settings, and Mixpanel will use the IFV as the default distinct ID.
+     build settings, and Mixpanel will use the IFV as the default local distinct ID.
 
      If we are unable to get an IFA or IFV, we will fall back to generating a
      random persistent UUID. If you want to always use a random persistent UUID
      you can define the <code>MIXPANEL_RANDOM_DISTINCT_ID</code> preprocessor flag
      in your build settings.
 
-     For tracking events, you do not need to call `identify:` if you
-     want to use the default. However,
-     **Mixpanel People always requires an explicit call to `identify:`.**
+     For tracking events, you do not need to call `identify:`. However,
+     **Mixpanel User profiles always requires an explicit call to `identify:`.**
      If calls are made to
      `set:`, `increment` or other `People`
      methods prior to calling `identify:`, then they are queued up and
@@ -823,23 +822,19 @@ extension MixpanelInstance {
     }
 
     /**
-     Creates a distinctId alias from alias to the current id.
+     The alias method creates an alias which Mixpanel will use to remap one id to another.
+     Multiple aliases can point to the same identifier.
 
-     This method is used to map an identifier called an alias to the existing Mixpanel
-     distinct id. This causes all events and people requests sent with the alias to be
-     mapped back to the original distinct id. The recommended usage pattern is to call
-     createAlias: and then identify: (with their new user ID)
-     when they log in the next time. This will keep your signup funnels working
-     correctly.
-     This makes the current id and 'Alias' interchangeable distinct ids.
-     Mixpanel.
-     mixpanelInstance.createAlias("Alias", mixpanelInstance.distinctId)
 
-     - precondition: You must call identify if you haven't already
-     (e.g. when your app launches)
+     `mixpanelInstance.createAlias("New ID", distinctId: mixpanelInstance.distinctId)`
 
-     - parameter alias:      the new distinct id that should represent the original
-     - parameter distinctId: the old distinct id that alias will be mapped to
+     You can add multiple id aliases to the existing id
+
+     `mixpanelInstance.createAlias("Newer ID", distinctId: mixpanelInstance.distinctId)`
+
+
+     - parameter alias:      A unique identifier that you want to use as an identifier for this user.
+     - parameter distinctId: The current user identifier.
      - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
      This should only be set to false if you wish to prevent people profile updates for that user.
      */

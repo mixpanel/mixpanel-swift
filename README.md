@@ -165,6 +165,23 @@ import Mixpanel
 class NotificationService: MixpanelNotificationServiceExtension {}
 ```
 
-#### 4. Run the app and send a test push notification from Mixpanel that includes an image or buttons
+#### 4. Delegate the handling of the notification response to the Mixpanel SDK
+In your `AppDelegate.swift` file, you need to call `MixpanelPushNotifications.handleResponse` when a push notification response is received:
+```swift
+@available(iOS 10.0, *)
+func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+    if MixpanelPushNotifications.isMixpanelPushNotification(response.notification.request.content) {
+        debugPrint("Handling Mixpanel push notification response...")
+        MixpanelPushNotifications.handleResponse(response: response, withCompletionHandler: completionHandler)
+    } else {
+        // not a Mixpanel push notification
+        debugPrint("Not a Mixpanel push notification.")
+        completionHandler()
+    }
+}
+```
+This will make sure the tap actions are appropriately handled (open url, deeplink, etc) as well as track whether a notification was tapped or dismissed.
+
+#### 5. Run the app and send a test push notification from Mixpanel that includes an image or buttons
 
 That's it! Your app should now be able to receive rich push notifications from Mixpanel.

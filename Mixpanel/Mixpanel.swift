@@ -70,7 +70,7 @@ open class Mixpanel {
      */
 
     @discardableResult
-    open static func initialize(token apiToken: String,
+    public static func initialize(token apiToken: String,
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
                                optOutTrackingByDefault: Bool = false) -> MixpanelInstance {

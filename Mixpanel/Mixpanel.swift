@@ -36,7 +36,7 @@ open class Mixpanel {
      You can always get the instance by calling getInstance(name)
      */
     @discardableResult
-    open class func initialize(token apiToken: String,
+    public static func initialize(token apiToken: String,
                                launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil,
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
@@ -70,7 +70,7 @@ open class Mixpanel {
      */
 
     @discardableResult
-    open class func initialize(token apiToken: String,
+    open static func initialize(token apiToken: String,
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
                                optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
@@ -87,7 +87,7 @@ open class Mixpanel {
 
      - returns: returns the mixpanel instance
      */
-    open class func getInstance(name: String) -> MixpanelInstance? {
+    public static func getInstance(name: String) -> MixpanelInstance? {
         return MixpanelManager.sharedInstance.getInstance(name: name)
     }
 
@@ -98,7 +98,7 @@ open class Mixpanel {
 
      - returns: returns the main Mixpanel instance
      */
-    open class func mainInstance() -> MixpanelInstance {
+    public static func mainInstance() -> MixpanelInstance {
         if let instance = MixpanelManager.sharedInstance.getMainInstance() {
             return instance
         } else {
@@ -113,7 +113,7 @@ open class Mixpanel {
 
      - parameter name: the instance name
      */
-    open class func setMainInstance(name: String) {
+    public static func setMainInstance(name: String) {
         MixpanelManager.sharedInstance.setMainInstance(name: name)
     }
 
@@ -122,7 +122,7 @@ open class Mixpanel {
 
      - parameter name: the instance name
      */
-    open class func removeInstance(name: String) {
+    public static func removeInstance(name: String) {
         MixpanelManager.sharedInstance.removeInstance(name: name)
     }
 }

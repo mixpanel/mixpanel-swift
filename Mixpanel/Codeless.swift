@@ -17,7 +17,7 @@ class Codeless {
         case tableViewBinding = "ui_table_view"
     }
 
-    class func createBinding(object: [String: Any]) -> CodelessBinding? {
+    static func createBinding(object: [String: Any]) -> CodelessBinding? {
         guard let bindingType = object["event_type"] as? String,
               let bindingTypeEnum = BindingType.init(rawValue: bindingType) else {
             return UIControlBinding(object: object)

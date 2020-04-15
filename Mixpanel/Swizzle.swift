@@ -11,7 +11,7 @@ import Foundation
 extension DispatchQueue {
     private static var _onceTracker = [String]()
 
-    class func once(token: String, block: () -> Void) {
+    static func once(token: String, block: () -> Void) {
         objc_sync_enter(self); defer { objc_sync_exit(self) }
         if _onceTracker.contains(token) {
             return
@@ -24,25 +24,25 @@ extension DispatchQueue {
 class Swizzler {
     static var swizzles = [Method: Swizzle]()
 
-    class func printSwizzles() {
+    static func printSwizzles() {
         for (_, swizzle) in swizzles {
             Logger.debug(message: "\(swizzle)")
         }
     }
 
-    class func getSwizzle(for method: Method) -> Swizzle? {
+    static func getSwizzle(for method: Method) -> Swizzle? {
         return swizzles[method]
     }
 
-    class func removeSwizzle(for method: Method) {
+    static func removeSwizzle(for method: Method) {
         swizzles.removeValue(forKey: method)
     }
 
-    class func setSwizzle(_ swizzle: Swizzle, for method: Method) {
+    static func setSwizzle(_ swizzle: Swizzle, for method: Method) {
         swizzles[method] = swizzle
     }
 
-    class func swizzleSelector(_ originalSelector: Selector,
+    static func swizzleSelector(_ originalSelector: Selector,
                                withSelector newSelector: Selector,
                                for aClass: AnyClass,
                                name: String,
@@ -84,7 +84,7 @@ class Swizzler {
         }
     }
 
-    class func unswizzleSelector(_ selector: Selector, aClass: AnyClass, name: String? = nil) {
+    static func unswizzleSelector(_ selector: Selector, aClass: AnyClass, name: String? = nil) {
         if let method = class_getInstanceMethod(aClass, selector),
             let swizzle = getSwizzle(for: method) {
             if let name = name {

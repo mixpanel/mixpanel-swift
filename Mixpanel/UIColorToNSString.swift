@@ -11,11 +11,11 @@ import UIKit
 
 @objc(UIColorToNSString) class UIColorToNSString: ValueTransformer {
 
-    override class func transformedValueClass() -> AnyClass {
+    override static func transformedValueClass() -> AnyClass {
         return NSString.self
     }
 
-    override class func allowsReverseTransformation() -> Bool {
+    override static func allowsReverseTransformation() -> Bool {
         return true
     }
 

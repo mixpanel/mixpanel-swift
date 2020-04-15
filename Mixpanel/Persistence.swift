@@ -43,11 +43,11 @@ class Persistence {
         case optOutStatus
     }
 
-    class func filePathWithType(_ type: ArchiveType, token: String) -> String? {
+    static func filePathWithType(_ type: ArchiveType, token: String) -> String? {
         return filePathFor(type.rawValue, token: token)
     }
 
-    class private func filePathFor(_ archiveType: String, token: String) -> String? {
+    static private func filePathFor(_ archiveType: String, token: String) -> String? {
         let filename = "mixpanel-\(token)-\(archiveType)"
         let manager = FileManager.default
 
@@ -65,7 +65,7 @@ class Persistence {
     }
 
     #if DECIDE
-    class func archive(eventsQueue: Queue,
+    static func archive(eventsQueue: Queue,
                        peopleQueue: Queue,
                        groupsQueue: Queue,
                        properties: ArchivedProperties,
@@ -80,7 +80,7 @@ class Persistence {
         archiveCodelessBindings(codelessBindings, token: token)
     }
     #else
-    class func archive(eventsQueue: Queue,
+    static func archive(eventsQueue: Queue,
                        peopleQueue: Queue,
                        groupsQueue: Queue,
                        properties: ArchivedProperties,
@@ -92,31 +92,31 @@ class Persistence {
     }
     #endif // DECIDE
 
-    class func archiveEvents(_ eventsQueue: Queue, token: String) {
+    static func archiveEvents(_ eventsQueue: Queue, token: String) {
         archiveEventQueue.sync { [eventsQueue, token] in
             archiveToFile(.events, object: eventsQueue, token: token)
         }
     }
 
-    class func archivePeople(_ peopleQueue: Queue, token: String) {
+    static func archivePeople(_ peopleQueue: Queue, token: String) {
         archivePeopleQueue.sync { [peopleQueue, token] in
             archiveToFile(.people, object: peopleQueue, token: token)
         }
     }
 
-    class func archiveGroups(_ groupsQueue: Queue, token: String) {
+    static func archiveGroups(_ groupsQueue: Queue, token: String) {
         archiveGroupsQueue.sync { [groupsQueue, token] in
             archiveToFile(.groups, object: groupsQueue, token: token)
         }
     }
 
-    class func archiveOptOutStatus(_ optOutStatus: Bool, token: String) {
+    static func archiveOptOutStatus(_ optOutStatus: Bool, token: String) {
         archiveOptOutStatusQueue.sync { [optOutStatus, token] in
             archiveToFile(.optOutStatus, object: optOutStatus, token: token)
         }
     }
 
-    class func archiveProperties(_ properties: ArchivedProperties, token: String) {
+    static func archiveProperties(_ properties: ArchivedProperties, token: String) {
         archivePropertiesQueue.sync { [properties, token] in
             var p = InternalProperties()
             p["distinctId"] = properties.distinctId
@@ -137,20 +137,20 @@ class Persistence {
     }
 
     #if DECIDE
-    class func archiveVariants(_ variants: Set<Variant>, token: String) {
+    static func archiveVariants(_ variants: Set<Variant>, token: String) {
         archiveVariantQueue.sync { [variants, token] in
             archiveToFile(.variants, object: variants, token: token)
         }
     }
 
-    class func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
+    static func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
         archiveCodelessQueue.sync { [codelessBindings, token] in
             archiveToFile(.codelessBindings, object: codelessBindings, token: token)
         }
     }
     #endif // DECIDE
 
-    class private func archiveToFile(_ type: ArchiveType, object: Any, token: String) {
+    static private func archiveToFile(_ type: ArchiveType, object: Any, token: String) {
         let filePath = filePathWithType(type, token: token)
         guard let path = filePath else {
             Logger.error(message: "bad file path, cant fetch file")
@@ -170,7 +170,7 @@ class Persistence {
         addSkipBackupAttributeToItem(at: path)
     }
 
-    class private func addSkipBackupAttributeToItem(at path: String) {
+    static private func addSkipBackupAttributeToItem(at path: String) {
         var url = URL.init(fileURLWithPath: path)
         var resourceValues = URLResourceValues()
         resourceValues.isExcludedFromBackup = true
@@ -182,7 +182,7 @@ class Persistence {
     }
 
     #if DECIDE
-    class func unarchive(token: String) -> (eventsQueue: Queue,
+    static func unarchive(token: String) -> (eventsQueue: Queue,
                                             peopleQueue: Queue,
                                             groupsQueue: Queue,
                                             superProperties: InternalProperties,
@@ -237,7 +237,7 @@ class Persistence {
                 automaticEventsEnabled)
     }
     #else
-    class func unarchive(token: String) -> (eventsQueue: Queue,
+    static func unarchive(token: String) -> (eventsQueue: Queue,
                                             peopleQueue: Queue,
                                             groupsQueue: Queue,
                                             superProperties: InternalProperties,
@@ -279,7 +279,7 @@ class Persistence {
     }
     #endif // DECIDE
 
-    class private func unarchiveWithFilePath(_ filePath: String) -> Any? {
+    static private func unarchiveWithFilePath(_ filePath: String) -> Any? {
         var unarchivedData: Any? = nil
         ExceptionWrapper.try({ [filePath] in
             unarchivedData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath)
@@ -294,7 +294,7 @@ class Persistence {
         return unarchivedData
     }
 
-    class private func removeArchivedFile(atPath filePath: String) {
+    static private func removeArchivedFile(atPath filePath: String) {
         do {
             try FileManager.default.removeItem(atPath: filePath)
         } catch let err {
@@ -302,27 +302,27 @@ class Persistence {
         }
     }
 
-    class private func unarchiveEvents(token: String) -> Queue {
+    static private func unarchiveEvents(token: String) -> Queue {
         let data = unarchiveWithType(.events, token: token)
         return data as? Queue ?? []
     }
 
-    class private func unarchivePeople(token: String) -> Queue {
+    static private func unarchivePeople(token: String) -> Queue {
         let data = unarchiveWithType(.people, token: token)
         return data as? Queue ?? []
     }
 
-    class private func unarchiveGroups(token: String) -> Queue {
+    static private func unarchiveGroups(token: String) -> Queue {
         let data = unarchiveWithType(.groups, token: token)
         return data as? Queue ?? []
     }
 
-    class private func unarchiveOptOutStatus(token: String) -> Bool? {
+    static private func unarchiveOptOutStatus(token: String) -> Bool? {
         return unarchiveWithType(.optOutStatus, token: token) as? Bool
     }
 
     #if DECIDE
-    class private func unarchiveProperties(token: String) -> (InternalProperties,
+    static private func unarchiveProperties(token: String) -> (InternalProperties,
                                                               InternalProperties,
                                                               String,
                                                               String?,
@@ -360,7 +360,7 @@ class Persistence {
                 automaticEventsEnabled)
     }
     #else
-    class private func unarchiveProperties(token: String) -> (InternalProperties,
+    static private func unarchiveProperties(token: String) -> (InternalProperties,
         InternalProperties,
         String,
         String?,
@@ -374,7 +374,7 @@ class Persistence {
     }
     #endif // DECIDE
 
-    class private func unarchivePropertiesHelper(token: String) -> (InternalProperties,
+    static private func unarchivePropertiesHelper(token: String) -> (InternalProperties,
         InternalProperties,
         String,
         String?,
@@ -423,18 +423,18 @@ class Persistence {
     }
 
     #if DECIDE
-    class private func unarchiveCodelessBindings(token: String) -> Set<CodelessBinding> {
+    static private func unarchiveCodelessBindings(token: String) -> Set<CodelessBinding> {
         let data = unarchiveWithType(.codelessBindings, token: token)
         return data as? Set<CodelessBinding> ?? Set()
     }
 
-    class private func unarchiveVariants(token: String) -> Set<Variant> {
+    static private func unarchiveVariants(token: String) -> Set<Variant> {
         let data = unarchiveWithType(.variants, token: token) as? Set<Variant>
         return data ?? Set()
     }
     #endif // DECIDE
 
-    class private func unarchiveWithType(_ type: ArchiveType, token: String) -> Any? {
+    static private func unarchiveWithType(_ type: ArchiveType, token: String) -> Any? {
         let filePath = filePathWithType(type, token: token)
         guard let path = filePath else {
             Logger.info(message: "bad file path, cant fetch file")
@@ -449,7 +449,7 @@ class Persistence {
         return unarchivedData
     }
 
-    class func storeIdentity(token: String, distinctID: String, peopleDistinctID: String?, anonymousID: String?, userID: String?, alias: String?, hadPersistedDistinctId: Bool?) {
+    static func storeIdentity(token: String, distinctID: String, peopleDistinctID: String?, anonymousID: String?, userID: String?, alias: String?, hadPersistedDistinctId: Bool?) {
         guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
             return
         }
@@ -463,7 +463,7 @@ class Persistence {
         defaults.synchronize()
     }
 
-    class func restoreIdentity(token: String) -> (String, String?, String?, String?, String?, Bool?) {
+    static func restoreIdentity(token: String) -> (String, String?, String?, String?, String?, Bool?) {
         guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
             return ("", nil, nil, nil, nil, nil)
         }
@@ -476,7 +476,7 @@ class Persistence {
                 defaults.bool(forKey: prefix + "MPHadPersistedDistinctId"))
     }
 
-    class func deleteMPUserDefaultsData(token: String) {
+    static func deleteMPUserDefaultsData(token: String) {
         guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
             return
         }

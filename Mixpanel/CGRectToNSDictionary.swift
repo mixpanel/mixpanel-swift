@@ -10,11 +10,11 @@ import Foundation
 import UIKit
 
 @objc(CGRectToNSDictionary) class CGRectToNSDictionary: ValueTransformer {
-    override class func transformedValueClass() -> AnyClass {
+    override static func transformedValueClass() -> AnyClass {
         return NSDictionary.self
     }
 
-    override class func allowsReverseTransformation() -> Bool {
+    override static func allowsReverseTransformation() -> Bool {
         return true
     }
 

@@ -62,21 +62,21 @@ class Logger {
     private static let readWriteLock: ReadWriteLock = ReadWriteLock(label: "loggerLock")
 
     /// Add a `Logging` object to receive all log messages
-    class func addLogging(_ logging: Logging) {
+    static func addLogging(_ logging: Logging) {
         readWriteLock.write {
             loggers.append(logging)
         }
     }
 
     /// Enable log messages of a specific `LogLevel` to be added to the log
-    class func enableLevel(_ level: LogLevel) {
+    static func enableLevel(_ level: LogLevel) {
         readWriteLock.write {
             enabledLevels.insert(level)
         }
     }
 
     /// Disable log messages of a specific `LogLevel` to prevent them from being logged
-    class func disableLevel(_ level: LogLevel) {
+    static func disableLevel(_ level: LogLevel) {
         readWriteLock.write {
             enabledLevels.remove(level)
         }
@@ -84,7 +84,7 @@ class Logger {
 
     /// debug: Adds a debug message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
-    class func debug(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
+    static func debug(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
         var enabledLevels = Set<LogLevel>()
         readWriteLock.read {
             enabledLevels = self.enabledLevels
@@ -96,7 +96,7 @@ class Logger {
 
     /// info: Adds an informational message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
-    class func info(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
+    static func info(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
         var enabledLevels = Set<LogLevel>()
         readWriteLock.read {
             enabledLevels = self.enabledLevels
@@ -108,7 +108,7 @@ class Logger {
 
     /// warn: Adds a warning message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
-    class func warn(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
+    static func warn(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
         var enabledLevels = Set<LogLevel>()
         readWriteLock.read {
             enabledLevels = self.enabledLevels
@@ -120,7 +120,7 @@ class Logger {
 
     /// error: Adds an error message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
-    class func error(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
+    static func error(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
         var enabledLevels = Set<LogLevel>()
         readWriteLock.read {
             enabledLevels = self.enabledLevels
@@ -131,7 +131,7 @@ class Logger {
     }
 
     /// This forwards a `LogMessage` to each logger that has been added
-    class private func forwardLogMessage(_ message: LogMessage) {
+    static private func forwardLogMessage(_ message: LogMessage) {
         // Forward the log message to every registered Logging instance
         var loggers = [Logging]()
         readWriteLock.read {

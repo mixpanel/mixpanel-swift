@@ -65,11 +65,11 @@ class SelectorEvaluator {
     private static let RIGHT = 1
     
     // For testing purposes
-    class func getCurrentDate() -> Date {
+    static func getCurrentDate() -> Date {
         return Date();
     }
     
-    class func toNumber(value: Any?) -> Double? {
+    static func toNumber(value: Any?) -> Double? {
         if let val = value {
             switch val {
             case let bool as Bool:
@@ -93,7 +93,7 @@ class SelectorEvaluator {
         return nil
     }
     
-    class func toBoolean(value: Any?) -> Bool {
+    static func toBoolean(value: Any?) -> Bool {
         if let val = value {
             switch val {
             case let bool as Bool:
@@ -115,7 +115,7 @@ class SelectorEvaluator {
         return false
     }
     
-    class func evaluateNumber(node: [String: Any], properties: InternalProperties) -> Double? {
+    static func evaluateNumber(node: [String: Any], properties: InternalProperties) -> Double? {
         guard let op = node[OPERATOR_KEY] as? String, op == NUMBER_OPERATOR else {
             Logger.error(message: "invalid operator: number")
             return nil
@@ -128,7 +128,7 @@ class SelectorEvaluator {
         return toNumber(value: evaluateNode(node: children[LEFT], properties: properties))
     }
     
-    class func evaluateBoolean(node: [String: Any], properties: InternalProperties) -> Bool? {
+    static func evaluateBoolean(node: [String: Any], properties: InternalProperties) -> Bool? {
         guard let op = node[OPERATOR_KEY] as? String, op == BOOLEAN_OPERATOR else {
             Logger.error(message: "invalid operator: boolean")
             return nil
@@ -141,7 +141,7 @@ class SelectorEvaluator {
         return toBoolean(value: evaluateNode(node: children[LEFT], properties: properties))
     }
     
-    class func evaluateDateTime(node: [String: Any], properties: InternalProperties) -> Date? {
+    static func evaluateDateTime(node: [String: Any], properties: InternalProperties) -> Date? {
         guard let op = node[OPERATOR_KEY] as? String, op == DATETIME_OPERATOR else {
             Logger.error(message: "invalid operator: datetime")
             return nil
@@ -172,7 +172,7 @@ class SelectorEvaluator {
         return nil
     }
     
-    class func evaluateList(node: [String: Any], properties: InternalProperties) -> [Any]? {
+    static func evaluateList(node: [String: Any], properties: InternalProperties) -> [Any]? {
         guard let op = node[OPERATOR_KEY] as? String, op == LIST_OPERATOR else {
             Logger.error(message: "invalid operator: list")
             return nil
@@ -188,7 +188,7 @@ class SelectorEvaluator {
         return nil
     }
     
-    private class func jsonStringify(value: Any) -> String? {
+    private static func jsonStringify(value: Any) -> String? {
         guard let jsonData = try? JSONSerialization.data(withJSONObject: value) else {
             Logger.error(message: "Error encoding as JSON")
             return nil
@@ -196,7 +196,7 @@ class SelectorEvaluator {
         return String(data: jsonData, encoding: .utf8)
     }
     
-    class func evaluateString(node: [String: Any], properties: InternalProperties) -> String? {
+    static func evaluateString(node: [String: Any], properties: InternalProperties) -> String? {
         guard let op = node[OPERATOR_KEY] as? String, op == STRING_OPERATOR else {
             Logger.error(message: "invalid operator: string")
             return nil
@@ -227,7 +227,7 @@ class SelectorEvaluator {
         return nil
     }
     
-    class func evaluateAnd(node: [String: Any], properties: InternalProperties) -> Bool? {
+    static func evaluateAnd(node: [String: Any], properties: InternalProperties) -> Bool? {
         guard let op = node[OPERATOR_KEY] as? String, op == AND_OPERATOR else {
             Logger.error(message: "invalid operator: and")
             return nil
@@ -240,7 +240,7 @@ class SelectorEvaluator {
         return toBoolean(value: evaluateNode(node: children[LEFT], properties: properties)) && toBoolean(value: evaluateNode(node: children[RIGHT], properties: properties))
     }
     
-    class func evaluateOr(node: [String: Any], properties: InternalProperties) -> Bool? {
+    static func evaluateOr(node: [String: Any], properties: InternalProperties) -> Bool? {
         guard let op = node[OPERATOR_KEY] as? String, op == OR_OPERATOR else {
             Logger.error(message: "invalid operator: or")
             return nil
@@ -253,7 +253,7 @@ class SelectorEvaluator {
         return toBoolean(value: evaluateNode(node: children[LEFT], properties: properties)) || toBoolean(value: evaluateNode(node: children[RIGHT], properties: properties))
     }
     
-    class func evaluateIn(node: [String: Any], properties: InternalProperties) -> Bool? {
+    static func evaluateIn(node: [String: Any], properties: InternalProperties) -> Bool? {
         let inOperators = [IN_OPERATOR, NOT_IN_OPERATOR]
         guard let op = node[OPERATOR_KEY] as? String, inOperators.contains(op) else {
             Logger.error(message: "invalid operator: in")
@@ -284,7 +284,7 @@ class SelectorEvaluator {
         return op == IN_OPERATOR ? b : !b
     }
     
-    class func evaluatePlus(node: [String: Any], properties: InternalProperties) -> Any? {
+    static func evaluatePlus(node: [String: Any], properties: InternalProperties) -> Any? {
         guard let op = node[OPERATOR_KEY] as? String, op == PLUS_OPERATOR else {
             Logger.error(message: "invalid operator: +")
             return nil
@@ -307,7 +307,7 @@ class SelectorEvaluator {
         }
     }
     
-    class func evaluateArithmetic(node: [String: Any], properties: InternalProperties) -> Double? {
+    static func evaluateArithmetic(node: [String: Any], properties: InternalProperties) -> Double? {
         let arithmeticOperators = [MINUS_OPERATOR, MUL_OPERATOR, DIV_OPERATOR, MOD_OPERATOR]
         guard let op = node[OPERATOR_KEY] as? String, arithmeticOperators.contains(op) else {
             Logger.error(message: "invalid arithmetic operator")
@@ -351,7 +351,7 @@ class SelectorEvaluator {
         }
     }
     
-    private class func equals(l: Any?, r: Any?) -> Bool {
+    private static func equals(l: Any?, r: Any?) -> Bool {
         switch (l, r) {
         case (nil, nil):
             return true
@@ -372,7 +372,7 @@ class SelectorEvaluator {
         }
     }
     
-    class func evaluateEquality(node: [String: Any], properties: InternalProperties) -> Bool? {
+    static func evaluateEquality(node: [String: Any], properties: InternalProperties) -> Bool? {
         let supportedOperators = [EQUALS_OPERATOR, NOT_EQUALS_OPERATOR]
         guard let op = node[OPERATOR_KEY] as? String, supportedOperators.contains(op) else {
             Logger.error(message: "invalid (not) equality operator")
@@ -390,7 +390,7 @@ class SelectorEvaluator {
         return op == NOT_EQUALS_OPERATOR ? !b : b
     }
     
-    private class func compareDoubles(ld: Double, rd: Double, op: String) -> Bool? {
+    private static func compareDoubles(ld: Double, rd: Double, op: String) -> Bool? {
         switch(op) {
         case GREATER_THAN_OPERATOR:
             return ld > rd
@@ -405,7 +405,7 @@ class SelectorEvaluator {
         }
     }
     
-    class func evaluateComparison(node: [String: Any], properties: InternalProperties) -> Bool? {
+    static func evaluateComparison(node: [String: Any], properties: InternalProperties) -> Bool? {
         let supportedOperators = [GREATER_THAN_OPERATOR, GREATER_THAN_EQUAL_OPERATOR, LESS_THAN_OPERATOR, LESS_THAN_EQUAL_OPERATOR]
         guard let op = node[OPERATOR_KEY] as? String, supportedOperators.contains(op) else {
             Logger.error(message: "invalid comparison operator")
@@ -441,7 +441,7 @@ class SelectorEvaluator {
         }
     }
     
-    class func evaluateDefined(node: [String: Any], properties: InternalProperties) -> Bool? {
+    static func evaluateDefined(node: [String: Any], properties: InternalProperties) -> Bool? {
         let supportedOperators = [DEFINED_OPERATOR, NOT_DEFINED_OPERATOR]
         guard let op = node[OPERATOR_KEY] as? String, supportedOperators.contains(op) else {
             Logger.error(message: "invalid operator: (not) defined")
@@ -456,7 +456,7 @@ class SelectorEvaluator {
         return op == DEFINED_OPERATOR ? b : !b
     }
     
-    class func evaluateNot(node: [String: Any], properties: InternalProperties) -> Bool? {
+    static func evaluateNot(node: [String: Any], properties: InternalProperties) -> Bool? {
         guard let op = node[OPERATOR_KEY] as? String, op == NOT_OPERATOR else {
             Logger.error(message: "invalid operator: not")
             return nil
@@ -477,7 +477,7 @@ class SelectorEvaluator {
         }
     }
     
-    class func evaluateWindow(value: [String: Any]) -> Date? {
+    static func evaluateWindow(value: [String: Any]) -> Date? {
         guard let window = value[WINDOW_KEY] as? [String: Any] else {
             Logger.error(message: "missing window")
             return nil
@@ -508,7 +508,7 @@ class SelectorEvaluator {
         }
     }
     
-    class func evaluateOperand(node: [String: Any], properties: InternalProperties) -> Any? {
+    static func evaluateOperand(node: [String: Any], properties: InternalProperties) -> Any? {
         guard let property = node[PROPERTY_KEY] as? String else {
             Logger.error(message: "missing key property")
             return nil
@@ -543,7 +543,7 @@ class SelectorEvaluator {
         }
     }
     
-    class func evaluateOperator(node: [String: Any], properties: InternalProperties) -> Any? {
+    static func evaluateOperator(node: [String: Any], properties: InternalProperties) -> Any? {
         guard let op = node[OPERATOR_KEY] as? String else {
             Logger.error(message: "invalid operator key")
             return nil
@@ -584,7 +584,7 @@ class SelectorEvaluator {
         }
     }
     
-    class func evaluateNode(node: [String: Any], properties: InternalProperties) -> Any? {
+    static func evaluateNode(node: [String: Any], properties: InternalProperties) -> Any? {
         if let _ = node[PROPERTY_KEY] {
             return evaluateOperand(node: node, properties: properties)
         }
@@ -592,7 +592,7 @@ class SelectorEvaluator {
         return evaluateOperator(node: node, properties: properties)
     }
     
-    public class func evaluate(selector: [String: Any], properties: InternalProperties) -> Bool? {
+    public static func evaluate(selector: [String: Any], properties: InternalProperties) -> Bool? {
         if let value = SelectorEvaluator.evaluateOperator(node: selector, properties: properties) {
             return SelectorEvaluator.toBoolean(value: value)
         }

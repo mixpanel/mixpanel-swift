@@ -200,7 +200,7 @@ class VariantAction: NSObject, NSCoding {
         return self.name.hash
     }
 
-    class func executeSelector(_ selector: Selector,
+    static func executeSelector(_ selector: Selector,
                                args: [Any],
                                path: ObjectSelector,
                                root: AnyObject,
@@ -217,7 +217,7 @@ class VariantAction: NSObject, NSCoding {
     }
 
     @discardableResult
-    class func executeSelector(_ selector: Selector, args: [Any], on objects: [AnyObject]) -> [(AnyObject, AnyObject?)] {
+    static func executeSelector(_ selector: Selector, args: [Any], on objects: [AnyObject]) -> [(AnyObject, AnyObject?)] {
         var targetRetValuePairs = [(AnyObject, AnyObject?)]()
         var transformedArgs = [Any]()
         var doesHaveNSValue = false
@@ -283,7 +283,7 @@ class VariantAction: NSObject, NSCoding {
         return targetRetValuePairs
     }
 
-    class func extractAndRunMethodFromSelector(selector: Selector, implementation: IMP?, object: AnyObject, args: [Any]) -> AnyObject? {
+    static func extractAndRunMethodFromSelector(selector: Selector, implementation: IMP?, object: AnyObject, args: [Any]) -> AnyObject? {
         if selector.description == "setImage:forState:" {
             typealias Function = @convention(c) (AnyObject, Selector, UIImage, UIControl.State) -> Void
             let function = unsafeBitCast(implementation, to: Function.self)

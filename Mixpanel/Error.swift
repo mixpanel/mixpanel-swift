@@ -25,7 +25,7 @@ func MPAssert(_ condition: @autoclosure() -> Bool,
 }
 
 class ErrorHandler {
-    class func wrap<ReturnType>(_ f: () throws -> ReturnType?) -> ReturnType? {
+    static func wrap<ReturnType>(_ f: () throws -> ReturnType?) -> ReturnType? {
         do {
             return try f()
         } catch let error {
@@ -34,7 +34,7 @@ class ErrorHandler {
         }
     }
 
-    class func logError(_ error: Error) {
+    static func logError(_ error: Error) {
         let stackSymbols = Thread.callStackSymbols
         Logger.error(message: "Error: \(error) \n Stack Symbols: \(stackSymbols)")
     }

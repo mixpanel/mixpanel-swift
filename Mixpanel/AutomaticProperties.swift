@@ -81,7 +81,7 @@ class AutomaticProperties {
         return p
     }()
 
-    class func deviceModel() -> String {
+    static func deviceModel() -> String {
         var systemInfo = utsname()
         uname(&systemInfo)
         let size = MemoryLayout<CChar>.size
@@ -97,7 +97,7 @@ class AutomaticProperties {
     }
 
     #if WATCH_OS
-    class func watchModel() -> String {
+    static func watchModel() -> String {
         let watchSize38mm = Int(136)
         let watchSize40mm = Int(162)
         let watchSize42mm = Int(156)
@@ -119,7 +119,7 @@ class AutomaticProperties {
     }
     #endif
 
-    class func libVersion() -> String? {
+    static func libVersion() -> String? {
         return Bundle(for: self).infoDictionary?["CFBundleShortVersionString"] as? String
     }
 

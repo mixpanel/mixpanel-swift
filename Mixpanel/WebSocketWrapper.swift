@@ -124,7 +124,7 @@ class WebSocketWrapper: WebSocketDelegate {
         }
     }
 
-    class func getMessageType(for message: Data) -> BaseWebSocketMessage? {
+    static func getMessageType(for message: Data) -> BaseWebSocketMessage? {
         Logger.info(message: "raw message \(message)")
         var webSocketMessage: BaseWebSocketMessage? = nil
 

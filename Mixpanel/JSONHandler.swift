@@ -12,7 +12,7 @@ class JSONHandler {
 
     typealias MPObjectToParse = Any
 
-    class func encodeAPIData(_ obj: MPObjectToParse) -> String? {
+    static func encodeAPIData(_ obj: MPObjectToParse) -> String? {
         let data: Data? = serializeJSONObject(obj)
 
         guard let d = data else {
@@ -31,7 +31,7 @@ class JSONHandler {
         return b64
     }
 
-     class func serializeJSONObject(_ obj: MPObjectToParse) -> Data? {
+     static func serializeJSONObject(_ obj: MPObjectToParse) -> Data? {
         let serializableJSONObject = makeObjectSerializable(obj)
 
         guard JSONSerialization.isValidJSONObject(serializableJSONObject) else {
@@ -48,7 +48,7 @@ class JSONHandler {
         return serializedObject
     }
 
-    private class func makeObjectSerializable(_ obj: MPObjectToParse) -> MPObjectToParse {
+    private static func makeObjectSerializable(_ obj: MPObjectToParse) -> MPObjectToParse {
         switch obj {
         case let obj as Double where obj.isFinite:
             return obj

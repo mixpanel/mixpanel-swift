@@ -57,7 +57,7 @@ class Network {
         self.basePathIdentifier = basePathIdentifier
     }
 
-    class func apiRequest<A>(base: String,
+    static func apiRequest<A>(base: String,
                           resource: Resource<A>,
                           failure: @escaping (Reason, Data?, URLResponse?) -> (),
                           success: @escaping (A, URLResponse?) -> ()) {
@@ -92,7 +92,7 @@ class Network {
         }.resume()
     }
 
-    private class func buildURLRequest<A>(_ base: String, resource: Resource<A>) -> URLRequest? {
+    private static func buildURLRequest<A>(_ base: String, resource: Resource<A>) -> URLRequest? {
         guard let url = BasePath.buildURL(base: base,
                                           path: resource.path,
                                           queryItems: resource.queryItems) else {
@@ -111,7 +111,7 @@ class Network {
         return request as URLRequest
     }
 
-    class func buildResource<A>(path: String,
+    static func buildResource<A>(path: String,
                              method: RequestMethod,
                              requestBody: Data? = nil,
                              queryItems: [URLQueryItem]? = nil,
@@ -125,7 +125,7 @@ class Network {
                         parse: parse)
     }
 
-    class func trackIntegration(apiToken: String, serverURL: String, completion: @escaping (Bool) -> ()) {
+    static func trackIntegration(apiToken: String, serverURL: String, completion: @escaping (Bool) -> ()) {
         let requestData = JSONHandler.encodeAPIData([["event": "Integration",
                                                       "properties": ["token": "85053bf24bba75239b16a601d9387e17",
                                                                      "mp_lib": "swift",

@@ -204,7 +204,7 @@ class PropertyDescription {
         self.predicate = predicate
     }
 
-    class func valueTransformer(for typeName: String) -> ValueTransformer? {
+    static func valueTransformer(for typeName: String) -> ValueTransformer? {
         for toTypeName in ["NSDictionary", "NSNumber", "NSString"] {
             let toTransformerName = NSValueTransformerName(rawValue: "\(typeName)To\(toTypeName)")
             if let toTransformer = ValueTransformer(forName: toTransformerName) {

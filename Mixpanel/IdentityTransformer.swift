@@ -10,11 +10,11 @@ import Foundation
 
 @objc(IdentityTransformer) class IdentityTransformer: ValueTransformer {
 
-    override class func transformedValueClass() -> AnyClass {
+    override static func transformedValueClass() -> AnyClass {
         return NSObject.self
     }
 
-    override class func allowsReverseTransformation() -> Bool {
+    override static func allowsReverseTransformation() -> Bool {
         return false
     }
 

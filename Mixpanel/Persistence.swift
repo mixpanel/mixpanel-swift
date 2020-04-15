@@ -25,13 +25,8 @@ struct ArchivedProperties {
 }
 
 class Persistence {
-    private static let archiveEventQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.event.archive", qos: .utility)
-    private static let archivePeopleQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.people.archive", qos: .utility)
-    private static let archiveGroupsQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.groups.archive", qos: .utility)
-    private static let archiveOptOutStatusQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.optout.archive", qos: .utility)
-    private static let archiveCodelessQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.codeless.archive", qos: .utility)
-    private static let archivePropertiesQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.properties.archive", qos: .utility)
-    private static let archiveVariantQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.variant.archive", qos: .utility)
+
+    private static let archiveQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.archiveQueue", qos: .utility)
 
     enum ArchiveType: String {
         case events
@@ -93,31 +88,31 @@ class Persistence {
     #endif // DECIDE
 
     static func archiveEvents(_ eventsQueue: Queue, token: String) {
-        archiveEventQueue.sync { [eventsQueue, token] in
+        archiveQueue.async { [eventsQueue, token] in
             archiveToFile(.events, object: eventsQueue, token: token)
         }
     }
 
     static func archivePeople(_ peopleQueue: Queue, token: String) {
-        archivePeopleQueue.sync { [peopleQueue, token] in
+        archiveQueue.async { [peopleQueue, token] in
             archiveToFile(.people, object: peopleQueue, token: token)
         }
     }
 
     static func archiveGroups(_ groupsQueue: Queue, token: String) {
-        archiveGroupsQueue.sync { [groupsQueue, token] in
+        archiveQueue.async { [groupsQueue, token] in
             archiveToFile(.groups, object: groupsQueue, token: token)
         }
     }
 
     static func archiveOptOutStatus(_ optOutStatus: Bool, token: String) {
-        archiveOptOutStatusQueue.sync { [optOutStatus, token] in
+        archiveQueue.async { [optOutStatus, token] in
             archiveToFile(.optOutStatus, object: optOutStatus, token: token)
         }
     }
 
     static func archiveProperties(_ properties: ArchivedProperties, token: String) {
-        archivePropertiesQueue.sync { [properties, token] in
+        archiveQueue.async { [properties, token] in
             var p = InternalProperties()
             p["distinctId"] = properties.distinctId
             p["anonymousId"] = properties.anonymousId
@@ -138,13 +133,13 @@ class Persistence {
 
     #if DECIDE
     static func archiveVariants(_ variants: Set<Variant>, token: String) {
-        archiveVariantQueue.sync { [variants, token] in
+        archiveQueue.async { [variants, token] in
             archiveToFile(.variants, object: variants, token: token)
         }
     }
 
     static func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
-        archiveCodelessQueue.sync { [codelessBindings, token] in
+        archiveQueue.async { [codelessBindings, token] in
             archiveToFile(.codelessBindings, object: codelessBindings, token: token)
         }
     }

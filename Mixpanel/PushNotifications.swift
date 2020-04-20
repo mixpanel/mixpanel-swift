@@ -141,7 +141,8 @@ public class MixpanelPushNotifications {
                 completionHandler()
                 return
             }
-
+            
+            #if !targetEnvironment(macCatalyst)
             UIApplication.shared.open(url, options: [:], completionHandler: { success in
                 if success {
                     Logger.debug(message: "Successfully loaded url: \(url)")
@@ -150,6 +151,7 @@ public class MixpanelPushNotifications {
                 }
                 completionHandler();
             })
+            #endif
 
         }
     }

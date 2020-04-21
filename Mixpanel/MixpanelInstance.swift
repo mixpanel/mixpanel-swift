@@ -253,7 +253,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var networkQueue: DispatchQueue!
     var optOutStatus: Bool?
     let readWriteLock: ReadWriteLock
-    #if os(iOS)
+    #if os(iOS) && !targetEnvironment(macCatalyst)
     static let reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
     static let telephonyInfo = CTTelephonyNetworkInfo()
     #endif
@@ -290,7 +290,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                               metadata: sessionMetadata)
         networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
 
-        #if os(iOS)
+        #if os(iOS) && !targetEnvironment(macCatalyst)
             if let reachability = MixpanelInstance.reachability {
                 var context = SCNetworkReachabilityContext(version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
                 func reachabilityCallback(reachability: SCNetworkReachability, flags: SCNetworkReachabilityFlags, unsafePointer: UnsafeMutableRawPointer?) -> Void {
@@ -385,7 +385,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
         trackIntegration()
-        #if os(iOS)
+        #if os(iOS) && !targetEnvironment(macCatalyst)
             setCurrentRadio()
             notificationCenter.addObserver(self,
                                            selector: #selector(setCurrentRadio),
@@ -448,7 +448,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     deinit {
         NotificationCenter.default.removeObserver(self)
-        #if os(iOS) && !WATCH_OS
+        #if os(iOS) && !WATCH_OS && !targetEnvironment(macCatalyst)
             if let reachability = MixpanelInstance.reachability {
                 if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
                     Logger.error(message: "\(self) error unsetting reachability callback")
@@ -661,7 +661,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             }
         }
     }
-    #if os(iOS)
+    #if os(iOS) && !targetEnvironment(macCatalyst)
     @objc func setCurrentRadio() {
         var radio = MixpanelInstance.telephonyInfo.currentRadioAccessTechnology ?? "None"
         let prefix = "CTRadioAccessTechnology"

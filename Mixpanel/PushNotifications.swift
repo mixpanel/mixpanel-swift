@@ -179,9 +179,11 @@ public class MixpanelPushNotifications {
         properties["$ios_notification_id"] = request.identifier
 
         // Track using project token and distinct_id from push payload
+        #if DECIDE
         let mixpanel = Mixpanel.initialize(token: projectToken)
         mixpanel.trackPushNotification(userInfo, event: event, properties: properties)
         mixpanel.flush()
+        #endif
     }
 
 }

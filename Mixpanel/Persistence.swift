@@ -87,31 +87,31 @@ class Persistence {
     #endif // DECIDE
 
     static func archiveEvents(_ eventsQueue: Queue, token: String) {
-        archiveQueue.async { [eventsQueue, token] in
+        archiveQueue.sync { [eventsQueue, token] in
             archiveToFile(.events, object: eventsQueue, token: token)
         }
     }
 
     static func archivePeople(_ peopleQueue: Queue, token: String) {
-        archiveQueue.async { [peopleQueue, token] in
+        archiveQueue.sync { [peopleQueue, token] in
             archiveToFile(.people, object: peopleQueue, token: token)
         }
     }
 
     static func archiveGroups(_ groupsQueue: Queue, token: String) {
-        archiveQueue.async { [groupsQueue, token] in
+        archiveQueue.sync { [groupsQueue, token] in
             archiveToFile(.groups, object: groupsQueue, token: token)
         }
     }
 
     static func archiveOptOutStatus(_ optOutStatus: Bool, token: String) {
-        archiveQueue.async { [optOutStatus, token] in
+        archiveQueue.sync { [optOutStatus, token] in
             archiveToFile(.optOutStatus, object: optOutStatus, token: token)
         }
     }
 
     static func archiveProperties(_ properties: ArchivedProperties, token: String) {
-        archiveQueue.async { [properties, token] in
+        archiveQueue.sync { [properties, token] in
             var p = InternalProperties()
             p["distinctId"] = properties.distinctId
             p["anonymousId"] = properties.anonymousId
@@ -132,13 +132,13 @@ class Persistence {
 
     #if DECIDE
     static func archiveVariants(_ variants: Set<Variant>, token: String) {
-        archiveQueue.async { [variants, token] in
+        archiveQueue.sync { [variants, token] in
             archiveToFile(.variants, object: variants, token: token)
         }
     }
 
     static func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
-        archiveQueue.async { [codelessBindings, token] in
+        archiveQueue.sync { [codelessBindings, token] in
             archiveToFile(.codelessBindings, object: codelessBindings, token: token)
         }
     }

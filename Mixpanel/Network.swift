@@ -17,10 +17,12 @@ struct BasePath {
         guard let url = URL(string: base) else {
             return nil
         }
-        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)
-        components?.path = path
-        components?.queryItems = queryItems
-        return components?.url
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            return nil
+        }
+        components.path = path
+        components.queryItems = queryItems
+        return components.url
     }
 
     static func getServerURL(identifier: String) -> String {

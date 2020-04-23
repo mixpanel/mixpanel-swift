@@ -13,7 +13,7 @@
     <a title="Mixpanel  Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="index.html">Mixpanel 2.7.0 Docs</a> (88% documented)</p>
+        <p><a href="index.html">Mixpanel 2.7.1 Docs</a> (66% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="img/gh.png"/>View on GitHub</a></p>
       </div>
     </header>
@@ -74,10 +74,22 @@
                 <a href="Extensions/CGFloat.html">CGFloat</a>
               </li>
               <li class="nav-group-task">
+                <a href="Extensions/Collection.html">Collection</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Extensions/Data.html">Data</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Extensions/Date.html">Date</a>
               </li>
               <li class="nav-group-task">
+                <a href="Extensions/DateFormatter.html">DateFormatter</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Extensions/Dictionary.html">Dictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Extensions/DispatchQueue.html">DispatchQueue</a>
               </li>
               <li class="nav-group-task">
                 <a href="Extensions/Double.html">Double</a>
@@ -92,13 +104,31 @@
                 <a href="Extensions/NSNull.html">NSNull</a>
               </li>
               <li class="nav-group-task">
+                <a href="Extensions/NSObject.html">NSObject</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Extensions/String.html">String</a>
               </li>
               <li class="nav-group-task">
                 <a href="Extensions/UIColor.html">UIColor</a>
               </li>
               <li class="nav-group-task">
+                <a href="Extensions/UIDevice.html">UIDevice</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Extensions/UIResponder.html">UIResponder</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Extensions/UIView.html">UIView</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Extensions/UIViewController.html">UIViewController</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Extensions/UInt.html">UInt</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Extensions/UNUserNotificationCenter.html">UNUserNotificationCenter</a>
               </li>
               <li class="nav-group-task">
                 <a href="Extensions/URL.html">URL</a>
@@ -328,14 +358,31 @@ end
 
 class NotificationService: MixpanelNotificationServiceExtension {}
 </code></pre>
-<h4 id='4-run-the-app-and-send-a-test-push-notification-from-mixpanel-that-includes-an-image-or-buttons' class='heading'>4. Run the app and send a test push notification from Mixpanel that includes an image or buttons</h4>
+<h4 id='4-delegate-the-handling-of-the-notification-response-to-the-mixpanel-sdk' class='heading'>4. Delegate the handling of the notification response to the Mixpanel SDK</h4>
+
+<p>In your <code>AppDelegate.swift</code> file, you need to call <code>MixpanelPushNotifications.handleResponse</code> when a push notification response is received:</p>
+<pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="n">iOS</span> <span class="mf">10.0</span><span class="p">,</span> <span class="o">*</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">userNotificationCenter</span><span class="p">(</span><span class="n">_</span> <span class="nv">center</span><span class="p">:</span> <span class="kt">UNUserNotificationCenter</span><span class="p">,</span> <span class="n">didReceive</span> <span class="nv">response</span><span class="p">:</span> <span class="kt">UNNotificationResponse</span><span class="p">,</span> <span class="n">withCompletionHandler</span> <span class="nv">completionHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="kt">MixpanelPushNotifications</span><span class="o">.</span><span class="nf">isMixpanelPushNotification</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">notification</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">content</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">debugPrint</span><span class="p">(</span><span class="s">"Handling Mixpanel push notification response..."</span><span class="p">)</span>
+        <span class="kt">MixpanelPushNotifications</span><span class="o">.</span><span class="nf">handleResponse</span><span class="p">(</span><span class="nv">response</span><span class="p">:</span> <span class="n">response</span><span class="p">,</span> <span class="nv">withCompletionHandler</span><span class="p">:</span> <span class="n">completionHandler</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// not a Mixpanel push notification</span>
+        <span class="nf">debugPrint</span><span class="p">(</span><span class="s">"Not a Mixpanel push notification."</span><span class="p">)</span>
+        <span class="nf">completionHandler</span><span class="p">()</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>This will make sure the tap actions are appropriately handled (open url, deeplink, etc) as well as track whether a notification was tapped or dismissed.</p>
+<h4 id='5-run-the-app-and-send-a-test-push-notification-from-mixpanel-that-includes-an-image-or-buttons' class='heading'>5. Run the app and send a test push notification from Mixpanel that includes an image or buttons</h4>
 
 <p>That&rsquo;s it! Your app should now be able to receive rich push notifications from Mixpanel.</p>
 
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2020 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2020-03-27)</p>
+          <p>&copy; 2020 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2020-04-23)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.1</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

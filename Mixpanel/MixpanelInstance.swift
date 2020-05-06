@@ -77,6 +77,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// data to the Mixpanel servers. Defaults to true.
     open var showNetworkActivityIndicator = true
 
+    /// This allows enabling or disabling collecting common mobile events
+    /// If this is not set, it will query the Autotrack settings from the Mixpanel server
+    open var trackAutomaticEventsEnabled: Bool? = nil
+
     /// Flush timer's interval.
     /// Setting a flush interval of 0 will turn off the flush timer.
     open var flushInterval: Double {
@@ -973,7 +977,7 @@ extension MixpanelInstance {
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue,
                                                 shownNotifications: decideInstance.notificationsInstance.shownNotifications,
-                                                automaticEventsEnabled: decideInstance.automaticEventsEnabled)
+                                                automaticEventsEnabled: trackAutomaticEventsEnabled ?? decideInstance.automaticEventsEnabled)
             Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
                                 peopleQueue: people.flushPeopleQueue + people.peopleQueue,
                                 groupsQueue: flushGroupsQueue + groupsQueue,
@@ -1055,7 +1059,7 @@ extension MixpanelInstance {
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue,
                                                 shownNotifications: decideInstance.notificationsInstance.shownNotifications,
-                                                automaticEventsEnabled: decideInstance.automaticEventsEnabled)
+                                                automaticEventsEnabled: trackAutomaticEventsEnabled ?? decideInstance.automaticEventsEnabled)
             Persistence.archiveProperties(properties, token: apiToken)
         }
     }
@@ -1156,7 +1160,7 @@ extension MixpanelInstance {
                 }
 
                 #if DECIDE
-                let automaticEventsEnabled = self.decideInstance.automaticEventsEnabled
+                let automaticEventsEnabled = self.trackAutomaticEventsEnabled ?? self.decideInstance.automaticEventsEnabled
                 #elseif TV_AUTO_EVENTS
                 let automaticEventsEnabled = true
                 #else

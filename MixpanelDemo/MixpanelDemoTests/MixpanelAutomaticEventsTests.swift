@@ -39,6 +39,50 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         XCTAssertNotNil((event?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")
     }
 
+    func testKeepAutomaticEventsIfNetworkNotAvailable() {
+        self.mixpanel.minimumSessionDuration = 0;
+        self.mixpanel.decideInstance.automaticEventsEnabled = nil
+        self.mixpanel.identify(distinctId: "d1")
+        sleep(1)
+        self.mixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
+                                              with: Notification(name: Notification.Name(rawValue: "test")))
+        
+        self.waitForMixpanelQueues()
+
+        flushAndWaitForNetworkQueue()
+        let event = self.mixpanel.eventsQueue.last
+        XCTAssertTrue(self.mixpanel.eventsQueue.count > 0, "automatic events should be accumulated if check decide is offline(decideInstance.automaticEventsEnabled is nil)")
+        XCTAssertEqual(event?["event"] as? String, "$ae_session", "should be app session event")
+    }
+    
+    func testDiscardAutomaticEventsIftrackAutomaticEventsEnabledIsFalse() {
+        self.mixpanel.minimumSessionDuration = 0;
+        self.mixpanel.trackAutomaticEventsEnabled = false
+        self.mixpanel.decideInstance.automaticEventsEnabled = nil
+        self.mixpanel.identify(distinctId: "d1")
+        sleep(1)
+        self.mixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
+                                              with: Notification(name: Notification.Name(rawValue: "test")))
+        
+        self.waitForMixpanelQueues()
+        flushAndWaitForNetworkQueue()
+        XCTAssertTrue(self.mixpanel.eventsQueue.count == 0, "automatic events should be discarded")
+    }
+    
+    func testFlushAutomaticEventsIftrackAutomaticEventsEnabledIsTrue() {
+        self.mixpanel.minimumSessionDuration = 0;
+        self.mixpanel.trackAutomaticEventsEnabled = false
+        self.mixpanel.decideInstance.automaticEventsEnabled = nil
+        self.mixpanel.identify(distinctId: "d1")
+        sleep(1)
+        self.mixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
+                                              with: Notification(name: Notification.Name(rawValue: "test")))
+        
+        self.waitForMixpanelQueues()
+        flushAndWaitForNetworkQueue()
+        XCTAssertTrue(self.mixpanel.eventsQueue.count == 0, "automatic events should be flushed")
+    }
+    
     func testUpdated() {
         let defaults = UserDefaults(suiteName: "Mixpanel")
         let infoDict = Bundle.main.infoDictionary

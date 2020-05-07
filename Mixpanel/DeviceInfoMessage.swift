@@ -95,8 +95,6 @@ class DeviceInfoRequest: BaseWebSocketMessage {
             return "@"
         } else if value is Int {
             return "i"
-        } else if value is UInt {
-            return "I"
         }
         return ""
     }

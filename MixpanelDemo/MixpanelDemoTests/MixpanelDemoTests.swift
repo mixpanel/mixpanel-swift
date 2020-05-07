@@ -567,6 +567,35 @@ class MixpanelDemoTests: MixpanelBaseTests {
                       "people queue failed to reset after archive")
     }
 
+    func testArchiveNSNumberBoolIntProperty() {
+        let testToken = randomId()
+        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
+        let aBoolNumber: Bool = true
+        let aBoolNSNumber = NSNumber(value: aBoolNumber)
+        
+        let aIntNumber: Int = 1
+        let aIntNSNumber = NSNumber(value: aIntNumber)
+        
+        mixpanel.track(event: "e1", properties:  ["p1": aBoolNSNumber, "p2": aIntNSNumber])
+        mixpanel.archive()
+        waitForTrackingQueue()
+        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
+        waitForTrackingQueue()
+        let properties: [String: Any] = mixpanel.eventsQueue[0]["properties"] as! [String: Any]
+        
+        XCTAssertTrue(isBoolNumber(num: properties["p1"]! as! NSNumber),
+                          "The bool value should be unarchived as bool")
+        XCTAssertFalse(isBoolNumber(num: properties["p2"]! as! NSNumber),
+                          "The int value should not be unarchived as bool")
+    }
+    
+    private func isBoolNumber(num: NSNumber) -> Bool
+    {
+        let boolID = CFBooleanGetTypeID() // the type ID of CFBoolean
+        let numID = CFGetTypeID(num) // the type ID of num
+        return numID == boolID
+    }
+
     func testArchive() {
         let testToken = randomId()
         mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)

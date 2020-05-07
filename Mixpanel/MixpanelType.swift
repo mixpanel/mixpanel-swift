@@ -34,6 +34,21 @@ extension String: MixpanelType {
     }
 }
 
+extension NSNumber: MixpanelType {
+    /**
+     Checks if this object has nested object types that Mixpanel supports.
+     Will always return true.
+     */
+    public func isValidNestedType() -> Bool { return true }
+    
+    public func equals(rhs: MixpanelType) -> Bool {
+        if rhs is NSNumber {
+            return self.isEqual(rhs)
+        }
+        return false
+    }
+}
+
 extension Int: MixpanelType {
     /**
      Checks if this object has nested object types that Mixpanel supports.
@@ -48,6 +63,7 @@ extension Int: MixpanelType {
         return false
     }
 }
+
 extension UInt: MixpanelType {
     /**
      Checks if this object has nested object types that Mixpanel supports.

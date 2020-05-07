@@ -1221,10 +1221,6 @@ extension MixpanelInstance {
             return
         }
         let epochInterval = Date().timeIntervalSince1970
-
-
-       // }
-
         trackingQueue.async { [weak self, event, properties, epochInterval] in
             guard let self = self else { return }
             var shadowEventsQueue = Queue()

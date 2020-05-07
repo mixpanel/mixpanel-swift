@@ -663,11 +663,25 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
     #if os(iOS) && !targetEnvironment(macCatalyst)
     @objc func setCurrentRadio() {
-        var radio = MixpanelInstance.telephonyInfo.currentRadioAccessTechnology ?? "None"
+        var radio = ""
         let prefix = "CTRadioAccessTechnology"
-        if radio.hasPrefix(prefix) {
-            radio = (radio as NSString).substring(from: prefix.count)
+        if #available(iOS 12.0, *) {
+            if let radioDict = MixpanelInstance.telephonyInfo.serviceCurrentRadioAccessTechnology {
+                for (_, value) in radioDict {
+                    if value.count > 0 && value.hasPrefix(prefix) {
+                        let radioValue = (value as NSString).substring(from: prefix.count)
+                        radio = radio.count > 0 ? ", \(radioValue)" : radioValue
+                    }
+                }
+                radio = radio.count > 0 ? radio : "None"
+            }
+        } else {
+            radio = MixpanelInstance.telephonyInfo.currentRadioAccessTechnology ?? "None"
+            if radio.hasPrefix(prefix) {
+                radio = (radio as NSString).substring(from: prefix.count)
+            }
         }
+        
         trackingQueue.async {
             AutomaticProperties.automaticPropertiesLock.write { [weak self, radio] in
                 AutomaticProperties.properties["$radio"] = radio

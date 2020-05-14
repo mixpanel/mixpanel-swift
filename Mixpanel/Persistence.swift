@@ -145,13 +145,21 @@ class Persistence {
     #endif // DECIDE
 
     static private func archiveToFile(_ type: ArchiveType, object: Any, token: String) {
+        var archiveObject = object
+        if var queue = archiveObject as? Queue {
+            if queue.count > QueueConstants.queueSize {
+                queue.removeSubrange(0..<(queue.count - QueueConstants.queueSize))
+                archiveObject = queue
+            }
+        }
+
         let filePath = filePathWithType(type, token: token)
         guard let path = filePath else {
             Logger.error(message: "bad file path, cant fetch file")
             return
         }
 
-        ExceptionWrapper.try({ [cObject = object, cPath = path, cType = type] in
+        ExceptionWrapper.try({ [cObject = archiveObject, cPath = path, cType = type] in
             if !NSKeyedArchiver.archiveRootObject(cObject, toFile: cPath) {
                 Logger.error(message: "failed to archive \(cType.rawValue)")
                 return
@@ -438,6 +446,13 @@ class Persistence {
         guard let unarchivedData = unarchiveWithFilePath(path) else {
             Logger.info(message: "can't unarchive file")
             return nil
+        }
+        
+        if var queue = unarchivedData as? Queue {
+            if queue.count > QueueConstants.queueSize {
+                queue.removeSubrange(0..<(queue.count - QueueConstants.queueSize))
+                return queue
+            }
         }
 
         return unarchivedData

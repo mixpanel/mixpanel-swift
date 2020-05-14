@@ -10,6 +10,7 @@ import Foundation
 
 protocol FlushDelegate {
     func flush(completion: (() -> Void)?)
+    func updateQueue(_ queue: Queue, type: FlushType)
     #if os(iOS)
     func updateNetworkActivityIndicator(_ on: Bool)
     #endif // os(iOS)
@@ -153,6 +154,7 @@ class Flush: AppLifecycle {
                                                 } else {
                                                     shadowQueue.removeAll()
                                                 }
+                                                self?.delegate?.updateQueue(shadowQueue, type: type)
                                             }
                                             shouldContinue = success
                                             semaphore.signal()

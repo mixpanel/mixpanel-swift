@@ -596,7 +596,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // os(OSX)
 
     @objc private func applicationWillTerminate(_ notification: Notification) {
-        self.archive()
+        networkQueue.async { [weak self] in
+            guard let self = self else { return }
+            self.archive()
+        }
     }
 
     func defaultDistinctId() -> String {
@@ -1203,6 +1206,21 @@ extension MixpanelInstance {
                 }
             }
         }}
+    
+    
+    func updateQueue(_ queue: Queue, type: FlushType) {
+        self.readWriteLock.write {
+            if type == .events {
+                self.flushEventsQueue = queue
+            } else if type == .people {
+                self.people.flushPeopleQueue = queue
+            } else if type == .groups {
+                self.flushGroupsQueue = queue
+            }
+        }
+        
+        self.archive()
+    }
 }
 
 extension MixpanelInstance {
@@ -1648,24 +1666,28 @@ extension MixpanelInstance {
 
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
-            
-            self.readWriteLock.write { [weak self] in
-
+            self.networkQueue.async { [weak self] in
                 guard let self = self else {
                     return
                 }
+                self.readWriteLock.write { [weak self] in
 
-                self.alias = nil
-                self.people.distinctId = nil
-                self.userId = nil
-                self.distinctId = self.defaultDistinctId()
-                self.anonymousId = self.distinctId
-                self.hadPersistedDistinctId = nil
-                self.superProperties = InternalProperties()
-                self.people.unidentifiedQueue = Queue()
-                self.timedEvents = InternalProperties()
+                    guard let self = self else {
+                        return
+                    }
+
+                    self.alias = nil
+                    self.people.distinctId = nil
+                    self.userId = nil
+                    self.distinctId = self.defaultDistinctId()
+                    self.anonymousId = self.distinctId
+                    self.hadPersistedDistinctId = nil
+                    self.superProperties = InternalProperties()
+                    self.people.unidentifiedQueue = Queue()
+                    self.timedEvents = InternalProperties()
+                }
+                self.archive()
             }
-            self.archive()
         }
 
         optOutStatus = true

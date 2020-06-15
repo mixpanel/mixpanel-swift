@@ -674,12 +674,22 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         let prefix = "CTRadioAccessTechnology"
         if #available(iOS 12.0, *) {
             if let radioDict = MixpanelInstance.telephonyInfo.serviceCurrentRadioAccessTechnology {
-                for (_, value) in radioDict {
-                    if value.count > 0 && value.hasPrefix(prefix) {
-                        let radioValue = (value as NSString).substring(from: prefix.count)
-                        radio = radio.count > 0 ? ", \(radioValue)" : radioValue
+                for (_, value) in radioDict where value.count > 0 && value.hasPrefix(prefix) {
+                    // the first should be the prefix, second the target
+                    let components = value.components(separatedBy: prefix)
+
+                    // Something went wrong and we have more than prefix:target
+                    guard components.count == 2 else {
+                        continue
                     }
+
+                    // Safe to directly access by index since we confirmed count == 2 above
+                    let radioValue = components[1]
+                    
+                    // Send to parent
+                    radio = radio.count > 0 ? ", \(radioValue)" : radioValue
                 }
+
                 radio = radio.count > 0 ? radio : "None"
             }
         } else {

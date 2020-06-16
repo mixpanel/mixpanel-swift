@@ -687,7 +687,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     let radioValue = components[1]
                     
                     // Send to parent
-                    radio = radio.count > 0 ? ", \(radioValue)" : radioValue
+                    radio += radio.count > 0 ? ", \(radioValue)" : radioValue
                 }
 
                 radio = radio.count > 0 ? radio : "None"

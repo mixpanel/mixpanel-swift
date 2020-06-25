@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if SWIFT_PACKAGE
+import ExceptionWrapper
+#endif
 
 struct ArchivedProperties {
     let superProperties: InternalProperties

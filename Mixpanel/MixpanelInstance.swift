@@ -391,10 +391,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         trackIntegration()
         #if os(iOS) && !targetEnvironment(macCatalyst)
             setCurrentRadio()
-            notificationCenter.addObserver(self,
-                                           selector: #selector(setCurrentRadio),
-                                           name: .CTRadioAccessTechnologyDidChange,
-                                           object: nil)
+        // Temporarily remove the ability to monitor the radio change due to a crash issue might relate to the api from Apple
+        // https://openradar.appspot.com/46873673
+        //    notificationCenter.addObserver(self,
+        //                                   selector: #selector(setCurrentRadio),
+        //                                   name: .CTRadioAccessTechnologyDidChange,
+        //                                   object: nil)
             #if DECIDE
                 notificationCenter.addObserver(self,
                                                selector: #selector(executeTweaks),

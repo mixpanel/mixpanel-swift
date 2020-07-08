@@ -278,7 +278,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
             #if MIXPANEL_RANDOM_DISTINCT_ID
             XCTAssertNotEqual(prevDistinctId, originalDistinctId, "After reset, UUID will be used - never the same");
             #else
-            XCTAssertEqual(prevDistinctId, originalDistinctId, "After reset, IFA/UIDevice id will be used - always the same");
+            XCTAssertEqual(prevDistinctId, originalDistinctId, "After reset, IFV will be used - always the same");
             #endif
             mixpanel.reset()
             waitForTrackingQueue()

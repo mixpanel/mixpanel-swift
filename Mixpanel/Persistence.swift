@@ -159,15 +159,10 @@ class Persistence {
             return
         }
 
-        ExceptionWrapper.try({ [cObject = archiveObject, cPath = path, cType = type] in
-            if !NSKeyedArchiver.archiveRootObject(cObject, toFile: cPath) {
-                Logger.error(message: "failed to archive \(cType.rawValue)")
-                return
-            }
-        }, catch: { [cType = type] (error) in
-            Logger.error(message: "failed to archive \(cType.rawValue) due to an uncaught exception")
+        if !NSKeyedArchiver.archiveRootObject(archiveObject, toFile: path) {
+            Logger.error(message: "failed to archive \(type.rawValue)")
             return
-        }, finally: {})
+        }
         
         addSkipBackupAttributeToItem(at: path)
     }
@@ -283,16 +278,11 @@ class Persistence {
 
     static private func unarchiveWithFilePath(_ filePath: String) -> Any? {
         var unarchivedData: Any? = nil
-        ExceptionWrapper.try({ [filePath] in
-            unarchivedData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath)
-            if unarchivedData == nil {
-                Logger.info(message: "Unable to read file at path: \(filePath)")
-                removeArchivedFile(atPath: filePath)
-            }
-        }, catch: { [filePath] (error) in
+        unarchivedData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath)
+        if unarchivedData == nil {
+            Logger.info(message: "Unable to read file at path: \(filePath)")
             removeArchivedFile(atPath: filePath)
-            Logger.info(message: "Unable to read file at path: \(filePath), error: \(String(describing: error))")
-        }, finally: {})
+        }
         return unarchivedData
     }
 

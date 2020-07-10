@@ -605,18 +605,18 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     func defaultDistinctId() -> String {
-        #if MIXPANEL_RANDOM_DISTINCT_ID
-        let distinctId: String? = UUID().uuidString
-        #elseif !os(OSX) && !WATCH_OS
+        #if MIXPANEL_UNIQUE_DISTINCT_ID
+        #if !os(OSX) && !WATCH_OS
         var distinctId: String? = nil
         if NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString
         }
         #elseif os(OSX)
         let distinctId = MixpanelInstance.macOSIdentifier()
-        #else
-        let distinctId: String? = nil
         #endif // os(OSX)
+        #else
+        let distinctId: String? = UUID().uuidString
+        #endif
         guard let distId = distinctId else {
             return UUID().uuidString
         }
@@ -725,14 +725,14 @@ extension MixpanelInstance {
     /**
      Sets the distinct ID of the current user.
 
-     Mixpanel uses the IFV String (`UIDevice.current().identifierForVendor`) as the default local distinct ID.
-     This ID will identify a user across all apps by the same vendor, but cannot be used to link the same
-     user across apps from different vendors.
+     Mixpanel use a random persistent UUID as the default local distinct ID.
 
-     If we are unable to get an IFV, we will fall back to generating a
-     random persistent UUID. If you want to always use a random persistent UUID
-     you can define the <code>MIXPANEL_RANDOM_DISTINCT_ID</code> preprocessor flag
-     in your build settings.
+     If you want to  use a unique persistent UUID, you can define the
+     <code>MIXPANEL_UNIQUE_DISTINCT_ID</code> flag in your  <code>Active Compilation Conditions</code>
+     build settings. It then uses the IFV String (`UIDevice.current().identifierForVendor`) as
+     the default local distinct ID. This ID will identify a user across all apps by the same vendor, but cannot be
+     used to link the same user across apps from different vendors. If we are unable to get an IFV, we will fall
+     back to generating a random persistent UUID.
 
      For tracking events, you do not need to call `identify:`. However,
      **Mixpanel User profiles always requires an explicit call to `identify:`.**

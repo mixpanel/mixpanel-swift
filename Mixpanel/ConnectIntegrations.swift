@@ -5,6 +5,7 @@
 //  Created by Peter Chien on 10/10/17.
 //  Copyright © 2017 Mixpanel. All rights reserved.
 //
+import Foundation
 
 class ConnectIntegrations {
     open var mixpanel: MixpanelInstance?

@@ -282,7 +282,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         self.name = name
         self.readWriteLock = ReadWriteLock(label: "globalLock")
-        flushInstance = Flush(basePathIdentifier: name, lock: self.readWriteLock)
+        flushInstance = Flush(basePathIdentifier: name)
         #if DECIDE
             decideInstance = Decide(basePathIdentifier: name, lock: self.readWriteLock)
         #endif // DECIDE
@@ -357,7 +357,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         self.name = name
         self.readWriteLock = ReadWriteLock(label: "globalLock")
-        flushInstance = Flush(basePathIdentifier: name, lock: self.readWriteLock)
+        flushInstance = Flush(basePathIdentifier: name)
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: label)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)

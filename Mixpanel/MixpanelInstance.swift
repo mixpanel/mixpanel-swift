@@ -614,7 +614,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #elseif os(OSX)
         let distinctId = MixpanelInstance.macOSIdentifier()
         #endif
-        #else // use a random UUID by default 
+        #else // use a random UUID by default
         let distinctId: String? = UUID().uuidString
         #endif
         guard let distId = distinctId else {
@@ -725,7 +725,7 @@ extension MixpanelInstance {
     /**
      Sets the distinct ID of the current user.
 
-     Mixpanel use a random persistent UUID as the default local distinct ID.
+     Mixpanel uses a randomly generated persistent UUID  as the default local distinct ID.
 
      If you want to  use a unique persistent UUID, you can define the
      <code>MIXPANEL_UNIQUE_DISTINCT_ID</code> flag in your <code>Active Compilation Conditions</code>

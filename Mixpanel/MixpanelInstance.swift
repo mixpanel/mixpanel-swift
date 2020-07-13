@@ -613,8 +613,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         #elseif os(OSX)
         let distinctId = MixpanelInstance.macOSIdentifier()
-        #endif // os(OSX)
-        #else
+        #endif
+        #else // use a random UUID by default 
         let distinctId: String? = UUID().uuidString
         #endif
         guard let distId = distinctId else {

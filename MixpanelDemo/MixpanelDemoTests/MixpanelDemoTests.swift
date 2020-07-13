@@ -168,12 +168,14 @@ class MixpanelDemoTests: MixpanelBaseTests {
             // run this twice to test reset works correctly wrt to distinct ids
             let distinctId: String = "d1"
             // try this for ODIN and nil
+            #if MIXPANEL_UNIQUE_DISTINCT_ID
             XCTAssertEqual(mixpanel.distinctId,
                            mixpanel.defaultDistinctId(),
                            "mixpanel identify failed to set default distinct id")
             XCTAssertEqual(mixpanel.anonymousId,
                            mixpanel.defaultDistinctId(),
                            "mixpanel failed to set default anonymous id")
+            #endif
             XCTAssertNil(mixpanel.people.distinctId,
                          "mixpanel people distinct id should default to nil")
             XCTAssertNil(mixpanel.people.distinctId,
@@ -182,9 +184,11 @@ class MixpanelDemoTests: MixpanelBaseTests {
             waitForTrackingQueue()
             XCTAssertTrue(mixpanel.eventsQueue.count == 1,
                           "events should be sent right away with default distinct id")
+            #if MIXPANEL_UNIQUE_DISTINCT_ID
             XCTAssertEqual((mixpanel.eventsQueue.last?["properties"] as? InternalProperties)?["distinct_id"] as? String,
                            mixpanel.defaultDistinctId(),
                            "events should use default distinct id if none set")
+            #endif
             XCTAssertEqual((mixpanel.eventsQueue.last?["properties"] as? InternalProperties)?["$lib_version"] as? String,
                            AutomaticProperties.libVersion(),
                            "events should has lib version in internal properties")
@@ -275,9 +279,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
             let p: InternalProperties = e["properties"] as! InternalProperties
             XCTAssertEqual(p["distinct_id"] as? String, newDistinctId, "wrong distinct_id")
             XCTAssertEqual(p["$anon_distinct_id"] as? String, prevDistinctId, "wrong $anon_distinct_id")
-            #if MIXPANEL_RANDOM_DISTINCT_ID
             XCTAssertNotEqual(prevDistinctId, originalDistinctId, "After reset, UUID will be used - never the same");
-            #else
+            #if MIXPANEL_UNIQUE_DISTINCT_ID
             XCTAssertEqual(prevDistinctId, originalDistinctId, "After reset, IFV will be used - always the same");
             #endif
             mixpanel.reset()
@@ -545,9 +548,11 @@ class MixpanelDemoTests: MixpanelBaseTests {
         mixpanel.archive()
         mixpanel.reset()
         waitForTrackingQueue()
+        #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(mixpanel.distinctId,
                        mixpanel.defaultDistinctId(),
                        "distinct id failed to reset")
+        #endif
         XCTAssertNil(mixpanel.people.distinctId, "people distinct id failed to reset")
         XCTAssertTrue(mixpanel.currentSuperProperties().isEmpty,
                       "super properties failed to reset")
@@ -555,8 +560,10 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty, "people queue failed to reset")
         mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
         waitForTrackingQueue()
+        #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(mixpanel.distinctId, mixpanel.defaultDistinctId(),
                        "distinct id failed to reset after archive")
+        #endif
         XCTAssertNil(mixpanel.people.distinctId,
                      "people distinct id failed to reset after archive")
         XCTAssertTrue(mixpanel.currentSuperProperties().isEmpty,
@@ -599,8 +606,10 @@ class MixpanelDemoTests: MixpanelBaseTests {
     func testArchive() {
         let testToken = randomId()
         mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
+        #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(mixpanel.distinctId, mixpanel.defaultDistinctId(),
                        "default distinct id archive failed")
+        #endif
         XCTAssertTrue(mixpanel.currentSuperProperties().isEmpty,
                       "default super properties archive failed")
         XCTAssertTrue(mixpanel.eventsQueue.isEmpty, "default events queue archive failed")
@@ -700,8 +709,10 @@ class MixpanelDemoTests: MixpanelBaseTests {
         Persistence.deleteMPUserDefaultsData(token: testToken)
         mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
         waitForTrackingQueue()
+        #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(mixpanel.distinctId, mixpanel.defaultDistinctId(),
                        "default distinct id from garbage failed")
+        #endif
         XCTAssertTrue(mixpanel.currentSuperProperties().isEmpty,
                       "default super properties from garbage failed")
         XCTAssertNotNil(mixpanel.eventsQueue, "default events queue from garbage is nil")

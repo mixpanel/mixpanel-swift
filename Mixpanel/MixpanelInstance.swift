@@ -728,7 +728,7 @@ extension MixpanelInstance {
      Mixpanel use a random persistent UUID as the default local distinct ID.
 
      If you want to  use a unique persistent UUID, you can define the
-     <code>MIXPANEL_UNIQUE_DISTINCT_ID</code> flag in your  <code>Active Compilation Conditions</code>
+     <code>MIXPANEL_UNIQUE_DISTINCT_ID</code> flag in your <code>Active Compilation Conditions</code>
      build settings. It then uses the IFV String (`UIDevice.current().identifierForVendor`) as
      the default local distinct ID. This ID will identify a user across all apps by the same vendor, but cannot be
      used to link the same user across apps from different vendors. If we are unable to get an IFV, we will fall

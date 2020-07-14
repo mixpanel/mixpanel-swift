@@ -41,11 +41,13 @@ class WebSocketWrapper: WebSocketDelegate {
     var connectivityIndiciatorWindow: UIWindow? = nil
     let connectCallback: (() -> Void)?
     let disconnectCallback: (() -> Void)?
+    let sessionObjectLock: DispatchQueue
 
     init(url: URL, keepTrying: Bool, connectCallback: (() -> Void)?, disconnectCallback: (() -> Void)?) {
         open = false
         connected = false
         session = [String: Any]()
+        sessionObjectLock = DispatchQueue(label: "com.mixpanel.session_object_lock", attributes: .concurrent)
         self.url = url
         self.connectCallback = connectCallback
         self.disconnectCallback = disconnectCallback
@@ -65,17 +67,15 @@ class WebSocketWrapper: WebSocketDelegate {
     }
 
     func setSessionObjectSynchronized(with value: Any, for key: String) {
-        objc_sync_enter(self)
-        defer { objc_sync_exit(self) }
-
-        session[key] = value
+        sessionObjectLock.sync(flags: .barrier, execute: {
+            session[key] = value
+        })
     }
 
     func getSessionObjectSynchronized(for key: String) -> Any? {
-        objc_sync_enter(self)
-        defer { objc_sync_exit(self) }
-
-        return session[key]
+        sessionObjectLock.sync {
+            return session[key]
+        }
     }
 
     func open(initiate: Bool, maxInterval: Int = 0, maxRetries: Int = 0) {

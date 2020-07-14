@@ -16,35 +16,35 @@
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/AutomaticEvents.swift",
-      "line": 256,
+      "line": 259,
       "symbol": "UNUserNotificationCenter.addDelegateObserver(ae:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/AutomaticEvents.swift",
-      "line": 260,
+      "line": 263,
       "symbol": "UNUserNotificationCenter.removeDelegateObserver(ae:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/AutomaticEvents.swift",
-      "line": 266,
+      "line": 269,
       "symbol": "UIResponder.mp_application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/AutomaticEvents.swift",
-      "line": 280,
+      "line": 283,
       "symbol": "UIResponder.mp_application(_:newDidReceiveRemoteNotification:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/AutomaticEvents.swift",
-      "line": 297,
+      "line": 300,
       "symbol": "NSObject.mp_userNotificationCenter(_:newDidReceive:withCompletionHandler:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
@@ -446,13 +446,6 @@
       "line": 12,
       "symbol": "DateFormatter.formatterForJSONDate()",
       "symbol_kind": "source.lang.swift.decl.function.method.static",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/Swizzle.swift",
-      "line": 14,
-      "symbol": "DispatchQueue.once(token:block:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {

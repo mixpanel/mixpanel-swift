@@ -49,7 +49,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     var hasAddedObserver = false
     var automaticPushTracking = true
     var firstAppOpen = false
-    let awaitingTransactionsWriteLock = DispatchQueue(label: "com.mixpanel.awaiting_transactions_writeLock")
+    let awaitingTransactionsWriteLock = DispatchQueue(label: "com.mixpanel.awaiting_transactions_writeLock", qos: .utility)
 
     func initializeEvents() {
         let firstOpenKey = "MPFirstOpen"

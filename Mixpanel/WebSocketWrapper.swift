@@ -47,7 +47,7 @@ class WebSocketWrapper: WebSocketDelegate {
         open = false
         connected = false
         session = [String: Any]()
-        sessionObjectLock = DispatchQueue(label: "com.mixpanel.session_object_lock", attributes: .concurrent)
+        sessionObjectLock = DispatchQueue(label: "com.mixpanel.session_object_lock", qos: .utility, attributes: .concurrent)
         self.url = url
         self.connectCallback = connectCallback
         self.disconnectCallback = disconnectCallback

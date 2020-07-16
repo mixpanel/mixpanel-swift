@@ -281,7 +281,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             self.apiToken = apiToken
         }
         self.name = name
-        self.readWriteLock = ReadWriteLock(label: "globalLock")
+        self.readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
         flushInstance = Flush(basePathIdentifier: name)
         #if DECIDE
             decideInstance = Decide(basePathIdentifier: name, lock: self.readWriteLock)
@@ -356,16 +356,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             self.apiToken = apiToken
         }
         self.name = name
-        self.readWriteLock = ReadWriteLock(label: "globalLock")
+        self.readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
         flushInstance = Flush(basePathIdentifier: name)
         let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: label)
+        trackingQueue = DispatchQueue(label: label, qos: .utility)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
                               metadata: sessionMetadata)
         flushInstance.delegate = self
-        networkQueue = DispatchQueue(label: label)
+        networkQueue = DispatchQueue(label: label, qos: .utility)
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
                         serialQueue: trackingQueue,

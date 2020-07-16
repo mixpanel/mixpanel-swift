@@ -858,7 +858,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     func testReadWriteLock() {
         var array = [Int]()
         let lock = ReadWriteLock(label: "test")
-        let queue = DispatchQueue(label: "concurrent", attributes: .concurrent)
+        let queue = DispatchQueue(label: "concurrent", qos: .utility, attributes: .concurrent)
         for _ in 0..<10 {
             queue.async {
                 lock.write {

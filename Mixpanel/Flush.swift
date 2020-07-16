@@ -43,7 +43,7 @@ class Flush: AppLifecycle {
 
     required init(basePathIdentifier: String) {
         self.flushRequest = FlushRequest(basePathIdentifier: basePathIdentifier)
-        flushIntervalReadWriteLock = DispatchQueue(label: "com.mixpanel.flush_interval.lock", attributes: .concurrent)
+        flushIntervalReadWriteLock = DispatchQueue(label: "com.mixpanel.flush_interval.lock", qos: .utility, attributes: .concurrent)
     }
 
     func flushEventsQueue(_ eventsQueue: Queue, automaticEventsEnabled: Bool?) -> Queue? {

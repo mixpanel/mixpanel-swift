@@ -6,6 +6,8 @@
 //  Copyright © 2017 Mixpanel. All rights reserved.
 //
 
+import Foundation
+
 class ConnectIntegrations {
     open var mixpanel: MixpanelInstance?
     var urbanAirshipRetries = 0

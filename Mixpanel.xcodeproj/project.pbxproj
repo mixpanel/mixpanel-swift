@@ -186,8 +186,8 @@
 		60FF895923CD34E300628249 /* PushNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotifications.swift; sourceTree = "<group>"; };
 		60FF895E23CE587C00628249 /* MixpanelNotificationServiceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelNotificationServiceExtension.swift; sourceTree = "<group>"; };
 		673ABE3921360CBE00B1784B /* Group.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
-		86EE92C621370CA600D55487 /* ExceptionWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExceptionWrapper.h; sourceTree = "<group>"; };
-		86EE92C721370CA600D55487 /* ExceptionWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExceptionWrapper.m; sourceTree = "<group>"; };
+		86EE92C621370CA600D55487 /* ExceptionWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ExceptionWrapper.h; path = ExceptionWrapper/include/ExceptionWrapper.h; sourceTree = "<group>"; };
+		86EE92C721370CA600D55487 /* ExceptionWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ExceptionWrapper.m; path = ExceptionWrapper/ExceptionWrapper.m; sourceTree = "<group>"; };
 		86F86E81224404BD00B69832 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadWriteLock.swift; sourceTree = "<group>"; };
 		E115234C1D7A59AF00657E80 /* UIImageToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageToNSDictionary.swift; sourceTree = "<group>"; };

@@ -6,6 +6,9 @@
 //  Copyright © 2016 Mixpanel. All rights reserved.
 //
 
+#if SWIFT_PACKAGE
+import ExceptionWrapper
+#endif
 import Foundation
 
 struct ArchivedProperties {

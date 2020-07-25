@@ -118,7 +118,12 @@ class AutomaticProperties {
     #endif
 
     class func libVersion() -> String? {
-        return Bundle(for: self).infoDictionary?["CFBundleShortVersionString"] as? String
+        #if SWIFT_PACKAGE
+        let bundle = Bundle.module
+        #else
+        let bundle = Bundle(for: self)
+        #endif
+        return bundle.infoDictionary?["CFBundleShortVersionString"] as? String
     }
 
 }

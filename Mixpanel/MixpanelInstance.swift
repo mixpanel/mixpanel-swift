@@ -605,55 +605,25 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     func defaultDistinctId() -> String {
-        #if MIXPANEL_RANDOM_DISTINCT_ID
-        let distinctId: String? = UUID().uuidString
-        #elseif !os(OSX) && !WATCH_OS
-        var distinctId: String? = IFA()
-        if distinctId == nil && NSClassFromString("UIDevice") != nil {
+        #if MIXPANEL_UNIQUE_DISTINCT_ID
+        #if !os(OSX) && !WATCH_OS
+        var distinctId: String? = nil
+        if NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString
         }
         #elseif os(OSX)
         let distinctId = MixpanelInstance.macOSIdentifier()
-        #else
-        let distinctId: String? = nil
-        #endif // os(OSX)
+        #endif
+        #else // use a random UUID by default
+        let distinctId: String? = UUID().uuidString
+        #endif
         guard let distId = distinctId else {
             return UUID().uuidString
         }
         return distId
     }
 
-    #if !os(OSX) && !WATCH_OS
-    func IFA() -> String? {
-        var ifa: String? = nil
-        #if !MIXPANEL_NO_IFA
-        if let ASIdentifierManagerClass = NSClassFromString("ASIdentifierManager") {
-            let sharedManagerSelector = NSSelectorFromString("sharedManager")
-            if let sharedManagerIMP = ASIdentifierManagerClass.method(for: sharedManagerSelector) {
-                typealias sharedManagerFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
-                let curriedImplementation = unsafeBitCast(sharedManagerIMP, to: sharedManagerFunc.self)
-                if let sharedManager = curriedImplementation(ASIdentifierManagerClass.self, sharedManagerSelector) {
-                    let advertisingTrackingEnabledSelector = NSSelectorFromString("isAdvertisingTrackingEnabled")
-                    if let isTrackingEnabledIMP = sharedManager.method(for: advertisingTrackingEnabledSelector) {
-                        typealias isTrackingEnabledFunc = @convention(c) (AnyObject, Selector) -> Bool
-                        let curriedImplementation2 = unsafeBitCast(isTrackingEnabledIMP, to: isTrackingEnabledFunc.self)
-                        let isTrackingEnabled = curriedImplementation2(self, advertisingTrackingEnabledSelector)
-                        if isTrackingEnabled {
-                            let advertisingIdentifierSelector = NSSelectorFromString("advertisingIdentifier")
-                            if let advertisingIdentifierIMP = sharedManager.method(for: advertisingIdentifierSelector) {
-                                typealias adIdentifierFunc = @convention(c) (AnyObject, Selector) -> NSUUID
-                                let curriedImplementation3 = unsafeBitCast(advertisingIdentifierIMP, to: adIdentifierFunc.self)
-                                ifa = curriedImplementation3(self, advertisingIdentifierSelector).uuidString
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        #endif
-        return ifa
-    }
-    #elseif os(OSX)
+    #if os(OSX)
     static func macOSIdentifier() -> String? {
         let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"));
         let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0);
@@ -755,26 +725,14 @@ extension MixpanelInstance {
     /**
      Sets the distinct ID of the current user.
 
-     Mixpanel will choose a default local distinct ID based on whether you are using the
-     AdSupport.framework or not.
+     Mixpanel uses a randomly generated persistent UUID  as the default local distinct ID.
 
-     If you are not using the AdSupport Framework (iAds), then we use the IFV String
-     (`UIDevice.current().identifierForVendor`) as the default local distinct ID. This ID will
-     identify a user across all apps by the same vendor, but cannot be used to link the same
-     user across apps from different vendors. If we are unable to get the IFV, we will fall
-     back to generating a random persistent UUID
-
-     If you are showing iAds in your application, you are allowed use the iOS ID
-     for Advertising (IFA) to identify users. If you have this framework in your
-     app, Mixpanel will use the IFA as the default local distinct ID. If you have
-     AdSupport installed but still don't want to use the IFA, you can define the
-     <code>MIXPANEL_NO_IFA</code> flag in your <code>Active Compilation Conditions</code>
-     build settings, and Mixpanel will use the IFV as the default local distinct ID.
-
-     If we are unable to get an IFA or IFV, we will fall back to generating a
-     random persistent UUID. If you want to always use a random persistent UUID
-     you can define the <code>MIXPANEL_RANDOM_DISTINCT_ID</code> preprocessor flag
-     in your build settings.
+     If you want to  use a unique persistent UUID, you can define the
+     <code>MIXPANEL_UNIQUE_DISTINCT_ID</code> flag in your <code>Active Compilation Conditions</code>
+     build settings. It then uses the IFV String (`UIDevice.current().identifierForVendor`) as
+     the default local distinct ID. This ID will identify a user across all apps by the same vendor, but cannot be
+     used to link the same user across apps from different vendors. If we are unable to get an IFV, we will fall
+     back to generating a random persistent UUID.
 
      For tracking events, you do not need to call `identify:`. However,
      **Mixpanel User profiles always requires an explicit call to `identify:`.**

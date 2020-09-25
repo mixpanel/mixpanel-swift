@@ -69,7 +69,7 @@ private final class TweakDiskPersistency {
 			.appendingPathExtension("db")
 	}
 
-	private let queue = DispatchQueue(label: "org.khanacademy.swift_tweaks.disk_persistency", attributes: [])
+	private let queue = DispatchQueue(label: "org.khanacademy.swift_tweaks.disk_persistency", qos: .utility, attributes: [])
 
 	init(identifier: String) {
 		self.fileURL = TweakDiskPersistency.fileURLForIdentifier(identifier)

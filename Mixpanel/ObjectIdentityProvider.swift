@@ -33,7 +33,7 @@ class ObjectIdentityProvider {
 }
 
 class SequenceGenerator {
-    private var queue = DispatchQueue(label: "com.mixpanel.sequence.generator")
+    private var queue = DispatchQueue(label: "com.mixpanel.sequence.generator", qos: .utility)
     private(set) var value: Int32 = 0
     
     init() {

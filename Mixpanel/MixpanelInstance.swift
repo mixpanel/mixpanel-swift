@@ -281,8 +281,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             self.apiToken = apiToken
         }
         self.name = name
-        self.readWriteLock = ReadWriteLock(label: "globalLock")
-        flushInstance = Flush(basePathIdentifier: name, lock: self.readWriteLock)
+        self.readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
+        flushInstance = Flush(basePathIdentifier: name)
         #if DECIDE
             decideInstance = Decide(basePathIdentifier: name, lock: self.readWriteLock)
         #endif // DECIDE
@@ -356,16 +356,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             self.apiToken = apiToken
         }
         self.name = name
-        self.readWriteLock = ReadWriteLock(label: "globalLock")
-        flushInstance = Flush(basePathIdentifier: name, lock: self.readWriteLock)
+        self.readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
+        flushInstance = Flush(basePathIdentifier: name)
         let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: label)
+        trackingQueue = DispatchQueue(label: label, qos: .utility)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
                               metadata: sessionMetadata)
         flushInstance.delegate = self
-        networkQueue = DispatchQueue(label: label)
+        networkQueue = DispatchQueue(label: label, qos: .utility)
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
                         serialQueue: trackingQueue,
@@ -391,10 +391,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         trackIntegration()
         #if os(iOS) && !targetEnvironment(macCatalyst)
             setCurrentRadio()
-            notificationCenter.addObserver(self,
-                                           selector: #selector(setCurrentRadio),
-                                           name: .CTRadioAccessTechnologyDidChange,
-                                           object: nil)
+        // Temporarily remove the ability to monitor the radio change due to a crash issue might relate to the api from Apple
+        // https://openradar.appspot.com/46873673
+        //    notificationCenter.addObserver(self,
+        //                                   selector: #selector(setCurrentRadio),
+        //                                   name: .CTRadioAccessTechnologyDidChange,
+        //                                   object: nil)
             #if DECIDE
                 notificationCenter.addObserver(self,
                                                selector: #selector(executeTweaks),
@@ -603,55 +605,25 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     func defaultDistinctId() -> String {
-        #if MIXPANEL_RANDOM_DISTINCT_ID
-        let distinctId: String? = UUID().uuidString
-        #elseif !os(OSX) && !WATCH_OS
-        var distinctId: String? = IFA()
-        if distinctId == nil && NSClassFromString("UIDevice") != nil {
+        #if MIXPANEL_UNIQUE_DISTINCT_ID
+        #if !os(OSX) && !WATCH_OS
+        var distinctId: String? = nil
+        if NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString
         }
         #elseif os(OSX)
         let distinctId = MixpanelInstance.macOSIdentifier()
-        #else
-        let distinctId: String? = nil
-        #endif // os(OSX)
+        #endif
+        #else // use a random UUID by default
+        let distinctId: String? = UUID().uuidString
+        #endif
         guard let distId = distinctId else {
             return UUID().uuidString
         }
         return distId
     }
 
-    #if !os(OSX) && !WATCH_OS
-    func IFA() -> String? {
-        var ifa: String? = nil
-        #if !MIXPANEL_NO_IFA
-        if let ASIdentifierManagerClass = NSClassFromString("ASIdentifierManager") {
-            let sharedManagerSelector = NSSelectorFromString("sharedManager")
-            if let sharedManagerIMP = ASIdentifierManagerClass.method(for: sharedManagerSelector) {
-                typealias sharedManagerFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
-                let curriedImplementation = unsafeBitCast(sharedManagerIMP, to: sharedManagerFunc.self)
-                if let sharedManager = curriedImplementation(ASIdentifierManagerClass.self, sharedManagerSelector) {
-                    let advertisingTrackingEnabledSelector = NSSelectorFromString("isAdvertisingTrackingEnabled")
-                    if let isTrackingEnabledIMP = sharedManager.method(for: advertisingTrackingEnabledSelector) {
-                        typealias isTrackingEnabledFunc = @convention(c) (AnyObject, Selector) -> Bool
-                        let curriedImplementation2 = unsafeBitCast(isTrackingEnabledIMP, to: isTrackingEnabledFunc.self)
-                        let isTrackingEnabled = curriedImplementation2(self, advertisingTrackingEnabledSelector)
-                        if isTrackingEnabled {
-                            let advertisingIdentifierSelector = NSSelectorFromString("advertisingIdentifier")
-                            if let advertisingIdentifierIMP = sharedManager.method(for: advertisingIdentifierSelector) {
-                                typealias adIdentifierFunc = @convention(c) (AnyObject, Selector) -> NSUUID
-                                let curriedImplementation3 = unsafeBitCast(advertisingIdentifierIMP, to: adIdentifierFunc.self)
-                                ifa = curriedImplementation3(self, advertisingIdentifierSelector).uuidString
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        #endif
-        return ifa
-    }
-    #elseif os(OSX)
+    #if os(OSX)
     static func macOSIdentifier() -> String? {
         let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"));
         let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0);
@@ -674,12 +646,22 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         let prefix = "CTRadioAccessTechnology"
         if #available(iOS 12.0, *) {
             if let radioDict = MixpanelInstance.telephonyInfo.serviceCurrentRadioAccessTechnology {
-                for (_, value) in radioDict {
-                    if value.count > 0 && value.hasPrefix(prefix) {
-                        let radioValue = (value as NSString).substring(from: prefix.count)
-                        radio = radio.count > 0 ? ", \(radioValue)" : radioValue
+                for (_, value) in radioDict where value.count > 0 && value.hasPrefix(prefix) {
+                    // the first should be the prefix, second the target
+                    let components = value.components(separatedBy: prefix)
+
+                    // Something went wrong and we have more than prefix:target
+                    guard components.count == 2 else {
+                        continue
                     }
+
+                    // Safe to directly access by index since we confirmed count == 2 above
+                    let radioValue = components[1]
+                    
+                    // Send to parent
+                    radio += radio.count > 0 ? ", \(radioValue)" : radioValue
                 }
+
                 radio = radio.count > 0 ? radio : "None"
             }
         } else {
@@ -743,26 +725,14 @@ extension MixpanelInstance {
     /**
      Sets the distinct ID of the current user.
 
-     Mixpanel will choose a default local distinct ID based on whether you are using the
-     AdSupport.framework or not.
+     Mixpanel uses a randomly generated persistent UUID  as the default local distinct ID.
 
-     If you are not using the AdSupport Framework (iAds), then we use the IFV String
-     (`UIDevice.current().identifierForVendor`) as the default local distinct ID. This ID will
-     identify a user across all apps by the same vendor, but cannot be used to link the same
-     user across apps from different vendors. If we are unable to get the IFV, we will fall
-     back to generating a random persistent UUID
-
-     If you are showing iAds in your application, you are allowed use the iOS ID
-     for Advertising (IFA) to identify users. If you have this framework in your
-     app, Mixpanel will use the IFA as the default local distinct ID. If you have
-     AdSupport installed but still don't want to use the IFA, you can define the
-     <code>MIXPANEL_NO_IFA</code> flag in your <code>Active Compilation Conditions</code>
-     build settings, and Mixpanel will use the IFV as the default local distinct ID.
-
-     If we are unable to get an IFA or IFV, we will fall back to generating a
-     random persistent UUID. If you want to always use a random persistent UUID
-     you can define the <code>MIXPANEL_RANDOM_DISTINCT_ID</code> preprocessor flag
-     in your build settings.
+     If you want to  use a unique persistent UUID, you can define the
+     <code>MIXPANEL_UNIQUE_DISTINCT_ID</code> flag in your <code>Active Compilation Conditions</code>
+     build settings. It then uses the IFV String (`UIDevice.current().identifierForVendor`) as
+     the default local distinct ID. This ID will identify a user across all apps by the same vendor, but cannot be
+     used to link the same user across apps from different vendors. If we are unable to get an IFV, we will fall
+     back to generating a random persistent UUID.
 
      For tracking events, you do not need to call `identify:`. However,
      **Mixpanel User profiles always requires an explicit call to `identify:`.**

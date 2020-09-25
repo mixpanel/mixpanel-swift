@@ -16,35 +16,35 @@
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/AutomaticEvents.swift",
-      "line": 256,
+      "line": 259,
       "symbol": "UNUserNotificationCenter.addDelegateObserver(ae:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/AutomaticEvents.swift",
-      "line": 260,
+      "line": 263,
       "symbol": "UNUserNotificationCenter.removeDelegateObserver(ae:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/AutomaticEvents.swift",
-      "line": 266,
+      "line": 269,
       "symbol": "UIResponder.mp_application(_:newDidReceiveRemoteNotification:fetchCompletionHandler:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/AutomaticEvents.swift",
-      "line": 280,
+      "line": 283,
       "symbol": "UIResponder.mp_application(_:newDidReceiveRemoteNotification:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/AutomaticEvents.swift",
-      "line": 297,
+      "line": 300,
       "symbol": "NSObject.mp_userNotificationCenter(_:newDidReceive:withCompletionHandler:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
@@ -135,147 +135,147 @@
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1026,
+      "line": 996,
       "symbol": "MixpanelInstance.unarchive()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1053,
+      "line": 1023,
       "symbol": "MixpanelInstance.archiveProperties()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1108,
+      "line": 1078,
       "symbol": "MixpanelInstance.trackIntegration()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1211,
+      "line": 1181,
       "symbol": "MixpanelInstance.updateQueue(_:type:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1321,
+      "line": 1291,
       "symbol": "MixpanelInstance.getGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1340,
+      "line": 1310,
       "symbol": "MixpanelInstance.removeCachedGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1344,
+      "line": 1314,
       "symbol": "MixpanelInstance.makeMapKey(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1349,
+      "line": 1319,
       "symbol": "MixpanelInstance.trackPushNotification(_:event:properties:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1727,
+      "line": 1697,
       "symbol": "MixpanelInstance.dispatchAndTrack(closure:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1735,
+      "line": 1705,
       "symbol": "MixpanelInstance.increment(property:by:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1739,
+      "line": 1709,
       "symbol": "MixpanelInstance.setOnce(properties:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1748,
+      "line": 1718,
       "symbol": "MixpanelInstance.checkDecide(forceFetch:completion:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1767,
+      "line": 1737,
       "symbol": "MixpanelInstance.connectToWebSocket()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1772,
+      "line": 1742,
       "symbol": "MixpanelInstance.executeCachedCodelessBindings()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1779,
+      "line": 1749,
       "symbol": "MixpanelInstance.markVariantRun(_:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1797,
+      "line": 1767,
       "symbol": "MixpanelInstance.executeCachedVariants()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1803,
+      "line": 1773,
       "symbol": "MixpanelInstance.executeTweaks()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1809,
+      "line": 1779,
       "symbol": "MixpanelInstance.checkForVariants(completion:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1921,
+      "line": 1891,
       "symbol": "MixpanelInstance.checkForNotifications(completion:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1930,
+      "line": 1900,
       "symbol": "MixpanelInstance.notificationDidShow(_:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/MixpanelInstance.swift",
-      "line": 1941,
+      "line": 1911,
       "symbol": "MixpanelInstance.trackNotification(_:event:properties:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
@@ -446,13 +446,6 @@
       "line": 12,
       "symbol": "DateFormatter.formatterForJSONDate()",
       "symbol_kind": "source.lang.swift.decl.function.method.static",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Mixpanel/Swizzle.swift",
-      "line": 14,
-      "symbol": "DispatchQueue.once(token:block:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {

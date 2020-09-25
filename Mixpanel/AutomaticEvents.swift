@@ -49,6 +49,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     var hasAddedObserver = false
     var automaticPushTracking = true
     var firstAppOpen = false
+    let awaitingTransactionsWriteLock = DispatchQueue(label: "com.mixpanel.awaiting_transactions_writeLock", qos: .utility)
 
     func initializeEvents() {
         let firstOpenKey = "MPFirstOpen"
@@ -119,21 +120,23 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         var productsRequest = SKProductsRequest()
         var productIdentifiers: Set<String> = []
-        objc_sync_enter(awaitingTransactions)
-        for transaction:AnyObject in transactions {
-            if let trans = transaction as? SKPaymentTransaction {
-                switch trans.transactionState {
-                case .purchased:
-                    productIdentifiers.insert(trans.payment.productIdentifier)
-                    awaitingTransactions[trans.payment.productIdentifier] = trans
-                    break
-                case .failed: break
-                case .restored: break
-                default: break
+        awaitingTransactionsWriteLock.sync {
+            for transaction:AnyObject in transactions {
+                if let trans = transaction as? SKPaymentTransaction {
+                    switch trans.transactionState {
+                    case .purchased:
+                        productIdentifiers.insert(trans.payment.productIdentifier)
+                        awaitingTransactions[trans.payment.productIdentifier] = trans
+                        break
+                    case .failed: break
+                    case .restored: break
+                    default: break
+                    }
                 }
             }
         }
-        objc_sync_exit(awaitingTransactions)
+
+
         if productIdentifiers.count > 0 {
             productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
             productsRequest.delegate = self
@@ -163,16 +166,16 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 
 
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
-        objc_sync_enter(awaitingTransactions)
-        for product in response.products {
-            if let trans = awaitingTransactions[product.productIdentifier] {
-                delegate?.track(event: "$ae_iap", properties: ["$ae_iap_price": "\(product.price)",
-                    "$ae_iap_quantity": trans.payment.quantity,
-                    "$ae_iap_name": product.productIdentifier])
-                awaitingTransactions.removeValue(forKey: product.productIdentifier)
+        awaitingTransactionsWriteLock.sync {
+            for product in response.products {
+                if let trans = awaitingTransactions[product.productIdentifier] {
+                    delegate?.track(event: "$ae_iap", properties: ["$ae_iap_price": "\(product.price)",
+                        "$ae_iap_quantity": trans.payment.quantity,
+                        "$ae_iap_name": product.productIdentifier])
+                    awaitingTransactions.removeValue(forKey: product.productIdentifier)
+                }
             }
         }
-        objc_sync_exit(awaitingTransactions)
     }
 
     #if DECIDE

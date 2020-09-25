@@ -21,7 +21,6 @@ class AutomaticProperties {
     static let automaticPropertiesLock = ReadWriteLock(label: "automaticPropertiesLock")
 
     static var properties: InternalProperties = {
-        objc_sync_enter(AutomaticProperties.self); defer { objc_sync_exit(AutomaticProperties.self) }
         var p = InternalProperties()
         #if os(iOS) || TV_OS
         let screenSize = UIScreen.main.bounds.size
@@ -62,7 +61,6 @@ class AutomaticProperties {
     }()
 
     static var peopleProperties: InternalProperties = {
-        objc_sync_enter(AutomaticProperties.self); defer { objc_sync_exit(AutomaticProperties.self) }
         var p = InternalProperties()
         let infoDict = Bundle.main.infoDictionary
         if let infoDict = infoDict {

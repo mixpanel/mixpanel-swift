@@ -17,33 +17,33 @@ protocol FlushDelegate {
 }
 
 class Flush: AppLifecycle {
-    let lock: ReadWriteLock
     var timer: Timer?
     var delegate: FlushDelegate?
     var useIPAddressForGeoLocation = true
     var flushRequest: FlushRequest
     var flushOnBackground = true
     var _flushInterval = 0.0
+    private let flushIntervalReadWriteLock: DispatchQueue
+
     var flushInterval: Double {
         set {
-            objc_sync_enter(self)
-            _flushInterval = newValue
-            objc_sync_exit(self)
+            flushIntervalReadWriteLock.sync(flags: .barrier, execute: {
+                _flushInterval = newValue
+            })
 
             delegate?.flush(completion: nil)
             startFlushTimer()
         }
         get {
-            objc_sync_enter(self)
-            defer { objc_sync_exit(self) }
-
-            return _flushInterval
+            flushIntervalReadWriteLock.sync {
+                return _flushInterval
+            }
         }
     }
 
-    required init(basePathIdentifier: String, lock: ReadWriteLock) {
+    required init(basePathIdentifier: String) {
         self.flushRequest = FlushRequest(basePathIdentifier: basePathIdentifier)
-        self.lock = lock
+        flushIntervalReadWriteLock = DispatchQueue(label: "com.mixpanel.flush_interval.lock", qos: .utility, attributes: .concurrent)
     }
 
     func flushEventsQueue(_ eventsQueue: Queue, automaticEventsEnabled: Bool?) -> Queue? {

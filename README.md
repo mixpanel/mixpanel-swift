@@ -31,7 +31,7 @@
 
 Welcome to the official Mixpanel Swift Library
 
-The Mixpanel Swift library for iOS is an open source project, and we'd love to see your contributions! 
+The Mixpanel Swift library for iOS is an open-source project, and we'd love to see your contributions! 
 We'd also love for you to come and work with us! Check out **[Jobs](https://mixpanel.com/jobs/#openings)** for details.
 
 If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
@@ -43,7 +43,7 @@ If you are using Objective-C, we recommend using our **[Objective-C Library](htt
 
 **If you wish to use our Swift 4.2 implementation, please point to the v2.6.1 release. For Swift 4/4.1 implementation, please point to the v2.4.5 release. For Swift 3 implementation, please point to the v2.2.3 release. For Swift 2.3 implementation, please point to the v1.0.1 release.**
 
-Our Swift library fully supports all of the Mixpanel features, and has full parity with the [Objective-C Library](https://github.com/mixpanel/mixpanel-iphone).
+Our Swift library fully supports all of the Mixpanel features and has full parity with the [Objective-C Library](https://github.com/mixpanel/mixpanel-iphone).
 
 <a name="installation"></a>
 # Installation
@@ -72,7 +72,7 @@ Check out the **[Carthage docs »](https://github.com/Carthage/Carthage#if-youre
 <a name="manual-installation"></a>
 ## Manual Installation
 
-To help users stay up to date with the latests version of our Swift SDK, we always recommend integrating our SDK via CocoaPods, which simplifies version updates and dependency management. However, there are cases where users can't use CocoaPods. Not to worry, just follow these manual installation steps and you'll be all set.
+To help users stay up to date with the latest version of our Swift SDK, we always recommend integrating our SDK via CocoaPods, which simplifies version updates and dependency management. However, there are cases where users can't use CocoaPods. Not to worry, just follow these manual installation steps and you'll be all set.
 
 ### Step 1: Add as a Submodule
 
@@ -138,7 +138,7 @@ First [enable Mixpanel push notifications in your app](https://developer.mixpane
 
 ### Integrating the MixpanelNotificationServiceExtension
 
-The Mixpanel SDK comes with a custom [Notification Service Extension](https://developer.apple.com/documentation/usernotifications/unnotificationserviceextension?language=swift) used to render rich media, custom action buttons, and track when push notifications are received. In order to enable these features, you will need to integrate it into your application.
+The Mixpanel SDK comes with a custom [Notification Service Extension](https://developer.apple.com/documentation/usernotifications/unnotificationserviceextension?language=swift) used to render rich media, custom action buttons, and track when push notifications are received. To enable these features, you will need to integrate it into your application.
 
 #### 1. Create a new Notification Service Extension Target
 <img width="660" alt="Screenshot 2020-02-13 14 45 23" src="https://user-images.githubusercontent.com/556882/74478474-0c224700-4e73-11ea-847c-b3f58ab16c4a.png">

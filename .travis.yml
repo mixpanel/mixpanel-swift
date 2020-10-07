@@ -15,8 +15,9 @@ env:
   - WORKSPACE=MixpanelDemo.xcworkspace
   - SCHEME=MixpanelDemo
   matrix:
-    - DESTINATION="OS=13.0,name=iPhone 11"   SCHEME="$SCHEME"    RUN_TESTS="YES"     POD_LINT="YES"
+    - DESTINATION="OS=13.0,name=iPhone 11" RUN_TESTS="YES" POD_LINT="YES"
 script:
+  - rm -fr ~/Library/Developer/Xcode/iOS\ DeviceSupport/
   - set -o pipefail
   - xcodebuild -version
   - xcodebuild -showsdks
@@ -32,5 +33,5 @@ script:
 
   # Run `pod lib lint` if specified
   - if [ $POD_LINT == "YES" ]; then
-      cd .. && pod lib lint --allow-warnings && cd MixpanelDemo;
+      cd .. && pod lib lint --allow-warnings --verbose --no-clean && cd MixpanelDemo;
     fi

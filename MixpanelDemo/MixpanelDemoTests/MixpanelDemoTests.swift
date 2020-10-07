@@ -456,19 +456,20 @@ class MixpanelDemoTests: MixpanelBaseTests {
         }
     }
 
-    func testInvalidSuperProperties() {
+    func testInvalidSuperProperties1() {
         let p: Properties = ["data": [Data()]]
         XCTExpectAssert("property type should not be allowed") {
             mixpanel.registerSuperProperties(p)
         }
-        XCTExpectAssert("property type should not be allowed") {
-            mixpanel.registerSuperPropertiesOnce(p)
-        }
+    }
+    
+    func testInvalidSuperProperties2() {
+        let p: Properties = ["data": [Data()]]
         XCTExpectAssert("property type should not be allowed") {
             mixpanel.registerSuperPropertiesOnce(p, defaultValue: "v")
         }
     }
-
+    
     func testValidPropertiesTrack() {
         let p: Properties = allPropertyTypes()
         mixpanel.track(event: "e1", properties: p)

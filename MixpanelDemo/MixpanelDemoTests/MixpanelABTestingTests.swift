@@ -132,7 +132,7 @@ class MixpanelABTestingTests: MixpanelBaseTests {
             }
             expect.fulfill()
         })
-        self.waitForExpectations(timeout: 0.5, handler: nil)
+        self.waitForExpectations(timeout: 1, handler: nil)
         // Test that calling again uses the cache (no extra requests to decide).
         self.mixpanel.checkDecide(completion: { _ in })
         self.waitForTrackingQueue()

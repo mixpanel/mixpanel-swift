@@ -17,12 +17,6 @@
 		673ABE3A21360CBE00B1784B /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		67FF65E421878414005161FA /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		67FF65E521878416005161FA /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
-		86EE92C821370CA600D55487 /* ExceptionWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 86EE92C621370CA600D55487 /* ExceptionWrapper.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		86EE92C921370CA600D55487 /* ExceptionWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 86EE92C621370CA600D55487 /* ExceptionWrapper.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		86EE92CA21370CA600D55487 /* ExceptionWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 86EE92C621370CA600D55487 /* ExceptionWrapper.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		86EE92CB21370CA600D55487 /* ExceptionWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 86EE92C721370CA600D55487 /* ExceptionWrapper.m */; };
-		86EE92CC21370CA600D55487 /* ExceptionWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 86EE92C721370CA600D55487 /* ExceptionWrapper.m */; };
-		86EE92CD21370CA600D55487 /* ExceptionWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 86EE92C721370CA600D55487 /* ExceptionWrapper.m */; };
 		86F86EB7224439D300B69832 /* Mixpanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115948A1CFF1538007F8B4F /* Mixpanel.swift */; };
 		86F86EB8224439D300B69832 /* MixpanelInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115948D1D000709007F8B4F /* MixpanelInstance.swift */; };
 		86F86EB9224439DC00B69832 /* AutomaticProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */; };
@@ -35,7 +29,6 @@
 		86F86EC022443A0800B69832 /* MixpanelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E165228E1D6781DF000D5949 /* MixpanelType.swift */; };
 		86F86EC122443A0E00B69832 /* JSONHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594981D01689F007F8B4F /* JSONHandler.swift */; };
 		86F86EC222443A1300B69832 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594A01D01C597007F8B4F /* Track.swift */; };
-		86F86EC322443A1A00B69832 /* ExceptionWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 86EE92C721370CA600D55487 /* ExceptionWrapper.m */; };
 		86F86EC422443A2300B69832 /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
 		86F86EC522443A2C00B69832 /* People.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7C71D0435670076CDE3 /* People.swift */; };
 		86F86EC622443A3100B69832 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1982BFE1D0AC2E2006B7330 /* Error.swift */; };
@@ -43,7 +36,6 @@
 		86F86EC922443A4700B69832 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CD1D30578E00E68E12 /* Constants.swift */; };
 		86F86ECA22443A4C00B69832 /* SessionMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = E190522C1F9FC1BC00900E5D /* SessionMetadata.swift */; };
 		86F86ED32244411800B69832 /* Mixpanel.h in Headers */ = {isa = PBXBuildFile; fileRef = E11594801CFF1491007F8B4F /* Mixpanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		86F86ED42244411B00B69832 /* ExceptionWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 86EE92C621370CA600D55487 /* ExceptionWrapper.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		86F86EF7224554B900B69832 /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		86F86F3622497F1200B69832 /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		86F86F3722497F2900B69832 /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
@@ -186,8 +178,6 @@
 		60FF895923CD34E300628249 /* PushNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotifications.swift; sourceTree = "<group>"; };
 		60FF895E23CE587C00628249 /* MixpanelNotificationServiceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelNotificationServiceExtension.swift; sourceTree = "<group>"; };
 		673ABE3921360CBE00B1784B /* Group.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
-		86EE92C621370CA600D55487 /* ExceptionWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExceptionWrapper.h; sourceTree = "<group>"; };
-		86EE92C721370CA600D55487 /* ExceptionWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExceptionWrapper.m; sourceTree = "<group>"; };
 		86F86E81224404BD00B69832 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadWriteLock.swift; sourceTree = "<group>"; };
 		E115234C1D7A59AF00657E80 /* UIImageToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageToNSDictionary.swift; sourceTree = "<group>"; };
@@ -546,8 +536,6 @@
 				E12BD38C1D91EBE2008989C9 /* SHA256.swift */,
 				BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */,
 				E190522C1F9FC1BC00900E5D /* SessionMetadata.swift */,
-				86EE92C621370CA600D55487 /* ExceptionWrapper.h */,
-				86EE92C721370CA600D55487 /* ExceptionWrapper.m */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -634,7 +622,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				86F86ED42244411B00B69832 /* ExceptionWrapper.h in Headers */,
 				86F86ED32244411800B69832 /* Mixpanel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -644,7 +631,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E11594811CFF1491007F8B4F /* Mixpanel.h in Headers */,
-				86EE92C821370CA600D55487 /* ExceptionWrapper.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -653,7 +639,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E1F15FD41E64B51300391AE3 /* Mixpanel.h in Headers */,
-				86EE92C921370CA600D55487 /* ExceptionWrapper.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -662,7 +647,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E1F15FD21E64A2AB00391AE3 /* Mixpanel.h in Headers */,
-				86EE92CA21370CA600D55487 /* ExceptionWrapper.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -845,7 +829,6 @@
 				86F86EC622443A3100B69832 /* Error.swift in Sources */,
 				86F86EC522443A2C00B69832 /* People.swift in Sources */,
 				86F86EC422443A2300B69832 /* ReadWriteLock.swift in Sources */,
-				86F86EC322443A1A00B69832 /* ExceptionWrapper.m in Sources */,
 				86F86EC222443A1300B69832 /* Track.swift in Sources */,
 				86F86EC122443A0E00B69832 /* JSONHandler.swift in Sources */,
 				86F86EC022443A0800B69832 /* MixpanelType.swift in Sources */,
@@ -934,7 +917,6 @@
 				E19D12981D9C94A900A8016D /* ABTesting.swift in Sources */,
 				E1592B9B1D7F6F38007BBACA /* CGRectToNSDictionary.swift in Sources */,
 				E174DAE11DA336EC00FED703 /* Tweak.swift in Sources */,
-				86EE92CB21370CA600D55487 /* ExceptionWrapper.m in Sources */,
 				E174DADF1DA336D300FED703 /* TweakStore.swift in Sources */,
 				E1592B9D1D7F6F4A007BBACA /* CGPointToNSDictionary.swift in Sources */,
 				E115234D1D7A59AF00657E80 /* UIImageToNSDictionary.swift in Sources */,
@@ -974,7 +956,6 @@
 				E12782C41D4AB5CB0025FB05 /* FlushRequest.swift in Sources */,
 				E12782C51D4AB5CB0025FB05 /* Track.swift in Sources */,
 				E12782C61D4AB5CB0025FB05 /* People.swift in Sources */,
-				86EE92CC21370CA600D55487 /* ExceptionWrapper.m in Sources */,
 				E19052001F9548F000900E5D /* ReadWriteLock.swift in Sources */,
 				E12782C71D4AB5CB0025FB05 /* Error.swift in Sources */,
 				E16522901D67D421000D5949 /* MixpanelType.swift in Sources */,
@@ -1002,7 +983,6 @@
 				E1F15FDE1E64B60A00391AE3 /* MixpanelType.swift in Sources */,
 				E1F15FDA1E64B60A00391AE3 /* JSONHandler.swift in Sources */,
 				E1F15FE31E64B60D00391AE3 /* Track.swift in Sources */,
-				86EE92CD21370CA600D55487 /* ExceptionWrapper.m in Sources */,
 				E19052011F9548F000900E5D /* ReadWriteLock.swift in Sources */,
 				E1F15FE41E64B60D00391AE3 /* People.swift in Sources */,
 				E1F15FDB1E64B60A00391AE3 /* Error.swift in Sources */,

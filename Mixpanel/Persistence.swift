@@ -159,15 +159,21 @@ class Persistence {
             return
         }
 
-        ExceptionWrapper.try({ [cObject = archiveObject, cPath = path, cType = type] in
-            if !NSKeyedArchiver.archiveRootObject(cObject, toFile: cPath) {
-                Logger.error(message: "failed to archive \(cType.rawValue)")
+        if #available(iOS 11.0, macOS 10.13, watchOS 4.0, tvOS 11.0, *) {
+            do {
+                let data = try NSKeyedArchiver.archivedData(withRootObject: archiveObject, requiringSecureCoding: false)
+                try data.write(to: URL(fileURLWithPath: path))
+            }
+            catch {
+                Logger.error(message: "failed to archive \(type.rawValue)")
                 return
             }
-        }, catch: { [cType = type] (error) in
-            Logger.error(message: "failed to archive \(cType.rawValue) due to an uncaught exception")
-            return
-        }, finally: {})
+        } else {
+            if !NSKeyedArchiver.archiveRootObject(archiveObject, toFile: path) {
+                Logger.error(message: "failed to archive \(type.rawValue)")
+                return
+            }
+        }
         
         addSkipBackupAttributeToItem(at: path)
     }
@@ -282,18 +288,22 @@ class Persistence {
     #endif // DECIDE
 
     static private func unarchiveWithFilePath(_ filePath: String) -> Any? {
-        var unarchivedData: Any? = nil
-        ExceptionWrapper.try({ [filePath] in
-            unarchivedData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath)
-            if unarchivedData == nil {
+        if #available(iOS 11.0, macOS 10.13, watchOS 4.0, tvOS 11.0, *) {
+            guard let data = try? Data(contentsOf: URL(fileURLWithPath: filePath)),
+                  let unarchivedData = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data)  else {
                 Logger.info(message: "Unable to read file at path: \(filePath)")
                 removeArchivedFile(atPath: filePath)
+                return nil
             }
-        }, catch: { [filePath] (error) in
-            removeArchivedFile(atPath: filePath)
-            Logger.info(message: "Unable to read file at path: \(filePath), error: \(String(describing: error))")
-        }, finally: {})
-        return unarchivedData
+            return unarchivedData
+        } else {
+            guard let unarchivedData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath) else {
+                Logger.info(message: "Unable to read file at path: \(filePath)")
+                removeArchivedFile(atPath: filePath)
+                return nil
+            }
+            return unarchivedData
+        }
     }
 
     static private func removeArchivedFile(atPath filePath: String) {

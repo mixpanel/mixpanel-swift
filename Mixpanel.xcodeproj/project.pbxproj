@@ -354,7 +354,8 @@
 				E11594891CFF14DF007F8B4F /* Supporting Files */,
 				E15FF8021D0461F60076CDE3 /* Frameworks */,
 			);
-			path = Mixpanel;
+			name = Mixpanel;
+			path = Sources;
 			sourceTree = "<group>";
 		};
 		E11594881CFF14D3007F8B4F /* Source */ = {

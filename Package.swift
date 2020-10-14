@@ -10,15 +10,12 @@ let package = Package(
     targets: [
         .target(
             name: "Mixpanel",
-            path: "Mixpanel",
+            path: "Sources",
             exclude: [
                 "Info.plist"
             ],
             resources: [
-                .process("MPCloseButton.png"),
-                .process("MPCloseButton@2x.png"),
-                .process("MPCloseButton@3x.png"),
-                .process("placeholder-image.png")
+                .process("placeholder-image.png"),
             ],
             swiftSettings: [
                 .define("DECIDE")

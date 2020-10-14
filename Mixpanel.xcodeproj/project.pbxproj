@@ -39,6 +39,7 @@
 		86F86EF7224554B900B69832 /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		86F86F3622497F1200B69832 /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		86F86F3722497F2900B69832 /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
+		86FC4F202536E15B00D2533F /* placeholder-image.png in Resources */ = {isa = PBXBuildFile; fileRef = 86FC4F1F2536E15B00D2533F /* placeholder-image.png */; };
 		BB9614171F3BB87700C3EF3E /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
 		E10D118D1EC0F30900195CCD /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		E115234D1D7A59AF00657E80 /* UIImageToNSDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115234C1D7A59AF00657E80 /* UIImageToNSDictionary.swift */; };
@@ -102,9 +103,6 @@
 		E158C6E81D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */; };
 		E158C6F11D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */; };
 		E158C6F21D5D39A100651465 /* TakeoverNotificationViewController~iphoneportrait.xib in Resources */ = {isa = PBXBuildFile; fileRef = E158C6F01D5D39A100651465 /* TakeoverNotificationViewController~iphoneportrait.xib */; };
-		E158C6F71D5D3AAE00651465 /* MPCloseButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E158C6F41D5D3AAE00651465 /* MPCloseButton.png */; };
-		E158C6F81D5D3AAE00651465 /* MPCloseButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E158C6F51D5D3AAE00651465 /* MPCloseButton@2x.png */; };
-		E158C6F91D5D3AAE00651465 /* MPCloseButton@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = E158C6F61D5D3AAE00651465 /* MPCloseButton@3x.png */; };
 		E1592B9B1D7F6F38007BBACA /* CGRectToNSDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1592B9A1D7F6F38007BBACA /* CGRectToNSDictionary.swift */; };
 		E1592B9D1D7F6F4A007BBACA /* CGPointToNSDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1592B9C1D7F6F4A007BBACA /* CGPointToNSDictionary.swift */; };
 		E1592B9F1D7F79FD007BBACA /* CGAffineTransformToNSDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1592B9E1D7F79FD007BBACA /* CGAffineTransformToNSDictionary.swift */; };
@@ -134,7 +132,6 @@
 		E19052001F9548F000900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
 		E19052011F9548F000900E5D /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
 		E190522D1F9FC1BC00900E5D /* SessionMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = E190522C1F9FC1BC00900E5D /* SessionMetadata.swift */; };
-		E19087BF1E53985300023FCC /* placeholder-image.png in Resources */ = {isa = PBXBuildFile; fileRef = E19087BE1E53985300023FCC /* placeholder-image.png */; };
 		E19312671D5A7848007CE1E9 /* InAppNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312661D5A7848007CE1E9 /* InAppNotification.swift */; };
 		E193126B1D5B9D1E007CE1E9 /* MiniNotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */; };
 		E193126C1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E193126A1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib */; };
@@ -179,6 +176,7 @@
 		60FF895E23CE587C00628249 /* MixpanelNotificationServiceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelNotificationServiceExtension.swift; sourceTree = "<group>"; };
 		673ABE3921360CBE00B1784B /* Group.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
 		86F86E81224404BD00B69832 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		86FC4F1F2536E15B00D2533F /* placeholder-image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "placeholder-image.png"; sourceTree = "<group>"; };
 		BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadWriteLock.swift; sourceTree = "<group>"; };
 		E115234C1D7A59AF00657E80 /* UIImageToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageToNSDictionary.swift; sourceTree = "<group>"; };
 		E115234E1D7F58B000657E80 /* CGSizeToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGSizeToNSDictionary.swift; sourceTree = "<group>"; };
@@ -229,9 +227,6 @@
 		E158C6E61D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~ipad.xib"; sourceTree = "<group>"; };
 		E158C6EF1D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~iphonelandscape.xib"; sourceTree = "<group>"; };
 		E158C6F01D5D39A100651465 /* TakeoverNotificationViewController~iphoneportrait.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "TakeoverNotificationViewController~iphoneportrait.xib"; sourceTree = "<group>"; };
-		E158C6F41D5D3AAE00651465 /* MPCloseButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MPCloseButton.png; sourceTree = "<group>"; };
-		E158C6F51D5D3AAE00651465 /* MPCloseButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MPCloseButton@2x.png"; sourceTree = "<group>"; };
-		E158C6F61D5D3AAE00651465 /* MPCloseButton@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MPCloseButton@3x.png"; sourceTree = "<group>"; };
 		E1592B9A1D7F6F38007BBACA /* CGRectToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGRectToNSDictionary.swift; sourceTree = "<group>"; };
 		E1592B9C1D7F6F4A007BBACA /* CGPointToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGPointToNSDictionary.swift; sourceTree = "<group>"; };
 		E1592B9E1D7F79FD007BBACA /* CGAffineTransformToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGAffineTransformToNSDictionary.swift; sourceTree = "<group>"; };
@@ -258,7 +253,6 @@
 		E189D8F71D552324007F3F29 /* DecideRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DecideRequest.swift; sourceTree = "<group>"; };
 		E189D8FC1D5A6985007F3F29 /* InAppNotifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppNotifications.swift; sourceTree = "<group>"; };
 		E190522C1F9FC1BC00900E5D /* SessionMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionMetadata.swift; sourceTree = "<group>"; };
-		E19087BE1E53985300023FCC /* placeholder-image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "placeholder-image.png"; sourceTree = "<group>"; };
 		E19312661D5A7848007CE1E9 /* InAppNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppNotification.swift; sourceTree = "<group>"; };
 		E19312691D5B9D1E007CE1E9 /* MiniNotificationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MiniNotificationViewController.swift; sourceTree = "<group>"; };
 		E193126A1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MiniNotificationViewController.xib; sourceTree = "<group>"; };
@@ -474,10 +468,7 @@
 		E158C6F31D5D3A8200651465 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				E19087BE1E53985300023FCC /* placeholder-image.png */,
-				E158C6F41D5D3AAE00651465 /* MPCloseButton.png */,
-				E158C6F51D5D3AAE00651465 /* MPCloseButton@2x.png */,
-				E158C6F61D5D3AAE00651465 /* MPCloseButton@3x.png */,
+				86FC4F1F2536E15B00D2533F /* placeholder-image.png */,
 			);
 			name = Images;
 			sourceTree = "<group>";
@@ -790,13 +781,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E158C6F71D5D3AAE00651465 /* MPCloseButton.png in Resources */,
-				E158C6F91D5D3AAE00651465 /* MPCloseButton@3x.png in Resources */,
 				E158C6F11D5D39A100651465 /* TakeoverNotificationViewController~iphonelandscape.xib in Resources */,
-				E19087BF1E53985300023FCC /* placeholder-image.png in Resources */,
 				E158C6F21D5D39A100651465 /* TakeoverNotificationViewController~iphoneportrait.xib in Resources */,
 				E158C6E81D5D32DD00651465 /* TakeoverNotificationViewController~ipad.xib in Resources */,
-				E158C6F81D5D3AAE00651465 /* MPCloseButton@2x.png in Resources */,
+				86FC4F202536E15B00D2533F /* placeholder-image.png in Resources */,
 				E193126C1D5B9D1E007CE1E9 /* MiniNotificationViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1013,7 +1001,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = Mixpanel/Info.plist;
+				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -1048,7 +1036,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = Mixpanel/Info.plist;
+				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_FAST_MATH = YES;
@@ -1212,7 +1200,7 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = NO;
 				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = Mixpanel/Info.plist;
+				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -1260,7 +1248,7 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = NO;
 				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = Mixpanel/Info.plist;
+				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -1290,7 +1278,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Mixpanel/Info.plist;
+				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
@@ -1317,7 +1305,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Mixpanel/Info.plist;
+				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
@@ -1348,7 +1336,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = Mixpanel/Info.plist;
+				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
@@ -1377,7 +1365,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = Mixpanel/Info.plist;
+				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;

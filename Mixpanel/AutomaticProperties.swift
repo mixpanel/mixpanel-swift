@@ -117,8 +117,8 @@ class AutomaticProperties {
     }
     #endif
 
-    class func libVersion() -> String? {
-        return Bundle(for: self).infoDictionary?["CFBundleShortVersionString"] as? String
+    class func libVersion() -> String {
+        return "2.7.7"
     }
 
 }

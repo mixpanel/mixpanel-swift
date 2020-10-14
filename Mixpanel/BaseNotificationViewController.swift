@@ -26,7 +26,12 @@ class BaseNotificationViewController: UIViewController {
     convenience init(notification: InAppNotification, nameOfClass: String) {
         // avoiding `type(of: self)` as it doesn't work with Swift 4.0.3 compiler
         // perhaps due to `self` not being fully constructed at this point
+        #if SWIFT_PACKAGE && swift(>=5.3)
+        let bundle = Bundle.module
+        #else
         let bundle = Bundle(for: BaseNotificationViewController.self)
+        #endif
+        
         self.init(nibName: nameOfClass, bundle: bundle)
         self.notification = notification
     }

@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="retina3_5" orientation="landscape">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina3_5" orientation="landscape" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -40,13 +38,13 @@
                     <rect key="frame" x="0.0" y="0.0" width="480" height="320"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="n85-3o-MhK">
-                            <rect key="frame" x="20" y="20" width="219" height="280"/>
+                            <rect key="frame" x="20" y="20" width="219.5" height="280"/>
                             <subviews>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pId-RE-RjE" customClass="FadingView" customModule="Mixpanel" customModuleProvider="target">
-                                    <rect key="frame" x="0.0" y="0.0" width="219" height="280"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="219.5" height="280"/>
                                     <subviews>
                                         <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" image="placeholder-image.png" translatesAutoresizingMaskIntoConstraints="NO" id="Xo2-Nk-9Zp" userLabel="Notif Image View">
-                                            <rect key="frame" x="0.0" y="0.0" width="219" height="280"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="219.5" height="280"/>
                                         </imageView>
                                     </subviews>
                                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
@@ -68,7 +66,7 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dcY-wi-XbP" userLabel="Middle Point">
-                            <rect key="frame" x="239" y="160" width="1" height="1"/>
+                            <rect key="frame" x="239.5" y="159.5" width="1" height="1"/>
                             <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="1" id="ZOs-Ip-ewZ"/>
@@ -76,23 +74,23 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uOA-rR-CAL">
-                            <rect key="frame" x="240" y="101" width="240" height="118"/>
+                            <rect key="frame" x="240.5" y="101.5" width="239.5" height="117"/>
                             <subviews>
                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="252" verticalCompressionResistancePriority="760" text="Notification Title" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="uU8-iL-VPd">
-                                    <rect key="frame" x="15" y="0.0" width="210" height="28"/>
+                                    <rect key="frame" x="15" y="0.0" width="209.5" height="27.5"/>
                                     <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="20"/>
                                     <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="252" text="Notification body" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lod-K4-ZtM">
-                                    <rect key="frame" x="15" y="38" width="210" height="24"/>
+                                    <rect key="frame" x="15" y="37.5" width="209.5" height="23.5"/>
                                     <fontDescription key="fontDescription" name="AvenirNext-Medium" family="Avenir Next" pointSize="17"/>
                                     <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     <nil key="highlightedColor"/>
                                     <size key="shadowOffset" width="0.0" height="1"/>
                                 </label>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="q6u-Gu-7TB">
-                                    <rect key="frame" x="6" y="77" width="228" height="41"/>
+                                    <rect key="frame" x="6" y="76" width="228" height="41"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="S0D-AI-bOn" customClass="InAppButtonView" customModule="Mixpanel" customModuleProvider="target">
                                             <rect key="frame" x="0.0" y="0.0" width="110" height="41"/>
@@ -177,18 +175,13 @@
                         <constraint firstItem="dcY-wi-XbP" firstAttribute="centerX" secondItem="qEo-cT-dUY" secondAttribute="centerX" id="wcQ-QK-Rzd"/>
                     </constraints>
                 </view>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dCO-y0-0yf" userLabel="Button - Close">
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dCO-y0-0yf" userLabel="Button - Close">
                     <rect key="frame" x="421" y="15" width="44" height="44"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="44" id="DkE-Ho-6vd"/>
                         <constraint firstAttribute="height" constant="44" id="Qk1-gQ-kdI"/>
                     </constraints>
-                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
                     <inset key="contentEdgeInsets" minX="10" minY="0.0" maxX="0.0" maxY="10"/>
-                    <state key="normal" image="MPCloseButton.png">
-                        <color key="titleColor" red="0.6588235294" green="0.70588235290000001" blue="0.76470588240000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <color key="titleShadowColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
-                    </state>
                     <connections>
                         <action selector="tappedClose:" destination="-1" eventType="touchUpInside" id="vML-oQ-wF6"/>
                     </connections>
@@ -211,10 +204,10 @@
                 <constraint firstItem="niR-bW-Ce4" firstAttribute="leading" secondItem="Kbr-Uz-bG2" secondAttribute="leading" id="tOe-ri-mI9"/>
                 <constraint firstItem="WAp-k0-Mff" firstAttribute="top" secondItem="Kbr-Uz-bG2" secondAttribute="top" id="xFO-wK-7Xl"/>
             </constraints>
+            <point key="canvasLocation" x="139" y="156"/>
         </view>
     </objects>
     <resources>
-        <image name="MPCloseButton.png" width="25" height="25"/>
         <image name="placeholder-image.png" width="800" height="600"/>
     </resources>
 </document>

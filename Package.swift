@@ -11,7 +11,7 @@ let package = Package(
       .watchOS(.v3),
     ],
     products: [
-        .library(name: "Mixpanel", targets: ["Mixpanel"])
+        .library(name: "Mixpanel", targets: ["Mixpanel"]),
     ],
     targets: [
         .target(

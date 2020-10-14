@@ -23,4 +23,8 @@ profile
 # AppCode
 .idea
 
+# Swift Package Manager
+.swiftpm/
+.build/
+
 MixpanelDemo/build/

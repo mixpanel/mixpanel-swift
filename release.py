@@ -11,6 +11,7 @@ args = parser.parse_args()
 def bump_version():
     replace_version('Mixpanel-swift.podspec', args.old, args.new)
     replace_version('Mixpanel/Info.plist', args.old, args.new)
+    replace_version('Mixpanel/AutomaticProperties.swift', args.old, args.new)
     replace_version('generate_docs.sh', args.old, args.new)
     subprocess.call('git add Mixpanel-swift.podspec', shell=True)
     subprocess.call('git add Mixpanel/Info.plist', shell=True)

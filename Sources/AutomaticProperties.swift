@@ -8,9 +8,9 @@
 
 import Foundation
 
-#if os(iOS) || TV_OS
+#if os(iOS) || os(tvOS)
 import UIKit
-#elseif MAC_OS
+#elseif os(macOS)
 import Cocoa
 #else
 import WatchKit
@@ -22,14 +22,14 @@ class AutomaticProperties {
 
     static var properties: InternalProperties = {
         var p = InternalProperties()
-        #if os(iOS) || TV_OS
+        #if os(iOS) || os(tvOS)
         let screenSize = UIScreen.main.bounds.size
         p["$screen_height"]     = Int(screenSize.height)
         p["$screen_width"]      = Int(screenSize.width)
         p["$os"]                = UIDevice.current.systemName
         p["$os_version"]        = UIDevice.current.systemVersion
 
-        #elseif MAC_OS
+        #elseif os(macOS)
         if let screenSize = NSScreen.main?.frame.size {
             p["$screen_height"]     = Int(screenSize.height)
             p["$screen_width"]      = Int(screenSize.width)
@@ -37,7 +37,7 @@ class AutomaticProperties {
         p["$os"]                = "macOS"
         p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
 
-        #elseif WATCH_OS
+        #elseif os(watchOS)
         let watchDevice = WKInterfaceDevice.current()
         p["$os"]                = watchDevice.systemName
         p["$os_version"]        = watchDevice.systemVersion
@@ -68,7 +68,7 @@ class AutomaticProperties {
             p["$ios_app_release"] = infoDict["CFBundleShortVersionString"]
         }
         p["$ios_device_model"]  = AutomaticProperties.deviceModel()
-        #if !os(OSX) && !WATCH_OS
+        #if !os(OSX) && !os(watchOS)
         p["$ios_version"]       = UIDevice.current.systemVersion
         #else
         p["$ios_version"]       = ProcessInfo.processInfo.operatingSystemVersionString
@@ -94,7 +94,7 @@ class AutomaticProperties {
         return ""
     }
 
-    #if WATCH_OS
+    #if os(watchOS)
     class func watchModel() -> String {
         let watchSize38mm = Int(136)
         let watchSize40mm = Int(162)
@@ -117,8 +117,8 @@ class AutomaticProperties {
     }
     #endif
 
-    class func libVersion() -> String? {
-        return Bundle(for: self).infoDictionary?["CFBundleShortVersionString"] as? String
+    class func libVersion() -> String {
+        return "2.7.7"
     }
 
 }

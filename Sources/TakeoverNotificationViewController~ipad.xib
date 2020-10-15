@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="ipad9_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="ipad9_7" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
-        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
-        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -80,7 +76,7 @@
                                 <constraint firstAttribute="width" relation="greaterThanOrEqual" secondItem="tt0-5R-PYS" secondAttribute="height" multiplier="8:9" id="o1m-h4-vwS"/>
                             </constraints>
                         </view>
-                        <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pOh-07-cCm" userLabel="Button - Close">
+                        <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pOh-07-cCm" userLabel="Button - Close">
                             <rect key="frame" x="210" y="20" width="44" height="44"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="23" id="BNF-qy-r5Z">
@@ -90,12 +86,7 @@
                                     <variation key="heightClass=regular-widthClass=regular" constant="44"/>
                                 </constraint>
                             </constraints>
-                            <fontDescription key="fontDescription" type="system" pointSize="13"/>
                             <inset key="contentEdgeInsets" minX="10" minY="0.0" maxX="0.0" maxY="10"/>
-                            <state key="normal" image="MPCloseButton.png">
-                                <color key="titleColor" red="0.6588235294" green="0.70588235290000001" blue="0.76470588240000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <color key="titleShadowColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
-                            </state>
                             <connections>
                                 <action selector="tappedClose:" destination="-1" eventType="touchUpInside" id="Fog-4z-iYt"/>
                             </connections>
@@ -210,10 +201,10 @@
                 <constraint firstItem="bd1-Ag-adM" firstAttribute="top" secondItem="LSp-1n-nEk" secondAttribute="top" id="knJ-If-yWh"/>
                 <constraint firstItem="y52-0P-44z" firstAttribute="leading" secondItem="LSp-1n-nEk" secondAttribute="leading" id="zi3-Ad-UcN"/>
             </constraints>
+            <point key="canvasLocation" x="102" y="53"/>
         </view>
     </objects>
     <resources>
-        <image name="MPCloseButton.png" width="25" height="25"/>
         <image name="placeholder-image.png" width="800" height="600"/>
     </resources>
 </document>

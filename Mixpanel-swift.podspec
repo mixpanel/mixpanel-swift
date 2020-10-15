@@ -9,19 +9,19 @@ Pod::Spec.new do |s|
   s.author       = { 'Mixpanel, Inc' => 'support@mixpanel.com' }
   s.source       = { :git => 'https://github.com/mixpanel/mixpanel-swift.git',
                      :tag => "v#{s.version}" }
-  s.ios.deployment_target = '8.0'
-  s.ios.resources = ['Mixpanel/**/*.{png,xib,storyboard}']
+  s.ios.deployment_target = '9.0'
+  s.ios.resources = ['Sources/*.{png,xib,storyboard}']
   s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   s.ios.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) IOS'
   }
   s.default_subspec = 'Complete'
-  base_source_files = ['Mixpanel/Network.swift', 'Mixpanel/FlushRequest.swift', 'Mixpanel/PrintLogging.swift', 'Mixpanel/FileLogging.swift',
-    'Mixpanel/Logger.swift', 'Mixpanel/JSONHandler.swift', 'Mixpanel/Error.swift', 'Mixpanel/AutomaticProperties.swift',
-    'Mixpanel/Constants.swift', 'Mixpanel/MixpanelType.swift', 'Mixpanel/Mixpanel.swift', 'Mixpanel/MixpanelInstance.swift',
-    'Mixpanel/Persistence.swift', 'Mixpanel/Flush.swift','Mixpanel/Track.swift', 'Mixpanel/People.swift', 'Mixpanel/AutomaticEvents.swift',
-    'Mixpanel/Group.swift',
-    'Mixpanel/ReadWriteLock.swift', 'Mixpanel/SessionMetadata.swift', 'Mixpanel/ExceptionWrapper.m', 'Mixpanel/ExceptionWrapper.h', 'Mixpanel/Mixpanel.h']
+  base_source_files = ['Sources/Network.swift', 'Sources/FlushRequest.swift', 'Sources/PrintLogging.swift', 'Sources/FileLogging.swift',
+    'Sources/Logger.swift', 'Sources/JSONHandler.swift', 'Sources/Error.swift', 'Sources/AutomaticProperties.swift',
+    'Sources/Constants.swift', 'Sources/MixpanelType.swift', 'Sources/Mixpanel.swift', 'Sources/MixpanelInstance.swift',
+    'Sources/Persistence.swift', 'Sources/Flush.swift','Sources/Track.swift', 'Sources/People.swift', 'Sources/AutomaticEvents.swift',
+    'Sources/Group.swift',
+    'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift']
   s.tvos.deployment_target = '9.0'
   s.tvos.frameworks = 'UIKit', 'Foundation'
   s.tvos.pod_target_xcconfig = {
@@ -42,7 +42,7 @@ Pod::Spec.new do |s|
     ss.ios.pod_target_xcconfig = {
       'OTHER_SWIFT_FLAGS' => '$(inherited) -D DECIDE'
     }
-    ss.ios.source_files = ['Mixpanel/*.swift', 'Mixpanel/ExceptionWrapper.m', 'Mixpanel/ExceptionWrapper.h', 'Mixpanel/Mixpanel.h']
+    ss.ios.source_files = ['Sources/*.swift']
     ss.tvos.source_files = base_source_files
     ss.osx.source_files = base_source_files
     ss.watchos.source_files = base_source_files

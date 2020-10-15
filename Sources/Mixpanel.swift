@@ -14,7 +14,7 @@ import UIKit
 /// The primary class for integrating Mixpanel with your app.
 open class Mixpanel {
 
-    #if !os(OSX) && !WATCH_OS
+    #if !os(OSX) && !os(watchOS)
     /**
      Initializes an instance of the API with the given project token.
 
@@ -140,7 +140,7 @@ class MixpanelManager {
         readWriteLock = ReadWriteLock(label: "com.mixpanel.instance.manager.lock")
     }
 
-    #if !os(OSX) && !WATCH_OS
+    #if !os(OSX) && !os(watchOS)
     func initialize(token apiToken: String,
                     launchOptions: [UIApplication.LaunchOptionsKey : Any]?,
                     flushInterval: Double,

@@ -88,12 +88,11 @@ class TakeoverNotificationViewController: BaseNotificationViewController {
         titleLabel.textColor = UIColor(MPHex: takeoverNotification.titleColor)
         bodyLabel.textColor = UIColor(MPHex: takeoverNotification.bodyColor)
 
-        let origImage = closeButton.image(for: UIControl.State.normal)
-        let tintedImage = origImage?.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
-        closeButton.setImage(tintedImage, for: UIControl.State.normal)
         closeButton.tintColor = UIColor(MPHex: takeoverNotification.closeButtonColor)
         closeButton.imageView?.contentMode = UIView.ContentMode.scaleAspectFit
-
+        closeButton.setTitle("x", for: .normal)
+        closeButton.titleLabel?.font = UIFont(name:"ArialRoundedMTBold",size:40)
+        
         if takeoverNotification.buttons.count >= 1 {
             setupButtonView(buttonView: firstButton, buttonModel: takeoverNotification.buttons[0], index: 0)
             if takeoverNotification.buttons.count == 2 {

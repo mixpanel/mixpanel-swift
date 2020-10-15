@@ -26,7 +26,7 @@ struct BundleConstants {
     static let ID = "com.mixpanel.Mixpanel"
 }
 
-#if !os(OSX) && !WATCH_OS
+#if !os(OSX) && !os(watchOS)
 struct InAppNotificationsConstants {
     static let miniInAppHeight: CGFloat = 65
     static let miniBottomPadding: CGFloat = 10 + (UIDevice.current.iPhoneX ? 34 : 0)

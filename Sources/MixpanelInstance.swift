@@ -261,7 +261,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     static let reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
     static let telephonyInfo = CTTelephonyNetworkInfo()
     #endif
-    #if !os(OSX) && !WATCH_OS
+    #if !os(OSX) && !os(watchOS)
     var taskId = UIBackgroundTaskIdentifier.invalid
     #endif // os(OSX)
     let sessionMetadata: SessionMetadata
@@ -275,7 +275,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         let automaticEvents = AutomaticEvents()
     #endif // DECIDE
 
-    #if !os(OSX) && !WATCH_OS
+    #if !os(OSX) && !os(watchOS)
     init(apiToken: String?, launchOptions: [UIApplication.LaunchOptionsKey : Any]?, flushInterval: Double, name: String, automaticPushTracking: Bool = true, optOutTrackingByDefault: Bool = false) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
@@ -372,7 +372,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                         lock: self.readWriteLock,
                         metadata: sessionMetadata)
         flushInstance._flushInterval = flushInterval
-    #if !WATCH_OS
+    #if !os(watchOS)
         setupListeners()
     #endif
         unarchive()
@@ -385,7 +385,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
     #endif // os(OSX)
 
-    #if !os(OSX) && !WATCH_OS
+    #if !os(OSX) && !os(watchOS)
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
         trackIntegration()
@@ -454,7 +454,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     deinit {
         NotificationCenter.default.removeObserver(self)
-        #if os(iOS) && !WATCH_OS && !targetEnvironment(macCatalyst)
+        #if os(iOS) && !os(watchOS) && !targetEnvironment(macCatalyst)
             if let reachability = MixpanelInstance.reachability {
                 if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
                     Logger.error(message: "\(self) error unsetting reachability callback")
@@ -470,7 +470,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         return Bundle.main.bundlePath.hasSuffix(".appex")
     }
 
-    #if !os(OSX) && !WATCH_OS
+    #if !os(OSX) && !os(watchOS)
     static func sharedUIApplication() -> UIApplication? {
         guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue() as? UIApplication else {
             return nil
@@ -526,7 +526,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif
     }
 
-    #if !os(OSX) && !WATCH_OS
+    #if !os(OSX) && !os(watchOS)
     @objc private func applicationDidEnterBackground(_ notification: Notification) {
         guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
@@ -606,7 +606,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     func defaultDistinctId() -> String {
         #if MIXPANEL_UNIQUE_DISTINCT_ID
-        #if !os(OSX) && !WATCH_OS
+        #if !os(OSX) && !os(watchOS)
         var distinctId: String? = nil
         if NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString

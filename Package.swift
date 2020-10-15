@@ -24,7 +24,7 @@ let package = Package(
                 .process("placeholder-image.png"),
             ],
             swiftSettings: [
-                .define("DECIDE")
+                .define("DECIDE", .when(platforms: [.iOS])),
             ]
         ),
     ]

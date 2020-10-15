@@ -35,7 +35,6 @@
 		86F86EC722443A3C00B69832 /* FileLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56811D306B7B0045D3DB /* FileLogging.swift */; };
 		86F86EC922443A4700B69832 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CD1D30578E00E68E12 /* Constants.swift */; };
 		86F86ECA22443A4C00B69832 /* SessionMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = E190522C1F9FC1BC00900E5D /* SessionMetadata.swift */; };
-		86F86ED32244411800B69832 /* Mixpanel.h in Headers */ = {isa = PBXBuildFile; fileRef = E11594801CFF1491007F8B4F /* Mixpanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		86F86EF7224554B900B69832 /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		86F86F3622497F1200B69832 /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		86F86F3722497F2900B69832 /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
@@ -46,7 +45,6 @@
 		E115234F1D7F58B000657E80 /* CGSizeToNSDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115234E1D7F58B000657E80 /* CGSizeToNSDictionary.swift */; };
 		E11523511D7F5C7500657E80 /* UIEdgeInsetsToNSDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11523501D7F5C7500657E80 /* UIEdgeInsetsToNSDictionary.swift */; };
 		E11523531D7F63E400657E80 /* IdentityTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11523521D7F63E400657E80 /* IdentityTransformer.swift */; };
-		E11594811CFF1491007F8B4F /* Mixpanel.h in Headers */ = {isa = PBXBuildFile; fileRef = E11594801CFF1491007F8B4F /* Mixpanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115948A1CFF1538007F8B4F /* Mixpanel.swift */; };
 		E115948E1D000709007F8B4F /* MixpanelInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115948D1D000709007F8B4F /* MixpanelInstance.swift */; };
 		E11594931D0036E1007F8B4F /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594921D0036E1007F8B4F /* Persistence.swift */; };
@@ -145,8 +143,6 @@
 		E1D335D01D3059A800E68E12 /* AutomaticProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */; };
 		E1ECD00B1FA001AD002104E8 /* SessionMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = E190522C1F9FC1BC00900E5D /* SessionMetadata.swift */; };
 		E1ECD00C1FA001AD002104E8 /* SessionMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = E190522C1F9FC1BC00900E5D /* SessionMetadata.swift */; };
-		E1F15FD21E64A2AB00391AE3 /* Mixpanel.h in Headers */ = {isa = PBXBuildFile; fileRef = E11594801CFF1491007F8B4F /* Mixpanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		E1F15FD41E64B51300391AE3 /* Mixpanel.h in Headers */ = {isa = PBXBuildFile; fileRef = E11594801CFF1491007F8B4F /* Mixpanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E1F15FD51E64B5F800391AE3 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594961D006022007F8B4F /* Network.swift */; };
 		E1F15FD61E64B5FC00391AE3 /* FlushRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D335CB1D303A0D00E68E12 /* FlushRequest.swift */; };
 		E1F15FD71E64B60200391AE3 /* PrintLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56801D306B7B0045D3DB /* PrintLogging.swift */; };
@@ -183,7 +179,6 @@
 		E11523501D7F5C7500657E80 /* UIEdgeInsetsToNSDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIEdgeInsetsToNSDictionary.swift; sourceTree = "<group>"; };
 		E11523521D7F63E400657E80 /* IdentityTransformer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentityTransformer.swift; sourceTree = "<group>"; };
 		E115947D1CFF1491007F8B4F /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E11594801CFF1491007F8B4F /* Mixpanel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Mixpanel.h; sourceTree = "<group>"; };
 		E11594821CFF1491007F8B4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E115948A1CFF1538007F8B4F /* Mixpanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mixpanel.swift; sourceTree = "<group>"; };
 		E115948D1D000709007F8B4F /* MixpanelInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelInstance.swift; sourceTree = "<group>"; };
@@ -381,7 +376,6 @@
 			isa = PBXGroup;
 			children = (
 				E158C6F31D5D3A8200651465 /* Images */,
-				E11594801CFF1491007F8B4F /* Mixpanel.h */,
 				E11594821CFF1491007F8B4F /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -614,7 +608,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				86F86ED32244411800B69832 /* Mixpanel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -622,7 +615,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E11594811CFF1491007F8B4F /* Mixpanel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -630,7 +622,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1F15FD41E64B51300391AE3 /* Mixpanel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -638,7 +629,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1F15FD21E64A2AB00391AE3 /* Mixpanel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

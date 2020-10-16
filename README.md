@@ -50,6 +50,18 @@ Our Swift library fully supports all of the Mixpanel features and has full parit
 # Installation
 
 <a name="cocoapods"></a>
+<a name="spm"></a>
+## Swift Package Manager
+
+**It requires XCode 12+ and v2.8.0+ release**
+
+**Important: we only add support for iOS for now, if you need integrations for other platforms(tvOS or macOS), please use other integration methods instead**
+
+1. In Xcode, select File > Swift Packages > Add Package Dependency.
+2. Follow the prompts using the URL for this repository and a minimum semantic version of v2.8.0
+
+Check out our **[swift integration guide »](https://mixpanel.com/help/reference/swift)** for more info.
+
 ## CocoaPods
 
 **Our current release only supports CocoaPods version 1.4.0+**
@@ -69,18 +81,6 @@ Mixpanel also supports `Carthage` to package your dependencies as a framework. I
 `github "mixpanel/mixpanel-swift"`
 
 Check out the **[Carthage docs »](https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos)** for more info. 
-
-<a name="spm"></a>
-## Swift Package Manager
-
-**It requires XCode 12+ and v2.8.0+ release**
-
-**Important: v2.8.0 release only supports iOS, if you need integrations for other platforms, please use other integration methods instead, we will add support for all platforms soon**
-
-1. In Xcode, select File > Swift Packages > Add Package Dependency.
-2. Follow the prompts using the URL for this repository and a minimum semantic version of v2.8.0
-
-Check out our **[swift integration guide »](https://mixpanel.com/help/reference/swift)** for more info.
 
 <a name="manual-installation"></a>
 ## Manual Installation

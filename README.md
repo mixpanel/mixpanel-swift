@@ -55,7 +55,7 @@ Our Swift library fully supports all of the Mixpanel features and has full parit
 
 **It requires XCode 12+ and v2.8.0+ release**
 
-**Important: we only add support for iOS for now, if you need integrations for other platforms(tvOS or macOS), please use other integration methods instead**
+**Important: we only have support for iOS for now, if you need integrations for other platforms(tvOS or macOS), please use other integration methods instead**
 
 1. In Xcode, select File > Swift Packages > Add Package Dependency.
 2. Follow the prompts using the URL for this repository and a minimum semantic version of v2.8.0

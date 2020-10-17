@@ -53,7 +53,7 @@ Our Swift library fully supports all of the Mixpanel features and has full parit
 <a name="spm"></a>
 ## Swift Package Manager
 
-**It requires XCode 12+ and v2.8.0+ release**
+**It requires Xcode 12+ and v2.8.0+ release**
 
 **Important: we only have support for iOS for now, if you need integrations for other platforms(tvOS or macOS), please use other integration methods instead**
 

@@ -22,6 +22,7 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
                           "Register SuperProperties Once",
                           "Register SP Once w Default Value",
                           "Unregister SuperProperty"]
+    var eventNo: Int = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,11 +46,12 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
 
         switch indexPath.item {
         case 0:
-            let ev = "Track Event!"
+            eventNo += 1
+            let ev = "Track Event! No: \(eventNo)"
             Mixpanel.mainInstance().track(event: ev)
             descStr = "Event: \"\(ev)\""
         case 1:
-            let ev = "Track Event With Properties!"
+            let ev = "Track Event With Properties! No: \(eventNo)"
             let p = ["Cool Property": "Property Value"]
             Mixpanel.mainInstance().track(event: ev, properties: p)
             descStr = "Event: \"\(ev)\"\n Properties: \(p)"

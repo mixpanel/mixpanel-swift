@@ -82,7 +82,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var trackAutomaticEventsEnabled: Bool? = nil
 
     /// Flush timer's interval.
-    /// Setting a flush interval of 0 will turn off the flush timer.
+    /// Setting a flush interval of 0 will turn off the flush timer and the queued data will be flushed whenever there is a new tracking
     open var flushInterval: Double {
         set {
             flushInstance.flushInterval = newValue
@@ -807,7 +807,7 @@ extension MixpanelInstance {
                                       hadPersistedDistinctId: self.hadPersistedDistinctId)
         }
 
-        if MixpanelInstance.isiOSAppExtension() {
+        if MixpanelInstance.isiOSAppExtension() || flushInterval == 0 {
             flush()
         }
     }
@@ -1247,7 +1247,7 @@ extension MixpanelInstance {
             #endif  // DECIDE
         }
 
-        if MixpanelInstance.isiOSAppExtension() {
+        if MixpanelInstance.isiOSAppExtension() || flushInterval == 0 {
             flush()
         }
     }

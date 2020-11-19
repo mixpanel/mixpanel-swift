@@ -137,29 +137,26 @@ class Flush: AppLifecycle {
                         delegate?.updateNetworkActivityIndicator(true)
                     }
                 #endif // os(iOS)
-                var shadowQueue = mutableQueue
                 flushRequest.sendRequest(requestData,
                                          type: type,
                                          useIP: useIPAddressForGeoLocation,
-                                         completion: { [weak self, semaphore, range] success in
+                                         completion: { [weak self, semaphore] success in
+                                            guard let self = self else { return }
                                             #if os(iOS)
                                                 if !MixpanelInstance.isiOSAppExtension() {
-                                                    guard let self = self else { return }
                                                     self.delegate?.updateNetworkActivityIndicator(false)
                                                 }
                                             #endif // os(iOS)
                                             if success {
-                                                if let lastIndex = range.last, shadowQueue.count - 1 > lastIndex {
-                                                    shadowQueue.removeSubrange(range)
-                                                } else {
-                                                    shadowQueue.removeAll()
-                                                }
-                                                self?.delegate?.updateQueue(shadowQueue, type: type)
+                                                mutableQueue = self.removeProcessedBatch(batchSize: batchSize, queue: mutableQueue, type: type)
                                             }
                                             shouldContinue = success
                                             semaphore.signal()
                 })
                 _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+            } else {
+                // in case the batch data that cannot be encoded, removing it from the queue to avoid blocking other good data
+                let shadowQueue = removeProcessedBatch(batchSize: batchSize, queue: mutableQueue, type: type)
                 mutableQueue = shadowQueue
             }
 
@@ -168,6 +165,18 @@ class Flush: AppLifecycle {
             }
         }
         return mutableQueue
+    }
+    
+    func removeProcessedBatch(batchSize: Int, queue: Queue, type: FlushType) -> Queue {
+        var shadowQueue = queue
+        let range = 0..<batchSize
+        if let lastIndex = range.last, shadowQueue.count - 1 > lastIndex {
+            shadowQueue.removeSubrange(range)
+        } else {
+            shadowQueue.removeAll()
+        }
+        delegate?.updateQueue(shadowQueue, type: type)
+        return shadowQueue
     }
 
     // MARK: - Lifecycle

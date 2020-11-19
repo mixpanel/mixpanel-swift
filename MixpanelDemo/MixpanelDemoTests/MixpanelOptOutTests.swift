@@ -254,7 +254,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         waitForMixpanelQueues()
         waitForAsyncTasks()
         //There will be additional events for '$opt_in' and 'identify'
-        XCTAssertTrue(mixpanel.eventsQueue.count == 52, "When opted in, events should have been queued")
+        XCTAssertTrue(mixpanel.eventsQueue.count == 51, "When opted in, events should have been queued")
         XCTAssertEqual(mixpanel.eventsQueue.first!["event"] as? String, "$opt_in", "incorrect optin event name")
 
         mixpanel.optOutTracking()
@@ -306,7 +306,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         }
         waitForTrackingQueue()
         waitForAsyncTasks()
-        XCTAssertTrue(mixpanel.eventsQueue.count == 52, "When opted in, events should have been queued")
+        XCTAssertTrue(mixpanel.eventsQueue.count == 51, "When opted in, events should have been queued")
 
         let eventsQueue = mixpanel.eventsQueue
         mixpanel.optOutTracking()
@@ -317,6 +317,6 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         mixpanel.flush()
         waitForMixpanelQueues()
         waitForAsyncTasks()
-        XCTAssertTrue(mixpanel.eventsQueue.count == 52, "When opted out, events should not be flushed")
+        XCTAssertTrue(mixpanel.eventsQueue.count == 51, "When opted out, events should not be flushed")
     }
 }

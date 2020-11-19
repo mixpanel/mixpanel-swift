@@ -539,17 +539,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         taskId = sharedApplication.beginBackgroundTask() { [weak self] in
             self?.taskId = UIBackgroundTaskIdentifier.invalid
         }
-
+        
         if flushOnBackground {
             flush()
-        }
-        else {
+        } else {
             // only need to archive if don't flush because flush archives at the end
             networkQueue.async { [weak self] in
                 self?.archive()
             }
         }
-
+        
         networkQueue.async { [weak self] in
             guard let self = self else { return }
 
@@ -1212,6 +1211,8 @@ extension MixpanelInstance {
         if hasOptedOutTracking() {
             return
         }
+        
+        Logger.debug(message: "triggered tracking")
         let epochInterval = Date().timeIntervalSince1970
         trackingQueue.async { [weak self, event, properties, epochInterval] in
             guard let self = self else { return }
@@ -1240,6 +1241,8 @@ extension MixpanelInstance {
             }
 
             self.readWriteLock.read {
+                Logger.debug(message: "archiving events")
+                Logger.debug(message: "flushEventsQueue size: \(self.flushEventsQueue.count), eventsQueue size: \(self.eventsQueue.count)")
                 Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
             }
             #if DECIDE

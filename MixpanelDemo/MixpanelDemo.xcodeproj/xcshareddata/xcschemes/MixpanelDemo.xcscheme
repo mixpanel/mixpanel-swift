@@ -38,7 +38,8 @@
       </MacroExpansion>
       <Testables>
          <TestableReference
-            skipped = "NO">
+            skipped = "NO"
+            testExecutionOrdering = "random">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E15FF7E61D0461130076CDE3"
@@ -46,6 +47,20 @@
                BlueprintName = "MixpanelDemoTests"
                ReferencedContainer = "container:MixpanelDemo.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "MixpanelABTestingTests">
+               </Test>
+               <Test
+                  Identifier = "MixpanelABTestingTests/testDecideVariants()">
+               </Test>
+               <Test
+                  Identifier = "MixpanelNotificationTests">
+               </Test>
+               <Test
+                  Identifier = "SelectorEvaluatorTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

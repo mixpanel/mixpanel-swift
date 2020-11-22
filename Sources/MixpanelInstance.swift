@@ -82,7 +82,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var trackAutomaticEventsEnabled: Bool? = nil
 
     /// Flush timer's interval.
-    /// Setting a flush interval of 0 will turn off the flush timer and the queued data will be flushed whenever there is a new tracking
+    /// Setting a flush interval of 0 will turn off the flush timer and you need call flush API manually to upload queued data to the Mixpanel server.
     open var flushInterval: Double {
         set {
             flushInstance.flushInterval = newValue
@@ -806,7 +806,7 @@ extension MixpanelInstance {
                                       hadPersistedDistinctId: self.hadPersistedDistinctId)
         }
 
-        if MixpanelInstance.isiOSAppExtension() || flushInterval == 0 {
+        if MixpanelInstance.isiOSAppExtension() {
             flush()
         }
     }
@@ -1212,7 +1212,6 @@ extension MixpanelInstance {
             return
         }
         
-        Logger.debug(message: "triggered tracking")
         let epochInterval = Date().timeIntervalSince1970
         trackingQueue.async { [weak self, event, properties, epochInterval] in
             guard let self = self else { return }
@@ -1241,8 +1240,6 @@ extension MixpanelInstance {
             }
 
             self.readWriteLock.read {
-                Logger.debug(message: "archiving events")
-                Logger.debug(message: "flushEventsQueue size: \(self.flushEventsQueue.count), eventsQueue size: \(self.eventsQueue.count)")
                 Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
             }
             #if DECIDE
@@ -1250,7 +1247,7 @@ extension MixpanelInstance {
             #endif  // DECIDE
         }
 
-        if MixpanelInstance.isiOSAppExtension() || flushInterval == 0 {
+        if MixpanelInstance.isiOSAppExtension() {
             flush()
         }
     }

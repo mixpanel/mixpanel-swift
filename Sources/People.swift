@@ -97,7 +97,7 @@ open class People {
             }
         }
 
-        if MixpanelInstance.isiOSAppExtension() || Mixpanel.mainInstance().flushInterval == 0 {
+        if MixpanelInstance.isiOSAppExtension() {
             delegate?.flush(completion: nil)
         }
     }

@@ -154,10 +154,6 @@ class Flush: AppLifecycle {
                                             semaphore.signal()
                 })
                 _ = semaphore.wait(timeout: DispatchTime.distantFuture)
-            } else {
-                // in case the batch data that cannot be encoded, removing it from the queue to avoid blocking other good data
-                let shadowQueue = removeProcessedBatch(batchSize: batchSize, queue: mutableQueue, type: type)
-                mutableQueue = shadowQueue
             }
 
             if !shouldContinue {

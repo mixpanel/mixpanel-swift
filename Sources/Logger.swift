@@ -137,6 +137,8 @@ class Logger {
         readWriteLock.read {
             loggers = self.loggers
         }
-        loggers.forEach() { $0.addMessage(message: message) }
+        readWriteLock.write {
+            loggers.forEach() { $0.addMessage(message: message) }
+        }
     }
 }

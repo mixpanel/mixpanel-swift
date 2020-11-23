@@ -32,12 +32,20 @@ class JSONHandler {
     }
 
      class func serializeJSONObject(_ obj: MPObjectToParse) -> Data? {
-        let serializableJSONObject = makeObjectSerializable(obj)
-
+        let serializableJSONObject: MPObjectToParse
+        if let jsonObject = makeObjectSerializable(obj) as? Array<Any> {
+            serializableJSONObject = jsonObject.filter() {
+                JSONSerialization.isValidJSONObject($0)
+            }
+        } else {
+            serializableJSONObject = makeObjectSerializable(obj)
+        }
+        
         guard JSONSerialization.isValidJSONObject(serializableJSONObject) else {
             Logger.warn(message: "object isn't valid and can't be serialzed to JSON")
             return nil
         }
+        
         var serializedObject: Data? = nil
         do {
             serializedObject = try JSONSerialization
@@ -53,14 +61,19 @@ class JSONHandler {
         case let obj as NSNumber:
             if isBoolNumber(obj) {
                 return obj.boolValue
+            } else if isInvalidNumber(obj) {
+                return String(describing: obj)
             } else {
                 return obj
             }
 
-        case let obj as Double where obj.isFinite:
+        case let obj as Double where obj.isFinite && !obj.isNaN:
             return obj
             
-        case is String, is Int, is UInt, is UInt64, is Float, is Bool:
+        case let obj as Float where obj.isFinite && !obj.isNaN:
+            return obj
+
+        case is String, is Int, is UInt, is UInt64, is Bool:
             return obj
 
         case let obj as Array<Any>:
@@ -70,7 +83,8 @@ class JSONHandler {
             var serializedDict = InternalProperties()
             _ = obj.map() { e in
                 serializedDict[e.key] =
-                    makeObjectSerializable(e.value) }
+                    makeObjectSerializable(e.value)
+            }
             return serializedDict
 
         case let obj as Date:
@@ -95,5 +109,10 @@ class JSONHandler {
         let boolID = CFBooleanGetTypeID()
         let numID = CFGetTypeID(num)
         return numID == boolID
+    }
+
+    private class func isInvalidNumber(_ num: NSNumber) -> Bool
+    {
+        return  num.doubleValue.isInfinite ||  num.doubleValue.isNaN
     }
 }

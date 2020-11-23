@@ -82,7 +82,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var trackAutomaticEventsEnabled: Bool? = nil
 
     /// Flush timer's interval.
-    /// Setting a flush interval of 0 will turn off the flush timer.
+    /// Setting a flush interval of 0 will turn off the flush timer and you need to call the flush() API manually to upload queued data to the Mixpanel server.
     open var flushInterval: Double {
         set {
             flushInstance.flushInterval = newValue
@@ -539,17 +539,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         taskId = sharedApplication.beginBackgroundTask() { [weak self] in
             self?.taskId = UIBackgroundTaskIdentifier.invalid
         }
-
+        
         if flushOnBackground {
             flush()
-        }
-        else {
+        } else {
             // only need to archive if don't flush because flush archives at the end
             networkQueue.async { [weak self] in
                 self?.archive()
             }
         }
-
+        
         networkQueue.async { [weak self] in
             guard let self = self else { return }
 
@@ -1212,6 +1211,7 @@ extension MixpanelInstance {
         if hasOptedOutTracking() {
             return
         }
+        
         let epochInterval = Date().timeIntervalSince1970
         trackingQueue.async { [weak self, event, properties, epochInterval] in
             guard let self = self else { return }

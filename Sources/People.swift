@@ -104,6 +104,8 @@ open class People {
 
     func addPeopleObject(_ r: InternalProperties) {
         lock.write {
+            Logger.debug(message: "adding to people queue")
+            Logger.debug(message: r)
             peopleQueue.append(r)
             if peopleQueue.count > QueueConstants.queueSize {
                 peopleQueue.remove(at: 0)

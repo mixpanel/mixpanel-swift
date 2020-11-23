@@ -75,8 +75,8 @@ class Track {
         var shadowEventsQueue = eventsQueue
         shadowEventsQueue.append(trackEvent)
         if shadowEventsQueue.count > QueueConstants.queueSize {
-            Logger.debug(message: "queue is full, dropping the oldest event from the queue")
-            Logger.debug(message: shadowEventsQueue.first as Any)
+            Logger.warn(message: "queue is full, dropping the oldest event from the queue")
+            Logger.warn(message: shadowEventsQueue.first as Any)
             shadowEventsQueue.remove(at: 0)
         }
         

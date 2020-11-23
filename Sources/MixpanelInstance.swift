@@ -82,7 +82,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var trackAutomaticEventsEnabled: Bool? = nil
 
     /// Flush timer's interval.
-    /// Setting a flush interval of 0 will turn off the flush timer and you need call flush API manually to upload queued data to the Mixpanel server.
+    /// Setting a flush interval of 0 will turn off the flush timer and you need to call the flush() API manually to upload queued data to the Mixpanel server.
     open var flushInterval: Double {
         set {
             flushInstance.flushInterval = newValue

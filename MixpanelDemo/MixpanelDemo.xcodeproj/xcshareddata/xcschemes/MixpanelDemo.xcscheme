@@ -47,20 +47,6 @@
                BlueprintName = "MixpanelDemoTests"
                ReferencedContainer = "container:MixpanelDemo.xcodeproj">
             </BuildableReference>
-            <SkippedTests>
-               <Test
-                  Identifier = "MixpanelABTestingTests">
-               </Test>
-               <Test
-                  Identifier = "MixpanelABTestingTests/testDecideVariants()">
-               </Test>
-               <Test
-                  Identifier = "MixpanelNotificationTests">
-               </Test>
-               <Test
-                  Identifier = "SelectorEvaluatorTests">
-               </Test>
-            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

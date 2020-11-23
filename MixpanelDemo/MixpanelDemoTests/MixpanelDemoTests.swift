@@ -123,7 +123,46 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(mixpanel.eventsQueue.count == 50,
                       "events should still be in the queue if flush fails")
 
+    }
 
+    func testFlushQueueContainsCorruptedEvent() {
+        stubTrack()
+        mixpanel.eventsQueue.append(["event": "bad event1", "properties": ["BadProp": Double.nan]])
+        mixpanel.eventsQueue.append(["event": "bad event2", "properties": ["BadProp": Float.nan]])
+        mixpanel.eventsQueue.append(["event": "bad event3", "properties": ["BadProp": Double.infinity]])
+        mixpanel.eventsQueue.append(["event": "bad event4", "properties": ["BadProp": Float.infinity]])
+
+        for i in 0..<10 {
+            mixpanel.track(event: "event \(UInt(i))")
+        }
+        waitForTrackingQueue()
+        flushAndWaitForNetworkQueue()
+        XCTAssertTrue(mixpanel.eventsQueue.count == 0, "good events should still be flushed")
+    }
+    
+    func testAddEventContainsInvalidJsonObjectDoubleNaN() {
+        stubTrack()
+        XCTExpectAssert("unsupported property type was allowed") {
+            mixpanel.track(event: "bad event", properties: ["BadProp": Double.nan])
+        }
+    }
+
+    func testAddEventContainsInvalidJsonObjectFloatNaN() {
+        XCTExpectAssert("unsupported property type was allowed") {
+            mixpanel.track(event: "bad event", properties: ["BadProp": Float.nan])
+        }
+    }
+
+    func testAddEventContainsInvalidJsonObjectDoubleInfinity() {
+        XCTExpectAssert("unsupported property type was allowed") {
+            mixpanel.track(event: "bad event", properties: ["BadProp": Double.infinity])
+        }
+    }
+
+    func testAddEventContainsInvalidJsonObjectFloatInfinity() {
+        XCTExpectAssert("unsupported property type was allowed") {
+            mixpanel.track(event: "bad event", properties: ["BadProp": Float.infinity])
+        }
     }
 
     func testAddingEventsAfterFlush() {
@@ -461,14 +500,22 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTExpectAssert("property type should not be allowed") {
             mixpanel.registerSuperProperties(p)
         }
+    }
+    
+    func testInvalidSuperProperties2() {
+        let p: Properties = ["data": [Data()]]
         XCTExpectAssert("property type should not be allowed") {
             mixpanel.registerSuperPropertiesOnce(p)
         }
+    }
+
+    func testInvalidSuperProperties3() {
+        let p: Properties = ["data": [Data()]]
         XCTExpectAssert("property type should not be allowed") {
             mixpanel.registerSuperPropertiesOnce(p, defaultValue: "v")
         }
     }
-
+    
     func testValidPropertiesTrack() {
         let p: Properties = allPropertyTypes()
         mixpanel.track(event: "e1", properties: p)

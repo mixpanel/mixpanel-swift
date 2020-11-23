@@ -10,11 +10,12 @@ import Foundation
 
 /// Property keys must be String objects and the supported value types need to conform to MixpanelType.
 /// MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
+/// Numbers are not NaN or infinity
 public protocol MixpanelType: Any {
     /**
      Checks if this object has nested object types that Mixpanel supports.
      */
-    func isValidNestedType() -> Bool
+    func isValidNestedTypeAndValue() -> Bool
     
     func equals(rhs: MixpanelType) -> Bool
 }
@@ -24,7 +25,7 @@ extension String: MixpanelType {
      Checks if this object has nested object types that Mixpanel supports.
      Will always return true.
      */
-    public func isValidNestedType() -> Bool { return true }
+    public func isValidNestedTypeAndValue() -> Bool { return true }
     
     public func equals(rhs: MixpanelType) -> Bool {
         if rhs is String {
@@ -39,7 +40,9 @@ extension NSNumber: MixpanelType {
      Checks if this object has nested object types that Mixpanel supports.
      Will always return true.
      */
-    public func isValidNestedType() -> Bool { return true }
+    public func isValidNestedTypeAndValue() -> Bool {
+        return !self.doubleValue.isInfinite && !self.doubleValue.isNaN
+    }
     
     public func equals(rhs: MixpanelType) -> Bool {
         if rhs is NSNumber {
@@ -54,7 +57,7 @@ extension Int: MixpanelType {
      Checks if this object has nested object types that Mixpanel supports.
      Will always return true.
      */
-    public func isValidNestedType() -> Bool { return true }
+    public func isValidNestedTypeAndValue() -> Bool { return true }
     
     public func equals(rhs: MixpanelType) -> Bool {
         if rhs is Int {
@@ -69,7 +72,7 @@ extension UInt: MixpanelType {
      Checks if this object has nested object types that Mixpanel supports.
      Will always return true.
      */
-    public func isValidNestedType() -> Bool { return true }
+    public func isValidNestedTypeAndValue() -> Bool { return true }
     
     public func equals(rhs: MixpanelType) -> Bool {
         if rhs is UInt {
@@ -83,7 +86,9 @@ extension Double: MixpanelType {
      Checks if this object has nested object types that Mixpanel supports.
      Will always return true.
      */
-    public func isValidNestedType() -> Bool { return true }
+    public func isValidNestedTypeAndValue() -> Bool {
+        return !self.isInfinite && !self.isNaN
+    }
     
     public func equals(rhs: MixpanelType) -> Bool {
         if rhs is Double {
@@ -97,7 +102,9 @@ extension Float: MixpanelType {
      Checks if this object has nested object types that Mixpanel supports.
      Will always return true.
      */
-    public func isValidNestedType() -> Bool { return true }
+    public func isValidNestedTypeAndValue() -> Bool {
+        return !self.isInfinite && !self.isNaN
+    }
     
     public func equals(rhs: MixpanelType) -> Bool {
         if rhs is Float {
@@ -111,7 +118,7 @@ extension Bool: MixpanelType {
      Checks if this object has nested object types that Mixpanel supports.
      Will always return true.
      */
-    public func isValidNestedType() -> Bool { return true }
+    public func isValidNestedTypeAndValue() -> Bool { return true }
 
     public func equals(rhs: MixpanelType) -> Bool {
         if rhs is Bool {
@@ -126,7 +133,7 @@ extension Date: MixpanelType {
      Checks if this object has nested object types that Mixpanel supports.
      Will always return true.
      */
-    public func isValidNestedType() -> Bool { return true }
+    public func isValidNestedTypeAndValue() -> Bool { return true }
 
     public func equals(rhs: MixpanelType) -> Bool {
         if rhs is Date {
@@ -141,7 +148,7 @@ extension URL: MixpanelType {
      Checks if this object has nested object types that Mixpanel supports.
      Will always return true.
      */
-    public func isValidNestedType() -> Bool { return true }
+    public func isValidNestedTypeAndValue() -> Bool { return true }
 
     public func equals(rhs: MixpanelType) -> Bool {
         if rhs is URL {
@@ -156,7 +163,7 @@ extension NSNull: MixpanelType {
      Checks if this object has nested object types that Mixpanel supports.
      Will always return true.
      */
-    public func isValidNestedType() -> Bool { return true }
+    public func isValidNestedTypeAndValue() -> Bool { return true }
 
     public func equals(rhs: MixpanelType) -> Bool {
         if rhs is NSNull {
@@ -170,7 +177,7 @@ extension Array: MixpanelType {
     /**
      Checks if this object has nested object types that Mixpanel supports.
      */
-    public func isValidNestedType() -> Bool {
+    public func isValidNestedTypeAndValue() -> Bool {
         for element in self {
             guard let _ = element as? MixpanelType else {
                 return false
@@ -187,7 +194,7 @@ extension Array: MixpanelType {
                 return false
             }
 
-            if !isValidNestedType() {
+            if !isValidNestedTypeAndValue() {
                 return false
             }
             
@@ -207,7 +214,7 @@ extension Dictionary: MixpanelType {
     /**
      Checks if this object has nested object types that Mixpanel supports.
      */
-    public func isValidNestedType() -> Bool {
+    public func isValidNestedTypeAndValue() -> Bool {
         for (key, value) in self {
             guard let _ = key as? String, let _ = value as? MixpanelType else {
                 return false
@@ -224,7 +231,7 @@ extension Dictionary: MixpanelType {
                 return false
             }
             
-            if !isValidNestedType() {
+            if !isValidNestedTypeAndValue() {
                 return false
             }
             
@@ -246,8 +253,8 @@ extension Dictionary: MixpanelType {
 func assertPropertyTypes(_ properties: Properties?) {
     if let properties = properties {
         for (_, v) in properties {
-            MPAssert(v.isValidNestedType(),
-                "Property values must be of valid type (MixpanelType). Got \(type(of: v))")
+            MPAssert(v.isValidNestedTypeAndValue(),
+                "Property values must be of valid type (MixpanelType) and valid value. Got \(type(of: v)) and Value \(v)")
         }
     }
 }

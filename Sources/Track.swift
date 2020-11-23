@@ -73,6 +73,8 @@ class Track {
         var trackEvent: InternalProperties = ["event": ev!, "properties": p]
         metadata.toDict().forEach { (k,v) in trackEvent[k] = v }
         var shadowEventsQueue = eventsQueue
+        Logger.debug(message: "adding event to queue")
+        Logger.debug(message: trackEvent)
         shadowEventsQueue.append(trackEvent)
         if shadowEventsQueue.count > QueueConstants.queueSize {
             Logger.warn(message: "queue is full, dropping the oldest event from the queue")

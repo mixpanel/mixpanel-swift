@@ -29,6 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                                              MixpanelTweaks.boolTweak,
                                              MixpanelTweaks.stringTweak]
         MixpanelTweaks.setTweaks(tweaks: allTweaks)
+        registerNotification()
 
         return true
     }
@@ -52,6 +53,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         completionHandler(.newData)
     }
 
+    func registerNotification() {
+        if #available(iOS 10.0, *) {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge], completionHandler: { (granted, error) in
+                if granted {
+                    DispatchQueue.main.async {
+                        UIApplication.shared.registerForRemoteNotifications()
+                    }
+                }
+            })
+            UNUserNotificationCenter.current().delegate = self
+        } else {
+            let settings = UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
+            DispatchQueue.main.async {
+                UIApplication.shared.registerUserNotificationSettings(settings)
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
+    }
+    
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler(.alert)

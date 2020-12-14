@@ -29,27 +29,9 @@ class LoginViewController: UIViewController {
         } else {
             NSLog("Unable to find view controller with name \"mainView\"")
         }
-        registerNotification()
     }
     
-    func registerNotification() {
-        if #available(iOS 10.0, *) {
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge], completionHandler: { (granted, error) in
-                if granted {
-                    DispatchQueue.main.async {
-                        UIApplication.shared.registerForRemoteNotifications()
-                    }
-                }
-            })
-            UNUserNotificationCenter.current().delegate = delegate
-        } else {
-            let settings = UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
-            DispatchQueue.main.async {
-                UIApplication.shared.registerUserNotificationSettings(settings)
-                UIApplication.shared.registerForRemoteNotifications()
-            }
-        }
-    }
+
     
     func registerDeviceForPush() {
         guard let deviceToken = delegate.pushDeviceToken else {

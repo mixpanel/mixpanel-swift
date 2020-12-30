@@ -767,9 +767,7 @@ extension MixpanelInstance {
                self.hadPersistedDistinctId = true
             }
 
-            // identify only changes the distinct id if it doesn't match either the existing or the alias;
-            // if it's new, blow away the alias as well.
-            if distinctId != self.alias {
+
                 if distinctId != self.distinctId {
                     let oldDistinctId = self.distinctId
                     self.alias = nil
@@ -795,7 +793,7 @@ extension MixpanelInstance {
                 } else {
                     self.people.distinctId = nil
                 }
-            }
+            
             self.archiveProperties()
             Persistence.storeIdentity(token: self.apiToken,
                                       distinctID: self.distinctId,

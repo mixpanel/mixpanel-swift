@@ -214,7 +214,7 @@ extension NSArray: MixpanelType {
     /**
      Checks if this object has nested object types that Mixpanel supports.
      */
-    public func isValidNestedType() -> Bool {
+    public func isValidNestedTypeAndValue() -> Bool {
         for element in self {
             guard let _ = element as? MixpanelType else {
                 return false

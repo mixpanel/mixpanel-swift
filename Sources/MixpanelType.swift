@@ -231,7 +231,7 @@ extension NSArray: MixpanelType {
                 return false
             }
 
-            if !isValidNestedType() {
+            if !isValidNestedTypeAndValue() {
                 return false
             }
             

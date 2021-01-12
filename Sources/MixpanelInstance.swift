@@ -768,31 +768,31 @@ extension MixpanelInstance {
             }
 
 
-                if distinctId != self.distinctId {
-                    let oldDistinctId = self.distinctId
-                    self.alias = nil
-                    self.distinctId = distinctId
-                    self.userId = distinctId
-                    self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
-                }
+            if distinctId != self.distinctId {
+                let oldDistinctId = self.distinctId
+                self.alias = nil
+                self.distinctId = distinctId
+                self.userId = distinctId
+                self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
+            }
 
-                if usePeople {
-                    self.people.distinctId = distinctId
-                    if !self.people.unidentifiedQueue.isEmpty {
-                        self.readWriteLock.write {
-                            for var r in self.people.unidentifiedQueue {
-                                r["$distinct_id"] = self.distinctId
-                                self.people.peopleQueue.append(r)
-                            }
-                            self.people.unidentifiedQueue.removeAll()
+            if usePeople {
+                self.people.distinctId = distinctId
+                if !self.people.unidentifiedQueue.isEmpty {
+                    self.readWriteLock.write {
+                        for var r in self.people.unidentifiedQueue {
+                            r["$distinct_id"] = self.distinctId
+                            self.people.peopleQueue.append(r)
                         }
-                        self.readWriteLock.read {
-                            Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
-                        }
+                        self.people.unidentifiedQueue.removeAll()
                     }
-                } else {
-                    self.people.distinctId = nil
+                    self.readWriteLock.read {
+                        Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
+                    }
                 }
+            } else {
+                self.people.distinctId = nil
+            }
             
             self.archiveProperties()
             Persistence.storeIdentity(token: self.apiToken,

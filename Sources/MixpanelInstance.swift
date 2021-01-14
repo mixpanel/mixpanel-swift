@@ -767,35 +767,33 @@ extension MixpanelInstance {
                self.hadPersistedDistinctId = true
             }
 
-            // identify only changes the distinct id if it doesn't match either the existing or the alias;
-            // if it's new, blow away the alias as well.
-            if distinctId != self.alias {
-                if distinctId != self.distinctId {
-                    let oldDistinctId = self.distinctId
-                    self.alias = nil
-                    self.distinctId = distinctId
-                    self.userId = distinctId
-                    self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
-                }
 
-                if usePeople {
-                    self.people.distinctId = distinctId
-                    if !self.people.unidentifiedQueue.isEmpty {
-                        self.readWriteLock.write {
-                            for var r in self.people.unidentifiedQueue {
-                                r["$distinct_id"] = self.distinctId
-                                self.people.peopleQueue.append(r)
-                            }
-                            self.people.unidentifiedQueue.removeAll()
-                        }
-                        self.readWriteLock.read {
-                            Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
-                        }
-                    }
-                } else {
-                    self.people.distinctId = nil
-                }
+            if distinctId != self.distinctId {
+                let oldDistinctId = self.distinctId
+                self.alias = nil
+                self.distinctId = distinctId
+                self.userId = distinctId
+                self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
             }
+
+            if usePeople {
+                self.people.distinctId = distinctId
+                if !self.people.unidentifiedQueue.isEmpty {
+                    self.readWriteLock.write {
+                        for var r in self.people.unidentifiedQueue {
+                            r["$distinct_id"] = self.distinctId
+                            self.people.peopleQueue.append(r)
+                        }
+                        self.people.unidentifiedQueue.removeAll()
+                    }
+                    self.readWriteLock.read {
+                        Persistence.archivePeople(self.people.peopleQueue, token: self.apiToken)
+                    }
+                }
+            } else {
+                self.people.distinctId = nil
+            }
+            
             self.archiveProperties()
             Persistence.storeIdentity(token: self.apiToken,
                                       distinctID: self.distinctId,

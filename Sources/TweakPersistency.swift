@@ -90,11 +90,11 @@ private final class TweakDiskPersistency {
 
         self.queue.sync {
             NSKeyedUnarchiver.setClass(Data.self, forClassName: "Data")
-                result = try? (try? Foundation.Data(contentsOf: self.fileURL))
-                    .flatMap(NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(_:))
-                    .flatMap { $0 as? Data }
-                    .map { $0.cache }
-                    ?? [:]
+            result = try? (try? Foundation.Data(contentsOf: self.fileURL))
+                .flatMap(NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(_:))
+                .flatMap { $0 as? Data }
+                .map { $0.cache }
+                ?? [:]
         }
 
         return result

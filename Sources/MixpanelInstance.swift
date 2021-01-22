@@ -680,7 +680,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 
                 AutomaticProperties.properties["$carrier"] = ""
                 if #available(iOS 12.0, *) {
-                    if let carrierName = MixpanelInstance.telephonyInfo.serviceSubscriberCellularProviders?.first {
+                    if let carrierName = MixpanelInstance.telephonyInfo.serviceSubscriberCellularProviders?.first?.value.carrierName {
                         AutomaticProperties.properties["$carrier"] = carrierName
                     }
                 } else {

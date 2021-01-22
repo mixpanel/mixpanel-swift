@@ -677,12 +677,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 guard self != nil else {
                     return
                 }
-
-                if let carrierName = MixpanelInstance.telephonyInfo.subscriberCellularProvider?.carrierName {
-                    AutomaticProperties.properties["$carrier"] = carrierName
-
+                
+                AutomaticProperties.properties["$carrier"] = ""
+                if #available(iOS 12.0, *) {
+                    if let carrierName = MixpanelInstance.telephonyInfo.serviceSubscriberCellularProviders?.first {
+                        AutomaticProperties.properties["$carrier"] = carrierName
+                    }
                 } else {
-                    AutomaticProperties.properties["$carrier"] = ""
+                    if let carrierName = MixpanelInstance.telephonyInfo.subscriberCellularProvider?.carrierName {
+                        AutomaticProperties.properties["$carrier"] = carrierName
+                    }
                 }
             }
         }

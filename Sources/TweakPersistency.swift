@@ -87,25 +87,47 @@ private final class TweakDiskPersistency {
 
     func loadFromDisk() -> TweakCache {
         var result: TweakCache!
-
-        self.queue.sync {
-            NSKeyedUnarchiver.setClass(Data.self, forClassName: "Data")
-            result = (try? Foundation.Data(contentsOf: self.fileURL))
-                .flatMap(NSKeyedUnarchiver.unarchiveObject(with:))
-                .flatMap { $0 as? Data }
-                .map { $0.cache }
-                ?? [:]
+        
+        if #available(iOS 11.0, macOS 10.13, watchOS 4.0, tvOS 11.0, *) {
+            self.queue.sync {
+                NSKeyedUnarchiver.setClass(Data.self, forClassName: "Data")
+                result = try? (try? Foundation.Data(contentsOf: self.fileURL))
+                    .flatMap(NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(_:))
+                    .flatMap { $0 as? Data }
+                    .map { $0.cache }
+                    ?? [:]
+            }
+        } else {
+            self.queue.sync {
+                NSKeyedUnarchiver.setClass(Data.self, forClassName: "Data")
+                result = (try? Foundation.Data(contentsOf: self.fileURL))
+                    .flatMap(NSKeyedUnarchiver.unarchiveObject(with:))
+                    .flatMap { $0 as? Data }
+                    .map { $0.cache }
+                    ?? [:]
+            }
         }
 
         return result
     }
 
     func saveToDisk(_ data: TweakCache) {
-        self.queue.async {
-            let data = Data(cache: data)
-            NSKeyedArchiver.setClassName("Data", for: type(of: data))
-            let nsData = NSKeyedArchiver.archivedData(withRootObject: data)
-            try? nsData.write(to: self.fileURL, options: [.atomic])
+        if #available(iOS 11.0, macOS 10.13, watchOS 4.0, tvOS 11.0, *) {
+            self.queue.async {
+                let data = Data(cache: data)
+                NSKeyedArchiver.setClassName("Data", for: type(of: data))
+                let nsData = try? NSKeyedArchiver.archivedData(withRootObject: data, requiringSecureCoding: false)
+                if let nsData = nsData {
+                    try? nsData.write(to: self.fileURL, options: [.atomic])
+                }
+            }
+        } else {
+            self.queue.async {
+                let data = Data(cache: data)
+                NSKeyedArchiver.setClassName("Data", for: type(of: data))
+                let nsData = NSKeyedArchiver.archivedData(withRootObject: data)
+                try? nsData.write(to: self.fileURL, options: [.atomic])
+            }
         }
     }
 

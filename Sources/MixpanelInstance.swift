@@ -1415,6 +1415,11 @@ extension MixpanelInstance {
         }
     }
     
+    /**
+     Clears the event timer for the named event.
+
+     - parameter event: the name of the event to clear the timer for
+     */
     open func clearTimedEvent(event: String) {
         trackingQueue.async {
             [weak self, event] in

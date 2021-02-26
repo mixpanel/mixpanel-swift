@@ -907,6 +907,19 @@ class MixpanelDemoTests: MixpanelBaseTests {
         p = e["properties"] as! InternalProperties
         XCTAssertNil(p["$duration"],
                      "Tracking the same event should require a second call to timeEvent.")
+        mixpanel.time(event: "Time Event A")
+        mixpanel.time(event: "Time Event B")
+        mixpanel.time(event: "Time Event C")
+        waitForTrackingQueue()
+        XCTAssertTrue(mixpanel.timedEvents.count == 3, "Each call to time() should add an event to timedEvents")
+        XCTAssertNotNil(mixpanel.timedEvents["Time Event A"], "Keys in timedEvents should be event names")
+        mixpanel.clearTimedEvent(event: "Time Event A")
+        waitForTrackingQueue()
+        XCTAssertNil(mixpanel.timedEvents["Time Event A"], "clearTimedEvent should remove key/value pair")
+        XCTAssertTrue(mixpanel.timedEvents.count == 2, "clearTimedEvent shoud remove only one key/value pair")
+        mixpanel.clearTimedEvents()
+        waitForTrackingQueue()
+        XCTAssertTrue(mixpanel.timedEvents.count == 0, "clearTimedEvents should remove all key/value pairs")
     }
 
     func testTelephonyInfoInitialized() {

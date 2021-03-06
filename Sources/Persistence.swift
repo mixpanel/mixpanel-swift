@@ -19,7 +19,6 @@ struct ArchivedProperties {
     let peopleDistinctId: String?
     let peopleUnidentifiedQueue: Queue
     #if DECIDE
-    let shownNotifications: Set<Int>
     let automaticEventsEnabled: Bool?
     #endif // DECIDE
 }
@@ -32,8 +31,6 @@ class Persistence {
         case people
         case groups
         case properties
-        case codelessBindings
-        case variants
         case optOutStatus
     }
 
@@ -63,15 +60,11 @@ class Persistence {
                        peopleQueue: Queue,
                        groupsQueue: Queue,
                        properties: ArchivedProperties,
-                       codelessBindings: Set<CodelessBinding>,
-                       variants: Set<Variant>,
                        token: String) {
         archiveEvents(eventsQueue, token: token)
         archivePeople(peopleQueue, token: token)
         archiveGroups(groupsQueue, token: token)
         archiveProperties(properties, token: token)
-        archiveVariants(variants, token: token)
-        archiveCodelessBindings(codelessBindings, token: token)
     }
     #else
     static func archive(eventsQueue: Queue,
@@ -123,26 +116,11 @@ class Persistence {
             p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
             p["timedEvents"] = properties.timedEvents
             #if DECIDE
-            p["shownNotifications"] = properties.shownNotifications
             p["automaticEvents"] = properties.automaticEventsEnabled
             #endif // DECIDE
             archiveToFile(.properties, object: p, token: token)
         }
     }
-
-    #if DECIDE
-    static func archiveVariants(_ variants: Set<Variant>, token: String) {
-        archiveQueue.sync { [variants, token] in
-            archiveToFile(.variants, object: variants, token: token)
-        }
-    }
-
-    static func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
-        archiveQueue.sync { [codelessBindings, token] in
-            archiveToFile(.codelessBindings, object: codelessBindings, token: token)
-        }
-    }
-    #endif // DECIDE
 
     static private func archiveToFile(_ type: ArchiveType, object: Any, token: String) {
         var archiveObject = object
@@ -201,16 +179,11 @@ class Persistence {
                                             hadPersistedDistinctId: Bool?,
                                             peopleDistinctId: String?,
                                             peopleUnidentifiedQueue: Queue,
-                                            shownNotifications: Set<Int>,
-                                            codelessBindings: Set<CodelessBinding>,
-                                            variants: Set<Variant>,
                                             optOutStatus: Bool?,
                                             automaticEventsEnabled: Bool?) {
         let eventsQueue = unarchiveEvents(token: token)
         let peopleQueue = unarchivePeople(token: token)
         let groupsQueue = unarchiveGroups(token: token)
-        let codelessBindings = unarchiveCodelessBindings(token: token)
-        let variants = unarchiveVariants(token: token)
         let optOutStatus = unarchiveOptOutStatus(token: token)
 
         let (superProperties,
@@ -222,7 +195,6 @@ class Persistence {
             hadPersistedDistinctId,
             peopleDistinctId,
             peopleUnidentifiedQueue,
-            shownNotifications,
             automaticEventsEnabled) = unarchiveProperties(token: token)
 
         return (eventsQueue,
@@ -237,9 +209,6 @@ class Persistence {
                 hadPersistedDistinctId,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
-                shownNotifications,
-                codelessBindings,
-                variants,
                 optOutStatus,
                 automaticEventsEnabled)
     }
@@ -345,9 +314,7 @@ class Persistence {
                                                               Bool?,
                                                               String?,
                                                               Queue,
-                                                              Set<Int>,
                                                               Bool?) {
-        let properties = unarchiveWithType(.properties, token: token) as? InternalProperties
         let (superProperties,
              timedEvents,
              distinctId,
@@ -358,8 +325,6 @@ class Persistence {
              peopleDistinctId,
              peopleUnidentifiedQueue,
              automaticEventsEnabled) = unarchivePropertiesHelper(token: token)
-        let shownNotifications =
-            properties?["shownNotifications"] as? Set<Int> ?? Set<Int>()
 
         return (superProperties,
                 timedEvents,
@@ -370,7 +335,6 @@ class Persistence {
                 hadPersistedDistinctId,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
-                shownNotifications,
                 automaticEventsEnabled)
     }
     #else
@@ -435,18 +399,6 @@ class Persistence {
                     peopleUnidentifiedQueue,
                     automaticEventsEnabled)
     }
-
-    #if DECIDE
-    static private func unarchiveCodelessBindings(token: String) -> Set<CodelessBinding> {
-        let data = unarchiveWithType(.codelessBindings, token: token)
-        return data as? Set<CodelessBinding> ?? Set()
-    }
-
-    static private func unarchiveVariants(token: String) -> Set<Variant> {
-        let data = unarchiveWithType(.variants, token: token) as? Set<Variant>
-        return data ?? Set()
-    }
-    #endif // DECIDE
 
     static private func unarchiveWithType(_ type: ArchiveType, token: String) -> Any? {
         let filePath = filePathWithType(type, token: token)

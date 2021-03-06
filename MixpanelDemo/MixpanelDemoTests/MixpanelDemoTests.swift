@@ -570,65 +570,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         mixpanel.registerSuperPropertiesOnce(p)
         mixpanel.registerSuperPropertiesOnce(p, defaultValue: "v")
     }
-    
-    func testTrackLaunchOptions() {
-        let nsJourneyId: NSNumber = 1
-        let launchOptions: [UIApplication.LaunchOptionsKey: Any] = [UIApplication.LaunchOptionsKey.remoteNotification: ["mp":
-                                                                                                                            ["m": 12345, "c": 54321, "journey_id": nsJourneyId, "additional_param": "abcd"]]]
-        mixpanel = Mixpanel.initialize(token: kTestToken,
-                                       launchOptions: launchOptions,
-                                       flushInterval: 60)
-        waitForTrackingQueue()
-        let e: InternalProperties = mixpanel.eventsQueue.last!
-        XCTAssertEqual(e["event"] as? String, "$app_open", "incorrect event name")
-        let p: InternalProperties = e["properties"] as! InternalProperties
-        XCTAssertEqual(p["campaign_id"] as? Int, 54321, "campaign_id not equal")
-        XCTAssertEqual(p["message_id"] as? Int, 12345, "message_id not equal")
-        XCTAssertEqual(p["journey_id"] as? Int, 1, "journey_id not equal")
-        XCTAssertEqual(p["additional_param"] as? String, "abcd", "additional_param not equal")
-        XCTAssertEqual(p["message_type"] as? String, "push", "type does not equal inapp")
-    }
-    
-    func testTrackPushNotification() {
-        let nsJourneyId: NSNumber = 1
-        mixpanel.trackPushNotification(["mp": ["m": 98765, "c": 56789, "journey_id": nsJourneyId, "additional_param": "abcd", "from_preview": true]])
-        waitForTrackingQueue()
-        let e: InternalProperties = mixpanel.eventsQueue.last!
-        XCTAssertEqual(e["event"] as? String, "$campaign_received", "incorrect event name")
-        let p: InternalProperties = e["properties"] as! InternalProperties
-        XCTAssertEqual(p["campaign_id"] as? Int, 56789, "campaign_id not equal")
-        XCTAssertEqual(p["message_id"] as? Int, 98765, "message_id not equal")
-        XCTAssertEqual(p["journey_id"] as? Int, 1, "journey_id not equal")
-        XCTAssertEqual(p["from_preview"] as? Bool, true, "from_preview not equal")
-        XCTAssertEqual(p["additional_param"] as? String, "abcd", "additional_param not equal")
-        XCTAssertEqual(p["message_type"] as? String, "push", "type does not equal inapp")
-    }
-    
-    func testTrackPushNotificationMalformed() {
-        mixpanel.trackPushNotification(["mp":
-                                            ["m": 11111, "cid": 22222]])
-        waitForTrackingQueue()
-        XCTAssertTrue(mixpanel.eventsQueue.isEmpty,
-                      "Invalid push notification was incorrectly queued.")
-        mixpanel.trackPushNotification(["mp": 1])
-        waitForTrackingQueue()
-        XCTAssertTrue(mixpanel.eventsQueue.isEmpty,
-                      "Invalid push notification was incorrectly queued.")
-        mixpanel.trackPushNotification([:])
-        waitForTrackingQueue()
-        XCTAssertTrue(mixpanel.eventsQueue.isEmpty,
-                      "Invalid push notification was incorrectly queued.")
-        mixpanel.trackPushNotification(["mp": "bad value"])
-        waitForTrackingQueue()
-        XCTAssertTrue(mixpanel.eventsQueue.isEmpty,
-                      "Invalid push notification was incorrectly queued.")
-        waitForTrackingQueue()
-        XCTAssertTrue(mixpanel.eventsQueue.isEmpty,
-                      "Invalid push notification was incorrectly queued.")
-    }
-    
-    
-    
     func testReset() {
         stubTrack()
         stubEngage()
@@ -650,7 +591,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                       "super properties failed to reset")
         XCTAssertTrue(mixpanel.eventsQueue.isEmpty, "events queue failed to reset")
         XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty, "people queue failed to reset")
-        mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
+        mixpanel = Mixpanel.initialize(token: kTestToken, flushInterval: 60)
         waitForTrackingQueue()
         #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(mixpanel.distinctId, mixpanel.defaultDistinctId(),
@@ -699,7 +640,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     
     func testArchiveNSNumberBoolIntProperty() {
         let testToken = randomId()
-        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
+        mixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
         let aBoolNumber: Bool = true
         let aBoolNSNumber = NSNumber(value: aBoolNumber)
         
@@ -709,7 +650,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         mixpanel.track(event: "e1", properties:  ["p1": aBoolNSNumber, "p2": aIntNSNumber])
         mixpanel.archive()
         waitForTrackingQueue()
-        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
+        mixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
         waitForTrackingQueue()
         let properties: [String: Any] = mixpanel.eventsQueue[0]["properties"] as! [String: Any]
         
@@ -728,7 +669,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     
     func testArchive() {
         let testToken = randomId()
-        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
+        mixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
         #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(mixpanel.distinctId, mixpanel.defaultDistinctId(),
                        "default distinct id archive failed")
@@ -756,7 +697,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         mixpanel.archive()
         waitForTrackingQueue()
         
-        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
+        mixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
         waitForTrackingQueue()
         XCTAssertEqual(mixpanel.distinctId, "d1", "custom distinct archive failed")
         XCTAssertTrue(mixpanel.currentSuperProperties().count == 1,
@@ -794,7 +735,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(fileManager.fileExists(
                         atPath: Persistence.filePathWithType(.properties, token: testToken)!),
                       "properties archive file not removed")
-        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
+        mixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
         XCTAssertEqual(mixpanel.distinctId, "d1", "expecting d1 as distinct id as initialised")
         XCTAssertTrue(mixpanel.currentSuperProperties().count == 1,
                       "default super properties expected to have 1 item")
@@ -830,7 +771,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                         atPath: Persistence.filePathWithType(.properties, token: testToken)!),
                       "properties archive file not removed")
         Persistence.deleteMPUserDefaultsData(token: testToken)
-        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
+        mixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
         waitForTrackingQueue()
         #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(mixpanel.distinctId, mixpanel.defaultDistinctId(),
@@ -850,105 +791,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(mixpanel.timedEvents.isEmpty,
                       "timedEvents is not empty")
     }
-    
-    func testUnarchiveInconsistentData() {
-        // corrupt file
-        let fileManager = FileManager.default
-        let testToken = randomId()
-        // Prior 2.1.7 we used to share every class between main target and extension target(appex). For serialization, this will cause problem.
-        // Because if the archive is triggered in extension, the class object will be saved as [Target Name].[Class name] for the key. Since in later version,
-        // we removed extension target. If the archive happened in 2.1.6, and unarchive happened in 2.4.4 (this is the case for upgrading the sdk), it will trigger a crash
-        // (throw NSException) because when try to map the key [Class name] to [Target Name].[Class name] and [Target Name].[Class name] no longer exists.
-        // The below line is to simulate this situation. Foo <--> Extension.Foo, Extension.Foo doesn't exist. We should catch the NSException and reset the file instead of
-        // crash the app
-        let data = try! Data(contentsOf: Bundle(for: type(of: self)).url(forResource: "test_variant", withExtension: "json")!)
-        let object = try! JSONSerialization.jsonObject(with: data, options: [])
-        let variant = Variant(JSONObject: object as? [String: Any])
-        NSKeyedArchiver.setClassName("Extension.Variant", for: Variant.self)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.events, token: testToken)!)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.people, token: testToken)!)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.properties, token: testToken)!)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.codelessBindings, token: testToken)!)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.variants, token: testToken)!)
-        NSKeyedArchiver.archiveRootObject(variant!, toFile: Persistence.filePathWithType(.optOutStatus, token: testToken)!)
         
-        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
-        waitForTrackingQueue()
-        // waitForArchive()
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.events, token: testToken)!),
-                      "events archive file not removed")
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.people, token: testToken)!),
-                      "people archive file not removed")
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.properties, token: testToken)!),
-                      "properties archive file not removed")
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.codelessBindings, token: testToken)!),
-                      "properties archive file not removed")
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.variants, token: testToken)!),
-                      "properties archive file not removed")
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.optOutStatus, token: testToken)!),
-                      "properties archive file not removed")
-    }
-    
-    func testUnarchiveCorruptedData() {
-        // corrupt file
-        let fileManager = FileManager.default
-        let garbage = "garbage".data(using: String.Encoding.utf8)!
-        let testToken = randomId()
-        
-        do {
-            try garbage.write(to: URL(
-                                fileURLWithPath: Persistence.filePathWithType(.events, token: testToken)!),
-                              options: [])
-            try garbage.write(to: URL(
-                                fileURLWithPath: Persistence.filePathWithType(.people, token: testToken)!),
-                              options: [])
-            try garbage.write(to: URL(
-                                fileURLWithPath: Persistence.filePathWithType(.properties, token: testToken)!),
-                              options: [])
-            try garbage.write(to: URL(
-                                fileURLWithPath: Persistence.filePathWithType(.codelessBindings, token: testToken)!),
-                              options: [])
-            try garbage.write(to: URL(
-                                fileURLWithPath: Persistence.filePathWithType(.variants, token: testToken)!),
-                              options: [])
-            try garbage.write(to: URL(
-                                fileURLWithPath: Persistence.filePathWithType(.optOutStatus, token: testToken)!),
-                              options: [])
-        } catch {
-            print("couldn't write data")
-        }
-        
-        mixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
-        waitForTrackingQueue()
-        
-        
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.events, token: testToken)!),
-                      "events archive file not removed")
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.people, token: testToken)!),
-                      "people archive file not removed")
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.properties, token: testToken)!),
-                      "properties archive file not removed")
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.codelessBindings, token: testToken)!),
-                      "properties archive file not removed")
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.variants, token: testToken)!),
-                      "properties archive file not removed")
-        XCTAssertTrue(!fileManager.fileExists(
-                        atPath: Persistence.filePathWithType(.optOutStatus, token: testToken)!),
-                      "properties archive file not removed")
-        waitForTrackingQueue()
-    }
-    
     func testMixpanelDelegate() {
         mixpanel.delegate = self
         mixpanel.identify(distinctId: "d1")

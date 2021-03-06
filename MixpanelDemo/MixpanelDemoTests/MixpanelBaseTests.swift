@@ -26,7 +26,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         stubGroups()
         LSNocilla.sharedInstance().start()
         mixpanelWillFlush = false
-        mixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
+        mixpanel = Mixpanel.initialize(token: kTestToken, flushInterval: 0)
         mixpanel.reset()
         waitForTrackingQueue()
 

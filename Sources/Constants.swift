@@ -27,12 +27,6 @@ struct BundleConstants {
 }
 
 #if !os(OSX) && !os(watchOS)
-struct InAppNotificationsConstants {
-    static let miniInAppHeight: CGFloat = 65
-    static let miniBottomPadding: CGFloat = 10 + (UIDevice.current.iPhoneX ? 34 : 0)
-    static let miniSidePadding: CGFloat = 15
-}
-
 extension UIDevice {
     var iPhoneX: Bool {
         return UIScreen.main.nativeBounds.height == 2436

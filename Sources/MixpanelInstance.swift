@@ -160,70 +160,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     public let name: String
 
     #if DECIDE
-    /// Controls whether to enable the visual editor for codeless on mixpanel.com
-    /// You will be unable to edit codeless events with this disabled, however previously
-    /// created codeless events will still be delivered.
-    open var enableVisualEditorForCodeless: Bool {
-        set {
-            decideInstance.enableVisualEditorForCodeless = newValue
-            decideInstance.gestureRecognizer?.isEnabled = newValue
-            if !newValue {
-                decideInstance.webSocketWrapper?.close()
-            }
-        }
-        get {
-            return decideInstance.enableVisualEditorForCodeless
-        }
-    }
-
-    /// Controls whether to automatically check for A/B test variants for the
-    /// currently identified user when the application becomes active.
-    /// Defaults to true.
-    open var checkForVariantsOnActive: Bool {
-        set {
-            decideInstance.ABTestingInstance.checkForVariantsOnActive = newValue
-        }
-        get {
-            return decideInstance.ABTestingInstance.checkForVariantsOnActive
-        }
-    }
-
-    /// Controls whether to automatically check for notifications for the
-    /// currently identified user when the application becomes active.
-    /// Defaults to true.
-    open var checkForNotificationOnActive: Bool {
-        set {
-            decideInstance.notificationsInstance.checkForNotificationOnActive = newValue
-        }
-        get {
-            return decideInstance.notificationsInstance.checkForNotificationOnActive
-        }
-    }
-
-    /// Controls whether to automatically check for and show in-app notifications
-    /// for the currently identified user when the application becomes active.
-    /// Defaults to true.
-    open var showNotificationOnActive: Bool {
-        set {
-            decideInstance.notificationsInstance.showNotificationOnActive = newValue
-        }
-        get {
-            return decideInstance.notificationsInstance.showNotificationOnActive
-        }
-    }
-
-    /// Determines the time, in seconds, that a mini notification will remain on
-    /// the screen before automatically hiding itself.
-    /// Defaults to 6 (seconds).
-    open var miniNotificationPresentationTime: Double {
-        set {
-            decideInstance.notificationsInstance.miniNotificationPresentationTime = newValue
-        }
-        get {
-            return decideInstance.notificationsInstance.miniNotificationPresentationTime
-        }
-    }
-
     /// The minimum session duration (ms) that is tracked in automatic events.
     /// The default value is 10000 (10 seconds).
     open var minimumSessionDuration: UInt64 {
@@ -276,7 +212,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // DECIDE
 
     #if !os(OSX) && !os(watchOS)
-    init(apiToken: String?, launchOptions: [UIApplication.LaunchOptionsKey : Any]?, flushInterval: Double, name: String, automaticPushTracking: Bool = true, optOutTrackingByDefault: Bool = false) {
+    init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -333,17 +269,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #if DECIDE || TV_AUTO_EVENTS
             if !MixpanelInstance.isiOSAppExtension() {
                 automaticEvents.delegate = self
-                automaticEvents.automaticPushTracking = automaticPushTracking
                 automaticEvents.initializeEvents()
-                #if DECIDE
-                decideInstance.inAppDelegate = self
-                executeCachedVariants()
-                executeCachedCodelessBindings()
-                if let notification =
-                    launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification] as? [AnyHashable: Any] {
-                    trackPushNotification(notification, event: "$app_open")
-                }
-                #endif
             }
             #if DECIDE
             connectIntegrations.mixpanel = self
@@ -397,12 +323,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         //                                   selector: #selector(setCurrentRadio),
         //                                   name: .CTRadioAccessTechnologyDidChange,
         //                                   object: nil)
-            #if DECIDE
-                notificationCenter.addObserver(self,
-                                               selector: #selector(executeTweaks),
-                                               name: Notification.Name("MPExecuteTweaks"),
-                                               object: nil)
-            #endif
         #endif // os(iOS)
         if !MixpanelInstance.isiOSAppExtension() {
             notificationCenter.addObserver(self,
@@ -429,9 +349,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                            selector: #selector(appLinksNotificationRaised(_:)),
                                            name: NSNotification.Name("com.parse.bolts.measurement_event"),
                                            object: nil)
-            #if os(iOS) && DECIDE && !NO_AB_TESTING_EDITOR
-                initializeGestureRecognizer()
-            #endif // os(iOS) && DECIDE
         }
     }
     #elseif os(OSX)
@@ -484,29 +401,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #if DECIDE
         checkDecide { decideResponse in
             if let decideResponse = decideResponse {
-                DispatchQueue.main.sync {
-                    decideResponse.toFinishVariants.forEach { $0.finish() }
-                }
-
-                if self.checkForNotificationOnActive && self.showNotificationOnActive && !decideResponse.unshownInAppNotifications.isEmpty {
-                    self.decideInstance.notificationsInstance.showNotification(decideResponse.unshownInAppNotifications.first!)
-                }
-
-                DispatchQueue.main.sync {
-                    for binding in decideResponse.newCodelessBindings {
-                        binding.execute()
-                    }
-                }
-
-                if self.checkForVariantsOnActive {
-                    DispatchQueue.main.sync {
-                        for variant in decideResponse.newVariants {
-                            variant.execute()
-                            self.markVariantRun(variant)
-                        }
-                    }
-                }
-
                 if decideResponse.integrations.count > 0 {
                     self.connectIntegrations.setupIntegrations(decideResponse.integrations)
                 }
@@ -692,32 +586,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
     }
     #endif
-
-    #if DECIDE
-    func initializeGestureRecognizer() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-
-            self.decideInstance.gestureRecognizer = UILongPressGestureRecognizer(target: self,
-                                                                                 action: #selector(self.connectGestureRecognized(gesture:)))
-            self.decideInstance.gestureRecognizer?.minimumPressDuration = 3
-            self.decideInstance.gestureRecognizer?.cancelsTouchesInView = false
-            #if (arch(i386) || arch(x86_64)) && DECIDE
-                self.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 2
-            #else
-                self.decideInstance.gestureRecognizer?.numberOfTouchesRequired = 4
-            #endif // (arch(i386) || arch(x86_64)) && DECIDE
-            self.decideInstance.gestureRecognizer?.isEnabled = self.enableVisualEditorForCodeless
-            MixpanelInstance.sharedUIApplication()?.keyWindow?.addGestureRecognizer(self.decideInstance.gestureRecognizer!)
-        }
-    }
-
-    @objc func connectGestureRecognized(gesture: UILongPressGestureRecognizer) {
-        if gesture.state == UIGestureRecognizer.State.began && enableVisualEditorForCodeless {
-            connectToWebSocket()
-        }
-    }
-    #endif // DECIDE
     #endif // os(iOS)
 
 }
@@ -912,10 +780,7 @@ extension MixpanelInstance {
                     // self.decideInstance.notificationsInstance.shownNotifications = Set()
 
                     self.decideInstance.decideFetched = false
-                    self.decideInstance.ABTestingInstance.variants = Set()
-                    self.decideInstance.codelessInstance.codelessBindings = Set()
                     self.connectIntegrations.reset()
-                    MixpanelTweaks.defaultStore.reset()
                     #endif // DECIDE
                 }
                 self?.archive()
@@ -950,14 +815,11 @@ extension MixpanelInstance {
                                                 hadPersistedDistinctId: hadPersistedDistinctId,
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue,
-                                                shownNotifications: decideInstance.notificationsInstance.shownNotifications,
                                                 automaticEventsEnabled: trackAutomaticEventsEnabled ?? decideInstance.automaticEventsEnabled)
             Persistence.archive(eventsQueue: flushEventsQueue + eventsQueue,
                                 peopleQueue: people.flushPeopleQueue + people.peopleQueue,
                                 groupsQueue: flushGroupsQueue + groupsQueue,
                                 properties: properties,
-                                codelessBindings: decideInstance.codelessInstance.codelessBindings,
-                                variants: decideInstance.ABTestingInstance.variants,
                                 token: apiToken)
         }
     }
@@ -1007,9 +869,6 @@ extension MixpanelInstance {
          hadPersistedDistinctId,
          people.distinctId,
          people.unidentifiedQueue,
-         decideInstance.notificationsInstance.shownNotifications,
-         decideInstance.codelessInstance.codelessBindings,
-         decideInstance.ABTestingInstance.variants,
          optOutStatus,
          decideInstance.automaticEventsEnabled) = Persistence.unarchive(token: apiToken)
 
@@ -1032,7 +891,6 @@ extension MixpanelInstance {
                                                 hadPersistedDistinctId: hadPersistedDistinctId,
                                                 peopleDistinctId: people.distinctId,
                                                 peopleUnidentifiedQueue: people.unidentifiedQueue,
-                                                shownNotifications: decideInstance.notificationsInstance.shownNotifications,
                                                 automaticEventsEnabled: trackAutomaticEventsEnabled ?? decideInstance.automaticEventsEnabled)
             Persistence.archiveProperties(properties, token: apiToken)
         }
@@ -1226,7 +1084,7 @@ extension MixpanelInstance {
                 shadowTimedEvents = self.timedEvents
                 shadowSuperProperties = self.superProperties
             }
-            let (eventsQueue, timedEvents, mergedProperties) = self.trackInstance.track(event: event,
+            let (eventsQueue, timedEvents, _) = self.trackInstance.track(event: event,
                                                                                         properties: properties,
                                                                                         eventsQueue: shadowEventsQueue,
                                                                                         timedEvents: shadowTimedEvents,
@@ -1244,9 +1102,6 @@ extension MixpanelInstance {
             self.readWriteLock.read {
                 Persistence.archiveEvents(self.flushEventsQueue + self.eventsQueue, token: self.apiToken)
             }
-            #if DECIDE
-            self.decideInstance.notificationsInstance.showNotification(event: event, properties: mergedProperties)
-            #endif  // DECIDE
         }
 
         if MixpanelInstance.isiOSAppExtension() {
@@ -1316,47 +1171,6 @@ extension MixpanelInstance {
     func makeMapKey(groupKey: String, groupID: MixpanelType) -> String {
         return "\(groupKey)_\(groupID)"
     }
-
-    #if DECIDE
-    func trackPushNotification(_ userInfo: [AnyHashable: Any],
-                                      event: String = "$campaign_received",
-                                      properties: Properties = [:]) {
-        if hasOptedOutTracking() {
-            return
-        }
-        if let mpPayload = userInfo["mp"] as? InternalProperties {
-            if let m = mpPayload["m"], let c = mpPayload["c"] {
-                var properties = properties
-                for (key, value) in mpPayload {
-                    // "token" and "distinct_id" are sent with the Mixpanel push payload but we don't need to track them
-                    // they are handled upstream to initialize the mixpanel instance and "distinct_id" will be passed in
-                    // explicitly in "additionalProperties"
-                    if !["m", "c", "token", "distinct_id"].contains(key) {
-                        // https://stackoverflow.com/questions/53547595/type-checks-on-int-and-bool-values-are-returning-incorrectly-in-swift-4-2
-                        if let typedValue = value as? NSNumber {
-                            if (typedValue === kCFBooleanTrue) {
-                                properties[key] = typedValue.boolValue
-                            } else if (typedValue === kCFBooleanFalse) {
-                                properties[key] = typedValue.boolValue
-                            } else {
-                                properties[key] = typedValue.intValue
-                            }
-                        }
-                        else if let typedValue = value as? String { properties[key] = typedValue }
-                        else if let typedValue = value as? MixpanelType { properties[key] = typedValue }
-                    }
-                }
-                properties["campaign_id"]  = c as? Int
-                properties["message_id"]   = m as? Int
-                properties["message_type"] = "push"
-                track(event: event,
-                      properties: properties)
-            } else {
-                Logger.info(message: "malformed mixpanel push payload")
-            }
-        }
-    }
-    #endif
 
     /**
      Starts a timer that will be stopped and added as a property when a
@@ -1730,7 +1544,7 @@ extension MixpanelInstance {
 }
 
 #if DECIDE
-extension MixpanelInstance: InAppNotificationsDelegate {
+extension MixpanelInstance {
 
     // MARK: - Decide
     func checkDecide(forceFetch: Bool = false, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
@@ -1749,194 +1563,6 @@ extension MixpanelInstance: InAppNotificationsDelegate {
                                                    completion: completion)
             }
         }
-    }
-    
-    // MARK: - WebSocket
-    func connectToWebSocket() {
-        decideInstance.connectToWebSocket(token: apiToken, mixpanelInstance: self)
-    }
-
-    // MARK: - Codeless
-    func executeCachedCodelessBindings() {
-        for binding in decideInstance.codelessInstance.codelessBindings {
-            binding.execute()
-        }
-    }
-
-    // MARK: - A/B Testing
-    func markVariantRun(_ variant: Variant) {
-        Logger.info(message: "Marking variant \(variant.ID) shown for experiment \(variant.experimentID)")
-        let shownVariant = ["\(variant.experimentID)": variant.ID]
-        people.merge(properties: ["$experiments": shownVariant])
-        trackingQueue.async { [weak self] in
-            guard let self = self else { return }
-
-            var superPropertiesCopy = self.superProperties
-            var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]
-            shownVariants += shownVariant
-            superPropertiesCopy += ["$experiments": shownVariants]
-            self.superProperties = superPropertiesCopy
-            self.archiveProperties()
-        }
-        track(event: "$experiment_started", properties: ["$experiment_id": variant.experimentID,
-                                                         "$variant_id": variant.ID])
-    }
-
-    func executeCachedVariants() {
-        for variant in decideInstance.ABTestingInstance.variants {
-            variant.execute()
-        }
-    }
-
-    @objc func executeTweaks() {
-        for variant in decideInstance.ABTestingInstance.variants {
-            variant.executeTweaks()
-        }
-    }
-
-    func checkForVariants(completion: @escaping (_ variants: Set<Variant>?) -> Void) {
-        checkDecide(forceFetch: true) { response in
-            DispatchQueue.main.sync {
-                response?.toFinishVariants.forEach { $0.finish() }
-            }
-            completion(response?.newVariants)
-        }
-    }
-
-    /**
-     Join any experiments (A/B tests) that are available for the current user.
-
-     Mixpanel will check for A/B tests automatically when your app enters
-     the foreground. Call this method if you would like to to check for,
-     and join, any experiments are newly available for the current user.
-
-     - parameter callback:  Optional callback for after the experiments have been loaded and applied
-     */
-    open func joinExperiments(callback: (() -> Void)? = nil) {
-        checkForVariants { newVariants in
-            guard let newVariants = newVariants else {
-                return
-            }
-
-            DispatchQueue.main.async { [weak self, newVariants] in
-                guard let self = self else {
-                    return
-                }
-
-                for variant in newVariants {
-                    variant.execute()
-                    self.markVariantRun(variant)
-                }
-            }
-
-            DispatchQueue.main.async { [callback] in
-                if let callback = callback {
-                    callback()
-                }
-            }
-        }
-    }
-
-    // MARK: - In App Notifications
-
-    /**
-     Shows a notification if one is available.
-
-     - note: You do not need to call this method on the main thread.
-    */
-    open func showNotification() {
-        checkForNotifications { (notifications) in
-            if let notifications = notifications, !notifications.isEmpty {
-                self.decideInstance.notificationsInstance.showNotification(notifications.first!)
-            }
-        }
-    }
-
-    /**
-     Shows a notification with the given type if one is available.
-
-     - note: You do not need to call this method on the main thread.
-     - parameter type: The type of notification to show, either "mini" or "takeover"
-    */
-    open func showNotification(type: String) {
-        checkForNotifications { (notifications) in
-            if let notifications = notifications {
-                for notification in notifications {
-                    if type == notification.type {
-                        self.decideInstance.notificationsInstance.showNotification(notification)
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     Shows a notification with the given ID
-
-     - note: You do not need to call this method on the main thread.
-     - parameter ID: The notification ID you want to present
-     */
-    open func showNotification(ID: Int) {
-        checkForNotifications { (notifications) in
-            if let notifications = notifications {
-                for notification in notifications {
-                    if ID == notification.ID {
-                        self.decideInstance.notificationsInstance.showNotification(notification)
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     Returns the payload of a notification if available
-
-     - note: You do not need to call this method on the main thread.
-     */
-    open func fetchNotificationPayload(completion: @escaping ([String: AnyObject]?) -> Void){
-        checkForNotifications { (notifications) in
-            if let notifications = notifications, !notifications.isEmpty {
-                if let notification = notifications.first {
-                    completion(notification.payload())
-                    self.notificationDidShow(notification)
-                }
-            } else {
-                completion(nil)
-            }
-        }
-    }
-
-    func checkForNotifications(completion: @escaping (_ notifications: [InAppNotification]?) -> Void) {
-        checkDecide(forceFetch: true) { response in
-            DispatchQueue.main.sync {
-                response?.toFinishVariants.forEach { $0.finish() }
-            }
-            completion(response?.unshownInAppNotifications)
-        }
-    }
-
-    func notificationDidShow(_ notification: InAppNotification) {
-        let properties: Properties = ["$campaigns": notification.ID,
-                          "$notifications": [
-                            "campaign_id": notification.ID,
-                            "message_id": notification.messageID,
-                            "type": "inapp",
-                            "time": Date()]]
-        people.append(properties: properties)
-        trackNotification(notification, event: "$campaign_delivery", properties: nil)
-    }
-
-    func trackNotification(_ notification: InAppNotification, event: String, properties: Properties?) {
-        var notificationProperties: Properties = ["campaign_id": notification.ID,
-                                                  "message_id": notification.messageID,
-                                                  "message_type": "inapp",
-                                                  "message_subtype": notification.type]
-        if let properties = properties {
-            for (k, v) in properties {
-                notificationProperties[k] = v
-            }
-        }
-        track(event: event, properties: notificationProperties)
     }
 }
 #endif // DECIDE

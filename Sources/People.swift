@@ -117,59 +117,7 @@ open class People {
         addPeopleRecordToQueueWithAction("$merge", properties: properties)
     }
 
-    private func deviceTokenDataToString(_ deviceToken: Data) -> String {
-        let tokenChars = (deviceToken as NSData).bytes.assumingMemoryBound(to: CChar.self)
-        var tokenString = ""
-
-        for i in 0..<deviceToken.count {
-            tokenString += String(format: "%02.2hhx", arguments: [tokenChars[i]])
-        }
-
-        return tokenString
-    }
-
     // MARK: - People
-
-    /**
-     Register the given device to receive push notifications.
-
-     This will associate the device token with the current user in Mixpanel People,
-     which will allow you to send push notifications to the user from the Mixpanel
-     People web interface. You should call this method with the `Data`
-     token passed to
-     `application:didRegisterForRemoteNotificationsWithDeviceToken:`.
-
-     - parameter deviceToken: device token as returned from
-     `application:didRegisterForRemoteNotificationsWithDeviceToken:`
-     */
-    open func addPushDeviceToken(_ deviceToken: Data) {
-        let properties = ["$ios_devices": [deviceTokenDataToString(deviceToken)]]
-        addPeopleRecordToQueueWithAction("$union", properties: properties)
-    }
-
-    /**
-     Unregister the given device to receive push notifications.
-
-     This will unset all of the push tokens saved to this people profile. This is useful
-     in conjunction with a call to `reset`, or when a user is logging out.
-     */
-    open func removeAllPushDeviceTokens() {
-        unset(properties: ["$ios_devices"])
-    }
-
-    /**
-     Unregister a specific device token from the ability to receive push notifications.
-
-     This will remove the provided push token saved to this people profile. This is useful
-     in conjunction with a call to `reset`, or when a user is logging out.
-
-     - parameter deviceToken: device token as returned from
-     `application:didRegisterForRemoteNotificationsWithDeviceToken:`
-     */
-    open func removePushDeviceToken(_ deviceToken: Data) {
-        let properties = ["$ios_devices": deviceTokenDataToString(deviceToken)]
-        addPeopleRecordToQueueWithAction("$remove", properties: properties)
-    }
 
     /**
      Set properties on the current user in Mixpanel People.

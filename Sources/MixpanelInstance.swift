@@ -341,10 +341,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                            selector: #selector(applicationWillEnterForeground(_:)),
                                            name: UIApplication.willEnterForegroundNotification,
                                            object: nil)
-            notificationCenter.addObserver(self,
-                                           selector: #selector(appLinksNotificationRaised(_:)),
-                                           name: NSNotification.Name("com.parse.bolts.measurement_event"),
-                                           object: nil)
         }
     }
     #elseif os(OSX)
@@ -463,19 +459,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     self.updateNetworkActivityIndicator(false)
                 #endif // os(iOS)
             }
-        }
-    }
-
-    @objc private func appLinksNotificationRaised(_ notification: Notification) {
-        let eventMap = ["al_nav_out": "$al_nav_out",
-                        "al_nav_in": "$al_nav_in",
-                        "al_ref_back_out": "$al_ref_back_out"]
-        let userInfo = (notification as Notification).userInfo
-
-        if let eventName = userInfo?["event_name"] as? String,
-           let eventArgs = userInfo?["event_args"] as? Properties,
-           let eventNameMap = eventMap[eventName] {
-            track(event: eventNameMap, properties: eventArgs)
         }
     }
     #endif // os(OSX)

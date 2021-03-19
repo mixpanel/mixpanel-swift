@@ -1,6 +1,5 @@
 import UIKit
 import Mixpanel
-import UserNotifications
 
 class LoginViewController: UIViewController {
     

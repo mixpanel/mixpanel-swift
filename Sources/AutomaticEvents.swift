@@ -16,7 +16,6 @@ protocol AEDelegate {
 import Foundation
 import UIKit
 import StoreKit
-import UserNotifications
 
 class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
 

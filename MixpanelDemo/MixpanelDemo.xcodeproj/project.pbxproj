@@ -262,6 +262,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0AAB97762ADB463FE09D6381 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		86F86E9422440C5F00B69832 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -487,6 +494,7 @@
 			buildPhases = (
 				86F86E8922440C5C00B69832 /* Resources */,
 				86F86EB322440C6000B69832 /* Embed App Extensions */,
+				0AAB97762ADB463FE09D6381 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -824,7 +832,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Nocilla/Nocilla.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -833,7 +841,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

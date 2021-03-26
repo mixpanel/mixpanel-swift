@@ -67,7 +67,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             if let appVersionValue = appVersionValue as? String,
                 let savedVersionValue = savedVersionValue,
                 appVersionValue.compare(savedVersionValue, options: .numeric, range: nil, locale: nil) == .orderedDescending {
-                delegate?.track(event: "$ae_updated", properties: ["$ae_updated_version": appVersionValue])
+                trackAllInstances(event: "$ae_updated", properties: ["$ae_updated_version": appVersionValue])
                 defaults.set(appVersionValue, forKey: appVersionKey)
                 defaults.synchronize()
             } else if savedVersionValue == nil {
@@ -102,17 +102,17 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         sessionLength = roundOneDigit(num: Date().timeIntervalSince1970 - sessionStartTime)
         if sessionLength >= Double(minimumSessionDuration / 1000) &&
            sessionLength <= Double(maximumSessionDuration / 1000) {
-            delegate?.track(event: "$ae_session", properties: ["$ae_session_length": sessionLength])
-            delegate?.increment(property: "$ae_total_app_sessions", by: 1)
-            delegate?.increment(property: "$ae_total_app_session_length", by: sessionLength)
+            trackAllInstances(event: "$ae_session", properties: ["$ae_session_length": sessionLength])
+            incrementAllInstances(property: "$ae_total_app_sessions", by: 1)
+            incrementAllInstances(property: "$ae_total_app_session_length", by: sessionLength)
         }
     }
 
     @objc private func appDidBecomeActive(_ notification: Notification) {
         sessionStartTime = Date().timeIntervalSince1970
         if firstAppOpen {
-            delegate?.track(event: "$ae_first_open", properties: nil)
-            delegate?.setOnce(properties: ["$ae_first_app_open_date": Date()])
+            trackAllInstances(event: "$ae_first_open", properties: nil)
+            setOnceAllInstances(properties: ["$ae_first_app_open_date": Date()])
             firstAppOpen = false
         }
     }
@@ -169,13 +169,39 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         awaitingTransactionsWriteLock.sync {
             for product in response.products {
                 if let trans = awaitingTransactions[product.productIdentifier] {
-                    delegate?.track(event: "$ae_iap", properties: ["$ae_iap_price": "\(product.price)",
+                    trackAllInstances(event: "$ae_iap", properties: ["$ae_iap_price": "\(product.price)",
                         "$ae_iap_quantity": trans.payment.quantity,
                         "$ae_iap_name": product.productIdentifier])
                     awaitingTransactions.removeValue(forKey: product.productIdentifier)
                 }
             }
         }
+    }
+    
+    func trackAllInstances(event: String?, properties: Properties?) {
+        for instance in MixpanelManager.sharedInstance.getAllInstances() {
+            instance.track(event: event, properties: properties)
+        }
+    }
+    
+    func incrementAllInstances(property: String, by: Double) {
+        for instance in MixpanelManager.sharedInstance.getAllInstances() {
+            instance.increment(property: property, by: by)
+        }
+    }
+    
+    func setOnceAllInstances(properties: Properties) {
+        for instance in MixpanelManager.sharedInstance.getAllInstances() {
+            instance.setOnce(properties: properties)
+        }
+    }
+    
+    func trackPushNotificationAllInstances(_ userInfo: [AnyHashable: Any], event: String, properties: Properties) {
+        #if DECIDE
+        for instance in MixpanelManager.sharedInstance.getAllInstances() {
+            instance.trackPushNotification(userInfo, event: event, properties: properties)
+        }
+        #endif
     }
 
     #if DECIDE
@@ -211,7 +237,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         if let selector = selector, let newSelector = newSelector {
             let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
                 if let param2 = param2 as? [AnyHashable: Any] {
-                    self.delegate?.trackPushNotification(param2, event: "$campaign_received", properties: [:])
+                    self.trackPushNotificationAllInstances(param2, event: "$campaign_received", properties: [:])
                 }
             }
             Swizzler.swizzleSelector(selector,
@@ -233,7 +259,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                 let newSelector = #selector(NSObject.mp_userNotificationCenter(_:newDidReceive:withCompletionHandler:))
                 let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
                     if let param2 = param2 as? [AnyHashable: Any] {
-                        self.delegate?.trackPushNotification(param2, event: "$campaign_received", properties: [:])
+                        self.trackPushNotificationAllInstances(param2, event: "$campaign_received", properties: [:])
                     }
                 }
                 Swizzler.swizzleSelector(selector,

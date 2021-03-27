@@ -67,7 +67,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             if let appVersionValue = appVersionValue as? String,
                 let savedVersionValue = savedVersionValue,
                 appVersionValue.compare(savedVersionValue, options: .numeric, range: nil, locale: nil) == .orderedDescending {
-                self.delegate?.track(event: "$ae_updated", properties: ["$ae_updated_version": appVersionValue])
+                delegate?.track(event: "$ae_updated", properties: ["$ae_updated_version": appVersionValue])
                 defaults.set(appVersionValue, forKey: appVersionKey)
                 defaults.synchronize()
             } else if savedVersionValue == nil {
@@ -102,9 +102,9 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         sessionLength = roundOneDigit(num: Date().timeIntervalSince1970 - sessionStartTime)
         if sessionLength >= Double(minimumSessionDuration / 1000) &&
            sessionLength <= Double(maximumSessionDuration / 1000) {
-            self.delegate?.track(event: "$ae_session", properties: ["$ae_session_length": sessionLength])
-            self.delegate?.increment(property: "$ae_total_app_sessions", by: 1)
-            self.delegate?.increment(property: "$ae_total_app_session_length", by: sessionLength)
+            delegate?.track(event: "$ae_session", properties: ["$ae_session_length": sessionLength])
+            delegate?.increment(property: "$ae_total_app_sessions", by: 1)
+            delegate?.increment(property: "$ae_total_app_session_length", by: sessionLength)
         }
     }
 
@@ -173,7 +173,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         awaitingTransactionsWriteLock.sync {
             for product in response.products {
                 if let trans = awaitingTransactions[product.productIdentifier] {
-                    self.delegate?.track(event: "$ae_iap", properties: ["$ae_iap_price": "\(product.price)",
+                    delegate?.track(event: "$ae_iap", properties: ["$ae_iap_price": "\(product.price)",
                         "$ae_iap_quantity": trans.payment.quantity,
                         "$ae_iap_name": product.productIdentifier])
                     awaitingTransactions.removeValue(forKey: product.productIdentifier)

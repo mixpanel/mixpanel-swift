@@ -107,5 +107,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         XCTAssertNotNil((event?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")
         let otherEvent = mp.eventsQueue.last
         XCTAssertEqual(otherEvent?["event"] as? String, "$ae_session", "should be app session event")
-        XCTAssertNotNil((otherEvent?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")    }
+        XCTAssertNotNil((otherEvent?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")
+        
+    }
 }

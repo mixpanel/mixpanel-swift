@@ -8,14 +8,22 @@
     <script src="../js/jquery.min.js" defer></script>
     <script src="../js/jazzy.js" defer></script>
     
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
     <a name="//apple_ref/swift/Class/People" class="dashAnchor"></a>
     <a title="People Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 2.8.1 Docs</a> (66% documented)</p>
+        <p><a href="../index.html">Mixpanel 2.9.1 Docs</a> (87% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png"/>View on GitHub</a></p>
+        <p class="header-right">
+          <form role="search" action="../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -75,16 +83,7 @@
                 <a href="../Extensions/CGFloat.html">CGFloat</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Extensions/Collection.html">Collection</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/Data.html">Data</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Extensions/Date.html">Date</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/DateFormatter.html">DateFormatter</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/Dictionary.html">Dictionary</a>
@@ -99,13 +98,16 @@
                 <a href="../Extensions/Int.html">Int</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Extensions/NSArray.html">NSArray</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Extensions/NSNull.html">NSNull</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/NSNumber.html">NSNumber</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Extensions/NSObject.html">NSObject</a>
+                <a href="../Extensions/NSString.html">NSString</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/String.html">String</a>
@@ -114,22 +116,7 @@
                 <a href="../Extensions/UIColor.html">UIColor</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Extensions/UIDevice.html">UIDevice</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UIResponder.html">UIResponder</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UIView.html">UIView</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UIViewController.html">UIViewController</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Extensions/UInt.html">UInt</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UNUserNotificationCenter.html">UNUserNotificationCenter</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/URL.html">URL</a>
@@ -197,6 +184,7 @@
             <h1>People</h1>
               <div class="declaration">
                 <div class="language">
+                  
                   <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">People</span></code></pre>
 
                 </div>
@@ -257,7 +245,7 @@ current time for all $set, $append, and $add operations</p>
                     <code>
                     <a name="/s:8Mixpanel6PeopleC18addPushDeviceTokenyy10Foundation4DataVF"></a>
                     <a name="//apple_ref/swift/Method/addPushDeviceToken(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC18addPushDeviceTokenyy10Foundation4DataVF">addPushDeviceToken(_:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC18addPushDeviceTokenyy10Foundation4DataVF">addPushDeviceToken(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -340,7 +328,7 @@ in conjunction with a call to <code>reset</code>, or when a user is logging out.
                     <code>
                     <a name="/s:8Mixpanel6PeopleC21removePushDeviceTokenyy10Foundation4DataVF"></a>
                     <a name="//apple_ref/swift/Method/removePushDeviceToken(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC21removePushDeviceTokenyy10Foundation4DataVF">removePushDeviceToken(_:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC21removePushDeviceTokenyy10Foundation4DataVF">removePushDeviceToken(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -390,7 +378,7 @@ in conjunction with a call to <code>reset</code>, or when a user is logging out.
                     <code>
                     <a name="/s:8Mixpanel6PeopleC3set10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/set(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC3set10propertiesySDySSAA0A4Type_pG_tF">set(properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC3set10propertiesySDySSAA0A4Type_pG_tF">set(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -449,7 +437,7 @@ value is overwritten. Other existing properties will not be affected.</p>
                     <code>
                     <a name="/s:8Mixpanel6PeopleC3set8property2toySS_AA0A4Type_ptF"></a>
                     <a name="//apple_ref/swift/Method/set(property:to:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC3set8property2toySS_AA0A4Type_ptF">set(property:to:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC3set8property2toySS_AA0A4Type_ptF">set(property:<wbr>to:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -510,7 +498,7 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                     <code>
                     <a name="/s:8Mixpanel6PeopleC7setOnce10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/setOnce(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC7setOnce10propertiesySDySSAA0A4Type_pG_tF">setOnce(properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC7setOnce10propertiesySDySSAA0A4Type_pG_tF">setOnce(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -562,7 +550,7 @@ representing the first time something happened.</p>
                     <code>
                     <a name="/s:8Mixpanel6PeopleC5unset10propertiesySaySSG_tF"></a>
                     <a name="//apple_ref/swift/Method/unset(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC5unset10propertiesySaySSG_tF">unset(properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC5unset10propertiesySaySSG_tF">unset(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -612,7 +600,7 @@ that don&rsquo;t exist there will be no effect.</p>
                     <code>
                     <a name="/s:8Mixpanel6PeopleC9increment10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/increment(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC9increment10propertiesySDySSAA0A4Type_pG_tF">increment(properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC9increment10propertiesySDySSAA0A4Type_pG_tF">increment(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -662,7 +650,7 @@ will be set to the increment amount. Property values must be number objects.</p>
                     <code>
                     <a name="/s:8Mixpanel6PeopleC9increment8property2byySS_SdtF"></a>
                     <a name="//apple_ref/swift/Method/increment(property:by:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC9increment8property2byySS_SdtF">increment(property:by:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC9increment8property2byySS_SdtF">increment(property:<wbr>by:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -721,7 +709,7 @@ amount.</p>
                     <code>
                     <a name="/s:8Mixpanel6PeopleC6append10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/append(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC6append10propertiesySDySSAA0A4Type_pG_tF">append(properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC6append10propertiesySDySSAA0A4Type_pG_tF">append(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -770,7 +758,7 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                     <code>
                     <a name="/s:8Mixpanel6PeopleC6remove10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/remove(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC6remove10propertiesySDySSAA0A4Type_pG_tF">remove(properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC6remove10propertiesySDySSAA0A4Type_pG_tF">remove(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -819,7 +807,7 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                     <code>
                     <a name="/s:8Mixpanel6PeopleC5union10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/union(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC5union10propertiesySDySSAA0A4Type_pG_tF">union(properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC5union10propertiesySDySSAA0A4Type_pG_tF">union(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -867,7 +855,7 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                     <code>
                     <a name="/s:8Mixpanel6PeopleC11trackCharge6amount10propertiesySd_SDySSAA0A4Type_pGSgtF"></a>
                     <a name="//apple_ref/swift/Method/trackCharge(amount:properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel6PeopleC11trackCharge6amount10propertiesySd_SDySSAA0A4Type_pGSgtF">trackCharge(amount:properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC11trackCharge6amount10propertiesySd_SDySSAA0A4Type_pGSgtF">trackCharge(amount:<wbr>properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -984,8 +972,8 @@ revenue analytics to see which products are generating the most revenue.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2020 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2020-11-23)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.1</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2021 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2021-04-01)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

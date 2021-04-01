@@ -8,14 +8,22 @@
     <script src="../js/jquery.min.js" defer></script>
     <script src="../js/jazzy.js" defer></script>
     
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
     <a name="//apple_ref/swift/Class/Group" class="dashAnchor"></a>
     <a title="Group Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 2.8.1 Docs</a> (66% documented)</p>
+        <p><a href="../index.html">Mixpanel 2.9.1 Docs</a> (87% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png"/>View on GitHub</a></p>
+        <p class="header-right">
+          <form role="search" action="../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -75,16 +83,7 @@
                 <a href="../Extensions/CGFloat.html">CGFloat</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Extensions/Collection.html">Collection</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/Data.html">Data</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Extensions/Date.html">Date</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/DateFormatter.html">DateFormatter</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/Dictionary.html">Dictionary</a>
@@ -99,13 +98,16 @@
                 <a href="../Extensions/Int.html">Int</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Extensions/NSArray.html">NSArray</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Extensions/NSNull.html">NSNull</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/NSNumber.html">NSNumber</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Extensions/NSObject.html">NSObject</a>
+                <a href="../Extensions/NSString.html">NSString</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/String.html">String</a>
@@ -114,22 +116,7 @@
                 <a href="../Extensions/UIColor.html">UIColor</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Extensions/UIDevice.html">UIDevice</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UIResponder.html">UIResponder</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UIView.html">UIView</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UIViewController.html">UIViewController</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Extensions/UInt.html">UInt</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UNUserNotificationCenter.html">UNUserNotificationCenter</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/URL.html">URL</a>
@@ -197,6 +184,7 @@
             <h1>Group</h1>
               <div class="declaration">
                 <div class="language">
+                  
                   <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">Group</span></code></pre>
 
                 </div>
@@ -222,7 +210,7 @@ the main Mixpanel instance.</p>
                     <code>
                     <a name="/s:8Mixpanel5GroupC3set10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/set(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel5GroupC3set10propertiesySDySSAA0A4Type_pG_tF">set(properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC3set10propertiesySDySSAA0A4Type_pG_tF">set(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -273,7 +261,7 @@ value is overwritten. Other existing properties will not be affected.</p>
                     <code>
                     <a name="/s:8Mixpanel5GroupC3set8property2toySS_AA0A4Type_ptF"></a>
                     <a name="//apple_ref/swift/Method/set(property:to:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel5GroupC3set8property2toySS_AA0A4Type_ptF">set(property:to:)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC3set8property2toySS_AA0A4Type_ptF">set(property:<wbr>to:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -334,7 +322,7 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                     <code>
                     <a name="/s:8Mixpanel5GroupC7setOnce10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/setOnce(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel5GroupC7setOnce10propertiesySDySSAA0A4Type_pG_tF">setOnce(properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC7setOnce10propertiesySDySSAA0A4Type_pG_tF">setOnce(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -385,7 +373,7 @@ data about dates representing the first time something happened.</p>
                     <code>
                     <a name="/s:8Mixpanel5GroupC5unset8propertyySS_tF"></a>
                     <a name="//apple_ref/swift/Method/unset(property:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel5GroupC5unset8propertyySS_tF">unset(property:)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC5unset8propertyySS_tF">unset(property:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -433,7 +421,7 @@ data about dates representing the first time something happened.</p>
                     <code>
                     <a name="/s:8Mixpanel5GroupC6remove3key5valueySS_AA0A4Type_ptF"></a>
                     <a name="//apple_ref/swift/Method/remove(key:value:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel5GroupC6remove3key5valueySS_AA0A4Type_ptF">remove(key:value:)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC6remove3key5valueySS_AA0A4Type_ptF">remove(key:<wbr>value:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -482,7 +470,7 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                     <code>
                     <a name="/s:8Mixpanel5GroupC5union3key6valuesySS_SayAA0A4Type_pGtF"></a>
                     <a name="//apple_ref/swift/Method/union(key:values:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel5GroupC5union3key6valuesySS_SayAA0A4Type_pGtF">union(key:values:)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC5union3key6valuesySS_SayAA0A4Type_pGtF">union(key:<wbr>values:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -557,8 +545,8 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2020 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2020-11-23)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.1</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2021 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2021-04-01)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

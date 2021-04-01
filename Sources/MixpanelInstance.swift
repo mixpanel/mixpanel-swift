@@ -774,14 +774,18 @@ extension MixpanelInstance {
 
             if distinctId != self.distinctId {
                 let oldDistinctId = self.distinctId
-                self.alias = nil
-                self.distinctId = distinctId
-                self.userId = distinctId
+                self.readWriteLock.write {
+                    self.alias = nil
+                    self.distinctId = distinctId
+                    self.userId = distinctId
+                }
                 self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
             }
 
             if usePeople {
-                self.people.distinctId = distinctId
+                self.readWriteLock.write {
+                    self.people.distinctId = distinctId
+                }
                 if !self.people.unidentifiedQueue.isEmpty {
                     self.readWriteLock.write {
                         for var r in self.people.unidentifiedQueue {
@@ -1293,16 +1297,27 @@ extension MixpanelInstance {
     open func getGroup(groupKey: String, groupID: MixpanelType) -> Group {
         let key = makeMapKey(groupKey: groupKey, groupID: groupID)
 
-        guard let group = groups[key] else {
-            groups[key] = Group(apiToken: apiToken, serialQueue: trackingQueue, lock: self.readWriteLock, groupKey: groupKey, groupID: groupID, metadata: sessionMetadata)
-            return groups[key]!
+        var groupsShadow: [String: Group] = [:]
+        
+        readWriteLock.read {
+            groupsShadow = groups
+        }
+        
+        guard let group = groupsShadow[key] else {
+            readWriteLock.write {
+                groups[key] = Group(apiToken: apiToken, serialQueue: trackingQueue, lock: self.readWriteLock, groupKey: groupKey, groupID: groupID, metadata: sessionMetadata)
+                groupsShadow = groups
+            }
+            return groupsShadow[key]!
         }
 
         if !(group.groupKey == groupKey && group.groupID.equals(rhs: groupID)) {
             // we somehow hit a collision on the map key, return a new group with the correct key and ID
             Logger.info(message: "groups dictionary key collision: \(key)")
             let newGroup = Group(apiToken: apiToken, serialQueue: trackingQueue, lock: self.readWriteLock, groupKey: groupKey, groupID: groupID, metadata: sessionMetadata)
-            groups[key] = newGroup
+            readWriteLock.write {
+                groups[key] = newGroup
+            }
             return newGroup
         }
 
@@ -1310,7 +1325,9 @@ extension MixpanelInstance {
     }
 
     func removeCachedGroup(groupKey: String, groupID: MixpanelType) {
-        groups.removeValue(forKey: makeMapKey(groupKey: groupKey, groupID: groupID))
+        readWriteLock.write {
+            groups.removeValue(forKey: makeMapKey(groupKey: groupKey, groupID: groupID))
+        }
     }
 
     func makeMapKey(groupKey: String, groupID: MixpanelType) -> String {
@@ -1528,9 +1545,17 @@ extension MixpanelInstance {
      - parameter update: closure to apply to superproperties
      */
     func updateSuperProperty(_ update: @escaping (_ superproperties: inout InternalProperties) -> Void) {
-        dispatchAndTrack() {
+        dispatchAndTrack() { [weak self] in
+            guard let self = self else { return }
+            var superPropertiesShadow = InternalProperties()
+            self.readWriteLock.read {
+                superPropertiesShadow = self.superProperties
+            }
             self.trackInstance.updateSuperProperty(update,
-                                                   superProperties: &self.superProperties)
+                                                   superProperties: &superPropertiesShadow)
+            self.readWriteLock.write {
+                self.superProperties = superPropertiesShadow
+            }
         }
     }
 
@@ -1575,7 +1600,7 @@ extension MixpanelInstance {
             return
         }
 
-        updateSuperProperty { (superProperties) -> Void in
+        updateSuperProperty { superProperties -> Void in
             guard let oldValue = superProperties[groupKey] else {
                 superProperties[groupKey] = [groupID]
                 self.people.set(properties: [groupKey: [groupID]])
@@ -1770,12 +1795,13 @@ extension MixpanelInstance: InAppNotificationsDelegate {
         people.merge(properties: ["$experiments": shownVariant])
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
-
-            var superPropertiesCopy = self.superProperties
-            var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]
-            shownVariants += shownVariant
-            superPropertiesCopy += ["$experiments": shownVariants]
-            self.superProperties = superPropertiesCopy
+            self.readWriteLock.write {
+                var superPropertiesCopy = self.superProperties
+                var shownVariants = superPropertiesCopy["$experiments"] as? [String: Any] ?? [:]
+                shownVariants += shownVariant
+                superPropertiesCopy += ["$experiments": shownVariants]
+                self.superProperties = superPropertiesCopy
+            }
             self.archiveProperties()
         }
         track(event: "$experiment_started", properties: ["$experiment_id": variant.experimentID,

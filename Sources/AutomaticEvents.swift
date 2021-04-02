@@ -108,7 +108,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         }
     }
 
-    @objc private func appDidBecomeActive(_ notification: Notification) {
+    @objc func appDidBecomeActive(_ notification: Notification) {
         sessionStartTime = Date().timeIntervalSince1970
         if firstAppOpen {
             if let allInstances = MixpanelManager.sharedInstance.getAllInstances() {

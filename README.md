@@ -49,8 +49,10 @@ Our Swift library fully supports all of the Mixpanel features and has full parit
 <a name="installation"></a>
 # Installation
 
-<a name="cocoapods"></a>
-<a name="spm"></a>
+On Jan 1, 2022, we’ll remove the [Messages & Experiments](https://mixpanel.com/blog/why-were-sunsetting-messaging-and-experiments/#:~:text=A%20year%20from%20now%2C%20on,offering%20discounts%20for%20getting%20started) feature from Mixpanel. For now, you can choose to opt in to our beta version without Messages & Experiments feature support. You can use **Swift Package Manager** to install the beta version:
+1.  In Xcode, select File > Swift Packages > Add Package Dependency.
+2.  Follow the prompts using the URL for this repository and point to the branch `3.0.0.beta`
+
 ## Swift Package Manager
 
 **It requires Xcode 12+ and v2.8.0+ release**

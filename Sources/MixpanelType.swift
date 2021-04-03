@@ -35,6 +35,21 @@ extension String: MixpanelType {
     }
 }
 
+extension NSString: MixpanelType {
+    /**
+     Checks if this object has nested object types that Mixpanel supports.
+     Will always return true.
+     */
+    public func isValidNestedTypeAndValue() -> Bool { return true }
+
+    public func equals(rhs: MixpanelType) -> Bool {
+        if rhs is NSString {
+            return self == rhs as! NSString
+        }
+        return false
+    }
+}
+
 extension NSNumber: MixpanelType {
     /**
      Checks if this object has nested object types that Mixpanel supports.
@@ -174,6 +189,43 @@ extension NSNull: MixpanelType {
 }
 
 extension Array: MixpanelType {
+    /**
+     Checks if this object has nested object types that Mixpanel supports.
+     */
+    public func isValidNestedTypeAndValue() -> Bool {
+        for element in self {
+            guard let _ = element as? MixpanelType else {
+                return false
+            }
+        }
+        return true
+    }
+
+    public func equals(rhs: MixpanelType) -> Bool {
+        if rhs is [MixpanelType] {
+            let rhs = rhs as! [MixpanelType]
+            
+            if self.count != rhs.count {
+                return false
+            }
+
+            if !isValidNestedTypeAndValue() {
+                return false
+            }
+            
+            let lhs = self as! [MixpanelType]
+            for (i, val) in lhs.enumerated() {
+                if !val.equals(rhs: rhs[i]) {
+                    return false
+                }
+            }
+            return true
+        }
+        return false
+    }
+}
+
+extension NSArray: MixpanelType {
     /**
      Checks if this object has nested object types that Mixpanel supports.
      */

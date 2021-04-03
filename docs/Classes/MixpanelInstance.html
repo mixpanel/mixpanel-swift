@@ -8,14 +8,22 @@
     <script src="../js/jquery.min.js" defer></script>
     <script src="../js/jazzy.js" defer></script>
     
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
     <a name="//apple_ref/swift/Class/MixpanelInstance" class="dashAnchor"></a>
     <a title="MixpanelInstance Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 2.8.1 Docs</a> (66% documented)</p>
+        <p><a href="../index.html">Mixpanel 2.9.1 Docs</a> (87% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png"/>View on GitHub</a></p>
+        <p class="header-right">
+          <form role="search" action="../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -75,16 +83,7 @@
                 <a href="../Extensions/CGFloat.html">CGFloat</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Extensions/Collection.html">Collection</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/Data.html">Data</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Extensions/Date.html">Date</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/DateFormatter.html">DateFormatter</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/Dictionary.html">Dictionary</a>
@@ -99,13 +98,16 @@
                 <a href="../Extensions/Int.html">Int</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Extensions/NSArray.html">NSArray</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Extensions/NSNull.html">NSNull</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/NSNumber.html">NSNumber</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Extensions/NSObject.html">NSObject</a>
+                <a href="../Extensions/NSString.html">NSString</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/String.html">String</a>
@@ -114,22 +116,7 @@
                 <a href="../Extensions/UIColor.html">UIColor</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Extensions/UIDevice.html">UIDevice</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UIResponder.html">UIResponder</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UIView.html">UIView</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UIViewController.html">UIViewController</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Extensions/UInt.html">UInt</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Extensions/UNUserNotificationCenter.html">UNUserNotificationCenter</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/URL.html">URL</a>
@@ -197,6 +184,7 @@
             <h1>MixpanelInstance</h1>
               <div class="declaration">
                 <div class="language">
+                  
                   <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">MixpanelInstance</span> <span class="p">:</span> <span class="kt">CustomDebugStringConvertible</span><span class="p">,</span> <span class="kt">FlushDelegate</span><span class="p">,</span> <span class="kt">AEDelegate</span></code></pre>
 
                 </div>
@@ -899,7 +887,7 @@ The default value is UINT64_MAX (no maximum session duration).</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC8identify10distinctId9usePeopleySS_SbtF"></a>
                     <a name="//apple_ref/swift/Method/identify(distinctId:usePeople:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8identify10distinctId9usePeopleySS_SbtF">identify(distinctId:usePeople:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8identify10distinctId9usePeopleySS_SbtF">identify(distinctId:<wbr>usePeople:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -978,7 +966,7 @@ flushed once <code>identify:</code> is called.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC11createAlias_10distinctId9usePeopleySS_SSSbtF"></a>
                     <a name="//apple_ref/swift/Method/createAlias(_:distinctId:usePeople:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11createAlias_10distinctId9usePeopleySS_SSSbtF">createAlias(_:distinctId:usePeople:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11createAlias_10distinctId9usePeopleySS_SSSbtF">createAlias(_:<wbr>distinctId:<wbr>usePeople:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1160,123 +1148,6 @@ persisting data as needed.</p>
                     </section>
                   </div>
                 </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC9unarchiveyyF"></a>
-                    <a name="//apple_ref/swift/Method/unarchive()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC9unarchiveyyF">unarchive()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">unarchive</span><span class="p">()</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC17archivePropertiesyyF"></a>
-                    <a name="//apple_ref/swift/Method/archiveProperties()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC17archivePropertiesyyF">archiveProperties()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">archiveProperties</span><span class="p">()</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/unarchive()" class="dashAnchor"></a>
-                    <a class="token" href="#/">unarchive()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/archiveProperties()" class="dashAnchor"></a>
-                    <a class="token" href="#/">archiveProperties()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC16trackIntegrationyyF"></a>
-                    <a name="//apple_ref/swift/Method/trackIntegration()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16trackIntegrationyyF">trackIntegration()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">trackIntegration</span><span class="p">()</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
               </ul>
             </div>
             <div class="task-group">
@@ -1295,7 +1166,7 @@ persisting data as needed.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC5flush10completionyyycSg_tF"></a>
                     <a name="//apple_ref/swift/Method/flush(completion:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC5flush10completionyyycSg_tF">flush(completion:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC5flush10completionyyycSg_tF">flush(completion:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1341,33 +1212,6 @@ method manually if you want to force a flush at a particular moment.</p>
                     </section>
                   </div>
                 </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC11updateQueue_4typeySaySDySSypGG_AA9FlushTypeOtF"></a>
-                    <a name="//apple_ref/swift/Method/updateQueue(_:type:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11updateQueue_4typeySaySDySSypGG_AA9FlushTypeOtF">updateQueue(_:type:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">updateQueue</span><span class="p">(</span><span class="n">_</span> <span class="nv">queue</span><span class="p">:</span> <span class="kt">Queue</span><span class="p">,</span> <span class="nv">type</span><span class="p">:</span> <span class="kt">FlushType</span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
               </ul>
             </div>
             <div class="task-group">
@@ -1386,7 +1230,7 @@ method manually if you want to force a flush at a particular moment.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC5track5event10propertiesySSSg_SDySSAA0A4Type_pGSgtF"></a>
                     <a name="//apple_ref/swift/Method/track(event:properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC5track5event10propertiesySSSg_SDySSAA0A4Type_pGSgtF">track(event:properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC5track5event10propertiesySSSg_SDySSAA0A4Type_pGSgtF">track(event:<wbr>properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1450,7 +1294,7 @@ If the event is being timed, the timer will stop and be added as a property.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC15trackWithGroups5event10properties6groupsySSSg_SDySSAA0A4Type_pGSgAKtF"></a>
                     <a name="//apple_ref/swift/Method/trackWithGroups(event:properties:groups:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC15trackWithGroups5event10properties6groupsySSSg_SDySSAA0A4Type_pGSgAKtF">trackWithGroups(event:properties:groups:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC15trackWithGroups5event10properties6groupsySSSg_SDySSAA0A4Type_pGSgAKtF">trackWithGroups(event:<wbr>properties:<wbr>groups:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1526,7 +1370,7 @@ If the event is being timed, the timer will stop and be added as a property.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC8getGroup8groupKey0E2IDAA0D0CSS_AA0A4Type_ptF"></a>
                     <a name="//apple_ref/swift/Method/getGroup(groupKey:groupID:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8getGroup8groupKey0E2IDAA0D0CSS_AA0A4Type_ptF">getGroup(groupKey:groupID:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8getGroup8groupKey0E2IDAA0D0CSS_AA0A4Type_ptF">getGroup(groupKey:<wbr>groupID:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1551,92 +1395,9 @@ If the event is being timed, the timer will stop and be added as a property.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC17removeCachedGroup8groupKey0F2IDySS_AA0A4Type_ptF"></a>
-                    <a name="//apple_ref/swift/Method/removeCachedGroup(groupKey:groupID:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC17removeCachedGroup8groupKey0F2IDySS_AA0A4Type_ptF">removeCachedGroup(groupKey:groupID:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">removeCachedGroup</span><span class="p">(</span><span class="nv">groupKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">groupID</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC10makeMapKey05groupE00F2IDS2S_AA0A4Type_ptF"></a>
-                    <a name="//apple_ref/swift/Method/makeMapKey(groupKey:groupID:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC10makeMapKey05groupE00F2IDS2S_AA0A4Type_ptF">makeMapKey(groupKey:groupID:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">makeMapKey</span><span class="p">(</span><span class="nv">groupKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">groupID</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">String</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC21trackPushNotification_5event10propertiesySDys11AnyHashableVypG_SSSDySSAA0A4Type_pGtF"></a>
-                    <a name="//apple_ref/swift/Method/trackPushNotification(_:event:properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC21trackPushNotification_5event10propertiesySDys11AnyHashableVypG_SSSDySSAA0A4Type_pGtF">trackPushNotification(_:event:properties:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">trackPushNotification</span><span class="p">(</span><span class="n">_</span> <span class="nv">userInfo</span><span class="p">:</span> <span class="p">[</span><span class="kt">AnyHashable</span><span class="p">:</span> <span class="kt">Any</span><span class="p">],</span>
-                                  <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"$campaign_received"</span><span class="p">,</span>
-                                  <span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span> <span class="o">=</span> <span class="p">[:])</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
                     <a name="/s:8Mixpanel0A8InstanceC4time5eventySS_tF"></a>
                     <a name="//apple_ref/swift/Method/time(event:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC4time5eventySS_tF">time(event:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC4time5eventySS_tF">time(event:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1700,7 +1461,7 @@ mixpanelInstance.track(&ldquo;Image Upload&rdquo;)
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC16eventElapsedTime0C0SdSS_tF"></a>
                     <a name="//apple_ref/swift/Method/eventElapsedTime(event:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16eventElapsedTime0C0SdSS_tF">eventElapsedTime(event:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16eventElapsedTime0C0SdSS_tF">eventElapsedTime(event:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1771,6 +1532,52 @@ mixpanelInstance.track(&ldquo;Image Upload&rdquo;)
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:8Mixpanel0A8InstanceC15clearTimedEvent5eventySS_tF"></a>
+                    <a name="//apple_ref/swift/Method/clearTimedEvent(event:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC15clearTimedEvent5eventySS_tF">clearTimedEvent(event:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Clears the event timer for the named event.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">clearTimedEvent</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>event</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>the name of the event to clear the timer for</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:8Mixpanel0A8InstanceC22currentSuperPropertiesSDySSypGyF"></a>
                     <a name="//apple_ref/swift/Method/currentSuperProperties()" class="dashAnchor"></a>
                     <a class="token" href="#/s:8Mixpanel0A8InstanceC22currentSuperPropertiesSDySSypGyF">currentSuperProperties()</a>
@@ -1831,7 +1638,7 @@ mixpanelInstance.track(&ldquo;Image Upload&rdquo;)
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC23registerSuperPropertiesyySDySSAA0A4Type_pGF"></a>
                     <a name="//apple_ref/swift/Method/registerSuperProperties(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC23registerSuperPropertiesyySDySSAA0A4Type_pGF">registerSuperProperties(_:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC23registerSuperPropertiesyySDySSAA0A4Type_pGF">registerSuperProperties(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1883,7 +1690,7 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC27registerSuperPropertiesOnce_12defaultValueySDySSAA0A4Type_pG_AaF_pSgtF"></a>
                     <a name="//apple_ref/swift/Method/registerSuperPropertiesOnce(_:defaultValue:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC27registerSuperPropertiesOnce_12defaultValueySDySSAA0A4Type_pG_AaF_pSgtF">registerSuperPropertiesOnce(_:defaultValue:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC27registerSuperPropertiesOnce_12defaultValueySDySSAA0A4Type_pG_AaF_pSgtF">registerSuperPropertiesOnce(_:<wbr>defaultValue:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1946,7 +1753,7 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC23unregisterSuperPropertyyySSF"></a>
                     <a name="//apple_ref/swift/Method/unregisterSuperProperty(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC23unregisterSuperPropertyyySSF">unregisterSuperProperty(_:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC23unregisterSuperPropertyyySSF">unregisterSuperProperty(_:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1998,55 +1805,9 @@ registered.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC19updateSuperPropertyyyySDySSypGzcF"></a>
-                    <a name="//apple_ref/swift/Method/updateSuperProperty(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC19updateSuperPropertyyyySDySSypGzcF">updateSuperProperty(_:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Updates a superproperty atomically. The update function</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">updateSuperProperty</span><span class="p">(</span><span class="n">_</span> <span class="nv">update</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="n">_</span> <span class="nv">superproperties</span><span class="p">:</span> <span class="k">inout</span> <span class="kt">InternalProperties</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>update</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>closure to apply to superproperties</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
                     <a name="/s:8Mixpanel0A8InstanceC8setGroup8groupKey0E2IDySS_AA0A4Type_ptF"></a>
                     <a name="//apple_ref/swift/Method/setGroup(groupKey:groupID:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8setGroup8groupKey0E2IDySS_AA0A4Type_ptF">setGroup(groupKey:groupID:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8setGroup8groupKey0E2IDySS_AA0A4Type_ptF">setGroup(groupKey:<wbr>groupID:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -2104,7 +1865,7 @@ registered.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC8setGroup8groupKey0E3IDsySS_SayAA0A4Type_pGtF"></a>
                     <a name="//apple_ref/swift/Method/setGroup(groupKey:groupIDs:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8setGroup8groupKey0E3IDsySS_SayAA0A4Type_pGtF">setGroup(groupKey:groupIDs:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8setGroup8groupKey0E3IDsySS_SayAA0A4Type_pGtF">setGroup(groupKey:<wbr>groupIDs:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -2162,7 +1923,7 @@ registered.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC8addGroup8groupKey0E2IDySS_AA0A4Type_ptF"></a>
                     <a name="//apple_ref/swift/Method/addGroup(groupKey:groupID:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8addGroup8groupKey0E2IDySS_AA0A4Type_ptF">addGroup(groupKey:groupID:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC8addGroup8groupKey0E2IDySS_AA0A4Type_ptF">addGroup(groupKey:<wbr>groupID:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -2220,7 +1981,7 @@ registered.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC11removeGroup8groupKey0E2IDySS_AA0A4Type_ptF"></a>
                     <a name="//apple_ref/swift/Method/removeGroup(groupKey:groupID:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11removeGroup8groupKey0E2IDySS_AA0A4Type_ptF">removeGroup(groupKey:groupID:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11removeGroup8groupKey0E2IDySS_AA0A4Type_ptF">removeGroup(groupKey:<wbr>groupID:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -2308,7 +2069,7 @@ to be sent back to the Mixpanel server.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC13optInTracking10distinctId10propertiesySSSg_SDySSAA0A4Type_pGSgtF"></a>
                     <a name="//apple_ref/swift/Method/optInTracking(distinctId:properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC13optInTracking10distinctId10propertiesySSSg_SDySSAA0A4Type_pGSgtF">optInTracking(distinctId:properties:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC13optInTracking10distinctId10propertiesySSSg_SDySSAA0A4Type_pGSgtF">optInTracking(distinctId:<wbr>properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -2397,228 +2158,14 @@ sent to Mixpanel after using this method.</p>
                     </section>
                   </div>
                 </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC16dispatchAndTrack7closureyyyc_tF"></a>
-                    <a name="//apple_ref/swift/Method/dispatchAndTrack(closure:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16dispatchAndTrack7closureyyyc_tF">dispatchAndTrack(closure:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">dispatchAndTrack</span><span class="p">(</span><span class="nv">closure</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
               </ul>
             </div>
             <div class="task-group">
               <div class="task-name-container">
-                <a name="/AEDelegate"></a>
-                <a name="//apple_ref/swift/Section/AEDelegate" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/AEDelegate"></a>
-                  <h3 class="section-name"><p>AEDelegate</p>
-</h3>
-                </div>
-              </div>
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC9increment8property2byySS_SdtF"></a>
-                    <a name="//apple_ref/swift/Method/increment(property:by:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC9increment8property2byySS_SdtF">increment(property:by:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">increment</span><span class="p">(</span><span class="nv">property</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">by</span><span class="p">:</span> <span class="kt">Double</span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC7setOnce10propertiesySDySSAA0A4Type_pG_tF"></a>
-                    <a name="//apple_ref/swift/Method/setOnce(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC7setOnce10propertiesySDySSAA0A4Type_pG_tF">setOnce(properties:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">setOnce</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Decide"></a>
-                <a name="//apple_ref/swift/Section/Decide" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/Decide"></a>
-                  <h3 class="section-name"><p>Decide</p>
-</h3>
-                </div>
-              </div>
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC11checkDecide10forceFetch10completionySb_yAA0D8ResponseVSgctF"></a>
-                    <a name="//apple_ref/swift/Method/checkDecide(forceFetch:completion:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11checkDecide10forceFetch10completionySb_yAA0D8ResponseVSgctF">checkDecide(forceFetch:completion:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">checkDecide</span><span class="p">(</span><span class="nv">forceFetch</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nv">completion</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">((</span><span class="n">_</span> <span class="nv">response</span><span class="p">:</span> <span class="kt">DecideResponse</span><span class="p">?)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">))</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/WebSocket"></a>
-                <a name="//apple_ref/swift/Section/WebSocket" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/WebSocket"></a>
-                  <h3 class="section-name"><p>WebSocket</p>
-</h3>
-                </div>
-              </div>
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC18connectToWebSocketyyF"></a>
-                    <a name="//apple_ref/swift/Method/connectToWebSocket()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC18connectToWebSocketyyF">connectToWebSocket()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">connectToWebSocket</span><span class="p">()</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Codeless"></a>
-                <a name="//apple_ref/swift/Section/Codeless" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/Codeless"></a>
-                  <h3 class="section-name"><p>Codeless</p>
-</h3>
-                </div>
-              </div>
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC29executeCachedCodelessBindingsyyF"></a>
-                    <a name="//apple_ref/swift/Method/executeCachedCodelessBindings()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC29executeCachedCodelessBindingsyyF">executeCachedCodelessBindings()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">executeCachedCodelessBindings</span><span class="p">()</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/A/B%20Testing"></a>
+                <a name="/A%2FB%20Testing"></a>
                 <a name="//apple_ref/swift/Section/A/B Testing" class="dashAnchor"></a>
                 <div class="section-name-container">
-                  <a class="section-name-link" href="#/A/B%20Testing"></a>
+                  <a class="section-name-link" href="#/A%2FB%20Testing"></a>
                   <h3 class="section-name"><p>A/B Testing</p>
 </h3>
                 </div>
@@ -2627,118 +2174,9 @@ sent to Mixpanel after using this method.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC14markVariantRunyyAA0D0CF"></a>
-                    <a name="//apple_ref/swift/Method/markVariantRun(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC14markVariantRunyyAA0D0CF">markVariantRun(_:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">markVariantRun</span><span class="p">(</span><span class="n">_</span> <span class="nv">variant</span><span class="p">:</span> <span class="kt">Variant</span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC21executeCachedVariantsyyF"></a>
-                    <a name="//apple_ref/swift/Method/executeCachedVariants()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC21executeCachedVariantsyyF">executeCachedVariants()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">executeCachedVariants</span><span class="p">()</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC13executeTweaksyyF"></a>
-                    <a name="//apple_ref/swift/Method/executeTweaks()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC13executeTweaksyyF">executeTweaks()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">@objc</span>
-<span class="kd">func</span> <span class="nf">executeTweaks</span><span class="p">()</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC16checkForVariants10completionyyShyAA7VariantCGSgc_tF"></a>
-                    <a name="//apple_ref/swift/Method/checkForVariants(completion:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16checkForVariants10completionyyShyAA7VariantCGSgc_tF">checkForVariants(completion:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">checkForVariants</span><span class="p">(</span><span class="nv">completion</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="n">_</span> <span class="nv">variants</span><span class="p">:</span> <span class="kt">Set</span><span class="o">&lt;</span><span class="kt">Variant</span><span class="o">&gt;</span><span class="p">?)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
                     <a name="/s:8Mixpanel0A8InstanceC15joinExperiments8callbackyyycSg_tF"></a>
                     <a name="//apple_ref/swift/Method/joinExperiments(callback:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC15joinExperiments8callbackyyycSg_tF">joinExperiments(callback:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC15joinExperiments8callbackyyycSg_tF">joinExperiments(callback:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -2833,7 +2271,7 @@ and join, any experiments are newly available for the current user.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC16showNotification4typeySS_tF"></a>
                     <a name="//apple_ref/swift/Method/showNotification(type:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16showNotification4typeySS_tF">showNotification(type:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16showNotification4typeySS_tF">showNotification(type:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -2884,7 +2322,7 @@ and join, any experiments are newly available for the current user.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC16showNotification2IDySi_tF"></a>
                     <a name="//apple_ref/swift/Method/showNotification(ID:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16showNotification2IDySi_tF">showNotification(ID:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC16showNotification2IDySi_tF">showNotification(ID:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -2935,7 +2373,7 @@ and join, any experiments are newly available for the current user.</p>
                     <code>
                     <a name="/s:8Mixpanel0A8InstanceC24fetchNotificationPayload10completionyySDySSyXlGSgc_tF"></a>
                     <a name="//apple_ref/swift/Method/fetchNotificationPayload(completion:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC24fetchNotificationPayload10completionyySDySSyXlGSgc_tF">fetchNotificationPayload(completion:)</a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC24fetchNotificationPayload10completionyySDySSyXlGSgc_tF">fetchNotificationPayload(completion:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -2962,94 +2400,13 @@ and join, any experiments are newly available for the current user.</p>
                     </section>
                   </div>
                 </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC21checkForNotifications10completionyySayAA17InAppNotificationCGSgc_tF"></a>
-                    <a name="//apple_ref/swift/Method/checkForNotifications(completion:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC21checkForNotifications10completionyySayAA17InAppNotificationCGSgc_tF">checkForNotifications(completion:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">checkForNotifications</span><span class="p">(</span><span class="nv">completion</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="n">_</span> <span class="nv">notifications</span><span class="p">:</span> <span class="p">[</span><span class="kt">InAppNotification</span><span class="p">]?)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC19notificationDidShowyyAA17InAppNotificationCF"></a>
-                    <a name="//apple_ref/swift/Method/notificationDidShow(_:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC19notificationDidShowyyAA17InAppNotificationCF">notificationDidShow(_:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">notificationDidShow</span><span class="p">(</span><span class="n">_</span> <span class="nv">notification</span><span class="p">:</span> <span class="kt">InAppNotification</span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A8InstanceC17trackNotification_5event10propertiesyAA05InAppD0C_SSSDySSAA0A4Type_pGSgtF"></a>
-                    <a name="//apple_ref/swift/Method/trackNotification(_:event:properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC17trackNotification_5event10propertiesyAA05InAppD0C_SSSDySSAA0A4Type_pGSgtF">trackNotification(_:event:properties:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">trackNotification</span><span class="p">(</span><span class="n">_</span> <span class="nv">notification</span><span class="p">:</span> <span class="kt">InAppNotification</span><span class="p">,</span> <span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
               </ul>
             </div>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2020 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2020-11-23)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.1</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2021 <a class="link" href="http://mixpanel.com" target="_blank" rel="external">Mixpanel</a>. All rights reserved. (Last updated: 2021-04-01)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

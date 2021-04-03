@@ -10,6 +10,7 @@ podfile: MixpanelDemo/Podfile
 branches:
   only:
   - master
+  - 3.0.0.beta
 env:
   global:
   - WORKSPACE=MixpanelDemo.xcworkspace

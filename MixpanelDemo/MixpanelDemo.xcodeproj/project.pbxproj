@@ -8,13 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		021F142821B8EA1313088AB6 /* Pods_MixpanelDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37433CF0620BC6A0A5EFC541 /* Pods_MixpanelDemoTests.framework */; };
-		05D4C3E2222E1C6800D30FC2 /* SelectorEvaluaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D4C3E1222E1C6800D30FC2 /* SelectorEvaluaterTests.swift */; };
-		05D4C3E82230A8AD00D30FC2 /* InAppNotificationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D4C3E72230A8AD00D30FC2 /* InAppNotificationTest.swift */; };
 		51DD568A1D3077390045D3DB /* LoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56891D3077390045D3DB /* LoggerTests.swift */; };
-		60AF351F23D7CC4400F00724 /* Mixpanel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */; };
 		60CB587123D77F9200F1632B /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60CB587023D77F9200F1632B /* LoginViewController.swift */; };
-		60DDD14A23D39621004F7CBB /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60DDD14923D39620004F7CBB /* NotificationService.swift */; };
-		60DDD14E23D39621004F7CBB /* NotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 60DDD14723D39620004F7CBB /* NotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		671EECAF21432E5F006DD9FA /* GroupsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 671EECAE21432E5F006DD9FA /* GroupsViewController.swift */; };
 		673ABE4321405A0500B1784B /* MixpanelGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE4221405A0500B1784B /* MixpanelGroupTests.swift */; };
 		860BE3132072B85D00C12F18 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 860BE30F2072B83E00C12F18 /* CoreTelephony.framework */; };
@@ -25,7 +20,6 @@
 		86F86E9822440C5F00B69832 /* MixpanelDemoWatch Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 86F86E9722440C5F00B69832 /* MixpanelDemoWatch Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		86F86E9D22440C5F00B69832 /* InterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F86E9C22440C5F00B69832 /* InterfaceController.swift */; };
 		86F86E9F22440C5F00B69832 /* ExtensionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F86E9E22440C5F00B69832 /* ExtensionDelegate.swift */; };
-		86F86EA122440C5F00B69832 /* NotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F86EA022440C5F00B69832 /* NotificationController.swift */; };
 		86F86EA322440C6000B69832 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 86F86EA222440C6000B69832 /* Assets.xcassets */; };
 		86F86EA822440C6000B69832 /* MixpanelDemoWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 86F86E8B22440C5C00B69832 /* MixpanelDemoWatch.app */; platformFilter = ios; };
 		86F86ECC22443D8B00B69832 /* Mixpanel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86F86EB122440C6000B69832 /* Mixpanel.framework */; };
@@ -40,13 +34,7 @@
 		86F86F2F22460B4F00B69832 /* Mixpanel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E16C35E41D872045003500AC /* Mixpanel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E1016E361D3D46DF00075BB7 /* ActionCompleteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1016E351D3D46DF00075BB7 /* ActionCompleteViewController.swift */; };
 		E12406201D249B2500383635 /* MixpanelBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E124061F1D249B2500383635 /* MixpanelBaseTests.swift */; };
-		E12BD0371D89FE6A008989C9 /* MixpanelCodelessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */; };
 		E12BD03D1D8A14F3008989C9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E12BD03C1D8A14F3008989C9 /* Assets.xcassets */; };
-		E131C43C1DB56B1000FAEE37 /* MixpanelABTestingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E131C43B1DB56B1000FAEE37 /* MixpanelABTestingTests.swift */; };
-		E131C4401DB5A2FE00FAEE37 /* test_decide_response_2.json in Resources */ = {isa = PBXBuildFile; fileRef = E131C43E1DB5A2FE00FAEE37 /* test_decide_response_2.json */; };
-		E131C4411DB5A2FE00FAEE37 /* test_decide_response.json in Resources */ = {isa = PBXBuildFile; fileRef = E131C43F1DB5A2FE00FAEE37 /* test_decide_response.json */; };
-		E131C4431DB5A30B00FAEE37 /* test_variant.json in Resources */ = {isa = PBXBuildFile; fileRef = E131C4421DB5A30B00FAEE37 /* test_variant.json */; };
-		E131C4451DB5AE8200FAEE37 /* checkerboard.jpg in Resources */ = {isa = PBXBuildFile; fileRef = E131C4441DB5AE8200FAEE37 /* checkerboard.jpg */; };
 		E146F1941D398D0A00D75B49 /* TrackingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E146F1931D398D0A00D75B49 /* TrackingViewController.swift */; };
 		E146F1961D398D1600D75B49 /* PeopleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E146F1951D398D1600D75B49 /* PeopleViewController.swift */; };
 		E146F19A1D399AF300D75B49 /* UtilityViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E146F1991D399AF300D75B49 /* UtilityViewController.swift */; };
@@ -57,22 +45,13 @@
 		E15FF7EC1D0461130076CDE3 /* MixpanelDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7EB1D0461130076CDE3 /* MixpanelDemoTests.swift */; };
 		E15FF7FC1D0461D70076CDE3 /* Mixpanel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */; };
 		E15FF7FD1D0461D70076CDE3 /* Mixpanel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E15FF7FB1D0461BC0076CDE3 /* Mixpanel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		E16C35E11D872044003500AC /* CodelessPlaygroundViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16C35E01D872044003500AC /* CodelessPlaygroundViewController.swift */; };
 		E17AA05E1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17AA05D1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift */; };
 		E1C61EBA1D22F6470056C56C /* MixpanelPeopleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */; };
 		E1C61EBE1D22F9F60056C56C /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EBD1D22F9F60056C56C /* TestConstants.swift */; };
 		E1C8F50C1EC244E90089C537 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1C8F50B1EC244E90089C537 /* StoreKit.framework */; };
-		E1E8F8B01D626BE80081295D /* MixpanelNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E8F8AF1D626BE80081295D /* MixpanelNotificationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		60DDD14C23D39621004F7CBB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E15FF7CB1D0461130076CDE3 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 60DDD14623D39620004F7CBB;
-			remoteInfo = NotificationServiceExtension;
-		};
 		86F86E9922440C5F00B69832 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E15FF7CB1D0461130076CDE3 /* Project object */;
@@ -166,7 +145,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				60DDD14E23D39621004F7CBB /* NotificationServiceExtension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -229,21 +207,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		05D4C3E1222E1C6800D30FC2 /* SelectorEvaluaterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectorEvaluaterTests.swift; sourceTree = "<group>"; };
-		05D4C3E72230A8AD00D30FC2 /* InAppNotificationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppNotificationTest.swift; sourceTree = "<group>"; };
 		37433CF0620BC6A0A5EFC541 /* Pods_MixpanelDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MixpanelDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		51DD56891D3077390045D3DB /* LoggerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoggerTests.swift; sourceTree = "<group>"; };
 		5609994314AFCE2B8FF1705B /* Pods-MixpanelDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MixpanelDemoTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests.release.xcconfig"; sourceTree = "<group>"; };
 		60CB587023D77F9200F1632B /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
-		60DDD14723D39620004F7CBB /* NotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		60DDD14923D39620004F7CBB /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
-		60DDD14B23D39621004F7CBB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		671EECAE21432E5F006DD9FA /* GroupsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroupsViewController.swift; sourceTree = "<group>"; };
 		673ABE4221405A0500B1784B /* MixpanelGroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelGroupTests.swift; sourceTree = "<group>"; };
 		860BE30F2072B83E00C12F18 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		860BE3702076FBCC00C12F18 /* GDPRViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GDPRViewController.swift; sourceTree = "<group>"; };
 		862773E2206B3B1D00CBE79E /* MixpanelOptOutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelOptOutTests.swift; sourceTree = "<group>"; };
-		8684BBDF244E643100A4FD98 /* NotificationServiceExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationServiceExtension.entitlements; sourceTree = "<group>"; };
 		86F86E8B22440C5C00B69832 /* MixpanelDemoWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MixpanelDemoWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		86F86E8E22440C5C00B69832 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		86F86E9022440C5F00B69832 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -251,10 +223,8 @@
 		86F86E9722440C5F00B69832 /* MixpanelDemoWatch Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "MixpanelDemoWatch Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		86F86E9C22440C5F00B69832 /* InterfaceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterfaceController.swift; sourceTree = "<group>"; };
 		86F86E9E22440C5F00B69832 /* ExtensionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionDelegate.swift; sourceTree = "<group>"; };
-		86F86EA022440C5F00B69832 /* NotificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationController.swift; sourceTree = "<group>"; };
 		86F86EA222440C6000B69832 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		86F86EA422440C6000B69832 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		86F86EA522440C6000B69832 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
 		86F86F0122460B3000B69832 /* MixpanelDemoTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MixpanelDemoTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		86F86F0322460B3000B69832 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		86F86F0522460B3000B69832 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -270,13 +240,7 @@
 		9233A000BB35A654EEC9A9D6 /* Pods-MixpanelDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MixpanelDemoTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		E1016E351D3D46DF00075BB7 /* ActionCompleteViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionCompleteViewController.swift; sourceTree = "<group>"; };
 		E124061F1D249B2500383635 /* MixpanelBaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelBaseTests.swift; sourceTree = "<group>"; };
-		E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelCodelessTests.swift; sourceTree = "<group>"; };
 		E12BD03C1D8A14F3008989C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		E131C43B1DB56B1000FAEE37 /* MixpanelABTestingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelABTestingTests.swift; sourceTree = "<group>"; };
-		E131C43E1DB5A2FE00FAEE37 /* test_decide_response_2.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_decide_response_2.json; sourceTree = "<group>"; };
-		E131C43F1DB5A2FE00FAEE37 /* test_decide_response.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_decide_response.json; sourceTree = "<group>"; };
-		E131C4421DB5A30B00FAEE37 /* test_variant.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_variant.json; sourceTree = "<group>"; };
-		E131C4441DB5AE8200FAEE37 /* checkerboard.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = checkerboard.jpg; sourceTree = "<group>"; };
 		E146F1931D398D0A00D75B49 /* TrackingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewController.swift; sourceTree = "<group>"; };
 		E146F1951D398D1600D75B49 /* PeopleViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeopleViewController.swift; sourceTree = "<group>"; };
 		E146F1991D399AF300D75B49 /* UtilityViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UtilityViewController.swift; sourceTree = "<group>"; };
@@ -291,20 +255,17 @@
 		E15FF7ED1D0461130076CDE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E15FF7F61D0461BC0076CDE3 /* Mixpanel.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Mixpanel.xcodeproj; path = ../Mixpanel.xcodeproj; sourceTree = "<group>"; };
 		E16BAEB41D3DB4FC00C442CE /* MixpanelDemo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = MixpanelDemo.entitlements; sourceTree = "<group>"; };
-		E16C35E01D872044003500AC /* CodelessPlaygroundViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodelessPlaygroundViewController.swift; sourceTree = "<group>"; };
 		E17AA05D1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelAutomaticEventsTests.swift; sourceTree = "<group>"; };
 		E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelPeopleTests.swift; sourceTree = "<group>"; };
 		E1C61EBD1D22F9F60056C56C /* TestConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstants.swift; sourceTree = "<group>"; };
 		E1C8F50B1EC244E90089C537 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		E1E8F8AF1D626BE80081295D /* MixpanelNotificationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelNotificationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		60DDD14423D39620004F7CBB /* Frameworks */ = {
+		0AAB97762ADB463FE09D6381 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				60AF351F23D7CC4400F00724 /* Mixpanel.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,16 +329,6 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		60DDD14823D39620004F7CBB /* NotificationServiceExtension */ = {
-			isa = PBXGroup;
-			children = (
-				8684BBDF244E643100A4FD98 /* NotificationServiceExtension.entitlements */,
-				60DDD14923D39620004F7CBB /* NotificationService.swift */,
-				60DDD14B23D39621004F7CBB /* Info.plist */,
-			);
-			path = NotificationServiceExtension;
-			sourceTree = "<group>";
-		};
 		773080F90ECB3A0D67A6E636 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -403,10 +354,8 @@
 			children = (
 				86F86E9C22440C5F00B69832 /* InterfaceController.swift */,
 				86F86E9E22440C5F00B69832 /* ExtensionDelegate.swift */,
-				86F86EA022440C5F00B69832 /* NotificationController.swift */,
 				86F86EA222440C6000B69832 /* Assets.xcassets */,
 				86F86EA422440C6000B69832 /* Info.plist */,
-				86F86EA522440C6000B69832 /* PushNotificationPayload.apns */,
 			);
 			path = "MixpanelDemoWatch Extension";
 			sourceTree = "<group>";
@@ -444,10 +393,6 @@
 		E12BD03A1D8A14D6008989C9 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				E131C4441DB5AE8200FAEE37 /* checkerboard.jpg */,
-				E131C4421DB5A30B00FAEE37 /* test_variant.json */,
-				E131C43E1DB5A2FE00FAEE37 /* test_decide_response_2.json */,
-				E131C43F1DB5A2FE00FAEE37 /* test_decide_response.json */,
 				E12BD03C1D8A14F3008989C9 /* Assets.xcassets */,
 				E15FF7ED1D0461130076CDE3 /* Info.plist */,
 			);
@@ -475,7 +420,6 @@
 				86F86F0222460B3000B69832 /* MixpanelDemoTV */,
 				86F86F1422460B3200B69832 /* MixpanelDemoTVTests */,
 				86F86F1F22460B3200B69832 /* MixpanelDemoTVUITests */,
-				60DDD14823D39620004F7CBB /* NotificationServiceExtension */,
 				E15FF7D41D0461130076CDE3 /* Products */,
 				28127E0746D6CC818BA7B834 /* Pods */,
 				773080F90ECB3A0D67A6E636 /* Frameworks */,
@@ -492,7 +436,6 @@
 				86F86F0122460B3000B69832 /* MixpanelDemoTV.app */,
 				86F86F1122460B3200B69832 /* MixpanelDemoTVTests.xctest */,
 				86F86F1C22460B3200B69832 /* MixpanelDemoTVUITests.xctest */,
-				60DDD14723D39620004F7CBB /* NotificationServiceExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -509,7 +452,6 @@
 				60CB587023D77F9200F1632B /* LoginViewController.swift */,
 				E146F1991D399AF300D75B49 /* UtilityViewController.swift */,
 				E1016E351D3D46DF00075BB7 /* ActionCompleteViewController.swift */,
-				E16C35E01D872044003500AC /* CodelessPlaygroundViewController.swift */,
 				860BE3702076FBCC00C12F18 /* GDPRViewController.swift */,
 				E146F1971D398D2D00D75B49 /* Supporting Files */,
 			);
@@ -524,15 +466,10 @@
 				E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */,
 				673ABE4221405A0500B1784B /* MixpanelGroupTests.swift */,
 				862773E2206B3B1D00CBE79E /* MixpanelOptOutTests.swift */,
-				E1E8F8AF1D626BE80081295D /* MixpanelNotificationTests.swift */,
-				E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */,
-				E131C43B1DB56B1000FAEE37 /* MixpanelABTestingTests.swift */,
 				E17AA05D1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift */,
 				E1C61EBD1D22F9F60056C56C /* TestConstants.swift */,
 				51DD56891D3077390045D3DB /* LoggerTests.swift */,
 				E12BD03A1D8A14D6008989C9 /* Supporting Files */,
-				05D4C3E1222E1C6800D30FC2 /* SelectorEvaluaterTests.swift */,
-				05D4C3E72230A8AD00D30FC2 /* InAppNotificationTest.swift */,
 			);
 			path = MixpanelDemoTests;
 			sourceTree = "<group>";
@@ -551,29 +488,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		60DDD14623D39620004F7CBB /* NotificationServiceExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 60DDD14F23D39621004F7CBB /* Build configuration list for PBXNativeTarget "NotificationServiceExtension" */;
-			buildPhases = (
-				60DDD14323D39620004F7CBB /* Sources */,
-				60DDD14423D39620004F7CBB /* Frameworks */,
-				60DDD14523D39620004F7CBB /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = NotificationServiceExtension;
-			productName = NotificationServiceExtension;
-			productReference = 60DDD14723D39620004F7CBB /* NotificationServiceExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 		86F86E8A22440C5C00B69832 /* MixpanelDemoWatch */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 86F86EB422440C6000B69832 /* Build configuration list for PBXNativeTarget "MixpanelDemoWatch" */;
 			buildPhases = (
 				86F86E8922440C5C00B69832 /* Resources */,
 				86F86EB322440C6000B69832 /* Embed App Extensions */,
+				0AAB97762ADB463FE09D6381 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -675,7 +596,6 @@
 			dependencies = (
 				E15FF7FF1D0461D70076CDE3 /* PBXTargetDependency */,
 				86F86EA722440C6000B69832 /* PBXTargetDependency */,
-				60DDD14D23D39621004F7CBB /* PBXTargetDependency */,
 			);
 			name = MixpanelDemo;
 			productName = MixpanelDemo;
@@ -712,11 +632,6 @@
 				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = Mixpanel;
 				TargetAttributes = {
-					60DDD14623D39620004F7CBB = {
-						CreatedOnToolsVersion = 11.2;
-						DevelopmentTeam = E8FVX7QLET;
-						ProvisioningStyle = Automatic;
-					};
 					86F86E8A22440C5C00B69832 = {
 						CreatedOnToolsVersion = 10.1;
 						DevelopmentTeam = E8FVX7QLET;
@@ -796,7 +711,6 @@
 				86F86F0022460B3000B69832 /* MixpanelDemoTV */,
 				86F86F1022460B3200B69832 /* MixpanelDemoTVTests */,
 				86F86F1B22460B3200B69832 /* MixpanelDemoTVUITests */,
-				60DDD14623D39620004F7CBB /* NotificationServiceExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -833,13 +747,6 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
-		60DDD14523D39620004F7CBB /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		86F86E8922440C5C00B69832 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -895,10 +802,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E12BD03D1D8A14F3008989C9 /* Assets.xcassets in Resources */,
-				E131C4431DB5A30B00FAEE37 /* test_variant.json in Resources */,
-				E131C4401DB5A2FE00FAEE37 /* test_decide_response_2.json in Resources */,
-				E131C4451DB5AE8200FAEE37 /* checkerboard.jpg in Resources */,
-				E131C4411DB5A2FE00FAEE37 /* test_decide_response.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -929,7 +832,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Nocilla/Nocilla.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -938,25 +841,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MixpanelDemoTests/Pods-MixpanelDemoTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		60DDD14323D39620004F7CBB /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				60DDD14A23D39621004F7CBB /* NotificationService.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		86F86E9322440C5F00B69832 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				86F86EA122440C5F00B69832 /* NotificationController.swift in Sources */,
 				86F86E9F22440C5F00B69832 /* ExtensionDelegate.swift in Sources */,
 				86F86E9D22440C5F00B69832 /* InterfaceController.swift in Sources */,
 			);
@@ -999,7 +893,6 @@
 				671EECAF21432E5F006DD9FA /* GroupsViewController.swift in Sources */,
 				860BE3712076FBCC00C12F18 /* GDPRViewController.swift in Sources */,
 				E1016E361D3D46DF00075BB7 /* ActionCompleteViewController.swift in Sources */,
-				E16C35E11D872044003500AC /* CodelessPlaygroundViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1007,17 +900,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E12BD0371D89FE6A008989C9 /* MixpanelCodelessTests.swift in Sources */,
 				673ABE4321405A0500B1784B /* MixpanelGroupTests.swift in Sources */,
-				05D4C3E2222E1C6800D30FC2 /* SelectorEvaluaterTests.swift in Sources */,
-				E131C43C1DB56B1000FAEE37 /* MixpanelABTestingTests.swift in Sources */,
-				E1E8F8B01D626BE80081295D /* MixpanelNotificationTests.swift in Sources */,
 				51DD568A1D3077390045D3DB /* LoggerTests.swift in Sources */,
 				862773E3206B3B1D00CBE79E /* MixpanelOptOutTests.swift in Sources */,
 				E1C61EBA1D22F6470056C56C /* MixpanelPeopleTests.swift in Sources */,
 				E1C61EBE1D22F9F60056C56C /* TestConstants.swift in Sources */,
 				E12406201D249B2500383635 /* MixpanelBaseTests.swift in Sources */,
-				05D4C3E82230A8AD00D30FC2 /* InAppNotificationTest.swift in Sources */,
 				E17AA05E1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift in Sources */,
 				E15FF7EC1D0461130076CDE3 /* MixpanelDemoTests.swift in Sources */,
 			);
@@ -1026,11 +914,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		60DDD14D23D39621004F7CBB /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 60DDD14623D39620004F7CBB /* NotificationServiceExtension */;
-			targetProxy = 60DDD14C23D39621004F7CBB /* PBXContainerItemProxy */;
-		};
 		86F86E9A22440C5F00B69832 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 86F86E9622440C5F00B69832 /* MixpanelDemoWatch Extension */;
@@ -1110,76 +993,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		60DDD15023D39621004F7CBB /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = NotificationServiceExtension/NotificationServiceExtension.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = NotificationServiceExtension/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.3;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.swiftsdkdemo.NotificationServiceExtension;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		60DDD15123D39621004F7CBB /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = NotificationServiceExtension/NotificationServiceExtension.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = NotificationServiceExtension/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.3;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.swiftsdkdemo.NotificationServiceExtension;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 		86F86EA922440C6000B69832 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1727,15 +1540,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		60DDD14F23D39621004F7CBB /* Build configuration list for PBXNativeTarget "NotificationServiceExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				60DDD15023D39621004F7CBB /* Debug */,
-				60DDD15123D39621004F7CBB /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		86F86EB222440C6000B69832 /* Build configuration list for PBXNativeTarget "MixpanelDemoWatch Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

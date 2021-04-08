@@ -108,11 +108,15 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         }
     }
 
-    @objc private func appDidBecomeActive(_ notification: Notification) {
+    @objc func appDidBecomeActive(_ notification: Notification) {
         sessionStartTime = Date().timeIntervalSince1970
         if firstAppOpen {
-            delegate?.track(event: "$ae_first_open", properties: nil)
-            delegate?.setOnce(properties: ["$ae_first_app_open_date": Date()])
+            if let allInstances = MixpanelManager.sharedInstance.getAllInstances() {
+                for instance in allInstances {
+                    instance.track(event: "$ae_first_open", properties: ["$ae_first_app_open_date": Date()])
+                    instance.setOnce(properties: ["$ae_first_app_open_date": Date()])
+                }
+            }
             firstAppOpen = false
         }
     }

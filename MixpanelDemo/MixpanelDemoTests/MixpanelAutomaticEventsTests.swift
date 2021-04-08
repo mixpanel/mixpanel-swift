@@ -92,20 +92,56 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
     }
 
     func testMultipleInstances() {
+        // remove UserDefaults key and archive files to simulate first app open state
+        let defaults = UserDefaults(suiteName: "Mixpanel")
+        defaults?.removeObject(forKey: "MPFirstOpen")
+        do {
+            let url = try FileManager.default.url(for: .libraryDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: nil) {
+                while let fileURL = enumerator.nextObject() as? URL {
+                    if fileURL.absoluteString.contains("mixpanel-") {
+                        try FileManager.default.removeItem(at: fileURL)
+                    }
+                }
+            }
+        } catch {
+            XCTFail()
+        }
+        
         let mp = Mixpanel.initialize(token: "abc")
+        mp.reset()
         mp.minimumSessionDuration = 0;
-        self.mixpanel.minimumSessionDuration = 0;
-        self.mixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
+        let mp2 = Mixpanel.initialize(token: "xyz")
+        mp2.reset()
+        mp2.minimumSessionDuration = 0;
+        
+        mp.automaticEvents.perform(#selector(AutomaticEvents.appDidBecomeActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
+        mp2.automaticEvents.perform(#selector(AutomaticEvents.appDidBecomeActive(_:)),
+                                              with: Notification(name: Notification.Name(rawValue: "test")))
+        mp.trackingQueue.sync { }
+        mp2.trackingQueue.sync { }
+        
+        XCTAssertEqual(mp.eventsQueue.count, 1, "there should be only 1 event")
+        let appOpenEvent = mp.eventsQueue.last
+        XCTAssertEqual(appOpenEvent?["event"] as? String, "$ae_first_open", "should be first app open event")
+        
+        XCTAssertEqual(mp2.eventsQueue.count, 1, "there should be only 1 event")
+        let otherAppOpenEvent = mp2.eventsQueue.last
+        XCTAssertEqual(otherAppOpenEvent?["event"] as? String, "$ae_first_open", "should be first app open event")
+        
         mp.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
-        self.waitForTrackingQueue()
+        mp2.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
+                                              with: Notification(name: Notification.Name(rawValue: "test")))
         mp.trackingQueue.sync { }
-        let event = self.mixpanel.eventsQueue.last
-        XCTAssertNotNil(event, "Should have an event")
-        XCTAssertEqual(event?["event"] as? String, "$ae_session", "should be app session event")
-        XCTAssertNotNil((event?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")
-        let otherEvent = mp.eventsQueue.last
-        XCTAssertEqual(otherEvent?["event"] as? String, "$ae_session", "should be app session event")
-        XCTAssertNotNil((otherEvent?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")    }
+        mp2.trackingQueue.sync { }
+        let appSessionEvent = mp.eventsQueue.last
+        XCTAssertNotNil(appSessionEvent, "Should have an event")
+        XCTAssertEqual(appSessionEvent?["event"] as? String, "$ae_session", "should be app session event")
+        XCTAssertNotNil((appSessionEvent?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")
+        let otherAppSessionEvent = mp2.eventsQueue.last
+        XCTAssertEqual(otherAppSessionEvent?["event"] as? String, "$ae_session", "should be app session event")
+        XCTAssertNotNil((otherAppSessionEvent?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")
+    }
 }

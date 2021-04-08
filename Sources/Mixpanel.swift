@@ -193,6 +193,14 @@ class MixpanelManager {
     func getMainInstance() -> MixpanelInstance? {
         return mainInstance
     }
+    
+    func getAllInstances() -> [MixpanelInstance]? {
+        var allInstances: [MixpanelInstance]? = nil
+        readWriteLock.read {
+            allInstances = Array(instances.values)
+        }
+        return allInstances
+    }
 
     func setMainInstance(name instanceName: String) {
         var instance: MixpanelInstance? = nil

@@ -16,7 +16,7 @@ def bump_version():
     subprocess.call('git add Mixpanel-swift.podspec', shell=True)
     subprocess.call('git add Sources/Info.plist', shell=True)
     subprocess.call('git add Sources/AutomaticProperties.swift', shell=True)
-    subprocess.call('git add generate_docs.sh', shell=True)
+    subprocess.call('git add ./scripts/generate_docs.sh', shell=True)
     subprocess.call('git commit -m "Version {}"'.format(args.new), shell=True)
     subprocess.call('git push', shell=True)
 

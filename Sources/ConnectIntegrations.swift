@@ -25,12 +25,12 @@ class ConnectIntegrations {
 
     func setUrbanAirshipPeopleProp() {
         if let urbanAirship = NSClassFromString("UAirship") {
-            let pushSelector = NSSelectorFromString("push")
-            if let pushIMP = urbanAirship.method(for: pushSelector) {
-                typealias pushFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
-                let curriedImplementation = unsafeBitCast(pushIMP, to: pushFunc.self)
-                if let push = curriedImplementation(urbanAirship.self, pushSelector) {
-                    if let channelID = push.perform(NSSelectorFromString("channelID"))?.takeUnretainedValue() as? String {
+            let channelSelector = NSSelectorFromString("channel")
+            if let channelIMP = urbanAirship.method(for: channelSelector) {
+                typealias channelFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
+                let curriedImplementation = unsafeBitCast(channelIMP, to: channelFunc.self)
+                if let channel = curriedImplementation(urbanAirship.self, channelSelector) {
+                    if let channelID = channel.perform(NSSelectorFromString("identifier"))?.takeUnretainedValue() as? String {
                         self.urbanAirshipRetries = 0
                         if channelID != self.savedUrbanAirshipChannelID {
                             self.mixpanel?.people.set(property: "$ios_urban_airship_channel_id", to: channelID)

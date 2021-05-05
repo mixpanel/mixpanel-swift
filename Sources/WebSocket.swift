@@ -27,14 +27,14 @@ let WebsocketDidConnectNotification = "WebsocketDidConnectNotification"
 let WebsocketDidDisconnectNotification = "WebsocketDidDisconnectNotification"
 let WebsocketDisconnectionErrorKeyName = "WebsocketDisconnectionErrorKeyName"
 
-protocol WebSocketDelegate: class {
+protocol WebSocketDelegate: AnyObject {
     func websocketDidConnect(_ socket: WebSocket)
     func websocketDidDisconnect(_ socket: WebSocket, error: NSError?)
     func websocketDidReceiveMessage(_ socket: WebSocket, text: String)
     func websocketDidReceiveData(_ socket: WebSocket, data: Data)
 }
 
-protocol WebSocketPongDelegate: class {
+protocol WebSocketPongDelegate: AnyObject {
     func websocketDidReceivePong(_ socket: WebSocket)
 }
 

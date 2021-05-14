@@ -604,22 +604,23 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     func defaultDistinctId() -> String {
+        let distinctId: String?
         #if MIXPANEL_UNIQUE_DISTINCT_ID
-        #if !os(OSX) && !os(watchOS)
-        var distinctId: String? = nil
+        #if os(OSX)
+        distinctId = MixpanelInstance.macOSIdentifier()
+        #elseif !os(watchOS)
         if NSClassFromString("UIDevice") != nil {
             distinctId = UIDevice.current.identifierForVendor?.uuidString
+        } else {
+            distinctId = nil
         }
-        #elseif os(OSX)
-        let distinctId = MixpanelInstance.macOSIdentifier()
+        #else
+        distinctId = nil
         #endif
-        #else // use a random UUID by default
-        let distinctId: String? = UUID().uuidString
+        #else
+        distinctId = nil
         #endif
-        guard let distId = distinctId else {
-            return UUID().uuidString
-        }
-        return distId
+        return distinctId ?? UUID().uuidString // use a random UUID by default
     }
 
     #if os(OSX)

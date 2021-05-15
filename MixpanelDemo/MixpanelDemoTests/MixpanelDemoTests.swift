@@ -412,11 +412,11 @@ class MixpanelDemoTests: MixpanelBaseTests {
     
     func testTrackWithOptionalProperties() {
         let optNil: Double? = nil
-        let optFloat: Double? = 1.0
+        let optDouble: Double? = 1.0
         let optArray: Array<Double?> = [nil, 1.0, 2.0]
         let optDict: Dictionary<String, Double?> = ["nil": nil, "double": 1.0]
         let p: Properties = ["nil": optNil,
-                             "double": optFloat,
+                             "double": optDouble,
                              "list": optArray,
                              "dict": optDict]
         mixpanel.track(event: "Optional Test", properties: p)

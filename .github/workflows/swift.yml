@@ -1,4 +1,4 @@
-name: Flutter action
+name: Mixpanel Swift SDK action
 
 on:
   push:
@@ -21,8 +21,8 @@ jobs:
         pod install --repo-update
     - name: Run Test
       working-directory: MixpanelDemo
-      run: xcodebuild -workspace MixpanelDemo.xcworkspace -scheme MixpanelDemo -destination ${{ matrix.destination }} -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES test
+      run: |
+        set -o pipefail
+        xcodebuild -workspace MixpanelDemo.xcworkspace -scheme MixpanelDemo -destination ${{ matrix.destination }} -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES test | xcpretty -c;
     - name: Pod Lint
       run: pod lib lint --allow-warnings
-
-    

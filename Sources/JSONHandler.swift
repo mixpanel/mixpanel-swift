@@ -75,6 +75,10 @@ class JSONHandler {
 
         case is String, is Int, is UInt, is UInt64, is Bool:
             return obj
+            
+        case let obj as Array<Any?>:
+            let nonNilEls: [Any] = obj.compactMap({ $0 })
+            return nonNilEls.map() { makeObjectSerializable($0) }
 
         case let obj as Array<Any>:
             return obj.map() { makeObjectSerializable($0) }
@@ -98,8 +102,13 @@ class JSONHandler {
             return obj.absoluteString
 
         default:
-            Logger.info(message: "enforcing string on object")
-            return String(describing: obj)
+            let objString = String(describing: obj)
+            if objString == "nil" {
+                return NSNull()
+            } else {
+                Logger.info(message: "enforcing string on object")
+                return String(describing: obj)
+            }
         }
     }
 

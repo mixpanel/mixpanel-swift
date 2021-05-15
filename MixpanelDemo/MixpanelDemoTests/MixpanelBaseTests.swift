@@ -124,7 +124,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss zzz"
         let date = dateFormatter.date(from: "2012-09-28 19:14:36 PDT")
         let nested = ["p1": ["p2": ["p3": ["bottom"]]]]
-        let opt: Float? = nil
+        let opt: String? = nil
         return ["string": "yello",
                 "number": 3,
                 "date": date!,

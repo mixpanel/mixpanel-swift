@@ -107,7 +107,7 @@ class JSONHandler {
                 return NSNull()
             } else {
                 Logger.info(message: "enforcing string on object")
-                return String(describing: obj)
+                return objString
             }
         }
     }

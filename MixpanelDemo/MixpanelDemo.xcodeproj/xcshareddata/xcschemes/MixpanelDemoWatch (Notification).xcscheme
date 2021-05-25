@@ -56,8 +56,10 @@
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "8"
       notificationPayloadFile = "MixpanelDemoWatch Extension/PushNotificationPayload.apns">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.Carousel"
+         RemotePath = "/MixpanelDemo">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "86F86E8A22440C5C00B69832"
@@ -65,7 +67,7 @@
             BlueprintName = "MixpanelDemoWatch"
             ReferencedContainer = "container:MixpanelDemo.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </RemoteRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -75,8 +77,10 @@
       debugDocumentVersioning = "YES"
       launchAutomaticallySubstyle = "8"
       notificationPayloadFile = "MixpanelDemoWatch Extension/PushNotificationPayload.apns">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.Carousel"
+         RemotePath = "/MixpanelDemo">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "86F86E8A22440C5C00B69832"
@@ -84,7 +88,16 @@
             BlueprintName = "MixpanelDemoWatch"
             ReferencedContainer = "container:MixpanelDemo.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </RemoteRunnable>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "86F86E8A22440C5C00B69832"
+            BuildableName = "MixpanelDemoWatch.app"
+            BlueprintName = "MixpanelDemoWatch"
+            ReferencedContainer = "container:MixpanelDemo.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

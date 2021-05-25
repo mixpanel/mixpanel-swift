@@ -23,8 +23,8 @@ struct ArchivedProperties {
     let automaticEventsEnabled: Bool?
     #endif // DECIDE
 }
- 
-  class Persistence {
+
+class Persistence {
     private static let archiveQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.archiveQueue", qos: .utility)
 
     enum ArchiveType: String {

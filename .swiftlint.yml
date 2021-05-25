@@ -1,4 +1,6 @@
 excluded:
+  - .build/
+  - build/
   - MixpanelDemo
   - Sources/SelectorEvaluator.swift
   - Sources/CodelessBinding.swift

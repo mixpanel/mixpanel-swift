@@ -19,6 +19,8 @@ jobs:
       working-directory: MixpanelDemo
       run:
         pod install --repo-update
+    - name: Swift Lint
+      run: swiftlint
     - name: Run Test
       working-directory: MixpanelDemo
       run: |

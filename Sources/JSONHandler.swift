@@ -77,6 +77,7 @@ class JSONHandler {
             return obj
             
         case let obj as Array<Any?>:
+            // nil values in Array properties are dropped
             let nonNilEls: [Any] = obj.compactMap({ $0 })
             return nonNilEls.map() { makeObjectSerializable($0) }
 
@@ -104,6 +105,7 @@ class JSONHandler {
         default:
             let objString = String(describing: obj)
             if objString == "nil" {
+                // all nil properties outside of Arrays are converted to NSNull()
                 return NSNull()
             } else {
                 Logger.info(message: "enforcing string on object")

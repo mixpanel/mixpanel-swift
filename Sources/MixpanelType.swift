@@ -31,9 +31,11 @@ extension Optional: MixpanelType {
             case let mpt as MixpanelType:
                 return mpt.isValidNestedTypeAndValue()
             default:
+                // non-nil but cannot be unwrapped to MixpanelType
                 return false
             }
         }
+        // nil is valid
         return true
     }
 

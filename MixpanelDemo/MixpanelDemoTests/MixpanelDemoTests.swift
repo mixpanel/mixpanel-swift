@@ -415,10 +415,13 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let optDouble: Double? = 1.0
         let optArray: Array<Double?> = [nil, 1.0, 2.0]
         let optDict: Dictionary<String, Double?> = ["nil": nil, "double": 1.0]
+        let nested: Dictionary<String, Any> = ["list": optArray, "dict": optDict]
         let p: Properties = ["nil": optNil,
                              "double": optDouble,
                              "list": optArray,
-                             "dict": optDict]
+                             "dict": optDict,
+                             "nested": nested,
+                            ]
         mixpanel.track(event: "Optional Test", properties: p)
         waitForTrackingQueue()
         let props: InternalProperties = mixpanel.eventsQueue.last?["properties"] as! InternalProperties
@@ -426,6 +429,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertEqual(props["double"] as? Double, 1.0)
         XCTAssertEqual(props["list"] as? Array, [nil, 1.0, 2.0])
         XCTAssertEqual(props["dict"] as? Dictionary, ["nil": nil, "double": 1.0])
+        let nestedProp = props["nested"] as? Dictionary<String, Any>
+        XCTAssertEqual(nestedProp?["dict"] as? Dictionary, ["nil": nil, "double": 1.0])
+        XCTAssertEqual(nestedProp?["list"] as? Array, [nil, 1.0, 2.0])
     }
 
     func testTrackWithCustomDistinctIdAndToken() {

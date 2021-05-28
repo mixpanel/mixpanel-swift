@@ -26,7 +26,8 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES">
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      codeCoverageEnabled = "YES">
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
@@ -50,6 +51,9 @@
             <SkippedTests>
                <Test
                   Identifier = "MixpanelABTestingTests">
+               </Test>
+               <Test
+                  Identifier = "MixpanelNotificationTests">
                </Test>
                <Test
                   Identifier = "SelectorEvaluatorTests">

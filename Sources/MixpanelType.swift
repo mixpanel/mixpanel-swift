@@ -23,20 +23,16 @@ public protocol MixpanelType: Any {
 extension Optional: MixpanelType {
     /**
      Checks if this object has nested object types that Mixpanel supports.
-     Will always return true.
      */
     public func isValidNestedTypeAndValue() -> Bool {
-        if let val = self {
-            switch val {
-            case let mpt as MixpanelType:
-                return mpt.isValidNestedTypeAndValue()
-            default:
-                // non-nil but cannot be unwrapped to MixpanelType
-                return false
-            }
+        guard let val = self else { return true } // nil is valid
+        switch val {
+        case let v as MixpanelType:
+            return v.isValidNestedTypeAndValue()
+        default:
+            // non-nil but cannot be unwrapped to MixpanelType
+            return false
         }
-        // nil is valid
-        return true
     }
 
     public func equals(rhs: MixpanelType) -> Bool {

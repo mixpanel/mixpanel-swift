@@ -507,7 +507,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     }
                 }
 
-                if decideResponse.integrations.count > 0 {
+                if !decideResponse.integrations.isEmpty {
                     self.connectIntegrations.setupIntegrations(decideResponse.integrations)
                 }
             }
@@ -645,7 +645,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         let prefix = "CTRadioAccessTechnology"
         if #available(iOS 12.0, *) {
             if let radioDict = MixpanelInstance.telephonyInfo.serviceCurrentRadioAccessTechnology {
-                for (_, value) in radioDict where value.count > 0 && value.hasPrefix(prefix) {
+                for (_, value) in radioDict where !value.isEmpty && value.hasPrefix(prefix) {
                     // the first should be the prefix, second the target
                     let components = value.components(separatedBy: prefix)
 
@@ -658,10 +658,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     let radioValue = components[1]
                     
                     // Send to parent
-                    radio += radio.count > 0 ? ", \(radioValue)" : radioValue
+                    radio += radio.isEmpty ? radioValue : ", \(radioValue)"
                 }
 
-                radio = radio.count > 0 ? radio : "None"
+                radio = radio.isEmpty ? "None": radio
             }
         } else {
             radio = MixpanelInstance.telephonyInfo.currentRadioAccessTechnology ?? "None"

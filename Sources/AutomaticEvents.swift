@@ -141,7 +141,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         }
 
 
-        if productIdentifiers.count > 0 {
+        if !productIdentifiers.isEmpty {
             productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
             productsRequest.delegate = self
             productsRequest.start()

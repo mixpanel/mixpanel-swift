@@ -17,25 +17,29 @@ public protocol MixpanelType: Any {
      */
     func isValidNestedTypeAndValue() -> Bool
     
-    func equals(rhs: MixpanelType?) -> Bool
+    func equals(rhs: MixpanelType) -> Bool
 }
 
 extension Optional: MixpanelType {
     /**
      Checks if this object has nested object types that Mixpanel supports.
+     Will always return true.
      */
     public func isValidNestedTypeAndValue() -> Bool {
-        guard let val = self else { return true } // nil is valid
-        switch val {
-        case let v as MixpanelType:
-            return v.isValidNestedTypeAndValue()
-        default:
-            // non-nil but cannot be unwrapped to MixpanelType
-            return false
+        if let val = self {
+            switch val {
+            case let mpt as MixpanelType:
+                return mpt.isValidNestedTypeAndValue()
+            default:
+                // non-nil but cannot be unwrapped to MixpanelType
+                return false
+            }
         }
+        // nil is valid
+        return true
     }
 
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if let v = self as? String, rhs is String {
             return v == rhs as! String
         } else if let v = self as? NSString, rhs is NSString {
@@ -58,12 +62,6 @@ extension Optional: MixpanelType {
             return v == rhs as! URL
         } else if self is NSNull && rhs is NSNull {
             return true
-        } else if let v = self as? [MixpanelType], rhs is Array<Any?> {
-            return arrayEquals(lhs: v, rhs: rhs)
-        } else if let v = self as? [String : MixpanelType], rhs is [String : Any?] {
-            return dictionaryEquals(lhs: v, rhs: rhs)
-        } else if self == nil, rhs == nil {
-            return true
         }
         return false
     }
@@ -75,7 +73,7 @@ extension String: MixpanelType {
      */
     public func isValidNestedTypeAndValue() -> Bool { return true }
     
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if rhs is String {
             return self == rhs as! String
         }
@@ -90,7 +88,7 @@ extension NSString: MixpanelType {
      */
     public func isValidNestedTypeAndValue() -> Bool { return true }
 
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if rhs is NSString {
             return self == rhs as! NSString
         }
@@ -107,7 +105,7 @@ extension NSNumber: MixpanelType {
         return !self.doubleValue.isInfinite && !self.doubleValue.isNaN
     }
     
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if rhs is NSNumber {
             return self.isEqual(rhs)
         }
@@ -122,7 +120,7 @@ extension Int: MixpanelType {
      */
     public func isValidNestedTypeAndValue() -> Bool { return true }
     
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if rhs is Int {
             return self == rhs as! Int
         }
@@ -137,7 +135,7 @@ extension UInt: MixpanelType {
      */
     public func isValidNestedTypeAndValue() -> Bool { return true }
     
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if rhs is UInt {
             return self == rhs as! UInt
         }
@@ -153,7 +151,7 @@ extension Double: MixpanelType {
         return !self.isInfinite && !self.isNaN
     }
     
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if rhs is Double {
             return self == rhs as! Double
         }
@@ -169,7 +167,7 @@ extension Float: MixpanelType {
         return !self.isInfinite && !self.isNaN
     }
     
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if rhs is Float {
             return self == rhs as! Float
         }
@@ -183,7 +181,7 @@ extension Bool: MixpanelType {
      */
     public func isValidNestedTypeAndValue() -> Bool { return true }
 
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if rhs is Bool {
             return self == rhs as! Bool
         }
@@ -198,7 +196,7 @@ extension Date: MixpanelType {
      */
     public func isValidNestedTypeAndValue() -> Bool { return true }
 
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if rhs is Date {
             return self == rhs as! Date
         }
@@ -213,7 +211,7 @@ extension URL: MixpanelType {
      */
     public func isValidNestedTypeAndValue() -> Bool { return true }
 
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if rhs is URL {
             return self == rhs as! URL
         }
@@ -228,7 +226,7 @@ extension NSNull: MixpanelType {
      */
     public func isValidNestedTypeAndValue() -> Bool { return true }
 
-    public func equals(rhs: MixpanelType?) -> Bool {
+    public func equals(rhs: MixpanelType) -> Bool {
         if rhs is NSNull {
             return true
         }
@@ -249,8 +247,27 @@ extension Array: MixpanelType {
         return true
     }
 
-    public func equals(rhs: MixpanelType?) -> Bool {
-        arrayEquals(lhs: self as! [MixpanelType], rhs: rhs)
+    public func equals(rhs: MixpanelType) -> Bool {
+        if rhs is [MixpanelType] {
+            let rhs = rhs as! [MixpanelType]
+            
+            if self.count != rhs.count {
+                return false
+            }
+
+            if !isValidNestedTypeAndValue() {
+                return false
+            }
+            
+            let lhs = self as! [MixpanelType]
+            for (i, val) in lhs.enumerated() {
+                if !val.equals(rhs: rhs[i]) {
+                    return false
+                }
+            }
+            return true
+        }
+        return false
     }
 }
 
@@ -267,31 +284,28 @@ extension NSArray: MixpanelType {
         return true
     }
 
-    public func equals(rhs: MixpanelType?) -> Bool {
-        arrayEquals(lhs: self as! [MixpanelType], rhs: rhs)
-    }
-}
-
-func arrayEquals(lhs: [MixpanelType], rhs: MixpanelType) -> Bool {
-    if rhs is [MixpanelType] {
-        let rhs = rhs as! [MixpanelType]
-        
-        if lhs.count != rhs.count {
-            return false
-        }
-
-        if !lhs.isValidNestedTypeAndValue() {
-            return false
-        }
-        
-        for (i, val) in lhs.enumerated() {
-            if !val.equals(rhs: rhs[i]) {
+    public func equals(rhs: MixpanelType) -> Bool {
+        if rhs is [MixpanelType] {
+            let rhs = rhs as! [MixpanelType]
+            
+            if self.count != rhs.count {
                 return false
             }
+
+            if !isValidNestedTypeAndValue() {
+                return false
+            }
+            
+            let lhs = self as! [MixpanelType]
+            for (i, val) in lhs.enumerated() {
+                if !val.equals(rhs: rhs[i]) {
+                    return false
+                }
+            }
+            return true
         }
-        return true
+        return false
     }
-    return false
 }
 
 extension Dictionary: MixpanelType {
@@ -307,35 +321,31 @@ extension Dictionary: MixpanelType {
         return true
     }
     
-    public func equals(rhs: MixpanelType?) -> Bool {
-        dictionaryEquals(lhs: self as! [String : MixpanelType], rhs: rhs)
-    }
-}
-
-func dictionaryEquals(lhs: [String : MixpanelType], rhs: MixpanelType) -> Bool {
-    if rhs is [String: MixpanelType] {
-        let rhs = rhs as! [String: MixpanelType]
-        
-        if lhs.keys.count != rhs.keys.count {
-            return false
-        }
-        
-        if !lhs.isValidNestedTypeAndValue() {
-            return false
-        }
-        
-        for (key, val) in lhs {
-            guard let rVal = rhs[key] else {
+    public func equals(rhs: MixpanelType) -> Bool {
+        if rhs is [String: MixpanelType] {
+            let rhs = rhs as! [String: MixpanelType]
+            
+            if self.keys.count != rhs.keys.count {
                 return false
             }
-
-            if !val.equals(rhs: rVal) {
+            
+            if !isValidNestedTypeAndValue() {
                 return false
             }
+            
+            for (key, val) in self as! [String: MixpanelType] {
+                guard let rVal = rhs[key] else {
+                    return false
+                }
+
+                if !val.equals(rhs: rVal) {
+                    return false
+                }
+            }
+            return true
         }
-        return true
+        return false
     }
-    return false
 }
 
 func assertPropertyTypes(_ properties: Properties?) {

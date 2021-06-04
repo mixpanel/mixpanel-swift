@@ -22,30 +22,33 @@ class AutomaticProperties {
 
     static var properties: InternalProperties = {
         var p = InternalProperties()
-        #if os(iOS) || os(tvOS)
-        let screenSize = UIScreen.main.bounds.size
-        p["$screen_height"]     = Int(screenSize.height)
-        p["$screen_width"]      = Int(screenSize.width)
-        p["$os"]                = UIDevice.current.systemName
-        p["$os_version"]        = UIDevice.current.systemVersion
 
-        #elseif os(macOS)
-        if let screenSize = NSScreen.main?.frame.size {
+        #if os(iOS) || os(tvOS)
+            let screenSize = UIScreen.main.bounds.size
             p["$screen_height"]     = Int(screenSize.height)
             p["$screen_width"]      = Int(screenSize.width)
-        }
-        p["$os"]                = "macOS"
-        p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
-
+            #if targetEnvironment(macCatalyst)
+                p["$os"]                = "macOS"
+                p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
+            #else
+                p["$os"]                = UIDevice.current.systemName
+                p["$os_version"]        = UIDevice.current.systemVersion
+            #endif
+        #elseif os(macOS)
+            if let screenSize = NSScreen.main?.frame.size {
+                p["$screen_height"]     = Int(screenSize.height)
+                p["$screen_width"]      = Int(screenSize.width)
+            }
+            p["$os"]                = "macOS"
+            p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
         #elseif os(watchOS)
-        let watchDevice = WKInterfaceDevice.current()
-        p["$os"]                = watchDevice.systemName
-        p["$os_version"]        = watchDevice.systemVersion
-        p["$watch_model"]       = AutomaticProperties.watchModel()
-        let screenSize = watchDevice.screenBounds.size
-        p["$screen_width"]      = Int(screenSize.width)
-        p["$screen_height"]     = Int(screenSize.height)
-        
+            let watchDevice = WKInterfaceDevice.current()
+            p["$os"]                = watchDevice.systemName
+            p["$os_version"]        = watchDevice.systemVersion
+            p["$watch_model"]       = AutomaticProperties.watchModel()
+            let screenSize = watchDevice.screenBounds.size
+            p["$screen_width"]      = Int(screenSize.width)
+            p["$screen_height"]     = Int(screenSize.height)
         #endif
 
         let infoDict = Bundle.main.infoDictionary

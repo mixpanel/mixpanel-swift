@@ -14,12 +14,12 @@ class ReadWriteLock {
         self.concurentQueue = DispatchQueue(label: label, qos: .utility, attributes: .concurrent)
     }
 
-    func read(closure: () -> ()) {
+    func read(closure: () -> Void) {
         self.concurentQueue.sync {
             closure()
         }
     }
-    func write(closure: () -> ()) {
+    func write(closure: () -> Void) {
         self.concurentQueue.sync(flags: .barrier, execute: {
             closure()
         })

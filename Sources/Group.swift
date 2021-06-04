@@ -17,7 +17,7 @@ open class Group {
     let lock: ReadWriteLock
     let groupKey: String
     let groupID: MixpanelType
-    var delegate: FlushDelegate?
+    weak var delegate: FlushDelegate?
     let metadata: SessionMetadata
 
     init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, groupKey: String, groupID: MixpanelType, metadata: SessionMetadata) {
@@ -35,7 +35,7 @@ open class Group {
         }
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
 
-        serialQueue.async() {
+        serialQueue.async {
             var r = InternalProperties()
             var p = InternalProperties()
             r["$token"] = self.apiToken
@@ -48,13 +48,13 @@ open class Group {
                 p += properties
                 r[action] = p
             }
-            self.metadata.toDict(isEvent: false).forEach { (k,v) in r[k] = v }
+            self.metadata.toDict(isEvent: false).forEach { (k, v) in r[k] = v }
 
             r["$group_key"] = self.groupKey
             r["$group_id"] = self.groupID
             self.addGroupObject(r)
 
-            self.lock.read{
+            self.lock.read {
                 Persistence.archiveGroups(Mixpanel.mainInstance().flushGroupsQueue + Mixpanel.mainInstance().groupsQueue, token: self.apiToken)
             }
         }
@@ -126,7 +126,7 @@ open class Group {
      - parameter property: name of the property to unset
      */
     open func unset(property: String) {
-        addGroupRecordToQueueWithAction("$unset", properties: ["$properties":[property]])
+        addGroupRecordToQueueWithAction("$unset", properties: ["$properties": [property]])
     }
 
     /**

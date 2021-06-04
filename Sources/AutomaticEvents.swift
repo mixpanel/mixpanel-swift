@@ -43,7 +43,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     }
     var awaitingTransactions = [String: SKPaymentTransaction]()
     let defaults = UserDefaults(suiteName: "Mixpanel")
-    weak var delegate: AEDelegate?
+    var delegate: AEDelegate?
     var sessionLength: TimeInterval = 0
     var sessionStartTime: TimeInterval = Date().timeIntervalSince1970
     var hasAddedObserver = false

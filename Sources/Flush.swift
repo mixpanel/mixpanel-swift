@@ -18,7 +18,7 @@ protocol FlushDelegate {
 
 class Flush: AppLifecycle {
     var timer: Timer?
-    weak var delegate: FlushDelegate?
+    var delegate: FlushDelegate?
     var useIPAddressForGeoLocation = true
     var flushRequest: FlushRequest
     var flushOnBackground = true

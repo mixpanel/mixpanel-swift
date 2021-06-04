@@ -17,7 +17,7 @@ open class Group {
     let lock: ReadWriteLock
     let groupKey: String
     let groupID: MixpanelType
-    weak var delegate: FlushDelegate?
+    var delegate: FlushDelegate?
     let metadata: SessionMetadata
 
     init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, groupKey: String, groupID: MixpanelType, metadata: SessionMetadata) {

@@ -26,7 +26,7 @@ open class People {
     var flushPeopleQueue = Queue()
     var unidentifiedQueue = Queue()
     var distinctId: String?
-    weak var delegate: FlushDelegate?
+    var delegate: FlushDelegate?
     let metadata: SessionMetadata
 
     init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, metadata: SessionMetadata) {

@@ -49,7 +49,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var apiToken = ""
 
     /// The a MixpanelDelegate object that gives control over Mixpanel network activity.
-    open weak var delegate: MixpanelDelegate?
+    open var delegate: MixpanelDelegate?
 
     /// distinctId string that uniquely identifies the current user.
     open var distinctId = ""

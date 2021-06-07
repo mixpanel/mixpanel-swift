@@ -163,8 +163,7 @@ class Persistence {
             do {
                 let data = try NSKeyedArchiver.archivedData(withRootObject: archiveObject, requiringSecureCoding: false)
                 try data.write(to: URL(fileURLWithPath: path))
-            }
-            catch {
+            } catch {
                 Logger.error(message: "failed to archive \(type.rawValue)")
                 return
             }

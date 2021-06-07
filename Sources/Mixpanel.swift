@@ -37,15 +37,15 @@ open class Mixpanel {
      */
     @discardableResult
     open class func initialize(token apiToken: String,
-                               launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil,
+                               launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil,
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
                                automaticPushTracking: Bool = true,
                                optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
-        return MixpanelManager.sharedInstance.initialize(token:         apiToken,
+        return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          launchOptions: launchOptions,
                                                          flushInterval: flushInterval,
-                                                         instanceName:  instanceName,
+                                                         instanceName: instanceName,
                                                          automaticPushTracking: automaticPushTracking,
                                                          optOutTrackingByDefault: optOutTrackingByDefault)
     }
@@ -74,9 +74,9 @@ open class Mixpanel {
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
                                optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
-        return MixpanelManager.sharedInstance.initialize(token:         apiToken,
+        return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
-                                                         instanceName:  instanceName)
+                                                         instanceName: instanceName)
     }
     #endif // os(OSX)
 
@@ -142,7 +142,7 @@ class MixpanelManager {
 
     #if !os(OSX) && !os(watchOS)
     func initialize(token apiToken: String,
-                    launchOptions: [UIApplication.LaunchOptionsKey : Any]?,
+                    launchOptions: [UIApplication.LaunchOptionsKey: Any]?,
                     flushInterval: Double,
                     instanceName: String,
                     automaticPushTracking: Bool = true,
@@ -179,7 +179,7 @@ class MixpanelManager {
     #endif // os(OSX)
 
     func getInstance(name instanceName: String) -> MixpanelInstance? {
-        var instance: MixpanelInstance? = nil
+        var instance: MixpanelInstance?
         readWriteLock.read {
             instance = instances[instanceName]
         }
@@ -195,7 +195,7 @@ class MixpanelManager {
     }
     
     func getAllInstances() -> [MixpanelInstance]? {
-        var allInstances: [MixpanelInstance]? = nil
+        var allInstances: [MixpanelInstance]?
         readWriteLock.read {
             allInstances = Array(instances.values)
         }
@@ -203,7 +203,7 @@ class MixpanelManager {
     }
 
     func setMainInstance(name instanceName: String) {
-        var instance: MixpanelInstance? = nil
+        var instance: MixpanelInstance?
         readWriteLock.read {
             instance = instances[instanceName]
         }

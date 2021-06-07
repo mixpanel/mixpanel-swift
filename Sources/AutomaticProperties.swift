@@ -16,7 +16,6 @@ import Cocoa
 import WatchKit
 #endif
 
-
 class AutomaticProperties {
     static let automaticPropertiesLock = ReadWriteLock(label: "automaticPropertiesLock")
 

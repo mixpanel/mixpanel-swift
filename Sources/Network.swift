@@ -8,10 +8,9 @@
 
 import Foundation
 
-
 struct BasePath {
     static let DefaultMixpanelAPI = "https://api.mixpanel.com"
-    static var namedBasePaths = [String:String]()
+    static var namedBasePaths = [String: String]()
 
     static func buildURL(base: String, path: String, queryItems: [URLQueryItem]?) -> URL? {
         guard let url = URL(string: base) else {
@@ -22,7 +21,7 @@ struct BasePath {
         }
         components.path = path
         components.queryItems = queryItems
-        //adding workaround to replece + for %2B as it's not done by default within URLComponents
+        // adding workaround to replece + for %2B as it's not done by default within URLComponents
         components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
         return components.url
     }
@@ -42,7 +41,7 @@ struct Resource<A> {
     let method: RequestMethod
     let requestBody: Data?
     let queryItems: [URLQueryItem]?
-    let headers: [String:String]
+    let headers: [String: String]
     let parse: (Data) -> A?
 }
 
@@ -63,8 +62,8 @@ class Network {
 
     class func apiRequest<A>(base: String,
                           resource: Resource<A>,
-                          failure: @escaping (Reason, Data?, URLResponse?) -> (),
-                          success: @escaping (A, URLResponse?) -> ()) {
+                          failure: @escaping (Reason, Data?, URLResponse?) -> Void,
+                          success: @escaping (A, URLResponse?) -> Void) {
         guard let request = buildURLRequest(base, resource: resource) else {
             return
         }
@@ -103,8 +102,8 @@ class Network {
             return nil
         }
 
-        Logger.debug(message: "Fetching URL");
-        Logger.debug(message: url.absoluteURL);
+        Logger.debug(message: "Fetching URL")
+        Logger.debug(message: url.absoluteURL)
         var request = URLRequest(url: url)
         request.httpMethod = resource.method.rawValue
         request.httpBody = resource.requestBody
@@ -129,7 +128,7 @@ class Network {
                         parse: parse)
     }
 
-    class func trackIntegration(apiToken: String, serverURL: String, completion: @escaping (Bool) -> ()) {
+    class func trackIntegration(apiToken: String, serverURL: String, completion: @escaping (Bool) -> Void) {
         let requestData = JSONHandler.encodeAPIData([["event": "Integration",
                                                       "properties": ["token": "85053bf24bba75239b16a601d9387e17",
                                                                      "mp_lib": "swift",
@@ -157,11 +156,11 @@ class Network {
 
             Network.apiRequest(base: serverURL,
                                resource: resource,
-                               failure: { (reason, data, response) in
+                               failure: { (_, _, _) in
                                 Logger.debug(message: "failed to track integration")
                                 completion(false)
                 },
-                               success: { (result, response) in
+                               success: { (_, _) in
                                 Logger.debug(message: "integration tracked")
                                 completion(true)
                 }

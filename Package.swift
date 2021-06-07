@@ -8,10 +8,10 @@ let package = Package(
       .iOS(.v9),
       .tvOS(.v9),
       .macOS(.v10_10),
-      .watchOS(.v3),
+      .watchOS(.v3)
     ],
     products: [
-        .library(name: "Mixpanel", targets: ["Mixpanel"]),
+        .library(name: "Mixpanel", targets: ["Mixpanel"])
     ],
     targets: [
         .target(
@@ -21,11 +21,11 @@ let package = Package(
                 "Info.plist"
             ],
             resources: [
-                .process("placeholder-image.png"),
+                .process("placeholder-image.png")
             ],
             swiftSettings: [
-                .define("DECIDE", .when(platforms: [.iOS])),
+                .define("DECIDE", .when(platforms: [.iOS]))
             ]
-        ),
+        )
     ]
 )

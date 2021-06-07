@@ -25,7 +25,7 @@ open class People {
     var peopleQueue = Queue()
     var flushPeopleQueue = Queue()
     var unidentifiedQueue = Queue()
-    var distinctId: String? = nil
+    var distinctId: String?
     var delegate: FlushDelegate?
     let metadata: SessionMetadata
 
@@ -43,7 +43,7 @@ open class People {
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
         let ignoreTimeCopy = ignoreTime
 
-        serialQueue.async() { [weak self, action, properties] in
+        serialQueue.async { [weak self, action, properties] in
             guard let self = self else { return }
 
             var r = InternalProperties()
@@ -66,7 +66,7 @@ open class People {
                 p += properties
                 r[action] = p
             }
-            self.metadata.toDict(isEvent: false).forEach { (k,v) in r[k] = v }
+            self.metadata.toDict(isEvent: false).forEach { (k, v) in r[k] = v }
 
             if let anonymousId = Mixpanel.mainInstance().anonymousId {
                r["$device_id"] = anonymousId
@@ -230,7 +230,7 @@ open class People {
      - parameter properties: properties array
      */
     open func unset(properties: [String]) {
-        addPeopleRecordToQueueWithAction("$unset", properties: ["$properties":properties])
+        addPeopleRecordToQueueWithAction("$unset", properties: ["$properties": properties])
     }
 
     /**
@@ -243,7 +243,7 @@ open class People {
      - parameter properties: properties array
      */
     open func increment(properties: Properties) {
-        let filtered = properties.values.filter() {
+        let filtered = properties.values.filter {
             !($0 is Int || $0 is UInt || $0 is Double || $0 is Float) }
         if !filtered.isEmpty {
             MPAssert(false, "increment property values should be numbers")
@@ -296,7 +296,7 @@ open class People {
      - parameter properties: mapping of list property names to lists to union
      */
     open func union(properties: Properties) {
-        let filtered = properties.values.filter() {
+        let filtered = properties.values.filter {
             !($0 is [MixpanelType])
         }
         if !filtered.isEmpty {

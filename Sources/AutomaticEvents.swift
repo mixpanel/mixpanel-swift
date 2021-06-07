@@ -125,7 +125,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         var productsRequest = SKProductsRequest()
         var productIdentifiers: Set<String> = []
         awaitingTransactionsWriteLock.sync {
-            for transaction:AnyObject in transactions {
+            for transaction: AnyObject in transactions {
                 if let trans = transaction as? SKPaymentTransaction {
                     switch trans.transactionState {
                     case .purchased:
@@ -139,7 +139,6 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                 }
             }
         }
-
 
         if !productIdentifiers.isEmpty {
             productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
@@ -168,7 +167,6 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         return false
     }
 
-
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         awaitingTransactionsWriteLock.sync {
             for product in response.products {
@@ -187,8 +185,8 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         guard let appDelegate = MixpanelInstance.sharedUIApplication()?.delegate else {
             return
         }
-        var selector: Selector? = nil
-        var newSelector: Selector? = nil
+        var selector: Selector?
+        var newSelector: Selector?
         let aClass: AnyClass = type(of: appDelegate)
         var newClass: AnyClass?
         if #available(iOS 10.0, *), let UNDelegate = UNUserNotificationCenter.current().delegate {
@@ -213,7 +211,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         }
 
         if let selector = selector, let newSelector = newSelector {
-            let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
+            let block = { (_: AnyObject?, _: Selector, _: AnyObject?, param2: AnyObject?) in
                 if let param2 = param2 as? [AnyHashable: Any] {
                     self.delegate?.trackPushNotification(param2, event: "$campaign_received", properties: [:])
                 }
@@ -226,7 +224,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         }
     }
 
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
         if #available(iOS 10.0, *),
             keyPath == "delegate",
             let UNDelegate = UNUserNotificationCenter.current().delegate {
@@ -235,7 +233,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                     NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")) != nil {
                 let selector = NSSelectorFromString("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")
                 let newSelector = #selector(NSObject.mp_userNotificationCenter(_:newDidReceive:withCompletionHandler:))
-                let block = { (view: AnyObject?, command: Selector, param1: AnyObject?, param2: AnyObject?) in
+                let block = { (_: AnyObject?, _: Selector, _: AnyObject?, param2: AnyObject?) in
                     if let param2 = param2 as? [AnyHashable: Any] {
                         self.delegate?.trackPushNotification(param2, event: "$campaign_received", properties: [:])
                     }
@@ -270,7 +268,7 @@ extension UNUserNotificationCenter {
 }
 
 extension UIResponder {
-    @objc func mp_application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Swift.Void) {
+    @objc func mp_application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Swift.Void) {
         let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:fetchCompletionHandler:")
         if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
             let swizzle = Swizzler.swizzles[originalMethod] {
@@ -284,7 +282,7 @@ extension UIResponder {
         }
     }
 
-    @objc func mp_application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+    @objc func mp_application(_ application: UIApplication, newDidReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
         let originalSelector = NSSelectorFromString("application:didReceiveRemoteNotification:")
         if let originalMethod = class_getInstanceMethod(type(of: self), originalSelector),
             let swizzle = Swizzler.swizzles[originalMethod] {

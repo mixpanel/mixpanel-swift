@@ -8,7 +8,7 @@
 
 import Foundation
 
-func += <K, V> (left: inout [K:V], right: [K:V]) {
+func += <K, V> (left: inout [K: V], right: [K: V]) {
     for (k, v) in right {
         left.updateValue(v, forKey: k)
     }
@@ -61,7 +61,7 @@ class Track {
         if userId != nil {
             p["$user_id"] = userId
         }
-        if hadPersistedDistinctId != nil  {
+        if hadPersistedDistinctId != nil {
             p["$had_persisted_distinct_id"] = hadPersistedDistinctId
         }
         
@@ -71,7 +71,7 @@ class Track {
         }
 
         var trackEvent: InternalProperties = ["event": ev!, "properties": p]
-        metadata.toDict().forEach { (k,v) in trackEvent[k] = v }
+        metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
         var shadowEventsQueue = eventsQueue
         Logger.debug(message: "adding event to queue")
         Logger.debug(message: trackEvent)
@@ -107,7 +107,7 @@ class Track {
 
         var updatedSuperProperties = superProperties
         assertPropertyTypes(properties)
-        _ = properties.map() {
+        _ = properties.map {
             let val = updatedSuperProperties[$0.key]
             if val == nil ||
                 (defaultValue != nil && (val as? NSObject == defaultValue as? NSObject)) {

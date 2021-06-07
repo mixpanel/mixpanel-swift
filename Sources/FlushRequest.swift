@@ -53,7 +53,7 @@ class FlushRequest: Network {
                                      completion: @escaping (Bool) -> Void) {
 
         Network.apiRequest(base: base, resource: resource,
-            failure: { (reason, data, response) in
+            failure: { (reason, _, response) in
                 self.networkConsecutiveFailures += 1
                 self.updateRetryDelay(response)
                 Logger.warn(message: "API request to \(resource.path) has failed with reason \(reason)")

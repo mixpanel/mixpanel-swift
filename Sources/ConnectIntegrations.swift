@@ -14,7 +14,7 @@ class ConnectIntegrations {
     var savedBrazeID: String?
     var savedDeviceId: String?
 
-    open func setupIntegrations(_ integrations:[String]) {
+    open func setupIntegrations(_ integrations: [String]) {
         if integrations.contains("urbanairship") {
             self.setUrbanAirshipPeopleProp()
         }

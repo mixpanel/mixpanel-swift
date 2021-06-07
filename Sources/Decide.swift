@@ -91,7 +91,7 @@ class Decide {
                 }
                 
                 for parsedNotification in parsedNotifications {
-                    if (parsedNotification.hasDisplayTriggers()) {
+                    if parsedNotification.hasDisplayTriggers() {
                         self.notificationsInstance.triggeredNotifications.append(parsedNotification)
                     } else {
                         self.notificationsInstance.inAppNotifications.append(parsedNotification)

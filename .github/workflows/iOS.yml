@@ -12,7 +12,6 @@ jobs:
     strategy:
       matrix:
         destination: ['OS=14.4,name="iPhone 11"']
-        scheme: ['MixpanelDemo', 'MixpanelDemoMac']
 
     steps:
     - uses: actions/checkout@v2
@@ -26,7 +25,7 @@ jobs:
       working-directory: MixpanelDemo
       run: |
         set -o pipefail
-        xcodebuild -workspace MixpanelDemo.xcworkspace -scheme ${{ matrix.scheme }} -derivedDataPath Build/ -destination ${{ matrix.destination }} -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES -enableCodeCoverage YES clean build test | xcpretty -c;
+        xcodebuild -workspace MixpanelDemo.xcworkspace -scheme MixpanelDemo -derivedDataPath Build/ -destination ${{ matrix.destination }} -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES -enableCodeCoverage YES clean build test | xcpretty -c;
     - name: Pod Lint
       run: pod lib lint --allow-warnings
     - name: Code Coverage Report

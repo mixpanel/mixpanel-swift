@@ -22,7 +22,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         Mixpanel.initialize(token: "MIXPANEL_TOKEN")
         Mixpanel.mainInstance().loggingEnabled = true
-        Mixpanel.mainInstance().track("Tracked Event")
+        Mixpanel.mainInstance().track(event: "Tracked Event")
+        
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {

@@ -16,61 +16,6 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         mixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
         XCTAssertTrue(mixpanel.hasOptedOutTracking(), "When initialize with opted out flag set to YES, the current user should have opted out tracking")
     }
-    
-    func testNoTrackShouldEverBeTriggeredDuringInitializedWithOptedOutYES()
-    {
-        _ = stubTrack().andReturn(503)
-        let launchOptions = [UIApplication.LaunchOptionsKey.remoteNotification:
-            ["mp":["m":"the_message_id","c": "the_campaign_id",
-                   "journey_id": 123456]
-            ]]
-        
-        mixpanel = Mixpanel.initialize(token: randomId(), launchOptions: launchOptions, optOutTrackingByDefault: true)
-        waitForTrackingQueue()
-        flushAndWaitForNetworkQueue()
-
-        XCTAssert(mixpanel.flushInstance.flushRequest.networkConsecutiveFailures == 0,
-                  "When initialize with opted out flag set to YES, no track should be ever triggered during ")
-    }
-    
-    func testAutoTrackEventsShouldNotBeQueuedDuringInitializedWithOptedOutYES()
-    {
-        let launchOptions = [UIApplication.LaunchOptionsKey.remoteNotification:
-            ["mp":["m":"the_message_id","c": "the_campaign_id",
-                   "journey_id": 123456]
-            ]]
-        mixpanel = Mixpanel.initialize(token: randomId(), launchOptions: launchOptions, optOutTrackingByDefault: true)
-        waitForMixpanelQueues()
-        XCTAssertTrue(self.mixpanel.eventsQueue.count == 0, "When initialize with opted out flag set to YES, no event should be queued")
-    }
-
-    func testAutoTrackEventsShouldBeQueuedDuringInitializedWithOptedOutYESAndOptInLater()
-    {
-        let launchOptions = [UIApplication.LaunchOptionsKey.remoteNotification:
-            ["mp":["m":"the_message_id","c": "the_campaign_id",
-                   "journey_id": 123456]
-            ]]
-        let tokenId = randomId()
-        mixpanel = Mixpanel.initialize(token: tokenId, launchOptions: launchOptions, optOutTrackingByDefault: true)
-        mixpanel.optInTracking()
-        mixpanel = Mixpanel.initialize(token: tokenId, launchOptions: launchOptions, optOutTrackingByDefault: true)
-        waitForMixpanelQueues()
-        XCTAssertTrue(self.mixpanel.eventsQueue.count == 1, "When initialize with opted out flag set to YES, event should be queued")
-    }
-    
-    func testAutoTrackShouldBeTriggeredDuringInitializedWithOptedOutNO()
-    {
-        let launchOptions = [UIApplication.LaunchOptionsKey.remoteNotification:
-            ["mp":["m":"the_message_id","c": "the_campaign_id",
-                   "journey_id": 123456]
-            ]]
-        mixpanel = Mixpanel.initialize(token: randomId(), launchOptions: launchOptions, optOutTrackingByDefault: false)
-        waitForMixpanelQueues()
-        let e = mixpanel.eventsQueue.last!
-        XCTAssertEqual((e["event"] as? String), "$app_open", "incorrect event name")
-        let p = e["properties"] as? InternalProperties
-        XCTAssertEqual((p!["journey_id"] as? NSNumber), 123456, "journey_id not equal")
-    }
 
     func testOptInWillAddOptInEvent()
     {
@@ -172,6 +117,17 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         XCTAssertFalse(mixpanel.hasOptedOutTracking(), "When optOutTracking is called, the current user should have opted in tracking")
     }
 
+    func testEventBeingTrackedBeforeOptOutShouldNotBeCleared()
+    {
+        mixpanel = Mixpanel.initialize(token: randomId())
+        mixpanel.track(event: "a normal event")
+        waitForMixpanelQueues()
+        XCTAssertTrue(mixpanel.eventsQueue.count == 1, "events should be queued")
+        mixpanel.optOutTracking()
+        waitForMixpanelQueues()
+        XCTAssertTrue(mixpanel.eventsQueue.count == 1, "When opted out, any events tracked before opted out should not be cleared")
+    }
+
     func testOptOutTrackingWillNotGenerateEventQueue()
     {
         mixpanel.optOutTracking()
@@ -199,17 +155,6 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         XCTAssertNotEqual(mixpanel.alias, "testAlias", "When opted out, alias should not be set")
     }
 
-    func testEventBeingTrackedBeforeOptOutShouldNotBeCleared()
-    {
-        mixpanel = Mixpanel.initialize(token: randomId())
-        mixpanel.track(event: "a normal event")
-        waitForMixpanelQueues()
-        XCTAssertTrue(mixpanel.eventsQueue.count == 1, "events should be queued")
-        mixpanel.optOutTracking()
-        waitForMixpanelQueues()
-        XCTAssertTrue(mixpanel.eventsQueue.count == 1, "When opted out, any events tracked before opted out should not be cleared")
-    }
-    
     func testOptOutTrackingRegisterSuperProperties()
     {
         let properties: Properties = ["p1": "a", "p2": 3, "p3": Date()]

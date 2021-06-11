@@ -255,10 +255,12 @@ class Persistence {
                                             alias: String?,
                                             hadPersistedDistinctId: Bool?,
                                             peopleDistinctId: String?,
-                                            peopleUnidentifiedQueue: Queue) {
+                                            peopleUnidentifiedQueue: Queue,
+                                            optOutStatus: Bool?) {
             let eventsQueue = unarchiveEvents(token: token)
             let peopleQueue = unarchivePeople(token: token)
             let groupsQueue = unarchiveGroups(token: token)
+            let optOutStatus = unarchiveOptOutStatus(token: token)
 
             let (superProperties,
                 timedEvents,
@@ -282,7 +284,8 @@ class Persistence {
                     alias,
                     hadPersistedDistinctId,
                     peopleDistinctId,
-                    peopleUnidentifiedQueue)
+                    peopleUnidentifiedQueue,
+                    optOutStatus)
     }
     #endif // DECIDE
 

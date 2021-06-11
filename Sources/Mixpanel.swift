@@ -76,7 +76,8 @@ open class Mixpanel {
                                optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
-                                                         instanceName: instanceName)
+                                                         instanceName: instanceName,
+                                                         optOutTrackingByDefault: optOutTrackingByDefault)
     }
     #endif // os(OSX)
 

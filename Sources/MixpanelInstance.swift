@@ -1054,7 +1054,8 @@ extension MixpanelInstance {
          alias,
          hadPersistedDistinctId,
          people.distinctId,
-         people.unidentifiedQueue) = Persistence.unarchive(token: apiToken)
+         people.unidentifiedQueue,
+         optOutStatus) = Persistence.unarchive(token: apiToken)
 
         if distinctId == "" {
             distinctId = defaultDistinctId()
@@ -1657,16 +1658,7 @@ extension MixpanelInstance {
      This method is used to opt out tracking. This causes all events and people request no longer
      to be sent back to the Mixpanel server.
      */
-    open func optOutTracking() {
-        trackingQueue.async { [weak self] in
-            guard let self = self else { return }
-
-            self.readWriteLock.write {
-                self.eventsQueue = Queue()
-                self.people.peopleQueue = Queue()
-            }
-        }
-
+    open func optOutTracking() {        
         if people.distinctId != nil {
             people.deleteUser()
             people.clearCharges()
@@ -1680,7 +1672,6 @@ extension MixpanelInstance {
                     return
                 }
                 self.readWriteLock.write { [weak self] in
-
                     guard let self = self else {
                         return
                     }

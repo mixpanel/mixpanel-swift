@@ -397,7 +397,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #if DECIDE
         checkDecide { decideResponse in
             if let decideResponse = decideResponse {
-                if decideResponse.integrations.count > 0 {
+                if !decideResponse.integrations.isEmpty {
                     self.connectIntegrations.setupIntegrations(decideResponse.integrations)
                 }
             }

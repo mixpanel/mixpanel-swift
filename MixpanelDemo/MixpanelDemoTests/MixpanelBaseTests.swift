@@ -124,15 +124,18 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss zzz"
         let date = dateFormatter.date(from: "2012-09-28 19:14:36 PDT")
         let nested = ["p1": ["p2": ["p3": ["bottom"]]]]
+        let opt: String? = nil
         return ["string": "yello",
                 "number": 3,
                 "date": date!,
-                "dictionary": ["k": "v"],
-                "array": ["1"],
+                "dictionary": ["k": "v", "opt": opt as Any],
+                "array": ["1", opt as Any],
                 "null": NSNull(),
                 "nested": nested,
                 "url": URL(string: "https://mixpanel.com/")!,
-                "float": 1.3]
+                "float": 1.3,
+                "optional": opt,
+        ]
     }
 
     func topViewController() -> UIViewController {

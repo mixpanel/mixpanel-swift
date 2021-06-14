@@ -1,0 +1,35 @@
+name: Mixpanel Swift SDK action
+
+on:
+  push:
+    branches: [ master, 3.0.0.beta ]
+  pull_request:
+    branches: [ master, 3.0.0.beta ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        destination: ['OS=14.4,name="iPhone 11"']
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Dependencies
+      working-directory: MixpanelDemo
+      run:
+        pod install --repo-update
+    - name: Swift Lint
+      run: swiftlint
+    - name: Run Test
+      working-directory: MixpanelDemo
+      run: |
+        set -o pipefail
+        xcodebuild -workspace MixpanelDemo.xcworkspace -scheme MixpanelDemo -derivedDataPath Build/ -destination ${{ matrix.destination }} -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES -enableCodeCoverage YES clean build test | xcpretty -c;
+    - name: Pod Lint
+      run: pod lib lint --allow-warnings
+    - name: Code Coverage Report
+      working-directory: MixpanelDemo/build/Logs/Test
+      run: |
+        xcrun xccov view --report --files-for-target Mixpanel.framework  *.xcresult
+        xcrun xccov view --report --only-targets *.xcresult

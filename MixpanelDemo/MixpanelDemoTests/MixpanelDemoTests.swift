@@ -409,6 +409,30 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertEqual(props["$app_version"] as? String, "override",
                        "reserved property override failed")
     }
+    
+    func testTrackWithOptionalProperties() {
+        let optNil: Double? = nil
+        let optDouble: Double? = 1.0
+        let optArray: Array<Double?> = [nil, 1.0, 2.0]
+        let optDict: Dictionary<String, Double?> = ["nil": nil, "double": 1.0]
+        let nested: Dictionary<String, Any> = ["list": optArray, "dict": optDict]
+        let p: Properties = ["nil": optNil,
+                             "double": optDouble,
+                             "list": optArray,
+                             "dict": optDict,
+                             "nested": nested,
+                            ]
+        mixpanel.track(event: "Optional Test", properties: p)
+        waitForTrackingQueue()
+        let props: InternalProperties = mixpanel.eventsQueue.last?["properties"] as! InternalProperties
+        XCTAssertNil(props["nil"] as? Double)
+        XCTAssertEqual(props["double"] as? Double, 1.0)
+        XCTAssertEqual(props["list"] as? Array, [nil, 1.0, 2.0])
+        XCTAssertEqual(props["dict"] as? Dictionary, ["nil": nil, "double": 1.0])
+        let nestedProp = props["nested"] as? Dictionary<String, Any>
+        XCTAssertEqual(nestedProp?["dict"] as? Dictionary, ["nil": nil, "double": 1.0])
+        XCTAssertEqual(nestedProp?["list"] as? Array, [nil, 1.0, 2.0])
+    }
 
     func testTrackWithCustomDistinctIdAndToken() {
         let p: Properties = ["token": "t1", "distinct_id": "d1"]

@@ -92,7 +92,7 @@ class Flush: AppLifecycle {
     func startFlushTimer() {
         stopFlushTimer()
         if flushInterval > 0 {
-            DispatchQueue.main.async() { [weak self] in
+            DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
                     return
                 }
@@ -112,7 +112,7 @@ class Flush: AppLifecycle {
 
     func stopFlushTimer() {
         if let timer = timer {
-            DispatchQueue.main.async() { [weak self, timer] in
+            DispatchQueue.main.async { [weak self, timer] in
                 timer.invalidate()
                 self?.timer = nil
             }

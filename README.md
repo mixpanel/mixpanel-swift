@@ -57,7 +57,7 @@ On Jan 1, 2022, we’ll remove the [Messages & Experiments](https://mixpanel.com
 
 **It requires Xcode 12+ and v2.8.0+ release**
 
-**Important: we only have support for iOS, for now, if you need integrations for other platforms(tvOS or macOS), please use other integration methods instead**
+**Important: It only supports for iOS, if you need integrations for other platforms(tvOS or macOS), please use other integration methods instead or use our beta version by pointing to the branch `3.0.0.beta`**
 
 1. In Xcode, select File > Swift Packages > Add Package Dependency.
 2. Follow the prompts using the URL for this repository and a minimum semantic version of v2.8.0

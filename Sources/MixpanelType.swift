@@ -20,6 +20,48 @@ public protocol MixpanelType: Any {
     func equals(rhs: MixpanelType) -> Bool
 }
 
+extension Optional: MixpanelType {
+    /**
+     Checks if this object has nested object types that Mixpanel supports.
+     */
+    public func isValidNestedTypeAndValue() -> Bool {
+        guard let val = self else { return true } // nil is valid
+        switch val {
+        case let v as MixpanelType:
+            return v.isValidNestedTypeAndValue()
+        default:
+            // non-nil but cannot be unwrapped to MixpanelType
+            return false
+        }
+    }
+
+    public func equals(rhs: MixpanelType) -> Bool {
+        if let v = self as? String, rhs is String {
+            return v == rhs as! String
+        } else if let v = self as? NSString, rhs is NSString {
+            return v == rhs as! NSString
+        } else if let v = self as? NSNumber, rhs is NSNumber {
+            return v.isEqual(to: rhs as! NSNumber)
+        } else if let v = self as? Int, rhs is Int {
+            return v == rhs as! Int
+        } else if let v = self as? UInt, rhs is UInt {
+            return v == rhs as! UInt
+        } else if let v = self as? Double, rhs is Double {
+            return v == rhs as! Double
+        } else if let v = self as? Float, rhs is Float {
+            return v == rhs as! Float
+        } else if let v = self as? Bool, rhs is Bool {
+            return v == rhs as! Bool
+        } else if let v = self as? Date, rhs is Date {
+            return v == rhs as! Date
+        } else if let v = self as? URL, rhs is URL {
+            return v == rhs as! URL
+        } else if self is NSNull && rhs is NSNull {
+            return true
+        }
+        return false
+    }
+}
 extension String: MixpanelType {
     /**
      Checks if this object has nested object types that Mixpanel supports.

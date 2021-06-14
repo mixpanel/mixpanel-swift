@@ -113,7 +113,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         var productsRequest = SKProductsRequest()
         var productIdentifiers: Set<String> = []
         awaitingTransactionsWriteLock.sync {
-            for transaction:AnyObject in transactions {
+            for transaction: AnyObject in transactions {
                 if let trans = transaction as? SKPaymentTransaction {
                     switch trans.transactionState {
                     case .purchased:
@@ -128,8 +128,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             }
         }
 
-
-        if productIdentifiers.count > 0 {
+        if !productIdentifiers.isEmpty {
             productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
             productsRequest.delegate = self
             productsRequest.start()
@@ -155,7 +154,6 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         }
         return false
     }
-
 
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         awaitingTransactionsWriteLock.sync {

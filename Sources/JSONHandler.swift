@@ -33,8 +33,8 @@ class JSONHandler {
 
      class func serializeJSONObject(_ obj: MPObjectToParse) -> Data? {
         let serializableJSONObject: MPObjectToParse
-        if let jsonObject = makeObjectSerializable(obj) as? Array<Any> {
-            serializableJSONObject = jsonObject.filter() {
+        if let jsonObject = makeObjectSerializable(obj) as? [Any] {
+            serializableJSONObject = jsonObject.filter {
                 JSONSerialization.isValidJSONObject($0)
             }
         } else {
@@ -46,7 +46,7 @@ class JSONHandler {
             return nil
         }
         
-        var serializedObject: Data? = nil
+        var serializedObject: Data?
         do {
             serializedObject = try JSONSerialization
                 .data(withJSONObject: serializableJSONObject, options: [])
@@ -75,13 +75,18 @@ class JSONHandler {
 
         case is String, is Int, is UInt, is UInt64, is Bool:
             return obj
+            
+        case let obj as [Any?]:
+            // nil values in Array properties are dropped
+            let nonNilEls: [Any] = obj.compactMap({ $0 })
+            return nonNilEls.map { makeObjectSerializable($0) }
 
-        case let obj as Array<Any>:
-            return obj.map() { makeObjectSerializable($0) }
+        case let obj as [Any]:
+            return obj.map { makeObjectSerializable($0) }
 
         case let obj as InternalProperties:
             var serializedDict = InternalProperties()
-            _ = obj.map() { e in
+            _ = obj.map { e in
                 serializedDict[e.key] =
                     makeObjectSerializable(e.value)
             }
@@ -98,21 +103,24 @@ class JSONHandler {
             return obj.absoluteString
 
         default:
-            Logger.info(message: "enforcing string on object")
-            return String(describing: obj)
+            let objString = String(describing: obj)
+            if objString == "nil" {
+                // all nil properties outside of Arrays are converted to NSNull()
+                return NSNull()
+            } else {
+                Logger.info(message: "enforcing string on object")
+                return objString
+            }
         }
     }
 
-
-    private class func isBoolNumber(_ num: NSNumber) -> Bool
-    {
+    private class func isBoolNumber(_ num: NSNumber) -> Bool {
         let boolID = CFBooleanGetTypeID()
         let numID = CFGetTypeID(num)
         return numID == boolID
     }
 
-    private class func isInvalidNumber(_ num: NSNumber) -> Bool
-    {
+    private class func isInvalidNumber(_ num: NSNumber) -> Bool {
         return  num.doubleValue.isInfinite ||  num.doubleValue.isNaN
     }
 }

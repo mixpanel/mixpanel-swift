@@ -14,7 +14,7 @@ class ConnectIntegrations {
     var savedBrazeID: String?
     var savedDeviceId: String?
 
-    open func setupIntegrations(_ integrations:[String]) {
+    open func setupIntegrations(_ integrations: [String]) {
         if integrations.contains("urbanairship") {
             self.setUrbanAirshipPeopleProp()
         }
@@ -27,8 +27,8 @@ class ConnectIntegrations {
         if let urbanAirship = NSClassFromString("UAirship") {
             let channelSelector = NSSelectorFromString("channel")
             if let channelIMP = urbanAirship.method(for: channelSelector) {
-                typealias channelFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
-                let curriedImplementation = unsafeBitCast(channelIMP, to: channelFunc.self)
+                typealias ChannelFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
+                let curriedImplementation = unsafeBitCast(channelIMP, to: ChannelFunc.self)
                 if let channel = curriedImplementation(urbanAirship.self, channelSelector) {
                     if let channelID = channel.perform(NSSelectorFromString("identifier"))?.takeUnretainedValue() as? String {
                         self.urbanAirshipRetries = 0
@@ -53,8 +53,8 @@ class ConnectIntegrations {
         if let brazeClass = NSClassFromString("Appboy") {
             let shareInstanceSel = NSSelectorFromString("sharedInstance")
             if let appBoyShareInstanceIMP = brazeClass.method(for: shareInstanceSel) {
-                typealias shareInstanceFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
-                let curriedImplementation = unsafeBitCast(appBoyShareInstanceIMP, to: shareInstanceFunc.self)
+                typealias ShareInstanceFunc = @convention(c) (AnyObject, Selector) -> AnyObject?
+                let curriedImplementation = unsafeBitCast(appBoyShareInstanceIMP, to: ShareInstanceFunc.self)
                 if let instance = curriedImplementation(brazeClass.self, shareInstanceSel) {
                     if let deviceId = instance.perform(NSSelectorFromString("getDeviceId"))?.takeUnretainedValue() as? String {
                         if deviceId != self.savedDeviceId {

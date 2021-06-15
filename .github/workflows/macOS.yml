@@ -1,4 +1,4 @@
-name: Mixpanel Swift SDK action
+name: macOS CI
 
 on:
   push:

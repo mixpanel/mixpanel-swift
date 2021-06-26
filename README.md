@@ -1,3 +1,4 @@
+
 <p align="center">
   <img src="https://github.com/mixpanel/mixpanel-android/blob/assets/mixpanel.png?raw=true" alt="Mixpanel Swift Library" height="150"/>
 </p>
@@ -86,8 +87,8 @@ func application(_ application: UIApplication,
 Let's get started by sending event data. You can send an event from anywhere in your application. Better understand user behavior by storing details that are specific to the event (properties). After initializing the library, Mixpanel will [automatically collect common mobile events](https://mixpanel.com/help/questions/articles/which-common-mobile-events-can-mixpanel-collect-on-my-behalf-automatically). You can enable/disable automatic collection through your [project settings](https://help.mixpanel.com/hc/en-us/articles/115004596186#enable-or-disable-common-mobile-events). Also, Mixpanel automatically tracks some properties by default. [learn more](https://help.mixpanel.com/hc/en-us/articles/115004613766-Default-Properties-Collected-by-Mixpanel#iOS)
 ```swift
 Mixpanel.mainInstance().track(event: "Sign Up", properties: [
-  "source": "Pat's affiliate site",
-  "Opted out of email": true
+   "source": "Pat's affiliate site",
+   "Opted out of email": true
 ])
 ```
 In addition to event data, you can also send [user profile data](https://developer.mixpanel.com/docs/swift#storing-user-profiles). We recommend this after completing the quickstart guide.
@@ -107,8 +108,8 @@ func application(_ application: UIApplication,
     ...
     Mixpanel.initialize(token: "MIXPANEL_TOKEN")
     Mixpanel.mainInstance().track(event: "Sign Up", properties: [
-        "source": "Pat's affiliate site",
-  "Opted out of email": true
+       "source": "Pat's affiliate site",
+       "Opted out of email": true
     ])
     ...
 }
@@ -134,9 +135,11 @@ If your events are still not showing up after 60 seconds, check if you have opte
 Mixpanel.mainInstance().loggingEnabled = true
 ```
 **Starting with iOS 14.5, do I need to request the user’s permission through the AppTrackingTransparency framework to use Mixpanel?**
+
 No, Mixpanel does not use IDFA so it does not require user permission through the AppTrackingTransparency(ATT) framework.
 
 **If I use Mixpanel, how do I answer app privacy questions for the App Store?**
+
 Please refer to our [Apple App Developer Privacy Guidance](https://mixpanel.com/legal/app-store-privacy-details/)
 
 

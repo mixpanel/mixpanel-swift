@@ -1,4 +1,5 @@
 
+
 <p align="center">
   <img src="https://github.com/mixpanel/mixpanel-android/blob/assets/mixpanel.png?raw=true" alt="Mixpanel Swift Library" height="150"/>
 </p>
@@ -33,20 +34,18 @@
 
 Welcome to the official Mixpanel Swift Library
 
-The Mixpanel Swift library for iOS is an open-source project, and we'd love to see your contributions! 
+The Mixpanel Swift library for iOS is an open-source project, and we'd love to see your contributions!
 We'd also love for you to come and work with us! Check out **[Jobs](https://mixpanel.com/jobs/#openings)** for details.
 
 If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
 
 Check out our [Advanced iOS Swift Guide](swift) for additional advanced configurations and use cases, like setting up your project with European Union data storage.
 
-
 # Quick Start Guide
+Our master branch and our releases are on Swift 5. If you wish to use our Swift 4.2 implementation, please point to the v2.6.1 release. For Swift 4/4.1 implementation, please point to the v2.4.5 release. For Swift 3 implementation, please point to the v2.2.3 release.
+
 ## 1. Install Mixpanel
 You will need your project token for initializing your library. You can get your project token from [project settings](https://mixpanel.com/settings/project).
-**Our master branch and our releases are now on Swift 5.**
-
-**If you wish to use our Swift 4.2 implementation, please point to the v2.6.1 release. For Swift 4/4.1 implementation, please point to the v2.4.5 release. For Swift 3 implementation, please point to the v2.2.3 release. For Swift 2.3 implementation, please point to the v1.0.1 release.**
 
 ### Installation Option 1: Swift Package Manager
 The easiest way to get Mixpanel into your iOS project is to use Swift Package Manager(requires Xcode 12+).

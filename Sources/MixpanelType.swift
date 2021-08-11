@@ -352,3 +352,13 @@ func assertPropertyTypes(_ properties: Properties?) {
         }
     }
 }
+
+extension Dictionary {
+    func get<T>(key: Key, defaultValue: T) -> T {
+        if let value = self[key] as? T {
+            return value
+        }
+
+        return defaultValue
+    }
+}

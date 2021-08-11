@@ -14,7 +14,6 @@ class Decide {
     let decideRequest: DecideRequest
     let lock: ReadWriteLock
     var decideFetched = false
-    var automaticEventsEnabled: Bool?
 
     required init(basePathIdentifier: String, lock: ReadWriteLock) {
         self.decideRequest = DecideRequest(basePathIdentifier: basePathIdentifier)
@@ -35,8 +34,8 @@ class Decide {
                     return
                 }
 
-                if let automaticEvents = result["automatic_events"] as? Bool {
-                    self.automaticEventsEnabled = automaticEvents
+                if let automaticEventsEnabled = result["automatic_events"] as? Bool {
+                    MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: automaticEventsEnabled, fromDecide: true, token: token)
                 }
 
                 self.decideFetched = true

@@ -22,9 +22,6 @@ open class People {
     let apiToken: String
     let serialQueue: DispatchQueue
     let lock: ReadWriteLock
-    var peopleQueue = Queue()
-    var flushPeopleQueue = Queue()
-    var unidentifiedQueue = Queue()
     var distinctId: String?
     var delegate: FlushDelegate?
     let metadata: SessionMetadata
@@ -82,18 +79,9 @@ open class People {
 
             if let distinctId = self.distinctId {
                 r["$distinct_id"] = distinctId
-                self.addPeopleObject(r)
+                MixpanelPersistence.sharedInstance.saveEntity(r, type: .people, token: self.apiToken)
             } else {
-                self.lock.write {
-                    self.unidentifiedQueue.append(r)
-                    if self.unidentifiedQueue.count > QueueConstants.queueSize {
-                        self.unidentifiedQueue.remove(at: 0)
-                    }
-                }
-
-            }
-            self.lock.read {
-                Persistence.archivePeople(self.flushPeopleQueue + self.peopleQueue, token: self.apiToken)
+                MixpanelPersistence.sharedInstance.saveEntity(r, type: .unIdentifiedPeople, token: self.apiToken)
             }
         }
 
@@ -102,16 +90,6 @@ open class People {
         }
     }
 
-    func addPeopleObject(_ r: InternalProperties) {
-        lock.write {
-            Logger.debug(message: "adding to people queue")
-            Logger.debug(message: r)
-            peopleQueue.append(r)
-            if peopleQueue.count > QueueConstants.queueSize {
-                peopleQueue.remove(at: 0)
-            }
-        }
-    }
 
     func merge(properties: InternalProperties) {
         addPeopleRecordToQueueWithAction("$merge", properties: properties)

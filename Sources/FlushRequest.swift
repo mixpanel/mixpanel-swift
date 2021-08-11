@@ -20,7 +20,7 @@ class FlushRequest: Network {
     var networkConsecutiveFailures = 0
 
     func sendRequest(_ requestData: String,
-                     type: FlushType,
+                     type: PersistenceType,
                      useIP: Bool,
                      completion: @escaping (Bool) -> Void) {
 

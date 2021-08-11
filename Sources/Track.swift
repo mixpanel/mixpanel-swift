@@ -18,6 +18,10 @@ class Track {
     let apiToken: String
     let lock: ReadWriteLock
     let metadata: SessionMetadata
+    
+    var isAutomaticEventEnabled: Bool {
+        return MixpanelPersistence.loadAutomacticEventsEnabledFlag(token: apiToken)
+    }
 
     init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata) {
         self.apiToken = apiToken
@@ -27,20 +31,26 @@ class Track {
     
     func track(event: String?,
                properties: Properties? = nil,
-               eventsQueue: Queue,
-               timedEvents: InternalProperties,
-               superProperties: InternalProperties,
                distinctId: String,
                anonymousId: String?,
                userId: String?,
                hadPersistedDistinctId: Bool?,
-               epochInterval: Double) -> (eventsQueque: Queue, timedEvents: InternalProperties, properties: InternalProperties) {
+               epochInterval: Double) {
         var ev = event
         if ev == nil || ev!.isEmpty {
             Logger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")
             ev = "mp_event"
         }
+        if !isAutomaticEventEnabled && ev!.hasPrefix("$ae_") {
+            return
+        }
         assertPropertyTypes(properties)
+        
+        let persistedProperties = MixpanelPersistence.sharedInstance.loadEntity(.properties, token: apiToken)
+        let timedEvents: InternalProperties = persistedProperties.get(key: "timedEvents", defaultValue: [:])
+        
+        let superProperties: InternalProperties = InternalProperties()
+        
         let epochSeconds = Int(round(epochInterval))
         let eventStartTime = timedEvents[ev!] as? Double
         var p = InternalProperties()
@@ -72,17 +82,7 @@ class Track {
 
         var trackEvent: InternalProperties = ["event": ev!, "properties": p]
         metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
-        var shadowEventsQueue = eventsQueue
-        Logger.debug(message: "adding event to queue")
-        Logger.debug(message: trackEvent)
-        shadowEventsQueue.append(trackEvent)
-        if shadowEventsQueue.count > QueueConstants.queueSize {
-            Logger.warn(message: "queue is full, dropping the oldest event from the queue")
-            Logger.warn(message: shadowEventsQueue.first as Any)
-            shadowEventsQueue.remove(at: 0)
-        }
-        
-        return (shadowEventsQueue, shadowTimedEvents, p)
+        MixpanelPersistence.sharedInstance.saveEntity(trackEvent, type: .events, token: apiToken)
     }
 
     func registerSuperProperties(_ properties: Properties,
@@ -120,12 +120,11 @@ class Track {
 
     func unregisterSuperProperty(_ propertyName: String,
                                  superProperties: InternalProperties) -> InternalProperties {
-        
         var updatedSuperProperties = superProperties
         updatedSuperProperties.removeValue(forKey: propertyName)
         return updatedSuperProperties
     }
-
+        
     func clearSuperProperties(_ superProperties: InternalProperties) -> InternalProperties {
         var updatedSuperProperties = superProperties
         updatedSuperProperties.removeAll()

@@ -18,7 +18,7 @@ import UIKit
 import StoreKit
 
 class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
-
+    
     var _minimumSessionDuration: UInt64 = 10000
     var minimumSessionDuration: UInt64 {
         set {
@@ -37,6 +37,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             return _maximumSessionDuration
         }
     }
+    
     var awaitingTransactions = [String: SKPaymentTransaction]()
     let defaults = UserDefaults(suiteName: "Mixpanel")
     var delegate: AEDelegate?
@@ -44,8 +45,9 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     var sessionStartTime: TimeInterval = Date().timeIntervalSince1970
     var hasAddedObserver = false
     var firstAppOpen = false
+    
     let awaitingTransactionsWriteLock = DispatchQueue(label: "com.mixpanel.awaiting_transactions_writeLock", qos: .utility)
-
+    
     func initializeEvents() {
         let firstOpenKey = "MPFirstOpen"
         if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
@@ -60,8 +62,8 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             let appVersionValue = infoDict["CFBundleShortVersionString"]
             let savedVersionValue = defaults.string(forKey: appVersionKey)
             if let appVersionValue = appVersionValue as? String,
-                let savedVersionValue = savedVersionValue,
-                appVersionValue.compare(savedVersionValue, options: .numeric, range: nil, locale: nil) == .orderedDescending {
+               let savedVersionValue = savedVersionValue,
+               appVersionValue.compare(savedVersionValue, options: .numeric, range: nil, locale: nil) == .orderedDescending {
                 delegate?.track(event: "$ae_updated", properties: ["$ae_updated_version": appVersionValue])
                 defaults.set(appVersionValue, forKey: appVersionKey)
                 defaults.synchronize()
@@ -70,32 +72,32 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                 defaults.synchronize()
             }
         }
-
+        
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(appWillResignActive(_:)),
                                                name: UIApplication.willResignActiveNotification,
                                                object: nil)
-
+        
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(appDidBecomeActive(_:)),
                                                name: UIApplication.didBecomeActiveNotification,
                                                object: nil)
-
+        
         #if DECIDE
         SKPaymentQueue.default().add(self)
         #endif
     }
-
+    
     @objc func appWillResignActive(_ notification: Notification) {
         sessionLength = roundOneDigit(num: Date().timeIntervalSince1970 - sessionStartTime)
         if sessionLength >= Double(minimumSessionDuration / 1000) &&
-           sessionLength <= Double(maximumSessionDuration / 1000) {
+            sessionLength <= Double(maximumSessionDuration / 1000) {
             delegate?.track(event: "$ae_session", properties: ["$ae_session_length": sessionLength])
             delegate?.increment(property: "$ae_total_app_sessions", by: 1)
             delegate?.increment(property: "$ae_total_app_session_length", by: sessionLength)
         }
     }
-
+    
     @objc func appDidBecomeActive(_ notification: Notification) {
         sessionStartTime = Date().timeIntervalSince1970
         if firstAppOpen {
@@ -108,7 +110,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
             firstAppOpen = false
         }
     }
-
+    
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         var productsRequest = SKProductsRequest()
         var productIdentifiers: Set<String> = []
@@ -127,18 +129,18 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                 }
             }
         }
-
+        
         if !productIdentifiers.isEmpty {
             productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
             productsRequest.delegate = self
             productsRequest.start()
         }
     }
-
+    
     func roundOneDigit(num: TimeInterval) -> TimeInterval {
         return round(num * 10.0) / 10.0
     }
-
+    
     func isExistingUser() -> Bool {
         do {
             if let searchPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).last {
@@ -154,14 +156,14 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         }
         return false
     }
-
+    
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         awaitingTransactionsWriteLock.sync {
             for product in response.products {
                 if let trans = awaitingTransactions[product.productIdentifier] {
                     delegate?.track(event: "$ae_iap", properties: ["$ae_iap_price": "\(product.price)",
-                        "$ae_iap_quantity": trans.payment.quantity,
-                        "$ae_iap_name": product.productIdentifier])
+                                                                   "$ae_iap_quantity": trans.payment.quantity,
+                                                                   "$ae_iap_name": product.productIdentifier])
                     awaitingTransactions.removeValue(forKey: product.productIdentifier)
                 }
             }

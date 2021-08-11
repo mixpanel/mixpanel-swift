@@ -52,24 +52,11 @@ open class Group {
 
             r["$group_key"] = self.groupKey
             r["$group_id"] = self.groupID
-            self.addGroupObject(r)
-
-            self.lock.read {
-                Persistence.archiveGroups(Mixpanel.mainInstance().flushGroupsQueue + Mixpanel.mainInstance().groupsQueue, token: self.apiToken)
-            }
+            MixpanelPersistence.sharedInstance.saveEntity(r, type: .groups, token: self.apiToken)
         }
 
         if MixpanelInstance.isiOSAppExtension() {
             delegate?.flush(completion: nil)
-        }
-    }
-
-    func addGroupObject(_ r: InternalProperties) {
-        self.lock.write {
-            Mixpanel.mainInstance().groupsQueue.append(r)
-            if Mixpanel.mainInstance().groupsQueue.count > QueueConstants.queueSize {
-                Mixpanel.mainInstance().groupsQueue.remove(at: 0)
-            }
         }
     }
 

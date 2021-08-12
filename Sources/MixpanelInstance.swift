@@ -662,6 +662,9 @@ extension MixpanelInstance {
                                                     userId: self.userId,
                                                     alias: self.alias,
                                                 hadPersistedDistinctId: self.hadPersistedDistinctId), apiToken: self.apiToken)
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
         }
         
         if MixpanelInstance.isiOSAppExtension() {

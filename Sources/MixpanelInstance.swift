@@ -612,9 +612,10 @@ extension MixpanelInstance {
      
      - parameter distinctId: string that uniquely identifies the current user
      - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
-     This should only be set to false if you wish to prevent people profile updates for that user.
+                            This should only be set to false if you wish to prevent people profile updates for that user.
+     - parameter completion: an optional completion handler for when the identify has completed.
      */
-    open func identify(distinctId: String, usePeople: Bool = true) {
+    open func identify(distinctId: String, usePeople: Bool = true, completion: (() -> Void)? = nil) {
         if hasOptedOutTracking() {
             return
         }
@@ -660,6 +661,9 @@ extension MixpanelInstance {
                                                     userId: self.userId,
                                                     alias: self.alias,
                                                 hadPersistedDistinctId: self.hadPersistedDistinctId), apiToken: self.apiToken)
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
         }
         
         if MixpanelInstance.isiOSAppExtension() {
@@ -682,9 +686,10 @@ extension MixpanelInstance {
      - parameter alias:      A unique identifier that you want to use as an identifier for this user.
      - parameter distinctId: The current user identifier.
      - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
+     - parameter completion: an optional completion handler for when the createAlias has completed.
      This should only be set to false if you wish to prevent people profile updates for that user.
      */
-    open func createAlias(_ alias: String, distinctId: String, usePeople: Bool = true) {
+    open func createAlias(_ alias: String, distinctId: String, usePeople: Bool = true, completion: (() -> Void)? = nil) {
         if hasOptedOutTracking() {
             return
         }
@@ -717,17 +722,22 @@ extension MixpanelInstance {
             let properties = ["distinct_id": distinctId, "alias": alias]
             track(event: "$create_alias", properties: properties)
             identify(distinctId: distinctId, usePeople: usePeople)
-            flush()
+            flush(completion: completion)
         } else {
             Logger.error(message: "alias: \(alias) matches distinctId: \(distinctId) - skipping api call.")
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
         }
     }
     
     /**
      Clears all stored properties including the distinct Id.
      Useful if your app's user logs out.
+     
+     - parameter completion: an optional completion handler for when the reset has completed.
      */
-    open func reset() {
+    open func reset(completion: (() -> Void)? = nil) {
         flush()
         trackingQueue.async { [weak self] in
             self?.readWriteLock.write { [weak self] in

@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         Mixpanel.initialize(token: "5d9d3df08d1c34a272abf23d892820bf")
         Mixpanel.mainInstance().loggingEnabled = true
-        Mixpanel.mainInstance().flushInterval = 5
+        Mixpanel.mainInstance().flushInterval = 2000
         
 //        MPDB.self.open()
 //        MPDB.createTable(tableName: "TEST")

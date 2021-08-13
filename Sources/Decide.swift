@@ -46,7 +46,7 @@ class Decide {
                 }
 
                 if let automaticEventsEnabled = result["automatic_events"] as? Bool {
-                    MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: automaticEventsEnabled, fromDecide: true, token: token)
+                    MixpanelPersistence.init(token: token).saveAutomacticEventsEnabledFlag(value: automaticEventsEnabled, fromDecide: true)
                 }
 
                 if let integrations = result["integrations"] as? [String] {

@@ -18,19 +18,23 @@ class Track {
     let apiToken: String
     let lock: ReadWriteLock
     let metadata: SessionMetadata
+    let mixpanelPersistence: MixpanelPersistence
     
     var isAutomaticEventEnabled: Bool {
-        return MixpanelPersistence.loadAutomacticEventsEnabledFlag(token: apiToken)
+        return MixpanelPersistence.init(token: apiToken).loadAutomacticEventsEnabledFlag()
     }
 
-    init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata) {
+    init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata, mixpanelPersistence: MixpanelPersistence) {
         self.apiToken = apiToken
         self.lock = lock
         self.metadata = metadata
+        self.mixpanelPersistence = mixpanelPersistence
     }
     
     func track(event: String?,
                properties: Properties? = nil,
+               timedEvents: InternalProperties,
+               superProperties: InternalProperties,
                distinctId: String,
                anonymousId: String?,
                userId: String?,
@@ -45,11 +49,6 @@ class Track {
             return
         }
         assertPropertyTypes(properties)
-        
-        let persistedProperties = MixpanelPersistence.sharedInstance.loadEntity(.properties, token: apiToken)
-        let timedEvents: InternalProperties = persistedProperties.get(key: "timedEvents", defaultValue: [:])
-        
-        let superProperties: InternalProperties = InternalProperties()
         
         let epochSeconds = Int(round(epochInterval))
         let eventStartTime = timedEvents[ev!] as? Double
@@ -82,7 +81,9 @@ class Track {
 
         var trackEvent: InternalProperties = ["event": ev!, "properties": p]
         metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
-        MixpanelPersistence.sharedInstance.saveEntity(trackEvent, type: .events, token: apiToken)
+        
+        self.mixpanelPersistence.saveEntity(trackEvent, type: .events)
+        self.mixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents)
     }
 
     func registerSuperProperties(_ properties: Properties,

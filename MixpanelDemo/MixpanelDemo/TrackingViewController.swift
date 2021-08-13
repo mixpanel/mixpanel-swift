@@ -23,6 +23,8 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
                           "Register SP Once w Default Value",
                           "Unregister SuperProperty"]
     var counter: Int = 0
+    var trackCounter: Int = 0
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,6 +37,12 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
         let cell = self.tableView.dequeueReusableCell(withIdentifier: "cell")! as UITableViewCell
         cell.textLabel?.text = tableViewItems[indexPath.item]
         cell.textLabel?.textColor = #colorLiteral(red: 0.200000003, green: 0.200000003, blue: 0.200000003, alpha: 1)
+        trackCounter += 1
+        let ev = "Tracked event \(trackCounter)"
+        print(ev)
+        for _ in 1...10 {
+            Mixpanel.mainInstance().track(event: ev)
+        }
         return cell
     }
 
@@ -46,7 +54,7 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
 
         switch indexPath.item {
         case 0:
-            let ev = "Track Event!"
+            let ev = "Track Event11!"
             Mixpanel.mainInstance().track(event: ev)
             descStr = "Event: \"\(ev)\""
         case 1:
@@ -98,12 +106,12 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
             break
         }
 
-        let vc = storyboard!.instantiateViewController(withIdentifier: "ActionCompleteViewController") as! ActionCompleteViewController
-        vc.actionStr = actionStr
-        vc.descStr = descStr
-        vc.modalTransitionStyle = UIModalTransitionStyle.crossDissolve
-        vc.modalPresentationStyle = UIModalPresentationStyle.overFullScreen
-        present(vc, animated: true, completion: nil)
+//        let vc = storyboard!.instantiateViewController(withIdentifier: "ActionCompleteViewController") as! ActionCompleteViewController
+//        vc.actionStr = actionStr
+//        vc.descStr = descStr
+//        vc.modalTransitionStyle = UIModalTransitionStyle.crossDissolve
+//        vc.modalPresentationStyle = UIModalPresentationStyle.overFullScreen
+//        present(vc, animated: true, completion: nil)
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

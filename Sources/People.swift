@@ -20,17 +20,20 @@ open class People {
     open var ignoreTime = false
 
     let apiToken: String
-    let serialQueue: DispatchQueue
+    let serialQueue: DispatchQueue!
     let lock: ReadWriteLock
     var distinctId: String?
     var delegate: FlushDelegate?
     let metadata: SessionMetadata
+    let mixpanelPersistence: MixpanelPersistence
+    
 
-    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, metadata: SessionMetadata) {
+    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, metadata: SessionMetadata, mixpanelPersistence: MixpanelPersistence) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
         self.lock = lock
         self.metadata = metadata
+        self.mixpanelPersistence = mixpanelPersistence
     }
 
     func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
@@ -79,9 +82,10 @@ open class People {
 
             if let distinctId = self.distinctId {
                 r["$distinct_id"] = distinctId
-                MixpanelPersistence.sharedInstance.saveEntity(r, type: .people, token: self.apiToken)
+                // identified
+                self.mixpanelPersistence.saveEntity(r, type: .people, flag: !PersistenceConstant.unIdentifiedFlag)
             } else {
-                MixpanelPersistence.sharedInstance.saveEntity(r, type: .unIdentifiedPeople, token: self.apiToken)
+                self.mixpanelPersistence.saveEntity(r, type: .people, flag: PersistenceConstant.unIdentifiedFlag)
             }
         }
 

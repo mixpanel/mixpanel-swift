@@ -23,6 +23,9 @@ struct BasePath {
         components.queryItems = queryItems
         // adding workaround to replece + for %2B as it's not done by default within URLComponents
         components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
+        
+        print(components.url)
+        print(components.path)
         return components.url
     }
 

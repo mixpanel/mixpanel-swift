@@ -19,14 +19,16 @@ open class Group {
     let groupID: MixpanelType
     var delegate: FlushDelegate?
     let metadata: SessionMetadata
+    let mixpanelPersistence: MixpanelPersistence
 
-    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, groupKey: String, groupID: MixpanelType, metadata: SessionMetadata) {
+    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, groupKey: String, groupID: MixpanelType, metadata: SessionMetadata, mixpanelPersistence: MixpanelPersistence) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
         self.lock = lock
         self.groupKey = groupKey
         self.groupID  = groupID
         self.metadata = metadata
+        self.mixpanelPersistence = mixpanelPersistence
     }
 
     func addGroupRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
@@ -52,7 +54,7 @@ open class Group {
 
             r["$group_key"] = self.groupKey
             r["$group_id"] = self.groupID
-            MixpanelPersistence.sharedInstance.saveEntity(r, type: .groups, token: self.apiToken)
+            self.mixpanelPersistence.saveEntity(r, type: .groups)
         }
 
         if MixpanelInstance.isiOSAppExtension() {

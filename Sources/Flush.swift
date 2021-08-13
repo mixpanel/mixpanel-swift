@@ -10,7 +10,7 @@ import Foundation
 
 protocol FlushDelegate {
     func flush(completion: (() -> Void)?)
-    func flushSuccess(_ queueSize: Int, type: PersistenceType)
+    func flushSuccess(type: FlushType, ids: [Int32])
     
     #if os(iOS)
     func updateNetworkActivityIndicator(_ on: Bool)
@@ -48,7 +48,7 @@ class Flush: AppLifecycle {
     }
 
 
-    func flushQueue(type: PersistenceType, queue: Queue) {
+    func flushQueue(type: FlushType, queue: Queue) {
         if flushRequest.requestNotAllowed() {
             return
         }
@@ -85,10 +85,16 @@ class Flush: AppLifecycle {
         }
     }
 
-    func flushQueueInBatches(_ queue: Queue, type: PersistenceType) {
-            let batchSize = min(queue.count, APIConstants.batchSize)
+    func flushQueueInBatches(_ queue: Queue, type: FlushType) {
+        var mutableQueue = queue
+        while !mutableQueue.isEmpty {
+            var shouldContinue = false
+            let batchSize = min(mutableQueue.count, APIConstants.batchSize)
             let range = 0..<batchSize
-            let batch = Array(queue[range])
+            let batch = Array(mutableQueue[range])
+            let ids: [Int32] = batch.map { entity in
+                (entity["id"] as? Int32) ?? 0
+            }
             // Log data payload sent
             Logger.debug(message: "Sending batch of data")
             Logger.debug(message: batch as Any)
@@ -112,13 +118,31 @@ class Flush: AppLifecycle {
                                             #endif // os(iOS)
                                             if success {
                                                 // remove
-                                                self.delegate?.flushSuccess(batchSize, type: type)
+                                                self.delegate?.flushSuccess(type: type, ids: ids)
+                                                mutableQueue = self.removeProcessedBatch(batchSize: batchSize, queue: mutableQueue, type: type)
                                             }
+                                            shouldContinue = success
                                             semaphore.signal()
                 })
                 _ = semaphore.wait(timeout: DispatchTime.distantFuture)
             }
+            if !shouldContinue {
+                break
+            }
+        }
     }
+    
+    func removeProcessedBatch(batchSize: Int, queue: Queue, type: FlushType) -> Queue {
+        var shadowQueue = queue
+        let range = 0..<batchSize
+        if let lastIndex = range.last, shadowQueue.count - 1 > lastIndex {
+            shadowQueue.removeSubrange(range)
+        } else {
+            shadowQueue.removeAll()
+        }
+        return shadowQueue
+    }
+
 
     // MARK: - Lifecycle
     func applicationDidBecomeActive() {

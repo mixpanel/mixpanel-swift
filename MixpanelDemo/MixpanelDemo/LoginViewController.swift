@@ -32,7 +32,7 @@ class LoginViewController: UIViewController {
     
     
     @IBAction func start(_ sender: Any) {
-        Mixpanel.mainInstance().identify(distinctId: distinctIdTextField.text ?? "")
+     //   Mixpanel.mainInstance().identify(distinctId: distinctIdTextField.text ?? "")
         Mixpanel.mainInstance().people.set(property: "$name", to: nameTextField.text ?? "")
         Mixpanel.mainInstance().track(event: "Logged in")
         Mixpanel.mainInstance().flush()

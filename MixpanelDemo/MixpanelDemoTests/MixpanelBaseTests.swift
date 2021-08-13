@@ -8,6 +8,7 @@
 
 import XCTest
 import Nocilla
+import SQLite3
 
 @testable import Mixpanel
 @testable import MixpanelDemo
@@ -45,7 +46,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         stubDecide()
         stubEngage()
         stubGroups()
-        deleteOptOutSettings(mixpanelInstance: mixpanel)
         mixpanel.reset()
         waitForTrackingQueue()
 
@@ -55,15 +55,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         mixpanel = nil
     }
 
-    func deleteOptOutSettings(mixpanelInstance: MixpanelInstance)
-    {
-        let filePath = Persistence.filePathWithType(.optOutStatus, token: mixpanelInstance.apiToken)
-        do {
-            try FileManager.default.removeItem(atPath: filePath!)
-        } catch {
-            Logger.info(message: "Unable to remove file at path: \(filePath!)")
-        }
-    }
     
     func mixpanelWillFlush(_ mixpanel: MixpanelInstance) -> Bool {
         return mixpanelWillFlush
@@ -80,20 +71,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         return String(format: "%08x%08x", arc4random(), arc4random())
     }
     
-    func waitForMixpanelQueues() {
-        mixpanel.trackingQueue.sync() {
-            mixpanel.networkQueue.sync() {
-                return
-            }
-        }
-    }
-
-    func waitForNetworkQueue() {
-        mixpanel.networkQueue.sync() {
-            return
-        }
-    }
-
     func waitForAsyncTasks() {
         var hasCompletedTask = false
         DispatchQueue.main.async {
@@ -105,10 +82,53 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
             RunLoop.current.run(mode: RunLoop.Mode.default, before: loopUntil)
         }
     }
+    
+    func eventQueue(token: String) -> Queue {
+        let dataMap = MPDBTest.readRows(.events, projectToken: token, numRows: Int.max)
+        var jsonArray : [InternalProperties] = []
+        for (key, value) in dataMap {
+            if let jsonObject = JSONHandler.deserializeData(value) as? InternalProperties {
+                var entity = jsonObject
+                entity["id"] = key
+                jsonArray.append(entity)
+            }
+        }
+        return jsonArray
+    }
 
-    func flushAndWaitForNetworkQueue() {
+    func peopleQueue(token: String) -> Queue {
+        let dataMap = MPDBTest.readRows(.people, projectToken: token, numRows: Int.max)
+        var jsonArray : [InternalProperties] = []
+        for (key, value) in dataMap {
+            if let jsonObject = JSONHandler.deserializeData(value) as? InternalProperties {
+                var entity = jsonObject
+                entity["id"] = key
+                jsonArray.append(entity)
+            }
+        }
+        return jsonArray
+    }
+    
+    func unIdentifiedPeopleQueue(token: String) -> Queue {
+        let dataMap = MPDBTest.readRows(.people, projectToken: token, numRows: Int.max, flag: true)
+        var jsonArray : [InternalProperties] = []
+        for (key, value) in dataMap {
+            if let jsonObject = JSONHandler.deserializeData(value) as? InternalProperties {
+                var entity = jsonObject
+                entity["id"] = key
+                jsonArray.append(entity)
+            }
+        }
+        return jsonArray
+    }
+    
+    func groupQueue(token: String) -> Queue {
+        return MixpanelPersistence.sharedInstance.loadEntitiesInBatch(type: .groups, token: token, batchSize: Int.max)
+    }
+    
+    func flushAndWaitForTrackingQueue() {
         mixpanel.flush()
-        waitForMixpanelQueues()
+        waitForTrackingQueue()
     }
 
     func assertDefaultPeopleProperties(_ properties: InternalProperties) {

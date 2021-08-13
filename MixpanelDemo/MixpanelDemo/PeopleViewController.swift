@@ -101,18 +101,18 @@ class PeopleViewController: UIViewController, UITableViewDelegate, UITableViewDa
             // Note that the call to Mixpanel People identify: can come after properties have been set. We queue them until
             // identify: is called and flush them at that time. That way, you can set properties before a user is logged in
             // and identify them once you know their user ID.
-            Mixpanel.mainInstance().identify(distinctId: Mixpanel.mainInstance().distinctId)
+            Mixpanel.mainInstance().identify(distinctId: "testDistinctId111")
             descStr = "Identified User"
         default:
             break
         }
 
-        let vc = storyboard!.instantiateViewController(withIdentifier: "ActionCompleteViewController") as! ActionCompleteViewController
-        vc.actionStr = actionStr
-        vc.descStr = descStr
-        vc.modalTransitionStyle = UIModalTransitionStyle.crossDissolve
-        vc.modalPresentationStyle = UIModalPresentationStyle.overFullScreen
-        present(vc, animated: true, completion: nil)
+//        let vc = storyboard!.instantiateViewController(withIdentifier: "ActionCompleteViewController") as! ActionCompleteViewController
+//        vc.actionStr = actionStr
+//        vc.descStr = descStr
+//        vc.modalTransitionStyle = UIModalTransitionStyle.crossDissolve
+//        vc.modalPresentationStyle = UIModalPresentationStyle.overFullScreen
+//        present(vc, animated: true, completion: nil)
 
     }
 

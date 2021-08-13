@@ -756,15 +756,26 @@ extension MixpanelInstance {
      */
     open func identify(distinctId: String, usePeople: Bool = true, completion: (() -> Void)? = nil) {
         if hasOptedOutTracking() {
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
             return
         }
         if distinctId.isEmpty {
             Logger.error(message: "\(self) cannot identify blank distinct id")
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
             return
         }
 
         trackingQueue.async { [weak self, distinctId, usePeople] in
-            guard let self = self else { return }
+            guard let self = self else {
+                if let completion = completion {
+                    DispatchQueue.main.async(execute: completion)
+                }
+                return
+            }
 
             // If there's no anonymousId assigned yet, that means distinctId is stored in the storage. Assigning already stored
             // distinctId as anonymousId on identify and also setting a flag to notify that it might be previously logged in user
@@ -841,21 +852,33 @@ extension MixpanelInstance {
      */
     open func createAlias(_ alias: String, distinctId: String, usePeople: Bool = true, completion: (() -> Void)? = nil) {
         if hasOptedOutTracking() {
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
             return
         }
         if distinctId.isEmpty {
             Logger.error(message: "\(self) cannot identify blank distinct id")
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
             return
         }
 
         if alias.isEmpty {
             Logger.error(message: "\(self) create alias called with empty alias")
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
             return
         }
 
         if alias != distinctId {
             trackingQueue.async { [weak self, alias] in
                 guard let self = self else {
+                    if let completion = completion {
+                        DispatchQueue.main.async(execute: completion)
+                    }
                     return
                 }
 
@@ -894,6 +917,9 @@ extension MixpanelInstance {
             self?.networkQueue.sync { [weak self] in
                 self?.readWriteLock.write { [weak self] in
                     guard let self = self else {
+                        if let completion = completion {
+                            DispatchQueue.main.async(execute: completion)
+                        }
                         return
                     }
 

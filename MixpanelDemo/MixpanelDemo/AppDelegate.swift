@@ -31,6 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         MixpanelTweaks.setTweaks(tweaks: allTweaks)
         registerNotification()
 
+
         return true
     }
 

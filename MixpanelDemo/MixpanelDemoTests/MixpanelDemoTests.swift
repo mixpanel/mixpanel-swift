@@ -277,6 +277,24 @@ class MixpanelDemoTests: MixpanelBaseTests {
             waitForTrackingQueue()
         }
     }
+    
+    func testIdentifyCompletion() {
+        let mixpanelInsance = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
+        mixpanelInsance.identify(distinctId: "demouser") {
+            XCTAssertEqual(mixpanelInsance.distinctId, "demouser",
+                           "mixpanel identify failed to set distinct id")
+            XCTAssertEqual(mixpanelInsance.people.distinctId, "demouser",
+                           "mixpanel identify failed to set people distinct id")
+            XCTAssertTrue(mixpanelInsance.people.unidentifiedQueue.isEmpty,
+                          "identify: should move records from unidentified queue")
+            XCTAssertTrue(mixpanelInsance.people.peopleQueue.count == 1,
+                          "identify: should move records to main people queue")
+            XCTAssertEqual(mixpanelInsance.people.peopleQueue.last?["$token"] as? String,
+                           kTestToken, "incorrect project token in people record")
+            XCTAssertEqual(mixpanelInsance.people.peopleQueue.last?["$distinct_id"] as? String,
+                           "demouser", "distinct id not set properly on unidentified people record")
+        }
+    }
 
     func testIdentifyTrack() {
         stubTrack()
@@ -324,6 +342,13 @@ class MixpanelDemoTests: MixpanelBaseTests {
             #endif
             mixpanel.reset()
             waitForTrackingQueue()
+        }
+    }
+    
+    func testAliasCompletion() {
+        let mixpanelInstance = Mixpanel.initialize(token: kTestToken)
+        mixpanelInstance.createAlias("testAlias", distinctId: mixpanel.distinctId) {
+            XCTAssertEqual(mixpanelInstance.alias, "testAlias", "lias should be set")
         }
     }
 
@@ -608,6 +633,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
                       "Invalid push notification was incorrectly queued.")
     }
 
+    
+    
     func testReset() {
         stubTrack()
         stubEngage()
@@ -643,6 +670,44 @@ class MixpanelDemoTests: MixpanelBaseTests {
                       "events queue failed to reset after archive")
         XCTAssertTrue(mixpanel.people.peopleQueue.isEmpty,
                       "people queue failed to reset after archive")
+    }
+    
+    func testRestCompletion() {
+        stubTrack()
+        stubEngage()
+        let mixpanelInstance = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
+        mixpanelInstance.identify(distinctId: "d1")
+        mixpanelInstance.track(event: "e1")
+        let p: Properties = ["p1": "a"]
+        mixpanelInstance.registerSuperProperties(p)
+        mixpanelInstance.people.set(properties: p)
+        mixpanelInstance.archive()
+        mixpanelInstance.reset {
+            #if MIXPANEL_UNIQUE_DISTINCT_ID
+            XCTAssertEqual(mixpanel.distinctId,
+                           mixpanel.defaultDistinctId(),
+                           "distinct id failed to reset")
+            #endif
+            XCTAssertNil(mixpanelInstance.people.distinctId, "people distinct id failed to reset")
+            XCTAssertTrue(mixpanelInstance.currentSuperProperties().isEmpty,
+                          "super properties failed to reset")
+            XCTAssertTrue(mixpanelInstance.eventsQueue.isEmpty, "events queue failed to reset")
+            XCTAssertTrue(mixpanelInstance.people.peopleQueue.isEmpty, "people queue failed to reset")
+            
+            let newMixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
+            #if MIXPANEL_UNIQUE_DISTINCT_ID
+            XCTAssertEqual(newMixpanel.distinctId, mixpanel.defaultDistinctId(),
+                           "distinct id failed to reset after archive")
+            #endif
+            XCTAssertNil(newMixpanel.people.distinctId,
+                         "people distinct id failed to reset after archive")
+            XCTAssertTrue(newMixpanel.currentSuperProperties().isEmpty,
+                          "super properties failed to reset after archive")
+            XCTAssertTrue(newMixpanel.eventsQueue.isEmpty,
+                          "events queue failed to reset after archive")
+            XCTAssertTrue(newMixpanel.people.peopleQueue.isEmpty,
+                          "people queue failed to reset after archive")
+        }
     }
 
     func testArchiveNSNumberBoolIntProperty() {

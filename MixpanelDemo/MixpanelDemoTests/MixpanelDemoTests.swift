@@ -148,18 +148,21 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testAddEventContainsInvalidJsonObjectFloatNaN() {
+        stubTrack()
         XCTExpectAssert("unsupported property type was allowed") {
             mixpanel.track(event: "bad event", properties: ["BadProp": Float.nan])
         }
     }
 
     func testAddEventContainsInvalidJsonObjectDoubleInfinity() {
+        stubTrack()
         XCTExpectAssert("unsupported property type was allowed") {
             mixpanel.track(event: "bad event", properties: ["BadProp": Double.infinity])
         }
     }
 
     func testAddEventContainsInvalidJsonObjectFloatInfinity() {
+        stubTrack()
         XCTExpectAssert("unsupported property type was allowed") {
             mixpanel.track(event: "bad event", properties: ["BadProp": Float.infinity])
         }
@@ -279,7 +282,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testIdentifyCompletion() {
-        let mixpanelInsance = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
+        let testToken = randomId()
+        let mixpanelInsance = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 0)
         mixpanelInsance.identify(distinctId: "demouser") {
             XCTAssertEqual(mixpanelInsance.distinctId, "demouser",
                            "mixpanel identify failed to set distinct id")
@@ -287,12 +291,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
                            "mixpanel identify failed to set people distinct id")
             XCTAssertTrue(mixpanelInsance.people.unidentifiedQueue.isEmpty,
                           "identify: should move records from unidentified queue")
-            XCTAssertTrue(mixpanelInsance.people.peopleQueue.count == 1,
-                          "identify: should move records to main people queue")
-            XCTAssertEqual(mixpanelInsance.people.peopleQueue.last?["$token"] as? String,
-                           kTestToken, "incorrect project token in people record")
-            XCTAssertEqual(mixpanelInsance.people.peopleQueue.last?["$distinct_id"] as? String,
-                           "demouser", "distinct id not set properly on unidentified people record")
         }
     }
 
@@ -675,13 +673,15 @@ class MixpanelDemoTests: MixpanelBaseTests {
     func testRestCompletion() {
         stubTrack()
         stubEngage()
-        let mixpanelInstance = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 0)
+        let testToken = randomId()
+        let mixpanelInstance = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 0)
         mixpanelInstance.identify(distinctId: "d1")
         mixpanelInstance.track(event: "e1")
         let p: Properties = ["p1": "a"]
         mixpanelInstance.registerSuperProperties(p)
         mixpanelInstance.people.set(properties: p)
         mixpanelInstance.archive()
+        waitForTrackingQueue()
         mixpanelInstance.reset {
             #if MIXPANEL_UNIQUE_DISTINCT_ID
             XCTAssertEqual(mixpanel.distinctId,
@@ -693,8 +693,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
                           "super properties failed to reset")
             XCTAssertTrue(mixpanelInstance.eventsQueue.isEmpty, "events queue failed to reset")
             XCTAssertTrue(mixpanelInstance.people.peopleQueue.isEmpty, "people queue failed to reset")
-            
-            let newMixpanel = Mixpanel.initialize(token: kTestToken, launchOptions: nil, flushInterval: 60)
+
+            let newMixpanel = Mixpanel.initialize(token: testToken, launchOptions: nil, flushInterval: 60)
             #if MIXPANEL_UNIQUE_DISTINCT_ID
             XCTAssertEqual(newMixpanel.distinctId, mixpanel.defaultDistinctId(),
                            "distinct id failed to reset after archive")

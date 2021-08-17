@@ -48,7 +48,7 @@ extension XCTestCase {
 
         // Call code.
         block()
-        waitForExpectations(timeout: 0.5, handler: nil)
+        waitForExpectations(timeout: 60, handler: nil)
         Assertions.assertClosure = Assertions.swiftAssertClosure
     }
 

@@ -91,8 +91,8 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptInTrackingForDistinctId()
     {
-        mixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
-        mixpanel .optInTracking(distinctId: "testDistinctId")
+        mixpanel = Mixpanel.initialize(token: "testOptIn", optOutTrackingByDefault: true)
+        mixpanel.optInTracking(distinctId: "testDistinctId")
         XCTAssertFalse(mixpanel.hasOptedOutTracking(), "The current user should have opted in tracking")
         waitForTrackingQueue()
         if mixpanel.eventsQueue.count > 0 {
@@ -116,7 +116,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             "date": now,
             "$app_version": "override"]
         mixpanel.optInTracking(distinctId: "testDistinctId", properties: testProperties)
-        waitForTrackingQueue()
+        waitForMixpanelQueues()
         let props = mixpanel.eventsQueue.first!["properties"] as? InternalProperties
         XCTAssertEqual(props!["string"] as? String, "yello")
         XCTAssertEqual(props!["number"] as? NSNumber, 3)

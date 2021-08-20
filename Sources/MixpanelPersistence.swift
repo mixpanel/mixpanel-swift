@@ -250,7 +250,7 @@ class MixpanelPersistence {
             saveOptOutStatusFlag(value: optOutFlag)
         }
         if let automaticEventsFlag = automaticEventsEnabled {
-            saveAutomacticEventsEnabledFlag(value: automaticEventsFlag, fromDecide: false) // shoulde fromDecide = false here?
+            saveAutomacticEventsEnabledFlag(value: automaticEventsFlag, fromDecide: false) // should fromDecide = false here?
         }
         return
     }
@@ -308,11 +308,11 @@ class MixpanelPersistence {
         removeArchivedFile(atPath: filePathFor(PersistenceType.events.rawValue)!)
         removeArchivedFile(atPath: filePathFor(PersistenceType.people.rawValue)!)
         removeArchivedFile(atPath: filePathFor(PersistenceType.groups.rawValue)!)
+        removeArchivedFile(atPath: filePathFor("properties")!)
+        removeArchivedFile(atPath: filePathFor("optOutStatus")!)
         removeArchivedFile(atPath: filePathFor("codelessBindings")!)
         removeArchivedFile(atPath: filePathFor("variants")!)
-        removeArchivedFile(atPath: filePathFor("optOutStatus")!)
-        removeArchivedFile(atPath: filePathFor("properties")!)
-
+        
         return (eventsQueue,
                 peopleQueue,
                 groupsQueue,
@@ -376,19 +376,6 @@ class MixpanelPersistence {
     }
 
     private func unarchiveProperties() -> (InternalProperties,
-        InternalProperties,
-        String,
-        String?,
-        String?,
-        String?,
-        Bool?,
-        String?,
-        Queue,
-        Bool?) {
-        return unarchivePropertiesHelper()
-    }
-
-    private func unarchivePropertiesHelper() -> (InternalProperties,
         InternalProperties,
         String,
         String?,

@@ -256,11 +256,7 @@ class MixpanelPersistence {
     }
     
     private func filePathWithType(_ type: String) -> String? {
-            return filePathFor(type)
-        }
-
-    private func filePathFor(_ persistenceType: String) -> String? {
-        let filename = "mixpanel-\(apiToken)-\(persistenceType)"
+        let filename = "mixpanel-\(apiToken)-\(type)"
         let manager = FileManager.default
 
         #if os(iOS)
@@ -305,13 +301,27 @@ class MixpanelPersistence {
             peopleUnidentifiedQueue,
             automaticEventsEnabled) = unarchiveProperties()
         
-        removeArchivedFile(atPath: filePathFor(PersistenceType.events.rawValue)!)
-        removeArchivedFile(atPath: filePathFor(PersistenceType.people.rawValue)!)
-        removeArchivedFile(atPath: filePathFor(PersistenceType.groups.rawValue)!)
-        removeArchivedFile(atPath: filePathFor("properties")!)
-        removeArchivedFile(atPath: filePathFor("optOutStatus")!)
-        removeArchivedFile(atPath: filePathFor("codelessBindings")!)
-        removeArchivedFile(atPath: filePathFor("variants")!)
+        if let eventsFile = filePathWithType(PersistenceType.events.rawValue) {
+            removeArchivedFile(atPath: eventsFile)
+        }
+        if let peopleFile = filePathWithType(PersistenceType.people.rawValue) {
+            removeArchivedFile(atPath: peopleFile)
+        }
+        if let groupsFile = filePathWithType(PersistenceType.groups.rawValue) {
+            removeArchivedFile(atPath: groupsFile)
+        }
+        if let propsFile = filePathWithType("properties") {
+            removeArchivedFile(atPath:propsFile)
+        }
+        if let optOutFile = filePathWithType("optOutStatus") {
+            removeArchivedFile(atPath: optOutFile)
+        }
+        if let codelessFile = filePathWithType("codelessBindings") {
+            removeArchivedFile(atPath: codelessFile)
+        }
+        if let variantsFile = filePathWithType("variants") {
+            removeArchivedFile(atPath: variantsFile)
+        }
         
         return (eventsQueue,
                 peopleQueue,

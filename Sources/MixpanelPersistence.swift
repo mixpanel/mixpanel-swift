@@ -59,7 +59,7 @@ class MixpanelPersistence {
         }
     }
     
-    func saveEntities(_ entities: Queue, type: PersistenceType) {
+    func saveEntities(_ entities: Queue, type: PersistenceType, flag: Bool = false) {
         for entity in entities {
             saveEntity(entity, type: type)
         }
@@ -222,4 +222,227 @@ class MixpanelPersistence {
         defaults.synchronize()
     }
     
+    // code for unarchiving from legacy archive files and migrating to SQLite / NSUserDefaults persistence
+    func migrate() {
+        let (eventsQueue,
+             peopleQueue,
+             groupsQueue,
+             superProperties,
+             timedEvents,
+             distinctId,
+             anonymousId,
+             userId,
+             alias,
+             hadPersistedDistinctId,
+             peopleDistinctId,
+             peopleUnidentifiedQueue,
+             optOutStatus,
+             automaticEventsEnabled) = unarchive()
+        
+        saveEntities(eventsQueue, type: PersistenceType.events)
+        saveEntities(peopleUnidentifiedQueue, type: PersistenceType.people, flag: true)
+        saveEntities(peopleQueue, type: PersistenceType.people)
+        saveEntities(groupsQueue, type: PersistenceType.groups)
+        saveSuperProperties(superProperties: superProperties)
+        saveTimedEvents(timedEvents: timedEvents)
+        saveIdentity(distinctID: distinctId, peopleDistinctID: peopleDistinctId, anonymousID: anonymousId, userID: userId, alias: alias, hadPersistedDistinctId: hadPersistedDistinctId)
+        if let optOutFlag = optOutStatus {
+            saveOptOutStatusFlag(value: optOutFlag)
+        }
+        if let automaticEventsFlag = automaticEventsEnabled {
+            saveAutomacticEventsEnabledFlag(value: automaticEventsFlag, fromDecide: false) // shoulde fromDecide = false here?
+        }
+        return
+    }
+    
+    private func filePathWithType(_ type: String) -> String? {
+            return filePathFor(type)
+        }
+
+    private func filePathFor(_ persistenceType: String) -> String? {
+        let filename = "mixpanel-\(apiToken)-\(persistenceType)"
+        let manager = FileManager.default
+
+        #if os(iOS)
+            let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
+        #else
+            let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
+        #endif // os(iOS)
+        guard let urlUnwrapped = url?.appendingPathComponent(filename).path else {
+            return nil
+        }
+
+        return urlUnwrapped
+    }
+    
+    private func unarchive() -> (eventsQueue: Queue,
+                                            peopleQueue: Queue,
+                                            groupsQueue: Queue,
+                                            superProperties: InternalProperties,
+                                            timedEvents: InternalProperties,
+                                            distinctId: String,
+                                            anonymousId: String?,
+                                            userId: String?,
+                                            alias: String?,
+                                            hadPersistedDistinctId: Bool?,
+                                            peopleDistinctId: String?,
+                                            peopleUnidentifiedQueue: Queue,
+                                            optOutStatus: Bool?,
+                                            automaticEventsEnabled: Bool?) {
+        let eventsQueue = unarchiveEvents()
+        let peopleQueue = unarchivePeople()
+        let groupsQueue = unarchiveGroups()
+        removeArchivedFile(atPath: filePathFor("codelessBindings")!)
+        removeArchivedFile(atPath: filePathFor("variants")!)
+        let optOutStatus = unarchiveOptOutStatus()
+
+        let (superProperties,
+            timedEvents,
+            distinctId,
+            anonymousId,
+            userId,
+            alias,
+            hadPersistedDistinctId,
+            peopleDistinctId,
+            peopleUnidentifiedQueue,
+            automaticEventsEnabled) = unarchiveProperties()
+
+        return (eventsQueue,
+                peopleQueue,
+                groupsQueue,
+                superProperties,
+                timedEvents,
+                distinctId,
+                anonymousId,
+                userId,
+                alias,
+                hadPersistedDistinctId,
+                peopleDistinctId,
+                peopleUnidentifiedQueue,
+                optOutStatus,
+                automaticEventsEnabled)
+    }
+
+    private func unarchiveWithFilePath(_ filePath: String) -> Any? {
+        if #available(iOS 11.0, macOS 10.13, watchOS 4.0, tvOS 11.0, *) {
+            guard let data = try? Data(contentsOf: URL(fileURLWithPath: filePath)),
+                  let unarchivedData = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data)  else {
+                Logger.info(message: "Unable to read file at path: \(filePath)")
+                removeArchivedFile(atPath: filePath)
+                return nil
+            }
+            return unarchivedData
+        } else {
+            guard let unarchivedData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath) else {
+                Logger.info(message: "Unable to read file at path: \(filePath)")
+                removeArchivedFile(atPath: filePath)
+                return nil
+            }
+            return unarchivedData
+        }
+    }
+
+    private func removeArchivedFile(atPath filePath: String) {
+        do {
+            try FileManager.default.removeItem(atPath: filePath)
+        } catch let err {
+            Logger.info(message: "Unable to remove file at path: \(filePath), error: \(err)")
+        }
+    }
+
+    private func unarchiveEvents() -> Queue {
+        let data = unarchiveWithType(PersistenceType.events.rawValue)
+        return data as? Queue ?? []
+    }
+
+    private func unarchivePeople() -> Queue {
+        let data = unarchiveWithType(PersistenceType.people.rawValue)
+        return data as? Queue ?? []
+    }
+
+    private func unarchiveGroups() -> Queue {
+        let data = unarchiveWithType(PersistenceType.groups.rawValue)
+        return data as? Queue ?? []
+    }
+
+    private func unarchiveOptOutStatus() -> Bool? {
+        return unarchiveWithType("optOutStatus") as? Bool
+    }
+
+    private func unarchiveProperties() -> (InternalProperties,
+        InternalProperties,
+        String,
+        String?,
+        String?,
+        String?,
+        Bool?,
+        String?,
+        Queue,
+        Bool?) {
+        return unarchivePropertiesHelper()
+    }
+
+    private func unarchivePropertiesHelper() -> (InternalProperties,
+        InternalProperties,
+        String,
+        String?,
+        String?,
+        String?,
+        Bool?,
+        String?,
+        Queue,
+        Bool?) {
+            let properties = unarchiveWithType("properties") as? InternalProperties
+            let superProperties =
+                properties?["superProperties"] as? InternalProperties ?? InternalProperties()
+            let timedEvents =
+                properties?["timedEvents"] as? InternalProperties ?? InternalProperties()
+            let distinctId =
+                properties?["distinctId"] as? String ?? ""
+            let anonymousId =
+                properties?["anonymousId"] as? String ?? nil
+            let userId =
+                properties?["userId"] as? String ?? nil
+            let alias =
+                properties?["alias"] as? String ?? nil
+            let hadPersistedDistinctId =
+                properties?["hadPersistedDistinctId"] as? Bool ?? nil
+            let peopleDistinctId =
+                properties?["peopleDistinctId"] as? String ?? nil
+            let peopleUnidentifiedQueue =
+                properties?["peopleUnidentifiedQueue"] as? Queue ?? Queue()
+            let automaticEventsEnabled =
+                properties?["automaticEvents"] as? Bool ?? nil
+        
+//            we dont't need to worry about this during migration right?
+//            if properties == nil {
+//                (distinctId, peopleDistinctId, anonymousId, userId, alias, hadPersistedDistinctId) = restoreIdentity(token: token)
+//            }
+
+            return (superProperties,
+                    timedEvents,
+                    distinctId,
+                    anonymousId,
+                    userId,
+                    alias,
+                    hadPersistedDistinctId,
+                    peopleDistinctId,
+                    peopleUnidentifiedQueue,
+                    automaticEventsEnabled)
+    }
+
+    private func unarchiveWithType(_ type: String) -> Any? {
+        let filePath = filePathWithType(type)
+        guard let path = filePath else {
+            Logger.info(message: "bad file path, cant fetch file")
+            return nil
+        }
+
+        guard let unarchivedData = unarchiveWithFilePath(path) else {
+            Logger.info(message: "can't unarchive file")
+            return nil
+        }
+
+        return unarchivedData
+    }
 }

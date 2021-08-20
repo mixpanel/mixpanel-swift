@@ -292,8 +292,6 @@ class MixpanelPersistence {
         let eventsQueue = unarchiveEvents()
         let peopleQueue = unarchivePeople()
         let groupsQueue = unarchiveGroups()
-        removeArchivedFile(atPath: filePathFor("codelessBindings")!)
-        removeArchivedFile(atPath: filePathFor("variants")!)
         let optOutStatus = unarchiveOptOutStatus()
 
         let (superProperties,
@@ -306,6 +304,14 @@ class MixpanelPersistence {
             peopleDistinctId,
             peopleUnidentifiedQueue,
             automaticEventsEnabled) = unarchiveProperties()
+        
+        removeArchivedFile(atPath: filePathFor(PersistenceType.events.rawValue)!)
+        removeArchivedFile(atPath: filePathFor(PersistenceType.people.rawValue)!)
+        removeArchivedFile(atPath: filePathFor(PersistenceType.groups.rawValue)!)
+        removeArchivedFile(atPath: filePathFor("codelessBindings")!)
+        removeArchivedFile(atPath: filePathFor("variants")!)
+        removeArchivedFile(atPath: filePathFor("optOutStatus")!)
+        removeArchivedFile(atPath: filePathFor("properties")!)
 
         return (eventsQueue,
                 peopleQueue,

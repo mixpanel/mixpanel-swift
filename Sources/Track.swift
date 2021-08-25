@@ -39,14 +39,14 @@ class Track {
                anonymousId: String?,
                userId: String?,
                hadPersistedDistinctId: Bool?,
-               epochInterval: Double) {
+               epochInterval: Double) -> InternalProperties {
         var ev = event
         if ev == nil || ev!.isEmpty {
             Logger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")
             ev = "mp_event"
         }
         if !isAutomaticEventEnabled && ev!.hasPrefix("$ae_") {
-            return
+            return timedEvents
         }
         assertPropertyTypes(properties)
         
@@ -84,6 +84,7 @@ class Track {
         
         self.mixpanelPersistence.saveEntity(trackEvent, type: .events)
         self.mixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents)
+        return shadowTimedEvents
     }
 
     func registerSuperProperties(_ properties: Properties,

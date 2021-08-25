@@ -18,6 +18,30 @@ struct PersistenceConstant {
     static let unIdentifiedFlag = true
 }
 
+struct MixpanelIdentity {
+    let distinctID: String
+    let peopleDistinctID: String?
+    let anoymousId: String?
+    let userId: String?
+    let alias: String?
+    let hadPersistedDistinctId: Bool?
+}
+
+struct MixpanelUserDefaultsKeys {
+    static let suiteName = "Mixpanel"
+    static let prefix = "mixpanel"
+    static let optOutStatus = "OptOutStatus"
+    static let automaticEventEnabled = "AutomaticEventEnabled"
+    static let automaticEventEnabledFromDecide = "AutomaticEventEnabledFromDecide"
+    static let timedEvents = "timedEvents"
+    static let superProperties = "superProperties"
+    static let distinctID = "MPDistinctID"
+    static let peopleDistinctID = "MPPeopleDistinctID"
+    static let anonymousId = "MPAnonymousId"
+    static let userID = "MPUserId"
+    static let alias = "MPAlias"
+    static let hadPersistedDistinctId = "MPHadPersistedDistinctId"
+}
 
 class MixpanelPersistence {
     
@@ -29,7 +53,6 @@ class MixpanelPersistence {
         mpdb = MPDB.init(token: apiToken)
     }
     
-    
     func saveEntity(_ entity: InternalProperties, type: PersistenceType, flag: Bool = false) {
         if let data = JSONHandler.serializeJSONObject(entity) {
             mpdb.insertRow(type, data: data, flag: flag)
@@ -38,23 +61,12 @@ class MixpanelPersistence {
     
     func saveEntities(_ entities: Queue, type: PersistenceType) {
         for entity in entities {
-            if let data = JSONHandler.serializeJSONObject(entity) {
-                mpdb.insertRow(type, data: data)
-            }
+            saveEntity(entity, type: type)
         }
     }
     
-    func loadEntitiesInBatch(type: PersistenceType, batchSize: Int = 50, flag: Bool = false) -> [InternalProperties] {
-        let dataMap = mpdb.readRows(type, numRows: batchSize, flag: flag)
-        var jsonArray : [InternalProperties] = []
-        for (key, value) in dataMap {
-            if let jsonObject = JSONHandler.deserializeData(value) as? InternalProperties {
-                var entity = jsonObject
-                entity["id"] = key
-                jsonArray.append(entity)
-            }
-        }
-        return jsonArray
+    func loadEntitiesInBatch(type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false) -> [InternalProperties] {
+        return mpdb.readRows(type, numRows: batchSize, flag: flag)
     }
     
     func removeEntitiesInBatch(type: PersistenceType, ids: [Int32]) {
@@ -72,32 +84,32 @@ class MixpanelPersistence {
     }
     
     func saveOptOutStatusFlag(value: Bool) {
-        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
-        let prefix = "mixpanel-\(apiToken)-"
-        defaults.setValue(value, forKey: prefix + "OptOutStatus")
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
+        defaults.setValue(value, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)")
         defaults.synchronize()
     }
     
-    func loadOptOutStatusFlag() -> Bool {
-        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
-            return false
+    func loadOptOutStatusFlag() -> Bool? {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+            return nil
         }
-        let prefix = "mixpanel-\(apiToken)-"
-        return defaults.bool(forKey: prefix + "OptOutStatus")
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
+        return defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)") as? Bool
     }
     
     
     func saveAutomacticEventsEnabledFlag(value: Bool, fromDecide: Bool) {
-        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
-        let prefix = "mixpanel-\(apiToken)-"
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
         if fromDecide {
-            defaults.setValue(value, forKey: prefix + "AutomaticEventEnabledFromDecide")
+            defaults.setValue(value, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)")
         } else {
-            defaults.setValue(value, forKey: prefix + "AutomaticEventEnabled")
+            defaults.setValue(value, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)")
         }
         defaults.synchronize()
     }
@@ -106,99 +118,107 @@ class MixpanelPersistence {
         #if TV_AUTO_EVENTS
         return true
         #else
-        let prefix = "mixpanel-\(apiToken)-"
-        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
-            return false
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+            return true
         }
-        return defaults.bool(forKey: prefix + "AutomaticEventEnabled") || defaults.bool(forKey: prefix + "AutomaticEventEnabledFromDecide")
+        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") == nil && defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)") == nil {
+            return true // default true
+        }
+        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") != nil {
+            return defaults.bool(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)")
+        } else { // if there is no local settings, get the value from Decide
+            return defaults.bool(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)")
+        }
         #endif
     }
     
     func saveTimedEvents(timedEvents: InternalProperties) {
-        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
-        let prefix = "mixpanel-\(apiToken)-"
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
         let timedEventsData = NSKeyedArchiver.archivedData(withRootObject: timedEvents)
-        defaults.set(timedEventsData, forKey: prefix + "timedEvents")
+        defaults.set(timedEventsData, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.timedEvents)")
         defaults.synchronize()
     }
     
     func loadTimedEvents() -> InternalProperties {
-        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return InternalProperties()
         }
-        let prefix = "mixpanel-\(apiToken)-"
-        guard let timedEventsData  = defaults.data(forKey: prefix + "timedEvents") else {
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
+        guard let timedEventsData  = defaults.data(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.timedEvents)") else {
             return InternalProperties()
         }
         return NSKeyedUnarchiver.unarchiveObject(with: timedEventsData) as? InternalProperties ?? InternalProperties()
     }
     
     func saveSuperProperties(superProperties: InternalProperties) {
-        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
-        let prefix = "mixpanel-\(apiToken)-"
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
         let superPropertiesData = NSKeyedArchiver.archivedData(withRootObject: superProperties)
-        defaults.set(superPropertiesData, forKey: prefix + "superProperties")
+        defaults.set(superPropertiesData, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.superProperties)")
         defaults.synchronize()
     }
     
     func loadSuperProperties() -> InternalProperties {
-        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return InternalProperties()
         }
-        let prefix = "mixpanel-\(apiToken)-"
-        guard let superPropertiesData  = defaults.data(forKey: prefix + "superProperties") else {
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
+        guard let superPropertiesData  = defaults.data(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.superProperties)") else {
             return InternalProperties()
         }
         return NSKeyedUnarchiver.unarchiveObject(with: superPropertiesData) as? InternalProperties ?? InternalProperties()
     }
     
-    func saveIdentity(distinctID: String, peopleDistinctID: String?, anonymousID: String?, userID: String?, alias: String?, hadPersistedDistinctId: Bool?) {
-        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
+    func saveIdentity(mixpanelIdentity: MixpanelIdentity) {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
-        let prefix = "mixpanel-\(apiToken)-"
-        defaults.set(distinctID, forKey: prefix + "MPDistinctID")
-        defaults.set(peopleDistinctID, forKey: prefix + "MPPeopleDistinctID")
-        defaults.set(anonymousID, forKey: prefix + "MPAnonymousId")
-        defaults.set(userID, forKey: prefix + "MPUserId")
-        defaults.set(alias, forKey: prefix + "MPAlias")
-        defaults.set(hadPersistedDistinctId, forKey: prefix + "MPHadPersistedDistinctId")
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
+        defaults.set(mixpanelIdentity.distinctID, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.distinctID)")
+        defaults.set(mixpanelIdentity.peopleDistinctID, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.peopleDistinctID)")
+        defaults.set(mixpanelIdentity.anoymousId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.anonymousId)")
+        defaults.set(mixpanelIdentity.userId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)")
+        defaults.set(mixpanelIdentity.alias, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
+        defaults.set(mixpanelIdentity.hadPersistedDistinctId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)")
         defaults.synchronize()
     }
     
-    func loadIdentity() -> (String, String?, String?, String?, String?, Bool?) {
-        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
-            return ("", nil, nil, nil, nil, nil)
+    func loadIdentity() -> MixpanelIdentity {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+            return MixpanelIdentity.init(distinctID: "", peopleDistinctID: nil, anoymousId: nil, userId: nil, alias: nil, hadPersistedDistinctId: nil)
         }
-        let prefix = "mixpanel-\(apiToken)-"
-        return (defaults.string(forKey: prefix + "MPDistinctID") ?? "",
-                defaults.string(forKey: prefix + "MPPeopleDistinctID"),
-                defaults.string(forKey: prefix + "MPAnonymousId"),
-                defaults.string(forKey: prefix + "MPUserId"),
-                defaults.string(forKey: prefix + "MPAlias"),
-                defaults.bool(forKey: prefix + "MPHadPersistedDistinctId"))
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
+        return MixpanelIdentity.init(
+            distinctID: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.distinctID)") ?? "",
+            peopleDistinctID: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.peopleDistinctID)"),
+            anoymousId: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.anonymousId)"),
+            userId: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)"),
+            alias: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)"),
+            hadPersistedDistinctId: defaults.bool(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)"))
     }
     
     func deleteMPUserDefaultsData() {
-        guard let defaults = UserDefaults(suiteName: "Mixpanel") else {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
-        let prefix = "mixpanel-\(apiToken)-"
-        defaults.removeObject(forKey: prefix + "MPDistinctID")
-        defaults.removeObject(forKey: prefix + "MPPeopleDistinctID")
-        defaults.removeObject(forKey: prefix + "MPAnonymousId")
-        defaults.removeObject(forKey: prefix + "MPUserId")
-        defaults.removeObject(forKey: prefix + "MPAlias")
-        defaults.removeObject(forKey: prefix + "MPHadPersistedDistinctId")
-        defaults.removeObject(forKey: prefix + "AutomaticEventEnabled")
-        defaults.removeObject(forKey: prefix + "AutomaticEventEnabledFromDecide")
-        defaults.removeObject(forKey: prefix + "OptOutStatus")
-        defaults.removeObject(forKey: prefix + "timedEvents")
-        defaults.removeObject(forKey: prefix + "superProperties")
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.distinctID)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.peopleDistinctID)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.anonymousId)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.timedEvents)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.superProperties)")
         defaults.synchronize()
     }
     

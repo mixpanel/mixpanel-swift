@@ -172,3 +172,4 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 }
 
 #endif
+

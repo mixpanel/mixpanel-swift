@@ -83,12 +83,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// This allows enabling or disabling collecting common mobile events
     /// If this is not set, it will query the Autotrack settings from the Mixpanel server
     open var trackAutomaticEventsEnabled: Bool? {
-        set {
-            self.mixpanelPersistence.saveAutomacticEventsEnabledFlag(value: newValue ?? false, fromDecide: false)
-        }
-        
-        get {
-            self.mixpanelPersistence.loadAutomacticEventsEnabledFlag()
+        didSet {
+            self.mixpanelPersistence.saveAutomacticEventsEnabledFlag(value: trackAutomaticEventsEnabled ?? false, fromDecide: false)
         }
     }
     
@@ -193,9 +189,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // DECIDE
     
     var superProperties = InternalProperties()
-    var timedEvents = InternalProperties()
     var trackingQueue: DispatchQueue!
     var optOutStatus: Bool?
+    var timedEvents = InternalProperties()
     let readWriteLock: ReadWriteLock
     #if os(iOS) && !targetEnvironment(macCatalyst)
     static let reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
@@ -649,12 +645,13 @@ extension MixpanelInstance {
                 self.people.distinctId = nil
             }
             
-            self.mixpanelPersistence.saveIdentity(distinctID: self.distinctId,
-                                                  peopleDistinctID: self.people.distinctId,
-                                                  anonymousID: self.anonymousId,
-                                                  userID: self.userId,
-                                                  alias: self.alias,
-                                                  hadPersistedDistinctId: self.hadPersistedDistinctId)
+            self.mixpanelPersistence.saveIdentity(mixpanelIdentity: MixpanelIdentity.init(
+                                                    distinctID: self.distinctId,
+                                                    peopleDistinctID: self.people.distinctId,
+                                                    anoymousId: self.anonymousId,
+                                                    userId: self.userId,
+                                                    alias: self.alias,
+                                                    hadPersistedDistinctId: self.hadPersistedDistinctId))
         }
         
         if MixpanelInstance.isiOSAppExtension() {
@@ -713,12 +710,13 @@ extension MixpanelInstance {
                 }
                 
                 self.alias = alias
-                self.mixpanelPersistence.saveIdentity(distinctID: self.distinctId,
-                                                      peopleDistinctID: self.people.distinctId,
-                                                      anonymousID: self.anonymousId,
-                                                      userID: self.userId,
-                                                      alias: self.alias,
-                                                      hadPersistedDistinctId: self.hadPersistedDistinctId)
+                self.mixpanelPersistence.saveIdentity(mixpanelIdentity: MixpanelIdentity.init(
+                                                        distinctID: self.distinctId,
+                                                        peopleDistinctID: self.people.distinctId,
+                                                        anoymousId: self.anonymousId,
+                                                        userId: self.userId,
+                                                        alias: self.alias,
+                                                        hadPersistedDistinctId: self.hadPersistedDistinctId))
             }
             
             let properties = ["distinct_id": distinctId, "alias": alias]
@@ -772,12 +770,12 @@ extension MixpanelInstance {
                 }
                 
                 self.mixpanelPersistence.deleteMPUserDefaultsData()
+                self.timedEvents = InternalProperties()
                 self.distinctId = self.defaultDistinctId()
                 self.anonymousId = self.distinctId
                 self.hadPersistedDistinctId = nil
                 self.userId = nil
                 self.superProperties = InternalProperties()
-                self.timedEvents = InternalProperties()
                 self.people.distinctId = nil
                 self.alias = nil
                 #if DECIDE
@@ -798,17 +796,30 @@ extension MixpanelInstance {
         self.readWriteLock.read {
             self.mixpanelPersistence.saveTimedEvents(timedEvents: timedEvents)
             self.mixpanelPersistence.saveSuperProperties(superProperties: superProperties)
-            self.mixpanelPersistence.saveIdentity(distinctID: distinctId, peopleDistinctID: people.distinctId, anonymousID: anonymousId, userID: userId, alias: alias, hadPersistedDistinctId: hadPersistedDistinctId)
+            self.mixpanelPersistence.saveIdentity(mixpanelIdentity: MixpanelIdentity.init(
+                                                    distinctID: distinctId,
+                                                    peopleDistinctID: people.distinctId,
+                                                    anoymousId: anonymousId,
+                                                    userId: userId,
+                                                    alias: alias,
+                                                    hadPersistedDistinctId: hadPersistedDistinctId))
         }
     }
     
     
     func unarchive() {
-        timedEvents = self.mixpanelPersistence.loadTimedEvents()
         optOutStatus = self.mixpanelPersistence.loadOptOutStatusFlag()
         superProperties = self.mixpanelPersistence.loadSuperProperties()
-        
-        (distinctId, people.distinctId, anonymousId, userId, alias, hadPersistedDistinctId) = self.mixpanelPersistence.loadIdentity()
+        timedEvents = self.mixpanelPersistence.loadTimedEvents()
+        let mixpanelIdentity = self.mixpanelPersistence.loadIdentity()
+        (distinctId, people.distinctId, anonymousId, userId, alias, hadPersistedDistinctId) = (
+            mixpanelIdentity.distinctID,
+            mixpanelIdentity.peopleDistinctID,
+            mixpanelIdentity.anoymousId,
+            mixpanelIdentity.userId,
+            mixpanelIdentity.alias,
+            mixpanelIdentity.hadPersistedDistinctId
+        )
     }
     
     func trackIntegration() {
@@ -880,7 +891,10 @@ extension MixpanelInstance {
     }
     
     func flushQueue(type: FlushType) {
-        let queue = self.mixpanelPersistence.loadEntitiesInBatch(type: persistenceTypeFromFlushType(type), batchSize: Int.max)
+        if hasOptedOutTracking() {
+            return
+        }
+        let queue = self.mixpanelPersistence.loadEntitiesInBatch(type: persistenceTypeFromFlushType(type))
         self.flushInstance.flushQueue(type: type, queue: queue)
     }
     
@@ -921,7 +935,8 @@ extension MixpanelInstance {
             guard let self = self else {
                 return
             }
-            self.trackInstance.track(event: event, properties: properties,
+            
+            self.timedEvents = self.trackInstance.track(event: event, properties: properties,
                                      timedEvents: self.timedEvents,
                                      superProperties: self.superProperties,
                                      distinctId: self.distinctId,
@@ -929,7 +944,6 @@ extension MixpanelInstance {
                                      userId: self.userId,
                                      hadPersistedDistinctId: self.hadPersistedDistinctId,
                                      epochInterval: epochInterval)
-            
         }
         
         if MixpanelInstance.isiOSAppExtension() {
@@ -1038,10 +1052,11 @@ extension MixpanelInstance {
         let startTime = Date().timeIntervalSince1970
         trackingQueue.async { [weak self, startTime, event] in
             guard let self = self else { return }
-            
+            let timedEvents = self.trackInstance.time(event: event, timedEvents: self.timedEvents, startTime: startTime)
             self.readWriteLock.write {
-                self.timedEvents = self.trackInstance.time(event: event, timedEvents: self.timedEvents, startTime: startTime)
+                self.timedEvents = timedEvents
             }
+            self.mixpanelPersistence.saveTimedEvents(timedEvents: timedEvents)
         }
     }
     
@@ -1064,8 +1079,9 @@ extension MixpanelInstance {
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
             self.readWriteLock.write {
-                self.timedEvents = self.trackInstance.clearTimedEvents(self.timedEvents)
+                self.timedEvents = InternalProperties()
             }
+            self.mixpanelPersistence.saveTimedEvents(timedEvents: InternalProperties())
         }
     }
     
@@ -1079,9 +1095,8 @@ extension MixpanelInstance {
             [weak self, event] in
             guard let self = self else { return }
             
-            self.readWriteLock.write {
-                self.timedEvents = self.trackInstance.clearTimedEvent(event: event, timedEvents: self.timedEvents)
-            }
+            let updatedTimedEvents = self.trackInstance.clearTimedEvent(event: event, timedEvents: self.timedEvents)
+            self.mixpanelPersistence.saveTimedEvents(timedEvents: updatedTimedEvents)
         }
     }
     
@@ -1309,7 +1324,7 @@ extension MixpanelInstance {
                 self.anonymousId = self.distinctId
                 self.hadPersistedDistinctId = nil
                 self.superProperties = InternalProperties()
-                self.timedEvents = InternalProperties()
+                self.mixpanelPersistence.saveTimedEvents(timedEvents: InternalProperties())
             }
             self.archive()
         }

@@ -19,13 +19,15 @@ struct BasePath {
         guard var components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
             return nil
         }
+<<<<<<< HEAD
         components.path += path
+=======
+
+        components.path = path
+>>>>>>> 3c2e9a6 (fix unit tests)
         components.queryItems = queryItems
         // adding workaround to replece + for %2B as it's not done by default within URLComponents
         components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
-        
-        print(components.url)
-        print(components.path)
         return components.url
     }
 

@@ -8,6 +8,7 @@
 
 import XCTest
 import Nocilla
+import SQLite3
 
 @testable import Mixpanel
 @testable import MixpanelDemoMac
@@ -16,6 +17,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     var mixpanel: MixpanelInstance!
     var mixpanelWillFlush: Bool!
     static var requestCount = 0
+    var apiToken: String?
 
     override func setUp() {
         NSLog("starting test setup...")
@@ -26,10 +28,11 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         stubGroups()
         LSNocilla.sharedInstance().start()
         mixpanelWillFlush = false
-        mixpanel = Mixpanel.initialize(token: kTestToken)
+        apiToken = randomId()
+        mixpanel = Mixpanel.initialize(token: apiToken!, flushInterval: 0)
         mixpanel.reset()
         waitForTrackingQueue()
-
+        
         NSLog("finished test setup")
     }
 
@@ -39,7 +42,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         stubDecide()
         stubEngage()
         stubGroups()
-        deleteOptOutSettings(mixpanelInstance: mixpanel)
         mixpanel.reset()
         waitForTrackingQueue()
 
@@ -47,17 +49,44 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         LSNocilla.sharedInstance().clearStubs()
 
         mixpanel = nil
+        removeDBfile()
     }
-
-    func deleteOptOutSettings(mixpanelInstance: MixpanelInstance)
-    {
-        let filePath = Persistence.filePathWithType(.optOutStatus, token: mixpanelInstance.apiToken)
+    
+    func removeDBfile(_ token: String? = nil) {
         do {
-            try FileManager.default.removeItem(atPath: filePath!)
-        } catch {
-            Logger.info(message: "Unable to remove file at path: \(filePath!)")
+             let fileManager = FileManager.default
+            
+            // Check if file exists
+            if fileManager.fileExists(atPath: dbFilePath(token)) {
+                // Delete file
+                try fileManager.removeItem(atPath: dbFilePath(token))
+            } else {
+                print("Unable to delete the test db file at \(dbFilePath(token)), the file does not exist")
+            }
+         
+        }
+        catch let error as NSError {
+            print("An error took place: \(error)")
         }
     }
+    
+    func dbFilePath(_ token: String? = nil) -> String {
+        let manager = FileManager.default
+        #if os(iOS)
+        let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
+        #else
+        let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
+        #endif // os(iOS)
+        guard let apiToken = apiToken else {
+            return ""
+        }
+        
+        guard let urlUnwrapped = url?.appendingPathComponent("\(token ?? apiToken)_MPDB.sqlite").path else {
+            return ""
+        }
+        return urlUnwrapped
+    }
+
     
     func mixpanelWillFlush(_ mixpanel: MixpanelInstance) -> Bool {
         return mixpanelWillFlush
@@ -69,25 +98,17 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         }
     }
     
+    func waitForTrackingQueue(_ mixpanel: MixpanelInstance) {
+        mixpanel.trackingQueue.sync() {
+            return
+        }
+    }
+    
     func randomId() -> String
     {
         return String(format: "%08x%08x", arc4random(), arc4random())
     }
     
-    func waitForMixpanelQueues() {
-        mixpanel.trackingQueue.sync() {
-            mixpanel.networkQueue.sync() {
-                return
-            }
-        }
-    }
-
-    func waitForNetworkQueue() {
-        mixpanel.networkQueue.sync() {
-            return
-        }
-    }
-
     func waitForAsyncTasks() {
         var hasCompletedTask = false
         DispatchQueue.main.async {
@@ -99,10 +120,28 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
             RunLoop.current.run(mode: RunLoop.Mode.default, before: loopUntil)
         }
     }
+    
+    func eventQueue(token: String) -> Queue {
+        return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .events)
+    }
 
-    func flushAndWaitForNetworkQueue() {
+    func peopleQueue(token: String) -> Queue {
+        return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .people)
+    }
+    
+    func unIdentifiedPeopleQueue(token: String) -> Queue {
+        return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .people, flag: PersistenceConstant.unIdentifiedFlag)
+    }
+    
+    func groupQueue(token: String) -> Queue {
+        return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .groups)
+    }
+    
+    func flushAndWaitForTrackingQueue() {
         mixpanel.flush()
-        waitForMixpanelQueues()
+        waitForTrackingQueue()
+        mixpanel.flush()
+        waitForTrackingQueue()
     }
 
     func assertDefaultPeopleProperties(_ properties: InternalProperties) {
@@ -113,6 +152,12 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         XCTAssertNotNil(properties["$ios_app_release"], "missing $ios_app_release property")
     }
 
+    func compareDate(dateString: String, dateDate: Date) {
+        let dateFormatter: ISO8601DateFormatter = ISO8601DateFormatter()
+        let date = dateFormatter.string(from: dateDate)
+        XCTAssertEqual(String(date.prefix(19)), String(dateString.prefix(19)))
+    }
+    
     func allPropertyTypes() -> Properties {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss zzz"

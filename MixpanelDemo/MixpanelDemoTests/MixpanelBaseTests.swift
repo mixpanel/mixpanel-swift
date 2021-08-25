@@ -17,20 +17,19 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     var mixpanel: MixpanelInstance!
     var mixpanelWillFlush: Bool!
     static var requestCount = 0
+    var apiToken: String?
 
     override func setUp() {
         NSLog("starting test setup...")
         super.setUp()
-        stubTrack()
-        stubDecide()
-        stubEngage()
-        stubGroups()
-        LSNocilla.sharedInstance().start()
+        stubCalls()
         mixpanelWillFlush = false
-        mixpanel = Mixpanel.initialize(token: kTestToken, flushInterval: 0)
+        apiToken = randomId()
+        mixpanel = Mixpanel.initialize(token: apiToken!, flushInterval: 0)
         mixpanel.reset()
+        mixpanel.loggingEnabled = true
         waitForTrackingQueue()
-
+        
         if let loginView = self.topViewController() as? LoginViewController {
             loginView.goToMainView()
         } else {
@@ -40,6 +39,14 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         NSLog("finished test setup")
     }
 
+    func stubCalls() {
+        stubTrack()
+        stubDecide()
+        stubEngage()
+        stubGroups()
+        LSNocilla.sharedInstance().start()
+    }
+    
     override func tearDown() {
         super.tearDown()
         stubTrack()
@@ -53,6 +60,42 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         LSNocilla.sharedInstance().clearStubs()
 
         mixpanel = nil
+        removeDBfile()
+    }
+    
+    func removeDBfile(_ token: String? = nil) {
+        do {
+             let fileManager = FileManager.default
+            
+            // Check if file exists
+            if fileManager.fileExists(atPath: dbFilePath(token)) {
+                // Delete file
+                try fileManager.removeItem(atPath: dbFilePath(token))
+            } else {
+                print("Unable to delete the test db file at \(dbFilePath(token)), the file does not exist")
+            }
+         
+        }
+        catch let error as NSError {
+            print("An error took place: \(error)")
+        }
+    }
+    
+    func dbFilePath(_ token: String? = nil) -> String {
+        let manager = FileManager.default
+        #if os(iOS)
+        let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
+        #else
+        let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
+        #endif // os(iOS)
+        guard let apiToken = apiToken else {
+            return ""
+        }
+        
+        guard let urlUnwrapped = url?.appendingPathComponent("\(token ?? apiToken)_MPDB.sqlite").path else {
+            return ""
+        }
+        return urlUnwrapped
     }
 
     
@@ -61,6 +104,12 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     }
 
     func waitForTrackingQueue() {
+        mixpanel.trackingQueue.sync() {
+            return
+        }
+    }
+    
+    func waitForTrackingQueue(_ mixpanel: MixpanelInstance) {
         mixpanel.trackingQueue.sync() {
             return
         }
@@ -84,49 +133,24 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     }
     
     func eventQueue(token: String) -> Queue {
-        let dataMap = MPDBTest.readRows(.events, projectToken: token, numRows: Int.max)
-        var jsonArray : [InternalProperties] = []
-        for (key, value) in dataMap {
-            if let jsonObject = JSONHandler.deserializeData(value) as? InternalProperties {
-                var entity = jsonObject
-                entity["id"] = key
-                jsonArray.append(entity)
-            }
-        }
-        return jsonArray
+        return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .events)
     }
 
     func peopleQueue(token: String) -> Queue {
-        let dataMap = MPDBTest.readRows(.people, projectToken: token, numRows: Int.max)
-        var jsonArray : [InternalProperties] = []
-        for (key, value) in dataMap {
-            if let jsonObject = JSONHandler.deserializeData(value) as? InternalProperties {
-                var entity = jsonObject
-                entity["id"] = key
-                jsonArray.append(entity)
-            }
-        }
-        return jsonArray
+        return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .people)
     }
     
     func unIdentifiedPeopleQueue(token: String) -> Queue {
-        let dataMap = MPDBTest.readRows(.people, projectToken: token, numRows: Int.max, flag: true)
-        var jsonArray : [InternalProperties] = []
-        for (key, value) in dataMap {
-            if let jsonObject = JSONHandler.deserializeData(value) as? InternalProperties {
-                var entity = jsonObject
-                entity["id"] = key
-                jsonArray.append(entity)
-            }
-        }
-        return jsonArray
+        return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .people, flag: PersistenceConstant.unIdentifiedFlag)
     }
     
     func groupQueue(token: String) -> Queue {
-        return MixpanelPersistence.sharedInstance.loadEntitiesInBatch(type: .groups, token: token, batchSize: Int.max)
+        return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .groups)
     }
     
     func flushAndWaitForTrackingQueue() {
+        mixpanel.flush()
+        waitForTrackingQueue()
         mixpanel.flush()
         waitForTrackingQueue()
     }
@@ -139,6 +163,12 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         XCTAssertNotNil(properties["$ios_app_release"], "missing $ios_app_release property")
     }
 
+    func compareDate(dateString: String, dateDate: Date) {
+        let dateFormatter: ISO8601DateFormatter = ISO8601DateFormatter()
+        let date = dateFormatter.string(from: dateDate)
+        XCTAssertEqual(String(date.prefix(19)), String(dateString.prefix(19)))
+    }
+    
     func allPropertyTypes() -> Properties {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss zzz"

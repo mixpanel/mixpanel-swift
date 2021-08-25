@@ -17,17 +17,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
+        Mixpanel.initialize(token: "MIXPANEL_TOKEN")
+       // Mixpanel.mainInstance().loggingEnabled = true
         
-        Mixpanel.initialize(token: "5d9d3df08d1c34a272abf23d892820bf")
-        Mixpanel.mainInstance().loggingEnabled = true
-        Mixpanel.mainInstance().flushInterval = 2000
-        
-//        MPDB.self.open()
-//        MPDB.createTable(tableName: "TEST")
-//        MPDB.insertRow(tableName: "event", data: "Test".data(using: .utf8)!, time: 2342.23)
-//        
-//        
-
         return true
     }
 

@@ -29,7 +29,7 @@ class MPDB {
             let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
         #endif // os(iOS)
 
-        guard let urlUnwrapped = url?.appendingPathComponent(DB_FILE_NAME).path else {
+        guard let urlUnwrapped = url?.appendingPathComponent(apiToken + "_" + DB_FILE_NAME).path else {
             return nil
         }
         return urlUnwrapped
@@ -94,11 +94,9 @@ class MPDB {
                     Logger.info(message: "\(tableName) table created")
                 } else {
                     logSqlError(message: "\(tableName) table create failed")
-                    recreate()
                 }
             } else {
                 logSqlError(message: "CREATE statement for table \(tableName) could not be prepared")
-                recreate()
             }
             sqlite3_finalize(createTableStatement)
         } else {
@@ -195,11 +193,11 @@ class MPDB {
         }
     }
     
-    func readRows(_ persistenceType: PersistenceType, numRows: Int, flag: Bool = false)  -> [Int32: Data] {
-        var rows: [Int32: Data] = [:]
+    func readRows(_ persistenceType: PersistenceType, numRows: Int, flag: Bool = false)  -> [InternalProperties] {
+        var rows: [InternalProperties] = []
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
-            let selectString = "SELECT id, data FROM \(tableName) WHERE flag = \(flag ? 1 : 0) ORDER BY time\(numRows == Int.max ? "" : " LIMIT \(numRows))")"
+            let selectString = "SELECT id, data FROM \(tableName) WHERE flag = \(flag ? 1 : 0) ORDER BY time\(numRows == Int.max ? "" : " LIMIT \(numRows)")"
                 var selectStatement: OpaquePointer? = nil
                 var rowsRead: Int = 0
             if sqlite3_prepare_v2(db, selectString, -1, &selectStatement, nil) == SQLITE_OK {
@@ -208,7 +206,12 @@ class MPDB {
                         let blobLength = sqlite3_column_bytes(selectStatement, 1)
                         let data = Data(bytes: blob, count: Int(blobLength))
                         let id = sqlite3_column_int(selectStatement, 0)
-                        rows[id] = (data)
+                        
+                        if let jsonObject = JSONHandler.deserializeData(data) as? InternalProperties {
+                            var entity = jsonObject
+                            entity["id"] = id
+                            rows.append(entity)
+                        }
                         rowsRead += 1
                     } else {
                         logSqlError(message: "No blob found in data column for row in \(tableName)")

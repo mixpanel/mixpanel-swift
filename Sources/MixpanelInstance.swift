@@ -649,7 +649,7 @@ extension MixpanelInstance {
                 self.people.distinctId = nil
             }
             
-            self.mixpanelPersistence.saveIdentity(mixpanelIdentity: MixpanelIdentity.init(
+            self.mixpanelPersistence.saveIdentity(MixpanelIdentity.init(
                                                     distinctID: self.distinctId,
                                                     peopleDistinctID: self.people.distinctId,
                                                     anoymousId: self.anonymousId,
@@ -714,7 +714,7 @@ extension MixpanelInstance {
                 }
                 
                 self.alias = alias
-                self.mixpanelPersistence.saveIdentity(mixpanelIdentity: MixpanelIdentity.init(
+                self.mixpanelPersistence.saveIdentity(MixpanelIdentity.init(
                                                         distinctID: self.distinctId,
                                                         peopleDistinctID: self.people.distinctId,
                                                         anoymousId: self.anonymousId,
@@ -800,7 +800,7 @@ extension MixpanelInstance {
         self.readWriteLock.read {
             self.mixpanelPersistence.saveTimedEvents(timedEvents: timedEvents)
             self.mixpanelPersistence.saveSuperProperties(superProperties: superProperties)
-            self.mixpanelPersistence.saveIdentity(mixpanelIdentity: MixpanelIdentity.init(
+            self.mixpanelPersistence.saveIdentity(MixpanelIdentity.init(
                                                     distinctID: distinctId,
                                                     peopleDistinctID: people.distinctId,
                                                     anoymousId: anonymousId,

@@ -50,21 +50,22 @@ class MixpanelDemoTests: MixpanelBaseTests {
     
     func testFlushEvents() {
         stubTrack()
-        
-        mixpanel.identify(distinctId: "d1")
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        testMixpanel.identify(distinctId: "d1")
         for i in 0..<50 {
-            mixpanel.track(event: "event \(i)")
+            testMixpanel.track(event: "event \(i)")
         }
         flushAndWaitForTrackingQueue()
-        XCTAssertTrue(eventQueue(token: mixpanel.apiToken).isEmpty,
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty,
                       "events should have been flushed")
         
         for i in 0..<60 {
-            mixpanel.track(event: "event \(i)")
+            testMixpanel.track(event: "event \(i)")
         }
         flushAndWaitForTrackingQueue()
-        XCTAssertTrue(eventQueue(token: mixpanel.apiToken).isEmpty,
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty,
                       "events should have been flushed")
+        removeDBfile(testMixpanel.apiToken)
     }
     
     
@@ -835,41 +836,90 @@ class MixpanelDemoTests: MixpanelBaseTests {
     
     func testReadWriteMultiThreadShouldNotCrash() {
         let concurentQueue = DispatchQueue(label: "multithread", attributes: .concurrent)
+        let testToken = randomId()
+        let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        
         for n in 1...10 {
             concurentQueue.async {
-                self.mixpanel.track(event: "event\(n)")
+                testMixpanel.track(event: "event\(n)")
             }
             concurentQueue.async {
-                self.mixpanel.flush()
+                testMixpanel.flush()
             }
             concurentQueue.async {
-                self.mixpanel.archive()
+                testMixpanel.archive()
             }
             concurentQueue.async {
-                self.mixpanel.reset()
+                testMixpanel.reset()
             }
             concurentQueue.async {
-                self.mixpanel.createAlias("aaa11", distinctId: self.mixpanel.distinctId)
-                self.mixpanel.identify(distinctId: "test")
+                testMixpanel.createAlias("aaa11", distinctId: self.mixpanel.distinctId)
+                testMixpanel.identify(distinctId: "test")
             }
             concurentQueue.async {
-                self.mixpanel.registerSuperProperties(["Plan": "Mega"])
+                testMixpanel.registerSuperProperties(["Plan": "Mega"])
             }
             concurentQueue.async {
-                let _ = self.mixpanel.currentSuperProperties()
+                let _ = testMixpanel.currentSuperProperties()
             }
             concurentQueue.async {
-                self.mixpanel.people.set(property: "aaa", to: "SwiftSDK Cocoapods")
-                self.mixpanel.getGroup(groupKey: "test", groupID: 123).set(properties: ["test": 123])
-                self.mixpanel.removeGroup(groupKey: "test", groupID: 123)
+                testMixpanel.people.set(property: "aaa", to: "SwiftSDK Cocoapods")
+                testMixpanel.getGroup(groupKey: "test", groupID: 123).set(properties: ["test": 123])
+                testMixpanel.removeGroup(groupKey: "test", groupID: 123)
             }
             concurentQueue.async {
-                self.mixpanel.track(event: "test")
-                self.mixpanel.time(event: "test")
-                self.mixpanel.clearTimedEvents()
+                testMixpanel.track(event: "test")
+                testMixpanel.time(event: "test")
+                testMixpanel.clearTimedEvents()
             }
         }
         sleep(5)
+        removeDBfile(testToken)
+    }
+    
+    func testMPDB() {
+        let testToken = randomId()
+        let numRows = 50
+        let halfRows = numRows/2
+        let eventName = "Test Event"
+        func _inner() {
+            removeDBfile(testToken)
+            let mpdb = MPDB.init(token: testToken)
+            mpdb.open()
+            for pType in PersistenceType.allCases {
+                let emptyArray: [InternalProperties] = mpdb.readRows(pType, numRows: numRows)
+                XCTAssertTrue(emptyArray.isEmpty, "Table should be empty")
+                for i in 0...numRows-1 {
+                    let eventObj : InternalProperties = ["event": eventName, "properties": ["index": i]]
+                    let eventData = JSONHandler.serializeJSONObject(eventObj)!
+                    mpdb.insertRow(pType, data: eventData)
+                }
+                let dataArray : [InternalProperties] = mpdb.readRows(pType, numRows: halfRows)
+                XCTAssertEqual(dataArray.count, halfRows, "Should have read only half of the rows")
+                var ids: [Int32] = []
+                for (n, entity) in dataArray.enumerated() {
+                    guard let id = entity["id"] as? Int32 else {
+                        continue
+                    }
+                    ids.append(id)
+                    XCTAssertEqual(entity["event"] as! String, eventName, "Event name should be unchanged")
+                    // index should be oldest events, 0 - 24
+                    XCTAssertEqual(entity["properties"] as! [String : Int], ["index": n], "Should read oldest events first")
+                }
+                
+                mpdb.deleteRows(pType, ids: [1, 2, 3])
+                let dataArray2 : [InternalProperties] = mpdb.readRows(pType, numRows: numRows)
+                // even though we requested numRows, there should only be halfRows left
+                XCTAssertEqual(dataArray2.count, numRows - 3, "Should have deleted half the rows")
+                for (n, entity) in dataArray2.enumerated() {
+                    XCTAssertEqual(entity["event"] as! String, eventName, "Event name should be unchanged")
+                    // old events (0-24) should have been deleted so index should be recent events 25-49
+                    XCTAssertEqual(entity["properties"] as! [String : Int], ["index": n + halfRows], "Should have deleted oldest events first")
+                }
+                mpdb.close()
+            }
+        }
+        removeDBfile(testToken)
     }
     
 }

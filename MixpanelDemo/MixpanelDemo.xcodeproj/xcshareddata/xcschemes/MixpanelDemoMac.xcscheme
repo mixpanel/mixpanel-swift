@@ -38,6 +38,14 @@
                BlueprintName = "MixpanelDemoMacTests"
                ReferencedContainer = "container:MixpanelDemo.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "MixpanelOptOutTests/testHasOptOutTrackingFlagBeingSetProperlyForOptIn()">
+               </Test>
+               <Test
+                  Identifier = "MixpanelOptOutTests/testHasOptOutTrackingFlagBeingSetProperlyForOptOut()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

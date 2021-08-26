@@ -11,16 +11,11 @@ import XCTest
 @testable import Mixpanel
 
 class LoggerTests: XCTestCase {
-    var counter: CounterLogging!
 
-    override func setUp() {
-        super.setUp()
-
-        counter = CounterLogging()
-        Logger.addLogging(counter)
-    }
 
     func testEnableDebug() {
+        let counter = CounterLogging()
+        Logger.addLogging(counter)
         Logger.enableLevel(.debug)
 
         Logger.debug(message: "logged")
@@ -28,27 +23,32 @@ class LoggerTests: XCTestCase {
     }
 
     func testEnableInfo() {
+        let counter = CounterLogging()
+        Logger.addLogging(counter)
         Logger.enableLevel(.info)
-
         Logger.info(message: "logged")
         XCTAssertEqual(1, counter.count)
     }
 
     func testEnableWarning() {
+        let counter = CounterLogging()
+        Logger.addLogging(counter)
         Logger.enableLevel(.warning)
-
         Logger.warn(message: "logged")
         XCTAssertEqual(1, counter.count)
     }
 
     func testEnableError() {
+        let counter = CounterLogging()
+        Logger.addLogging(counter)
         Logger.enableLevel(.error)
-
         Logger.error(message: "logged")
         XCTAssertEqual(1, counter.count)
     }
 
     func testDisabledLogging() {
+        let counter = CounterLogging()
+        Logger.addLogging(counter)
         Logger.disableLevel(.debug)
         Logger.debug(message: "not logged")
         XCTAssertEqual(0, counter.count)

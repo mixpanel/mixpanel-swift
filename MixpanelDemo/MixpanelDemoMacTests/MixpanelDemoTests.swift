@@ -827,41 +827,45 @@ class MixpanelDemoTests: MixpanelBaseTests {
     
     func testReadWriteMultiThreadShouldNotCrash() {
         let concurentQueue = DispatchQueue(label: "multithread", attributes: .concurrent)
+        let testToken = randomId()
+        let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        
         for n in 1...10 {
             concurentQueue.async {
-                self.mixpanel.track(event: "event\(n)")
+                testMixpanel.track(event: "event\(n)")
             }
             concurentQueue.async {
-                self.mixpanel.flush()
+                testMixpanel.flush()
             }
             concurentQueue.async {
-                self.mixpanel.archive()
+                testMixpanel.archive()
             }
             concurentQueue.async {
-                self.mixpanel.reset()
+                testMixpanel.reset()
             }
             concurentQueue.async {
-                self.mixpanel.createAlias("aaa11", distinctId: self.mixpanel.distinctId)
-                self.mixpanel.identify(distinctId: "test")
+                testMixpanel.createAlias("aaa11", distinctId: self.mixpanel.distinctId)
+                testMixpanel.identify(distinctId: "test")
             }
             concurentQueue.async {
-                self.mixpanel.registerSuperProperties(["Plan": "Mega"])
+                testMixpanel.registerSuperProperties(["Plan": "Mega"])
             }
             concurentQueue.async {
-                let _ = self.mixpanel.currentSuperProperties()
+                let _ = testMixpanel.currentSuperProperties()
             }
             concurentQueue.async {
-                self.mixpanel.people.set(property: "aaa", to: "SwiftSDK Cocoapods")
-                self.mixpanel.getGroup(groupKey: "test", groupID: 123).set(properties: ["test": 123])
-                self.mixpanel.removeGroup(groupKey: "test", groupID: 123)
+                testMixpanel.people.set(property: "aaa", to: "SwiftSDK Cocoapods")
+                testMixpanel.getGroup(groupKey: "test", groupID: 123).set(properties: ["test": 123])
+                testMixpanel.removeGroup(groupKey: "test", groupID: 123)
             }
             concurentQueue.async {
-                self.mixpanel.track(event: "test")
-                self.mixpanel.time(event: "test")
-                self.mixpanel.clearTimedEvents()
+                testMixpanel.track(event: "test")
+                testMixpanel.time(event: "test")
+                testMixpanel.clearTimedEvents()
             }
         }
         sleep(5)
+        removeDBfile(testToken)
     }
     
 }

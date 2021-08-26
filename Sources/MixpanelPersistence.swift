@@ -8,6 +8,14 @@
 
 import Foundation
 
+enum LegacyArchiveType: String {
+    case events
+    case people
+    case groups
+    case properties
+    case optOutStatus
+}
+
 enum PersistenceType: String, CaseIterable {
     case events
     case people
@@ -175,7 +183,7 @@ class MixpanelPersistence {
         return NSKeyedUnarchiver.unarchiveObject(with: superPropertiesData) as? InternalProperties ?? InternalProperties()
     }
     
-    func saveIdentity(mixpanelIdentity: MixpanelIdentity) {
+    func saveIdentity(_ mixpanelIdentity: MixpanelIdentity) {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
@@ -238,14 +246,22 @@ class MixpanelPersistence {
              peopleUnidentifiedQueue,
              optOutStatus,
              automaticEventsEnabled) = unarchive()
-        
+        if !needMigration() {
+            return
+        }
         saveEntities(eventsQueue, type: PersistenceType.events)
-        saveEntities(peopleUnidentifiedQueue, type: PersistenceType.people, flag: true)
+        saveEntities(peopleUnidentifiedQueue, type: PersistenceType.people, flag: PersistenceConstant.unIdentifiedFlag)
         saveEntities(peopleQueue, type: PersistenceType.people)
         saveEntities(groupsQueue, type: PersistenceType.groups)
         saveSuperProperties(superProperties: superProperties)
         saveTimedEvents(timedEvents: timedEvents)
-        saveIdentity(distinctID: distinctId, peopleDistinctID: peopleDistinctId, anonymousID: anonymousId, userID: userId, alias: alias, hadPersistedDistinctId: hadPersistedDistinctId)
+        saveIdentity(MixpanelIdentity.init(
+                        distinctID: distinctId,
+                        peopleDistinctID: peopleDistinctId,
+                        anoymousId: anonymousId,
+                        userId: userId,
+                        alias: alias,
+                        hadPersistedDistinctId: hadPersistedDistinctId))
         if let optOutFlag = optOutStatus {
             saveOptOutStatusFlag(value: optOutFlag)
         }
@@ -315,12 +331,6 @@ class MixpanelPersistence {
         }
         if let optOutFile = filePathWithType("optOutStatus") {
             removeArchivedFile(atPath: optOutFile)
-        }
-        if let codelessFile = filePathWithType("codelessBindings") {
-            removeArchivedFile(atPath: codelessFile)
-        }
-        if let variantsFile = filePathWithType("variants") {
-            removeArchivedFile(atPath: variantsFile)
         }
         
         return (eventsQueue,
@@ -417,11 +427,6 @@ class MixpanelPersistence {
             let automaticEventsEnabled =
                 properties?["automaticEvents"] as? Bool ?? nil
         
-//            we dont't need to worry about this during migration right?
-//            if properties == nil {
-//                (distinctId, peopleDistinctId, anonymousId, userId, alias, hadPersistedDistinctId) = restoreIdentity(token: token)
-//            }
-
             return (superProperties,
                     timedEvents,
                     distinctId,
@@ -448,4 +453,18 @@ class MixpanelPersistence {
 
         return unarchivedData
     }
+    
+    private func needMigration() -> Bool {
+        return fileExists(type: LegacyArchiveType.events.rawValue) ||
+            fileExists(type: LegacyArchiveType.people.rawValue) ||
+            fileExists(type: LegacyArchiveType.people.rawValue) ||
+            fileExists(type: LegacyArchiveType.groups.rawValue) ||
+            fileExists(type: LegacyArchiveType.properties.rawValue) ||
+            fileExists(type: LegacyArchiveType.optOutStatus.rawValue)
+    }
+    
+    private func fileExists(type: String) -> Bool {
+        return FileManager.default.fileExists(atPath: filePathWithType(type) ?? "")
+    }
+    
 }

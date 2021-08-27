@@ -98,14 +98,14 @@ class MixpanelOptOutTests: MixpanelBaseTests {
     func testHasOptOutTrackingFlagBeingSetProperlyAfterInitializedWithOptedOutNO()
     {
         let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: false)
-        XCTAssertFalse(mixpanel.hasOptedOutTracking(), "When initialize with opted out flag set to NO, the current user should have opted out tracking")
+        XCTAssertFalse(testMixpanel.hasOptedOutTracking(), "When initialize with opted out flag set to NO, the current user should have opted out tracking")
         removeDBfile(testMixpanel.apiToken)
     }
 
     func testHasOptOutTrackingFlagBeingSetProperlyByDefault()
     {
         let testMixpanel = Mixpanel.initialize(token: randomId())
-        XCTAssertFalse(mixpanel.hasOptedOutTracking(), "By default, the current user should not opted out tracking")
+        XCTAssertFalse(testMixpanel.hasOptedOutTracking(), "By default, the current user should not opted out tracking")
         removeDBfile(testMixpanel.apiToken)
     }
 
@@ -130,9 +130,9 @@ class MixpanelOptOutTests: MixpanelBaseTests {
     func testOptOutTrackingWillNotGenerateEventQueue()
     {
         let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
-        mixpanel.optOutTracking()
+        testMixpanel.optOutTracking()
         for i in 0..<50 {
-            mixpanel.track(event: "event \(i)")
+            testMixpanel.track(event: "event \(i)")
         }
         waitForTrackingQueue(testMixpanel)
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "When opted out, events should not be queued")
@@ -192,7 +192,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         testMixpanel.optOutTracking()
         testMixpanel.registerSuperPropertiesOnce(properties)
         waitForTrackingQueue(testMixpanel)
-            XCTAssertNotEqual(NSDictionary(dictionary: mixpanel.currentSuperProperties()),
+            XCTAssertNotEqual(NSDictionary(dictionary: testMixpanel.currentSuperProperties()),
                               NSDictionary(dictionary: properties),
                           "When opted out, register super properties once should not be successful")
         removeDBfile(testMixpanel.apiToken)

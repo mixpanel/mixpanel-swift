@@ -14,21 +14,14 @@ import SQLite3
 @testable import MixpanelDemo
 
 class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
-    var mixpanel: MixpanelInstance!
     var mixpanelWillFlush: Bool!
     static var requestCount = 0
-    var apiToken: String?
 
     override func setUp() {
         NSLog("starting test setup...")
         super.setUp()
         stubCalls()
         mixpanelWillFlush = false
-        apiToken = randomId()
-        mixpanel = Mixpanel.initialize(token: apiToken!, flushInterval: 0)
-        mixpanel.reset()
-        mixpanel.loggingEnabled = true
-        waitForTrackingQueue()
         
         if let loginView = self.topViewController() as? LoginViewController {
             loginView.goToMainView()
@@ -53,14 +46,9 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         stubDecide()
         stubEngage()
         stubGroups()
-        mixpanel.reset()
-        waitForTrackingQueue()
 
         LSNocilla.sharedInstance().stop()
         LSNocilla.sharedInstance().clearStubs()
-
-        mixpanel = nil
-        removeDBfile()
     }
     
     func removeDBfile(_ token: String? = nil) {
@@ -88,7 +76,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         #else
         let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
         #endif // os(iOS)
-        guard let apiToken = apiToken else {
+        guard let apiToken = token else {
             return ""
         }
         
@@ -103,12 +91,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         return mixpanelWillFlush
     }
 
-    func waitForTrackingQueue() {
-        mixpanel.trackingQueue.sync() {
-            return
-        }
-    }
-    
     func waitForTrackingQueue(_ mixpanel: MixpanelInstance) {
         mixpanel.trackingQueue.sync() {
             return
@@ -148,11 +130,11 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .groups)
     }
     
-    func flushAndWaitForTrackingQueue() {
+    func flushAndWaitForTrackingQueue(_ mixpanel: MixpanelInstance) {
         mixpanel.flush()
-        waitForTrackingQueue()
+        waitForTrackingQueue(mixpanel)
         mixpanel.flush()
-        waitForTrackingQueue()
+        waitForTrackingQueue(mixpanel)
     }
 
     func assertDefaultPeopleProperties(_ properties: InternalProperties) {

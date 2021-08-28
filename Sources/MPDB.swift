@@ -217,7 +217,9 @@ class MPDB {
                         logSqlError(message: "No blob found in data column for row in \(tableName)")
                     }
                 }
-                Logger.info(message: "Successfully read \(rowsRead) from table \(tableName)")
+                if rowsRead > 0 {
+                    Logger.info(message: "Successfully read \(rowsRead) from table \(tableName)")
+                }
             } else {
                 logSqlError(message: "SELECT statement for table \(tableName) could not be prepared")
             }

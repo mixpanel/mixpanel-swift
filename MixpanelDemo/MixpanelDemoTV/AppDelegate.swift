@@ -23,7 +23,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Mixpanel.initialize(token: "MIXPANEL_TOKEN")
         Mixpanel.mainInstance().loggingEnabled = true
         Mixpanel.mainInstance().registerSuperProperties(["super apple tv properties": 1]);
-        
         Mixpanel.mainInstance().track(event: "apple tv track")
         
         return true

@@ -22,8 +22,6 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
                           "Register SuperProperties Once",
                           "Register SP Once w Default Value",
                           "Unregister SuperProperty"]
-    var trackCounter: Int = 0
-
 
     override func viewDidLoad() {
         super.viewDidLoad()

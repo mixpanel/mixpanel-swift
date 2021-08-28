@@ -44,8 +44,10 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         testMixpanel.optInTracking(distinctId: "testDistinctId")
         XCTAssertFalse(testMixpanel.hasOptedOutTracking(), "The current user should have opted in tracking")
         waitForTrackingQueue(testMixpanel)
-        let event = eventQueue(token: testMixpanel.apiToken).first
-        XCTAssertEqual((event!["event"] as? String), "$opt_in", "When opted in, a track '$opt_in' should have been queued")
+        sleep(1)
+        let event1 = eventQueue(token: testMixpanel.apiToken).first
+        let event2 = eventQueue(token: testMixpanel.apiToken).last
+        XCTAssertTrue((event1!["event"] as? String) == "$opt_in" || (event2!["event"] as? String) == "$opt_in", "When opted in, a track '$opt_in' should have been queued")
         XCTAssertEqual(testMixpanel.distinctId, "testDistinctId", "mixpanel identify failed to set distinct id")
         XCTAssertEqual(testMixpanel.people.distinctId, "testDistinctId", "mixpanel identify failed to set people distinct id")
         XCTAssertTrue(unIdentifiedPeopleQueue(token: testMixpanel.apiToken).count == 0, "identify: should move records from unidentified queue")
@@ -62,6 +64,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
         testMixpanel.optInTracking(distinctId: "testDistinctId", properties: testProperties)
         waitForTrackingQueue(testMixpanel)
+        sleep(1)
         let eventQueueValue = eventQueue(token: testMixpanel.apiToken)
         
         let props = eventQueueValue.first!["properties"] as? InternalProperties

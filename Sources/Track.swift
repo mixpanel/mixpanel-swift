@@ -21,7 +21,7 @@ class Track {
     let mixpanelPersistence: MixpanelPersistence
     
     var isAutomaticEventEnabled: Bool {
-        return MixpanelPersistence.init(token: apiToken).loadAutomacticEventsEnabledFlag()
+        return MixpanelPersistence.loadAutomacticEventsEnabledFlag(apiToken: apiToken)
     }
 
     init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata, mixpanelPersistence: MixpanelPersistence) {
@@ -83,7 +83,7 @@ class Track {
         metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
         
         self.mixpanelPersistence.saveEntity(trackEvent, type: .events)
-        self.mixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents)
+        MixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents, apiToken: apiToken)
         return shadowTimedEvents
     }
 

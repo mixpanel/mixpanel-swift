@@ -51,7 +51,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.minimumSessionDuration = 0;
         testMixpanel.trackAutomaticEventsEnabled = false
-        MixpanelPersistence.init(token: testMixpanel.apiToken).saveAutomacticEventsEnabledFlag(value: true, fromDecide: true)
+        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: true, fromDecide: true, apiToken: testMixpanel.apiToken)
         testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         waitForTrackingQueue(testMixpanel)
@@ -63,7 +63,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.minimumSessionDuration = 0;
         testMixpanel.trackAutomaticEventsEnabled = true
-        MixpanelPersistence.init(token: testMixpanel.apiToken).saveAutomacticEventsEnabledFlag(value: false, fromDecide: true)
+        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: false, fromDecide: true, apiToken: testMixpanel.apiToken)
         testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         waitForTrackingQueue(testMixpanel)
@@ -78,7 +78,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
     func testDiscardAutomaticEventsIfDecideIsFalse() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.minimumSessionDuration = 0;
-        MixpanelPersistence.init(token: testMixpanel.apiToken).saveAutomacticEventsEnabledFlag(value: false, fromDecide: true)
+        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: false, fromDecide: true, apiToken: testMixpanel.apiToken)
         testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
 
@@ -90,7 +90,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
     func testFlushAutomaticEventsIfDecideIsTrue() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.minimumSessionDuration = 0;
-        MixpanelPersistence.init(token: testMixpanel.apiToken).saveAutomacticEventsEnabledFlag(value: true, fromDecide: true)
+        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: true, fromDecide: true, apiToken: testMixpanel.apiToken)
         testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         waitForTrackingQueue(testMixpanel)

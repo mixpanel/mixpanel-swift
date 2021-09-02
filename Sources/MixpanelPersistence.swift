@@ -108,7 +108,6 @@ class MixpanelPersistence {
         return defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)") as? Bool
     }
     
-    
     static func saveAutomacticEventsEnabledFlag(value: Bool, fromDecide: Bool, apiToken: String) {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
@@ -130,7 +129,8 @@ class MixpanelPersistence {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return true
         }
-        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") == nil && defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)") == nil {
+        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") == nil &&
+            defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)") == nil {
             return true // default true
         }
         if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") != nil {
@@ -199,7 +199,12 @@ class MixpanelPersistence {
     
     static func loadIdentity(apiToken: String) -> MixpanelIdentity {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
-            return MixpanelIdentity.init(distinctID: "", peopleDistinctID: nil, anonymousId: nil, userId: nil, alias: nil, hadPersistedDistinctId: nil)
+            return MixpanelIdentity.init(distinctID: "",
+                                         peopleDistinctID: nil,
+                                         anonymousId: nil,
+                                         userId: nil,
+                                         alias: nil,
+                                         hadPersistedDistinctId: nil)
         }
         let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
         return MixpanelIdentity.init(
@@ -266,7 +271,7 @@ class MixpanelPersistence {
             MixpanelPersistence.saveOptOutStatusFlag(value: optOutFlag, apiToken: apiToken)
         }
         if let automaticEventsFlag = automaticEventsEnabled {
-            MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: automaticEventsFlag, fromDecide: false, apiToken: apiToken) // should fromDecide = false here?
+            MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: automaticEventsFlag, fromDecide: false, apiToken: apiToken)
         }
         return
     }
@@ -327,7 +332,7 @@ class MixpanelPersistence {
             removeArchivedFile(atPath: groupsFile)
         }
         if let propsFile = filePathWithType("properties") {
-            removeArchivedFile(atPath:propsFile)
+            removeArchivedFile(atPath: propsFile)
         }
         if let optOutFile = filePathWithType("optOutStatus") {
             removeArchivedFile(atPath: optOutFile)

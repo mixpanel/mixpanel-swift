@@ -35,10 +35,7 @@ class Track {
                properties: Properties? = nil,
                timedEvents: InternalProperties,
                superProperties: InternalProperties,
-               distinctId: String,
-               anonymousId: String?,
-               userId: String?,
-               hadPersistedDistinctId: Bool?,
+               mixpanelIdentity: MixpanelIdentity,
                epochInterval: Double) -> InternalProperties {
         var ev = event
         if ev == nil || ev!.isEmpty {
@@ -63,15 +60,15 @@ class Track {
             shadowTimedEvents.removeValue(forKey: ev!)
             p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
         }
-        p["distinct_id"] = distinctId
-        if anonymousId != nil {
-            p["$device_id"] = anonymousId
+        p["distinct_id"] = mixpanelIdentity.distinctID
+        if mixpanelIdentity.anonymousId != nil {
+            p["$device_id"] = mixpanelIdentity.anonymousId
         }
-        if userId != nil {
-            p["$user_id"] = userId
+        if mixpanelIdentity.userId != nil {
+            p["$user_id"] = mixpanelIdentity.userId
         }
-        if hadPersistedDistinctId != nil {
-            p["$had_persisted_distinct_id"] = hadPersistedDistinctId
+        if mixpanelIdentity.hadPersistedDistinctId != nil {
+            p["$had_persisted_distinct_id"] = mixpanelIdentity.hadPersistedDistinctId
         }
         
         p += superProperties

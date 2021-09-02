@@ -23,7 +23,7 @@ import CoreTelephony
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
  */
-public protocol MixpanelDelegate {
+public protocol MixpanelDelegate: AnyObject {
     /**
      Asks the delegate if data should be uploaded to the server.
      
@@ -49,7 +49,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var apiToken = ""
     
     /// The a MixpanelDelegate object that gives control over Mixpanel network activity.
-    open var delegate: MixpanelDelegate?
+    open weak var delegate: MixpanelDelegate?
     
     /// distinctId string that uniquely identifies the current user.
     open var distinctId = ""
@@ -72,7 +72,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     
     let mixpanelPersistence: MixpanelPersistence
     
-    
     /// Accessor to the Mixpanel People API object.
     var groups: [String: Group] = [:]
     
@@ -84,29 +83,32 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// If this is not set, it will query the Autotrack settings from the Mixpanel server
     open var trackAutomaticEventsEnabled: Bool? {
         didSet {
-            MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: trackAutomaticEventsEnabled ?? false, fromDecide: false, apiToken: apiToken)
+            MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: trackAutomaticEventsEnabled ?? false,
+                                                                fromDecide: false,
+                                                                apiToken: apiToken)
         }
     }
     
     /// Flush timer's interval.
-    /// Setting a flush interval of 0 will turn off the flush timer and you need to call the flush() API manually to upload queued data to the Mixpanel server.
+    /// Setting a flush interval of 0 will turn off the flush timer and you need to call the flush() API manually
+    /// to upload queued data to the Mixpanel server.
     open var flushInterval: Double {
-        set {
-            flushInstance.flushInterval = newValue
-        }
         get {
             return flushInstance.flushInterval
+        }
+        set {
+            flushInstance.flushInterval = newValue
         }
     }
     
     /// Control whether the library should flush data to Mixpanel when the app
     /// enters the background. Defaults to true.
     open var flushOnBackground: Bool {
-        set {
-            flushInstance.flushOnBackground = newValue
-        }
         get {
             return flushInstance.flushOnBackground
+        }
+        set {
+            flushInstance.flushOnBackground = newValue
         }
     }
     
@@ -114,11 +116,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// event tracking. With an IP address, the Mixpanel Dashboard will show you the users' city.
     /// Defaults to true.
     open var useIPAddressForGeoLocation: Bool {
-        set {
-            flushInstance.useIPAddressForGeoLocation = newValue
-        }
         get {
             return flushInstance.useIPAddressForGeoLocation
+        }
+        set {
+            flushInstance.useIPAddressForGeoLocation = newValue
         }
     }
     
@@ -168,22 +170,22 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// The minimum session duration (ms) that is tracked in automatic events.
     /// The default value is 10000 (10 seconds).
     open var minimumSessionDuration: UInt64 {
-        set {
-            automaticEvents.minimumSessionDuration = newValue
-        }
         get {
             return automaticEvents.minimumSessionDuration
+        }
+        set {
+            automaticEvents.minimumSessionDuration = newValue
         }
     }
     
     /// The maximum session duration (ms) that is tracked in automatic events.
     /// The default value is UINT64_MAX (no maximum session duration).
     open var maximumSessionDuration: UInt64 {
-        set {
-            automaticEvents.maximumSessionDuration = newValue
-        }
         get {
             return automaticEvents.maximumSessionDuration
+        }
+        set {
+            automaticEvents.maximumSessionDuration = newValue
         }
     }
     #endif // DECIDE
@@ -235,7 +237,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #if os(iOS) && !targetEnvironment(macCatalyst)
         if let reachability = MixpanelInstance.reachability {
             var context = SCNetworkReachabilityContext(version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
-            func reachabilityCallback(reachability: SCNetworkReachability, flags: SCNetworkReachabilityFlags, unsafePointer: UnsafeMutableRawPointer?) {
+            func reachabilityCallback(reachability: SCNetworkReachability,
+                                      flags: SCNetworkReachabilityFlags,
+                                      unsafePointer: UnsafeMutableRawPointer?) {
                 let wifi = flags.contains(SCNetworkReachabilityFlags.reachable) && !flags.contains(SCNetworkReachabilityFlags.isWWAN)
                 AutomaticProperties.automaticPropertiesLock.write {
                     AutomaticProperties.properties["$wifi"] = wifi
@@ -389,7 +393,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     
     #if !os(OSX) && !os(watchOS)
     static func sharedUIApplication() -> UIApplication? {
-        guard let sharedApplication = UIApplication.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue() as? UIApplication else {
+        guard let sharedApplication =
+                UIApplication.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue() as? UIApplication else {
             return nil
         }
         return sharedApplication
@@ -507,7 +512,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if os(OSX)
     static func macOSIdentifier() -> String? {
         let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
-        let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0)
+        let serialNumberAsCFString =
+            IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0)
         IOObjectRelease(platformExpert)
         return (serialNumberAsCFString?.takeUnretainedValue() as? String)
     }
@@ -752,7 +758,6 @@ extension MixpanelInstance {
 extension MixpanelInstance {
     // MARK: - Persistence
     
-    
     open func archive() {
         self.readWriteLock.read {
             MixpanelPersistence.saveTimedEvents(timedEvents: timedEvents, apiToken: apiToken)
@@ -767,7 +772,6 @@ extension MixpanelInstance {
         }
     }
     
-    
     func unarchive() {
         optOutStatus = MixpanelPersistence.loadOptOutStatusFlag(apiToken: apiToken)
         superProperties = MixpanelPersistence.loadSuperProperties(apiToken: apiToken)
@@ -781,7 +785,7 @@ extension MixpanelInstance {
             mixpanelIdentity.alias,
             mixpanelIdentity.hadPersistedDistinctId
         )
-        if distinctId == "" {
+        if distinctId.isEmpty {
             distinctId = defaultDistinctId()
             anonymousId = distinctId
             hadPersistedDistinctId = nil
@@ -902,15 +906,18 @@ extension MixpanelInstance {
             guard let self = self else {
                 return
             }
-            
-            self.timedEvents = self.trackInstance.track(event: event, properties: properties,
-                                     timedEvents: self.timedEvents,
-                                     superProperties: self.superProperties,
-                                     distinctId: self.distinctId,
-                                     anonymousId: self.anonymousId,
-                                     userId: self.userId,
-                                     hadPersistedDistinctId: self.hadPersistedDistinctId,
-                                     epochInterval: epochInterval)
+            let mixpanelIdentity = MixpanelIdentity.init(distinctID: self.distinctId,
+                                  peopleDistinctID: nil,
+                                  anonymousId: self.anonymousId,
+                                  userId: self.userId,
+                                  alias: nil,
+                                  hadPersistedDistinctId: self.hadPersistedDistinctId)
+            self.timedEvents = self.trackInstance.track(event: event,
+                                                        properties: properties,
+                                                        timedEvents: self.timedEvents,
+                                                        superProperties: self.superProperties,
+                                                        mixpanelIdentity: mixpanelIdentity,
+                                                        epochInterval: epochInterval)
         }
         
         if MixpanelInstance.isiOSAppExtension() {
@@ -964,7 +971,13 @@ extension MixpanelInstance {
         
         guard let group = groupsShadow[key] else {
             readWriteLock.write {
-                groups[key] = Group(apiToken: apiToken, serialQueue: trackingQueue, lock: self.readWriteLock, groupKey: groupKey, groupID: groupID, metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
+                groups[key] = Group(apiToken: apiToken,
+                                    serialQueue: trackingQueue,
+                                    lock: self.readWriteLock,
+                                    groupKey: groupKey,
+                                    groupID: groupID,
+                                    metadata: sessionMetadata,
+                                    mixpanelPersistence: mixpanelPersistence)
                 groupsShadow = groups
             }
             return groupsShadow[key]!
@@ -973,7 +986,13 @@ extension MixpanelInstance {
         if !(group.groupKey == groupKey && group.groupID.equals(rhs: groupID)) {
             // we somehow hit a collision on the map key, return a new group with the correct key and ID
             Logger.info(message: "groups dictionary key collision: \(key)")
-            let newGroup = Group(apiToken: apiToken, serialQueue: trackingQueue, lock: self.readWriteLock, groupKey: groupKey, groupID: groupID, metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
+            let newGroup = Group(apiToken: apiToken,
+                                 serialQueue: trackingQueue,
+                                 lock: self.readWriteLock,
+                                 groupKey: groupKey,
+                                 groupID: groupID,
+                                 metadata: sessionMetadata,
+                                 mixpanelPersistence: mixpanelPersistence)
             readWriteLock.write {
                 groups[key] = newGroup
             }
@@ -1058,8 +1077,7 @@ extension MixpanelInstance {
      - parameter event: the name of the event to clear the timer for
      */
     open func clearTimedEvent(event: String) {
-        trackingQueue.async {
-            [weak self, event] in
+        trackingQueue.async { [weak self, event] in
             guard let self = self else { return }
             
             let updatedTimedEvents = self.trackInstance.clearTimedEvent(event: event, timedEvents: self.timedEvents)
@@ -1309,7 +1327,8 @@ extension MixpanelInstance {
      This method will internally track an opt in event to your project.
      
      - parameter distintId: an optional string to use as the distinct ID for events
-     - parameter properties: an optional properties dictionary that could be passed to add properties to the opt-in event that is sent to Mixpanel
+     - parameter properties: an optional properties dictionary that could be passed to add properties to the opt-in event
+     that is sent to Mixpanel
      */
     open func optInTracking(distinctId: String? = nil, properties: Properties? = nil) {
         optOutStatus = false
@@ -1329,7 +1348,6 @@ extension MixpanelInstance {
     open func hasOptedOutTracking() -> Bool {
         return optOutStatus ?? false
     }
-    
     
     // MARK: - AEDelegate
     func increment(property: String, by: Double) {

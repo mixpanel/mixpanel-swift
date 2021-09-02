@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol FlushDelegate {
+protocol FlushDelegate: AnyObject {
     func flush(completion: (() -> Void)?)
     func flushSuccess(type: FlushType, ids: [Int32])
     
@@ -19,7 +19,7 @@ protocol FlushDelegate {
 
 class Flush: AppLifecycle {
     var timer: Timer?
-    var delegate: FlushDelegate?
+    weak var delegate: FlushDelegate?
     var useIPAddressForGeoLocation = true
     var flushRequest: FlushRequest
     var flushOnBackground = true
@@ -27,6 +27,11 @@ class Flush: AppLifecycle {
     private let flushIntervalReadWriteLock: DispatchQueue
 
     var flushInterval: Double {
+        get {
+            flushIntervalReadWriteLock.sync {
+                return _flushInterval
+            }
+        }
         set {
             flushIntervalReadWriteLock.sync(flags: .barrier, execute: {
                 _flushInterval = newValue
@@ -35,18 +40,12 @@ class Flush: AppLifecycle {
             delegate?.flush(completion: nil)
             startFlushTimer()
         }
-        get {
-            flushIntervalReadWriteLock.sync {
-                return _flushInterval
-            }
-        }
     }
 
     required init(basePathIdentifier: String) {
         self.flushRequest = FlushRequest(basePathIdentifier: basePathIdentifier)
         flushIntervalReadWriteLock = DispatchQueue(label: "com.mixpanel.flush_interval.lock", qos: .utility, attributes: .concurrent)
     }
-
 
     func flushQueue(type: FlushType, queue: Queue) {
         if flushRequest.requestNotAllowed() {
@@ -119,7 +118,9 @@ class Flush: AppLifecycle {
                                             if success {
                                                 // remove
                                                 self.delegate?.flushSuccess(type: type, ids: ids)
-                                                mutableQueue = self.removeProcessedBatch(batchSize: batchSize, queue: mutableQueue, type: type)
+                                                mutableQueue = self.removeProcessedBatch(batchSize: batchSize,
+                                                                                         queue: mutableQueue,
+                                                                                         type: type)
                                             }
                                             shouldContinue = success
                                             semaphore.signal()
@@ -142,7 +143,6 @@ class Flush: AppLifecycle {
         }
         return shadowQueue
     }
-
 
     // MARK: - Lifecycle
     func applicationDidBecomeActive() {

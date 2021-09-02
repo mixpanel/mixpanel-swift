@@ -28,6 +28,11 @@
 		8654F3002671636B00ACEED5 /* MixpanelPeopleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8654F2FB2671636B00ACEED5 /* MixpanelPeopleTests.swift */; };
 		8654F3012671636B00ACEED5 /* MixpanelOptOutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8654F2FC2671636B00ACEED5 /* MixpanelOptOutTests.swift */; };
 		8654F3052671C4B000ACEED5 /* MixpanelGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8654F3032671C4B000ACEED5 /* MixpanelGroupTests.swift */; };
+		8675E9A126DF356B0096858F /* mixpanel-testToken-events in Resources */ = {isa = PBXBuildFile; fileRef = 8675E99C26DF356A0096858F /* mixpanel-testToken-events */; };
+		8675E9A226DF356B0096858F /* mixpanel-testToken-groups in Resources */ = {isa = PBXBuildFile; fileRef = 8675E99E26DF356A0096858F /* mixpanel-testToken-groups */; };
+		8675E9A326DF356B0096858F /* mixpanel-testToken-people in Resources */ = {isa = PBXBuildFile; fileRef = 8675E99F26DF356A0096858F /* mixpanel-testToken-people */; };
+		8675E9AB26E144FE0096858F /* mixpanel-testToken-optOutStatus in Resources */ = {isa = PBXBuildFile; fileRef = 8675E9AA26E144FE0096858F /* mixpanel-testToken-optOutStatus */; };
+		8675E9B426E171AE0096858F /* mixpanel-testToken-properties in Resources */ = {isa = PBXBuildFile; fileRef = 8675E9B326E171AE0096858F /* mixpanel-testToken-properties */; };
 		86F86E8F22440C5D00B69832 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 86F86E8D22440C5C00B69832 /* Interface.storyboard */; };
 		86F86E9122440C5F00B69832 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 86F86E9022440C5F00B69832 /* Assets.xcassets */; };
 		86F86E9822440C5F00B69832 /* MixpanelDemoWatch Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 86F86E9722440C5F00B69832 /* MixpanelDemoWatch Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -275,6 +280,11 @@
 		8654F2FB2671636B00ACEED5 /* MixpanelPeopleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelPeopleTests.swift; sourceTree = "<group>"; };
 		8654F2FC2671636B00ACEED5 /* MixpanelOptOutTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelOptOutTests.swift; sourceTree = "<group>"; };
 		8654F3032671C4B000ACEED5 /* MixpanelGroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelGroupTests.swift; sourceTree = "<group>"; };
+		8675E99C26DF356A0096858F /* mixpanel-testToken-events */ = {isa = PBXFileReference; explicitFileType = text.pbxproject; path = "mixpanel-testToken-events"; sourceTree = "<group>"; };
+		8675E99E26DF356A0096858F /* mixpanel-testToken-groups */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = "mixpanel-testToken-groups"; sourceTree = "<group>"; };
+		8675E99F26DF356A0096858F /* mixpanel-testToken-people */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = "mixpanel-testToken-people"; sourceTree = "<group>"; };
+		8675E9AA26E144FE0096858F /* mixpanel-testToken-optOutStatus */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = "mixpanel-testToken-optOutStatus"; sourceTree = "<group>"; };
+		8675E9B326E171AE0096858F /* mixpanel-testToken-properties */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = "mixpanel-testToken-properties"; sourceTree = "<group>"; };
 		86F86E8B22440C5C00B69832 /* MixpanelDemoWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MixpanelDemoWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		86F86E8E22440C5C00B69832 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		86F86E9022440C5F00B69832 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -323,13 +333,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		0AAB97762ADB463FE09D6381 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8654F2C1266ED84F00ACEED5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -470,6 +473,18 @@
 			path = MixpanelDemoMacUITests;
 			sourceTree = "<group>";
 		};
+		8675E9A626DF37B20096858F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8675E99C26DF356A0096858F /* mixpanel-testToken-events */,
+				8675E9B326E171AE0096858F /* mixpanel-testToken-properties */,
+				8675E99E26DF356A0096858F /* mixpanel-testToken-groups */,
+				8675E99F26DF356A0096858F /* mixpanel-testToken-people */,
+				8675E9AA26E144FE0096858F /* mixpanel-testToken-optOutStatus */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
 		86F86E8C22440C5C00B69832 /* MixpanelDemoWatch */ = {
 			isa = PBXGroup;
 			children = (
@@ -524,6 +539,7 @@
 		E12BD03A1D8A14D6008989C9 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				8675E9A626DF37B20096858F /* Resources */,
 				E12BD03C1D8A14F3008989C9 /* Assets.xcassets */,
 				E15FF7ED1D0461130076CDE3 /* Info.plist */,
 			);
@@ -825,11 +841,6 @@
 				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = Mixpanel;
 				TargetAttributes = {
-					60DDD14623D39620004F7CBB = {
-						CreatedOnToolsVersion = 11.2;
-						DevelopmentTeam = E8FVX7QLET;
-						ProvisioningStyle = Automatic;
-					};
 					8654F2C3266ED84F00ACEED5 = {
 						CreatedOnToolsVersion = 12.5;
 					};
@@ -960,13 +971,6 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
-		60DDD14523D39620004F7CBB /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8654F2C2266ED84F00ACEED5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1045,6 +1049,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				E12BD03D1D8A14F3008989C9 /* Assets.xcassets in Resources */,
+				8675E9A226DF356B0096858F /* mixpanel-testToken-groups in Resources */,
+				8675E9B426E171AE0096858F /* mixpanel-testToken-properties in Resources */,
+				8675E9A126DF356B0096858F /* mixpanel-testToken-events in Resources */,
+				8675E9A326DF356B0096858F /* mixpanel-testToken-people in Resources */,
+				8675E9AB26E144FE0096858F /* mixpanel-testToken-optOutStatus in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

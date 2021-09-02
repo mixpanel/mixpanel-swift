@@ -32,7 +32,7 @@ class JSONHandler {
     }
     
     class func deserializeData(_ data: Data) -> MPObjectToParse? {
-        var object: MPObjectToParse? = nil
+        var object: MPObjectToParse?
         do {
             object = try JSONSerialization.jsonObject(with: data, options: [])
         } catch {

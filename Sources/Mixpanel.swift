@@ -38,9 +38,9 @@ open class Mixpanel {
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
                                optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
-        return MixpanelManager.sharedInstance.initialize(token:         apiToken,
+        return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
-                                                         instanceName:  instanceName,
+                                                         instanceName: instanceName,
                                                          optOutTrackingByDefault: optOutTrackingByDefault)
     }
     #else

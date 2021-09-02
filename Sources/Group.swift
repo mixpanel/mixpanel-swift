@@ -17,11 +17,17 @@ open class Group {
     let lock: ReadWriteLock
     let groupKey: String
     let groupID: MixpanelType
-    var delegate: FlushDelegate?
+    weak var delegate: FlushDelegate?
     let metadata: SessionMetadata
     let mixpanelPersistence: MixpanelPersistence
 
-    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, groupKey: String, groupID: MixpanelType, metadata: SessionMetadata, mixpanelPersistence: MixpanelPersistence) {
+    init(apiToken: String,
+         serialQueue: DispatchQueue,
+         lock: ReadWriteLock,
+         groupKey: String,
+         groupID: MixpanelType,
+         metadata: SessionMetadata,
+         mixpanelPersistence: MixpanelPersistence) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
         self.lock = lock

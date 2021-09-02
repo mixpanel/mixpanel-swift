@@ -6,7 +6,7 @@
 //  Copyright © 2017 Mixpanel. All rights reserved.
 //
 
-protocol AEDelegate {
+protocol AEDelegate: AnyObject {
     func track(event: String?, properties: Properties?)
     func setOnce(properties: Properties)
     func increment(property: String, by: Double)
@@ -21,26 +21,26 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     
     var _minimumSessionDuration: UInt64 = 10000
     var minimumSessionDuration: UInt64 {
-        set {
-            _minimumSessionDuration = newValue
-        }
         get {
             return _minimumSessionDuration
+        }
+        set {
+            _minimumSessionDuration = newValue
         }
     }
     var _maximumSessionDuration: UInt64 = UINT64_MAX
     var maximumSessionDuration: UInt64 {
-        set {
-            _maximumSessionDuration = newValue
-        }
         get {
             return _maximumSessionDuration
+        }
+        set {
+            _maximumSessionDuration = newValue
         }
     }
     
     var awaitingTransactions = [String: SKPaymentTransaction]()
     let defaults = UserDefaults(suiteName: "Mixpanel")
-    var delegate: AEDelegate?
+    weak var delegate: AEDelegate?
     var sessionLength: TimeInterval = 0
     var sessionStartTime: TimeInterval = Date().timeIntervalSince1970
     var hasAddedObserver = false
@@ -121,7 +121,6 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                     case .purchased:
                         productIdentifiers.insert(trans.payment.productIdentifier)
                         awaitingTransactions[trans.payment.productIdentifier] = trans
-                        break
                     case .failed: break
                     case .restored: break
                     default: break
@@ -172,4 +171,3 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
 }
 
 #endif
-

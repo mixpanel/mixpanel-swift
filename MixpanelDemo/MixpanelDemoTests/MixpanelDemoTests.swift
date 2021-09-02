@@ -988,4 +988,84 @@ class MixpanelDemoTests: MixpanelBaseTests {
         removeDBfile(testToken)
     }
     
+    func testMigration() {
+        let token = "testToken"
+        // clean up
+        removeDBfile(token)
+        // copy the legacy archived file for the migration test
+        let legacyFiles = ["mixpanel-testToken-events", "mixpanel-testToken-properties", "mixpanel-testToken-groups", "mixpanel-testToken-people", "mixpanel-testToken-optOutStatus"]
+        prepareForMigrationFiles(legacyFiles)
+        // initialize mixpanel will do the migration automatically if found legacy archive files.
+        let testMixpanel = Mixpanel.initialize(token: token, flushInterval: 60)
+        let fileManager = FileManager.default
+        let libraryUrls = fileManager.urls(for: .libraryDirectory,
+                                            in: .userDomainMask)
+        XCTAssertFalse(fileManager.fileExists(atPath: (libraryUrls.first?.appendingPathComponent("mixpanel-testToken-events"))!.path), "after migration, the legacy archive files should be removed")
+        XCTAssertFalse(fileManager.fileExists(atPath: (libraryUrls.first?.appendingPathComponent("mixpanel-testToken-properties"))!.path), "after migration, the legacy archive files should be removed")
+        XCTAssertFalse(fileManager.fileExists(atPath: (libraryUrls.first?.appendingPathComponent("mixpanel-testToken-groups"))!.path), "after migration, the legacy archive files should be removed")
+        XCTAssertFalse(fileManager.fileExists(atPath: (libraryUrls.first?.appendingPathComponent("mixpanel-testToken-people"))!.path), "after migration, the legacy archive files should be removed")
+        
+        let events = eventQueue(token: testMixpanel.apiToken)
+        XCTAssertEqual(events.count, 306)
+        
+        XCTAssertEqual(events[0]["event"] as? String, "$identify")
+        XCTAssertEqual(events[1]["event"] as? String, "Logged in")
+        XCTAssertEqual(events[2]["event"] as? String, "$ae_first_open")
+        XCTAssertEqual(events[3]["event"] as? String, "Tracked event 1")
+        let properties = events.last?["properties"] as? InternalProperties
+        XCTAssertEqual(properties?["Cool Property"] as? [Int], [12345,301])
+        XCTAssertEqual(properties?["Super Property 2"] as? String, "p2")
+        
+        let people = peopleQueue(token: testMixpanel.apiToken)
+        XCTAssertEqual(people.count, 6)
+        XCTAssertEqual(people[0]["$distinct_id"] as? String, "demo_user")
+        XCTAssertEqual(people[0]["$token"] as? String, "testToken")
+        let appendProperties = people[5]["$append"] as! InternalProperties
+        XCTAssertEqual(appendProperties["d"] as? String, "goodbye")
+        
+        let group = groupQueue(token: testMixpanel.apiToken)
+        XCTAssertEqual(group.count, 2)
+        XCTAssertEqual(group[0]["$group_key"] as? String, "Cool Property")
+        let setProperties = group[0]["$set"] as! InternalProperties
+        XCTAssertEqual(setProperties["g"] as? String, "yo")
+        let setProperties2 = group[1]["$set"] as! InternalProperties
+        XCTAssertEqual(setProperties2["a"] as? Int, 1)
+        XCTAssertTrue(MixpanelPersistence.loadOptOutStatusFlag(apiToken: token)!)
+        XCTAssertTrue(MixpanelPersistence.loadAutomacticEventsEnabledFlag(apiToken: token))
+        
+        //timedEvents
+        let testTimedEvents = MixpanelPersistence.loadTimedEvents(apiToken: token)
+        XCTAssertEqual(testTimedEvents.count, 3)
+        XCTAssertNotNil(testTimedEvents["Time Event A"])
+        XCTAssertNotNil(testTimedEvents["Time Event B"])
+        XCTAssertNotNil(testTimedEvents["Time Event C"])
+        let identity = MixpanelPersistence.loadIdentity(apiToken: token)
+        XCTAssertEqual(identity.distinctID, "demo_user")
+        XCTAssertEqual(identity.peopleDistinctID, "demo_user")
+        XCTAssertNotNil(identity.anonymousId)
+        XCTAssertEqual(identity.userId, "demo_user")
+        XCTAssertEqual(identity.alias, "New Alias")
+        XCTAssertEqual(identity.hadPersistedDistinctId, false)
+        
+        let superProperties = MixpanelPersistence.loadSuperProperties(apiToken: token)
+        XCTAssertEqual(superProperties.count, 7)
+        XCTAssertEqual(superProperties["Super Property 1"] as? Int, 1)
+        XCTAssertEqual(superProperties["Super Property 7"] as? NSNull, NSNull())
+        removeDBfile("testToken")
+    }
+    
+    func prepareForMigrationFiles(_ fileNames: [String]) {
+        for fileName in fileNames {
+            let fileManager = FileManager.default
+            let filepath = Bundle(for: type(of: self)).url(forResource: fileName, withExtension: nil)!
+            let libraryUrls = fileManager.urls(for: .libraryDirectory,
+                                               in: .userDomainMask)
+            let destURL = libraryUrls.first?.appendingPathComponent(fileName)
+            do {
+                try FileManager.default.copyItem(at: filepath, to: destURL!)
+            } catch let error {
+                print(error)
+            }
+        }
+    }
 }

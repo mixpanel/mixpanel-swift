@@ -23,12 +23,15 @@ open class People {
     let serialQueue: DispatchQueue!
     let lock: ReadWriteLock
     var distinctId: String?
-    var delegate: FlushDelegate?
+    weak var delegate: FlushDelegate?
     let metadata: SessionMetadata
     let mixpanelPersistence: MixpanelPersistence
     
-
-    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, metadata: SessionMetadata, mixpanelPersistence: MixpanelPersistence) {
+    init(apiToken: String,
+         serialQueue: DispatchQueue,
+         lock: ReadWriteLock,
+         metadata: SessionMetadata,
+         mixpanelPersistence: MixpanelPersistence) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
         self.lock = lock
@@ -93,7 +96,6 @@ open class People {
             delegate?.flush(completion: nil)
         }
     }
-
 
     func merge(properties: InternalProperties) {
         addPeopleRecordToQueueWithAction("$merge", properties: properties)

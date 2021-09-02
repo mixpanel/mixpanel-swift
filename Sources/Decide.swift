@@ -15,7 +15,6 @@ class Decide {
     let lock: ReadWriteLock
     var decideFetched = false
     let mixpanelPersistence: MixpanelPersistence
-    
 
     required init(basePathIdentifier: String, lock: ReadWriteLock, mixpanelPersistence: MixpanelPersistence) {
         self.decideRequest = DecideRequest(basePathIdentifier: basePathIdentifier)

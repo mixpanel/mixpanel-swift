@@ -53,8 +53,7 @@ class MPDB {
             if sqlite3_open_v2(dbPath, &connection, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil) != SQLITE_OK {
                 logSqlError(message: "Error opening or creating database at path: \(dbPath)")
                 close()
-            }
-            else {
+            } else {
                 Logger.info(message: "Successfully opened connection to database at path: \(dbPath)")
                 createTables()
             }
@@ -76,8 +75,7 @@ class MPDB {
                     try manager.removeItem(atPath: dbPath)
                     Logger.info(message: "Deleted database file at path: \(dbPath)")
                 }
-            }
-            catch let error {
+            } catch let error {
                 Logger.error(message: "Unable to remove database file at path: \(dbPath), error: \(error)")
             }
         }
@@ -87,8 +85,9 @@ class MPDB {
     private func createTableFor(_ persistenceType: PersistenceType) {
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
-            let createTableString = "CREATE TABLE IF NOT EXISTS \(tableName)(id integer primary key autoincrement,data blob,time real,flag integer);"
-            var createTableStatement: OpaquePointer? = nil
+            let createTableString =
+                "CREATE TABLE IF NOT EXISTS \(tableName)(id integer primary key autoincrement,data blob,time real,flag integer);"
+            var createTableStatement: OpaquePointer?
             if sqlite3_prepare_v2(db, createTableString, -1, &createTableStatement, nil) == SQLITE_OK {
                 if sqlite3_step(createTableStatement) == SQLITE_DONE {
                     Logger.info(message: "\(tableName) table created")
@@ -114,7 +113,7 @@ class MPDB {
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
             let insertString = "INSERT INTO \(tableName) (data, flag, time) VALUES(?, ?, ?);"
-            var insertStatement: OpaquePointer? = nil
+            var insertStatement: OpaquePointer?
             data.withUnsafeBytes { rawBuffer in
                 if let pointer = rawBuffer.baseAddress {
                     if sqlite3_prepare_v2(db, insertString, -1, &insertStatement, nil) == SQLITE_OK {
@@ -143,7 +142,7 @@ class MPDB {
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
             let deleteString = "DELETE FROM \(tableName)\(ids.isEmpty ? "" : " WHERE id IN \(idsSqlString(ids))")"
-            var deleteStatement: OpaquePointer? = nil
+            var deleteStatement: OpaquePointer?
             if sqlite3_prepare_v2(db, deleteString, -1, &deleteStatement, nil) == SQLITE_OK {
                 if sqlite3_step(deleteStatement) == SQLITE_DONE {
                     Logger.info(message: "Succesfully deleted rows from table \(tableName)")
@@ -175,7 +174,7 @@ class MPDB {
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
             let updateString = "UPDATE \(tableName) SET flag = \(newFlag) where flag = \(!newFlag)"
-            var updateStatement: OpaquePointer? = nil
+            var updateStatement: OpaquePointer?
             if sqlite3_prepare_v2(db, updateString, -1, &updateStatement, nil) == SQLITE_OK {
                 if sqlite3_step(updateStatement) == SQLITE_DONE {
                     Logger.info(message: "Succesfully update rows from table \(tableName)")
@@ -193,13 +192,16 @@ class MPDB {
         }
     }
     
-    func readRows(_ persistenceType: PersistenceType, numRows: Int, flag: Bool = false)  -> [InternalProperties] {
+    func readRows(_ persistenceType: PersistenceType, numRows: Int, flag: Bool = false) -> [InternalProperties] {
         var rows: [InternalProperties] = []
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
-            let selectString = "SELECT id, data FROM \(tableName) WHERE flag = \(flag ? 1 : 0) ORDER BY time\(numRows == Int.max ? "" : " LIMIT \(numRows)")"
-                var selectStatement: OpaquePointer? = nil
-                var rowsRead: Int = 0
+            let selectString = """
+            SELECT id, data FROM \(tableName) WHERE flag = \(flag ? 1 : 0) \
+            ORDER BY time\(numRows == Int.max ? "" : " LIMIT \(numRows)")
+            """
+            var selectStatement: OpaquePointer?
+            var rowsRead: Int = 0
             if sqlite3_prepare_v2(db, selectString, -1, &selectStatement, nil) == SQLITE_OK {
                 while sqlite3_step(selectStatement) == SQLITE_ROW {
                     if let blob = sqlite3_column_blob(selectStatement, 1) {

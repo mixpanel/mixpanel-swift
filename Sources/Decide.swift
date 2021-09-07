@@ -21,11 +21,12 @@ class Decide {
     let decideRequest: DecideRequest
     let lock: ReadWriteLock
     var decideFetched = false
-    var automaticEventsEnabled: Bool?
+    let mixpanelPersistence: MixpanelPersistence
 
-    required init(basePathIdentifier: String, lock: ReadWriteLock) {
+    required init(basePathIdentifier: String, lock: ReadWriteLock, mixpanelPersistence: MixpanelPersistence) {
         self.decideRequest = DecideRequest(basePathIdentifier: basePathIdentifier)
         self.lock = lock
+        self.mixpanelPersistence = mixpanelPersistence
     }
 
     func checkDecide(forceFetch: Bool = false,
@@ -46,8 +47,8 @@ class Decide {
                     return
                 }
 
-                if let automaticEvents = result["automatic_events"] as? Bool {
-                    self.automaticEventsEnabled = automaticEvents
+                if let automaticEventsEnabled = result["automatic_events"] as? Bool {
+                    MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: automaticEventsEnabled, fromDecide: true, apiToken: token)
                 }
 
                 if let integrations = result["integrations"] as? [String] {

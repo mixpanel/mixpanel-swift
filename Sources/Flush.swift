@@ -8,9 +8,10 @@
 
 import Foundation
 
-protocol FlushDelegate {
+protocol FlushDelegate: AnyObject {
     func flush(completion: (() -> Void)?)
-    func updateQueue(_ queue: Queue, type: FlushType)
+    func flushSuccess(type: FlushType, ids: [Int32])
+    
     #if os(iOS)
     func updateNetworkActivityIndicator(_ on: Bool)
     #endif // os(iOS)
@@ -18,7 +19,7 @@ protocol FlushDelegate {
 
 class Flush: AppLifecycle {
     var timer: Timer?
-    var delegate: FlushDelegate?
+    weak var delegate: FlushDelegate?
     var useIPAddressForGeoLocation = true
     var flushRequest: FlushRequest
     var flushOnBackground = true
@@ -26,6 +27,11 @@ class Flush: AppLifecycle {
     private let flushIntervalReadWriteLock: DispatchQueue
 
     var flushInterval: Double {
+        get {
+            flushIntervalReadWriteLock.sync {
+                return _flushInterval
+            }
+        }
         set {
             flushIntervalReadWriteLock.sync(flags: .barrier, execute: {
                 _flushInterval = newValue
@@ -34,11 +40,6 @@ class Flush: AppLifecycle {
             delegate?.flush(completion: nil)
             startFlushTimer()
         }
-        get {
-            flushIntervalReadWriteLock.sync {
-                return _flushInterval
-            }
-        }
     }
 
     required init(basePathIdentifier: String) {
@@ -46,47 +47,11 @@ class Flush: AppLifecycle {
         flushIntervalReadWriteLock = DispatchQueue(label: "com.mixpanel.flush_interval.lock", qos: .utility, attributes: .concurrent)
     }
 
-    func flushEventsQueue(_ eventsQueue: Queue, automaticEventsEnabled: Bool?) -> Queue? {
-        let (automaticEventsQueue, eventsQueue) = orderAutomaticEvents(queue: eventsQueue,
-                                                        automaticEventsEnabled: automaticEventsEnabled)
-        var mutableEventsQueue = flushQueue(type: .events, queue: eventsQueue)
-        if let automaticEventsQueue = automaticEventsQueue {
-            mutableEventsQueue?.append(contentsOf: automaticEventsQueue)
-        }
-        return mutableEventsQueue
-    }
-    
-    func orderAutomaticEvents(queue: Queue, automaticEventsEnabled: Bool?) ->
-        (automaticEventQueue: Queue?, eventsQueue: Queue) {
-            var eventsQueue = queue
-            if automaticEventsEnabled == nil || !automaticEventsEnabled! {
-                var discardedItems = Queue()
-                for (i, ev) in eventsQueue.enumerated().reversed() {
-                    if let eventName = ev["event"] as? String, eventName.hasPrefix("$ae_") {
-                        discardedItems.append(ev)
-                        eventsQueue.remove(at: i)
-                    }
-                }
-                if automaticEventsEnabled == nil {
-                    return (discardedItems, eventsQueue)
-                }
-            }
-            return (nil, eventsQueue)
-    }
-
-    func flushPeopleQueue(_ peopleQueue: Queue) -> Queue? {
-        return flushQueue(type: .people, queue: peopleQueue)
-    }
-
-    func flushGroupsQueue(_ groupsQueue: Queue) -> Queue? {
-        return flushQueue(type: .groups, queue: groupsQueue)
-    }
-
-    func flushQueue(type: FlushType, queue: Queue) -> Queue? {
+    func flushQueue(type: FlushType, queue: Queue) {
         if flushRequest.requestNotAllowed() {
-            return queue
+            return
         }
-        return flushQueueInBatches(queue, type: type)
+        flushQueueInBatches(queue, type: type)
     }
 
     func startFlushTimer() {
@@ -119,13 +84,16 @@ class Flush: AppLifecycle {
         }
     }
 
-    func flushQueueInBatches(_ queue: Queue, type: FlushType) -> Queue {
+    func flushQueueInBatches(_ queue: Queue, type: FlushType) {
         var mutableQueue = queue
         while !mutableQueue.isEmpty {
             var shouldContinue = false
             let batchSize = min(mutableQueue.count, APIConstants.batchSize)
             let range = 0..<batchSize
             let batch = Array(mutableQueue[range])
+            let ids: [Int32] = batch.map { entity in
+                (entity["id"] as? Int32) ?? 0
+            }
             // Log data payload sent
             Logger.debug(message: "Sending batch of data")
             Logger.debug(message: batch as Any)
@@ -148,19 +116,21 @@ class Flush: AppLifecycle {
                                                 }
                                             #endif // os(iOS)
                                             if success {
-                                                mutableQueue = self.removeProcessedBatch(batchSize: batchSize, queue: mutableQueue, type: type)
+                                                // remove
+                                                self.delegate?.flushSuccess(type: type, ids: ids)
+                                                mutableQueue = self.removeProcessedBatch(batchSize: batchSize,
+                                                                                         queue: mutableQueue,
+                                                                                         type: type)
                                             }
                                             shouldContinue = success
                                             semaphore.signal()
                 })
                 _ = semaphore.wait(timeout: DispatchTime.distantFuture)
             }
-
             if !shouldContinue {
                 break
             }
         }
-        return mutableQueue
     }
     
     func removeProcessedBatch(batchSize: Int, queue: Queue, type: FlushType) -> Queue {
@@ -171,7 +141,6 @@ class Flush: AppLifecycle {
         } else {
             shadowQueue.removeAll()
         }
-        delegate?.updateQueue(shadowQueue, type: type)
         return shadowQueue
     }
 

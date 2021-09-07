@@ -61,3 +61,4 @@ disabled_rules:
   - type_body_length
   - variable_name
   - trailing_whitespace
+  - unused_optional_binding

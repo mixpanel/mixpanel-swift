@@ -12,22 +12,22 @@ import XCTest
 @testable import Mixpanel
 
 let kTestToken = "abc123"
-let kDefaultServerString = "https://api.mixpanel.com"
-let kDefaultServerTrackString = "https://api.mixpanel.com/track/"
-let kDefaultServerEngageString = "https://api.mixpanel.com/engage/"
-let kDefaultServerGroupsString = "https://api.mixpanel.com/groups/"
+let kDefaultServerString = "^https://api.mixpanel.com"
+let kDefaultServerTrackString = "^https://api.mixpanel.com/track/".regex
+let kDefaultServerEngageString = "^https://api.mixpanel.com/engage/".regex
+let kDefaultServerGroupsString = "^https://api.mixpanel.com/groups/".regex
 let kDefaultServerDecideString = "^https://api.mixpanel.com/decide(.*?)".regex
 
 @discardableResult func stubEngage() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerEngageString as LSMatcheable).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("POST", kDefaultServerEngageString()).withHeader("Accept-Encoding", "gzip")!
 }
 
 @discardableResult func stubGroups() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerGroupsString as LSMatcheable?).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("POST", kDefaultServerGroupsString()).withHeader("Accept-Encoding", "gzip")!
 }
 
 @discardableResult func stubTrack() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerTrackString as LSMatcheable).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("POST", kDefaultServerTrackString()).withHeader("Accept-Encoding", "gzip")!
 }
 
 @discardableResult func stubDecide() -> LSStubRequestDSL {
@@ -48,7 +48,7 @@ extension XCTestCase {
 
         // Call code.
         block()
-        waitForExpectations(timeout: 0.5, handler: nil)
+        waitForExpectations(timeout: 2, handler: nil)
         Assertions.assertClosure = Assertions.swiftAssertClosure
     }
 

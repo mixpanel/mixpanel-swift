@@ -20,20 +20,23 @@ open class People {
     open var ignoreTime = false
 
     let apiToken: String
-    let serialQueue: DispatchQueue
+    let serialQueue: DispatchQueue!
     let lock: ReadWriteLock
-    var peopleQueue = Queue()
-    var flushPeopleQueue = Queue()
-    var unidentifiedQueue = Queue()
     var distinctId: String?
-    var delegate: FlushDelegate?
+    weak var delegate: FlushDelegate?
     let metadata: SessionMetadata
-
-    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, metadata: SessionMetadata) {
+    let mixpanelPersistence: MixpanelPersistence
+    
+    init(apiToken: String,
+         serialQueue: DispatchQueue,
+         lock: ReadWriteLock,
+         metadata: SessionMetadata,
+         mixpanelPersistence: MixpanelPersistence) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
         self.lock = lock
         self.metadata = metadata
+        self.mixpanelPersistence = mixpanelPersistence
     }
 
     func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
@@ -82,34 +85,15 @@ open class People {
 
             if let distinctId = self.distinctId {
                 r["$distinct_id"] = distinctId
-                self.addPeopleObject(r)
+                // identified
+                self.mixpanelPersistence.saveEntity(r, type: .people, flag: !PersistenceConstant.unIdentifiedFlag)
             } else {
-                self.lock.write {
-                    self.unidentifiedQueue.append(r)
-                    if self.unidentifiedQueue.count > QueueConstants.queueSize {
-                        self.unidentifiedQueue.remove(at: 0)
-                    }
-                }
-
-            }
-            self.lock.read {
-                Persistence.archivePeople(self.flushPeopleQueue + self.peopleQueue, token: self.apiToken)
+                self.mixpanelPersistence.saveEntity(r, type: .people, flag: PersistenceConstant.unIdentifiedFlag)
             }
         }
 
         if MixpanelInstance.isiOSAppExtension() {
             delegate?.flush(completion: nil)
-        }
-    }
-
-    func addPeopleObject(_ r: InternalProperties) {
-        lock.write {
-            Logger.debug(message: "adding to people queue")
-            Logger.debug(message: r)
-            peopleQueue.append(r)
-            if peopleQueue.count > QueueConstants.queueSize {
-                peopleQueue.remove(at: 0)
-            }
         }
     }
 

@@ -37,18 +37,21 @@ class Track {
                superProperties: InternalProperties,
                mixpanelIdentity: MixpanelIdentity,
                epochInterval: Double) -> InternalProperties {
-        var ev = event
-        if ev == nil || ev!.isEmpty {
+
+        var ev = "mp_event"
+        if let hasEvent = event, !hasEvent.isEmpty {
+            ev = hasEvent
+        } else {
             Logger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")
-            ev = "mp_event"
         }
-        if !isAutomaticEventEnabled && ev!.hasPrefix("$ae_") {
+
+        if !isAutomaticEventEnabled && ev.hasPrefix("$ae_") {
             return timedEvents
         }
         assertPropertyTypes(properties)
         
         let epochSeconds = Int(round(epochInterval))
-        let eventStartTime = timedEvents[ev!] as? Double
+        let eventStartTime = timedEvents[ev] as? Double
         var p = InternalProperties()
         AutomaticProperties.automaticPropertiesLock.read {
             p += AutomaticProperties.properties
@@ -57,7 +60,7 @@ class Track {
         p["time"] = epochSeconds
         var shadowTimedEvents = timedEvents
         if let eventStartTime = eventStartTime {
-            shadowTimedEvents.removeValue(forKey: ev!)
+            shadowTimedEvents.removeValue(forKey: ev)
             p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
         }
         p["distinct_id"] = mixpanelIdentity.distinctID
@@ -76,7 +79,7 @@ class Track {
             p += properties
         }
 
-        var trackEvent: InternalProperties = ["event": ev!, "properties": p]
+        var trackEvent: InternalProperties = ["event": ev, "properties": p]
         metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
         
         self.mixpanelPersistence.saveEntity(trackEvent, type: .events)

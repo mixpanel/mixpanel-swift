@@ -137,8 +137,8 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         mp2.automaticEvents.perform(#selector(AutomaticEvents.appDidBecomeActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
-        mp.trackingQueue.sync { }
-        mp2.trackingQueue.sync { }
+        MixpanelInstance.trackingQueue.sync { }
+        MixpanelInstance.trackingQueue.sync { }
 
         XCTAssertEqual(eventQueue(token: mp.apiToken).count, 1, "there should be only 1 event")
         let appOpenEvent = eventQueue(token: mp.apiToken).last
@@ -152,8 +152,8 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         mp2.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
-        mp.trackingQueue.sync { }
-        mp2.trackingQueue.sync { }
+        MixpanelInstance.trackingQueue.sync { }
+        MixpanelInstance.trackingQueue.sync { }
         let appSessionEvent = eventQueue(token: mp.apiToken).last
         XCTAssertNotNil(appSessionEvent, "Should have an event")
         XCTAssertEqual(appSessionEvent?["event"] as? String, "$ae_session", "should be app session event")

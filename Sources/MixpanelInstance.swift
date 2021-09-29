@@ -357,17 +357,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         self.name = name
         self.readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
         flushInstance = Flush(basePathIdentifier: name)
-        let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: label, qos: .utility)
-        sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
+        sessionMetadata = SessionMetadata(trackingQueue: MixpanelInstance.trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
                               metadata: sessionMetadata)
         flushInstance.delegate = self
-        networkQueue = DispatchQueue(label: label, qos: .utility)
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,
-                        serialQueue: trackingQueue,
+                        serialQueue: MixpanelInstance.trackingQueue,
                         lock: self.readWriteLock,
                         metadata: sessionMetadata)
         flushInstance._flushInterval = flushInterval
@@ -404,10 +401,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             #endif
         #endif // os(iOS)
         if !MixpanelInstance.isiOSAppExtension() {
-            notificationCenter.addObserver(self,
-                                           selector: #selector(applicationWillTerminate(_:)),
-                                           name: UIApplication.willTerminateNotification,
-                                           object: nil)
+//            notificationCenter.addObserver(self,
+//                                           selector: #selector(applicationWillTerminate(_:)),
+//                                           name: UIApplication.willTerminateNotification,
+//                                           object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationWillResignActive(_:)),
                                            name: UIApplication.willResignActiveNotification,
@@ -436,10 +433,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #elseif os(OSX)
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
-        notificationCenter.addObserver(self,
-                                       selector: #selector(applicationWillTerminate(_:)),
-                                       name: NSApplication.willTerminateNotification,
-                                       object: nil)
+//        notificationCenter.addObserver(self,
+//                                       selector: #selector(applicationWillTerminate(_:)),
+//                                       name: NSApplication.willTerminateNotification,
+//                                       object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillResignActive(_:)),
                                        name: NSApplication.willResignActiveNotification,
@@ -594,13 +591,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
     }
     #endif // os(OSX)
-
-    @objc private func applicationWillTerminate(_ notification: Notification) {
-        MixpanelInstance.networkQueue.async { [weak self] in
-            guard let self = self else { return }
-            self.archive()
-        }
-    }
 
     func defaultDistinctId() -> String {
         let distinctId: String?

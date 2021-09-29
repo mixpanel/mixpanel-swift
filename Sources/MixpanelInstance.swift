@@ -246,7 +246,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 Logger.info(message: "reachability changed, wifi=\(wifi)")
             }
             if SCNetworkReachabilitySetCallback(reachability, reachabilityCallback, &context) {
-                if !SCNetworkReachabilitySetDispatchQueue(reachability, trackingQueue) {
+                if !SCNetworkReachabilitySetDispatchQueue(reachability, MixpanelInstance.trackingQueue) {
                     // cleanup callback if setting dispatch queue failed
                     SCNetworkReachabilitySetCallback(reachability, nil, nil)
                 }
@@ -548,7 +548,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             }
         }
         
-        trackingQueue.async {
+        MixpanelInstance.trackingQueue.async {
             AutomaticProperties.automaticPropertiesLock.write { [weak self, radio] in
                 AutomaticProperties.properties["$radio"] = radio
                 

@@ -431,9 +431,36 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if hasOptedOutTracking() {
             return
         }
+
+        // Start the background task on DidEnterBackground so that flush/archive have plenty
+        // of time to execute
         
         taskId = sharedApplication.beginBackgroundTask { [weak self] in
-            self?.taskId = UIBackgroundTaskIdentifier.invalid
+
+                // If self DNE, then we're already dead and can't do anything anyways
+                // This shouldn't happen in practice
+                guard let self = self else { return }
+
+                // Expiration handler: All Code inside this block MUST BE SYNCRONOUS!
+                // This block is the system telling us we're about to be ejected, so we need to
+                // 1) Always end the task
+                // 2) set the taskID to invalid
+                // Any async calls here will never be executed (at best) or crash at worst.
+
+                #if DECIDE
+                self.readWriteLock.write {
+                    self.decideInstance.decideFetched = false
+                }
+                #endif
+
+                // If the system is calling the expiration handler, the taskID must be valid (?)
+                // Either way, there is no known harm in ending an invalid background task
+                // It is also possible iOS has some internal hack requiring a call to endBackgroundTask
+                // always, so by "defensively" calling endBackgroundTask here we are insuring iOS
+                // doesn't kill our process. Note that repeated "violations" of not ending your task
+                // will influence the background time iOS grants you in future requests.
+                sharedApplication.endBackgroundTask(self.taskId)
+                self.taskId = UIBackgroundTaskIdentifier.invalid
         }
         
         if flushOnBackground {
@@ -444,20 +471,29 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 self?.archive()
             }
         }
+
+        // iOS will _always_ call our beginBackgroundTask's expiration handler. I do not believe we
+        // need to manually end the task, but if we do then I strongly recommend wrapping the above
+        // call to flush() in the same MixpanelInstance.trackingQueue.async dispatch. Without it
+        // flush() could be executing on main _while_ the below code ends the task abruptly.
+        // Also, if flush() or archive() have async dispatches internally MixpanelInstance.trackingQueue
+        // could move to kill the background task before those nested async calls finish.
+        // Either way, I believe not ending the task until iOS asks us to is the superior design as it gives
+        // us plenty of time to execute flush()/archive() internally without adding "sync" flags.
         
-        MixpanelInstance.trackingQueue.async { [weak self] in
-            guard let self = self else { return }
-            
-            #if DECIDE
-            self.readWriteLock.write {
-                self.decideInstance.decideFetched = false
-            }
-            #endif // DECIDE
-            if self.taskId != UIBackgroundTaskIdentifier.invalid {
-                sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskIdentifier.invalid
-            }
-        }
+//        MixpanelInstance.trackingQueue.async { [weak self] in
+//            guard let self = self else { return }
+//
+//            #if DECIDE
+//            self.readWriteLock.write {
+//                self.decideInstance.decideFetched = false
+//            }
+//            #endif // DECIDE
+//            if self.taskId != UIBackgroundTaskIdentifier.invalid {
+//                sharedApplication.endBackgroundTask(self.taskId)
+//                self.taskId = UIBackgroundTaskIdentifier.invalid
+//            }
+//        }
     }
     
     @objc private func applicationWillEnterForeground(_ notification: Notification) {

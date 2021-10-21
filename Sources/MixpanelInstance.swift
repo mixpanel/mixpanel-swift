@@ -441,7 +441,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 // This shouldn't happen in practice
                 guard let self = self else { return }
 
-                // Expiration handler: All Code inside this block MUST BE SYNCRONOUS!
+                // Expiration handler: All Code inside this block MUST BE SYNCHRONOUS!
                 // This block is the system telling us we're about to be ejected, so we need to
                 // 1) Always end the task
                 // 2) set the taskID to invalid
@@ -501,16 +501,18 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             return
         }
         sessionMetadata.applicationWillEnterForeground()
-        MixpanelInstance.trackingQueue.async { [weak self, sharedApplication] in
-            guard let self = self else { return }
-            
-            if self.taskId != UIBackgroundTaskIdentifier.invalid {
-                sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskIdentifier.invalid
-                #if os(iOS)
-                self.updateNetworkActivityIndicator(false)
-                #endif // os(iOS)
-            }
+
+        // Note: taskId should be modifed on the main thread, as multithreaded read/write
+        // of unprotected vars is very dangerous. applicationWillEnterForeground
+        // will always be called on main, as will applicationDidEnterBackground when it sets
+        // taskId in the first place.
+
+        if taskId != UIBackgroundTaskIdentifier.invalid {
+            sharedApplication.endBackgroundTask(self.taskId)
+            taskId = UIBackgroundTaskIdentifier.invalid
+            #if os(iOS)
+            updateNetworkActivityIndicator(false)
+            #endif // os(iOS)
         }
     }
     #endif // os(OSX)

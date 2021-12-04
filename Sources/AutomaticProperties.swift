@@ -50,7 +50,7 @@ class AutomaticProperties {
             p["$screen_height"]     = Int(screenSize.height)
         #endif
 
-        let infoDict = Bundle.main.infoDictionary
+        let infoDict = Bundle(for: AutomaticProperties.self).infoDictionary
         if let infoDict = infoDict {
             p["$app_build_number"]     = infoDict["CFBundleVersion"]
             p["$app_version_string"]   = infoDict["CFBundleShortVersionString"]
@@ -64,7 +64,7 @@ class AutomaticProperties {
 
     static var peopleProperties: InternalProperties = {
         var p = InternalProperties()
-        let infoDict = Bundle.main.infoDictionary
+        let infoDict = Bundle(for: AutomaticProperties.self).infoDictionary
         if let infoDict = infoDict {
             p["$ios_app_version"] = infoDict["CFBundleVersion"]
             p["$ios_app_release"] = infoDict["CFBundleShortVersionString"]

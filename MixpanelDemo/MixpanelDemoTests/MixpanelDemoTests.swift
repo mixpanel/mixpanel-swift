@@ -247,6 +247,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
             let anonymousId = testMixpanel.anonymousId
             peopleQueue_value = peopleQueue(token: testMixpanel.apiToken)
             unidentifiedQueue = unIdentifiedPeopleQueue(token: testMixpanel.apiToken)
+            XCTAssertEqual(peopleQueue_value.last?["$distinct_id"] as? String,
+                           distinctId, "distinct id not set properly on unidentified people record")
             XCTAssertEqual(testMixpanel.distinctId, distinctId,
                            "mixpanel identify failed to set distinct id")
             XCTAssertEqual(testMixpanel.userId, distinctId,

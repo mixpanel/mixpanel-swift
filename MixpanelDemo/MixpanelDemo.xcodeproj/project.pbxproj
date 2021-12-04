@@ -826,7 +826,6 @@
 					E15FF7E61D0461130076CDE3 = {
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1020;
-						TestTargetID = E15FF7D21D0461130076CDE3;
 					};
 				};
 			};
@@ -1671,7 +1670,6 @@
 			baseConfigurationReference = 9233A000BB35A654EEC9A9D6 /* Pods-MixpanelDemoTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_MODULES = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -1690,7 +1688,6 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MixpanelDemo.app/MixpanelDemo";
 			};
 			name = Debug;
 		};
@@ -1699,7 +1696,6 @@
 			baseConfigurationReference = 5609994314AFCE2B8FF1705B /* Pods-MixpanelDemoTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = MixpanelDemoTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1714,7 +1710,6 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MixpanelDemo.app/MixpanelDemo";
 			};
 			name = Release;
 		};

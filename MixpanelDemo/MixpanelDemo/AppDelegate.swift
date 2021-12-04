@@ -19,7 +19,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
         Mixpanel.initialize(token: "MIXPANEL_TOKEN")
         Mixpanel.mainInstance().loggingEnabled = true
-        
         return true
     }
 

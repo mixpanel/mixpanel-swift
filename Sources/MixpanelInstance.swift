@@ -650,7 +650,6 @@ extension MixpanelInstance {
                     self.people.distinctId = distinctId
                 }
                 self.mixpanelPersistence.identifyPeople(token: self.apiToken)
-                
             } else {
                 self.people.distinctId = nil
             }

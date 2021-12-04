@@ -17,7 +17,7 @@ class LoginViewController: UIViewController {
         super.viewDidLoad()
         let token = Mixpanel.mainInstance().apiToken
         projectTokenTextField.text = token
-        
+
         distinctIdTextField.text = "demo_user"
         nameTextField.text = "Demo User"
     }

@@ -209,7 +209,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if DECIDE
     let decideInstance: Decide
     let automaticEvents = AutomaticEvents()
-    let connectIntegrations = ConnectIntegrations()
     #elseif TV_AUTO_EVENTS
     let automaticEvents = AutomaticEvents()
     #endif // DECIDE
@@ -279,9 +278,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             automaticEvents.delegate = self
             automaticEvents.initializeEvents()
         }
-        #if DECIDE
-        connectIntegrations.mixpanel = self
-        #endif
         #endif // DECIDE
     }
     #else
@@ -399,14 +395,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     @objc private func applicationDidBecomeActive(_ notification: Notification) {
         flushInstance.applicationDidBecomeActive()
         #if DECIDE
-        checkDecide { decideResponse in
-            if let decideResponse = decideResponse {
-                if !decideResponse.integrations.isEmpty {
-                    self.connectIntegrations.setupIntegrations(decideResponse.integrations)
-                }
-            }
-        }
-        
+        checkDecide()
         #endif // DECIDE
     }
     
@@ -731,7 +720,6 @@ extension MixpanelInstance {
                 self.alias = nil
                 #if DECIDE
                 self.decideInstance.decideFetched = false
-                self.connectIntegrations.reset()
                 #endif // DECIDE
                 self.mixpanelPersistence.resetEntities()
             }
@@ -1357,13 +1345,12 @@ extension MixpanelInstance {
 extension MixpanelInstance {
     
     // MARK: - Decide
-    func checkDecide(forceFetch: Bool = false, completion: @escaping ((_ response: DecideResponse?) -> Void)) {
-        trackingQueue.async { [weak self, completion, forceFetch] in
+    func checkDecide(forceFetch: Bool = false) {
+        trackingQueue.async { [weak self, forceFetch] in
             guard let self = self else { return }
             self.decideInstance.checkDecide(forceFetch: forceFetch,
                                             distinctId: self.people.distinctId ?? self.distinctId,
-                                            token: self.apiToken,
-                                            completion: completion)
+                                            token: self.apiToken)
         }
     }
 }

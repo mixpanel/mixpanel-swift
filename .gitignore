@@ -27,4 +27,8 @@ profile
 .swiftpm/
 .build/
 
+# Carthage
+
+Carthage/Build/
+
 MixpanelDemo/build/

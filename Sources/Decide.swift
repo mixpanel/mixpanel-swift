@@ -8,14 +8,6 @@
 
 import Foundation
 
-struct DecideResponse {
-    var integrations: [String]
-
-    init() {
-        integrations = []
-    }
-}
-
 class Decide {
 
     let decideRequest: DecideRequest
@@ -31,9 +23,7 @@ class Decide {
 
     func checkDecide(forceFetch: Bool = false,
                      distinctId: String,
-                     token: String,
-                     completion: @escaping ((_ response: DecideResponse?) -> Void)) {
-        var decideResponse = DecideResponse()
+                     token: String) {
 
         if !decideFetched || forceFetch {
             let semaphore = DispatchSemaphore(value: 0)
@@ -43,16 +33,11 @@ class Decide {
                 }
                 guard let result = decideResult else {
                     semaphore.signal()
-                    completion(nil)
                     return
                 }
 
                 if let automaticEventsEnabled = result["automatic_events"] as? Bool {
                     MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: automaticEventsEnabled, fromDecide: true, apiToken: token)
-                }
-
-                if let integrations = result["integrations"] as? [String] {
-                    decideResponse.integrations = integrations
                 }
 
                 self.decideFetched = true
@@ -63,8 +48,6 @@ class Decide {
         } else {
             Logger.info(message: "decide cache found, skipping network request")
         }
-
-        completion(decideResponse)
     }
 
 }

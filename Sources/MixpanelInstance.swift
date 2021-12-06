@@ -396,7 +396,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         flushInstance.applicationDidBecomeActive()
         #if DECIDE
         checkDecide()
-
         #endif // DECIDE
     }
     

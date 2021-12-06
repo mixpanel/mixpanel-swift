@@ -8,7 +8,6 @@
 
 import Foundation
 
-
 class Decide {
 
     let decideRequest: DecideRequest

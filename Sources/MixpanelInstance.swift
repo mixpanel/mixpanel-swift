@@ -270,7 +270,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if DECIDE
     let decideInstance: Decide
     let automaticEvents = AutomaticEvents()
-    let connectIntegrations = ConnectIntegrations()
     #elseif TV_AUTO_EVENTS
         let automaticEvents = AutomaticEvents()
     #endif // DECIDE
@@ -345,9 +344,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 }
                 #endif
             }
-            #if DECIDE
-            connectIntegrations.mixpanel = self
-            #endif
         #endif // DECIDE
     }
     #else
@@ -505,10 +501,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                             self.markVariantRun(variant)
                         }
                     }
-                }
-
-                if !decideResponse.integrations.isEmpty {
-                    self.connectIntegrations.setupIntegrations(decideResponse.integrations)
                 }
             }
         }
@@ -954,7 +946,6 @@ extension MixpanelInstance {
                     self.decideInstance.decideFetched = false
                     self.decideInstance.ABTestingInstance.variants = Set()
                     self.decideInstance.codelessInstance.codelessBindings = Set()
-                    self.connectIntegrations.reset()
                     MixpanelTweaks.defaultStore.reset()
                     #endif // DECIDE
                     if let completion = completion {

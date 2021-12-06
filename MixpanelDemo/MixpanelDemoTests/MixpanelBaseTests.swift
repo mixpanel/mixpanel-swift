@@ -11,7 +11,6 @@ import Nocilla
 import SQLite3
 
 @testable import Mixpanel
-@testable import MixpanelDemo
 
 class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     var mixpanelWillFlush: Bool!
@@ -22,12 +21,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         super.setUp()
         stubCalls()
         mixpanelWillFlush = false
-        
-        if let loginView = self.topViewController() as? LoginViewController {
-            loginView.goToMainView()
-        } else {
-            NSLog("Expected login screen but not found.")
-        }
 
         NSLog("finished test setup")
     }

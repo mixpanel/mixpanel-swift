@@ -74,7 +74,16 @@ class MixpanelPersistence {
     }
     
     func loadEntitiesInBatch(type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false) -> [InternalProperties] {
-        return mpdb.readRows(type, numRows: batchSize, flag: flag)
+        let entities = mpdb.readRows(type, numRows: batchSize, flag: flag)
+        let distinctId = MixpanelPersistence.loadIdentity(apiToken: apiToken).distinctID
+
+        return entities.map { entityWithDistinctId($0, distinctId: distinctId) }
+    }
+
+    private func entityWithDistinctId(_ entity: InternalProperties, distinctId: String) -> InternalProperties {
+        var result = entity;
+        result["$distinct_id"] = distinctId
+        return result
     }
     
     func removeEntitiesInBatch(type: PersistenceType, ids: [Int32]) {

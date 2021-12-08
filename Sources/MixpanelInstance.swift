@@ -191,7 +191,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // DECIDE
     
     var superProperties = InternalProperties()
-    var trackingQueue: DispatchQueue!
+    var trackingQueue: DispatchQueue
     var optOutStatus: Bool?
     var timedEvents = InternalProperties()
     let readWriteLock: ReadWriteLock
@@ -218,6 +218,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
+        let label = "com.mixpanel.\(self.apiToken)"
+        trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility)
         mixpanelPersistence = MixpanelPersistence.init(token: self.apiToken)
         mixpanelPersistence.migrate()
         
@@ -227,8 +229,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #if DECIDE
         decideInstance = Decide(basePathIdentifier: name, lock: readWriteLock, mixpanelPersistence: mixpanelPersistence)
         #endif // DECIDE
-        let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
@@ -287,14 +287,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
+        let label = "com.mixpanel.\(self.apiToken)"
+        trackingQueue = DispatchQueue(label: label, qos: .utility)
         mixpanelPersistence = MixpanelPersistence.init(token: self.apiToken)
         mixpanelPersistence.migrate()
         
         self.name = name
         self.readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
         flushInstance = Flush(basePathIdentifier: name)
-        let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: label, qos: .utility)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
@@ -333,10 +333,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         //                                   object: nil)
         #endif // os(iOS)
         if !MixpanelInstance.isiOSAppExtension() {
-            notificationCenter.addObserver(self,
-                                           selector: #selector(applicationWillTerminate(_:)),
-                                           name: UIApplication.willTerminateNotification,
-                                           object: nil)
             notificationCenter.addObserver(self,
                                            selector: #selector(applicationWillResignActive(_:)),
                                            name: UIApplication.willResignActiveNotification,
@@ -441,11 +437,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         
         if flushOnBackground {
             flush()
-        } else {
-            // only need to archive if don't flush because flush archives at the end
-            trackingQueue.async { [weak self] in
-                self?.archive()
-            }
         }
         
         trackingQueue.async { [weak self] in
@@ -481,13 +472,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
     }
     #endif // os(OSX)
-    
-    @objc private func applicationWillTerminate(_ notification: Notification) {
-        trackingQueue.async { [weak self] in
-            guard let self = self else { return }
-            self.archive()
-        }
-    }
     
     func defaultDistinctId() -> String {
         let distinctId: String?

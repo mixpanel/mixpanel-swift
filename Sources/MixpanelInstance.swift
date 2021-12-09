@@ -191,7 +191,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // DECIDE
     
     var superProperties = InternalProperties()
-    var trackingQueue: DispatchQueue!
+    var trackingQueue: DispatchQueue
+    var networkQueue: DispatchQueue
     var optOutStatus: Bool?
     var timedEvents = InternalProperties()
     let readWriteLock: ReadWriteLock
@@ -218,6 +219,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
+        let label = "com.mixpanel.\(self.apiToken)"
+        trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility)
+        networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
         mixpanelPersistence = MixpanelPersistence.init(token: self.apiToken)
         mixpanelPersistence.migrate()
         
@@ -227,8 +231,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #if DECIDE
         decideInstance = Decide(basePathIdentifier: name, lock: readWriteLock, mixpanelPersistence: mixpanelPersistence)
         #endif // DECIDE
-        let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
@@ -287,14 +289,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
+        let label = "com.mixpanel.\(self.apiToken)"
+        trackingQueue = DispatchQueue(label: label, qos: .utility)
+        networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
         mixpanelPersistence = MixpanelPersistence.init(token: self.apiToken)
         mixpanelPersistence.migrate()
         
         self.name = name
         self.readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
         flushInstance = Flush(basePathIdentifier: name)
-        let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: label, qos: .utility)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
@@ -334,10 +337,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif // os(iOS)
         if !MixpanelInstance.isiOSAppExtension() {
             notificationCenter.addObserver(self,
-                                           selector: #selector(applicationWillTerminate(_:)),
-                                           name: UIApplication.willTerminateNotification,
-                                           object: nil)
-            notificationCenter.addObserver(self,
                                            selector: #selector(applicationWillResignActive(_:)),
                                            name: UIApplication.willResignActiveNotification,
                                            object: nil)
@@ -358,10 +357,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #elseif os(OSX)
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
-        notificationCenter.addObserver(self,
-                                       selector: #selector(applicationWillTerminate(_:)),
-                                       name: NSApplication.willTerminateNotification,
-                                       object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillResignActive(_:)),
                                        name: NSApplication.willResignActiveNotification,
@@ -436,19 +431,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         
         taskId = sharedApplication.beginBackgroundTask { [weak self] in
-            self?.taskId = UIBackgroundTaskIdentifier.invalid
-        }
-        
-        if flushOnBackground {
-            flush()
-        } else {
-            // only need to archive if don't flush because flush archives at the end
-            trackingQueue.async { [weak self] in
-                self?.archive()
-            }
-        }
-        
-        trackingQueue.async { [weak self] in
             guard let self = self else { return }
             
             #if DECIDE
@@ -456,10 +438,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 self.decideInstance.decideFetched = false
             }
             #endif // DECIDE
-            if self.taskId != UIBackgroundTaskIdentifier.invalid {
-                sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskIdentifier.invalid
-            }
+            
+            sharedApplication.endBackgroundTask(self.taskId)
+            self.taskId = UIBackgroundTaskIdentifier.invalid
+        }
+        
+        if flushOnBackground {
+            flush()
         }
     }
     
@@ -468,26 +453,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             return
         }
         sessionMetadata.applicationWillEnterForeground()
-        trackingQueue.async { [weak self, sharedApplication] in
-            guard let self = self else { return }
-            
-            if self.taskId != UIBackgroundTaskIdentifier.invalid {
-                sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskIdentifier.invalid
-                #if os(iOS)
-                self.updateNetworkActivityIndicator(false)
-                #endif // os(iOS)
-            }
+
+        if taskId != UIBackgroundTaskIdentifier.invalid {
+            sharedApplication.endBackgroundTask(taskId)
+            taskId = UIBackgroundTaskIdentifier.invalid
+            #if os(iOS)
+            self.updateNetworkActivityIndicator(false)
+            #endif // os(iOS)
         }
-    }
-    #endif // os(OSX)
     
-    @objc private func applicationWillTerminate(_ notification: Notification) {
-        trackingQueue.async { [weak self] in
-            guard let self = self else { return }
-            self.archive()
-        }
     }
+    #endif
     
     func defaultDistinctId() -> String {
         let distinctId: String?
@@ -874,8 +850,14 @@ extension MixpanelInstance {
         if hasOptedOutTracking() {
             return
         }
+        
         let queue = self.mixpanelPersistence.loadEntitiesInBatch(type: persistenceTypeFromFlushType(type))
-        self.flushInstance.flushQueue(type: type, queue: queue)
+        networkQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            self.flushInstance.flushQueue(type: type, queue: queue)
+        }
     }
     
     func flushSuccess(type: FlushType, ids: [Int32]) {

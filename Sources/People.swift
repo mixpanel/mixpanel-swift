@@ -20,7 +20,7 @@ open class People {
     open var ignoreTime = false
 
     let apiToken: String
-    let serialQueue: DispatchQueue!
+    let serialQueue: DispatchQueue
     let lock: ReadWriteLock
     var distinctId: String?
     weak var delegate: FlushDelegate?

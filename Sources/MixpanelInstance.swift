@@ -431,14 +431,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         
         taskId = sharedApplication.beginBackgroundTask { [weak self] in
-            self?.taskId = UIBackgroundTaskIdentifier.invalid
-        }
-        
-        if flushOnBackground {
-            flush()
-        }
-        
-        trackingQueue.async { [weak self] in
             guard let self = self else { return }
             
             #if DECIDE
@@ -446,10 +438,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 self.decideInstance.decideFetched = false
             }
             #endif // DECIDE
-            if self.taskId != UIBackgroundTaskIdentifier.invalid {
-                sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskIdentifier.invalid
-            }
+            
+            sharedApplication.endBackgroundTask(self.taskId)
+            self.taskId = UIBackgroundTaskIdentifier.invalid
+        }
+        
+        if flushOnBackground {
+            flush()
         }
     }
     
@@ -458,19 +453,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             return
         }
         sessionMetadata.applicationWillEnterForeground()
-        trackingQueue.async { [weak self, sharedApplication] in
-            guard let self = self else { return }
-            
-            if self.taskId != UIBackgroundTaskIdentifier.invalid {
-                sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskIdentifier.invalid
-                #if os(iOS)
-                self.updateNetworkActivityIndicator(false)
-                #endif // os(iOS)
-            }
+
+        if taskId != UIBackgroundTaskIdentifier.invalid {
+            sharedApplication.endBackgroundTask(taskId)
+            taskId = UIBackgroundTaskIdentifier.invalid
+            #if os(iOS)
+            self.updateNetworkActivityIndicator(false)
+            #endif // os(iOS)
         }
+    
     }
-    #endif // os(OSX)
+    #endif
     
     func defaultDistinctId() -> String {
         let distinctId: String?

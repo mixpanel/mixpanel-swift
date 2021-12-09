@@ -192,6 +192,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     
     var superProperties = InternalProperties()
     var trackingQueue: DispatchQueue
+    var networkQueue: DispatchQueue
     var optOutStatus: Bool?
     var timedEvents = InternalProperties()
     let readWriteLock: ReadWriteLock
@@ -219,6 +220,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility)
+        networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
         mixpanelPersistence = MixpanelPersistence.init(token: self.apiToken)
         mixpanelPersistence.migrate()
         
@@ -285,6 +287,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: label, qos: .utility)
+        networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
         mixpanelPersistence = MixpanelPersistence.init(token: self.apiToken)
         mixpanelPersistence.migrate()
         
@@ -350,10 +353,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #elseif os(OSX)
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
-        notificationCenter.addObserver(self,
-                                       selector: #selector(applicationWillTerminate(_:)),
-                                       name: NSApplication.willTerminateNotification,
-                                       object: nil)
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationWillResignActive(_:)),
                                        name: NSApplication.willResignActiveNotification,
@@ -894,8 +893,14 @@ extension MixpanelInstance {
         if hasOptedOutTracking() {
             return
         }
+        
         let queue = self.mixpanelPersistence.loadEntitiesInBatch(type: persistenceTypeFromFlushType(type))
-        self.flushInstance.flushQueue(type: type, queue: queue)
+        networkQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            self.flushInstance.flushQueue(type: type, queue: queue)
+        }
     }
     
     func flushSuccess(type: FlushType, ids: [Int32]) {

@@ -51,9 +51,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     func initializeEvents() {
         let firstOpenKey = "MPFirstOpen"
         if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
-            if !isExistingUser() {
-                firstAppOpen = true
-            }
+            firstAppOpen = true
             defaults.set(true, forKey: firstOpenKey)
             defaults.synchronize()
         }
@@ -138,22 +136,6 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     
     func roundOneDigit(num: TimeInterval) -> TimeInterval {
         return round(num * 10.0) / 10.0
-    }
-    
-    func isExistingUser() -> Bool {
-        do {
-            if let searchPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).last {
-                let pathContents = try FileManager.default.contentsOfDirectory(atPath: searchPath)
-                for path in pathContents {
-                    if path.hasPrefix("mixpanel-") {
-                        return true
-                    }
-                }
-            }
-        } catch {
-            return false
-        }
-        return false
     }
     
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {

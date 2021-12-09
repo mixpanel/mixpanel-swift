@@ -113,18 +113,6 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         // remove UserDefaults key and archive files to simulate first app open state
         let defaults = UserDefaults(suiteName: "Mixpanel")
         defaults?.removeObject(forKey: "MPFirstOpen")
-        do {
-            let url = try FileManager.default.url(for: .libraryDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-            if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: nil) {
-                while let fileURL = enumerator.nextObject() as? URL {
-                    if fileURL.absoluteString.contains("mixpanel-") {
-                        try FileManager.default.removeItem(at: fileURL)
-                    }
-                }
-            }
-        } catch {
-            XCTFail()
-        }
 
         let mp = Mixpanel.initialize(token: randomId())
         mp.reset()

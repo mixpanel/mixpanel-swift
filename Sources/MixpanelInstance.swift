@@ -825,12 +825,22 @@ extension MixpanelInstance {
                 return
             }
             
-            self.flushQueue(type: .events)
-            self.flushQueue(type: .people)
-            self.flushQueue(type: .groups)
             
-            if let completion = completion {
-                DispatchQueue.main.async(execute: completion)
+            let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.events))
+            let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.people))
+            let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.groups))
+            
+            self.networkQueue.async { [weak self, completion] in
+                guard let self = self else {
+                    return
+                }
+                self.flushQueue(eventQueue, type: .events)
+                self.flushQueue(peopleQueue, type: .people)
+                self.flushQueue(groupsQueue, type: .groups)
+                
+                if let completion = completion {
+                    DispatchQueue.main.async(execute: completion)
+                }
             }
         }
     }
@@ -846,18 +856,11 @@ extension MixpanelInstance {
         }
     }
     
-    func flushQueue(type: FlushType) {
+    func flushQueue(_ queue: Queue, type: FlushType) {
         if hasOptedOutTracking() {
             return
         }
-        
-        let queue = self.mixpanelPersistence.loadEntitiesInBatch(type: persistenceTypeFromFlushType(type))
-        networkQueue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-            self.flushInstance.flushQueue(type: type, queue: queue)
-        }
+        self.flushInstance.flushQueue(queue, type: type)
     }
     
     func flushSuccess(type: FlushType, ids: [Int32]) {

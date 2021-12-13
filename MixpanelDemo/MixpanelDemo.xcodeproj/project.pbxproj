@@ -54,9 +54,7 @@
 		B4B5DABFC38A904240FE7CE4 /* Pods_MixpanelDemoMacTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B89985A7B7D8CFD708D22619 /* Pods_MixpanelDemoMacTests.framework */; };
 		E1016E361D3D46DF00075BB7 /* ActionCompleteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1016E351D3D46DF00075BB7 /* ActionCompleteViewController.swift */; };
 		E12406201D249B2500383635 /* MixpanelBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E124061F1D249B2500383635 /* MixpanelBaseTests.swift */; };
-		E12BD0371D89FE6A008989C9 /* MixpanelCodelessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */; };
 		E12BD03D1D8A14F3008989C9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E12BD03C1D8A14F3008989C9 /* Assets.xcassets */; };
-		E131C43C1DB56B1000FAEE37 /* MixpanelABTestingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E131C43B1DB56B1000FAEE37 /* MixpanelABTestingTests.swift */; };
 		E131C4401DB5A2FE00FAEE37 /* test_decide_response_2.json in Resources */ = {isa = PBXBuildFile; fileRef = E131C43E1DB5A2FE00FAEE37 /* test_decide_response_2.json */; };
 		E131C4411DB5A2FE00FAEE37 /* test_decide_response.json in Resources */ = {isa = PBXBuildFile; fileRef = E131C43F1DB5A2FE00FAEE37 /* test_decide_response.json */; };
 		E131C4431DB5A30B00FAEE37 /* test_variant.json in Resources */ = {isa = PBXBuildFile; fileRef = E131C4421DB5A30B00FAEE37 /* test_variant.json */; };
@@ -76,7 +74,6 @@
 		E1C61EBA1D22F6470056C56C /* MixpanelPeopleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */; };
 		E1C61EBE1D22F9F60056C56C /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EBD1D22F9F60056C56C /* TestConstants.swift */; };
 		E1C8F50C1EC244E90089C537 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1C8F50B1EC244E90089C537 /* StoreKit.framework */; };
-		E1E8F8B01D626BE80081295D /* MixpanelNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E8F8AF1D626BE80081295D /* MixpanelNotificationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -331,9 +328,7 @@
 		B89985A7B7D8CFD708D22619 /* Pods_MixpanelDemoMacTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MixpanelDemoMacTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1016E351D3D46DF00075BB7 /* ActionCompleteViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionCompleteViewController.swift; sourceTree = "<group>"; };
 		E124061F1D249B2500383635 /* MixpanelBaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelBaseTests.swift; sourceTree = "<group>"; };
-		E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelCodelessTests.swift; sourceTree = "<group>"; };
 		E12BD03C1D8A14F3008989C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		E131C43B1DB56B1000FAEE37 /* MixpanelABTestingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelABTestingTests.swift; sourceTree = "<group>"; };
 		E131C43E1DB5A2FE00FAEE37 /* test_decide_response_2.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_decide_response_2.json; sourceTree = "<group>"; };
 		E131C43F1DB5A2FE00FAEE37 /* test_decide_response.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_decide_response.json; sourceTree = "<group>"; };
 		E131C4421DB5A30B00FAEE37 /* test_variant.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_variant.json; sourceTree = "<group>"; };
@@ -357,7 +352,6 @@
 		E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelPeopleTests.swift; sourceTree = "<group>"; };
 		E1C61EBD1D22F9F60056C56C /* TestConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstants.swift; sourceTree = "<group>"; };
 		E1C8F50B1EC244E90089C537 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		E1E8F8AF1D626BE80081295D /* MixpanelNotificationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelNotificationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -661,9 +655,6 @@
 				E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */,
 				673ABE4221405A0500B1784B /* MixpanelGroupTests.swift */,
 				862773E2206B3B1D00CBE79E /* MixpanelOptOutTests.swift */,
-				E1E8F8AF1D626BE80081295D /* MixpanelNotificationTests.swift */,
-				E12BD0361D89FE6A008989C9 /* MixpanelCodelessTests.swift */,
-				E131C43B1DB56B1000FAEE37 /* MixpanelABTestingTests.swift */,
 				E17AA05D1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift */,
 				E1C61EBD1D22F9F60056C56C /* TestConstants.swift */,
 				51DD56891D3077390045D3DB /* LoggerTests.swift */,
@@ -1309,11 +1300,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E12BD0371D89FE6A008989C9 /* MixpanelCodelessTests.swift in Sources */,
 				673ABE4321405A0500B1784B /* MixpanelGroupTests.swift in Sources */,
 				05D4C3E2222E1C6800D30FC2 /* SelectorEvaluaterTests.swift in Sources */,
-				E131C43C1DB56B1000FAEE37 /* MixpanelABTestingTests.swift in Sources */,
-				E1E8F8B01D626BE80081295D /* MixpanelNotificationTests.swift in Sources */,
 				51DD568A1D3077390045D3DB /* LoggerTests.swift in Sources */,
 				862773E3206B3B1D00CBE79E /* MixpanelOptOutTests.swift in Sources */,
 				E1C61EBA1D22F6470056C56C /* MixpanelPeopleTests.swift in Sources */,

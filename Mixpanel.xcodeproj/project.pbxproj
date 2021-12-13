@@ -159,7 +159,6 @@
 		E1F15FE21E64B60D00391AE3 /* Flush.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115949E1D01BE14007F8B4F /* Flush.swift */; };
 		E1F15FE31E64B60D00391AE3 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594A01D01C597007F8B4F /* Track.swift */; };
 		E1F15FE41E64B60D00391AE3 /* People.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7C71D0435670076CDE3 /* People.swift */; };
-		F05767541F8D909600499D9B /* ConnectIntegrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05767531F8D909600499D9B /* ConnectIntegrations.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -260,7 +259,6 @@
 		E1D335CD1D30578E00E68E12 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutomaticProperties.swift; sourceTree = "<group>"; };
 		E1F15FC91E64A10700391AE3 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F05767531F8D909600499D9B /* ConnectIntegrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectIntegrations.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -498,7 +496,6 @@
 		E189D8F91D5A6908007F3F29 /* Decide */ = {
 			isa = PBXGroup;
 			children = (
-				F05767521F8D905D00499D9B /* Connect Integrations */,
 				E189D8F51D54ECBF007F3F29 /* Decide.swift */,
 				E15422161D6FBA97009421A0 /* Swizzle.swift */,
 				E154221A1D70BEF0009421A0 /* Web Socket */,
@@ -591,14 +588,6 @@
 				E19D12951D9C5E6600A8016D /* VariantTweak.swift */,
 			);
 			name = "A/B Testing";
-			sourceTree = "<group>";
-		};
-		F05767521F8D905D00499D9B /* Connect Integrations */ = {
-			isa = PBXGroup;
-			children = (
-				F05767531F8D909600499D9B /* ConnectIntegrations.swift */,
-			);
-			name = "Connect Integrations";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -904,7 +893,6 @@
 				E1D335CC1D303A0D00E68E12 /* FlushRequest.swift in Sources */,
 				E115234F1D7F58B000657E80 /* CGSizeToNSDictionary.swift in Sources */,
 				E154221F1D70DB09009421A0 /* WebSocket.swift in Sources */,
-				F05767541F8D909600499D9B /* ConnectIntegrations.swift in Sources */,
 				E15422151D6F9F44009421A0 /* Codeless.swift in Sources */,
 				E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */,
 				E1497EF21D6B8DC900B2B65C /* CodelessBinding.swift in Sources */,

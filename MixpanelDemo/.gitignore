@@ -1,2 +1,6 @@
 Podfile.lock
 Pods
+**/*.xccheckout
+**/*.moved-aside
+**/*.xcuserstate
+**/*.xcscheme

@@ -47,7 +47,7 @@ class Flush: AppLifecycle {
         flushIntervalReadWriteLock = DispatchQueue(label: "com.mixpanel.flush_interval.lock", qos: .utility, attributes: .concurrent)
     }
 
-    func flushQueue(type: FlushType, queue: Queue) {
+    func flushQueue(_ queue: Queue, type: FlushType) {
         if flushRequest.requestNotAllowed() {
             return
         }

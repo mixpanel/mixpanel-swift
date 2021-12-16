@@ -727,33 +727,9 @@ extension MixpanelInstance {
     open func reset(completion: (() -> Void)? = nil) {
         flush()
         trackingQueue.async { [weak self] in
-            self?.networkQueue.sync { [weak self] in
-                self?.readWriteLock.write { [weak self] in
-                    guard let self = self else {
-                        if let completion = completion {
-                            DispatchQueue.main.async(execute: completion)
-                        }
-                        return
-                    }
-
-                    Persistence.deleteMPUserDefaultsData(token: self.apiToken)
-                    self.distinctId = self.defaultDistinctId()
-                    self.anonymousId = self.distinctId
-                    self.hadPersistedDistinctId = nil
-                    self.userId = nil
-                    self.superProperties = InternalProperties()
-                    self.eventsQueue = Queue()
-                    self.timedEvents = InternalProperties()
-                    self.people.distinctId = nil
-                    self.alias = nil
-                    self.people.peopleQueue = Queue()
-                    self.people.unidentifiedQueue = Queue()
-                    #if DECIDE
-                    self.decideInstance.decideFetched = false
-                    #endif // DECIDE
-                    if let completion = completion {
-                        DispatchQueue.main.async(execute: completion)
-                    }
+            self?.readWriteLock.write { [weak self] in
+                guard let self = self else {
+                    return
                 }
                 
                 MixpanelPersistence.deleteMPUserDefaultsData(apiToken: self.apiToken)

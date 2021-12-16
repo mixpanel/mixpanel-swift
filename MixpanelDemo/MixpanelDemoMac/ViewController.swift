@@ -2,13 +2,11 @@
 //  ViewController.swift
 //  MixpanelDemoMac
 //
-//  Created by ZIHE JIA on 6/7/21.
+//  Created by ZIHE JIA on 12/15/21.
 //  Copyright © 2021 Mixpanel. All rights reserved.
 //
 
 import Cocoa
-import Mixpanel
-
 
 class ViewController: NSViewController {
 

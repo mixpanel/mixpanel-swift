@@ -18,12 +18,12 @@
 		862072B7276B19FB00DE3CC8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862072B6276B19FB00DE3CC8 /* ViewController.swift */; };
 		862072B9276B19FF00DE3CC8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 862072B8276B19FF00DE3CC8 /* Assets.xcassets */; };
 		862072BC276B19FF00DE3CC8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 862072BA276B19FF00DE3CC8 /* Main.storyboard */; };
-		862072F7276B227F00DE3CC8 /* MixpanelPeopleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862072F1276B227E00DE3CC8 /* MixpanelPeopleTests.swift */; };
-		862072F8276B227F00DE3CC8 /* MixpanelOptOutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862072F2276B227E00DE3CC8 /* MixpanelOptOutTests.swift */; };
-		862072F9276B227F00DE3CC8 /* MixpanelBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862072F3276B227E00DE3CC8 /* MixpanelBaseTests.swift */; };
-		862072FA276B227F00DE3CC8 /* MixpanelGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862072F4276B227E00DE3CC8 /* MixpanelGroupTests.swift */; };
-		862072FB276B227F00DE3CC8 /* MixpanelDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862072F5276B227E00DE3CC8 /* MixpanelDemoTests.swift */; };
-		862072FC276B227F00DE3CC8 /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862072F6276B227F00DE3CC8 /* TestConstants.swift */; };
+		86207303276B243700DE3CC8 /* MixpanelBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862072FD276B243700DE3CC8 /* MixpanelBaseTests.swift */; };
+		86207304276B243700DE3CC8 /* MixpanelGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862072FE276B243700DE3CC8 /* MixpanelGroupTests.swift */; };
+		86207305276B243700DE3CC8 /* MixpanelOptOutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862072FF276B243700DE3CC8 /* MixpanelOptOutTests.swift */; };
+		86207306276B243700DE3CC8 /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86207300276B243700DE3CC8 /* TestConstants.swift */; };
+		86207307276B243700DE3CC8 /* MixpanelPeopleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86207301276B243700DE3CC8 /* MixpanelPeopleTests.swift */; };
+		86207308276B243700DE3CC8 /* MixpanelDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86207302276B243700DE3CC8 /* MixpanelDemoTests.swift */; };
 		862773E3206B3B1D00CBE79E /* MixpanelOptOutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862773E2206B3B1D00CBE79E /* MixpanelOptOutTests.swift */; };
 		8675E9A126DF356B0096858F /* mixpanel-testToken-events in Resources */ = {isa = PBXBuildFile; fileRef = 8675E99C26DF356A0096858F /* mixpanel-testToken-events */; };
 		8675E9A226DF356B0096858F /* mixpanel-testToken-groups in Resources */ = {isa = PBXBuildFile; fileRef = 8675E99E26DF356A0096858F /* mixpanel-testToken-groups */; };
@@ -246,12 +246,12 @@
 		862072BD276B19FF00DE3CC8 /* MixpanelDemoMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MixpanelDemoMac.entitlements; sourceTree = "<group>"; };
 		862072C2276B1A0000DE3CC8 /* MixpanelDemoMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MixpanelDemoMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		862072E2276B21A400DE3CC8 /* MixpanelDemoMacTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MixpanelDemoMacTests-Bridging-Header.h"; sourceTree = "<group>"; };
-		862072F1276B227E00DE3CC8 /* MixpanelPeopleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MixpanelPeopleTests.swift; path = "../../../mixpanel-swift1/MixpanelDemo/MixpanelDemoMacTests/MixpanelPeopleTests.swift"; sourceTree = "<group>"; };
-		862072F2276B227E00DE3CC8 /* MixpanelOptOutTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MixpanelOptOutTests.swift; path = "../../../mixpanel-swift1/MixpanelDemo/MixpanelDemoMacTests/MixpanelOptOutTests.swift"; sourceTree = "<group>"; };
-		862072F3276B227E00DE3CC8 /* MixpanelBaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MixpanelBaseTests.swift; path = "../../../mixpanel-swift1/MixpanelDemo/MixpanelDemoMacTests/MixpanelBaseTests.swift"; sourceTree = "<group>"; };
-		862072F4276B227E00DE3CC8 /* MixpanelGroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MixpanelGroupTests.swift; path = "../../../mixpanel-swift1/MixpanelDemo/MixpanelDemoMacTests/MixpanelGroupTests.swift"; sourceTree = "<group>"; };
-		862072F5276B227E00DE3CC8 /* MixpanelDemoTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MixpanelDemoTests.swift; path = "../../../mixpanel-swift1/MixpanelDemo/MixpanelDemoMacTests/MixpanelDemoTests.swift"; sourceTree = "<group>"; };
-		862072F6276B227F00DE3CC8 /* TestConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TestConstants.swift; path = "../../../mixpanel-swift1/MixpanelDemo/MixpanelDemoMacTests/TestConstants.swift"; sourceTree = "<group>"; };
+		862072FD276B243700DE3CC8 /* MixpanelBaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelBaseTests.swift; sourceTree = "<group>"; };
+		862072FE276B243700DE3CC8 /* MixpanelGroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelGroupTests.swift; sourceTree = "<group>"; };
+		862072FF276B243700DE3CC8 /* MixpanelOptOutTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelOptOutTests.swift; sourceTree = "<group>"; };
+		86207300276B243700DE3CC8 /* TestConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstants.swift; sourceTree = "<group>"; };
+		86207301276B243700DE3CC8 /* MixpanelPeopleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelPeopleTests.swift; sourceTree = "<group>"; };
+		86207302276B243700DE3CC8 /* MixpanelDemoTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelDemoTests.swift; sourceTree = "<group>"; };
 		862773E2206B3B1D00CBE79E /* MixpanelOptOutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelOptOutTests.swift; sourceTree = "<group>"; };
 		8675E99C26DF356A0096858F /* mixpanel-testToken-events */ = {isa = PBXFileReference; explicitFileType = text.pbxproject; path = "mixpanel-testToken-events"; sourceTree = "<group>"; };
 		8675E99E26DF356A0096858F /* mixpanel-testToken-groups */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = "mixpanel-testToken-groups"; sourceTree = "<group>"; };
@@ -406,12 +406,12 @@
 		862072C5276B1A0000DE3CC8 /* MixpanelDemoMacTests */ = {
 			isa = PBXGroup;
 			children = (
-				862072F3276B227E00DE3CC8 /* MixpanelBaseTests.swift */,
-				862072F5276B227E00DE3CC8 /* MixpanelDemoTests.swift */,
-				862072F4276B227E00DE3CC8 /* MixpanelGroupTests.swift */,
-				862072F2276B227E00DE3CC8 /* MixpanelOptOutTests.swift */,
-				862072F1276B227E00DE3CC8 /* MixpanelPeopleTests.swift */,
-				862072F6276B227F00DE3CC8 /* TestConstants.swift */,
+				862072FD276B243700DE3CC8 /* MixpanelBaseTests.swift */,
+				86207302276B243700DE3CC8 /* MixpanelDemoTests.swift */,
+				862072FE276B243700DE3CC8 /* MixpanelGroupTests.swift */,
+				862072FF276B243700DE3CC8 /* MixpanelOptOutTests.swift */,
+				86207301276B243700DE3CC8 /* MixpanelPeopleTests.swift */,
+				86207300276B243700DE3CC8 /* TestConstants.swift */,
 				862072E2276B21A400DE3CC8 /* MixpanelDemoMacTests-Bridging-Header.h */,
 			);
 			path = MixpanelDemoMacTests;
@@ -1020,12 +1020,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				862072F9276B227F00DE3CC8 /* MixpanelBaseTests.swift in Sources */,
-				862072FC276B227F00DE3CC8 /* TestConstants.swift in Sources */,
-				862072FB276B227F00DE3CC8 /* MixpanelDemoTests.swift in Sources */,
-				862072FA276B227F00DE3CC8 /* MixpanelGroupTests.swift in Sources */,
-				862072F8276B227F00DE3CC8 /* MixpanelOptOutTests.swift in Sources */,
-				862072F7276B227F00DE3CC8 /* MixpanelPeopleTests.swift in Sources */,
+				86207307276B243700DE3CC8 /* MixpanelPeopleTests.swift in Sources */,
+				86207305276B243700DE3CC8 /* MixpanelOptOutTests.swift in Sources */,
+				86207308276B243700DE3CC8 /* MixpanelDemoTests.swift in Sources */,
+				86207303276B243700DE3CC8 /* MixpanelBaseTests.swift in Sources */,
+				86207304276B243700DE3CC8 /* MixpanelGroupTests.swift in Sources */,
+				86207306276B243700DE3CC8 /* TestConstants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

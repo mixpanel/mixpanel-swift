@@ -101,21 +101,6 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
-    func testPeopleAddPushDeviceToken() {
-        mixpanel.identify(distinctId: "d1")
-        let token: Data = "0123456789abcdef".data(using: String.Encoding.utf8)!
-        mixpanel.people.addPushDeviceToken(token)
-        waitForTrackingQueue()
-        XCTAssertTrue(mixpanel.people.peopleQueue.count == 1, "people records not queued")
-        let p: Properties = mixpanel.people.peopleQueue.last!["$union"] as! Properties
-        XCTAssertTrue(p.count == 1, "incorrect people properties: \(p)")
-        let a: [MixpanelType] = p["$ios_devices"] as! [MixpanelType]
-        XCTAssertTrue(a.count == 1, "device token array not set")
-        XCTAssertEqual(a.last as? String,
-                       "30313233343536373839616263646566",
-                       "device token not encoded properly")
-    }
-
     func testPeopleIncrement() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")

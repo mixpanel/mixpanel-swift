@@ -1,9 +1,10 @@
+
+
 <p align="center">
   <img src="https://github.com/mixpanel/mixpanel-android/blob/assets/mixpanel.png?raw=true" alt="Mixpanel Swift Library" height="150"/>
 </p>
 
 
-[![Build Status](https://travis-ci.org/mixpanel/mixpanel-swift.svg)](https://travis-ci.org/mixpanel/mixpanel-swift)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mixpanel/mixpanel-swift.svg)](http://isitmaintained.com/project/mixpanel/mixpanel-swift "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/mixpanel/mixpanel-swift.svg)](http://isitmaintained.com/project/mixpanel/mixpanel-swift "Percentage of issues still open")
 [![CocoaPods Compatible](http://img.shields.io/cocoapods/v/Mixpanel-swift.svg)](https://mixpanel.com)
@@ -15,188 +16,138 @@
 
 <!-- MarkdownTOC -->
 
-- [Introduction](#introduction)
-    - [Current supported features](#current-supported-features)
-- [Installation](#installation)
-    - [CocoaPods](#cocoapods)
-    - [Carthage](#carthage)
-    - [Manual Installation](#manual-installation)
-- [Initializing and Usage](#initializing-and-usage)
-    - [Integrate](#integrate)
-    - [Start tracking](#start-tracking)
+- [Overview](#overview)
+- [Quick Start Guide](#quick-start-guide)
+    - [Install Mixpanel](#1-install-mixpanel)
+    - [Initialize Mixpanel](#2-initialize-mixpanel)
+    - [Send Data](#3-send-data)
+    - [Check for Success](#4-check-for-success)
+    - [Complete Code Example](#complete-code-example)
+- [FAQ](#faq)
+- [I want to know more!](#i-want-to-know-more)
 
 <!-- /MarkdownTOC -->
 
+
 <a name="introduction"></a>
-# Introduction
+# Overview
 
 Welcome to the official Mixpanel Swift Library
 
-The Mixpanel Swift library for iOS is an open-source project, and we'd love to see your contributions! 
+The Mixpanel Swift library for iOS is an open-source project, and we'd love to see your contributions!
 We'd also love for you to come and work with us! Check out **[Jobs](https://mixpanel.com/jobs/#openings)** for details.
 
 If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
 
-<a name="current-supported-features"></a>
-## Current supported features
+Check out our [Advanced iOS Swift Guide](swift) for additional advanced configurations and use cases, like setting up your project with European Union data storage.
 
-**Our master branch and our releases are now on Swift 5.**
+# Quick Start Guide
+Our master branch and our releases are on Swift 5. If you wish to use our Swift 4.2 implementation, please point to the v2.6.1 release. For Swift 4/4.1 implementation, please point to the v2.4.5 release. For Swift 3 implementation, please point to the v2.2.3 release.
 
-**If you wish to use our Swift 4.2 implementation, please point to the v2.6.1 release. For Swift 4/4.1 implementation, please point to the v2.4.5 release. For Swift 3 implementation, please point to the v2.2.3 release. For Swift 2.3 implementation, please point to the v1.0.1 release.**
+## 1. Install Mixpanel
+You will need your project token for initializing your library. You can get your project token from [project settings](https://mixpanel.com/settings/project).
 
-Our Swift library fully supports all of the Mixpanel features and has full parity with the [Objective-C Library](https://github.com/mixpanel/mixpanel-iphone).
-
-<a name="installation"></a>
-# Installation
-
-On Jan 1, 2022, we’ll remove the [Messages & Experiments](https://mixpanel.com/blog/why-were-sunsetting-messaging-and-experiments/#:~:text=A%20year%20from%20now%2C%20on,offering%20discounts%20for%20getting%20started) feature from Mixpanel. For now, you can choose to opt in to our beta version without Messages & Experiments feature support. You can use **Swift Package Manager** to install the beta version:
-1.  In Xcode, select File > Swift Packages > Add Package Dependency.
-2.  Follow the prompts using the URL for this repository and point to the branch `3.0.0.beta`
-
-## Swift Package Manager
-
-**It requires Xcode 12+ and v2.8.0+ release**
-
-**Important: It only supports for iOS, if you need integrations for other platforms(tvOS or macOS), please use other integration methods instead or use our beta version by pointing to the branch `3.0.0.beta`**
-
+### Installation Option 1: Swift Package Manager
+The easiest way to get Mixpanel into your iOS project is to use Swift Package Manager(requires Xcode 12+).
 1. In Xcode, select File > Swift Packages > Add Package Dependency.
-2. Follow the prompts using the URL for this repository and a minimum semantic version of v2.8.0
+2. Follow the prompts using the Github URL for [Mixpanel Swift library](https://github.com/mixpanel/mixpanel-swift) and a minimum semantic version of v2.8.0.
 
-Check out our **[swift integration guide »](https://mixpanel.com/help/reference/swift)** for more info.
+On Jan 1, 2022, we’ll remove the [Messages & Experiments](https://mixpanel.com/blog/why-were-sunsetting-messaging-and-experiments/#:~:text=A%20year%20from%20now%2C%20on,offering%20discounts%20for%20getting%20started) feature from Mixpanel. For now, you can choose to opt in to our beta version without Messages & Experiments feature support. You can use **Swift Package Manager** to point to the branch `3.0.0.beta`
 
-## CocoaPods
 
-**Our current release only supports CocoaPods version 1.4.0+**
+### Installation Option 2: CocoaPods
+1. If this is your first time using CocoaPods, Install CocoaPods using `gem install cocoapods`. Otherwise, continue to Step 3.
+2. Run `pod setup` to create a local CocoaPods spec mirror.
+3. Create a Podfile in your Xcode project directory by running `pod init` in your terminal, edit the Podfile generated, and add the following line: `pod 'Mixpanel-swift'`.
+4. Run `pod install` in your Xcode project directory. CocoaPods should download and install the Mixpanel library, and create a new Xcode workspace. Open up this workspace in Xcode or typing `open *.xcworkspace` in your terminal.
 
-Mixpanel supports `CocoaPods` for easy installation.
-To Install, see our **[swift integration guide »](https://mixpanel.com/help/reference/swift)**
-
-For iOS, tvOS, macOS, and App Extension integrations:
-
-`pod 'Mixpanel-swift'`
-
-<a name="carthage"></a>
-## Carthage
-
-Mixpanel also supports `Carthage` to package your dependencies as a framework. Include the following dependency in your Cartfile:
-
-`github "mixpanel/mixpanel-swift"`
-
-Check out the **[Carthage docs »](https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos)** for more info. 
-
-<a name="manual-installation"></a>
-## Manual Installation
-
-To help users stay up to date with the latest version of our Swift SDK, we always recommend integrating our SDK via CocoaPods, which simplifies version updates and dependency management. However, there are cases where users can't use CocoaPods. Not to worry, just follow these manual installation steps and you'll be all set.
-
-### Step 1: Add as a Submodule
-
-Add Mixpanel as a submodule to your local git repo like so:
-
-```
-git submodule add git@github.com:mixpanel/mixpanel-swift.git
-```
-
-Now the Mixpanel project and its files should be in your project folder! 
-
-### Step 2: Drag Mixpanel to your project
-
-Drag the Mixpanel.xcodeproj inside your sample project under the main sample project file:
-
-![alt text](http://images.mxpnl.com/docs/2016-07-19%2023:34:02.724663-Screen%20Shot%202016-07-19%20at%204.33.34%20PM.png)
-
-### Step 3: Embed the framework
-
-Select your app .xcodeproj file. Under "General", add the Mixpanel framework as an embedded binary:
-
-![alt text](http://images.mxpnl.com/docs/2016-07-19%2023:31:29.237158-add_framework.png)
-
-<a name="initializing-and-usage"></a>
-# Initializing and Usage
-
-<a name="integrate"></a>
-## Integrate
-
-Import Mixpanel into AppDelegate.swift, and initialize Mixpanel within `application:didFinishLaunchingWithOptions:`
-![alt text](http://images.mxpnl.com/docs/2016-07-19%2023:27:03.724972-Screen%20Shot%202016-07-18%20at%207.16.51%20PM.png)
-
+### Installation Option 3: Carthage
+Mixpanel supports Carthage to package your dependencies as a framework. Include the following dependency in your Cartfile:
 ```swift
-func application(_ application: UIApplication,
-                 didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-    Mixpanel.initialize(token: "MIXPANEL_TOKEN")
-}
+github "mixpanel/mixpanel-swift"
 ```
+Check out the [Carthage docs](https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos) for more info.
 
-You initialize your Mixpanel instance with the token provided to you on mixpanel.com.
-
-<a name="start-tracking"></a>
-## Start tracking
-
-After installing the library into your iOS app, Mixpanel will <a href="https://mixpanel.com/help/questions/articles/which-common-mobile-events-can-mixpanel-collect-on-my-behalf-automatically" target="_blank">automatically collect common mobile events</a>. You can enable/ disable automatic collection through your <a href="https://mixpanel.com/help/questions/articles/how-do-i-enable-common-mobile-events-if-i-have-already-implemented-mixpanel" target="_blank">project settings</a>.
-
-To interact with the instance and track additional events, you can either use the mixpanel instance given when initializing:
+## 2. Initialize Mixpanel
+Import Mixpanel into AppDelegate.swift, and initialize Mixpanel within application:didFinishLaunchingWithOptions:
 ```swift
-mixpanel.track(event: "Tracked Event!")
-```
-or you can directly fetch the instance and use it from the Mixpanel object:
-```swift
-Mixpanel.mainInstance().track(event: "Tracked Event!")
-```
-
-You're done! You've successfully integrated the Mixpanel Swift SDK into your app. To stay up to speed on important SDK releases and updates, star or watch our repository on [Github](https://github.com/mixpanel/mixpanel-swift).
-
-Have any questions? Reach out to [support@mixpanel.com](mailto:support@mixpanel.com) to speak to someone smart, quickly.
-
-## Using Mixpanel Push Notifications
-
-First [enable Mixpanel push notifications in your app](https://developer.mixpanel.com/docs/ios-push-notifications). Then for Rich Push Notifications, you'll need to integrate your application with the MixpanelNotificationServiceExtension.
-
-### Integrating the MixpanelNotificationServiceExtension
-
-The Mixpanel SDK comes with a custom [Notification Service Extension](https://developer.apple.com/documentation/usernotifications/unnotificationserviceextension?language=swift) used to render rich media, custom action buttons, and track when push notifications are received. To enable these features, you will need to integrate it into your application.
-
-#### 1. Create a new Notification Service Extension Target
-<img width="660" alt="Screenshot 2020-02-13 14 45 23" src="https://user-images.githubusercontent.com/556882/74478474-0c224700-4e73-11ea-847c-b3f58ab16c4a.png">
-<img width="738" alt="Screenshot 2020-02-13 14 44 38" src="https://user-images.githubusercontent.com/556882/74478475-0c224700-4e73-11ea-9f57-3b40b6fdbbcd.png">
-<img width="739" alt="Screenshot 2020-02-13 14 46 53" src="https://user-images.githubusercontent.com/556882/74478559-3ecc3f80-4e73-11ea-926f-96659958936e.png">
-
-#### 2. Add Mixpanel-swift as a dependency
-Add the following to the end of your `Podfile`:
-```Podspec
-target 'NotificationService' do
-  use_frameworks!
-  
-  pod 'Mixpanel-swift'
-end
-```
-Then run `pod install`
-
-
-#### 3. Extend your NotificationService from MixpanelNotificationServiceExtension
-Replace the contents of your `NotificationService.swift` file with the following:
-```NotificationService.swift
 import Mixpanel
 
-class NotificationService: MixpanelNotificationServiceExtension {}
-```
-
-#### 4. Delegate the handling of the notification response to the Mixpanel SDK
-In your `AppDelegate.swift` file, you need to call `MixpanelPushNotifications.handleResponse` when a push notification response is received:
-```swift
-@available(iOS 10.0, *)
-func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-    if MixpanelPushNotifications.isMixpanelPushNotification(response.notification.request.content) {
-        debugPrint("Handling Mixpanel push notification response...")
-        MixpanelPushNotifications.handleResponse(response: response, withCompletionHandler: completionHandler)
-    } else {
-        // not a Mixpanel push notification
-        debugPrint("Not a Mixpanel push notification.")
-        completionHandler()
-    }
+func application(_ application: UIApplication,
+                 didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+    ...
+    Mixpanel.initialize(token: "MIXPANEL_TOKEN")
+    ...
 }
 ```
-This will make sure the tap actions are appropriately handled (open URL, deeplink, etc) as well as track whether a notification was tapped or dismissed.
+[See all configuration options](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html)
 
-#### 5. Run the app and send a test push notification from Mixpanel that includes an image or buttons
+## 3. Send Data
+Let's get started by sending event data. You can send an event from anywhere in your application. Better understand user behavior by storing details that are specific to the event (properties). After initializing the library, Mixpanel will [automatically collect common mobile events](https://mixpanel.com/help/questions/articles/which-common-mobile-events-can-mixpanel-collect-on-my-behalf-automatically). You can enable/disable automatic collection through your [project settings](https://help.mixpanel.com/hc/en-us/articles/115004596186#enable-or-disable-common-mobile-events). Also, Mixpanel automatically tracks some properties by default. [learn more](https://help.mixpanel.com/hc/en-us/articles/115004613766-Default-Properties-Collected-by-Mixpanel#iOS)
+```swift
+Mixpanel.mainInstance().track(event: "Sign Up", properties: [
+   "source": "Pat's affiliate site",
+   "Opted out of email": true
+])
+```
+In addition to event data, you can also send [user profile data](https://developer.mixpanel.com/docs/swift#storing-user-profiles). We recommend this after completing the quickstart guide.
 
-That's it! Your app should now be able to receive rich push notifications from Mixpanel.
+## 4. Check for Success
+[Open up Live View in Mixpanel](http://mixpanel.com/report/live) to view incoming events. 
+
+Once data hits our API, it generally takes ~60 seconds for it to be processed, stored, and queryable in your project.
+
+## Complete Code Example
+Here's a runnable code example that covers everything in this quickstart guide.
+```swift
+import Mixpanel
+
+func application(_ application: UIApplication,
+                 didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+    ...
+    Mixpanel.initialize(token: "MIXPANEL_TOKEN")
+    Mixpanel.mainInstance().track(event: "Sign Up", properties: [
+       "source": "Pat's affiliate site",
+       "Opted out of email": true
+    ])
+    ...
+}
+```
+
+# FAQ
+**I want to stop tracking an event/event property in Mixpanel. Is that possible?**
+
+Yes, in Lexicon, you can intercept and drop incoming events or properties. Mixpanel won’t store any new data for the event or property you select to drop. [See this article for more information](https://help.mixpanel.com/hc/en-us/articles/360001307806#dropping-events-and-properties).
+
+**I have a test user I would like to opt out of tracking. How do I do that?**
+
+Mixpanel’s client-side tracking library contains the [optOutTracking()](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14optOutTrackingyyF) method, which will set the user’s local opt-out state to “true” and will prevent data from being sent from a user’s device. More detailed instructions can be found in the section, [Opting users out of tracking](https://developer.mixpanel.com/docs/swift#opting-users-out-of-tracking).
+
+**Why aren't my events showing up?**
+
+To preserve battery life and customer bandwidth, the Mixpanel library doesn't send the events you record immediately. Instead, it sends batches to the Mixpanel servers every 60 seconds while your application is running, as well as when the application transitions to the background. You can call [flush()](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC5flush10completionyyycSg_tF) manually if you want to force a flush at a particular moment.
+```swift
+Mixpanel.mainInstance().flush()
+```
+If your events are still not showing up after 60 seconds, check if you have opted out of tracking. You can also enable Mixpanel debugging and logging, it allows you to see the debug output from the Mixpanel library. To enable it, set [loggingEnabled](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14loggingEnabledSbvp) to true.
+```swift
+Mixpanel.mainInstance().loggingEnabled = true
+```
+**Starting with iOS 14.5, do I need to request the user’s permission through the AppTrackingTransparency framework to use Mixpanel?**
+
+No, Mixpanel does not use IDFA so it does not require user permission through the AppTrackingTransparency(ATT) framework.
+
+**If I use Mixpanel, how do I answer app privacy questions for the App Store?**
+
+Please refer to our [Apple App Developer Privacy Guidance](https://mixpanel.com/legal/app-store-privacy-details/)
+
+
+## I want to know more!
+
+No worries, here are some links that you will find useful:
+* **[Advanced iOS - Swift Guide](https://developer.mixpanel.com/docs/swift)**
+* **[Sample app](https://github.com/mixpanel/mixpanel-swift/tree/master/MixpanelDemo)**
+* **[Full API Reference](https://mixpanel.github.io/mixpanel-swift)**
+
+Have any questions? Reach out to Mixpanel [Support](https://help.mixpanel.com/hc/en-us/requests/new) to speak to someone smart, quickly.
+

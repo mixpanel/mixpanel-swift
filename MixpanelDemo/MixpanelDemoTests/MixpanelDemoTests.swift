@@ -13,7 +13,7 @@ import Nocilla
 @testable import MixpanelDemo
 
 class MixpanelDemoTests: MixpanelBaseTests {
-
+    
     func test5XXResponse() {
         LSNocilla.sharedInstance().clearStubs()
         _ = stubTrack().andReturn(503)
@@ -32,7 +32,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                   "Removed an event from the queue that was not sent")
         removeDBfile(testMixpanel.apiToken)
     }
-
+    
     func testRetryAfterHTTPHeader() {
         LSNocilla.sharedInstance().clearStubs()
         _ = stubTrack().andReturn(200)?.withHeader("Retry-After", "60")
@@ -49,7 +49,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                   "Network failures did not equal 0")
         removeDBfile(testMixpanel.apiToken)
     }
-
+    
     func testFlushEvents() {
         stubTrack()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
@@ -61,7 +61,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         sleep(1)
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty,
                       "events should have been flushed")
-
+        
         for i in 0..<60 {
             testMixpanel.track(event: "event \(i)")
         }
@@ -71,8 +71,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
                       "events should have been flushed")
         removeDBfile(testMixpanel.apiToken)
     }
-
-
+    
+    
     func testFlushPeople() {
         stubEngage()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
@@ -91,7 +91,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty, "people should have been flushed")
         removeDBfile(testMixpanel.apiToken)
     }
-
+    
     func testFlushGroups() {
         stubGroups()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
@@ -112,7 +112,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty, "groups should have been flushed")
         removeDBfile(testMixpanel.apiToken)
     }
-
+    
     func testFlushNetworkFailure() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         LSNocilla.sharedInstance().clearStubs()
@@ -128,7 +128,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                       "events should still be in the queue if flush fails")
         removeDBfile(testMixpanel.apiToken)
     }
-
+    
     func testFlushQueueContainsCorruptedEvent() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         stubTrack()
@@ -153,7 +153,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         }
         removeDBfile(testMixpanel.apiToken)
     }
-
+    
     func testAddEventContainsInvalidJsonObjectFloatNaN() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         XCTExpectAssert("unsupported property type was allowed") {
@@ -161,7 +161,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         }
         removeDBfile(testMixpanel.apiToken)
     }
-
+    
     func testAddEventContainsInvalidJsonObjectDoubleInfinity() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         XCTExpectAssert("unsupported property type was allowed") {
@@ -169,7 +169,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         }
         removeDBfile(testMixpanel.apiToken)
     }
-
+    
     func testAddEventContainsInvalidJsonObjectFloatInfinity() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         XCTExpectAssert("unsupported property type was allowed") {
@@ -177,7 +177,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         }
         removeDBfile(testMixpanel.apiToken)
     }
-
+    
     func testAddingEventsAfterFlush() {
         stubTrack()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)

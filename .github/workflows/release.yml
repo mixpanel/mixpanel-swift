@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: "🚀 Release"
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: "Check-out"
         uses: actions/checkout@v1
@@ -25,8 +25,8 @@ jobs:
           enhancementLabel: '### Enhancements'
           stripGeneratorNotice: true
           bugsLabel: '### Fixes'
-          issues: true
-          issuesWoLabels: true
+          issues: false
+          issuesWoLabels: false
           pullRequests: true
           prWoLabels: true
           author: false
@@ -63,6 +63,7 @@ jobs:
           author: false
           verbose: true
       - name: "🚀 Create GitHub Release"
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -70,3 +71,4 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
           body: ${{ steps.generate-release-changelog.outputs.changelog }}
+

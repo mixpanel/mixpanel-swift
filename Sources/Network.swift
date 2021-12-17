@@ -19,7 +19,6 @@ struct BasePath {
         guard var components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
             return nil
         }
-
         components.path += path
         components.queryItems = queryItems
         // adding workaround to replece + for %2B as it's not done by default within URLComponents

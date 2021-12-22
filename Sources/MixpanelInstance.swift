@@ -262,7 +262,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                         lock: self.readWriteLock,
                         metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
         people.delegate = self
-        flushInstance._flushInterval = flushInterval
+        flushInstance.flushInterval = flushInterval
         setupListeners()
         unarchive()
         

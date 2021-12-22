@@ -1364,7 +1364,7 @@ extension MixpanelInstance {
     
     // MARK: - Decide
     func checkDecide(forceFetch: Bool = false) {
-        trackingQueue.async { [weak self, forceFetch] in
+        networkQueue.async { [weak self, forceFetch] in
             guard let self = self else { return }
             self.decideInstance.checkDecide(forceFetch: forceFetch,
                                             distinctId: self.people.distinctId ?? self.distinctId,

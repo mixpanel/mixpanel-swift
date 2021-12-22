@@ -262,7 +262,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                         lock: self.readWriteLock,
                         metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
         people.delegate = self
-        flushInstance.flushInterval = flushInterval
+        flushInstance._flushInterval = flushInterval
         setupListeners()
         unarchive()
         
@@ -731,7 +731,7 @@ extension MixpanelInstance {
                 self.timedEvents = InternalProperties()
                 self.distinctId = self.defaultDistinctId()
                 self.anonymousId = self.distinctId
-                self.hadPersistedDistinctId = nil
+                self.hadPersistedDistinctId = true
                 self.userId = nil
                 self.superProperties = InternalProperties()
                 self.people.distinctId = nil
@@ -764,23 +764,32 @@ extension MixpanelInstance {
     }
     
     func unarchive() {
-        optOutStatus = MixpanelPersistence.loadOptOutStatusFlag(apiToken: apiToken)
-        superProperties = MixpanelPersistence.loadSuperProperties(apiToken: apiToken)
-        timedEvents = MixpanelPersistence.loadTimedEvents(apiToken: apiToken)
-        let mixpanelIdentity = MixpanelPersistence.loadIdentity(apiToken: apiToken)
-        (distinctId, people.distinctId, anonymousId, userId, alias, hadPersistedDistinctId) = (
-            mixpanelIdentity.distinctID,
-            mixpanelIdentity.peopleDistinctID,
-            mixpanelIdentity.anonymousId,
-            mixpanelIdentity.userId,
-            mixpanelIdentity.alias,
-            mixpanelIdentity.hadPersistedDistinctId
-        )
-        if distinctId.isEmpty {
-            distinctId = defaultDistinctId()
-            anonymousId = distinctId
-            hadPersistedDistinctId = nil
-            userId = nil
+        self.readWriteLock.write {
+            optOutStatus = MixpanelPersistence.loadOptOutStatusFlag(apiToken: apiToken)
+            superProperties = MixpanelPersistence.loadSuperProperties(apiToken: apiToken)
+            timedEvents = MixpanelPersistence.loadTimedEvents(apiToken: apiToken)
+            let mixpanelIdentity = MixpanelPersistence.loadIdentity(apiToken: apiToken)
+            (distinctId, people.distinctId, anonymousId, userId, alias, hadPersistedDistinctId) = (
+                mixpanelIdentity.distinctID,
+                mixpanelIdentity.peopleDistinctID,
+                mixpanelIdentity.anonymousId,
+                mixpanelIdentity.userId,
+                mixpanelIdentity.alias,
+                mixpanelIdentity.hadPersistedDistinctId
+            )
+            if distinctId.isEmpty {
+                distinctId = defaultDistinctId()
+                anonymousId = distinctId
+                hadPersistedDistinctId = true
+                userId = nil
+                MixpanelPersistence.saveIdentity(MixpanelIdentity.init(
+                    distinctID: distinctId,
+                    peopleDistinctID: people.distinctId,
+                    anonymousId: anonymousId,
+                    userId: userId,
+                    alias: alias,
+                    hadPersistedDistinctId: hadPersistedDistinctId), apiToken: apiToken)
+            }
         }
     }
     
@@ -1307,7 +1316,7 @@ extension MixpanelInstance {
                 self.userId = nil
                 self.distinctId = self.defaultDistinctId()
                 self.anonymousId = self.distinctId
-                self.hadPersistedDistinctId = nil
+                self.hadPersistedDistinctId = true
                 self.superProperties = InternalProperties()
                 MixpanelPersistence.saveTimedEvents(timedEvents: InternalProperties(), apiToken: self.apiToken)
             }

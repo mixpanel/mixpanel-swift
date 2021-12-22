@@ -367,17 +367,13 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testHadPersistedDistinctId() {
         stubTrack()
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testToken = randomId()
+        let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
         XCTAssertNotNil(testMixpanel.distinctId)
-        let distinctId: String = "d1"
-        testMixpanel.anonymousId = nil
-        testMixpanel.userId = nil
-        testMixpanel.alias = nil
-        testMixpanel.distinctId = distinctId
-        testMixpanel.archive()
-        
-        XCTAssertEqual(testMixpanel.distinctId, distinctId)
-        
+        let distinctId = testMixpanel.distinctId
+        let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        XCTAssertEqual(testMixpanel2.distinctId, distinctId, "mixpanel anonymous distinct id should not be changed for each init")
+                
         let userId: String = "u1"
         testMixpanel.identify(distinctId: userId)
         waitForTrackingQueue(testMixpanel)

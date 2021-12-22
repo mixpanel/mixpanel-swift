@@ -262,7 +262,7 @@ class MixpanelPersistence {
              peopleDistinctId,
              peopleUnidentifiedQueue,
              optOutStatus,
-             automaticEventsEnabled) = unarchive()
+             automaticEventsEnabled) = unarchiveFromLegacy()
         saveEntities(eventsQueue, type: PersistenceType.events)
         saveEntities(peopleUnidentifiedQueue, type: PersistenceType.people, flag: PersistenceConstant.unIdentifiedFlag)
         saveEntities(peopleQueue, type: PersistenceType.people)
@@ -301,7 +301,7 @@ class MixpanelPersistence {
         return urlUnwrapped
     }
     
-    private func unarchive() -> (eventsQueue: Queue,
+    private func unarchiveFromLegacy() -> (eventsQueue: Queue,
                                             peopleQueue: Queue,
                                             groupsQueue: Queue,
                                             superProperties: InternalProperties,

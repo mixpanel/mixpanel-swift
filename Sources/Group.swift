@@ -17,16 +17,24 @@ open class Group {
     let lock: ReadWriteLock
     let groupKey: String
     let groupID: MixpanelType
-    var delegate: FlushDelegate?
+    weak var delegate: FlushDelegate?
     let metadata: SessionMetadata
+    let mixpanelPersistence: MixpanelPersistence
 
-    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, groupKey: String, groupID: MixpanelType, metadata: SessionMetadata) {
+    init(apiToken: String,
+         serialQueue: DispatchQueue,
+         lock: ReadWriteLock,
+         groupKey: String,
+         groupID: MixpanelType,
+         metadata: SessionMetadata,
+         mixpanelPersistence: MixpanelPersistence) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
         self.lock = lock
         self.groupKey = groupKey
         self.groupID  = groupID
         self.metadata = metadata
+        self.mixpanelPersistence = mixpanelPersistence
     }
 
     func addGroupRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
@@ -52,24 +60,11 @@ open class Group {
 
             r["$group_key"] = self.groupKey
             r["$group_id"] = self.groupID
-            self.addGroupObject(r)
-
-            self.lock.read {
-                Persistence.archiveGroups(Mixpanel.mainInstance().flushGroupsQueue + Mixpanel.mainInstance().groupsQueue, token: self.apiToken)
-            }
+            self.mixpanelPersistence.saveEntity(r, type: .groups)
         }
 
         if MixpanelInstance.isiOSAppExtension() {
             delegate?.flush(completion: nil)
-        }
-    }
-
-    func addGroupObject(_ r: InternalProperties) {
-        self.lock.write {
-            Mixpanel.mainInstance().groupsQueue.append(r)
-            if Mixpanel.mainInstance().groupsQueue.count > QueueConstants.queueSize {
-                Mixpanel.mainInstance().groupsQueue.remove(at: 0)
-            }
         }
     }
 

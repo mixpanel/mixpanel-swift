@@ -20,9 +20,6 @@ let package = Package(
             exclude: [
                 "Info.plist"
             ],
-            resources: [
-                .process("placeholder-image.png")
-            ],
             swiftSettings: [
                 .define("DECIDE", .when(platforms: [.iOS]))
             ]

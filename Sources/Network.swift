@@ -61,9 +61,9 @@ class Network {
     }
 
     class func apiRequest<A>(base: String,
-                          resource: Resource<A>,
-                          failure: @escaping (Reason, Data?, URLResponse?) -> Void,
-                          success: @escaping (A, URLResponse?) -> Void) {
+                             resource: Resource<A>,
+                             failure: @escaping (Reason, Data?, URLResponse?) -> Void,
+                             success: @escaping (A, URLResponse?) -> Void) {
         guard let request = buildURLRequest(base, resource: resource) else {
             return
         }
@@ -115,11 +115,11 @@ class Network {
     }
 
     class func buildResource<A>(path: String,
-                             method: RequestMethod,
-                             requestBody: Data? = nil,
-                             queryItems: [URLQueryItem]? = nil,
-                             headers: [String: String],
-                             parse: @escaping (Data) -> A?) -> Resource<A> {
+                                method: RequestMethod,
+                                requestBody: Data? = nil,
+                                queryItems: [URLQueryItem]? = nil,
+                                headers: [String: String],
+                                parse: @escaping (Data) -> A?) -> Resource<A> {
         return Resource(path: path,
                         method: method,
                         requestBody: requestBody,

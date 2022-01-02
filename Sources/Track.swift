@@ -18,29 +18,35 @@ class Track {
     let apiToken: String
     let lock: ReadWriteLock
     let metadata: SessionMetadata
+    let mixpanelPersistence: MixpanelPersistence
+    
+    var isAutomaticEventEnabled: Bool {
+        return MixpanelPersistence.loadAutomacticEventsEnabledFlag(apiToken: apiToken)
+    }
 
-    init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata) {
+    init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata, mixpanelPersistence: MixpanelPersistence) {
         self.apiToken = apiToken
         self.lock = lock
         self.metadata = metadata
+        self.mixpanelPersistence = mixpanelPersistence
     }
     
     func track(event: String?,
                properties: Properties? = nil,
-               eventsQueue: Queue,
                timedEvents: InternalProperties,
                superProperties: InternalProperties,
-               distinctId: String,
-               anonymousId: String?,
-               userId: String?,
-               hadPersistedDistinctId: Bool?,
-               epochInterval: Double) -> (eventsQueque: Queue, timedEvents: InternalProperties, properties: InternalProperties) {
+               mixpanelIdentity: MixpanelIdentity,
+               epochInterval: Double) -> InternalProperties {
         var ev = event
         if ev == nil || ev!.isEmpty {
             Logger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")
             ev = "mp_event"
         }
+        if !isAutomaticEventEnabled && ev!.hasPrefix("$ae_") {
+            return timedEvents
+        }
         assertPropertyTypes(properties)
+        
         let epochSeconds = Int(round(epochInterval))
         let eventStartTime = timedEvents[ev!] as? Double
         var p = InternalProperties()
@@ -54,15 +60,15 @@ class Track {
             shadowTimedEvents.removeValue(forKey: ev!)
             p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
         }
-        p["distinct_id"] = distinctId
-        if anonymousId != nil {
-            p["$device_id"] = anonymousId
+        p["distinct_id"] = mixpanelIdentity.distinctID
+        if mixpanelIdentity.anonymousId != nil {
+            p["$device_id"] = mixpanelIdentity.anonymousId
         }
-        if userId != nil {
-            p["$user_id"] = userId
+        if mixpanelIdentity.userId != nil {
+            p["$user_id"] = mixpanelIdentity.userId
         }
-        if hadPersistedDistinctId != nil {
-            p["$had_persisted_distinct_id"] = hadPersistedDistinctId
+        if mixpanelIdentity.hadPersistedDistinctId != nil {
+            p["$had_persisted_distinct_id"] = mixpanelIdentity.hadPersistedDistinctId
         }
         
         p += superProperties
@@ -72,17 +78,10 @@ class Track {
 
         var trackEvent: InternalProperties = ["event": ev!, "properties": p]
         metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
-        var shadowEventsQueue = eventsQueue
-        Logger.debug(message: "adding event to queue")
-        Logger.debug(message: trackEvent)
-        shadowEventsQueue.append(trackEvent)
-        if shadowEventsQueue.count > QueueConstants.queueSize {
-            Logger.warn(message: "queue is full, dropping the oldest event from the queue")
-            Logger.warn(message: shadowEventsQueue.first as Any)
-            shadowEventsQueue.remove(at: 0)
-        }
         
-        return (shadowEventsQueue, shadowTimedEvents, p)
+        self.mixpanelPersistence.saveEntity(trackEvent, type: .events)
+        MixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents, apiToken: apiToken)
+        return shadowTimedEvents
     }
 
     func registerSuperProperties(_ properties: Properties,
@@ -120,12 +119,11 @@ class Track {
 
     func unregisterSuperProperty(_ propertyName: String,
                                  superProperties: InternalProperties) -> InternalProperties {
-        
         var updatedSuperProperties = superProperties
         updatedSuperProperties.removeValue(forKey: propertyName)
         return updatedSuperProperties
     }
-
+        
     func clearSuperProperties(_ superProperties: InternalProperties) -> InternalProperties {
         var updatedSuperProperties = superProperties
         updatedSuperProperties.removeAll()

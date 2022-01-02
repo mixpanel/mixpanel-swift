@@ -22,18 +22,21 @@ open class People {
     let apiToken: String
     let serialQueue: DispatchQueue
     let lock: ReadWriteLock
-    var peopleQueue = Queue()
-    var flushPeopleQueue = Queue()
-    var unidentifiedQueue = Queue()
     var distinctId: String?
-    var delegate: FlushDelegate?
+    weak var delegate: FlushDelegate?
     let metadata: SessionMetadata
-
-    init(apiToken: String, serialQueue: DispatchQueue, lock: ReadWriteLock, metadata: SessionMetadata) {
+    let mixpanelPersistence: MixpanelPersistence
+    
+    init(apiToken: String,
+         serialQueue: DispatchQueue,
+         lock: ReadWriteLock,
+         metadata: SessionMetadata,
+         mixpanelPersistence: MixpanelPersistence) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
         self.lock = lock
         self.metadata = metadata
+        self.mixpanelPersistence = mixpanelPersistence
     }
 
     func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
@@ -82,18 +85,10 @@ open class People {
 
             if let distinctId = self.distinctId {
                 r["$distinct_id"] = distinctId
-                self.addPeopleObject(r)
+                // identified
+                self.mixpanelPersistence.saveEntity(r, type: .people, flag: !PersistenceConstant.unIdentifiedFlag)
             } else {
-                self.lock.write {
-                    self.unidentifiedQueue.append(r)
-                    if self.unidentifiedQueue.count > QueueConstants.queueSize {
-                        self.unidentifiedQueue.remove(at: 0)
-                    }
-                }
-
-            }
-            self.lock.read {
-                Persistence.archivePeople(self.flushPeopleQueue + self.peopleQueue, token: self.apiToken)
+                self.mixpanelPersistence.saveEntity(r, type: .people, flag: PersistenceConstant.unIdentifiedFlag)
             }
         }
 
@@ -102,74 +97,11 @@ open class People {
         }
     }
 
-    func addPeopleObject(_ r: InternalProperties) {
-        lock.write {
-            Logger.debug(message: "adding to people queue")
-            Logger.debug(message: r)
-            peopleQueue.append(r)
-            if peopleQueue.count > QueueConstants.queueSize {
-                peopleQueue.remove(at: 0)
-            }
-        }
-    }
-
     func merge(properties: InternalProperties) {
         addPeopleRecordToQueueWithAction("$merge", properties: properties)
     }
 
-    private func deviceTokenDataToString(_ deviceToken: Data) -> String {
-        let tokenChars = (deviceToken as NSData).bytes.assumingMemoryBound(to: CChar.self)
-        var tokenString = ""
-
-        for i in 0..<deviceToken.count {
-            tokenString += String(format: "%02.2hhx", arguments: [tokenChars[i]])
-        }
-
-        return tokenString
-    }
-
     // MARK: - People
-
-    /**
-     Register the given device to receive push notifications.
-
-     This will associate the device token with the current user in Mixpanel People,
-     which will allow you to send push notifications to the user from the Mixpanel
-     People web interface. You should call this method with the `Data`
-     token passed to
-     `application:didRegisterForRemoteNotificationsWithDeviceToken:`.
-
-     - parameter deviceToken: device token as returned from
-     `application:didRegisterForRemoteNotificationsWithDeviceToken:`
-     */
-    open func addPushDeviceToken(_ deviceToken: Data) {
-        let properties = ["$ios_devices": [deviceTokenDataToString(deviceToken)]]
-        addPeopleRecordToQueueWithAction("$union", properties: properties)
-    }
-
-    /**
-     Unregister the given device to receive push notifications.
-
-     This will unset all of the push tokens saved to this people profile. This is useful
-     in conjunction with a call to `reset`, or when a user is logging out.
-     */
-    open func removeAllPushDeviceTokens() {
-        unset(properties: ["$ios_devices"])
-    }
-
-    /**
-     Unregister a specific device token from the ability to receive push notifications.
-
-     This will remove the provided push token saved to this people profile. This is useful
-     in conjunction with a call to `reset`, or when a user is logging out.
-
-     - parameter deviceToken: device token as returned from
-     `application:didRegisterForRemoteNotificationsWithDeviceToken:`
-     */
-    open func removePushDeviceToken(_ deviceToken: Data) {
-        let properties = ["$ios_devices": deviceTokenDataToString(deviceToken)]
-        addPeopleRecordToQueueWithAction("$remove", properties: properties)
-    }
 
     /**
      Set properties on the current user in Mixpanel People.

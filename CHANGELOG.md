@@ -1,6 +1,14 @@
 #
 
 ## [v3.0.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.0.0) (2022-01-02)
+-  Messages & Experiments feature removal, for more detail, please check this [post](https://mixpanel.com/blog/why-were-sunsetting-messaging-and-experiments/#:~:text=A%20year%20from%20now%2C%20on,offering%20discounts%20for%20getting%20started):
+
+- Upgrade offline tracking storage with SQLite, it will:
+  - Reduce crashes caused by race conditions for serializing data
+  - Greatly improve the performance for intensive tracking needs
+  - Fix the memory leaks
+  - Be a non-functional change and transparent to all users, the new version will take care of migrating data from the NSKeyedArchiver files to SQLite DBs, no data will be lost.
+
 
 ## [3.0.0.rc.1](https://github.com/mixpanel/mixpanel-swift/tree/3.0.0.rc.1) (2021-12-16)
 

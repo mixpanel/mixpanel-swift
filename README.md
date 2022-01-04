@@ -47,13 +47,10 @@ Our master branch and our releases are on Swift 5. If you wish to use our Swift 
 ## 1. Install Mixpanel
 You will need your project token for initializing your library. You can get your project token from [project settings](https://mixpanel.com/settings/project).
 
-### Installation Option 1: Swift Package Manager
-The easiest way to get Mixpanel into your iOS project is to use Swift Package Manager(requires Xcode 12+).
-1. In Xcode, select File > Swift Packages > Add Package Dependency.
-2. Follow the prompts using the Github URL for [Mixpanel Swift library](https://github.com/mixpanel/mixpanel-swift) and a minimum semantic version of v2.8.0.
-
-On Jan 1, 2022, we’ll remove the [Messages & Experiments](https://mixpanel.com/blog/why-were-sunsetting-messaging-and-experiments/#:~:text=A%20year%20from%20now%2C%20on,offering%20discounts%20for%20getting%20started) feature from Mixpanel. For now, you can choose to opt in to our beta version without Messages & Experiments feature support. You can use **Swift Package Manager** to point to the branch `3.0.0.beta`
-
+### Installation Option 1: Swift Package Manager (v2.8.0+)
+The easiest way to get Mixpanel into your iOS project is to use Swift Package Manager.
+1. In Xcode, select File > Add Packages...
+2. Enter the package URL for this repository [Mixpanel Swift library](https://github.com/mixpanel/mixpanel-swift).
 
 ### Installation Option 2: CocoaPods
 1. If this is your first time using CocoaPods, Install CocoaPods using `gem install cocoapods`. Otherwise, continue to Step 3.

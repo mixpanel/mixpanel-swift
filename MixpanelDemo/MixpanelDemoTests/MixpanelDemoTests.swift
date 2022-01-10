@@ -538,6 +538,17 @@ class MixpanelDemoTests: MixpanelBaseTests {
                       "clear super properties failed")
         removeDBfile(testMixpanel.apiToken)
     }
+    
+    func testSettingSuperPropertiesWhenInit() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, superProperties: ["mp_lib": "flutter"])
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertEqual(testMixpanel.currentSuperProperties()["mp_lib"] as? String, "flutter",
+                       "register super properties in init failed")
+        testMixpanel.track(event: "e1")
+        let e = eventQueue(token: testMixpanel.apiToken).last!
+        let p = e["properties"] as! InternalProperties
+        XCTAssertNotNil(p["mp_lib"], "flutter")
+    }
 
     func testInvalidPropertiesTrack() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)

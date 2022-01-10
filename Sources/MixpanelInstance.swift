@@ -214,7 +214,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // DECIDE
     
     #if !os(OSX) && !os(watchOS)
-    init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false, trackAutomaticEvents: Bool = true) {
+    init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false,
+         trackAutomaticEvents: Bool = true, superProperties: Properties? = nil) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -273,6 +274,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if optOutTrackingByDefault && (hasOptedOutTracking() || optOutStatus == nil) {
             optOutTracking()
         }
+        
+        if let superProperties = superProperties {
+            registerSuperProperties(superProperties)
+        }
+        
         MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: trackAutomaticEvents,
                                                             fromDecide: false,
                                                             apiToken: self.apiToken)

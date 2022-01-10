@@ -75,8 +75,8 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         }
         waitForTrackingQueue(testMixpanel)
         sleep(1)
-        XCTAssertTrue(unIdentifiedPeopleQueue(token: testMixpanel.apiToken).count == 505)
-        var r: InternalProperties = unIdentifiedPeopleQueue(token: testMixpanel.apiToken).first!
+        XCTAssertTrue(unIdentifiedPeopleQueue(token: testMixpanel.apiToken).count == 506)
+        var r: InternalProperties = unIdentifiedPeopleQueue(token: testMixpanel.apiToken)[1]
         XCTAssertEqual((r["$set"] as? InternalProperties)?["i"] as? Int, 0)
         r = unIdentifiedPeopleQueue(token: testMixpanel.apiToken).last!
         XCTAssertEqual((r["$set"] as? InternalProperties)?["i"] as? Int, 504)

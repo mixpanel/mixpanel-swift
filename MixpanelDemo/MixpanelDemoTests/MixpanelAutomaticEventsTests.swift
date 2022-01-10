@@ -24,8 +24,8 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         
         let event = eventQueue(token: testMixpanel.apiToken).last
-        let people1 = peopleQueue(token: testMixpanel.apiToken)[0]["$add"] as! InternalProperties
-        let people2 = peopleQueue(token: testMixpanel.apiToken)[1]["$add"] as! InternalProperties
+        let people1 = peopleQueue(token: testMixpanel.apiToken)[1]["$add"] as! InternalProperties
+        let people2 = peopleQueue(token: testMixpanel.apiToken)[2]["$add"] as! InternalProperties
         XCTAssertEqual((people1["$ae_total_app_sessions"] as? NSNumber)?.intValue, 1, "total app sessions should be added by 1")
         XCTAssertNotNil((people2["$ae_total_app_session_length"], "should have session length in $add queue"))
         XCTAssertNotNil(event, "Should have an event")
@@ -42,16 +42,14 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
 
         waitForTrackingQueue(testMixpanel)
         let event = eventQueue(token: testMixpanel.apiToken).last
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 1, "automatic events should be accumulated if check decide is offline(decideInstance.automaticEventsEnabled is nil)")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "automatic events should be accumulated if check decide is offline(decideInstance.automaticEventsEnabled is nil)")
         XCTAssertEqual(event?["event"] as? String, "$ae_session", "should be app session event")
         removeDBfile(testMixpanel.apiToken)
     }
 
     func testDiscardAutomaticEventsIftrackAutomaticEventsEnabledIsFalse() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
         testMixpanel.minimumSessionDuration = 0;
-        testMixpanel.trackAutomaticEventsEnabled = false
-        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: true, fromDecide: true, apiToken: testMixpanel.apiToken)
         testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         waitForTrackingQueue(testMixpanel)
@@ -62,12 +60,10 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
     func testFlushAutomaticEventsIftrackAutomaticEventsEnabledIsTrue() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.minimumSessionDuration = 0;
-        testMixpanel.trackAutomaticEventsEnabled = true
-        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: false, fromDecide: true, apiToken: testMixpanel.apiToken)
         testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         waitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 1, "automatic events should be tracked")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "automatic events should be tracked")
         
         flushAndWaitForTrackingQueue(testMixpanel)
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "automatic events should be flushed")
@@ -94,7 +90,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         waitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 1, "automatic events should be tracked")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "automatic events should be tracked")
         
         flushAndWaitForTrackingQueue(testMixpanel)
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "automatic events should be flushed")
@@ -109,24 +105,31 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         XCTAssertEqual(appVersionValue as? String, savedVersionValue, "Saved version and current version need to be the same")
     }
 
-    func testMultipleInstances() {
+    func testFirstAppShouldOnlyBeTrackedOnce() {
+        let testToken = randomId()
+        let mp = Mixpanel.initialize(token: testToken)
+        mp.minimumSessionDuration = 0;
+        waitForTrackingQueue(mp)
+        XCTAssertEqual(eventQueue(token: mp.apiToken).count, 1, "First app open should be tracked again")
+        flushAndWaitForTrackingQueue(mp)
+        
+        let mp2 = Mixpanel.initialize(token: testToken)
+        mp2.minimumSessionDuration = 0;
+        waitForTrackingQueue(mp2)
+        XCTAssertEqual(eventQueue(token: mp2.apiToken).count, 0, "First app open should not be tracked again")
+    }
+    
+    func testAutomaticEventsInMultipleInstances() {
         // remove UserDefaults key and archive files to simulate first app open state
         let defaults = UserDefaults(suiteName: "Mixpanel")
         defaults?.removeObject(forKey: "MPFirstOpen")
 
         let mp = Mixpanel.initialize(token: randomId())
-        mp.reset()
         mp.minimumSessionDuration = 0;
+        waitForTrackingQueue(mp)
         let mp2 = Mixpanel.initialize(token: randomId())
-        mp2.reset()
         mp2.minimumSessionDuration = 0;
-
-        mp.automaticEvents.perform(#selector(AutomaticEvents.appDidBecomeActive(_:)),
-                                              with: Notification(name: Notification.Name(rawValue: "test")))
-        mp2.automaticEvents.perform(#selector(AutomaticEvents.appDidBecomeActive(_:)),
-                                              with: Notification(name: Notification.Name(rawValue: "test")))
-        mp.trackingQueue.sync { }
-        mp2.trackingQueue.sync { }
+        waitForTrackingQueue(mp2)
 
         XCTAssertEqual(eventQueue(token: mp.apiToken).count, 1, "there should be only 1 event")
         let appOpenEvent = eventQueue(token: mp.apiToken).last

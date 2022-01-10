@@ -26,7 +26,8 @@ open class People {
     weak var delegate: FlushDelegate?
     let metadata: SessionMetadata
     let mixpanelPersistence: MixpanelPersistence
-    
+    weak var mixpanelInstance: MixpanelInstance?
+  
     init(apiToken: String,
          serialQueue: DispatchQueue,
          lock: ReadWriteLock,
@@ -40,7 +41,7 @@ open class People {
     }
 
     func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
-        if Mixpanel.mainInstance().hasOptedOutTracking() {
+        if mixpanelInstance?.hasOptedOutTracking() ?? false {
             return
         }
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
@@ -71,15 +72,15 @@ open class People {
             }
             self.metadata.toDict(isEvent: false).forEach { (k, v) in r[k] = v }
 
-            if let anonymousId = Mixpanel.mainInstance().anonymousId {
+            if let anonymousId = self.mixpanelInstance?.anonymousId {
                r["$device_id"] = anonymousId
             }
 
-            if let userId = Mixpanel.mainInstance().userId {
+            if let userId = self.mixpanelInstance?.userId {
                 r["$user_id"] = userId
             }
 
-            if let hadPersistedDistinctId = Mixpanel.mainInstance().hadPersistedDistinctId {
+            if let hadPersistedDistinctId = self.mixpanelInstance?.hadPersistedDistinctId {
                 r["$had_persisted_distinct_id"] = hadPersistedDistinctId
             }
 

@@ -19,12 +19,14 @@ class Track {
     let lock: ReadWriteLock
     let metadata: SessionMetadata
     let mixpanelPersistence: MixpanelPersistence
+    weak var mixpanelInstance: MixpanelInstance?
     
     var isAutomaticEventEnabled: Bool {
         return MixpanelPersistence.loadAutomacticEventsEnabledFlag(apiToken: apiToken)
     }
 
-    init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata, mixpanelPersistence: MixpanelPersistence) {
+    init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata,
+         mixpanelPersistence: MixpanelPersistence) {
         self.apiToken = apiToken
         self.lock = lock
         self.metadata = metadata
@@ -86,7 +88,7 @@ class Track {
 
     func registerSuperProperties(_ properties: Properties,
                                  superProperties: InternalProperties) -> InternalProperties {
-        if Mixpanel.mainInstance().hasOptedOutTracking() {
+        if mixpanelInstance?.hasOptedOutTracking() ?? false {
             return superProperties
         }
 
@@ -100,7 +102,7 @@ class Track {
     func registerSuperPropertiesOnce(_ properties: Properties,
                                      superProperties: InternalProperties,
                                      defaultValue: MixpanelType?) -> InternalProperties {
-        if Mixpanel.mainInstance().hasOptedOutTracking() {
+        if mixpanelInstance?.hasOptedOutTracking() ?? false {
             return superProperties
         }
 
@@ -135,7 +137,7 @@ class Track {
     }
 
     func time(event: String?, timedEvents: InternalProperties, startTime: Double) -> InternalProperties {
-        if Mixpanel.mainInstance().hasOptedOutTracking() {
+        if mixpanelInstance?.hasOptedOutTracking() ?? false {
             return timedEvents
         }
         var updatedTimedEvents = timedEvents

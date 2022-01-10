@@ -26,6 +26,7 @@ open class Mixpanel {
      - parameter flushInterval:             Optional. Interval to run background flushing
      - parameter instanceName:              Optional. The name you want to call this instance
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
+     - parameter trackAutomaticEvents:      Optional. Whether or not to collect common mobile events
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -37,11 +38,13 @@ open class Mixpanel {
     open class func initialize(token apiToken: String,
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
-                               optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
+                               optOutTrackingByDefault: Bool = false,
+                               trackAutomaticEvents: Bool = true) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: instanceName,
-                                                         optOutTrackingByDefault: optOutTrackingByDefault)
+                                                         optOutTrackingByDefault: optOutTrackingByDefault,
+                                                         trackAutomaticEvents: trackAutomaticEvents)
     }
     #else
     /**
@@ -139,11 +142,13 @@ class MixpanelManager {
     func initialize(token apiToken: String,
                     flushInterval: Double,
                     instanceName: String,
-                    optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
+                    optOutTrackingByDefault: Bool = false,
+                    trackAutomaticEvents: Bool = true) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
                                         flushInterval: flushInterval,
                                         name: instanceName,
-                                        optOutTrackingByDefault: optOutTrackingByDefault)
+                                        optOutTrackingByDefault: optOutTrackingByDefault,
+                                        trackAutomaticEvents: trackAutomaticEvents)
         mainInstance = instance
         readWriteLock.write {
             instances[instanceName] = instance

@@ -21,6 +21,8 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         super.setUp()
         stubCalls()
         mixpanelWillFlush = false
+        let defaults = UserDefaults(suiteName: "Mixpanel")
+        defaults?.removeObject(forKey: "MPFirstOpen")
 
         NSLog("finished test setup")
     }

@@ -28,7 +28,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssert(testMixpanel.flushInstance.flushRequest.networkConsecutiveFailures == 2,
                   "Network failures did not equal 2")
 
-        XCTAssert(eventQueue(token: testMixpanel.apiToken).count == 1,
+        XCTAssert(eventQueue(token: testMixpanel.apiToken).count == 2,
                   "Removed an event from the queue that was not sent")
         removeDBfile(testMixpanel.apiToken)
     }
@@ -122,9 +122,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
             testMixpanel.track(event: "event \(UInt(i))")
         }
         waitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 50, "50 events should be queued up")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 51, "51 events should be queued up")
         flushAndWaitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 50,
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 51,
                       "events should still be in the queue if flush fails")
         removeDBfile(testMixpanel.apiToken)
     }
@@ -132,10 +132,12 @@ class MixpanelDemoTests: MixpanelBaseTests {
     func testFlushQueueContainsCorruptedEvent() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         stubTrack()
-        testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event1", "properties": ["BadProp": Double.nan]], type: .events)
-        testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event2", "properties": ["BadProp": Float.nan]], type: .events)
-        testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event3", "properties": ["BadProp": Double.infinity]], type: .events)
-        testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event4", "properties": ["BadProp": Float.infinity]], type: .events)
+        testMixpanel.trackingQueue.async {
+            testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event1", "properties": ["BadProp": Double.nan]], type: .events)
+            testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event2", "properties": ["BadProp": Float.nan]], type: .events)
+            testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event3", "properties": ["BadProp": Double.infinity]], type: .events)
+            testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event4", "properties": ["BadProp": Float.infinity]], type: .events)
+        }
 
         for i in 0..<10 {
             testMixpanel.track(event: "event \(UInt(i))")
@@ -185,7 +187,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
             testMixpanel.track(event: "event \(UInt(i))")
         }
         waitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 10, "10 events should be queued up")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 11, "11 events should be queued up")
         flushAndWaitForTrackingQueue(testMixpanel)
         for i in 0..<5 {
             testMixpanel.track(event: "event \(UInt(i))")
@@ -220,7 +222,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
             testMixpanel.track(event: "e1")
             waitForTrackingQueue(testMixpanel)
             let eventsQueue = eventQueue(token: testMixpanel.apiToken)
-            XCTAssertTrue(eventsQueue.count == 1,
+            XCTAssertTrue(eventsQueue.count == 2 || eventsQueue.count == 1, // first app open should not be tracked for the second run,
                           "events should be sent right away with default distinct id")
             #if MIXPANEL_UNIQUE_DISTINCT_ID
             XCTAssertEqual((eventsQueue.last?["properties"] as? InternalProperties)?["distinct_id"] as? String,
@@ -236,7 +238,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
             var unidentifiedQueue = unIdentifiedPeopleQueue(token: testMixpanel.apiToken)
             XCTAssertTrue(peopleQueue_value.isEmpty,
                           "people records should go to unidentified queue before identify:")
-            XCTAssertTrue(unidentifiedQueue.count == 1,
+            XCTAssertTrue(unidentifiedQueue.count == 2 || eventsQueue.count == 1, // first app open should not be tracked for the second run,
                           "unidentified people records not queued")
             XCTAssertEqual(unidentifiedQueue.last?["$token"] as? String,
                            testMixpanel.apiToken,
@@ -622,7 +624,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                      "people distinct id failed to reset after archive")
         XCTAssertTrue(testMixpanel2.currentSuperProperties().isEmpty,
                       "super properties failed to reset after archive")
-        XCTAssertTrue(eventQueue(token: testMixpanel2.apiToken).isEmpty,
+        XCTAssertTrue(eventQueue(token: testMixpanel2.apiToken).count == 1,
                       "events queue failed to reset after archive")
         XCTAssertTrue(peopleQueue(token: testMixpanel2.apiToken).isEmpty,
                       "people queue failed to reset after archive")
@@ -645,7 +647,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         
         let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
         waitForTrackingQueue(testMixpanel2)
-        let properties: [String: Any] = eventQueue(token: testMixpanel2.apiToken)[0]["properties"] as! [String: Any]
+        let properties: [String: Any] = eventQueue(token: testMixpanel2.apiToken)[1]["properties"] as! [String: Any]
 
         XCTAssertTrue(isBoolNumber(num: properties["p1"]! as! NSNumber),
                           "The bool value should be unarchived as bool")
@@ -663,7 +665,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testArchive() {
         let testToken = randomId()
-        let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60, trackAutomaticEvents: false)
         #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(testMixpanel.distinctId, testMixpanel.defaultDistinctId(),
                        "default distinct id archive failed")
@@ -691,7 +693,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         testMixpanel.timedEvents["e2"] = 5
         testMixpanel.archive()
-        let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60, trackAutomaticEvents: false)
         waitForTrackingQueue(testMixpanel2)
         sleep(1)
         XCTAssertEqual(testMixpanel2.distinctId, "d1", "custom distinct archive failed")
@@ -719,11 +721,11 @@ class MixpanelDemoTests: MixpanelBaseTests {
                        "event was not successfully archived/unarchived or order is incorrect")
         XCTAssertEqual(testMixpanel2.people.distinctId, "d1",
                        "custom people distinct id archive failed")
-        XCTAssertTrue(peopleQueue(token: testMixpanel2.apiToken).count == 1, "pending people queue archive failed")
+        XCTAssertTrue(peopleQueue(token: testMixpanel2.apiToken).count >= 1, "pending people queue archive failed")
         XCTAssertEqual(testMixpanel2.timedEvents["e2"] as? Double, 5.0,
                        "timedEvents archive failed")
 
-        let testMixpanel3 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        let testMixpanel3 = Mixpanel.initialize(token: testToken, flushInterval: 60, trackAutomaticEvents: false)
         XCTAssertEqual(testMixpanel3.distinctId, "d1", "expecting d1 as distinct id as initialised")
         XCTAssertTrue(testMixpanel3.currentSuperProperties().count == 1,
                       "default super properties expected to have 1 item")
@@ -732,7 +734,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertNotNil(testMixpanel3.people.distinctId,
                         "default people distinct id from no file failed")
         XCTAssertNotNil(peopleQueue(token:testMixpanel3.apiToken), "default people queue from no file is nil")
-        XCTAssertTrue(peopleQueue(token:testMixpanel3.apiToken).count == 1, "default people queue expecting 1 item")
+        XCTAssertTrue(peopleQueue(token:testMixpanel3.apiToken).count >= 1, "default people queue expecting 1 item")
         XCTAssertTrue(testMixpanel3.timedEvents.count == 1, "timedEvents expecting 1 item")
         removeDBfile(testToken)
     }
@@ -747,8 +749,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         sleep(1)
         flushAndWaitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "delegate should have stopped flush")
-        XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).count == 1, "delegate should have stopped flush")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 3, "delegate should have stopped flush")
+        XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).count == 2, "delegate should have stopped flush")
         removeDBfile(testMixpanel.apiToken)
     }
 

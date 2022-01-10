@@ -214,7 +214,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // DECIDE
     
     #if !os(OSX) && !os(watchOS)
-    init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false) {
+    init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false, trackAutomaticEvents: Bool = true) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -261,6 +261,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                         serialQueue: trackingQueue,
                         lock: self.readWriteLock,
                         metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
+        people.mixpanelInstance = self
         people.delegate = self
         flushInstance._flushInterval = flushInterval
         setupListeners()
@@ -272,11 +273,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if optOutTrackingByDefault && (hasOptedOutTracking() || optOutStatus == nil) {
             optOutTracking()
         }
+        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: trackAutomaticEvents,
+                                                            fromDecide: false,
+                                                            apiToken: self.apiToken)
         
         #if DECIDE || TV_AUTO_EVENTS
         if !MixpanelInstance.isiOSAppExtension() {
             automaticEvents.delegate = self
-            automaticEvents.initializeEvents()
+            automaticEvents.initializeEvents(apiToken: self.apiToken)
         }
         #endif // DECIDE
     }
@@ -304,6 +308,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                         serialQueue: trackingQueue,
                         lock: self.readWriteLock,
                         metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
+        people.mixpanelInstance = self
         flushInstance._flushInterval = flushInterval
         #if !os(watchOS)
         setupListeners()
@@ -986,7 +991,8 @@ extension MixpanelInstance {
                                     groupKey: groupKey,
                                     groupID: groupID,
                                     metadata: sessionMetadata,
-                                    mixpanelPersistence: mixpanelPersistence)
+                                    mixpanelPersistence: mixpanelPersistence,
+                                    mixpanelInstance: self)
                 groupsShadow = groups
             }
             return groupsShadow[key]!
@@ -1001,7 +1007,8 @@ extension MixpanelInstance {
                                  groupKey: groupKey,
                                  groupID: groupID,
                                  metadata: sessionMetadata,
-                                 mixpanelPersistence: mixpanelPersistence)
+                                 mixpanelPersistence: mixpanelPersistence,
+                                 mixpanelInstance: self)
             readWriteLock.write {
                 groups[key] = newGroup
             }

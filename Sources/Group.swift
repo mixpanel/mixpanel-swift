@@ -20,6 +20,7 @@ open class Group {
     weak var delegate: FlushDelegate?
     let metadata: SessionMetadata
     let mixpanelPersistence: MixpanelPersistence
+    weak var mixpanelInstance: MixpanelInstance?
 
     init(apiToken: String,
          serialQueue: DispatchQueue,
@@ -27,7 +28,8 @@ open class Group {
          groupKey: String,
          groupID: MixpanelType,
          metadata: SessionMetadata,
-         mixpanelPersistence: MixpanelPersistence) {
+         mixpanelPersistence: MixpanelPersistence,
+         mixpanelInstance: MixpanelInstance) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
         self.lock = lock
@@ -35,10 +37,11 @@ open class Group {
         self.groupID  = groupID
         self.metadata = metadata
         self.mixpanelPersistence = mixpanelPersistence
+        self.mixpanelInstance = mixpanelInstance
     }
 
     func addGroupRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
-        if Mixpanel.mainInstance().hasOptedOutTracking() {
+        if mixpanelInstance?.hasOptedOutTracking() ?? false {
             return
         }
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
@@ -155,6 +158,6 @@ open class Group {
      */
     open func deleteGroup() {
         addGroupRecordToQueueWithAction("$delete", properties: [:])
-        Mixpanel.mainInstance().removeCachedGroup(groupKey: groupKey, groupID: groupID)
+        mixpanelInstance?.removeCachedGroup(groupKey: groupKey, groupID: groupID)
     }
 }

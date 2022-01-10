@@ -44,16 +44,21 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     var sessionLength: TimeInterval = 0
     var sessionStartTime: TimeInterval = Date().timeIntervalSince1970
     var hasAddedObserver = false
-    var firstAppOpen = false
     
     let awaitingTransactionsWriteLock = DispatchQueue(label: "com.mixpanel.awaiting_transactions_writeLock", qos: .utility)
     
-    func initializeEvents() {
-        let firstOpenKey = "MPFirstOpen"
-        if let defaults = defaults, !defaults.bool(forKey: firstOpenKey) {
-            firstAppOpen = true
-            defaults.set(true, forKey: firstOpenKey)
-            defaults.synchronize()
+    func initializeEvents(apiToken: String) {
+        let legacyFirstOpenKey = "MPFirstOpen"
+        let firstOpenKey = "MPFirstOpen-\(apiToken)"
+        // do not track `$ae_first_open` again if the legacy key exist,
+        // but we will start using the key with the mixpanel token in favour of multiple instances support
+        if let defaults = defaults, !defaults.bool(forKey: legacyFirstOpenKey) {
+            if !defaults.bool(forKey: firstOpenKey) {
+                defaults.set(true, forKey: firstOpenKey)
+                defaults.synchronize()
+                delegate?.track(event: "$ae_first_open", properties: ["$ae_first_app_open_date": Date()])
+                delegate?.setOnce(properties: ["$ae_first_app_open_date": Date()])
+            }
         }
         if let defaults = defaults, let infoDict = Bundle.main.infoDictionary {
             let appVersionKey = "MPAppVersion"
@@ -98,15 +103,6 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     
     @objc func appDidBecomeActive(_ notification: Notification) {
         sessionStartTime = Date().timeIntervalSince1970
-        if firstAppOpen {
-            if let allInstances = MixpanelManager.sharedInstance.getAllInstances() {
-                for instance in allInstances {
-                    instance.track(event: "$ae_first_open", properties: ["$ae_first_app_open_date": Date()])
-                    instance.setOnce(properties: ["$ae_first_app_open_date": Date()])
-                }
-            }
-            firstAppOpen = false
-        }
     }
     
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {

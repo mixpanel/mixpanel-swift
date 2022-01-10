@@ -168,10 +168,10 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(token: randomId())
         testMixpanel.track(event: "a normal event")
         waitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 1, "events should be queued")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "events should be queued")
         testMixpanel.optOutTracking()
         waitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 1, "When opted out, any events tracked before opted out should not be cleared")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "When opted out, any events tracked before opted out should not be cleared")
         removeDBfile(testMixpanel.apiToken)
     }
 

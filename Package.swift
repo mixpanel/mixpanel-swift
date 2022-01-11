@@ -17,9 +17,6 @@ let package = Package(
         .target(
             name: "Mixpanel",
             path: "Sources",
-            exclude: [
-                "Info.plist"
-            ],
             swiftSettings: [
                 .define("DECIDE", .when(platforms: [.iOS]))
             ]

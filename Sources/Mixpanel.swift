@@ -27,6 +27,7 @@ open class Mixpanel {
      - parameter instanceName:              Optional. The name you want to call this instance
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
      - parameter trackAutomaticEvents:      Optional. Whether or not to collect common mobile events
+     - parameter superProperties:           Optional. Super properties dictionary to register during initialization
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.

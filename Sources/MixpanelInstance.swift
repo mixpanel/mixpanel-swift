@@ -235,7 +235,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
                               metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
-        
+        trackInstance.mixpanelInstance = self
         #if os(iOS) && !targetEnvironment(macCatalyst)
         if let reachability = MixpanelInstance.reachability {
             var context = SCNetworkReachabilityContext(version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)

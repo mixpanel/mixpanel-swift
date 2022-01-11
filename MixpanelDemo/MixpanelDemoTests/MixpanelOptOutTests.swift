@@ -195,7 +195,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         testMixpanel.optOutTracking()
         testMixpanel.registerSuperPropertiesOnce(properties)
         waitForTrackingQueue(testMixpanel)
-            XCTAssertNotEqual(NSDictionary(dictionary: testMixpanel.currentSuperProperties()),
+        XCTAssertNotEqual(NSDictionary(dictionary: testMixpanel.currentSuperProperties()),
                               NSDictionary(dictionary: properties),
                           "When opted out, register super properties once should not be successful")
         removeDBfile(testMixpanel.apiToken)

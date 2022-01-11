@@ -39,12 +39,14 @@ open class Mixpanel {
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
                                optOutTrackingByDefault: Bool = false,
-                               trackAutomaticEvents: Bool = true) -> MixpanelInstance {
+                               trackAutomaticEvents: Bool = true,
+                               superProperties: Properties? = nil) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: instanceName,
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
-                                                         trackAutomaticEvents: trackAutomaticEvents)
+                                                         trackAutomaticEvents: trackAutomaticEvents,
+                                                         superProperties: superProperties)
     }
     #else
     /**
@@ -143,12 +145,14 @@ class MixpanelManager {
                     flushInterval: Double,
                     instanceName: String,
                     optOutTrackingByDefault: Bool = false,
-                    trackAutomaticEvents: Bool = true) -> MixpanelInstance {
+                    trackAutomaticEvents: Bool = true,
+                    superProperties: Properties? = nil) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
                                         flushInterval: flushInterval,
                                         name: instanceName,
                                         optOutTrackingByDefault: optOutTrackingByDefault,
-                                        trackAutomaticEvents: trackAutomaticEvents)
+                                        trackAutomaticEvents: trackAutomaticEvents,
+                                        superProperties: superProperties)
         mainInstance = instance
         readWriteLock.write {
             instances[instanceName] = instance

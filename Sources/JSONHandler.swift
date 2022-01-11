@@ -15,20 +15,12 @@ class JSONHandler {
     class func encodeAPIData(_ obj: MPObjectToParse) -> String? {
         let data: Data? = serializeJSONObject(obj)
 
-        guard let d = data else {
+        guard let data = data else {
             Logger.warn(message: "couldn't serialize object")
             return nil
         }
 
-        let base64Encoded = d.base64EncodedString(options: .lineLength64Characters)
-
-        guard let b64 = base64Encoded
-            .addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed) else {
-            Logger.warn(message: "couldn't replace characters to allowed URL character set")
-            return nil
-        }
-
-        return b64
+        return String(decoding: data, as: UTF8.self)
     }
     
     class func deserializeData(_ data: Data) -> MPObjectToParse? {

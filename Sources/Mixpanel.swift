@@ -28,6 +28,7 @@ open class Mixpanel {
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
      - parameter trackAutomaticEvents:      Optional. Whether or not to collect common mobile events
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
+     - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -41,12 +42,14 @@ open class Mixpanel {
                                instanceName: String = UUID().uuidString,
                                optOutTrackingByDefault: Bool = false,
                                trackAutomaticEvents: Bool = true,
+                               useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: instanceName,
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          trackAutomaticEvents: trackAutomaticEvents,
+                                                         useUniqueDistinctId: useUniqueDistinctId,
                                                          superProperties: superProperties)
     }
     #else
@@ -61,6 +64,7 @@ open class Mixpanel {
      - parameter flushInterval:             Optional. Interval to run background flushing
      - parameter instanceName:              Optional. The name you want to call this instance
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
+     - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -73,11 +77,13 @@ open class Mixpanel {
     open class func initialize(token apiToken: String,
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
-                               optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
+                               optOutTrackingByDefault: Bool = false,
+                               useUniqueDistinctId: Bool = false) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: instanceName,
-                                                         optOutTrackingByDefault: optOutTrackingByDefault)
+                                                         optOutTrackingByDefault: optOutTrackingByDefault,
+                                                         useUniqueDistinctId: useUniqueDistinctId)
     }
     #endif // os(OSX)
 
@@ -147,12 +153,14 @@ class MixpanelManager {
                     instanceName: String,
                     optOutTrackingByDefault: Bool = false,
                     trackAutomaticEvents: Bool = true,
+                    useUniqueDistinctId: Bool = false,
                     superProperties: Properties? = nil) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
                                         flushInterval: flushInterval,
                                         name: instanceName,
                                         optOutTrackingByDefault: optOutTrackingByDefault,
                                         trackAutomaticEvents: trackAutomaticEvents,
+                                        useUniqueDistinctId: useUniqueDistinctId,
                                         superProperties: superProperties)
         mainInstance = instance
         readWriteLock.write {
@@ -165,11 +173,13 @@ class MixpanelManager {
     func initialize(token apiToken: String,
                     flushInterval: Double,
                     instanceName: String,
-                    optOutTrackingByDefault: Bool = false) -> MixpanelInstance {
+                    optOutTrackingByDefault: Bool = false,
+                    useUniqueDistinctId: Bool = false) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,
                                         flushInterval: flushInterval,
                                         name: instanceName,
-                                        optOutTrackingByDefault: optOutTrackingByDefault)
+                                        optOutTrackingByDefault: optOutTrackingByDefault,
+                                        useUniqueDistinctId: useUniqueDistinctId)
         mainInstance = instance
         readWriteLock.write {
             instances[instanceName] = instance

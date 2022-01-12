@@ -194,6 +194,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var trackingQueue: DispatchQueue
     var networkQueue: DispatchQueue
     var optOutStatus: Bool?
+    var useUniqueDistinctId: Bool
     var timedEvents = InternalProperties()
     let readWriteLock: ReadWriteLock
     #if os(iOS) && !targetEnvironment(macCatalyst)
@@ -215,7 +216,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     
     #if !os(OSX) && !os(watchOS)
     init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false,
-         trackAutomaticEvents: Bool = true, superProperties: Properties? = nil) {
+         trackAutomaticEvents: Bool = true, useUniqueDistinctId: Bool = false, superProperties: Properties? = nil) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -224,6 +225,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
         mixpanelPersistence = MixpanelPersistence.init(token: self.apiToken)
         mixpanelPersistence.migrate()
+        self.useUniqueDistinctId = useUniqueDistinctId
         
         self.name = name
         readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
@@ -291,10 +293,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif // DECIDE
     }
     #else
-    init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false) {
+    init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false, useUniqueDistinctId: Bool = false) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
+        self.useUniqueDistinctId = useUniqueDistinctId
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: label, qos: .utility)
         networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
@@ -467,7 +470,20 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     
     func defaultDistinctId() -> String {
         let distinctId: String?
-        #if MIXPANEL_UNIQUE_DISTINCT_ID
+        if useUniqueDistinctId {
+            distinctId = uniqueIdentifierForDevice()
+        } else {
+            #if MIXPANEL_UNIQUE_DISTINCT_ID
+            distinctId = uniqueIdentifierForDevice()
+            #else
+            distinctId = nil
+            #endif
+        }
+        return distinctId ?? UUID().uuidString // use a random UUID by default
+    }
+    
+    func uniqueIdentifierForDevice() -> String? {
+        var distinctId: String?
         #if os(OSX)
         distinctId = MixpanelInstance.macOSIdentifier()
         #elseif !os(watchOS)
@@ -479,10 +495,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #else
         distinctId = nil
         #endif
-        #else
-        distinctId = nil
-        #endif
-        return distinctId ?? UUID().uuidString // use a random UUID by default
+        return distinctId
     }
     
     #if os(OSX)

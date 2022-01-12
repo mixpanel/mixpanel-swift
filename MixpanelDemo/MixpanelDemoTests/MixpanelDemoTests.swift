@@ -367,6 +367,20 @@ class MixpanelDemoTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
+    func testUseUniqueDistinctId() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel2 = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        XCTAssertNotEqual(testMixpanel.distinctId, testMixpanel2.distinctId, "by default, distinctId should not be unique to the device")
+        
+        let testMixpanel3 = Mixpanel.initialize(token: randomId(), flushInterval: 60, useUniqueDistinctId: false)
+        let testMixpanel4 = Mixpanel.initialize(token: randomId(), flushInterval: 60, useUniqueDistinctId: false)
+        XCTAssertNotEqual(testMixpanel3.distinctId, testMixpanel4.distinctId, "distinctId should not be unique to the device if useUniqueDistinctId is set to false")
+        
+        let testMixpanel5 = Mixpanel.initialize(token: randomId(), flushInterval: 60, useUniqueDistinctId: true)
+        let testMixpanel6 = Mixpanel.initialize(token: randomId(), flushInterval: 60, useUniqueDistinctId: true)
+        XCTAssertEqual(testMixpanel5.distinctId, testMixpanel6.distinctId, "distinctId should be unique to the device if useUniqueDistinctId is set to true")
+    }
+    
     func testHadPersistedDistinctId() {
         stubTrack()
         let testToken = randomId()

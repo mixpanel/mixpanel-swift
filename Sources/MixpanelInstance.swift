@@ -266,7 +266,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                         metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
         people.mixpanelInstance = self
         people.delegate = self
-        flushInstance._flushInterval = flushInterval
+        flushInstance.flushInterval = flushInterval
         setupListeners()
         unarchive()
         
@@ -318,7 +318,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                         lock: self.readWriteLock,
                         metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
         people.mixpanelInstance = self
-        flushInstance._flushInterval = flushInterval
+        flushInstance.flushInterval = flushInterval
         #if !os(watchOS)
         setupListeners()
         #endif

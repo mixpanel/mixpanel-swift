@@ -130,6 +130,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testFlushQueueContainsCorruptedEvent() {
+        LSNocilla.sharedInstance().clearStubs()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         stubTrack()
         testMixpanel.trackingQueue.async {
@@ -658,6 +659,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testArchiveNSNumberBoolIntProperty() {
+        LSNocilla.sharedInstance().clearStubs()
+        _ = stubTrack().andReturn(503)
         let testToken = randomId()
         let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
         let aBoolNumber: Bool = true
@@ -672,6 +675,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         
         let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
         waitForTrackingQueue(testMixpanel2)
+        
         let properties: [String: Any] = eventQueue(token: testMixpanel2.apiToken)[1]["properties"] as! [String: Any]
 
         XCTAssertTrue(isBoolNumber(num: properties["p1"]! as! NSNumber),
@@ -689,6 +693,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testArchive() {
+        LSNocilla.sharedInstance().clearStubs()
+        _ = stubTrack().andReturn(503)
+        _ = stubEngage().andReturn(503)
         let testToken = randomId()
         let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60, trackAutomaticEvents: false)
         #if MIXPANEL_UNIQUE_DISTINCT_ID
@@ -718,6 +725,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         testMixpanel.timedEvents["e2"] = 5
         testMixpanel.archive()
+        LSNocilla.sharedInstance().clearStubs()
+        _ = stubTrack().andReturn(503)
+        _ = stubEngage().andReturn(503)
         let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60, trackAutomaticEvents: false)
         waitForTrackingQueue(testMixpanel2)
         sleep(1)
@@ -749,7 +759,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(peopleQueue(token: testMixpanel2.apiToken).count >= 1, "pending people queue archive failed")
         XCTAssertEqual(testMixpanel2.timedEvents["e2"] as? Double, 5.0,
                        "timedEvents archive failed")
-
+        LSNocilla.sharedInstance().clearStubs()
+        _ = stubTrack().andReturn(503)
+        _ = stubEngage().andReturn(503)
         let testMixpanel3 = Mixpanel.initialize(token: testToken, flushInterval: 60, trackAutomaticEvents: false)
         XCTAssertEqual(testMixpanel3.distinctId, "d1", "expecting d1 as distinct id as initialised")
         XCTAssertTrue(testMixpanel3.currentSuperProperties().count == 1,

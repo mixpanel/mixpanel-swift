@@ -130,6 +130,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testFlushQueueContainsCorruptedEvent() {
+        LSNocilla.sharedInstance().clearStubs()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         stubTrack()
         testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event1", "properties": ["BadProp": Double.nan]], type: .events)
@@ -633,6 +634,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testArchiveNSNumberBoolIntProperty() {
+        LSNocilla.sharedInstance().clearStubs()
+        _ = stubTrack().andReturn(503)
+        _ = stubEngage().andReturn(503)
         let testToken = randomId()
         let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
         let aBoolNumber: Bool = true
@@ -645,6 +649,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
         testMixpanel.archive()
         waitForTrackingQueue(testMixpanel)
         
+        LSNocilla.sharedInstance().clearStubs()
+        _ = stubTrack().andReturn(503)
+        _ = stubEngage().andReturn(503)
         let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
         waitForTrackingQueue(testMixpanel2)
         let properties: [String: Any] = eventQueue(token: testMixpanel2.apiToken)[0]["properties"] as! [String: Any]
@@ -664,6 +671,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testArchive() {
+        LSNocilla.sharedInstance().clearStubs()
+        _ = stubTrack().andReturn(503)
+        _ = stubEngage().andReturn(503)
         let testToken = randomId()
         let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
         #if MIXPANEL_UNIQUE_DISTINCT_ID

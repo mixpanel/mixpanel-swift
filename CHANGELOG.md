@@ -1,5 +1,24 @@
 #
 
+## [v3.1.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.0) (2022-01-13)
+
+### Enhancements
+
+- Add useUniqueDistinctId parameter to initialize [\#500](https://github.com/mixpanel/mixpanel-swift/pull/500)
+- Remove base64 encoding [\#499](https://github.com/mixpanel/mixpanel-swift/pull/499)
+- Add superProperties param to initialize [\#498](https://github.com/mixpanel/mixpanel-swift/pull/498)
+
+### Fixes
+
+- Fix incorrect app version property [\#497](https://github.com/mixpanel/mixpanel-swift/pull/497)
+- Fix  `First App Open` not always being able to be triggered [\#496](https://github.com/mixpanel/mixpanel-swift/pull/496)
+
+**Merged pull requests:**
+
+- Add completion closure to async apis `reset\(\)`, `identify\(\)` and `createAlias\(\)`  [\#468](https://github.com/mixpanel/mixpanel-swift/pull/468)
+
+#
+
 ## [v3.0.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.0.0) (2022-01-02)
 -  Messages & Experiments feature removal, for more detail, please check this [post](https://mixpanel.com/blog/why-were-sunsetting-messaging-and-experiments/#:~:text=A%20year%20from%20now%2C%20on,offering%20discounts%20for%20getting%20started):
 
@@ -33,6 +52,8 @@
 - Improve README for quick start guide [\#464](https://github.com/mixpanel/mixpanel-swift/pull/464)
 - remove github actions for uploading Carthage artifact [\#462](https://github.com/mixpanel/mixpanel-swift/pull/462)
 - enable github actions automatically upload Carthage artifact [\#461](https://github.com/mixpanel/mixpanel-swift/pull/461)
+
+
 
 
 

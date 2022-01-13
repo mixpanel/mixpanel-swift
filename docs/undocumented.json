@@ -9,14 +9,14 @@
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 752,
+      "line": 776,
       "symbol": "MixpanelInstance.archive()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/zihejia/Documents/Projects/Develop/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 972,
+      "line": 996,
       "symbol": "MixpanelInstance.getGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"

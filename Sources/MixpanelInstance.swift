@@ -766,6 +766,9 @@ extension MixpanelInstance {
                 self.mixpanelPersistence.resetEntities()
             }
             self?.archive()
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
         }
     }
 }

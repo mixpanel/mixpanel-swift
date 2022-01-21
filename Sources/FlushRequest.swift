@@ -31,14 +31,13 @@ class FlushRequest: Network {
             }
             return nil
         }
-
-        let requestBody = "ip=\(useIP ? 1 : 0)&data=\(requestData)"
-            .data(using: String.Encoding.utf8)
-
+        
+        let ipString = useIP ? "1" : "0"
         let resource = Network.buildResource(path: type.rawValue,
                                              method: .post,
-                                             requestBody: requestBody,
-                                             headers: ["Accept-Encoding": "gzip"],
+                                             requestBody: requestData.data(using: .utf8),
+                                             queryItems: [URLQueryItem(name: "ip", value: ipString)],
+                                             headers: ["Content-Type": "application/json"],
                                              parse: responseParser)
 
         flushRequestHandler(BasePath.getServerURL(identifier: basePathIdentifier),

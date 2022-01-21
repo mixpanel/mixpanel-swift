@@ -19,19 +19,19 @@ let kDefaultServerGroupsString = "https://api.mixpanel.com/groups/"
 let kDefaultServerDecideString = "^https://api.mixpanel.com/decide(.*?)".regex
 
 @discardableResult func stubEngage() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerEngageString as LSMatcheable).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("POST", kDefaultServerEngageString as LSMatcheable).withHeader("Content-Type", "application/json")!
 }
 
 @discardableResult func stubGroups() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerGroupsString as LSMatcheable?).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("POST", kDefaultServerGroupsString as LSMatcheable?).withHeader("Content-Type", "application/json")!
 }
 
 @discardableResult func stubTrack() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerTrackString as LSMatcheable).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("POST", kDefaultServerTrackString as LSMatcheable).withHeader("Content-Type", "application/json")!
 }
 
 @discardableResult func stubDecide() -> LSStubRequestDSL {
-    return stubRequest("GET", kDefaultServerDecideString()).withHeader("Accept-Encoding", "gzip")!
+    return stubRequest("GET", kDefaultServerDecideString()).withHeader("Content-Type", "application/json")!
 }
 
 extension XCTestCase {

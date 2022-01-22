@@ -1,4 +1,13 @@
 #
+## [v3.1.1](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.1) (2022-01-21)
+
+## What's Changed
+* Fix the reset completion block not being triggered by @zihejia in https://github.com/mixpanel/mixpanel-swift/pull/505
+* Set content-type to application/json by @jaredmixpanel in https://github.com/mixpanel/mixpanel-swift/pull/506
+  This will avoid events being rejected by the server if any string contains "& % ".
+
+
+**Full Changelog**: https://github.com/mixpanel/mixpanel-swift/compare/v3.1.0...v3.1.1
 
 ## [v3.1.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.0) (2022-01-13)
 

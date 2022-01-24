@@ -15,12 +15,12 @@ class JSONHandler {
     class func encodeAPIData(_ obj: MPObjectToParse) -> String? {
         let data: Data? = serializeJSONObject(obj)
 
-        guard let data = data else {
+        guard let d = data else {
             Logger.warn(message: "couldn't serialize object")
             return nil
         }
 
-        return String(decoding: data, as: UTF8.self)
+        return String(decoding: d, as: UTF8.self)
     }
     
     class func deserializeData(_ data: Data) -> MPObjectToParse? {

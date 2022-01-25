@@ -14,7 +14,7 @@ import XCTest
 let kTestToken = "abc123"
 let kDefaultServerString = "^https://api.mixpanel.com"
 let kDefaultServerTrackString = "^https://api.mixpanel.com/track/".regex
-let kDefaultServerEngageString = "^https://api.mixpanel.com/engage/".regex
+let kDefaultServerEngageString = "^https://api.mixpanel.com/engage/?ip=1".regex
 let kDefaultServerGroupsString = "^https://api.mixpanel.com/groups/".regex
 let kDefaultServerDecideString = "^https://api.mixpanel.com/decide(.*?)".regex
 

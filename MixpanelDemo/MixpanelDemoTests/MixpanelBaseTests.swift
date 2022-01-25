@@ -19,7 +19,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     override func setUp() {
         NSLog("starting test setup...")
         super.setUp()
-        stubCalls()
+     //   stubCalls()
         mixpanelWillFlush = false
         let defaults = UserDefaults(suiteName: "Mixpanel")
         defaults?.removeObject(forKey: "MPFirstOpen")
@@ -37,13 +37,13 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     
     override func tearDown() {
         super.tearDown()
-        stubTrack()
-        stubDecide()
-        stubEngage()
-        stubGroups()
-
-        LSNocilla.sharedInstance().stop()
-        LSNocilla.sharedInstance().clearStubs()
+//        stubTrack()
+//        stubDecide()
+//        stubEngage()
+//        stubGroups()
+//
+//        LSNocilla.sharedInstance().stop()
+//        LSNocilla.sharedInstance().clearStubs()
     }
     
     func removeDBfile(_ token: String? = nil) {

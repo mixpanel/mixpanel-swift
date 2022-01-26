@@ -7,7 +7,6 @@
 //
 
 import XCTest
-import Nocilla
 import SQLite3
 
 @testable import Mixpanel
@@ -19,7 +18,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     override func setUp() {
         NSLog("starting test setup...")
         super.setUp()
-        stubCalls()
         mixpanelWillFlush = false
         let defaults = UserDefaults(suiteName: "Mixpanel")
         defaults?.removeObject(forKey: "MPFirstOpen")
@@ -27,23 +25,8 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         NSLog("finished test setup")
     }
 
-    func stubCalls() {
-        stubTrack()
-        stubDecide()
-        stubEngage()
-        stubGroups()
-        LSNocilla.sharedInstance().start()
-    }
-    
     override func tearDown() {
         super.tearDown()
-        stubTrack()
-        stubDecide()
-        stubEngage()
-        stubGroups()
-
-        LSNocilla.sharedInstance().stop()
-        LSNocilla.sharedInstance().clearStubs()
     }
     
     func removeDBfile(_ token: String? = nil) {
@@ -170,14 +153,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
                 "float": 1.3,
                 "optional": opt,
         ]
-    }
-
-    func topViewController() -> UIViewController {
-        var rootViewController = UIApplication.shared.keyWindow?.rootViewController
-        while rootViewController?.presentedViewController != nil {
-            rootViewController = rootViewController?.presentedViewController
-        }
-        return rootViewController!
     }
 
 }

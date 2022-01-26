@@ -6,33 +6,12 @@
 //  Copyright © 2016 Mixpanel. All rights reserved.
 //
 
-import Nocilla
 import XCTest
 
 @testable import Mixpanel
 
-let kTestToken = "abc123"
-let kDefaultServerString = "^https://api.mixpanel.com"
-let kDefaultServerTrackString = "^https://api.mixpanel.com/track/".regex
-let kDefaultServerEngageString = "^https://api.mixpanel.com/engage/".regex
-let kDefaultServerGroupsString = "^https://api.mixpanel.com/groups/".regex
-let kDefaultServerDecideString = "^https://api.mixpanel.com/decide(.*?)".regex
+let kFakeServerUrl = "https://34a272abf23d.com"
 
-@discardableResult func stubEngage() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerEngageString()).withHeader("Content-Type", "application/json")!
-}
-
-@discardableResult func stubGroups() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerGroupsString()).withHeader("Content-Type", "application/json")!
-}
-
-@discardableResult func stubTrack() -> LSStubRequestDSL {
-    return stubRequest("POST", kDefaultServerTrackString()).withHeader("Content-Type", "application/json")!
-}
-
-@discardableResult func stubDecide() -> LSStubRequestDSL {
-    return stubRequest("GET", kDefaultServerDecideString()).withHeader("Content-Type", "application/json")!
-}
 
 extension XCTestCase {
 

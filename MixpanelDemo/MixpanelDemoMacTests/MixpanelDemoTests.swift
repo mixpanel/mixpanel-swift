@@ -7,7 +7,6 @@
 //
 
 import XCTest
-import Nocilla
 
 @testable import Mixpanel
 @testable import MixpanelDemoMac
@@ -15,9 +14,8 @@ import Nocilla
 class MixpanelDemoTests: MixpanelBaseTests {
 
     func test5XXResponse() {
-        LSNocilla.sharedInstance().clearStubs()
-        _ = stubTrack().andReturn(503)
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        testMixpanel.serverURL = kFakeServerUrl
         testMixpanel.track(event: "Fake Event")
         flushAndWaitForTrackingQueue(testMixpanel)
         // Failure count should be 3
@@ -33,25 +31,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
-    func testRetryAfterHTTPHeader() {
-        LSNocilla.sharedInstance().clearStubs()
-        _ = stubTrack().andReturn(200)?.withHeader("Retry-After", "60")
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
-        testMixpanel.track(event: "Fake Event")
-        flushAndWaitForTrackingQueue(testMixpanel)
-
-        // Failure count should be 3
-        let waitTime =
-            testMixpanel.flushInstance.flushRequest.networkRequestsAllowedAfterTime - Date().timeIntervalSince1970
-        print("Delta wait time is \(waitTime)")
-        XCTAssert(fabs(60 - waitTime) < 5, "Mixpanel did not respect 'Retry-After' HTTP header")
-        XCTAssert(testMixpanel.flushInstance.flushRequest.networkConsecutiveFailures == 0,
-                  "Network failures did not equal 0")
-        removeDBfile(testMixpanel.apiToken)
-    }
-
     func testFlushEvents() {
-        stubTrack()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         for i in 0..<50 {
@@ -74,7 +54,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
 
     func testFlushPeople() {
-        stubEngage()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         for i in 0..<50 {
@@ -93,7 +72,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testFlushGroups() {
-        stubGroups()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         let groupKey = "test_key"
@@ -115,9 +93,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testFlushNetworkFailure() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
-        LSNocilla.sharedInstance().clearStubs()
-        stubTrack().andFailWithError(
-            NSError(domain: "com.mixpanel.sdk.testing", code: 1, userInfo: nil))
+        testMixpanel.serverURL = kFakeServerUrl
         for i in 0..<50 {
             testMixpanel.track(event: "event \(UInt(i))")
         }
@@ -130,14 +106,13 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testFlushQueueContainsCorruptedEvent() {
-        LSNocilla.sharedInstance().clearStubs()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
-        stubTrack()
-        testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event1", "properties": ["BadProp": Double.nan]], type: .events)
-        testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event2", "properties": ["BadProp": Float.nan]], type: .events)
-        testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event3", "properties": ["BadProp": Double.infinity]], type: .events)
-        testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event4", "properties": ["BadProp": Float.infinity]], type: .events)
-
+        testMixpanel.trackingQueue.async {
+            testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event1", "properties": ["BadProp": Double.nan]], type: .events)
+            testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event2", "properties": ["BadProp": Float.nan]], type: .events)
+            testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event3", "properties": ["BadProp": Double.infinity]], type: .events)
+            testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event4", "properties": ["BadProp": Float.infinity]], type: .events)
+        }
         for i in 0..<10 {
             testMixpanel.track(event: "event \(UInt(i))")
         }
@@ -147,7 +122,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testAddEventContainsInvalidJsonObjectDoubleNaN() {
-        stubTrack()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         XCTExpectAssert("unsupported property type was allowed") {
             testMixpanel.track(event: "bad event", properties: ["BadProp": Double.nan])
@@ -180,7 +154,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testAddingEventsAfterFlush() {
-        stubTrack()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         for i in 0..<10 {
             testMixpanel.track(event: "event \(UInt(i))")
@@ -199,8 +172,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testIdentify() {
-        stubTrack()
-        stubEngage()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         for _ in 0..<2 {
             // run this twice to test reset works correctly wrt to distinct ids
@@ -290,8 +261,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testIdentifyTrack() {
-        stubTrack()
-        stubEngage()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         let distinctIdBeforeIdentify: String? = testMixpanel.distinctId
         let distinctId = "testIdentifyTrack"
@@ -308,8 +277,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testIdentifyResetTrack() {
-        stubTrack()
-        stubEngage()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         let originalDistinctId: String? = testMixpanel.distinctId
         let distinctId = "testIdentifyTrack"
@@ -339,7 +306,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testPersistentIdentity() {
-        stubTrack()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         let distinctId: String = "d1"
         let alias: String = "a1"
@@ -365,7 +331,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testHadPersistedDistinctId() {
-        stubTrack()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         XCTAssertNotNil(testMixpanel.distinctId)
         let distinctId: String = "d1"
@@ -593,8 +558,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testReset() {
-        stubTrack()
-        stubEngage()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         testMixpanel.track(event: "e1")
@@ -634,11 +597,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testArchiveNSNumberBoolIntProperty() {
-        LSNocilla.sharedInstance().clearStubs()
-        _ = stubTrack().andReturn(503)
-        _ = stubEngage().andReturn(503)
         let testToken = randomId()
         let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        testMixpanel.serverURL = kFakeServerUrl
         let aBoolNumber: Bool = true
         let aBoolNSNumber = NSNumber(value: aBoolNumber)
 
@@ -649,10 +610,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
         testMixpanel.archive()
         waitForTrackingQueue(testMixpanel)
         
-        LSNocilla.sharedInstance().clearStubs()
-        _ = stubTrack().andReturn(503)
-        _ = stubEngage().andReturn(503)
         let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        testMixpanel2.serverURL = kFakeServerUrl
         waitForTrackingQueue(testMixpanel2)
         let properties: [String: Any] = eventQueue(token: testMixpanel2.apiToken)[0]["properties"] as! [String: Any]
 
@@ -671,11 +630,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testArchive() {
-        LSNocilla.sharedInstance().clearStubs()
-        _ = stubTrack().andReturn(503)
-        _ = stubEngage().andReturn(503)
         let testToken = randomId()
         let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        testMixpanel.serverURL = kFakeServerUrl
         #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(testMixpanel.distinctId, testMixpanel.defaultDistinctId(),
                        "default distinct id archive failed")
@@ -704,6 +661,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         testMixpanel.timedEvents["e2"] = 5
         testMixpanel.archive()
         let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        testMixpanel2.serverURL = kFakeServerUrl
         waitForTrackingQueue(testMixpanel2)
         sleep(1)
         XCTAssertEqual(testMixpanel2.distinctId, "d1", "custom distinct archive failed")
@@ -736,6 +694,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                        "timedEvents archive failed")
 
         let testMixpanel3 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        testMixpanel3.serverURL = kFakeServerUrl
         XCTAssertEqual(testMixpanel3.distinctId, "d1", "expecting d1 as distinct id as initialised")
         XCTAssertTrue(testMixpanel3.currentSuperProperties().count == 1,
                       "default super properties expected to have 1 item")
@@ -828,8 +787,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testSetGroup() {
-        stubTrack()
-        stubEngage()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         let groupKey = "test_key"
@@ -845,8 +802,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testAddGroup() {
-        stubTrack()
-        stubEngage()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         let groupKey = "test_key"
@@ -881,8 +836,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testRemoveGroup() {
-        stubTrack()
-        stubEngage()
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         let groupKey = "test_key"

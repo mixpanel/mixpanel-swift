@@ -7,7 +7,6 @@
 //
 
 import XCTest
-import Nocilla
 import SQLite3
 
 @testable import Mixpanel
@@ -20,29 +19,13 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     override func setUp() {
         NSLog("starting test setup...")
         super.setUp()
-        stubCalls()
         mixpanelWillFlush = false
 
         NSLog("finished test setup")
     }
-
-    func stubCalls() {
-        stubTrack()
-        stubDecide()
-        stubEngage()
-        stubGroups()
-        LSNocilla.sharedInstance().start()
-    }
     
     override func tearDown() {
         super.tearDown()
-        stubTrack()
-        stubDecide()
-        stubEngage()
-        stubGroups()
-
-        LSNocilla.sharedInstance().stop()
-        LSNocilla.sharedInstance().clearStubs()
     }
     
     func removeDBfile(_ token: String? = nil) {

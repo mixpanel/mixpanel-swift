@@ -6,7 +6,6 @@
 //  Copyright © 2016 Mixpanel. All rights reserved.
 //
 
-import Nocilla
 import XCTest
 
 @testable import Mixpanel

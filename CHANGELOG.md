@@ -1,4 +1,13 @@
 #
+
+## [v3.1.2](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.2) (2022-01-26)
+
+### Fixes
+
+- Fix unit tests and remove outdated 'Nocilla' stub server [\#509](https://github.com/mixpanel/mixpanel-swift/pull/509)
+- fix build issue in JSONHandler [\#508](https://github.com/mixpanel/mixpanel-swift/pull/508)
+
+#
 ## [v3.1.1](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.1) (2022-01-21)
 
 ## What's Changed
@@ -61,6 +70,8 @@
 - Improve README for quick start guide [\#464](https://github.com/mixpanel/mixpanel-swift/pull/464)
 - remove github actions for uploading Carthage artifact [\#462](https://github.com/mixpanel/mixpanel-swift/pull/462)
 - enable github actions automatically upload Carthage artifact [\#461](https://github.com/mixpanel/mixpanel-swift/pull/461)
+
+
 
 
 

@@ -826,35 +826,29 @@
 					};
 					86F86E8A22440C5C00B69832 = {
 						CreatedOnToolsVersion = 10.1;
-						DevelopmentTeam = E8FVX7QLET;
 						ProvisioningStyle = Automatic;
 					};
 					86F86E9622440C5F00B69832 = {
 						CreatedOnToolsVersion = 10.1;
-						DevelopmentTeam = E8FVX7QLET;
 						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
 					};
 					86F86F0022460B3000B69832 = {
 						CreatedOnToolsVersion = 10.1;
-						DevelopmentTeam = E8FVX7QLET;
 						ProvisioningStyle = Automatic;
 					};
 					86F86F1022460B3200B69832 = {
 						CreatedOnToolsVersion = 10.1;
-						DevelopmentTeam = E8FVX7QLET;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 86F86F0022460B3000B69832;
 					};
 					86F86F1B22460B3200B69832 = {
 						CreatedOnToolsVersion = 10.1;
-						DevelopmentTeam = E8FVX7QLET;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 86F86F0022460B3000B69832;
 					};
 					E15FF7D21D0461130076CDE3 = {
 						CreatedOnToolsVersion = 7.3.1;
-						DevelopmentTeam = E8FVX7QLET;
 						DevelopmentTeamName = "Mixpanel, Inc.";
 						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
@@ -1235,10 +1229,9 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = MixpanelDemoMac/MixpanelDemoMac.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = MixpanelDemoMac/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1297,11 +1290,11 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = AXVA7A4XGX;
+				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = MixpanelDemoMacTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1337,7 +1330,6 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = MixpanelDemoMacTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1459,7 +1451,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 6;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				IBSC_MODULE = MixpanelDemoWatch_Extension;
 				INFOPLIST_FILE = MixpanelDemoWatch/Info.plist;
@@ -1521,7 +1512,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 6;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = "MixpanelDemoWatch Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1556,7 +1546,6 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 6;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = MixpanelDemoTV/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1589,7 +1578,6 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 6;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = MixpanelDemoTV/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1617,10 +1605,9 @@
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WAE8FVX7QLETRN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = MixpanelDemoTVTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1652,7 +1639,6 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = MixpanelDemoTVTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1683,7 +1669,6 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = MixpanelDemoTVUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1714,7 +1699,6 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = MixpanelDemoTVUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1891,7 +1875,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 6;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = E8FVX7QLET;
 				INFOPLIST_FILE = MixpanelDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (

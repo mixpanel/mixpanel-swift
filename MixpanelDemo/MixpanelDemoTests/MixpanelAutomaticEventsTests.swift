@@ -7,7 +7,6 @@
 //
 
 import XCTest
-import Nocilla
 
 @testable import Mixpanel
 @testable import MixpanelDemo

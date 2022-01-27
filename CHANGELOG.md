@@ -40,7 +40,6 @@
 #
 
 ## [v3.0.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.0.0) (2022-01-02)
-## Caution: In this version, we have a bug that event names with `&` or `%` will be rejected by the server. We recommend you update to 3.1.1 or above. 
 
 -  Messages & Experiments feature removal, for more detail, please check this [post](https://mixpanel.com/blog/why-were-sunsetting-messaging-and-experiments/#:~:text=A%20year%20from%20now%2C%20on,offering%20discounts%20for%20getting%20started):
 

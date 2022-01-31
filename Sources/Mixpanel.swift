@@ -26,7 +26,7 @@ open class Mixpanel {
      - parameter flushInterval:             Optional. Interval to run background flushing
      - parameter instanceName:              Optional. The name you want to call this instance
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
-     - parameter trackAutomaticEvents:      Optional. Whether or not to collect common mobile events
+     - parameter trackAutomaticEvents:      Optional. Whether or not to collect common mobile events, it takes precedence over Autotrack settings from the Mixpanel server.
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
      - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
 

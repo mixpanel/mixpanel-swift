@@ -79,7 +79,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// data to the Mixpanel servers. Defaults to true.
     open var showNetworkActivityIndicator = true
     
-    /// This allows enabling or disabling collecting common mobile events
+    /// This allows enabling or disabling collecting common mobile events,
+    /// it takes precedence over Autotrack settings from the Mixpanel server.
     /// If this is not set, it will query the Autotrack settings from the Mixpanel server
     open var trackAutomaticEventsEnabled: Bool? {
         didSet {

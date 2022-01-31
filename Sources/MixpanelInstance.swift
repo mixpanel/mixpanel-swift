@@ -79,7 +79,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// data to the Mixpanel servers. Defaults to true.
     open var showNetworkActivityIndicator = true
     
-    /// This allows enabling or disabling collecting common mobile events
+    /// This allows enabling or disabling collecting common mobile events,
+    /// it takes precedence over Autotrack settings from the Mixpanel server.
     /// If this is not set, it will query the Autotrack settings from the Mixpanel server
     open var trackAutomaticEventsEnabled: Bool? {
         didSet {
@@ -216,7 +217,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     
     #if !os(OSX) && !os(watchOS)
     init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false,
-         trackAutomaticEvents: Bool = true, useUniqueDistinctId: Bool = false, superProperties: Properties? = nil) {
+         trackAutomaticEvents: Bool? = nil, useUniqueDistinctId: Bool = false, superProperties: Properties? = nil) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -280,11 +281,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let superProperties = superProperties {
             registerSuperProperties(superProperties)
         }
-        
-        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: trackAutomaticEvents,
+
+        if let trackAutomaticEvents = trackAutomaticEvents {
+            MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: trackAutomaticEvents,
                                                             fromDecide: false,
                                                             apiToken: self.apiToken)
-        
+        }
+
         #if DECIDE || TV_AUTO_EVENTS
         if !MixpanelInstance.isiOSAppExtension() {
             automaticEvents.delegate = self
@@ -1407,6 +1410,12 @@ extension MixpanelInstance {
             self.decideInstance.checkDecide(forceFetch: forceFetch,
                                             distinctId: self.people.distinctId ?? self.distinctId,
                                             token: self.apiToken)
+            self.trackingQueue.async { [weak self] in
+                guard let self = self else { return }
+                if !MixpanelPersistence.loadAutomacticEventsEnabledFlag(apiToken: self.apiToken) {
+                    self.mixpanelPersistence.removeAutomaticEvents()
+                }
+            }
         }
     }
 }

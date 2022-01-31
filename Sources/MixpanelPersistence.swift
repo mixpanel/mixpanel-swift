@@ -86,6 +86,13 @@ class MixpanelPersistence {
         return result
     }
     
+    func removeAutomaticEvents() {
+        let events = loadEntitiesInBatch(type: .events)
+        let ids = events.filter { ($0["event"] as! String).hasPrefix("$ae_") }
+            .map { $0["id"] as! Int32 }
+        removeEntitiesInBatch(type: .events, ids: ids)
+    }
+
     func removeEntitiesInBatch(type: PersistenceType, ids: [Int32]) {
         mpdb.deleteRows(type, ids: ids)
     }

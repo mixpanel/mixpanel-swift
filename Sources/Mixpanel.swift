@@ -41,7 +41,7 @@ open class Mixpanel {
                                flushInterval: Double = 60,
                                instanceName: String = UUID().uuidString,
                                optOutTrackingByDefault: Bool = false,
-                               trackAutomaticEvents: Bool = true,
+                               trackAutomaticEvents: Bool? = nil,
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
@@ -152,7 +152,7 @@ class MixpanelManager {
                     flushInterval: Double,
                     instanceName: String,
                     optOutTrackingByDefault: Bool = false,
-                    trackAutomaticEvents: Bool = true,
+                    trackAutomaticEvents: Bool? = nil,
                     useUniqueDistinctId: Bool = false,
                     superProperties: Properties? = nil) -> MixpanelInstance {
         let instance = MixpanelInstance(apiToken: apiToken,

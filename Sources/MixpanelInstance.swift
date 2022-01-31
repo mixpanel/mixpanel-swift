@@ -216,7 +216,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     
     #if !os(OSX) && !os(watchOS)
     init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false,
-         trackAutomaticEvents: Bool = true, useUniqueDistinctId: Bool = false, superProperties: Properties? = nil) {
+         trackAutomaticEvents: Bool? = nil, useUniqueDistinctId: Bool = false, superProperties: Properties? = nil) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -280,11 +280,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let superProperties = superProperties {
             registerSuperProperties(superProperties)
         }
-        
-        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: trackAutomaticEvents,
+
+        if let trackAutomaticEvents = trackAutomaticEvents {
+            MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: trackAutomaticEvents,
                                                             fromDecide: false,
                                                             apiToken: self.apiToken)
-        
+        }
+
         #if DECIDE || TV_AUTO_EVENTS
         if !MixpanelInstance.isiOSAppExtension() {
             automaticEvents.delegate = self
@@ -1407,6 +1409,12 @@ extension MixpanelInstance {
             self.decideInstance.checkDecide(forceFetch: forceFetch,
                                             distinctId: self.people.distinctId ?? self.distinctId,
                                             token: self.apiToken)
+            self.trackingQueue.async { [weak self] in
+                guard let self = self else { return }
+                if !MixpanelPersistence.loadAutomacticEventsEnabledFlag(apiToken: self.apiToken) {
+                    self.mixpanelPersistence.removeAutomaticEvents()
+                }
+            }
         }
     }
 }

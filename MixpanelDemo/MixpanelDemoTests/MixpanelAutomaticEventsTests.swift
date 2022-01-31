@@ -57,6 +57,19 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
     }
 
     func testFlushAutomaticEventsIftrackAutomaticEventsEnabledIsTrue() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
+        testMixpanel.minimumSessionDuration = 0;
+        testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
+                                              with: Notification(name: Notification.Name(rawValue: "test")))
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "automatic events should be tracked")
+        
+        flushAndWaitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "automatic events should be flushed")
+        removeDBfile(testMixpanel.apiToken)
+    }
+    
+    func testFlushAutomaticEventsIftrackAutomaticEventsEnabledIsNotSet() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.minimumSessionDuration = 0;
         testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
@@ -73,12 +86,11 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
     func testDiscardAutomaticEventsIfDecideIsFalse() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.minimumSessionDuration = 0;
-        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: false, fromDecide: true, apiToken: testMixpanel.apiToken)
+        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: false, fromDecide: false, apiToken: testMixpanel.apiToken)
         testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
                                               with: Notification(name: Notification.Name(rawValue: "test")))
-
-        flushAndWaitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "automatic events should be discarded")
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "automatic events should not be tracked")
         removeDBfile(testMixpanel.apiToken)
     }
     
@@ -93,6 +105,28 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         
         flushAndWaitForTrackingQueue(testMixpanel)
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "automatic events should be flushed")
+        removeDBfile(testMixpanel.apiToken)
+    }
+    
+    func testDiscardAutomaticEventsIfDecideIsTrueSettingIsFalse() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
+        testMixpanel.minimumSessionDuration = 0;
+        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: true, fromDecide: true, apiToken: testMixpanel.apiToken)
+        testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
+                                              with: Notification(name: Notification.Name(rawValue: "test")))
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "automatic events should not be tracked")
+        removeDBfile(testMixpanel.apiToken)
+    }
+    
+    func testFlushAutomaticEventsIfDecideIsFalseSettingIsTrue() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
+        testMixpanel.minimumSessionDuration = 0;
+        MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: false, fromDecide: true, apiToken: testMixpanel.apiToken)
+        testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),
+                                              with: Notification(name: Notification.Name(rawValue: "test")))
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "automatic events should be tracked")
         removeDBfile(testMixpanel.apiToken)
     }
 

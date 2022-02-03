@@ -1,5 +1,13 @@
 #
 
+## [v3.1.3](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.3) (2022-02-03)
+
+### Fixes
+
+- Fix automatic events settings [\#511](https://github.com/mixpanel/mixpanel-swift/pull/511)
+
+#
+
 ## [v3.1.2](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.2) (2022-01-26)
 
 ### Fixes
@@ -55,6 +63,8 @@
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

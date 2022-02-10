@@ -21,6 +21,10 @@ class MPDB {
         open()
     }
     
+    deinit {
+      close()
+    }
+    
     private func pathToDb() -> String? {
         let manager = FileManager.default
         #if os(iOS)

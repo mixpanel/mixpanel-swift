@@ -61,6 +61,14 @@ class MixpanelPersistence {
         mpdb = MPDB.init(token: apiToken)
     }
     
+    deinit {
+       mpdb.close()
+    }
+    
+    func closeDB() {
+        mpdb.close()
+    }
+    
     func saveEntity(_ entity: InternalProperties, type: PersistenceType, flag: Bool = false) {
         if let data = JSONHandler.serializeJSONObject(entity) {
             mpdb.insertRow(type, data: data, flag: flag)

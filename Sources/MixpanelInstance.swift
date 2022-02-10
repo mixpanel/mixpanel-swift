@@ -314,6 +314,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         trackInstance = Track(apiToken: self.apiToken,
                               lock: self.readWriteLock,
                               metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
+        trackInstance.mixpanelInstance = self
         flushInstance.delegate = self
         distinctId = defaultDistinctId()
         people = People(apiToken: self.apiToken,

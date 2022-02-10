@@ -219,8 +219,9 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptOutWillSkipFlushPeople()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true, trackAutomaticEvents: false)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 0, optOutTrackingByDefault: true, trackAutomaticEvents: false)
         testMixpanel.optInTracking()
+        waitForTrackingQueue(testMixpanel)
         testMixpanel.identify(distinctId: "d1")
         waitForTrackingQueue(testMixpanel)
         for i in 0..<1 {

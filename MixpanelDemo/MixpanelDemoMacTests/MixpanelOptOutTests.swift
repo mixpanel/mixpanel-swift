@@ -62,6 +62,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
         testMixpanel.optInTracking(distinctId: "testDistinctId", properties: testProperties)
         waitForTrackingQueue(testMixpanel)
+        waitForTrackingQueue(testMixpanel)
         let eventQueueValue = eventQueue(token: testMixpanel.apiToken)
         
         let props = eventQueueValue.first!["properties"] as? InternalProperties

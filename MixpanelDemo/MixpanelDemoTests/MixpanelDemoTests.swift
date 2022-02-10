@@ -38,7 +38,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
             testMixpanel.track(event: "event \(i)")
         }
         flushAndWaitForTrackingQueue(testMixpanel)
-        sleep(1)
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty,
                       "events should have been flushed")
         
@@ -46,7 +45,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
             testMixpanel.track(event: "event \(i)")
         }
         flushAndWaitForTrackingQueue(testMixpanel)
-        sleep(1)
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty,
                       "events should have been flushed")
         removeDBfile(testMixpanel.apiToken)
@@ -60,13 +58,11 @@ class MixpanelDemoTests: MixpanelBaseTests {
             testMixpanel.people.set(property: "p1", to: "\(i)")
         }
         flushAndWaitForTrackingQueue(testMixpanel)
-        sleep(1)
         XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty, "people should have been flushed")
         for i in 0..<60 {
             testMixpanel.people.set(property: "p1", to: "\(i)")
         }
         flushAndWaitForTrackingQueue(testMixpanel)
-        sleep(1)
         XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty, "people should have been flushed")
         removeDBfile(testMixpanel.apiToken)
     }
@@ -80,13 +76,11 @@ class MixpanelDemoTests: MixpanelBaseTests {
             testMixpanel.getGroup(groupKey: groupKey, groupID: groupValue).set(property: "p1", to: "\(i)")
         }
         flushAndWaitForTrackingQueue(testMixpanel)
-        sleep(1)
         XCTAssertTrue(groupQueue(token: testMixpanel.apiToken).isEmpty, "groups should have been flushed")
         for i in 0..<60 {
             testMixpanel.getGroup(groupKey: groupKey, groupID: groupValue).set(property: "p1", to: "\(i)")
         }
         flushAndWaitForTrackingQueue(testMixpanel)
-        sleep(1)
         XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty, "groups should have been flushed")
         removeDBfile(testMixpanel.apiToken)
     }
@@ -216,7 +210,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
                            "incorrect project token in people record")
             testMixpanel.identify(distinctId: distinctId)
             waitForTrackingQueue(testMixpanel)
-            sleep(2)
             let anonymousId = testMixpanel.anonymousId
             peopleQueue_value = peopleQueue(token: testMixpanel.apiToken)
             unidentifiedQueue = unIdentifiedPeopleQueue(token: testMixpanel.apiToken)
@@ -270,7 +263,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
         testMixpanel.identify(distinctId: distinctId)
         waitForTrackingQueue(testMixpanel)
-        sleep(1)
         let e: InternalProperties = eventQueue(token: testMixpanel.apiToken).last!
         XCTAssertEqual(e["event"] as? String, "$identify", "incorrect event name")
         let p: InternalProperties = e["properties"] as! InternalProperties
@@ -291,7 +283,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
             let newDistinctId = distinctId + String(i)
             testMixpanel.identify(distinctId: newDistinctId)
             waitForTrackingQueue(testMixpanel)
-            sleep(1)
 
             let e: InternalProperties = eventQueue(token: testMixpanel.apiToken).last!
             XCTAssertEqual(e["event"] as? String, "$identify", "incorrect event name")
@@ -314,7 +305,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let alias: String = "a1"
         testMixpanel.identify(distinctId: distinctId)
         waitForTrackingQueue(testMixpanel)
-        sleep(1)
         testMixpanel.createAlias(alias, distinctId: testMixpanel.distinctId)
         waitForTrackingQueue(testMixpanel)
         var mixpanelIdentity = MixpanelPersistence.loadIdentity(apiToken: testMixpanel.apiToken)
@@ -358,7 +348,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let userId: String = "u1"
         testMixpanel.identify(distinctId: userId)
         waitForTrackingQueue(testMixpanel)
-        sleep(1)
         XCTAssertEqual(testMixpanel.anonymousId, distinctId)
         XCTAssertEqual(testMixpanel.userId, userId)
         XCTAssertEqual(testMixpanel.distinctId, userId)
@@ -585,13 +574,14 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         testMixpanel.track(event: "e1")
-        sleep(1)
+        waitForTrackingQueue(testMixpanel)
         let p: Properties = ["p1": "a"]
         testMixpanel.registerSuperProperties(p)
         testMixpanel.people.set(properties: p)
         testMixpanel.archive()
         testMixpanel.reset()
         waitForTrackingQueue(testMixpanel)
+
         #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(testMixpanel.distinctId,
                        testMixpanel.defaultDistinctId(),
@@ -670,7 +660,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let p: Properties = ["p1": "a"]
         testMixpanel.identify(distinctId: "d1")
         waitForTrackingQueue(testMixpanel)
-        sleep(1)
         testMixpanel.registerSuperProperties(p)
         testMixpanel.track(event: "e1")
         testMixpanel.track(event: "e2")
@@ -688,7 +677,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60, trackAutomaticEvents: false)
         testMixpanel2.serverURL = kFakeServerUrl
         waitForTrackingQueue(testMixpanel2)
-        sleep(1)
         XCTAssertEqual(testMixpanel2.distinctId, "d1", "custom distinct archive failed")
         XCTAssertTrue(testMixpanel2.currentSuperProperties().count == 1,
                       "custom super properties archive failed")
@@ -740,7 +728,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         testMixpanel.track(event: "e1")
         testMixpanel.people.set(property: "p1", to: "a")
         waitForTrackingQueue(testMixpanel)
-        sleep(1)
         flushAndWaitForTrackingQueue(testMixpanel)
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 3, "delegate should have stopped flush")
         XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).count == 2, "delegate should have stopped flush")
@@ -817,7 +804,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let groupValue = "test_value"
         testMixpanel.setGroup(groupKey: groupKey, groupIDs: [groupValue])
         waitForTrackingQueue(testMixpanel)
-        sleep(1)
         XCTAssertEqual(testMixpanel.currentSuperProperties()[groupKey] as? [String], [groupValue])
         let q = peopleQueue(token: testMixpanel.apiToken).last!["$set"] as! InternalProperties
         XCTAssertEqual(q[groupKey] as? [String], [groupValue], "group value people property not queued")
@@ -833,17 +819,15 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
         testMixpanel.addGroup(groupKey: groupKey, groupID: groupValue)
         waitForTrackingQueue(testMixpanel)
-        sleep(1)
         XCTAssertEqual(testMixpanel.currentSuperProperties()[groupKey] as? [String], [groupValue])
         waitForTrackingQueue(testMixpanel)
         let q = peopleQueue(token: testMixpanel.apiToken).last!["$set"] as! InternalProperties
         XCTAssertEqual(q[groupKey] as? [String], [groupValue], "addGroup people update not queued")
         assertDefaultPeopleProperties(q)
-
         testMixpanel.addGroup(groupKey: groupKey, groupID: groupValue)
+        
         waitForTrackingQueue(testMixpanel)
         XCTAssertEqual(testMixpanel.currentSuperProperties()[groupKey] as? [String], [groupValue])
-        waitForTrackingQueue(testMixpanel)
         waitForTrackingQueue(testMixpanel)
         let q2 = peopleQueue(token: testMixpanel.apiToken).last!["$union"] as! InternalProperties
         XCTAssertEqual(q2[groupKey] as? [String], [groupValue], "addGroup people update not queued")
@@ -868,7 +852,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
         testMixpanel.setGroup(groupKey: groupKey, groupIDs: [groupValue, newVal])
         waitForTrackingQueue(testMixpanel)
-        sleep(1)
         XCTAssertEqual(testMixpanel.currentSuperProperties()[groupKey] as? [String], [groupValue, newVal])
 
         testMixpanel.removeGroup(groupKey: groupKey, groupID: groupValue)
@@ -926,7 +909,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
                 testMixpanel.clearTimedEvents()
             }
         }
-        sleep(5)
         removeDBfile(testMixpanel.apiToken)
     }
     

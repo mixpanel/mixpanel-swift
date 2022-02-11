@@ -1,5 +1,13 @@
 #
 
+## [v3.1.4](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.4) (2022-02-11)
+
+### Fixes
+
+- Fixes for several race conditions and sqlite warnings [\#517](https://github.com/mixpanel/mixpanel-swift/pull/517)
+
+#
+
 ## [v3.1.3](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.3) (2022-02-03)
 
 ### Fixes
@@ -63,6 +71,8 @@
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

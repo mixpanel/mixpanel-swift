@@ -28,22 +28,26 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         super.tearDown()
     }
     
-    func removeDBfile(_ token: String? = nil) {
+    func removeDBfile(apiToken: String) {
         do {
              let fileManager = FileManager.default
             
             // Check if file exists
-            if fileManager.fileExists(atPath: dbFilePath(token)) {
+            if fileManager.fileExists(atPath: dbFilePath(apiToken)) {
                 // Delete file
-                try fileManager.removeItem(atPath: dbFilePath(token))
+                try fileManager.removeItem(atPath: dbFilePath(apiToken))
             } else {
-                print("Unable to delete the test db file at \(dbFilePath(token)), the file does not exist")
+                print("Unable to delete the test db file at \(dbFilePath(apiToken)), the file does not exist")
             }
-         
         }
         catch let error as NSError {
             print("An error took place: \(error)")
         }
+    }
+    
+    func removeDBfile(_ mixpanel: MixpanelInstance) {
+        mixpanel.mixpanelPersistence.closeDB()
+        removeDBfile(apiToken: mixpanel.apiToken)
     }
     
     func dbFilePath(_ token: String? = nil) -> String {
@@ -69,6 +73,12 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     }
 
     func waitForTrackingQueue(_ mixpanel: MixpanelInstance) {
+        mixpanel.trackingQueue.sync() {
+            mixpanel.networkQueue.sync() {
+                return
+            }
+        }
+        
         mixpanel.trackingQueue.sync() {
             mixpanel.networkQueue.sync() {
                 return

@@ -61,6 +61,14 @@ class MixpanelPersistence {
         mpdb = MPDB.init(token: apiToken)
     }
     
+    deinit {
+       mpdb.close()
+    }
+    
+    func closeDB() {
+        mpdb.close()
+    }
+    
     func saveEntity(_ entity: InternalProperties, type: PersistenceType, flag: Bool = false) {
         if let data = JSONHandler.serializeJSONObject(entity) {
             mpdb.insertRow(type, data: data, flag: flag)
@@ -90,7 +98,9 @@ class MixpanelPersistence {
         let events = loadEntitiesInBatch(type: .events)
         let ids = events.filter { ($0["event"] as! String).hasPrefix("$ae_") }
             .map { $0["id"] as! Int32 }
-        removeEntitiesInBatch(type: .events, ids: ids)
+        if !ids.isEmpty {
+            removeEntitiesInBatch(type: .events, ids: ids)
+        }
     }
 
     func removeEntitiesInBatch(type: PersistenceType, ids: [Int32]) {
@@ -103,7 +113,7 @@ class MixpanelPersistence {
     
     func resetEntities() {
         for pType in PersistenceType.allCases {
-            mpdb.deleteRows(pType)
+            mpdb.deleteRows(pType, isDeleteAll: true)
         }
     }
     

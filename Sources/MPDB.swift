@@ -142,10 +142,11 @@ class MPDB {
         }
     }
     
-    func deleteRows(_ persistenceType: PersistenceType, ids: [Int32] = []) {
+    func deleteRows(_ persistenceType: PersistenceType, ids: [Int32] = [], isDeleteAll: Bool = false) {
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
-            let deleteString = "DELETE FROM \(tableName)\(ids.isEmpty ? "" : " WHERE id IN \(idsSqlString(ids))")"
+            let deleteAllString = "DELETE FROM \(tableName)"
+            let deleteString = isDeleteAll ? "\(deleteAllString)" : "\(deleteAllString) WHERE id IN \(idsSqlString(ids))"
             var deleteStatement: OpaquePointer?
             if sqlite3_prepare_v2(db, deleteString, -1, &deleteStatement, nil) == SQLITE_OK {
                 if sqlite3_step(deleteStatement) == SQLITE_DONE {

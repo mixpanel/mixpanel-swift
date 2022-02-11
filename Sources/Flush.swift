@@ -83,6 +83,36 @@ class Flush: AppLifecycle {
             }
         }
     }
+    
+    func coalesce(_ batch: [InternalProperties]) -> [InternalProperties] {
+        var seenProperties = [String]()
+        var coalescedBatch = [InternalProperties]()
+        for update in batch.reversed() {
+            var prunedUpdate = InternalProperties()
+            if let setUpdate = update["$set"] as? InternalProperties {
+                var prunedSet = InternalProperties()
+                for (key, value) in update {
+                    if key == "$set" {
+                        for (propName, propVal) in setUpdate {
+                            if !seenProperties.contains(propName) {
+                                prunedSet[propName] = propVal
+                                seenProperties.append(propName)
+                            }
+                        }
+                        prunedUpdate[key] = prunedSet
+                    } else {
+                        prunedUpdate[key] = value
+                    }
+                }
+                if !prunedSet.isEmpty {
+                    coalescedBatch.append(prunedUpdate)
+                }
+            } else {
+                coalescedBatch.append(update)
+            }
+        }
+        return coalescedBatch.reversed()
+    }
 
     func flushQueueInBatches(_ queue: Queue, type: FlushType) {
         var mutableQueue = queue
@@ -90,9 +120,14 @@ class Flush: AppLifecycle {
             var shouldContinue = false
             let batchSize = min(mutableQueue.count, APIConstants.batchSize)
             let range = 0..<batchSize
-            let batch = Array(mutableQueue[range])
+            var batch = Array(mutableQueue[range])
             let ids: [Int32] = batch.map { entity in
                 (entity["id"] as? Int32) ?? 0
+            }
+            Logger.debug(message: "Pre-coalesced batch")
+            Logger.debug(message: batch as Any)
+            if (type == FlushType.people) {
+                batch = coalesce(batch)
             }
             // Log data payload sent
             Logger.debug(message: "Sending batch of data")

@@ -54,6 +54,11 @@ class AutomaticProperties {
         if let infoDict = infoDict {
             p["$app_build_number"]     = infoDict["CFBundleVersion"]
             p["$app_version_string"]   = infoDict["CFBundleShortVersionString"]
+            if let mixpanelInfoDict = infoDict["mixpanel"] as? Dictionary<String, Any> {
+                if let customAppVersionValue = mixpanelInfoDict["appVersion"] {
+                    p["$app_version_string"] = customAppVersionValue
+                }
+            }
         }
         p["mp_lib"]             = "swift"
         p["$lib_version"]       = AutomaticProperties.libVersion()

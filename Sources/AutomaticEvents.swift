@@ -62,7 +62,15 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         }
         if let defaults = defaults, let infoDict = Bundle.main.infoDictionary {
             let appVersionKey = "MPAppVersion"
-            let appVersionValue = infoDict["CFBundleShortVersionString"]
+            var appVersionValue = infoDict["CFBundleShortVersionString"]
+            let savedVersionValue = defaults.string(forKey: appVersionKey)
+            
+            if let mixpanelInfoDict = infoDict["mixpanel"] as? Dictionary<String, Any> {
+                if let customAppVersionValue = mixpanelInfoDict["appVersion"] {
+                    appVersionValue = customAppVersionValue
+                }
+            }
+
             let savedVersionValue = defaults.string(forKey: appVersionKey)
             if let appVersionValue = appVersionValue as? String,
                let savedVersionValue = savedVersionValue,

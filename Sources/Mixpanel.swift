@@ -24,11 +24,11 @@ open class Mixpanel {
 
      - parameter token:                     your project token
      - parameter flushInterval:             Optional. Interval to run background flushing
-     - parameter instanceName:              Optional. The name you want to call this instance
+     - parameter instanceName:              Optional. The name you want to call this instance, has to be unique and correspond with the instance's project token
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
      - parameter trackAutomaticEvents:      Optional. Whether or not to collect common mobile events, it takes precedence over Autotrack settings from the Mixpanel server.
-     - parameter superProperties:           Optional. Super properties dictionary to register during initialization
      - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
+     - parameter superProperties:           Optional. Super properties dictionary to register during initialization
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -62,9 +62,10 @@ open class Mixpanel {
 
      - parameter token:                     your project token
      - parameter flushInterval:             Optional. Interval to run background flushing
-     - parameter instanceName:              Optional. The name you want to call this instance
+     - parameter instanceName:              Optional. The name you want to call this instance, has to be unique and correspond with the instance's project token
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
      - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
+     - parameter superProperties:           Optional. Super properties dictionary to register during initialization
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -78,12 +79,14 @@ open class Mixpanel {
                                flushInterval: Double = 60,
                                instanceName: String? = nil,
                                optOutTrackingByDefault: Bool = false,
-                               useUniqueDistinctId: Bool = false) -> MixpanelInstance {
+                               useUniqueDistinctId: Bool = false,
+                               superProperties: Properties? = nil) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
-                                                         useUniqueDistinctId: useUniqueDistinctId)
+                                                         useUniqueDistinctId: useUniqueDistinctId,
+                                                         superProperties: superProperties)
     }
     #endif // os(OSX)
 

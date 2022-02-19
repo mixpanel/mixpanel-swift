@@ -703,7 +703,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertEqual(testMixpanel2.people.distinctId, "d1",
                        "custom people distinct id archive failed")
         XCTAssertTrue(peopleQueue(token: testMixpanel2.apiToken).count >= 1, "pending people queue archive failed")
-        XCTAssertEqual(testMixpanel2.timedEvents["e2"] as? Double, 5.0,
+        XCTAssertEqual(testMixpanel2.timedEvents["e2"] as? Int, 5,
                        "timedEvents archive failed")
         let testMixpanel3 = Mixpanel.initialize(token: testToken, flushInterval: 60, trackAutomaticEvents: false)
         testMixpanel3.serverURL = kFakeServerUrl
@@ -870,6 +870,32 @@ class MixpanelDemoTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
     
+    func testMultipleInstancesWithSameToken() {
+        let testToken = randomId()
+        let concurentQueue = DispatchQueue(label: "multithread", attributes: .concurrent)
+
+        var testMixpanel: MixpanelInstance?
+        for _ in 1...10 {
+            concurentQueue.async {
+                testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
+                testMixpanel?.loggingEnabled = true
+                testMixpanel?.track(event: "test")
+            }
+          }
+        
+        var testMixpanel2: MixpanelInstance?
+        for _ in 1...10 {
+            concurentQueue.async {
+                testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+                testMixpanel2?.loggingEnabled = true
+                testMixpanel2?.track(event: "test")
+            }
+        }
+        sleep(5)
+        testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        XCTAssertTrue(testMixpanel === testMixpanel2, "instance with same token should be reused and no sqlite db locked error should be populated")
+    }
     
     func testReadWriteMultiThreadShouldNotCrash() {
         let concurentQueue = DispatchQueue(label: "multithread", attributes: .concurrent)

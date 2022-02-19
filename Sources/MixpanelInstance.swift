@@ -215,7 +215,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let automaticEvents = AutomaticEvents()
 #endif // DECIDE
     
-#if !os(OSX) && !os(watchOS)
     init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false,
          trackAutomaticEvents: Bool? = nil, useUniqueDistinctId: Bool = false, superProperties: Properties? = nil) {
         if let apiToken = apiToken, !apiToken.isEmpty {
@@ -268,7 +267,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         people.mixpanelInstance = self
         people.delegate = self
         flushInstance.flushInterval = flushInterval
+#if !os(watchOS)
         setupListeners()
+#endif
         unarchive()
         
         // check whether we should opt out by default
@@ -295,46 +296,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
 #endif // DECIDE
     }
-#else
-    init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false, useUniqueDistinctId: Bool = false) {
-        if let apiToken = apiToken, !apiToken.isEmpty {
-            self.apiToken = apiToken
-        }
-        self.useUniqueDistinctId = useUniqueDistinctId
-        let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: label, qos: .utility)
-        networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
-        mixpanelPersistence = MixpanelPersistence.init(token: self.apiToken)
-        mixpanelPersistence.migrate()
-        
-        self.name = name
-        self.readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
-        flushInstance = Flush(basePathIdentifier: name)
-        sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
-        trackInstance = Track(apiToken: self.apiToken,
-                              lock: self.readWriteLock,
-                              metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
-        trackInstance.mixpanelInstance = self
-        flushInstance.delegate = self
-        distinctId = defaultDistinctId()
-        people = People(apiToken: self.apiToken,
-                        serialQueue: trackingQueue,
-                        lock: self.readWriteLock,
-                        metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
-        people.mixpanelInstance = self
-        flushInstance.flushInterval = flushInterval
-#if !os(watchOS)
-        setupListeners()
-#endif
-        unarchive()
-        // check whether we should opt out by default
-        // note: we don't override opt out persistence here since opt-out default state is often
-        // used as an initial state while GDPR information is being collected
-        if optOutTrackingByDefault && (hasOptedOutTracking() || optOutStatus == nil) {
-            optOutTracking()
-        }
-    }
-#endif // os(OSX)
     
 #if !os(OSX) && !os(watchOS)
     private func setupListeners() {

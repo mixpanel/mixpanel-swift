@@ -24,7 +24,7 @@ open class Mixpanel {
 
      - parameter token:                     your project token
      - parameter flushInterval:             Optional. Interval to run background flushing
-     - parameter instanceName:              Optional. The name you want to call this instance, has to be unique and correspond with the instance's project token
+     - parameter instanceName:              Optional. The name you want to call this instance, must be unique 1:1 for each instance's project token. Defaults to project token.
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
      - parameter trackAutomaticEvents:      Optional. Whether or not to collect common mobile events, it takes precedence over Autotrack settings from the Mixpanel server.
      - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id

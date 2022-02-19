@@ -848,6 +848,18 @@ class MixpanelDemoTests: MixpanelBaseTests {
         removeDBfile(testMixpanel)
     }
     
+    func testMultipleInstancesWithSameToken() {
+        let testToken = randomId()
+        let concurentQueue = DispatchQueue(label: "multithread", attributes: .concurrent)
+        
+        for _ in 1...10 {
+            concurentQueue.async {
+                let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
+                testMixpanel.loggingEnabled = true
+                testMixpanel.track("test")
+            }
+        }
+    }
     
     func testReadWriteMultiThreadShouldNotCrash() {
         let concurentQueue = DispatchQueue(label: "multithread", attributes: .concurrent)

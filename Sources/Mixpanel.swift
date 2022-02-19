@@ -39,14 +39,14 @@ open class Mixpanel {
     @discardableResult
     open class func initialize(token apiToken: String,
                                flushInterval: Double = 60,
-                               instanceName: String = UUID().uuidString,
+                               instanceName: String? = nil,
                                optOutTrackingByDefault: Bool = false,
                                trackAutomaticEvents: Bool? = nil,
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
-                                                         instanceName: instanceName,
+                                                         instanceName: ((instanceName != nil) ? instanceName! : apiToken),
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          trackAutomaticEvents: trackAutomaticEvents,
                                                          useUniqueDistinctId: useUniqueDistinctId,
@@ -140,11 +140,13 @@ class MixpanelManager {
     private var instances: [String: MixpanelInstance]
     private var mainInstance: MixpanelInstance?
     private let readWriteLock: ReadWriteLock
+    private let instanceQueue: DispatchQueue
 
     init() {
         instances = [String: MixpanelInstance]()
         Logger.addLogging(PrintLogging())
         readWriteLock = ReadWriteLock(label: "com.mixpanel.instance.manager.lock")
+        instanceQueue = DispatchQueue(label: "com.mixpanel.instance.manager.instance", qos: .utility)
     }
 
     #if !os(OSX) && !os(watchOS)
@@ -155,19 +157,33 @@ class MixpanelManager {
                     trackAutomaticEvents: Bool? = nil,
                     useUniqueDistinctId: Bool = false,
                     superProperties: Properties? = nil) -> MixpanelInstance {
-        let instance = MixpanelInstance(apiToken: apiToken,
-                                        flushInterval: flushInterval,
-                                        name: instanceName,
-                                        optOutTrackingByDefault: optOutTrackingByDefault,
-                                        trackAutomaticEvents: trackAutomaticEvents,
-                                        useUniqueDistinctId: useUniqueDistinctId,
-                                        superProperties: superProperties)
-        mainInstance = instance
-        readWriteLock.write {
-            instances[instanceName] = instance
+        let semaphore = DispatchSemaphore(value: 0)
+        instanceQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            var instance: MixpanelInstance?
+            if let instance = self.instances[instanceName] {
+                self.mainInstance = instance
+                semaphore.signal()
+                return
+            }
+            instance = MixpanelInstance(apiToken: apiToken,
+                                            flushInterval: flushInterval,
+                                            name: instanceName,
+                                            optOutTrackingByDefault: optOutTrackingByDefault,
+                                            trackAutomaticEvents: trackAutomaticEvents,
+                                            useUniqueDistinctId: useUniqueDistinctId,
+                                            superProperties: superProperties)
+            self.readWriteLock.write {
+                self.instances[instanceName] = instance!
+                self.mainInstance = instance!
+            }
+            semaphore.signal()
         }
-
-        return instance
+        _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+        
+        return self.mainInstance!
     }
     #else
     func initialize(token apiToken: String,
@@ -175,6 +191,7 @@ class MixpanelManager {
                     instanceName: String,
                     optOutTrackingByDefault: Bool = false,
                     useUniqueDistinctId: Bool = false) -> MixpanelInstance {
+        
         let instance = MixpanelInstance(apiToken: apiToken,
                                         flushInterval: flushInterval,
                                         name: instanceName,

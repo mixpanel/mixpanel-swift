@@ -76,12 +76,12 @@ open class Mixpanel {
     @discardableResult
     open class func initialize(token apiToken: String,
                                flushInterval: Double = 60,
-                               instanceName: String = UUID().uuidString,
+                               instanceName: String? = nil,
                                optOutTrackingByDefault: Bool = false,
                                useUniqueDistinctId: Bool = false) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
-                                                         instanceName: instanceName,
+                                                         instanceName: ((instanceName != nil) ? instanceName! : apiToken),
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          useUniqueDistinctId: useUniqueDistinctId)
     }
@@ -149,7 +149,6 @@ class MixpanelManager {
         instanceQueue = DispatchQueue(label: "com.mixpanel.instance.manager.instance", qos: .utility)
     }
 
-    #if !os(OSX) && !os(watchOS)
     func initialize(token apiToken: String,
                     flushInterval: Double,
                     instanceName: String,
@@ -185,26 +184,6 @@ class MixpanelManager {
         
         return self.mainInstance!
     }
-    #else
-    func initialize(token apiToken: String,
-                    flushInterval: Double,
-                    instanceName: String,
-                    optOutTrackingByDefault: Bool = false,
-                    useUniqueDistinctId: Bool = false) -> MixpanelInstance {
-        
-        let instance = MixpanelInstance(apiToken: apiToken,
-                                        flushInterval: flushInterval,
-                                        name: instanceName,
-                                        optOutTrackingByDefault: optOutTrackingByDefault,
-                                        useUniqueDistinctId: useUniqueDistinctId)
-        mainInstance = instance
-        readWriteLock.write {
-            instances[instanceName] = instance
-        }
-
-        return instance
-    }
-    #endif // os(OSX)
 
     func getInstance(name instanceName: String) -> MixpanelInstance? {
         var instance: MixpanelInstance?

@@ -1,5 +1,13 @@
 #
 
+## [v3.1.5](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.5) (2022-02-19)
+
+### Fixes
+
+- Fix `disk I/O error` caused by race condition from multiple initializations with the same token [\#519](https://github.com/mixpanel/mixpanel-swift/pull/519)
+
+#
+
 ## [v3.1.4](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.4) (2022-02-11)
 
 ### Fixes
@@ -71,6 +79,8 @@
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

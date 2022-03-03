@@ -30,7 +30,7 @@ class AutomaticProperties {
                 p["$os"]                = "macOS"
                 p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
             #else
-                // iOS App Running on M1 Mac
+                // iOS App Running on Apple Silicon Mac
                 if AutomaticProperties.isiOSAppOnMac() {
                     p["$os"]                = "macOS"
                     p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString

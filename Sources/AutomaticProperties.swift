@@ -30,8 +30,8 @@ class AutomaticProperties {
                 p["$os"]                = "macOS"
                 p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
             #else
-                // iOS App Running on Apple Silicon Mac
                 if AutomaticProperties.isiOSAppOnMac() {
+                    // iOS App Running on Apple Silicon Mac
                     p["$os"]                = "macOS"
                     p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
                 } else {
@@ -90,6 +90,7 @@ class AutomaticProperties {
     class func deviceModel() -> String {
         var modelCode : String
         if AutomaticProperties.isiOSAppOnMac() {
+            // iOS App Running on Apple Silicon Mac
             var size = 0
             sysctlbyname("hw.model", nil, &size, nil, 0)
             var model = [CChar](repeating: 0,  count: size)

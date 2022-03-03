@@ -30,8 +30,14 @@ class AutomaticProperties {
                 p["$os"]                = "macOS"
                 p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
             #else
-                p["$os"]                = UIDevice.current.systemName
-                p["$os_version"]        = UIDevice.current.systemVersion
+                // iOS App Running on M1 Mac
+                if AutomaticProperties.isiOSAppOnMac() {
+                    p["$os"]                = "macOS"
+                    p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
+                } else {
+                    p["$os"]                = UIDevice.current.systemName
+                    p["$os_version"]        = UIDevice.current.systemVersion
+                }
             #endif
         #elseif os(macOS)
             if let screenSize = NSScreen.main?.frame.size {
@@ -82,12 +88,21 @@ class AutomaticProperties {
     }()
 
     class func deviceModel() -> String {
-        var systemInfo = utsname()
-        uname(&systemInfo)
-        let size = MemoryLayout<CChar>.size
-        let modelCode = withUnsafePointer(to: &systemInfo.machine) {
-            $0.withMemoryRebound(to: CChar.self, capacity: size) {
-                String(cString: UnsafePointer<CChar>($0))
+        var modelCode : String
+        if AutomaticProperties.isiOSAppOnMac() {
+            var size = 0
+            sysctlbyname("hw.model", nil, &size, nil, 0)
+            var model = [CChar](repeating: 0,  count: size)
+            sysctlbyname("hw.model", &model, &size, nil, 0)
+            modelCode = String(cString: model)
+        } else {
+            var systemInfo = utsname()
+            uname(&systemInfo)
+            let size = MemoryLayout<CChar>.size
+            modelCode = withUnsafePointer(to: &systemInfo.machine) {
+                $0.withMemoryRebound(to: CChar.self, capacity: size) {
+                    String(cString: UnsafePointer<CChar>($0))
+                }
             }
         }
         if let model = String(validatingUTF8: modelCode) {
@@ -118,6 +133,14 @@ class AutomaticProperties {
         }
     }
     #endif
+    
+    class func isiOSAppOnMac() -> Bool {
+        var isiOSAppOnMac = false
+        if #available(iOS 14.0, *) {
+            isiOSAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
+        }
+        return isiOSAppOnMac
+    }
 
     class func libVersion() -> String {
         return "3.1.5"

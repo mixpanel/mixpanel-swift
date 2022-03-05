@@ -162,6 +162,7 @@ class MixpanelManager {
         let semaphore = DispatchSemaphore(value: 0)
         instanceQueue.async { [weak self] in
             guard let self = self else {
+                semaphore.signal()
                 return
             }
             var instance: MixpanelInstance?

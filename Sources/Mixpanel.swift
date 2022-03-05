@@ -184,6 +184,8 @@ class MixpanelManager {
             }
           //  semaphore.signal()
         }
+        
+        sleep(5)
         //_ = semaphore.wait(timeout: DispatchTime.distantFuture)
         
         return self.mainInstance!

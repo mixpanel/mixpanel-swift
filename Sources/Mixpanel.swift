@@ -160,7 +160,7 @@ class MixpanelManager {
                     useUniqueDistinctId: Bool = false,
                     superProperties: Properties? = nil) -> MixpanelInstance {
         //let semaphore = DispatchSemaphore(value: 0)
-        instanceQueue.async { [weak self] in
+        instanceQueue.sync { [weak self] in
             guard let self = self else {
                // semaphore.signal()
                 return
@@ -185,7 +185,7 @@ class MixpanelManager {
           //  semaphore.signal()
         }
         
-        sleep(5)
+      //  sleep(5)
         //_ = semaphore.wait(timeout: DispatchTime.distantFuture)
         
         return self.mainInstance!

@@ -159,16 +159,16 @@ class MixpanelManager {
                     trackAutomaticEvents: Bool? = nil,
                     useUniqueDistinctId: Bool = false,
                     superProperties: Properties? = nil) -> MixpanelInstance {
-        let semaphore = DispatchSemaphore(value: 0)
+        //let semaphore = DispatchSemaphore(value: 0)
         instanceQueue.async { [weak self] in
             guard let self = self else {
-                semaphore.signal()
+               // semaphore.signal()
                 return
             }
             var instance: MixpanelInstance?
             if let instance = self.instances[instanceName] {
                 self.mainInstance = instance
-                semaphore.signal()
+                //semaphore.signal()
                 return
             }
             instance = MixpanelInstance(apiToken: apiToken,
@@ -182,9 +182,9 @@ class MixpanelManager {
                 self.instances[instanceName] = instance!
                 self.mainInstance = instance!
             }
-            semaphore.signal()
+          //  semaphore.signal()
         }
-        _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+        //_ = semaphore.wait(timeout: DispatchTime.distantFuture)
         
         return self.mainInstance!
     }

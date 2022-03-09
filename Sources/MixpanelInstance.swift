@@ -232,6 +232,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         flushInstance = Flush(basePathIdentifier: name)
 #if DECIDE
         decideInstance = Decide(basePathIdentifier: name, lock: readWriteLock, mixpanelPersistence: mixpanelPersistence)
+        self.delegate = decideInstance
 #endif // DECIDE
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,

@@ -9,6 +9,7 @@
 import Foundation
 
 class Decide {
+    
     let decideRequest: DecideRequest
     let lock: ReadWriteLock
     var decideFetched = false

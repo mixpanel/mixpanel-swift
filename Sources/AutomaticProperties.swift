@@ -120,7 +120,7 @@ class AutomaticProperties {
     #endif
 
     class func libVersion() -> String {
-        return "3.1.5"
+        return "3.1.6"
     }
 
 }

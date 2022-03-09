@@ -232,7 +232,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         flushInstance = Flush(basePathIdentifier: name)
 #if DECIDE
         decideInstance = Decide(basePathIdentifier: name, lock: readWriteLock, mixpanelPersistence: mixpanelPersistence)
-        self.delegate = decideInstance
 #endif // DECIDE
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
@@ -847,6 +846,12 @@ extension MixpanelInstance {
             guard let self = self else {
                 return
             }
+            
+            #if DECIDE
+            if !self.decideInstance.decideFetched {
+                return
+            }
+            #endif
             
             if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
                 return

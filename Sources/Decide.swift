@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Decide : MixpanelDelegate {
+class Decide {
     let decideRequest: DecideRequest
     let lock: ReadWriteLock
     var decideFetched = false
@@ -18,10 +18,6 @@ class Decide : MixpanelDelegate {
         self.decideRequest = DecideRequest(basePathIdentifier: basePathIdentifier)
         self.lock = lock
         self.mixpanelPersistence = mixpanelPersistence
-    }
-    
-    func mixpanelWillFlush(_ mixpanel: MixpanelInstance) -> Bool {
-        return mixpanel.decideInstance.decideFetched
     }
 
     func checkDecide(forceFetch: Bool = false,

@@ -1026,7 +1026,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let setProperties2 = group[1]["$set"] as! InternalProperties
         XCTAssertEqual(setProperties2["a"] as? Int, 1)
         XCTAssertTrue(MixpanelPersistence.loadOptOutStatusFlag(apiToken: token)!)
-        XCTAssertTrue(MixpanelPersistence.loadAutomacticEventsEnabledFlag(apiToken: token))
+        XCTAssertTrue(MixpanelPersistence.loadAutomaticEventsEnabledFlag(apiToken: token))
         
         //timedEvents
         let testTimedEvents = MixpanelPersistence.loadTimedEvents(apiToken: token)

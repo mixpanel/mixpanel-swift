@@ -22,7 +22,7 @@ class Track {
     weak var mixpanelInstance: MixpanelInstance?
     
     var isAutomaticEventEnabled: Bool {
-        return MixpanelPersistence.loadAutomacticEventsEnabledFlag(apiToken: apiToken)
+        return MixpanelPersistence.loadAutomaticEventsEnabledFlag(apiToken: apiToken)
     }
 
     init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata,

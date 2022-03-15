@@ -78,7 +78,8 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "automatic events should be tracked")
         
         flushAndWaitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "automatic events should be flushed")
+        let appOpenEvent = eventQueue(token: testMixpanel.apiToken).last
+        XCTAssertEqual(appOpenEvent?["event"] as? String, "$ae_session", "automatic events should NOT be flushed")
         removeDBfile(testMixpanel.apiToken)
     }
 
@@ -144,13 +145,13 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
 
     func testFirstAppShouldOnlyBeTrackedOnce() {
         let testToken = randomId()
-        let mp = Mixpanel.initialize(token: testToken)
+        let mp = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true)
         mp.minimumSessionDuration = 0;
         waitForTrackingQueue(mp)
         XCTAssertEqual(eventQueue(token: mp.apiToken).count, 1, "First app open should be tracked again")
         flushAndWaitForTrackingQueue(mp)
         
-        let mp2 = Mixpanel.initialize(token: testToken)
+        let mp2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true)
         mp2.minimumSessionDuration = 0;
         waitForTrackingQueue(mp2)
         XCTAssertEqual(eventQueue(token: mp2.apiToken).count, 0, "First app open should not be tracked again")

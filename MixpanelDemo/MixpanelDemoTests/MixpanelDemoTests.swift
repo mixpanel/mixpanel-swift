@@ -32,7 +32,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testFlushEvents() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
         testMixpanel.identify(distinctId: "d1")
         for i in 0..<50 {
             testMixpanel.track(event: "event \(i)")
@@ -100,7 +100,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testFlushQueueContainsCorruptedEvent() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
         testMixpanel.trackingQueue.async {
             testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event1", "properties": ["BadProp": Double.nan]], type: .events)
             testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event2", "properties": ["BadProp": Float.nan]], type: .events)
@@ -149,7 +149,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testAddingEventsAfterFlush() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
         for i in 0..<10 {
             testMixpanel.track(event: "event \(UInt(i))")
         }

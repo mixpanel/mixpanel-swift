@@ -83,7 +83,7 @@ class MixpanelPersistence {
     
     func loadEntitiesInBatch(type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false, includeAutomaticEvents: Bool = true) -> [InternalProperties] {
         var entities = mpdb.readRows(type, numRows: batchSize, flag: flag)
-        if !includeAutomaticEvents {
+        if !includeAutomaticEvents && type == .events {
             entities = entities.filter { !($0["event"] as! String).hasPrefix("$ae_") }
         }
         let distinctId = MixpanelPersistence.loadIdentity(apiToken: apiToken).distinctID

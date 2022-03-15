@@ -851,11 +851,13 @@ extension MixpanelInstance {
                 return
             }
             
-            let includeAutomaticEvents = MixpanelPersistence.automaticEventsFlagIsSet(apiToken: self.apiToken)
-            
-            let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.events), includeAutomaticEvents: includeAutomaticEvents)
-            let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.people), includeAutomaticEvents: includeAutomaticEvents)
-            let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.groups), includeAutomaticEvents: includeAutomaticEvents)
+            // automatic events will NOT be flushed until one of the flags is non-nil
+            let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(
+                type: self.persistenceTypeFromFlushType(.events),
+                includeAutomaticEvents: MixpanelPersistence.automaticEventsFlagIsSet(apiToken: self.apiToken)
+            )
+            let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.people))
+            let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.groups))
             
             self.networkQueue.async { [weak self, completion] in
                 guard let self = self else {

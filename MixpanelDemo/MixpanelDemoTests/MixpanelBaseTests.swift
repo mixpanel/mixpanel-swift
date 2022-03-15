@@ -116,7 +116,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     }
     
     func flushAndWaitForTrackingQueue(_ mixpanel: MixpanelInstance) {
-        mixpanel.decideInstance.decideFetched = true
         mixpanel.flush()
         waitForTrackingQueue(mixpanel)
         mixpanel.flush()

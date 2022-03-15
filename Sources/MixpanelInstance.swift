@@ -854,7 +854,7 @@ extension MixpanelInstance {
             // automatic events will NOT be flushed until one of the flags is non-nil
             let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(
                 type: self.persistenceTypeFromFlushType(.events),
-                includeAutomaticEvents: MixpanelPersistence.automaticEventsFlagIsSet(apiToken: self.apiToken)
+                excludeAutomaticEvents: !MixpanelPersistence.automaticEventsFlagIsSet(apiToken: self.apiToken)
             )
             let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.people))
             let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.groups))

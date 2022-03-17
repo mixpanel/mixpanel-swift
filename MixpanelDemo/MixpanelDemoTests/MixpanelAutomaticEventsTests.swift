@@ -69,7 +69,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
     
-    func testFlushAutomaticEventsIftrackAutomaticEventsEnabledIsNotSet() {
+    func testHoldAutomaticEventsIftrackAutomaticEventsEnabledIsNotSet() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         testMixpanel.minimumSessionDuration = 0;
         testMixpanel.automaticEvents.perform(#selector(AutomaticEvents.appWillResignActive(_:)),

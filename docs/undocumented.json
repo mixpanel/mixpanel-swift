@@ -16,7 +16,7 @@
     },
     {
       "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 995,
+      "line": 998,
       "symbol": "MixpanelInstance.getGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"

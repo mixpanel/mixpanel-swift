@@ -1,5 +1,13 @@
 #
 
+## [v3.1.7](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.7) (2022-03-23)
+
+### Fixes
+
+- Check if automatic events flag is set before flushing [\#526](https://github.com/mixpanel/mixpanel-swift/pull/526)
+
+#
+
 ## [v3.1.6](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.6) (2022-03-09)
 
 ### Fixes
@@ -87,6 +95,8 @@
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

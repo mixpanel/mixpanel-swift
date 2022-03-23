@@ -37,7 +37,7 @@ class Decide {
                 }
 
                 if let automaticEventsEnabled = result["automatic_events"] as? Bool {
-                    MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: automaticEventsEnabled, fromDecide: true, apiToken: token)
+                    MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: automaticEventsEnabled, fromDecide: true, apiToken: token)
                 }
 
                 self.decideFetched = true

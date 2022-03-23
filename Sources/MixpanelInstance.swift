@@ -84,7 +84,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// If this is not set, it will query the Autotrack settings from the Mixpanel server
     open var trackAutomaticEventsEnabled: Bool? {
         didSet {
-            MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: trackAutomaticEventsEnabled ?? false,
+            MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: trackAutomaticEventsEnabled ?? false,
                                                                 fromDecide: false,
                                                                 apiToken: apiToken)
         }
@@ -284,7 +284,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         
         if let trackAutomaticEvents = trackAutomaticEvents {
-            MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: trackAutomaticEvents,
+            MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: trackAutomaticEvents,
                                                                 fromDecide: false,
                                                                 apiToken: self.apiToken)
         }
@@ -851,8 +851,11 @@ extension MixpanelInstance {
                 return
             }
             
-            
-            let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.events))
+            // automatic events will NOT be flushed until one of the flags is non-nil
+            let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(
+                type: self.persistenceTypeFromFlushType(.events),
+                excludeAutomaticEvents: !MixpanelPersistence.automaticEventsFlagIsSet(apiToken: self.apiToken)
+            )
             let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.people))
             let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.groups))
             
@@ -1444,7 +1447,7 @@ extension MixpanelInstance {
                                             token: self.apiToken)
             self.trackingQueue.async { [weak self] in
                 guard let self = self else { return }
-                if !MixpanelPersistence.loadAutomacticEventsEnabledFlag(apiToken: self.apiToken) {
+                if !MixpanelPersistence.loadAutomaticEventsEnabledFlag(apiToken: self.apiToken) {
                     self.mixpanelPersistence.removeAutomaticEvents()
                 }
             }

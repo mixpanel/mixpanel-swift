@@ -81,8 +81,11 @@ class MixpanelPersistence {
         }
     }
     
-    func loadEntitiesInBatch(type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false) -> [InternalProperties] {
-        let entities = mpdb.readRows(type, numRows: batchSize, flag: flag)
+    func loadEntitiesInBatch(type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false, excludeAutomaticEvents: Bool = false) -> [InternalProperties] {
+        var entities = mpdb.readRows(type, numRows: batchSize, flag: flag)
+        if excludeAutomaticEvents && type == .events {
+            entities = entities.filter { !($0["event"] as! String).hasPrefix("$ae_") }
+        }
         let distinctId = MixpanelPersistence.loadIdentity(apiToken: apiToken).distinctID
 
         return entities.map { entityWithDistinctId($0, distinctId: distinctId) }
@@ -134,7 +137,7 @@ class MixpanelPersistence {
         return defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)") as? Bool
     }
     
-    static func saveAutomacticEventsEnabledFlag(value: Bool, fromDecide: Bool, apiToken: String) {
+    static func saveAutomaticEventsEnabledFlag(value: Bool, fromDecide: Bool, apiToken: String) {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
@@ -147,7 +150,7 @@ class MixpanelPersistence {
         defaults.synchronize()
     }
     
-    static func loadAutomacticEventsEnabledFlag(apiToken: String) -> Bool {
+    static func loadAutomaticEventsEnabledFlag(apiToken: String) -> Bool {
         #if TV_AUTO_EVENTS
         return true
         #else
@@ -167,6 +170,22 @@ class MixpanelPersistence {
         #endif
     }
     
+    static func automaticEventsFlagIsSet(apiToken: String) -> Bool {
+        #if TV_AUTO_EVENTS
+        return true
+        #else
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+            return false // no user defaults at all
+        }
+        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") == nil &&
+            defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)") == nil {
+            return false // neither flag is set
+        }
+        return true // at least one of the flags is set
+        #endif
+    }
+ 
     static func saveTimedEvents(timedEvents: InternalProperties, apiToken: String) {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
@@ -297,7 +316,7 @@ class MixpanelPersistence {
             MixpanelPersistence.saveOptOutStatusFlag(value: optOutFlag, apiToken: apiToken)
         }
         if let automaticEventsFlag = automaticEventsEnabled {
-            MixpanelPersistence.saveAutomacticEventsEnabledFlag(value: automaticEventsFlag, fromDecide: false, apiToken: apiToken)
+            MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: automaticEventsFlag, fromDecide: false, apiToken: apiToken)
         }
         return
     }

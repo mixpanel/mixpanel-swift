@@ -216,9 +216,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 #endif // DECIDE
     
     init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false,
-         trackAutomaticEvents: Bool? = nil, useUniqueDistinctId: Bool = false, superProperties: Properties? = nil) {
+         trackAutomaticEvents: Bool? = nil, useUniqueDistinctId: Bool = false, superProperties: Properties? = nil,
+         serverURL: String? = nil) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
+        }
+        if let serverURL = serverURL {
+            self.serverURL = serverURL
+            BasePath.namedBasePaths[name] = serverURL
         }
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility)

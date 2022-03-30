@@ -159,23 +159,21 @@ class MixpanelManager {
                     trackAutomaticEvents: Bool? = nil,
                     useUniqueDistinctId: Bool = false,
                     superProperties: Properties? = nil) -> MixpanelInstance {
-        instanceQueue.sync {
-            var instance: MixpanelInstance?
-            if let instance = instances[instanceName] {
-                mainInstance = instance
-                return
-            }
-            instance = MixpanelInstance(apiToken: apiToken,
-                                            flushInterval: flushInterval,
-                                            name: instanceName,
-                                            optOutTrackingByDefault: optOutTrackingByDefault,
-                                            trackAutomaticEvents: trackAutomaticEvents,
-                                            useUniqueDistinctId: useUniqueDistinctId,
-                                            superProperties: superProperties)
-            readWriteLock.write {
-                instances[instanceName] = instance!
-                mainInstance = instance!
-            }
+        if let instance = instances[instanceName] {
+            mainInstance = instance
+        }
+        else {
+            let instance = MixpanelInstance(
+                apiToken: apiToken,
+                flushInterval: flushInterval,
+                name: instanceName,
+                optOutTrackingByDefault: optOutTrackingByDefault,
+                trackAutomaticEvents: trackAutomaticEvents,
+                useUniqueDistinctId: useUniqueDistinctId,
+                superProperties: superProperties
+            )
+            instances[instanceName] = instance
+            mainInstance = instance
         }
         return mainInstance!
     }

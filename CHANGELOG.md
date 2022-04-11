@@ -1,5 +1,14 @@
 #
 
+## [v3.2.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.2.0) (2022-04-11)
+
+### Enhancements
+
+- Allow setting server URL during initialization [\#530](https://github.com/mixpanel/mixpanel-swift/pull/530)
+- check for ios app on mac in automatic props [\#521](https://github.com/mixpanel/mixpanel-swift/pull/521)
+
+#
+
 ## [v3.1.7](https://github.com/mixpanel/mixpanel-swift/tree/v3.1.7) (2022-03-23)
 
 ### Fixes
@@ -95,6 +104,8 @@
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

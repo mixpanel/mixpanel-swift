@@ -30,8 +30,15 @@ class AutomaticProperties {
                 p["$os"]                = "macOS"
                 p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
             #else
-                p["$os"]                = UIDevice.current.systemName
-                p["$os_version"]        = UIDevice.current.systemVersion
+                if AutomaticProperties.isiOSAppOnMac() {
+                    // iOS App Running on Apple Silicon Mac
+                    p["$os"]                = "macOS"
+                    // unfortunately, there is no API that reports the correct macOS version
+                    // for "Designed for iPad" apps running on macOS, so we omit it here rather than mis-report
+                } else {
+                    p["$os"]                = UIDevice.current.systemName
+                    p["$os_version"]        = UIDevice.current.systemVersion
+                }
             #endif
         #elseif os(macOS)
             if let screenSize = NSScreen.main?.frame.size {
@@ -82,12 +89,22 @@ class AutomaticProperties {
     }()
 
     class func deviceModel() -> String {
-        var systemInfo = utsname()
-        uname(&systemInfo)
-        let size = MemoryLayout<CChar>.size
-        let modelCode = withUnsafePointer(to: &systemInfo.machine) {
-            $0.withMemoryRebound(to: CChar.self, capacity: size) {
-                String(cString: UnsafePointer<CChar>($0))
+        var modelCode : String
+        if AutomaticProperties.isiOSAppOnMac() {
+            // iOS App Running on Apple Silicon Mac
+            var size = 0
+            sysctlbyname("hw.model", nil, &size, nil, 0)
+            var model = [CChar](repeating: 0,  count: size)
+            sysctlbyname("hw.model", &model, &size, nil, 0)
+            modelCode = String(cString: model)
+        } else {
+            var systemInfo = utsname()
+            uname(&systemInfo)
+            let size = MemoryLayout<CChar>.size
+            modelCode = withUnsafePointer(to: &systemInfo.machine) {
+                $0.withMemoryRebound(to: CChar.self, capacity: size) {
+                    String(cString: UnsafePointer<CChar>($0))
+                }
             }
         }
         if let model = String(validatingUTF8: modelCode) {
@@ -118,6 +135,14 @@ class AutomaticProperties {
         }
     }
     #endif
+    
+    class func isiOSAppOnMac() -> Bool {
+        var isiOSAppOnMac = false
+        if #available(iOS 14.0, macOS 11.0, watchOS 7.0, tvOS 14.0, *) {
+            isiOSAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
+        }
+        return isiOSAppOnMac
+    }
 
     class func libVersion() -> String {
         return "3.1.7"

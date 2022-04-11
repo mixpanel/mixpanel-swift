@@ -33,7 +33,8 @@ class AutomaticProperties {
                 if AutomaticProperties.isiOSAppOnMac() {
                     // iOS App Running on Apple Silicon Mac
                     p["$os"]                = "macOS"
-                    p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
+                    // unfortunately, there is no API that reports the correct macOS version
+                    // for "Designed for iPad" apps running on macOS, so we omit it here rather than mis-report
                 } else {
                     p["$os"]                = UIDevice.current.systemName
                     p["$os_version"]        = UIDevice.current.systemVersion

@@ -29,6 +29,7 @@ open class Mixpanel {
      - parameter trackAutomaticEvents:      Optional. Whether or not to collect common mobile events, it takes precedence over Autotrack settings from the Mixpanel server.
      - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
+     - parameter serverURL:                 Optional. Mixpanel cluster URL
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -43,14 +44,16 @@ open class Mixpanel {
                                optOutTrackingByDefault: Bool = false,
                                trackAutomaticEvents: Bool? = nil,
                                useUniqueDistinctId: Bool = false,
-                               superProperties: Properties? = nil) -> MixpanelInstance {
+                               superProperties: Properties? = nil,
+                               serverURL: String? = nil) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          trackAutomaticEvents: trackAutomaticEvents,
                                                          useUniqueDistinctId: useUniqueDistinctId,
-                                                         superProperties: superProperties)
+                                                         superProperties: superProperties,
+                                                         serverURL: serverURL)
     }
     #else
     /**
@@ -66,6 +69,7 @@ open class Mixpanel {
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
      - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
+     - parameter serverURL:                 Optional. Mixpanel cluster URL
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -80,13 +84,15 @@ open class Mixpanel {
                                instanceName: String? = nil,
                                optOutTrackingByDefault: Bool = false,
                                useUniqueDistinctId: Bool = false,
-                               superProperties: Properties? = nil) -> MixpanelInstance {
+                               superProperties: Properties? = nil,
+                               serverURL: String? = nil) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          useUniqueDistinctId: useUniqueDistinctId,
-                                                         superProperties: superProperties)
+                                                         superProperties: superProperties,
+                                                         serverURL: serverURL)
     }
     #endif // os(OSX)
 
@@ -158,7 +164,9 @@ class MixpanelManager {
                     optOutTrackingByDefault: Bool = false,
                     trackAutomaticEvents: Bool? = nil,
                     useUniqueDistinctId: Bool = false,
-                    superProperties: Properties? = nil) -> MixpanelInstance {
+                    superProperties: Properties? = nil,
+                    serverURL: String? = nil
+    ) -> MixpanelInstance {
         instanceQueue.sync {
             var instance: MixpanelInstance?
             if let instance = instances[instanceName] {
@@ -171,7 +179,8 @@ class MixpanelManager {
                                             optOutTrackingByDefault: optOutTrackingByDefault,
                                             trackAutomaticEvents: trackAutomaticEvents,
                                             useUniqueDistinctId: useUniqueDistinctId,
-                                            superProperties: superProperties)
+                                            superProperties: superProperties,
+                                            serverURL: serverURL)
             readWriteLock.write {
                 instances[instanceName] = instance!
                 mainInstance = instance!

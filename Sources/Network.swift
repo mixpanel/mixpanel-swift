@@ -128,12 +128,12 @@ class Network {
                         parse: parse)
     }
 
-    class func trackIntegration(apiToken: String, serverURL: String, completion: @escaping (Bool) -> Void) {
-        let requestData = JSONHandler.encodeAPIData([["event": "Integration",
-                                                      "properties": ["token": "85053bf24bba75239b16a601d9387e17",
+    class func trackEvent(eventName: String, apiToken: String, distinctId: String, completion: @escaping (Bool) -> Void) {
+        let requestData = JSONHandler.encodeAPIData([["event": eventName,
+                                                      "properties": ["token": apiToken,
                                                                      "mp_lib": "swift",
                                                                      "version": "3.0",
-                                                                     "distinct_id": apiToken,
+                                                                     "distinct_id": distinctId,
                                                                      "$lib_version": AutomaticProperties.libVersion()]]])
 
         let responseParser: (Data) -> Int? = { data in
@@ -154,14 +154,14 @@ class Network {
                                                  headers: ["Accept-Encoding": "gzip"],
                                                  parse: responseParser)
 
-            Network.apiRequest(base: serverURL,
+            Network.apiRequest(base: BasePath.DefaultMixpanelAPI,
                                resource: resource,
                                failure: { (_, _, _) in
-                                Logger.debug(message: "failed to track integration")
+                                Logger.debug(message: "failed to track \(eventName)")
                                 completion(false)
                 },
                                success: { (_, _) in
-                                Logger.debug(message: "integration tracked")
+                                Logger.debug(message: "\(eventName) tracked")
                                 completion(true)
                 }
             )

@@ -46,14 +46,17 @@ open class Mixpanel {
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
+        #if DEBUG
+        checkForSurvey()
+        #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
-                                                         flushInterval: flushInterval,
-                                                         instanceName: ((instanceName != nil) ? instanceName! : apiToken),
-                                                         optOutTrackingByDefault: optOutTrackingByDefault,
-                                                         trackAutomaticEvents: trackAutomaticEvents,
-                                                         useUniqueDistinctId: useUniqueDistinctId,
-                                                         superProperties: superProperties,
-                                                         serverURL: serverURL)
+                                                                       flushInterval: flushInterval,
+                                                                       instanceName: ((instanceName != nil) ? instanceName! : apiToken),
+                                                                       optOutTrackingByDefault: optOutTrackingByDefault,
+                                                                       trackAutomaticEvents: trackAutomaticEvents,
+                                                                       useUniqueDistinctId: useUniqueDistinctId,
+                                                                       superProperties: superProperties,
+                                                                       serverURL: serverURL)
     }
     #else
     /**
@@ -86,6 +89,9 @@ open class Mixpanel {
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
+        #if DEBUG
+        checkForSurvey()
+        #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
@@ -140,6 +146,22 @@ open class Mixpanel {
      */
     open class func removeInstance(name: String) {
         MixpanelManager.sharedInstance.removeInstance(name: name)
+    }
+    
+    private class func checkForSurvey() {
+        let initCount = UserDefaults.standard.integer(forKey: "MPInitCount")
+        let surveyShownCount = UserDefaults.standard.integer(forKey: "MPSurveyShownCount")
+        if (initCount > 10 && surveyShownCount < 1) || (initCount > 20 && surveyShownCount < 2) || (initCount > 30 && surveyShownCount < 3) {
+            print("""
+                .---------------------------------------------------------------------------------.
+                | How do you feel about the Mixpanel dev experience? https://3x32.short.gy/devnps |
+                '---------------------------------------------------------------------------------'
+                """)
+            UserDefaults.standard.set(surveyShownCount + 1, forKey: "MPSurveyShownCount")
+            Network.trackEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: apiToken) { (_) in }
+        }
+        UserDefaults.standard.set(initCount + 1, forKey: "MPInitCount")
+        UserDefaults.standard.synchronize()
     }
 }
 

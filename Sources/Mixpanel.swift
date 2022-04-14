@@ -47,7 +47,7 @@ open class Mixpanel {
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
         #if DEBUG
-        checkForSurvey()
+        checkForSurvey(distinctId: apiToken)
         #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
@@ -90,7 +90,7 @@ open class Mixpanel {
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
         #if DEBUG
-        checkForSurvey()
+        checkForSurvey(distinctId: apiToken)
         #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
@@ -148,7 +148,7 @@ open class Mixpanel {
         MixpanelManager.sharedInstance.removeInstance(name: name)
     }
     
-    private class func checkForSurvey() {
+    private class func checkForSurvey(distinctId: String) {
         let initCount = UserDefaults.standard.integer(forKey: "MPInitCount")
         let surveyShownCount = UserDefaults.standard.integer(forKey: "MPSurveyShownCount")
         if (initCount > 10 && surveyShownCount < 1) || (initCount > 20 && surveyShownCount < 2) || (initCount > 30 && surveyShownCount < 3) {
@@ -158,7 +158,7 @@ open class Mixpanel {
                 '---------------------------------------------------------------------------------'
                 """)
             UserDefaults.standard.set(surveyShownCount + 1, forKey: "MPSurveyShownCount")
-            Network.trackEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: apiToken) { (_) in }
+            Network.trackEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId) { (_) in }
         }
         UserDefaults.standard.set(initCount + 1, forKey: "MPInitCount")
         UserDefaults.standard.synchronize()

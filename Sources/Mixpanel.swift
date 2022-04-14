@@ -158,7 +158,7 @@ open class Mixpanel {
                 '---------------------------------------------------------------------------------'
                 """)
             UserDefaults.standard.set(surveyShownCount + 1, forKey: "MPSurveyShownCount")
-            Network.trackEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId) { (_) in }
+            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: ["Survey Shown Count": surveyShownCount]) { (_) in }
         }
         UserDefaults.standard.set(initCount + 1, forKey: "MPInitCount")
         UserDefaults.standard.synchronize()

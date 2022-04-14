@@ -50,13 +50,13 @@ open class Mixpanel {
         checkForSurvey()
         #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
-                                                                       flushInterval: flushInterval,
-                                                                       instanceName: ((instanceName != nil) ? instanceName! : apiToken),
-                                                                       optOutTrackingByDefault: optOutTrackingByDefault,
-                                                                       trackAutomaticEvents: trackAutomaticEvents,
-                                                                       useUniqueDistinctId: useUniqueDistinctId,
-                                                                       superProperties: superProperties,
-                                                                       serverURL: serverURL)
+                                                         flushInterval: flushInterval,
+                                                         instanceName: ((instanceName != nil) ? instanceName! : apiToken),
+                                                         optOutTrackingByDefault: optOutTrackingByDefault,
+                                                         trackAutomaticEvents: trackAutomaticEvents,
+                                                         useUniqueDistinctId: useUniqueDistinctId,
+                                                         superProperties: superProperties,
+                                                         serverURL: serverURL)
     }
     #else
     /**

@@ -49,7 +49,6 @@ struct MixpanelUserDefaultsKeys {
     static let userID = "MPUserId"
     static let alias = "MPAlias"
     static let hadPersistedDistinctId = "MPHadPersistedDistinctId"
-    static let surveySeen = "MPSurveySeen"
 }
 
 class MixpanelPersistence {

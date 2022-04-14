@@ -47,7 +47,7 @@ open class Mixpanel {
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
         #if DEBUG
-        checkForSurvey(distinctId: apiToken)
+        didDebugInit(distinctId: apiToken)
         #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
@@ -90,7 +90,7 @@ open class Mixpanel {
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
         #if DEBUG
-        checkForSurvey(distinctId: apiToken)
+        didDebugInit(distinctId: apiToken)
         #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
@@ -148,10 +148,20 @@ open class Mixpanel {
         MixpanelManager.sharedInstance.removeInstance(name: name)
     }
     
-    private class func checkForSurvey(distinctId: String) {
-        let initCount = UserDefaults.standard.integer(forKey: "MPInitCount")
+    private class func didDebugInit(distinctId: String) {
+        let debugInitCountKey = "MPDebugInitCountKey"
+        let debugInitCount = UserDefaults.standard.integer(forKey: debugInitCountKey) + 1
+        if debugInitCount == 1 {
+            Network.sendHttpEvent(eventName: "First Debug Launch", apiToken: "metrics-1", distinctId: distinctId) { (_) in }
+        }
+        checkForSurvey(distinctId: distinctId, debugInitCount: debugInitCount)
+        UserDefaults.standard.set(debugInitCount, forKey: debugInitCountKey)
+        UserDefaults.standard.synchronize()
+    }
+    
+    private class func checkForSurvey(distinctId: String, debugInitCount: Int) {
         let surveyShownCount = UserDefaults.standard.integer(forKey: "MPSurveyShownCount")
-        if (initCount > 10 && surveyShownCount < 1) || (initCount > 20 && surveyShownCount < 2) || (initCount > 30 && surveyShownCount < 3) {
+        if (debugInitCount > 10 && surveyShownCount < 1) || (debugInitCount > 20 && surveyShownCount < 2) || (debugInitCount > 30 && surveyShownCount < 3) {
             print("""
                 .---------------------------------------------------------------------------------.
                 | How do you feel about the Mixpanel dev experience? https://3x32.short.gy/devnps |
@@ -160,8 +170,6 @@ open class Mixpanel {
             UserDefaults.standard.set(surveyShownCount + 1, forKey: "MPSurveyShownCount")
             Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: ["Survey Shown Count": surveyShownCount]) { (_) in }
         }
-        UserDefaults.standard.set(initCount + 1, forKey: "MPInitCount")
-        UserDefaults.standard.synchronize()
     }
 }
 

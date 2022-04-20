@@ -162,13 +162,14 @@ open class Mixpanel {
     private class func checkForSurvey(distinctId: String, debugInitCount: Int) {
         let surveyShownCount = UserDefaults.standard.integer(forKey: "MPSurveyShownCount")
         if (debugInitCount > 10 && surveyShownCount < 1) || (debugInitCount > 20 && surveyShownCount < 2) || (debugInitCount > 30 && surveyShownCount < 3) {
+            let waveHand = UnicodeScalar(0x1f44b) ?? "*"
+            let thumbsUp = UnicodeScalar(0x1f44d) ?? "*"
+            let thumbsDown = UnicodeScalar(0x1f44e) ?? "*"
             print("""
-                .---------------------------------------------------------------------------------.
-                | How do you feel about the Mixpanel dev experience? https://3x32.short.gy/devnps |
-                '---------------------------------------------------------------------------------'
+                \(waveHand)\(waveHand) Zihe & Jared here, tell us about the Mixpanel developer experience! https://www.mixpanel.com/devnps \(thumbsUp)\(thumbsDown)
                 """)
             UserDefaults.standard.set(surveyShownCount + 1, forKey: "MPSurveyShownCount")
-            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: ["Survey Shown Count": surveyShownCount]) { (_) in }
+            Network.sendHttpEvent(eventName: "Dev Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: ["Survey Shown Count": surveyShownCount, "Debug Launch Count": debugInitCount]) { (_) in }
         }
     }
 }

@@ -131,7 +131,6 @@ class Network {
     class func sendHttpEvent(eventName: String, apiToken: String, distinctId: String, properties: Dictionary<String, Any> = [:], completion: @escaping (Bool) -> Void) {
         let trackProperties = properties.merging(["token": apiToken,
                                                   "mp_lib": "swift",
-                                                  "version": "3.0",
                                                   "distinct_id": distinctId,
                                                   "$lib_version": AutomaticProperties.libVersion()]) {(current, _) in current }
         let requestData = JSONHandler.encodeAPIData([["event": eventName, "properties": trackProperties]])

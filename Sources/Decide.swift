@@ -29,6 +29,7 @@ class Decide {
             let semaphore = DispatchSemaphore(value: 0)
             decideRequest.sendRequest(distinctId: distinctId, token: token) { [weak self] decideResult in
                 guard let self = self else {
+                    semaphore.signal()
                     return
                 }
                 guard let result = decideResult else {

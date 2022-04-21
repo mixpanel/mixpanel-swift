@@ -46,6 +46,9 @@ open class Mixpanel {
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
+        #if DEBUG
+        didDebugInit(distinctId: apiToken)
+        #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
@@ -86,6 +89,9 @@ open class Mixpanel {
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
+        #if DEBUG
+        didDebugInit(distinctId: apiToken)
+        #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
@@ -140,6 +146,32 @@ open class Mixpanel {
      */
     open class func removeInstance(name: String) {
         MixpanelManager.sharedInstance.removeInstance(name: name)
+    }
+    
+    private class func didDebugInit(distinctId: String) {
+        let debugInitCountKey = "MPDebugInitCountKey"
+        let debugInitCount = UserDefaults.standard.integer(forKey: debugInitCountKey) + 1
+        if debugInitCount == 1 {
+            Network.sendHttpEvent(eventName: "First SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId) { (_) in }
+        }
+        checkForSurvey(distinctId: distinctId, debugInitCount: debugInitCount)
+        UserDefaults.standard.set(debugInitCount, forKey: debugInitCountKey)
+        UserDefaults.standard.synchronize()
+    }
+    
+    private class func checkForSurvey(distinctId: String, debugInitCount: Int) {
+        let surveyShownCountKey = "MPSurveyShownCountKey"
+        let surveyShownCount = UserDefaults.standard.integer(forKey: surveyShownCountKey)
+        if (debugInitCount > 10 && surveyShownCount < 1) || (debugInitCount > 20 && surveyShownCount < 2) || (debugInitCount > 30 && surveyShownCount < 3) {
+            let waveHand = UnicodeScalar(0x1f44b) ?? "*"
+            let thumbsUp = UnicodeScalar(0x1f44d) ?? "*"
+            let thumbsDown = UnicodeScalar(0x1f44e) ?? "*"
+            print("""
+                \(waveHand)\(waveHand) Zihe & Jared here, tell us about the Mixpanel developer experience! https://www.mixpanel.com/devnps \(thumbsUp)\(thumbsDown)
+                """)
+            UserDefaults.standard.set(surveyShownCount + 1, forKey: surveyShownCountKey)
+            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: ["Survey Shown Count": surveyShownCount, "Debug Launch Count": debugInitCount]) { (_) in }
+        }
     }
 }
 

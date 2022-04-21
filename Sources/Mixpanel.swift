@@ -152,7 +152,7 @@ open class Mixpanel {
         let debugInitCountKey = "MPDebugInitCountKey"
         let debugInitCount = UserDefaults.standard.integer(forKey: debugInitCountKey) + 1
         if debugInitCount == 1 {
-            Network.sendHttpEvent(eventName: "First Debug Launch", apiToken: "metrics-1", distinctId: distinctId) { (_) in }
+            Network.sendHttpEvent(eventName: "First SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId) { (_) in }
         }
         checkForSurvey(distinctId: distinctId, debugInitCount: debugInitCount)
         UserDefaults.standard.set(debugInitCount, forKey: debugInitCountKey)

@@ -94,6 +94,8 @@ In addition to event data, you can also send [user profile data](https://develop
 
 Once data hits our API, it generally takes ~60 seconds for it to be processed, stored, and queryable in your project.
 
+ ✋ ✋  Tell us about the Mixpanel developer experience! [https://www.mixpanel.com/devnps](https://www.mixpanel.com/devnps) 👍  👎
+
 ## Complete Code Example
 Here's a runnable code example that covers everything in this quickstart guide.
 ```swift

@@ -1,5 +1,13 @@
 #
 
+## [v3.2.2](https://github.com/mixpanel/mixpanel-swift/tree/v3.2.2) (2022-04-26)
+
+### Fixes
+
+- only put $distinct\_id on People records [\#539](https://github.com/mixpanel/mixpanel-swift/pull/539)
+
+#
+
 ## [v3.2.1](https://github.com/mixpanel/mixpanel-swift/tree/v3.2.1) (2022-04-21)
 
 ### Enhancements
@@ -112,6 +120,8 @@
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

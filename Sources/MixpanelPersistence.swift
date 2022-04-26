@@ -86,9 +86,11 @@ class MixpanelPersistence {
         if excludeAutomaticEvents && type == .events {
             entities = entities.filter { !($0["event"] as! String).hasPrefix("$ae_") }
         }
-        let distinctId = MixpanelPersistence.loadIdentity(apiToken: apiToken).distinctID
-
-        return entities.map { entityWithDistinctId($0, distinctId: distinctId) }
+        if type == PersistenceType.people {
+            let distinctId = MixpanelPersistence.loadIdentity(apiToken: apiToken).distinctID
+            return entities.map { entityWithDistinctId($0, distinctId: distinctId) }
+        }
+        return entities
     }
 
     private func entityWithDistinctId(_ entity: InternalProperties, distinctId: String) -> InternalProperties {

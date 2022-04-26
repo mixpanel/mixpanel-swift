@@ -87,7 +87,9 @@ class MixpanelPersistence {
             entities = entities.filter { !($0["event"] as! String).hasPrefix("$ae_") }
         }
         let distinctId = MixpanelPersistence.loadIdentity(apiToken: apiToken).distinctID
-
+        if type != PersistenceType.people {
+            return entities
+        }
         return entities.map { entityWithDistinctId($0, distinctId: distinctId) }
     }
 

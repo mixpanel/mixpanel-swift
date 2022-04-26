@@ -17,13 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
-        
-        Mixpanel.initialize(token: "6d83a31dc1373e3153a5a3d087084721")
+        Mixpanel.initialize(token: "MIXPANEL_TOKEN")
         Mixpanel.mainInstance().loggingEnabled = true
-        Mixpanel.mainInstance().identify(distinctId: "testtesttest")
-        Mixpanel.mainInstance().addGroup(groupKey: "company", groupID: "mixpanel")
-        Mixpanel.mainInstance().getGroup(groupKey: "company", groupID: "mixpanel").set(property: "$name", to: "Mixpanel")
-        Mixpanel.mainInstance().flush()
 
         return true
     }

@@ -166,12 +166,12 @@ open class Mixpanel {
             let waveHand = UnicodeScalar(0x1f44b) ?? "*"
             let thumbsUp = UnicodeScalar(0x1f44d) ?? "*"
             let thumbsDown = UnicodeScalar(0x1f44e) ?? "*"
-            print(Array(repeating: "\(waveHand)", count: 5).joined(separator: ""))
+            print(Array(repeating: "\(waveHand)", count: 10).joined(separator: ""))
             print("""
-                Hi, Zihe & Jared here, please tell us about the Mixpanel developer experience!
+                Hi, Zihe & Jared here, please give feedback or tell us about the Mixpanel developer experience!
                 open -> https://www.mixpanel.com/devnps \(thumbsUp)\(thumbsDown)
                 """)
-            print(Array(repeating: "\(waveHand)", count: 5).joined(separator: ""))
+            print(Array(repeating: "\(waveHand)", count: 10).joined(separator: ""))
             surveyShownCount += 1
             UserDefaults.standard.set(surveyShownCount, forKey: surveyShownCountKey)
             var debugProperties: Properties = properties

@@ -39,4 +39,10 @@ class LoginViewController: UIViewController {
         
         goToMainView()
     }
+
+    @IBAction func rateDevX(_ sender: Any) {
+        if let url = URL(string: "https://www.mixpanel.com/devnps") {
+            UIApplication.shared.open(url)
+        }
+    }
 }

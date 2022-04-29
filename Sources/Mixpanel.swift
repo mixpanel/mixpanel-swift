@@ -47,7 +47,7 @@ open class Mixpanel {
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
         #if DEBUG
-        didDebugInit(distinctId: apiToken)
+        didDebugInit(distinctId: apiToken, properties: superProperties ?? [:])
         #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
@@ -90,7 +90,7 @@ open class Mixpanel {
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
         #if DEBUG
-        didDebugInit(distinctId: apiToken)
+        didDebugInit(distinctId: apiToken, properties: superProperties ?? [:])
         #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
@@ -148,30 +148,35 @@ open class Mixpanel {
         MixpanelManager.sharedInstance.removeInstance(name: name)
     }
     
-    private class func didDebugInit(distinctId: String) {
+    private class func didDebugInit(distinctId: String, properties: Properties = [:]) {
         let debugInitCountKey = "MPDebugInitCountKey"
         let debugInitCount = UserDefaults.standard.integer(forKey: debugInitCountKey) + 1
-        if debugInitCount == 1 {
-            Network.sendHttpEvent(eventName: "First SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId) { (_) in }
-        }
-        checkForSurvey(distinctId: distinctId, debugInitCount: debugInitCount)
+        var debugProperties: Properties = properties
+        debugProperties += ["Debug Launch Count": debugInitCount]
+        Network.sendHttpEvent(eventName: "SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId, properties: debugProperties)
+        checkForSurvey(distinctId: distinctId, debugInitCount: debugInitCount, properties: properties)
         UserDefaults.standard.set(debugInitCount, forKey: debugInitCountKey)
         UserDefaults.standard.synchronize()
     }
     
-    private class func checkForSurvey(distinctId: String, debugInitCount: Int) {
+    private class func checkForSurvey(distinctId: String, debugInitCount: Int, properties: Properties = [:]) {
         let surveyShownCountKey = "MPSurveyShownCountKey"
         var surveyShownCount = UserDefaults.standard.integer(forKey: surveyShownCountKey)
-        if (debugInitCount > 10 && surveyShownCount < 1) || (debugInitCount > 20 && surveyShownCount < 2) || (debugInitCount > 30 && surveyShownCount < 3) {
+        if (debugInitCount == 10 || debugInitCount == 20 || debugInitCount == 30) {
             let waveHand = UnicodeScalar(0x1f44b) ?? "*"
             let thumbsUp = UnicodeScalar(0x1f44d) ?? "*"
             let thumbsDown = UnicodeScalar(0x1f44e) ?? "*"
+            print(Array(repeating: "\(waveHand)", count: 10).joined(separator: ""))
             print("""
-                \(waveHand)\(waveHand) Zihe & Jared here, tell us about the Mixpanel developer experience! https://www.mixpanel.com/devnps \(thumbsUp)\(thumbsDown)
+                Hi, Zihe & Jared here, please give feedback or tell us about the Mixpanel developer experience!
+                open -> https://www.mixpanel.com/devnps \(thumbsUp)\(thumbsDown)
                 """)
+            print(Array(repeating: "\(waveHand)", count: 10).joined(separator: ""))
             surveyShownCount += 1
             UserDefaults.standard.set(surveyShownCount, forKey: surveyShownCountKey)
-            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: ["Survey Shown Count": surveyShownCount, "Debug Launch Count": debugInitCount]) { (_) in }
+            var debugProperties: Properties = properties
+            debugProperties += ["Survey Shown Count": surveyShownCount]
+            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: debugProperties)
         }
     }
 }

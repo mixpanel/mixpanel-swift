@@ -11,7 +11,7 @@ import Foundation
 struct BasePath {
     static let DefaultMixpanelAPI = "https://api.mixpanel.com"
     static var namedBasePaths = [String: String]()
-
+    
     static func buildURL(base: String, path: String, queryItems: [URLQueryItem]?) -> URL? {
         guard let url = URL(string: base) else {
             return nil
@@ -25,7 +25,7 @@ struct BasePath {
         components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
         return components.url
     }
-
+    
     static func getServerURL(identifier: String) -> String {
         return namedBasePaths[identifier] ?? DefaultMixpanelAPI
     }
@@ -53,13 +53,13 @@ enum Reason {
 }
 
 class Network {
-
+    
     let basePathIdentifier: String
-
+    
     required init(basePathIdentifier: String) {
         self.basePathIdentifier = basePathIdentifier
     }
-
+    
     class func apiRequest<A>(base: String,
                              resource: Resource<A>,
                              failure: @escaping (Reason, Data?, URLResponse?) -> Void,
@@ -67,10 +67,10 @@ class Network {
         guard let request = buildURLRequest(base, resource: resource) else {
             return
         }
-
+        
         URLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
             guard let httpResponse = response as? HTTPURLResponse else {
-
+                
                 if let hasError = error {
                     failure(.other(hasError), data, response)
                 } else {
@@ -90,30 +90,30 @@ class Network {
                 failure(.parseError, data, response)
                 return
             }
-
+            
             success(result, response)
         }.resume()
     }
-
+    
     private class func buildURLRequest<A>(_ base: String, resource: Resource<A>) -> URLRequest? {
         guard let url = BasePath.buildURL(base: base,
                                           path: resource.path,
                                           queryItems: resource.queryItems) else {
             return nil
         }
-
+        
         Logger.debug(message: "Fetching URL")
         Logger.debug(message: url.absoluteURL)
         var request = URLRequest(url: url)
         request.httpMethod = resource.method.rawValue
         request.httpBody = resource.requestBody
-
+        
         for (k, v) in resource.headers {
             request.setValue(v, forHTTPHeaderField: k)
         }
         return request as URLRequest
     }
-
+    
     class func buildResource<A>(path: String,
                                 method: RequestMethod,
                                 requestBody: Data? = nil,
@@ -127,14 +127,16 @@ class Network {
                         headers: headers,
                         parse: parse)
     }
-
-    class func sendHttpEvent(eventName: String, apiToken: String, distinctId: String, properties: Dictionary<String, Any> = [:], completion: @escaping (Bool) -> Void) {
+    
+    class func sendHttpEvent(eventName: String, apiToken: String, distinctId: String,
+                             properties: Properties = [:],
+                             completion: ((Bool) -> Void)? = nil) {
         let trackProperties = properties.merging(["token": apiToken,
-                                                  "mp_lib": "swift",
+                                                  "mp_lib": properties["mp_lib"] ?? "swift",
                                                   "distinct_id": distinctId,
-                                                  "$lib_version": AutomaticProperties.libVersion()]) {(current, _) in current }
+                                                  "$lib_version": properties["$lib_version"] ?? AutomaticProperties.libVersion()]) {(current, _) in current }
         let requestData = JSONHandler.encodeAPIData([["event": eventName, "properties": trackProperties]])
-
+        
         let responseParser: (Data) -> Int? = { data in
             let response = String(data: data, encoding: String.Encoding.utf8)
             if let response = response {
@@ -142,27 +144,32 @@ class Network {
             }
             return nil
         }
-
+        
         if let requestData = requestData {
             let requestBody = "ip=1&data=\(requestData)"
                 .data(using: String.Encoding.utf8)
-
+            
             let resource = Network.buildResource(path: FlushType.events.rawValue,
                                                  method: .post,
                                                  requestBody: requestBody,
                                                  headers: ["Accept-Encoding": "gzip"],
                                                  parse: responseParser)
-
+            
             Network.apiRequest(base: BasePath.DefaultMixpanelAPI,
                                resource: resource,
                                failure: { (_, _, _) in
-                                Logger.debug(message: "failed to track \(eventName)")
-                                completion(false)
-                },
-                               success: { (_, _) in
-                                Logger.debug(message: "\(eventName) tracked")
-                                completion(true)
+                Logger.debug(message: "failed to track \(eventName)")
+                if let completion = completion {
+                    completion(false)
                 }
+                
+            },
+                               success: { (_, _) in
+                Logger.debug(message: "\(eventName) tracked")
+                if let completion = completion {
+                    completion(true)
+                }
+            }
             )
         }
     }

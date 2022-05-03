@@ -157,19 +157,21 @@ open class Mixpanel {
     }
     
     private class func didDebugInit(distinctId: String, libName: String?, libVersion: String?) {
-        let debugInitCount = UserDefaults.standard.integer(forKey: InternalKeys.mpDebugInitCountKey) + 1
-        var properties: Properties = ["Debug Launch Count": debugInitCount]
-        if let libName = libName {
-            properties["mp_lib"] = libName
+        if distinctId.count == 32 {
+            let debugInitCount = UserDefaults.standard.integer(forKey: InternalKeys.mpDebugInitCountKey) + 1
+            var properties: Properties = ["Debug Launch Count": debugInitCount]
+            if let libName = libName {
+                properties["mp_lib"] = libName
+            }
+            if let libVersion = libVersion {
+                properties["$lib_version"] = libVersion
+            }
+            Network.sendHttpEvent(eventName: "SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId, properties: properties) { (_) in }
+            checkForSurvey(distinctId: distinctId, properties: properties)
+            checkIfImplemented(distinctId: distinctId, properties: properties)
+            UserDefaults.standard.set(debugInitCount, forKey: InternalKeys.mpDebugInitCountKey)
+            UserDefaults.standard.synchronize()
         }
-        if let libVersion = libVersion {
-            properties["$lib_version"] = libVersion
-        }
-        Network.sendHttpEvent(eventName: "SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId, properties: properties) { (_) in }
-        checkForSurvey(distinctId: distinctId, properties: properties)
-        checkIfImplemented(distinctId: distinctId, properties: properties)
-        UserDefaults.standard.set(debugInitCount, forKey: InternalKeys.mpDebugInitCountKey)
-        UserDefaults.standard.synchronize()
     }
     
     private class func checkForSurvey(distinctId: String, properties: Properties) {

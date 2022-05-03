@@ -149,29 +149,54 @@ open class Mixpanel {
     }
     
     private class func didDebugInit(distinctId: String) {
-        let debugInitCountKey = "MPDebugInitCountKey"
-        let debugInitCount = UserDefaults.standard.integer(forKey: debugInitCountKey) + 1
-        if debugInitCount == 1 {
-            Network.sendHttpEvent(eventName: "First SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId) { (_) in }
-        }
+        let debugInitCount = UserDefaults.standard.integer(forKey: InternalKeys.mpDebugInitCountKey) + 1
+        Network.sendHttpEvent(eventName: "SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId, properties: ["Debug Launch Count": debugInitCount]) { (_) in }
         checkForSurvey(distinctId: distinctId, debugInitCount: debugInitCount)
-        UserDefaults.standard.set(debugInitCount, forKey: debugInitCountKey)
+        checkIfImplemented(distinctId: distinctId, debugInitCount: debugInitCount)
+        UserDefaults.standard.set(debugInitCount, forKey: InternalKeys.mpDebugInitCountKey)
         UserDefaults.standard.synchronize()
     }
     
     private class func checkForSurvey(distinctId: String, debugInitCount: Int) {
-        let surveyShownCountKey = "MPSurveyShownCountKey"
-        var surveyShownCount = UserDefaults.standard.integer(forKey: surveyShownCountKey)
-        if (debugInitCount > 10 && surveyShownCount < 1) || (debugInitCount > 20 && surveyShownCount < 2) || (debugInitCount > 30 && surveyShownCount < 3) {
+        let surveyShownDate = UserDefaults.standard.object(forKey: InternalKeys.mpSurveyShownDateKey) as? Date ?? Date.distantPast
+        if (surveyShownDate.timeIntervalSinceNow < -86400) {
             let waveHand = UnicodeScalar(0x1f44b) ?? "*"
             let thumbsUp = UnicodeScalar(0x1f44d) ?? "*"
             let thumbsDown = UnicodeScalar(0x1f44e) ?? "*"
             print("""
                 \(waveHand)\(waveHand) Zihe & Jared here, tell us about the Mixpanel developer experience! https://www.mixpanel.com/devnps \(thumbsUp)\(thumbsDown)
                 """)
-            surveyShownCount += 1
-            UserDefaults.standard.set(surveyShownCount, forKey: surveyShownCountKey)
-            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: ["Survey Shown Count": surveyShownCount, "Debug Launch Count": debugInitCount]) { (_) in }
+            UserDefaults.standard.set(Date(), forKey: InternalKeys.mpSurveyShownDateKey)
+            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: ["Debug Launch Count": debugInitCount]) { (_) in }
+        }
+    }
+    
+    private class func checkIfImplemented(distinctId: String, debugInitCount: Int) {
+        let hasImplemented: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugImplementedKey)
+        if !hasImplemented {
+            var completed = 0
+            let hasTracked: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugTrackedKey)
+            completed += hasTracked ? 1 : 0
+            let hasIdentified: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugIdentifiedKey)
+            completed += hasIdentified ? 1 : 0
+            let hasAliased: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugAliasedKey)
+            completed += hasAliased ? 1 : 0
+            let hasUsedPeople: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugUsedPeopleKey)
+            completed += hasUsedPeople ? 1 : 0
+            if (completed >= 3) {
+                Network.sendHttpEvent(
+                    eventName: "SDK Implemented",
+                    apiToken: "metrics-1",
+                    distinctId: distinctId,
+                    properties: [
+                        "Tracked": hasTracked,
+                        "Identified": hasIdentified,
+                        "Aliased": hasAliased,
+                        "Used People": hasUsedPeople,
+                        "Debug Launch Count": debugInitCount,
+                    ]) { (_) in }
+                UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugImplementedKey)
+            }
         }
     }
 }

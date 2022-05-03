@@ -588,7 +588,9 @@ extension MixpanelInstance {
             }
             return
         }
-        
+        #if DEBUG
+        UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugIdentifiedKey)
+        #endif
         trackingQueue.async { [weak self, distinctId, usePeople] in
             guard let self = self else { return }
             
@@ -676,7 +678,9 @@ extension MixpanelInstance {
             }
             return
         }
-        
+        #if DEBUG
+        UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugAliasedKey)
+        #endif
         if alias != distinctId {
             trackingQueue.async { [weak self, alias] in
                 guard let self = self else {

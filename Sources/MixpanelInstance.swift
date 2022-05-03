@@ -151,15 +151,19 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 Logger.enableLevel(.info)
                 Logger.enableLevel(.warning)
                 Logger.enableLevel(.error)
-                
                 Logger.info(message: "Logging Enabled")
+#if DEBUG
+                Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: ["Logging Enabled": true])
+#endif
             } else {
                 Logger.info(message: "Logging Disabled")
-                
                 Logger.disableLevel(.debug)
                 Logger.disableLevel(.info)
                 Logger.disableLevel(.warning)
                 Logger.disableLevel(.error)
+#if DEBUG
+                Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: ["Logging Enabled": false])
+#endif
             }
         }
     }

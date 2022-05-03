@@ -47,7 +47,11 @@ open class Mixpanel {
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
         #if DEBUG
-        didDebugInit(distinctId: apiToken)
+        didDebugInit(
+            distinctId: apiToken,
+            libName: superProperties?.get(key: "mp_lib", defaultValue: nil),
+            libVersion: superProperties?.get(key: "$lib_version", defaultValue: nil)
+        )
         #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
@@ -90,7 +94,11 @@ open class Mixpanel {
                                superProperties: Properties? = nil,
                                serverURL: String? = nil) -> MixpanelInstance {
         #if DEBUG
-        didDebugInit(distinctId: apiToken)
+        didDebugInit(
+            distinctId: apiToken,
+            libName: superProperties?.get(key: "mp_lib", defaultValue: nil),
+            libVersion: superProperties?.get(key: "$lib_version", defaultValue: nil)
+        )
         #endif
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
@@ -148,30 +156,39 @@ open class Mixpanel {
         MixpanelManager.sharedInstance.removeInstance(name: name)
     }
     
-    private class func didDebugInit(distinctId: String) {
+    private class func didDebugInit(distinctId: String, libName: String?, libVersion: String?) {
         let debugInitCount = UserDefaults.standard.integer(forKey: InternalKeys.mpDebugInitCountKey) + 1
-        Network.sendHttpEvent(eventName: "SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId, properties: ["Debug Launch Count": debugInitCount]) { (_) in }
-        checkForSurvey(distinctId: distinctId, debugInitCount: debugInitCount)
-        checkIfImplemented(distinctId: distinctId, debugInitCount: debugInitCount)
+        var properties: Properties = ["Debug Launch Count": debugInitCount]
+        if let libName = libName {
+            properties["mp_lib"] = libName
+        }
+        if let libVersion = libVersion {
+            properties["$lib_version"] = libVersion
+        }
+        Network.sendHttpEvent(eventName: "SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId, properties: properties) { (_) in }
+        checkForSurvey(distinctId: distinctId, properties: properties)
+        checkIfImplemented(distinctId: distinctId, properties: properties)
         UserDefaults.standard.set(debugInitCount, forKey: InternalKeys.mpDebugInitCountKey)
         UserDefaults.standard.synchronize()
     }
     
-    private class func checkForSurvey(distinctId: String, debugInitCount: Int) {
+    private class func checkForSurvey(distinctId: String, properties: Properties) {
         let surveyShownDate = UserDefaults.standard.object(forKey: InternalKeys.mpSurveyShownDateKey) as? Date ?? Date.distantPast
         if (surveyShownDate.timeIntervalSinceNow < -86400) {
             let waveHand = UnicodeScalar(0x1f44b) ?? "*"
             let thumbsUp = UnicodeScalar(0x1f44d) ?? "*"
             let thumbsDown = UnicodeScalar(0x1f44e) ?? "*"
+            print(Array(repeating: "\(waveHand)", count: 10).joined(separator: ""))
             print("""
-                \(waveHand)\(waveHand) Zihe & Jared here, tell us about the Mixpanel developer experience! https://www.mixpanel.com/devnps \(thumbsUp)\(thumbsDown)
+                Hi, Zihe & Jared here, please give feedback or tell us about the Mixpanel developer experience!
+                open -> https://www.mixpanel.com/devnps \(thumbsUp)\(thumbsDown)
                 """)
             UserDefaults.standard.set(Date(), forKey: InternalKeys.mpSurveyShownDateKey)
-            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: ["Debug Launch Count": debugInitCount]) { (_) in }
+            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: properties) { (_) in }
         }
     }
     
-    private class func checkIfImplemented(distinctId: String, debugInitCount: Int) {
+    private class func checkIfImplemented(distinctId: String, properties: Properties) {
         let hasImplemented: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugImplementedKey)
         if !hasImplemented {
             var completed = 0
@@ -184,17 +201,17 @@ open class Mixpanel {
             let hasUsedPeople: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugUsedPeopleKey)
             completed += hasUsedPeople ? 1 : 0
             if (completed >= 3) {
+                let trackProps = properties.merging([
+                    "Tracked": hasTracked,
+                    "Identified": hasIdentified,
+                    "Aliased": hasAliased,
+                    "Used People": hasUsedPeople,
+                ]) {(_,new) in new}
                 Network.sendHttpEvent(
                     eventName: "SDK Implemented",
                     apiToken: "metrics-1",
                     distinctId: distinctId,
-                    properties: [
-                        "Tracked": hasTracked,
-                        "Identified": hasIdentified,
-                        "Aliased": hasAliased,
-                        "Used People": hasUsedPeople,
-                        "Debug Launch Count": debugInitCount,
-                    ]) { (_) in }
+                    properties: trackProps) { (_) in }
                 UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugImplementedKey)
             }
         }

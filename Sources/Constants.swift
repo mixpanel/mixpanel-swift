@@ -34,6 +34,7 @@ struct InternalKeys {
     static let mpDebugIdentifiedKey = "mpDebugIdentifiedKey"
     static let mpDebugAliasedKey = "mpDebugAliasedKey"
     static let mpDebugUsedPeopleKey = "mpDebugUsedPeopleKey"
+    static let mpSurveyShownCountKey = "mpSurveyShownCountKey"
 }
 
 

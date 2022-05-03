@@ -131,46 +131,48 @@ class Network {
     class func sendHttpEvent(eventName: String, apiToken: String, distinctId: String,
                              properties: Properties = [:],
                              completion: ((Bool) -> Void)? = nil) {
-        let trackProperties = properties.merging(["token": apiToken,
-                                                  "mp_lib": "swift",
-                                                  "distinct_id": distinctId,
-                                                  "$lib_version": AutomaticProperties.libVersion()]) {(current, _) in current }
-        let requestData = JSONHandler.encodeAPIData([["event": eventName, "properties": trackProperties]])
-        
-        let responseParser: (Data) -> Int? = { data in
-            let response = String(data: data, encoding: String.Encoding.utf8)
-            if let response = response {
-                return Int(response) ?? 0
-            }
-            return nil
-        }
-        
-        if let requestData = requestData {
-            let requestBody = "ip=1&data=\(requestData)"
-                .data(using: String.Encoding.utf8)
+        if distinctId.count == 32 {
+            let trackProperties = properties.merging(["token": apiToken,
+                                                      "mp_lib": "swift",
+                                                      "distinct_id": distinctId,
+                                                      "$lib_version": AutomaticProperties.libVersion()]) {(current, _) in current }
+            let requestData = JSONHandler.encodeAPIData([["event": eventName, "properties": trackProperties]])
             
-            let resource = Network.buildResource(path: FlushType.events.rawValue,
-                                                 method: .post,
-                                                 requestBody: requestBody,
-                                                 headers: ["Accept-Encoding": "gzip"],
-                                                 parse: responseParser)
-            
-            Network.apiRequest(base: BasePath.DefaultMixpanelAPI,
-                               resource: resource,
-                               failure: { (_, _, _) in
-                Logger.debug(message: "failed to track \(eventName)")
-                if let completion = completion {
-                    completion(false)
+            let responseParser: (Data) -> Int? = { data in
+                let response = String(data: data, encoding: String.Encoding.utf8)
+                if let response = response {
+                    return Int(response) ?? 0
                 }
+                return nil
+            }
+            
+            if let requestData = requestData {
+                let requestBody = "ip=1&data=\(requestData)"
+                    .data(using: String.Encoding.utf8)
                 
-            },
-                               success: { (_, _) in
-                Logger.debug(message: "\(eventName) tracked")
-                if let completion = completion {
-                    completion(true)
+                let resource = Network.buildResource(path: FlushType.events.rawValue,
+                                                     method: .post,
+                                                     requestBody: requestBody,
+                                                     headers: ["Accept-Encoding": "gzip"],
+                                                     parse: responseParser)
+                
+                Network.apiRequest(base: BasePath.DefaultMixpanelAPI,
+                                   resource: resource,
+                                   failure: { (_, _, _) in
+                    Logger.debug(message: "failed to track \(eventName)")
+                    if let completion = completion {
+                        completion(false)
+                    }
+                    
+                },
+                                   success: { (_, _) in
+                    Logger.debug(message: "\(eventName) tracked")
+                    if let completion = completion {
+                        completion(true)
+                    }
                 }
+                )
             }
-            )
         }
     }
 }

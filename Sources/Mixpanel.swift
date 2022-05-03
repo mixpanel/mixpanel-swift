@@ -184,7 +184,10 @@ open class Mixpanel {
                 open -> https://www.mixpanel.com/devnps \(thumbsUp)\(thumbsDown)
                 """)
             UserDefaults.standard.set(Date(), forKey: InternalKeys.mpSurveyShownDateKey)
-            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: properties) { (_) in }
+            let surveyShownCount = UserDefaults.standard.integer(forKey: InternalKeys.mpSurveyShownCountKey) + 1
+            UserDefaults.standard.set(surveyShownCount, forKey: InternalKeys.mpSurveyShownCountKey)
+            let trackProps = properties.merging(["Survey Shown Count": surveyShownCount]) {(_,new) in new}
+            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: trackProps) { (_) in }
         }
     }
     

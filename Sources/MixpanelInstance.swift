@@ -415,9 +415,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 self.decideInstance.decideFetched = false
             }
 #endif // DECIDE
-            
-            sharedApplication.endBackgroundTask(self.taskId)
-            self.taskId = UIBackgroundTaskIdentifier.invalid
+            if self.taskId != UIBackgroundTaskIdentifier.invalid {
+                sharedApplication.endBackgroundTask(self.taskId)
+                self.taskId = UIBackgroundTaskIdentifier.invalid
+            }
         }
         
         if flushOnBackground {

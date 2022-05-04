@@ -407,7 +407,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             return
         }
         
-        taskId = sharedApplication.beginBackgroundTask { [weak self] in
+        let completionHandler: () -> Void = { [weak self] in
             guard let self = self else { return }
             
 #if DECIDE
@@ -421,12 +421,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             }
         }
         
+        taskId = sharedApplication.beginBackgroundTask(expirationHandler: completionHandler)
+        
         if flushOnBackground {
-            flush() { [weak self] in
-                guard let self = self else { return }
-                sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskIdentifier.invalid
-            }
+            flush(completion: completionHandler)
         }
     }
     

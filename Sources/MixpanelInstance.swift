@@ -421,7 +421,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         
         if flushOnBackground {
-            flush()
+            flush() { [weak self] in
+                guard let self = self else { return }
+                sharedApplication.endBackgroundTask(self.taskId)
+                self.taskId = UIBackgroundTaskIdentifier.invalid
+            }
         }
     }
     

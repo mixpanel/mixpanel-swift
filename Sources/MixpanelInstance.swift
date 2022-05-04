@@ -856,10 +856,16 @@ extension MixpanelInstance {
         }
         trackingQueue.async { [weak self, completion] in
             guard let self = self else {
+                if let completion = completion {
+                    DispatchQueue.main.async(execute: completion)
+                }
                 return
             }
             
             if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
+                if let completion = completion {
+                    DispatchQueue.main.async(execute: completion)
+                }
                 return
             }
             
@@ -873,6 +879,9 @@ extension MixpanelInstance {
             
             self.networkQueue.async { [weak self, completion] in
                 guard let self = self else {
+                    if let completion = completion {
+                        DispatchQueue.main.async(execute: completion)
+                    }
                     return
                 }
                 self.flushQueue(eventQueue, type: .events)

@@ -134,7 +134,8 @@ class Network {
         let trackProperties = properties.merging(["token": apiToken,
                                                   "mp_lib": "swift",
                                                   "distinct_id": distinctId,
-                                                  "$lib_version": AutomaticProperties.libVersion()]) {(current, _) in current }
+                                                  "$lib_version": AutomaticProperties.libVersion(),
+                                                  "DevX": true]) {(current, _) in current }
         let requestData = JSONHandler.encodeAPIData([["event": eventName, "properties": trackProperties]])
         
         let responseParser: (Data) -> Int? = { data in

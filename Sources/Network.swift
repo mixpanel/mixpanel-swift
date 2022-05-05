@@ -130,6 +130,7 @@ class Network {
     
     class func sendHttpEvent(eventName: String, apiToken: String, distinctId: String,
                              properties: Properties = [:],
+                             updatePeople: Bool = true,
                              completion: ((Bool) -> Void)? = nil) {
         let trackProperties = properties.merging(["token": apiToken,
                                                   "mp_lib": "swift",
@@ -173,7 +174,7 @@ class Network {
             }
             )
         }
-        if !(eventName == "Integration") {
+        if updatePeople {
             let engageData = JSONHandler.encodeAPIData([["$token": apiToken, "$distinct_id": distinctId, "$add": [eventName: 1]]])
             if let engageData = engageData {
                 let engageBody = "ip=1&data=\(engageData)".data(using: String.Encoding.utf8)

@@ -130,11 +130,14 @@ class Network {
     
     class func sendHttpEvent(eventName: String, apiToken: String, distinctId: String,
                              properties: Properties = [:],
+                             updatePeople: Bool = true,
                              completion: ((Bool) -> Void)? = nil) {
         let trackProperties = properties.merging(["token": apiToken,
-                                                  "mp_lib": properties["mp_lib"] ?? "swift",
+                                                  "mp_lib": "swift",
                                                   "distinct_id": distinctId,
-                                                  "$lib_version": properties["$lib_version"] ?? AutomaticProperties.libVersion()]) {(current, _) in current }
+                                                  "$lib_version": AutomaticProperties.libVersion(),
+                                                  "Project Token": distinctId,
+                                                  "DevX": true]) {(current, _) in current }
         let requestData = JSONHandler.encodeAPIData([["event": eventName, "properties": trackProperties]])
         
         let responseParser: (Data) -> Int? = { data in
@@ -171,6 +174,18 @@ class Network {
                 }
             }
             )
+        }
+        if updatePeople {
+            let engageData = JSONHandler.encodeAPIData([["$token": apiToken, "$distinct_id": distinctId, "$add": [eventName: 1]]])
+            if let engageData = engageData {
+                let engageBody = "ip=1&data=\(engageData)".data(using: String.Encoding.utf8)
+                let engageResource = Network.buildResource(path: FlushType.people.rawValue,
+                                                          method: .post,
+                                                          requestBody: engageBody,
+                                                          headers: ["Accept-Encoding": "gzip"],
+                                                          parse: responseParser)
+                Network.apiRequest(base: BasePath.DefaultMixpanelAPI, resource: engageResource) { _, _, _ in } success: { _, _ in }
+            }
         }
     }
 }

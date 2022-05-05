@@ -152,19 +152,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 Logger.enableLevel(.warning)
                 Logger.enableLevel(.error)
                 Logger.info(message: "Logging Enabled")
-#if DEBUG
-                Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: ["Logging Enabled": true])
-#endif
             } else {
                 Logger.info(message: "Logging Disabled")
                 Logger.disableLevel(.debug)
                 Logger.disableLevel(.info)
                 Logger.disableLevel(.warning)
                 Logger.disableLevel(.error)
-#if DEBUG
-                Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: ["Logging Enabled": false])
-#endif
             }
+#if DEBUG
+            Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: ["Logging Enabled": loggingEnabled])
+#endif
         }
     }
     
@@ -595,7 +592,9 @@ extension MixpanelInstance {
             }
             return
         }
-        
+        #if DEBUG
+        UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugIdentifiedKey)
+        #endif
         trackingQueue.async { [weak self, distinctId, usePeople] in
             guard let self = self else { return }
             
@@ -683,7 +682,9 @@ extension MixpanelInstance {
             }
             return
         }
-        
+        #if DEBUG
+        UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugAliasedKey)
+        #endif
         if alias != distinctId {
             trackingQueue.async { [weak self, alias] in
                 guard let self = self else {
@@ -823,7 +824,7 @@ extension MixpanelInstance {
         let defaultsKey = "trackedKey"
         if !UserDefaults.standard.bool(forKey: defaultsKey) {
             trackingQueue.async { [apiToken, defaultsKey] in
-                Network.sendHttpEvent(eventName: "Integration", apiToken: "85053bf24bba75239b16a601d9387e17", distinctId: apiToken) { [defaultsKey] (success) in
+                Network.sendHttpEvent(eventName: "Integration", apiToken: "85053bf24bba75239b16a601d9387e17", distinctId: apiToken, updatePeople: false) { [defaultsKey] (success) in
                     if success {
                         UserDefaults.standard.set(true, forKey: defaultsKey)
                         UserDefaults.standard.synchronize()

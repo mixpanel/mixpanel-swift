@@ -44,6 +44,11 @@ open class People {
         if mixpanelInstance?.hasOptedOutTracking() ?? false {
             return
         }
+        #if DEBUG
+        if !(properties.keys.first?.hasPrefix("$ae_") ?? true) {
+            UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugUsedPeopleKey)
+        }
+        #endif
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
         let ignoreTimeCopy = ignoreTime
 

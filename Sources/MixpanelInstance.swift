@@ -160,7 +160,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 Logger.disableLevel(.error)
             }
 #if DEBUG
-            Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: ["Logging Enabled": loggingEnabled], updatePeople: false)
+            Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: ["Logging Enabled": loggingEnabled])
 #endif
         }
     }
@@ -821,7 +821,7 @@ extension MixpanelInstance {
         let defaultsKey = "trackedKey"
         if !UserDefaults.standard.bool(forKey: defaultsKey) {
             trackingQueue.async { [apiToken, defaultsKey] in
-                Network.sendHttpEvent(eventName: "Integration", apiToken: "85053bf24bba75239b16a601d9387e17", distinctId: apiToken) { [defaultsKey] (success) in
+                Network.sendHttpEvent(eventName: "Integration", apiToken: "85053bf24bba75239b16a601d9387e17", distinctId: apiToken, updatePeople: false) { [defaultsKey] (success) in
                     if success {
                         UserDefaults.standard.set(true, forKey: defaultsKey)
                         UserDefaults.standard.synchronize()

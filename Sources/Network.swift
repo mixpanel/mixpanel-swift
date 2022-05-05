@@ -173,15 +173,17 @@ class Network {
             }
             )
         }
-        let engageData = JSONHandler.encodeAPIData([["$token": apiToken, "$distinct_id": distinctId, "$add": [eventName: 1]]])
-        if let engageData = engageData {
-            let engageBody = "data=\(engageData)".data(using: String.Encoding.utf8)
-            let engageResource = Network.buildResource(path: FlushType.people.rawValue,
-                                                      method: .post,
-                                                      requestBody: engageBody,
-                                                      headers: ["Accept-Encoding": "gzip"],
-                                                      parse: responseParser)
-            Network.apiRequest(base: BasePath.DefaultMixpanelAPI, resource: engageResource) { _, _, _ in } success: { _, _ in }
+        if !(eventName == "Integration") {
+            let engageData = JSONHandler.encodeAPIData([["$token": apiToken, "$distinct_id": distinctId, "$add": [eventName: 1]]])
+            if let engageData = engageData {
+                let engageBody = "data=\(engageData)".data(using: String.Encoding.utf8)
+                let engageResource = Network.buildResource(path: FlushType.people.rawValue,
+                                                          method: .post,
+                                                          requestBody: engageBody,
+                                                          headers: ["Accept-Encoding": "gzip"],
+                                                          parse: responseParser)
+                Network.apiRequest(base: BasePath.DefaultMixpanelAPI, resource: engageResource) { _, _, _ in } success: { _, _ in }
+            }
         }
     }
 }

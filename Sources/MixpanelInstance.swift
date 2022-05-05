@@ -407,7 +407,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             return
         }
         
-        taskId = sharedApplication.beginBackgroundTask { [weak self] in
+        let completionHandler: () -> Void = { [weak self] in
             guard let self = self else { return }
             
 #if DECIDE
@@ -415,13 +415,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 self.decideInstance.decideFetched = false
             }
 #endif // DECIDE
-            
-            sharedApplication.endBackgroundTask(self.taskId)
-            self.taskId = UIBackgroundTaskIdentifier.invalid
+            if self.taskId != UIBackgroundTaskIdentifier.invalid {
+                sharedApplication.endBackgroundTask(self.taskId)
+                self.taskId = UIBackgroundTaskIdentifier.invalid
+            }
         }
         
+        taskId = sharedApplication.beginBackgroundTask(expirationHandler: completionHandler)
+        
         if flushOnBackground {
-            flush()
+            flush(completion: completionHandler)
         }
     }
     
@@ -853,10 +856,16 @@ extension MixpanelInstance {
         }
         trackingQueue.async { [weak self, completion] in
             guard let self = self else {
+                if let completion = completion {
+                    DispatchQueue.main.async(execute: completion)
+                }
                 return
             }
             
             if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
+                if let completion = completion {
+                    DispatchQueue.main.async(execute: completion)
+                }
                 return
             }
             
@@ -870,6 +879,9 @@ extension MixpanelInstance {
             
             self.networkQueue.async { [weak self, completion] in
                 guard let self = self else {
+                    if let completion = completion {
+                        DispatchQueue.main.async(execute: completion)
+                    }
                     return
                 }
                 self.flushQueue(eventQueue, type: .events)

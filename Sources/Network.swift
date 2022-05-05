@@ -136,6 +136,7 @@ class Network {
                                                   "mp_lib": "swift",
                                                   "distinct_id": distinctId,
                                                   "$lib_version": AutomaticProperties.libVersion(),
+                                                  "Project Token": distinctId,
                                                   "DevX": true]) {(current, _) in current }
         let requestData = JSONHandler.encodeAPIData([["event": eventName, "properties": trackProperties]])
         

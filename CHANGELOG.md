@@ -1,5 +1,17 @@
 #
 
+## [v3.2.4](https://github.com/mixpanel/mixpanel-swift/tree/v3.2.4) (2022-05-05)
+
+### Enhancements
+
+- track implementation and each launch [\#541](https://github.com/mixpanel/mixpanel-swift/pull/541)
+
+### Fixes
+
+- pass completion handler to flush on background [\#542](https://github.com/mixpanel/mixpanel-swift/pull/542)
+
+#
+
 ## [v3.2.3](https://github.com/mixpanel/mixpanel-swift/tree/v3.2.3) (2022-04-29)
 
 ### Enhancements
@@ -128,6 +140,8 @@
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

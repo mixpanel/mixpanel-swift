@@ -176,7 +176,7 @@ class Network {
         if !(eventName == "Integration") {
             let engageData = JSONHandler.encodeAPIData([["$token": apiToken, "$distinct_id": distinctId, "$add": [eventName: 1]]])
             if let engageData = engageData {
-                let engageBody = "data=\(engageData)".data(using: String.Encoding.utf8)
+                let engageBody = "ip=1&data=\(engageData)".data(using: String.Encoding.utf8)
                 let engageResource = Network.buildResource(path: FlushType.people.rawValue,
                                                           method: .post,
                                                           requestBody: engageBody,

@@ -160,7 +160,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 Logger.disableLevel(.error)
             }
 #if DEBUG
-            Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: ["Logging Enabled": loggingEnabled])
+            var trackProps: Properties = ["Logging Enabled": loggingEnabled]
+            if (self.superProperties["mp_lib"] != nil) {
+                trackProps["mp_lib"] = self.superProperties["mp_lib"] as! String
+            }
+            if (self.superProperties["$lib_version"] != nil) {
+                trackProps["$lib_version"] = self.superProperties["$lib_version"] as! String
+            }
+            Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: trackProps)
 #endif
         }
     }

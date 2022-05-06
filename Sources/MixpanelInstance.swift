@@ -161,10 +161,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             }
 #if DEBUG
             var trackProps: Properties = ["Logging Enabled": loggingEnabled]
-            if (self.superProperties["mp_lib"] != nil) {
+            if (superProperties["mp_lib"] != nil) {
                 trackProps["mp_lib"] = self.superProperties["mp_lib"] as! String
             }
-            if (self.superProperties["$lib_version"] != nil) {
+            if (superProperties["$lib_version"] != nil) {
                 trackProps["$lib_version"] = self.superProperties["$lib_version"] as! String
             }
             Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: trackProps)

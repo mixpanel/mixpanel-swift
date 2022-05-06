@@ -1,5 +1,13 @@
 #
 
+## [v3.2.5](https://github.com/mixpanel/mixpanel-swift/tree/v3.2.5) (2022-05-06)
+
+### Fixes
+
+- get lib name and version from super props [\#543](https://github.com/mixpanel/mixpanel-swift/pull/543)
+
+#
+
 ## [v3.2.4](https://github.com/mixpanel/mixpanel-swift/tree/v3.2.4) (2022-05-05)
 
 ### Enhancements
@@ -140,6 +148,8 @@
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

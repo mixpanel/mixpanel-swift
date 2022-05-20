@@ -167,29 +167,9 @@ open class Mixpanel {
                 properties["$lib_version"] = libVersion
             }
             Network.sendHttpEvent(eventName: "SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId, properties: properties) { (_) in }
-            checkForSurvey(distinctId: distinctId, properties: properties)
             checkIfImplemented(distinctId: distinctId, properties: properties)
             UserDefaults.standard.set(debugInitCount, forKey: InternalKeys.mpDebugInitCountKey)
             UserDefaults.standard.synchronize()
-        }
-    }
-    
-    private class func checkForSurvey(distinctId: String, properties: Properties) {
-        let surveyShownDate = UserDefaults.standard.object(forKey: InternalKeys.mpSurveyShownDateKey) as? Date ?? Date.distantPast
-        if (surveyShownDate.timeIntervalSinceNow < -86400) {
-            let waveHand = UnicodeScalar(0x1f44b) ?? "*"
-            let thumbsUp = UnicodeScalar(0x1f44d) ?? "*"
-            let thumbsDown = UnicodeScalar(0x1f44e) ?? "*"
-            print(Array(repeating: "\(waveHand)", count: 10).joined(separator: ""))
-            print("""
-                Hi, Zihe & Jared here, please give feedback or tell us about the Mixpanel developer experience!
-                open -> https://www.mixpanel.com/devnps \(thumbsUp)\(thumbsDown)
-                """)
-            UserDefaults.standard.set(Date(), forKey: InternalKeys.mpSurveyShownDateKey)
-            let surveyShownCount = UserDefaults.standard.integer(forKey: InternalKeys.mpSurveyShownCountKey) + 1
-            UserDefaults.standard.set(surveyShownCount, forKey: InternalKeys.mpSurveyShownCountKey)
-            let trackProps = properties.merging(["Survey Shown Count": surveyShownCount]) {(_,new) in new}
-            Network.sendHttpEvent(eventName: "Dev NPS Survey Logged", apiToken: "metrics-1", distinctId: distinctId, properties: trackProps) { (_) in }
         }
     }
     

@@ -29,12 +29,10 @@ struct BundleConstants {
 struct InternalKeys {
     static let mpDebugTrackedKey = "mpDebugTrackedKey"
     static let mpDebugInitCountKey = "mpDebugInitCountKey"
-    static let mpSurveyShownDateKey = "mpSurveyShownDateKey"
     static let mpDebugImplementedKey = "mpDebugImplementedKey"
     static let mpDebugIdentifiedKey = "mpDebugIdentifiedKey"
     static let mpDebugAliasedKey = "mpDebugAliasedKey"
     static let mpDebugUsedPeopleKey = "mpDebugUsedPeopleKey"
-    static let mpSurveyShownCountKey = "mpSurveyShownCountKey"
 }
 
 

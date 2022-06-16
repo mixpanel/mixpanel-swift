@@ -223,9 +223,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let automaticEvents = AutomaticEvents()
 #endif // DECIDE
     
-    init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false,
-         trackAutomaticEvents: Bool? = nil, useUniqueDistinctId: Bool = false, superProperties: Properties? = nil,
-         serverURL: String? = nil) {
+    init(apiToken: String?, trackAutomaticEvents: Bool, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false,
+         useUniqueDistinctId: Bool = false, superProperties: Properties? = nil, serverURL: String? = nil) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -296,7 +295,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             registerSuperProperties(superProperties)
         }
         
-        if let trackAutomaticEvents = trackAutomaticEvents {
+        if trackAutomaticEvents {
             MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: trackAutomaticEvents,
                                                                 fromDecide: false,
                                                                 apiToken: self.apiToken)

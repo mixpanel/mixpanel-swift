@@ -15,6 +15,7 @@ func += <K, V> (left: inout [K: V], right: [K: V]) {
 }
 
 class Track {
+    let instanceName: String
     let apiToken: String
     let lock: ReadWriteLock
     let metadata: SessionMetadata
@@ -22,11 +23,12 @@ class Track {
     weak var mixpanelInstance: MixpanelInstance?
     
     var isAutomaticEventEnabled: Bool {
-        return MixpanelPersistence.loadAutomaticEventsEnabledFlag(apiToken: apiToken)
+        return MixpanelPersistence.loadAutomaticEventsEnabledFlag(instanceName: self.instanceName)
     }
 
-    init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata,
+    init(apiToken: String, instanceName: String, lock: ReadWriteLock, metadata: SessionMetadata,
          mixpanelPersistence: MixpanelPersistence) {
+        self.instanceName = instanceName
         self.apiToken = apiToken
         self.lock = lock
         self.metadata = metadata
@@ -87,7 +89,7 @@ class Track {
         metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
         
         self.mixpanelPersistence.saveEntity(trackEvent, type: .events)
-        MixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents, apiToken: apiToken)
+        MixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents, instanceName: instanceName)
         return shadowTimedEvents
     }
 

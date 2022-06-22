@@ -39,7 +39,6 @@ struct MixpanelUserDefaultsKeys {
     static let suiteName = "Mixpanel"
     static let prefix = "mixpanel"
     static let optOutStatus = "OptOutStatus"
-    static let automaticEventEnabled = "AutomaticEventEnabled"
     static let timedEvents = "timedEvents"
     static let superProperties = "superProperties"
     static let distinctID = "MPDistinctID"
@@ -96,15 +95,6 @@ class MixpanelPersistence {
         var result = entity;
         result["$distinct_id"] = distinctId
         return result
-    }
-    
-    func removeAutomaticEvents() {
-        let events = loadEntitiesInBatch(type: .events)
-        let ids = events.filter { ($0["event"] as! String).hasPrefix("$ae_") }
-            .map { $0["id"] as! Int32 }
-        if !ids.isEmpty {
-            removeEntitiesInBatch(type: .events, ids: ids)
-        }
     }
 
     func removeEntitiesInBatch(type: PersistenceType, ids: [Int32]) {
@@ -224,7 +214,6 @@ class MixpanelPersistence {
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)")
-        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.timedEvents)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.superProperties)")

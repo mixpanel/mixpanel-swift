@@ -136,7 +136,7 @@ open class Mixpanel {
             assert(false, "You have to call initialize(token:trackAutomaticEvents:) before calling the main instance, " +
                 "or define a new main instance if removing the main one")
             #if !os(OSX) && !os(watchOS)
-            return Mixpanel.initialize(token: "", trackAutomaticEvents: false)
+            return Mixpanel.initialize(token: "", trackAutomaticEvents: true)
             #else
             return Mixpanel.initialize(token: "")
             #endif

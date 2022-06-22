@@ -39,7 +39,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Complete' do |ss|
     ss.ios.pod_target_xcconfig = {
-      'OTHER_SWIFT_FLAGS' => '$(inherited) -D DECIDE'
+      'OTHER_SWIFT_FLAGS' => '$(inherited) -D AUTOMATIC_EVENTS'
     }
     ss.ios.source_files = ['Sources/*.swift']
     ss.tvos.source_files = base_source_files

@@ -80,12 +80,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var showNetworkActivityIndicator = true
     
     /// This allows enabling or disabling collecting common mobile events,
-    open var trackAutomaticEventsEnabled: Bool? {
-        didSet {
-            MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: trackAutomaticEventsEnabled ?? false,
-                                                                apiToken: apiToken)
-        }
-    }
+    open var trackAutomaticEventsEnabled: Bool
     
     /// Flush timer's interval.
     /// Setting a flush interval of 0 will turn off the flush timer and you need to call the flush() API manually
@@ -223,6 +218,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
+        trackAutomaticEventsEnabled = trackAutomaticEvents
         if let serverURL = serverURL {
             self.serverURL = serverURL
             BasePath.namedBasePaths[name] = serverURL
@@ -286,9 +282,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let superProperties = superProperties {
             registerSuperProperties(superProperties)
         }
-        
-        MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: trackAutomaticEvents,
-                                                            apiToken: self.apiToken)
         
 #if AUTOMATIC_EVENTS || TV_AUTO_EVENTS
         if !MixpanelInstance.isiOSAppExtension() {
@@ -858,7 +851,7 @@ extension MixpanelInstance {
             // automatic events will NOT be flushed until one of the flags is non-nil
             let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(
                 type: self.persistenceTypeFromFlushType(.events),
-                excludeAutomaticEvents: !MixpanelPersistence.automaticEventsFlagIsSet(apiToken: self.apiToken)
+                excludeAutomaticEvents: !self.trackAutomaticEventsEnabled
             )
             let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.people))
             let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.groups))

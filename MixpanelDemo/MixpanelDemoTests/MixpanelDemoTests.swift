@@ -513,6 +513,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertEqual(testMixpanel.currentSuperProperties()["mp_lib"] as? String, "flutter",
                        "register super properties in init failed")
         testMixpanel.track(event: "e1")
+        waitForTrackingQueue(testMixpanel)
         let e = eventQueue(token: testMixpanel.apiToken).last!
         let p = e["properties"] as! InternalProperties
         XCTAssertNotNil(p["mp_lib"], "flutter")
@@ -1026,7 +1027,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let setProperties2 = group[1]["$set"] as! InternalProperties
         XCTAssertEqual(setProperties2["a"] as? Int, 1)
         XCTAssertTrue(MixpanelPersistence.loadOptOutStatusFlag(apiToken: token)!)
-        XCTAssertTrue(MixpanelPersistence.loadAutomaticEventsEnabledFlag(apiToken: token))
         
         //timedEvents
         let testTimedEvents = MixpanelPersistence.loadTimedEvents(apiToken: token)

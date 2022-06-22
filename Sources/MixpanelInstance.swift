@@ -83,7 +83,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var trackAutomaticEventsEnabled: Bool? {
         didSet {
             MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: trackAutomaticEventsEnabled ?? false,
-                                                                fromDecide: false,
                                                                 apiToken: apiToken)
         }
     }
@@ -214,7 +213,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let sessionMetadata: SessionMetadata
     let flushInstance: Flush
     let trackInstance: Track
-#if AUTOMATIC_EVENTS
+#if AUTOMATIC_EVENTS || TV_AUTO_EVENTS
     let automaticEvents = AutomaticEvents()
 #endif // AUTOMATIC_EVENTS
     
@@ -289,15 +288,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         
         MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: trackAutomaticEvents,
-                                                            fromDecide: false,
                                                             apiToken: self.apiToken)
         
-#if AUTOMATIC_EVENTS
+#if AUTOMATIC_EVENTS || TV_AUTO_EVENTS
         if !MixpanelInstance.isiOSAppExtension() {
             automaticEvents.delegate = self
             automaticEvents.initializeEvents(apiToken: self.apiToken)
         }
-#endif // DECIDE
+#endif // AUTOMATIC_EVENTS
     }
     
 #if !os(OSX) && !os(watchOS)

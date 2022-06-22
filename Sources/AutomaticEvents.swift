@@ -12,7 +12,7 @@ protocol AEDelegate: AnyObject {
     func increment(property: String, by: Double)
 }
 
-#if AUTOMATIC_EVENTS
+#if AUTOMATIC_EVENTS || TV_AUTO_EVENTS
 import Foundation
 import UIKit
 import StoreKit

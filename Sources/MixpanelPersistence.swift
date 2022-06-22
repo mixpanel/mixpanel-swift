@@ -40,7 +40,6 @@ struct MixpanelUserDefaultsKeys {
     static let prefix = "mixpanel"
     static let optOutStatus = "OptOutStatus"
     static let automaticEventEnabled = "AutomaticEventEnabled"
-    static let automaticEventEnabledFromDecide = "AutomaticEventEnabledFromDecide"
     static let timedEvents = "timedEvents"
     static let superProperties = "superProperties"
     static let distinctID = "MPDistinctID"
@@ -139,16 +138,12 @@ class MixpanelPersistence {
         return defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)") as? Bool
     }
     
-    static func saveAutomaticEventsEnabledFlag(value: Bool, fromDecide: Bool, apiToken: String) {
+    static func saveAutomaticEventsEnabledFlag(value: Bool, apiToken: String) {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
         let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
-        if fromDecide {
-            defaults.setValue(value, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)")
-        } else {
-            defaults.setValue(value, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)")
-        }
+        defaults.setValue(value, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)")
         defaults.synchronize()
     }
     
@@ -160,14 +155,10 @@ class MixpanelPersistence {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return true
         }
-        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") == nil &&
-            defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)") == nil {
+        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") == nil {
             return true // default true
-        }
-        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") != nil {
+        } else {
             return defaults.bool(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)")
-        } else { // if there is no local settings, get the value from Decide
-            return defaults.bool(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)")
         }
         #endif
     }
@@ -180,9 +171,8 @@ class MixpanelPersistence {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return false // no user defaults at all
         }
-        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") == nil &&
-            defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)") == nil {
-            return false // neither flag is set
+        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") == nil {
+            return false // flag is not set
         }
         return true // at least one of the flags is set
         #endif
@@ -275,7 +265,6 @@ class MixpanelPersistence {
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)")
-        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.timedEvents)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.superProperties)")
@@ -318,7 +307,7 @@ class MixpanelPersistence {
             MixpanelPersistence.saveOptOutStatusFlag(value: optOutFlag, apiToken: apiToken)
         }
         if let automaticEventsFlag = automaticEventsEnabled {
-            MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: automaticEventsFlag, fromDecide: false, apiToken: apiToken)
+            MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: automaticEventsFlag, apiToken: apiToken)
         }
         return
     }

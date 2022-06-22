@@ -14,7 +14,7 @@ import XCTest
 class MixpanelDemoTests: MixpanelBaseTests {
     
     func test5XXResponse() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.serverURL = kFakeServerUrl
         testMixpanel.track(event: "Fake Event")
         flushAndWaitForTrackingQueue(testMixpanel)
@@ -32,7 +32,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testFlushEvents() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         for i in 0..<50 {
             testMixpanel.track(event: "event \(i)")
@@ -52,7 +52,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     
     
     func testFlushPeople() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         for i in 0..<50 {
             testMixpanel.people.set(property: "p1", to: "\(i)")
@@ -68,7 +68,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testFlushGroups() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         let groupKey = "test_key"
         let groupValue = "test_value"
@@ -86,7 +86,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testFlushNetworkFailure() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.serverURL = kFakeServerUrl
         for i in 0..<50 {
             testMixpanel.track(event: "event \(UInt(i))")
@@ -100,7 +100,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testFlushQueueContainsCorruptedEvent() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.trackingQueue.async {
             testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event1", "properties": ["BadProp": Double.nan]], type: .events)
             testMixpanel.mixpanelPersistence.saveEntity(["event": "bad event2", "properties": ["BadProp": Float.nan]], type: .events)
@@ -117,7 +117,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testAddEventContainsInvalidJsonObjectDoubleNaN() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         XCTExpectAssert("unsupported property type was allowed") {
             testMixpanel.track(event: "bad event", properties: ["BadProp": Double.nan])
         }
@@ -125,7 +125,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testAddEventContainsInvalidJsonObjectFloatNaN() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         XCTExpectAssert("unsupported property type was allowed") {
             testMixpanel.track(event: "bad event", properties: ["BadProp": Float.nan])
         }
@@ -133,7 +133,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testAddEventContainsInvalidJsonObjectDoubleInfinity() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         XCTExpectAssert("unsupported property type was allowed") {
             testMixpanel.track(event: "bad event", properties: ["BadProp": Double.infinity])
         }
@@ -141,7 +141,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testAddEventContainsInvalidJsonObjectFloatInfinity() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         XCTExpectAssert("unsupported property type was allowed") {
             testMixpanel.track(event: "bad event", properties: ["BadProp": Float.infinity])
         }
@@ -149,7 +149,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testAddingEventsAfterFlush() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         for i in 0..<10 {
             testMixpanel.track(event: "event \(UInt(i))")
         }
@@ -167,7 +167,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testIdentify() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         for _ in 0..<2 {
             // run this twice to test reset works correctly wrt to distinct ids
             let distinctId: String = "d1"
@@ -257,7 +257,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testIdentifyTrack() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let distinctIdBeforeIdentify: String? = testMixpanel.distinctId
         let distinctId = "testIdentifyTrack"
 
@@ -272,7 +272,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testIdentifyResetTrack() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let originalDistinctId: String? = testMixpanel.distinctId
         let distinctId = "testIdentifyTrack"
         testMixpanel.reset()
@@ -300,7 +300,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testPersistentIdentity() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let distinctId: String = "d1"
         let alias: String = "a1"
         testMixpanel.identify(distinctId: distinctId)
@@ -324,25 +324,25 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testUseUniqueDistinctId() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
-        let testMixpanel2 = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
+        let testMixpanel2 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         XCTAssertNotEqual(testMixpanel.distinctId, testMixpanel2.distinctId, "by default, distinctId should not be unique to the device")
         
-        let testMixpanel3 = Mixpanel.initialize(token: randomId(), flushInterval: 60, useUniqueDistinctId: false)
-        let testMixpanel4 = Mixpanel.initialize(token: randomId(), flushInterval: 60, useUniqueDistinctId: false)
+        let testMixpanel3 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: false)
+        let testMixpanel4 = Mixpanel.initialize(token: randomId(),  trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: false)
         XCTAssertNotEqual(testMixpanel3.distinctId, testMixpanel4.distinctId, "distinctId should not be unique to the device if useUniqueDistinctId is set to false")
         
-        let testMixpanel5 = Mixpanel.initialize(token: randomId(), flushInterval: 60, useUniqueDistinctId: true)
-        let testMixpanel6 = Mixpanel.initialize(token: randomId(), flushInterval: 60, useUniqueDistinctId: true)
+        let testMixpanel5 = Mixpanel.initialize(token: randomId(),  trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: true)
+        let testMixpanel6 = Mixpanel.initialize(token: randomId(),  trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: true)
         XCTAssertEqual(testMixpanel5.distinctId, testMixpanel6.distinctId, "distinctId should be unique to the device if useUniqueDistinctId is set to true")
     }
     
     func testHadPersistedDistinctId() {
         let testToken = randomId()
-        let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60)
         XCTAssertNotNil(testMixpanel.distinctId)
         let distinctId = testMixpanel.distinctId
-        let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        let testMixpanel2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60)
         XCTAssertEqual(testMixpanel2.distinctId, distinctId, "mixpanel anonymous distinct id should not be changed for each init")
                 
         let userId: String = "u1"
@@ -356,7 +356,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testTrackWithDefaultProperties() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.track(event: "Something Happened")
         waitForTrackingQueue(testMixpanel)
         let e: InternalProperties = eventQueue(token: testMixpanel.apiToken).last!
@@ -379,7 +379,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testTrackWithCustomProperties() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let now = Date()
         let p: Properties = ["string": "yello",
                              "number": 3,
@@ -409,7 +409,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                              "dict": optDict,
                              "nested": nested,
                             ]
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.track(event: "Optional Test", properties: p)
         waitForTrackingQueue(testMixpanel)
         let props: InternalProperties = eventQueue(token: testMixpanel.apiToken).last?["properties"] as! InternalProperties
@@ -424,7 +424,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testTrackWithCustomDistinctIdAndToken() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let p: Properties = ["token": "t1", "distinct_id": "d1"]
         testMixpanel.track(event: "e1", properties: p)
         waitForTrackingQueue(testMixpanel)
@@ -436,7 +436,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testTrackWithGroups() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let groupKey = "test_key"
         let groupID = "test_id"
         testMixpanel.trackWithGroups(event: "Something Happened", properties: [groupKey: "some other value", "p1": "value"], groups: [groupKey: groupID])
@@ -463,7 +463,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testRegisterSuperProperties() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         var p: Properties = ["p1": "a", "p2": 3, "p3": Date()]
         testMixpanel.registerSuperProperties(p)
         waitForTrackingQueue(testMixpanel)
@@ -508,7 +508,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testSettingSuperPropertiesWhenInit() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60, superProperties: ["mp_lib": "flutter"])
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60, superProperties: ["mp_lib": "flutter"])
         waitForTrackingQueue(testMixpanel)
         XCTAssertEqual(testMixpanel.currentSuperProperties()["mp_lib"] as? String, "flutter",
                        "register super properties in init failed")
@@ -519,7 +519,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testInvalidPropertiesTrack() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let p: Properties = ["data": [Data()]]
         XCTExpectAssert("property type should not be allowed") {
             testMixpanel.track(event: "e1", properties: p)
@@ -528,7 +528,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testInvalidSuperProperties() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let p: Properties = ["data": [Data()]]
         XCTExpectAssert("property type should not be allowed") {
             testMixpanel.registerSuperProperties(p)
@@ -537,7 +537,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testInvalidSuperProperties2() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let p: Properties = ["data": [Data()]]
         XCTExpectAssert("property type should not be allowed") {
             testMixpanel.registerSuperPropertiesOnce(p)
@@ -546,7 +546,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testInvalidSuperProperties3() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let p: Properties = ["data": [Data()]]
         XCTExpectAssert("property type should not be allowed") {
             testMixpanel.registerSuperPropertiesOnce(p, defaultValue: "v")
@@ -555,14 +555,14 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testValidPropertiesTrack() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let p: Properties = allPropertyTypes()
         testMixpanel.track(event: "e1", properties: p)
         removeDBfile(testMixpanel.apiToken)
     }
 
     func testValidSuperProperties() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let p: Properties = allPropertyTypes()
         testMixpanel.registerSuperProperties(p)
         testMixpanel.registerSuperPropertiesOnce(p)
@@ -571,7 +571,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testReset() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         testMixpanel.track(event: "e1")
         waitForTrackingQueue(testMixpanel)
@@ -592,7 +592,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                       "super properties failed to reset")
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty, "events queue failed to reset")
         XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty, "people queue failed to reset")
-        let testMixpanel2 = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel2 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         waitForTrackingQueue(testMixpanel2)
         #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(testMixpanel2.distinctId, testMixpanel2.defaultDistinctId(),
@@ -612,7 +612,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testArchiveNSNumberBoolIntProperty() {
         let testToken = randomId()
-        let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.serverURL = kFakeServerUrl
         let aBoolNumber: Bool = true
         let aBoolNSNumber = NSNumber(value: aBoolNumber)
@@ -624,7 +624,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         testMixpanel.archive()
         waitForTrackingQueue(testMixpanel)
 
-        let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        let testMixpanel2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel2.serverURL = kFakeServerUrl
         waitForTrackingQueue(testMixpanel2)
 
@@ -646,7 +646,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testArchive() {
         let testToken = randomId()
-        let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60, trackAutomaticEvents: false)
+        let testMixpanel = Mixpanel.initialize(token: testToken, trackAutomaticEvents: false, flushInterval: 60)
         testMixpanel.serverURL = kFakeServerUrl
         #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(testMixpanel.distinctId, testMixpanel.defaultDistinctId(),
@@ -674,7 +674,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         testMixpanel.timedEvents["e2"] = 5
         testMixpanel.archive()
-        let testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60, trackAutomaticEvents: false)
+        let testMixpanel2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: false, flushInterval: 60)
         testMixpanel2.serverURL = kFakeServerUrl
         waitForTrackingQueue(testMixpanel2)
         XCTAssertEqual(testMixpanel2.distinctId, "d1", "custom distinct archive failed")
@@ -705,7 +705,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(peopleQueue(token: testMixpanel2.apiToken).count >= 1, "pending people queue archive failed")
         XCTAssertEqual(testMixpanel2.timedEvents["e2"] as? Int, 5,
                        "timedEvents archive failed")
-        let testMixpanel3 = Mixpanel.initialize(token: testToken, flushInterval: 60, trackAutomaticEvents: false)
+        let testMixpanel3 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: false, flushInterval: 60)
         testMixpanel3.serverURL = kFakeServerUrl
         XCTAssertEqual(testMixpanel3.distinctId, "d1", "expecting d1 as distinct id as initialised")
         XCTAssertTrue(testMixpanel3.currentSuperProperties().count == 1,
@@ -722,7 +722,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
 
     func testMixpanelDelegate() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.delegate = self
         testMixpanel.identify(distinctId: "d1")
         testMixpanel.track(event: "e1")
@@ -735,7 +735,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testEventTiming() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.track(event: "Something Happened")
         waitForTrackingQueue(testMixpanel)
         var e: InternalProperties = eventQueue(token: testMixpanel.apiToken).last!
@@ -798,7 +798,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testSetGroup() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         let groupKey = "test_key"
         let groupValue = "test_value"
@@ -812,7 +812,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testAddGroup() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         let groupKey = "test_key"
         let groupValue = "test_value"
@@ -844,7 +844,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
 
     func testRemoveGroup() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.identify(distinctId: "d1")
         let groupKey = "test_key"
         let groupValue = "test_value"
@@ -877,7 +877,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         var testMixpanel: MixpanelInstance?
         for _ in 1...10 {
             concurentQueue.async {
-                testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
+                testMixpanel = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60)
                 testMixpanel?.loggingEnabled = true
                 testMixpanel?.track(event: "test")
             }
@@ -886,20 +886,20 @@ class MixpanelDemoTests: MixpanelBaseTests {
         var testMixpanel2: MixpanelInstance?
         for _ in 1...10 {
             concurentQueue.async {
-                testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+                testMixpanel2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60)
                 testMixpanel2?.loggingEnabled = true
                 testMixpanel2?.track(event: "test")
             }
         }
         sleep(5)
-        testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
-        testMixpanel2 = Mixpanel.initialize(token: testToken, flushInterval: 60)
+        testMixpanel = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60)
+        testMixpanel2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60)
         XCTAssertTrue(testMixpanel === testMixpanel2, "instance with same token should be reused and no sqlite db locked error should be populated")
     }
     
     func testReadWriteMultiThreadShouldNotCrash() {
         let concurentQueue = DispatchQueue(label: "multithread", attributes: .concurrent)
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
 
         for n in 1...10 {
             concurentQueue.async {
@@ -991,7 +991,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let legacyFiles = ["mixpanel-testToken-events", "mixpanel-testToken-properties", "mixpanel-testToken-groups", "mixpanel-testToken-people", "mixpanel-testToken-optOutStatus"]
         prepareForMigrationFiles(legacyFiles)
         // initialize mixpanel will do the migration automatically if found legacy archive files.
-        let testMixpanel = Mixpanel.initialize(token: token, flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: token, trackAutomaticEvents: true, flushInterval: 60)
         let fileManager = FileManager.default
         let libraryUrls = fileManager.urls(for: .libraryDirectory,
                                             in: .userDomainMask)

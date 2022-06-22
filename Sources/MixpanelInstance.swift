@@ -173,7 +173,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// A unique identifier for this MixpanelInstance
     public let name: String
     
-#if DECIDE
+#if AUTOMATIC_EVENTS
     /// The minimum session duration (ms) that is tracked in automatic events.
     /// The default value is 10000 (10 seconds).
     open var minimumSessionDuration: UInt64 {
@@ -195,7 +195,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             automaticEvents.maximumSessionDuration = newValue
         }
     }
-#endif // DECIDE
+#endif // AUTOMATIC_EVENTS
     
     var superProperties = InternalProperties()
     var trackingQueue: DispatchQueue
@@ -214,11 +214,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let sessionMetadata: SessionMetadata
     let flushInstance: Flush
     let trackInstance: Track
-#if DECIDE
+#if AUTOMATIC_EVENTS
     let automaticEvents = AutomaticEvents()
-#elseif TV_AUTO_EVENTS
-    let automaticEvents = AutomaticEvents()
-#endif // DECIDE
+#endif // AUTOMATIC_EVENTS
     
     init(apiToken: String?, flushInterval: Double, name: String, trackAutomaticEvents: Bool, optOutTrackingByDefault: Bool = false,
          useUniqueDistinctId: Bool = false, superProperties: Properties? = nil,
@@ -294,7 +292,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                                             fromDecide: false,
                                                             apiToken: self.apiToken)
         
-#if DECIDE || TV_AUTO_EVENTS
+#if AUTOMATIC_EVENTS
         if !MixpanelInstance.isiOSAppExtension() {
             automaticEvents.delegate = self
             automaticEvents.initializeEvents(apiToken: self.apiToken)

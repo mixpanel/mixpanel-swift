@@ -17,9 +17,6 @@ let package = Package(
         .target(
             name: "Mixpanel",
             path: "Sources",
-            swiftSettings: [
-                .define("AUTOMATIC_EVENTS", .when(platforms: [.iOS]))
-            ]
         )
     ]
 )

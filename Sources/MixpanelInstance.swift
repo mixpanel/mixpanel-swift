@@ -167,9 +167,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// A unique identifier for this MixpanelInstance
     public let name: String
     
-#if AUTOMATIC_EVENTS
     /// The minimum session duration (ms) that is tracked in automatic events.
     /// The default value is 10000 (10 seconds).
+#if os(iOS) || os(tvOS)
     open var minimumSessionDuration: UInt64 {
         get {
             return automaticEvents.minimumSessionDuration
@@ -189,8 +189,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             automaticEvents.maximumSessionDuration = newValue
         }
     }
-#endif // AUTOMATIC_EVENTS
-    
+#endif
     var superProperties = InternalProperties()
     var trackingQueue: DispatchQueue
     var networkQueue: DispatchQueue
@@ -208,10 +207,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let sessionMetadata: SessionMetadata
     let flushInstance: Flush
     let trackInstance: Track
-#if AUTOMATIC_EVENTS || TV_AUTO_EVENTS
+#if os(iOS) || os(tvOS)
     let automaticEvents = AutomaticEvents()
-#endif // AUTOMATIC_EVENTS
-    
+#endif
     init(apiToken: String?, flushInterval: Double, name: String, trackAutomaticEvents: Bool, optOutTrackingByDefault: Bool = false,
          useUniqueDistinctId: Bool = false, superProperties: Properties? = nil,
          serverURL: String? = nil) {
@@ -282,13 +280,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let superProperties = superProperties {
             registerSuperProperties(superProperties)
         }
-        
-#if AUTOMATIC_EVENTS || TV_AUTO_EVENTS
+#if os(iOS) || os(tvOS)
         if !MixpanelInstance.isiOSAppExtension() {
             automaticEvents.delegate = self
             automaticEvents.initializeEvents(apiToken: self.apiToken)
         }
-#endif // AUTOMATIC_EVENTS
+#endif
     }
     
 #if !os(OSX) && !os(watchOS)

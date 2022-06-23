@@ -24,7 +24,7 @@ Pod::Spec.new do |s|
   s.tvos.deployment_target = '9.0'
   s.tvos.frameworks = 'UIKit', 'Foundation'
   s.tvos.pod_target_xcconfig = {
-    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) TV_OS TV_AUTO_EVENTS'
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) TV_OS'
   }
   s.osx.deployment_target = '10.10'
   s.osx.frameworks = 'Cocoa', 'Foundation'
@@ -38,9 +38,6 @@ Pod::Spec.new do |s|
   }
 
   s.subspec 'Complete' do |ss|
-    ss.ios.pod_target_xcconfig = {
-      'OTHER_SWIFT_FLAGS' => '$(inherited) -D AUTOMATIC_EVENTS'
-    }
     ss.ios.source_files = ['Sources/*.swift']
     ss.tvos.source_files = base_source_files
     ss.osx.source_files = base_source_files

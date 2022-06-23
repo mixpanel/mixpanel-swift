@@ -20,13 +20,6 @@ class Track {
     let metadata: SessionMetadata
     let mixpanelPersistence: MixpanelPersistence
     weak var mixpanelInstance: MixpanelInstance?
-    
-    var isAutomaticEventEnabled: Bool {
-        if mixpanelInstance?.trackAutomaticEventsEnabled ?? false {
-            return true
-        }
-        return false
-    }
 
     init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata,
          mixpanelPersistence: MixpanelPersistence) {
@@ -48,7 +41,7 @@ class Track {
         } else {
             Logger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")
         }
-        if !isAutomaticEventEnabled && ev.hasPrefix("$ae_") {
+        if !(mixpanelInstance?.trackAutomaticEventsEnabled ?? false) && ev.hasPrefix("$ae_") {
             return timedEvents
         }
         assertPropertyTypes(properties)

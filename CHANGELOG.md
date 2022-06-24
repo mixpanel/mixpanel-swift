@@ -1,5 +1,13 @@
 #
 
+## [v3.3.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.3.0) (2022-06-24)
+
+### Enhancements
+
+- use millisecond precision for event time property [\#546](https://github.com/mixpanel/mixpanel-swift/pull/546)
+
+#
+
 ## [v3.2.6](https://github.com/mixpanel/mixpanel-swift/tree/v3.2.6) (2022-05-20)
 
 ### Enhancements
@@ -156,6 +164,8 @@
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

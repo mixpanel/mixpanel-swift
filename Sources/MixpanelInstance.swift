@@ -652,6 +652,9 @@ extension MixpanelInstance {
      The alias method creates an alias which Mixpanel will use to remap one id to another.
      Multiple aliases can point to the same identifier.
      
+     Please note: With Mixpanel Identity Merge enabled, calling alias is no longer required
+     but can be used to merge two IDs in scenarios where identify() would fail
+     
      
      `mixpanelInstance.createAlias("New ID", distinctId: mixpanelInstance.distinctId)`
      
@@ -663,10 +666,12 @@ extension MixpanelInstance {
      - parameter alias:      A unique identifier that you want to use as an identifier for this user.
      - parameter distinctId: The current user identifier.
      - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
+     - parameter andIdentify: an optional boolean that controls whether or not to call 'identify' with your current
+     user identifier(not alias). Default to true for keeping your signup funnels working correctly in most cases.
      - parameter completion: an optional completion handler for when the createAlias has completed.
      This should only be set to false if you wish to prevent people profile updates for that user.
      */
-    open func createAlias(_ alias: String, distinctId: String, usePeople: Bool = true, completion: (() -> Void)? = nil) {
+    open func createAlias(_ alias: String, distinctId: String, usePeople: Bool = true, andIdentify: Bool = true, completion: (() -> Void)? = nil) {
         if hasOptedOutTracking() {
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
@@ -731,7 +736,9 @@ extension MixpanelInstance {
             
             let properties = ["distinct_id": distinctId, "alias": alias]
             track(event: "$create_alias", properties: properties)
-            identify(distinctId: distinctId, usePeople: usePeople)
+            if andIdentify {
+                identify(distinctId: distinctId, usePeople: usePeople)
+            }
             flush(completion: completion)
         } else {
             Logger.error(message: "alias: \(alias) matches distinctId: \(distinctId) - skipping api call.")

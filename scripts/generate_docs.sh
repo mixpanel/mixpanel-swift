@@ -3,6 +3,6 @@ jazzy \
 -a Mixpanel \
 -u http://mixpanel.com \
 --github_url https://github.com/mixpanel/mixpanel-swift \
---module-version 3.2.6 \
+--module-version 3.3.0 \
 --framework-root . \
 --module Mixpanel

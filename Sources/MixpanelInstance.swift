@@ -612,6 +612,12 @@ extension MixpanelInstance {
                 self.hadPersistedDistinctId = true
             }
             
+            if self.userId == nil {
+                self.readWriteLock.write {
+                    self.userId = distinctId
+                }
+            }
+            
             if distinctId != self.distinctId {
                 let oldDistinctId = self.distinctId
                 self.readWriteLock.write {

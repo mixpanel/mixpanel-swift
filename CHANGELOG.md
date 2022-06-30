@@ -6,6 +6,10 @@
 
 - add an option for 'createAlias' for not calling identify [\#547](https://github.com/mixpanel/mixpanel-swift/pull/547)
 
+When you call the API `createAlias`, there is an implicit `identify` call inside the API done for you. This will keep your signup funnels working correctly in most cases. However, if that is not what you want, this PR will allow you to not call `identify` by specifying `andIdentify` to `false`.
+
+ Please also note: With Mixpanel Identity Merge enabled, calling alias is no longer required but can be used to merge two IDs in scenarios where `identify` would fail.
+
 #
 
 ## [v3.3.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.3.0) (2022-06-24)

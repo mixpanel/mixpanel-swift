@@ -298,6 +298,42 @@ class MixpanelDemoTests: MixpanelBaseTests {
         }
         removeDBfile(testMixpanel.apiToken)
     }
+    
+    func testCreateAlias() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        testMixpanel.people.set(properties:  ["p1": "a"])
+        waitForTrackingQueue(testMixpanel)
+        var unidentifiedQueue = unIdentifiedPeopleQueue(token: testMixpanel.apiToken)
+        // the user profile update has been queued up in unidentifiedQueue until identify is called
+        XCTAssertTrue(!unidentifiedQueue.isEmpty)
+        
+        let distinctId = testMixpanel.distinctId
+        let alias: String = "a1"
+        testMixpanel.createAlias(alias, distinctId: testMixpanel.distinctId)
+        waitForTrackingQueue(testMixpanel)
+
+        let mixpanelIdentity = MixpanelPersistence.loadIdentity(apiToken: testMixpanel.apiToken)
+        XCTAssertTrue(distinctId == mixpanelIdentity.distinctID && distinctId == mixpanelIdentity.peopleDistinctID  && distinctId == mixpanelIdentity.userId && alias == mixpanelIdentity.alias)
+        removeDBfile(testMixpanel.apiToken)
+        unidentifiedQueue = unIdentifiedPeopleQueue(token: testMixpanel.apiToken)
+        // unidentifiedQueue has been flushed
+        XCTAssertTrue(unidentifiedQueue.isEmpty)
+        
+        let testMixpanel2 = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        testMixpanel2.people.set(properties:  ["p1": "a"])
+        waitForTrackingQueue(testMixpanel2)
+        
+        let distinctId2 = testMixpanel2.distinctId
+        testMixpanel2.createAlias(alias, distinctId: testMixpanel.distinctId, andIdentify: false)
+        waitForTrackingQueue(testMixpanel2)
+        
+        let unidentifiedQueue2 = unIdentifiedPeopleQueue(token: testMixpanel2.apiToken)
+        // The user profile updates should still be held in unidentifiedQueue cause no identify is called
+        XCTAssertTrue(!unidentifiedQueue2.isEmpty)
+        let mixpanelIdentity2 = MixpanelPersistence.loadIdentity(apiToken: testMixpanel2.apiToken)
+        XCTAssertTrue(distinctId2 == mixpanelIdentity2.distinctID && nil == mixpanelIdentity2.peopleDistinctID && nil == mixpanelIdentity2.userId && alias == mixpanelIdentity2.alias)
+        removeDBfile(testMixpanel2.apiToken)
+    }
 
     func testPersistentIdentity() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)

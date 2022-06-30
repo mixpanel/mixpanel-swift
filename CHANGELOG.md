@@ -1,5 +1,13 @@
 #
 
+## [v3.4.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.4.0) (2022-06-30)
+
+### Enhancements
+
+- add an option for 'createAlias' for not calling identify [\#547](https://github.com/mixpanel/mixpanel-swift/pull/547)
+
+#
+
 ## [v3.3.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.3.0) (2022-06-24)
 
 ### Enhancements
@@ -164,6 +172,8 @@
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

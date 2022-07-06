@@ -17,7 +17,7 @@
     <a title="MixpanelInstance Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 3.3.0 Docs</a> (84% documented)</p>
+        <p><a href="../index.html">Mixpanel 3.5.0 Docs</a> (84% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
@@ -619,9 +619,9 @@ Useful if you need to proxy Mixpanel requests. Defaults to
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC22minimumSessionDurations6UInt64Vvp"></a>
+                    <a name="/"></a>
                     <a name="//apple_ref/swift/Property/minimumSessionDuration" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC22minimumSessionDurations6UInt64Vvp">minimumSessionDuration</a>
+                    <a class="token" href="#/">minimumSessionDuration</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -633,23 +633,15 @@ Useful if you need to proxy Mixpanel requests. Defaults to
 The default value is 10000 (10 seconds).</p>
 
                       </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="k">var</span> <span class="nv">minimumSessionDuration</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
-
-                        </div>
-                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC22maximumSessionDurations6UInt64Vvp"></a>
+                    <a name="/"></a>
                     <a name="//apple_ref/swift/Property/maximumSessionDuration" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC22maximumSessionDurations6UInt64Vvp">maximumSessionDuration</a>
+                    <a class="token" href="#/">maximumSessionDuration</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -660,14 +652,6 @@ The default value is 10000 (10 seconds).</p>
                         <p>The maximum session duration (ms) that is tracked in automatic events.
 The default value is UINT64_MAX (no maximum session duration).</p>
 
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="k">var</span> <span class="nv">maximumSessionDuration</span><span class="p">:</span> <span class="kt">UInt64</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
-
-                        </div>
                       </div>
                     </section>
                   </div>
@@ -779,9 +763,9 @@ This should only be set to false if you wish to prevent people profile updates f
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A8InstanceC11createAlias_10distinctId9usePeople10completionySS_SSSbyycSgtF"></a>
-                    <a name="//apple_ref/swift/Method/createAlias(_:distinctId:usePeople:completion:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11createAlias_10distinctId9usePeople10completionySS_SSSbyycSgtF">createAlias(_:<wbr>distinctId:<wbr>usePeople:<wbr>completion:<wbr>)</a>
+                    <a name="/s:8Mixpanel0A8InstanceC11createAlias_10distinctId9usePeople11andIdentify10completionySS_SSS2byycSgtF"></a>
+                    <a name="//apple_ref/swift/Method/createAlias(_:distinctId:usePeople:andIdentify:completion:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11createAlias_10distinctId9usePeople11andIdentify10completionySS_SSS2byycSgtF">createAlias(_:<wbr>distinctId:<wbr>usePeople:<wbr>andIdentify:<wbr>completion:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -791,6 +775,9 @@ This should only be set to false if you wish to prevent people profile updates f
                       <div class="abstract">
                         <p>The alias method creates an alias which Mixpanel will use to remap one id to another.
 Multiple aliases can point to the same identifier.</p>
+
+<p>Please note: With Mixpanel Identity Merge enabled, calling alias is no longer required
+but can be used to merge two IDs in scenarios where identify() would fail</p>
 
 <p><code>mixpanelInstance.createAlias(&quot;New ID&quot;, distinctId: mixpanelInstance.distinctId)</code></p>
 
@@ -803,7 +790,7 @@ Multiple aliases can point to the same identifier.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">createAlias</span><span class="p">(</span><span class="n">_</span> <span class="nv">alias</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">usePeople</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span> <span class="nv">completion</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">createAlias</span><span class="p">(</span><span class="n">_</span> <span class="nv">alias</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">usePeople</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span> <span class="nv">andIdentify</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span> <span class="nv">completion</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -844,6 +831,19 @@ Multiple aliases can point to the same identifier.</p>
                               <td>
                                 <div>
                                   <p>boolean that controls whether or not to set the people distinctId to the event distinctId.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>andIdentify</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>an optional boolean that controls whether or not to call &lsquo;identify&rsquo; with your current
+user identifier(not alias). Default to true for keeping your signup funnels working correctly in most cases.</p>
                                 </div>
                               </td>
                             </tr>
@@ -1969,7 +1969,7 @@ that is sent to Mixpanel</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2022 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2022-06-24)</p>
+          <p>&copy; 2022 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2022-07-06)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

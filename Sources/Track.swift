@@ -15,14 +15,16 @@ func += <K, V> (left: inout [K: V], right: [K: V]) {
 }
 
 class Track {
+    let instanceName: String
     let apiToken: String
     let lock: ReadWriteLock
     let metadata: SessionMetadata
     let mixpanelPersistence: MixpanelPersistence
     weak var mixpanelInstance: MixpanelInstance?
 
-    init(apiToken: String, lock: ReadWriteLock, metadata: SessionMetadata,
+    init(apiToken: String, instanceName: String, lock: ReadWriteLock, metadata: SessionMetadata,
          mixpanelPersistence: MixpanelPersistence) {
+        self.instanceName = instanceName
         self.apiToken = apiToken
         self.lock = lock
         self.metadata = metadata
@@ -50,14 +52,14 @@ class Track {
             UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugTrackedKey)
         }
         #endif
-        let epochSeconds = Int(round(epochInterval))
+        let epochMilliseconds = Int(round(epochInterval * 1000))
         let eventStartTime = timedEvents[ev] as? Double
         var p = InternalProperties()
         AutomaticProperties.automaticPropertiesLock.read {
             p += AutomaticProperties.properties
         }
         p["token"] = apiToken
-        p["time"] = epochSeconds
+        p["time"] = epochMilliseconds
         var shadowTimedEvents = timedEvents
         if let eventStartTime = eventStartTime {
             shadowTimedEvents.removeValue(forKey: ev)
@@ -83,7 +85,7 @@ class Track {
         metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
         
         self.mixpanelPersistence.saveEntity(trackEvent, type: .events)
-        MixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents, apiToken: apiToken)
+        MixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents, instanceName: instanceName)
         return shadowTimedEvents
     }
 

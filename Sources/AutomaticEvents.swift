@@ -47,9 +47,9 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     
     let awaitingTransactionsWriteLock = DispatchQueue(label: "com.mixpanel.awaiting_transactions_writeLock", qos: .utility)
     
-    func initializeEvents(apiToken: String) {
+    func initializeEvents(instanceName: String) {
         let legacyFirstOpenKey = "MPFirstOpen"
-        let firstOpenKey = "MPFirstOpen-\(apiToken)"
+        let firstOpenKey = "MPFirstOpen-\(instanceName)"
         // do not track `$ae_first_open` again if the legacy key exist,
         // but we will start using the key with the mixpanel token in favour of multiple instances support
         if let defaults = defaults, !defaults.bool(forKey: legacyFirstOpenKey) {

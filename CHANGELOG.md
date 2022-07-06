@@ -1,5 +1,13 @@
 #
 
+## [v3.5.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.5.0) (2022-07-06)
+
+### Enhancements
+
+- add support for multiple instances under the same token [\#549](https://github.com/mixpanel/mixpanel-swift/pull/549)
+
+#
+
 ## [v3.4.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.4.0) (2022-06-30)
 
 ### Enhancements
@@ -176,6 +184,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

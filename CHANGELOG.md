@@ -1,5 +1,33 @@
 #
 
+## [v3.5.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.5.0) (2022-07-06)
+
+### Enhancements
+
+- add support for multiple instances under the same token [\#549](https://github.com/mixpanel/mixpanel-swift/pull/549)
+
+#
+
+## [v3.4.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.4.0) (2022-06-30)
+
+### Enhancements
+
+- add an option for 'createAlias' for not calling identify [\#547](https://github.com/mixpanel/mixpanel-swift/pull/547)
+
+When you call the API `createAlias`, there is an implicit `identify` call inside the API done for you. This will keep your signup funnels working correctly in most cases. However, if that is not what you want, this PR will allow you to not call `identify` by specifying `andIdentify` to `false`.
+
+ Please also note: With Mixpanel Identity Merge enabled, calling alias is no longer required but can be used to merge two IDs in scenarios where `identify` would fail.
+
+#
+
+## [v3.3.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.3.0) (2022-06-24)
+
+### Enhancements
+
+- use millisecond precision for event time property [\#546](https://github.com/mixpanel/mixpanel-swift/pull/546)
+
+#
+
 ## [v3.2.6](https://github.com/mixpanel/mixpanel-swift/tree/v3.2.6) (2022-05-20)
 
 ### Enhancements
@@ -156,6 +184,12 @@
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
+
+
+
+
 
 
 

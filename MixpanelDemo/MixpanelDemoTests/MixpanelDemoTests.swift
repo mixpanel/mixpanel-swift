@@ -300,7 +300,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testCreateAlias() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel.people.set(properties:  ["p1": "a"])
         waitForTrackingQueue(testMixpanel)
         var unidentifiedQueue = unIdentifiedPeopleQueue(token: testMixpanel.apiToken)
@@ -319,7 +319,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         // unidentifiedQueue has been flushed
         XCTAssertTrue(unidentifiedQueue.isEmpty)
         
-        let testMixpanel2 = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel2 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel2.people.set(properties:  ["p1": "a"])
         waitForTrackingQueue(testMixpanel2)
         
@@ -365,11 +365,11 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertNotEqual(testMixpanel.distinctId, testMixpanel2.distinctId, "by default, distinctId should not be unique to the device")
         
         let testMixpanel3 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: false)
-        let testMixpanel4 = Mixpanel.initialize(token: randomId(),  trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: false)
+        let testMixpanel4 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: false)
         XCTAssertNotEqual(testMixpanel3.distinctId, testMixpanel4.distinctId, "distinctId should not be unique to the device if useUniqueDistinctId is set to false")
         
-        let testMixpanel5 = Mixpanel.initialize(token: randomId(),  trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: true)
-        let testMixpanel6 = Mixpanel.initialize(token: randomId(),  trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: true)
+        let testMixpanel5 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: true)
+        let testMixpanel6 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: true)
         XCTAssertEqual(testMixpanel5.distinctId, testMixpanel6.distinctId, "distinctId should be unique to the device if useUniqueDistinctId is set to true")
     }
     
@@ -942,7 +942,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         
         for i in 1...10 {
             concurentQueue.async {
-                let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60, instanceName: "instance\(i)")
+                let testMixpanel = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60, instanceName: "instance\(i)")
                 testMixpanel.loggingEnabled = true
                 testMixpanel.track(event: "test")
             }
@@ -957,8 +957,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
     
     func testMultipleInstancesWithSameTokenButDifferentInstanceName() {
         let testToken = randomId()
-        let instance1 = Mixpanel.initialize(token: testToken, flushInterval: 60, instanceName: "instance1")
-        let instance2 = Mixpanel.initialize(token: testToken, flushInterval: 60, instanceName: "instance2")
+        let instance1 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60, instanceName: "instance1")
+        let instance2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60, instanceName: "instance2")
         
         XCTAssertNotEqual(instance1.distinctId, instance2.distinctId)
         instance1.identify(distinctId: "user1")

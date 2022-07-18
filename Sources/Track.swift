@@ -56,13 +56,14 @@ class Track {
             UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugTrackedKey)
         }
         #endif
+        let epochMilliseconds = round(epochInterval * 1000)
         let eventStartTime = timedEvents[ev] as? Double
         var p = InternalProperties()
         AutomaticProperties.automaticPropertiesLock.read {
             p += AutomaticProperties.properties
         }
         p["token"] = apiToken
-        p["time"] = epochInterval
+        p["time"] = epochMilliseconds
         var shadowTimedEvents = timedEvents
         if let eventStartTime = eventStartTime {
             shadowTimedEvents.removeValue(forKey: ev)

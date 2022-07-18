@@ -1,5 +1,13 @@
 #
 
+## [v3.5.1](https://github.com/mixpanel/mixpanel-swift/tree/v3.5.1) (2022-07-18)
+
+### Fixes
+
+- Send time as Decimal to avoid 32-bit max int [\#551](https://github.com/mixpanel/mixpanel-swift/pull/551)
+
+#
+
 ## [v3.5.0](https://github.com/mixpanel/mixpanel-swift/tree/v3.5.0) (2022-07-06)
 
 ### Enhancements
@@ -184,6 +192,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

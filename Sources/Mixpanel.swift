@@ -205,7 +205,7 @@ open class Mixpanel {
     }
 }
 
-class MixpanelManager {
+final class MixpanelManager {
 
     static let sharedInstance = MixpanelManager()
     private var instances: [String: MixpanelInstance]

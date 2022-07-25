@@ -210,32 +210,33 @@ class MixpanelManager {
     static let sharedInstance = MixpanelManager()
     private var instances: [String: MixpanelInstance]
     private var mainInstance: MixpanelInstance?
-    private let readWriteLock: ReadWriteLock
-    private let instanceQueue: DispatchQueue
+    
+    private let instancesLock = NSLock()
 
     init() {
         instances = [String: MixpanelInstance]()
         Logger.addLogging(PrintLogging())
-        readWriteLock = ReadWriteLock(label: "com.mixpanel.instance.manager.lock")
-        instanceQueue = DispatchQueue(label: "com.mixpanel.instance.manager.instance", qos: .utility)
     }
 
-    func initialize(token apiToken: String,
-                    flushInterval: Double,
-                    instanceName: String,
-                    optOutTrackingByDefault: Bool = false,
-                    trackAutomaticEvents: Bool? = nil,
-                    useUniqueDistinctId: Bool = false,
-                    superProperties: Properties? = nil,
-                    serverURL: String? = nil
+    func initialize(
+        token apiToken: String,
+        flushInterval: Double,
+        instanceName: String,
+        optOutTrackingByDefault: Bool = false,
+        trackAutomaticEvents: Bool? = nil,
+        useUniqueDistinctId: Bool = false,
+        superProperties: Properties? = nil,
+        serverURL: String? = nil
     ) -> MixpanelInstance {
-        instanceQueue.sync {
-            var instance: MixpanelInstance?
+        
+       let proposedInstance = instancesLock.with { () -> MixpanelInstance in
+            
             if let instance = instances[instanceName] {
                 mainInstance = instance
-                return
+                return instance
             }
-            instance = MixpanelInstance(apiToken: apiToken,
+            
+            let instance = MixpanelInstance(apiToken: apiToken,
                                             flushInterval: flushInterval,
                                             name: instanceName,
                                             optOutTrackingByDefault: optOutTrackingByDefault,
@@ -243,19 +244,23 @@ class MixpanelManager {
                                             useUniqueDistinctId: useUniqueDistinctId,
                                             superProperties: superProperties,
                                             serverURL: serverURL)
-            readWriteLock.write {
-                instances[instanceName] = instance!
-                mainInstance = instance!
-            }
+
+            instances[instanceName] = instance
+            mainInstance = instance
+            
+            return instance
         }
-        return mainInstance!
+        
+        return proposedInstance
     }
 
     func getInstance(name instanceName: String) -> MixpanelInstance? {
-        var instance: MixpanelInstance?
-        readWriteLock.read {
-            instance = instances[instanceName]
-        }
+        let instance: MixpanelInstance?
+        
+        instancesLock.lock()
+        instance = instances[instanceName]
+        instancesLock.unlock()
+        
         if instance == nil {
             Logger.warn(message: "no such instance: \(instanceName)")
             return nil
@@ -264,30 +269,24 @@ class MixpanelManager {
     }
 
     func getMainInstance() -> MixpanelInstance? {
-        return mainInstance
-    }
-    
-    func getAllInstances() -> [MixpanelInstance]? {
-        var allInstances: [MixpanelInstance]?
-        readWriteLock.read {
-            allInstances = Array(instances.values)
+        return instancesLock.with {
+            return mainInstance
         }
-        return allInstances
     }
 
     func setMainInstance(name instanceName: String) {
-        var instance: MixpanelInstance?
-        readWriteLock.read {
-            instance = instances[instanceName]
+        instancesLock.with {
+            let instance = instances[instanceName]
+            
+            if instance == nil {
+                return
+            }
+            mainInstance = instance
         }
-        if instance == nil {
-            return
-        }
-        mainInstance = instance
     }
 
     func removeInstance(name instanceName: String) {
-        readWriteLock.write {
+        instancesLock.with {
             if instances[instanceName] === mainInstance {
                 mainInstance = nil
             }

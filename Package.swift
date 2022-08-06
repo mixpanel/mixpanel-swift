@@ -16,7 +16,7 @@ let package = Package(
     targets: [
         .target(
             name: "Mixpanel",
-            path: "Sources",
+            path: "Sources"
         )
     ]
 )

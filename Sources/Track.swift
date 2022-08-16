@@ -52,7 +52,7 @@ class Track {
             UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugTrackedKey)
         }
         #endif
-        let epochMilliseconds = Int(round(epochInterval * 1000))
+        let epochMilliseconds = round(epochInterval * 1000)
         let eventStartTime = timedEvents[ev] as? Double
         var p = InternalProperties()
         AutomaticProperties.automaticPropertiesLock.read {

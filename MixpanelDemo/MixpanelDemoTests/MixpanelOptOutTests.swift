@@ -13,7 +13,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
     
     func testHasOptOutTrackingFlagBeingSetProperlyAfterInitializedWithOptedOutYES()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)
         waitForTrackingQueue(testMixpanel)
         XCTAssertTrue(testMixpanel.hasOptedOutTracking(), "When initialize with opted out flag set to YES, the current user should have opted out tracking")
         testMixpanel.reset()
@@ -22,7 +22,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptInWillAddOptInEvent()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true, trackAutomaticEvents: false)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false, optOutTrackingByDefault: true)
         testMixpanel.optInTracking()
         waitForTrackingQueue(testMixpanel)
         XCTAssertFalse(testMixpanel.hasOptedOutTracking(), "The current user should have opted in tracking")
@@ -40,7 +40,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptInTrackingForDistinctId()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true, trackAutomaticEvents: false)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false, optOutTrackingByDefault: true)
         testMixpanel.optInTracking(distinctId: "testDistinctId")
         waitForTrackingQueue(testMixpanel)
         XCTAssertFalse(testMixpanel.hasOptedOutTracking(), "The current user should have opted in tracking")
@@ -61,7 +61,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             "number": 3,
             "date": now,
             "$app_version": "override"]
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)
         testMixpanel.optInTracking(distinctId: "testDistinctId", properties: testProperties)
         waitForTrackingQueue(testMixpanel)
         waitForTrackingQueue(testMixpanel)
@@ -88,33 +88,33 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testHasOptOutTrackingFlagBeingSetProperlyForMultipleInstances()
     {
-        let mixpanel1 = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
+        let mixpanel1 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)
         waitForTrackingQueue(mixpanel1)
         XCTAssertTrue(mixpanel1.hasOptedOutTracking(), "When initialize with opted out flag set to YES, the current user should have opted out tracking")
         removeDBfile(mixpanel1.apiToken)
 
-        let mixpanel2 = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: false)
+        let mixpanel2 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: false)
         XCTAssertFalse(mixpanel2.hasOptedOutTracking(), "When initialize with opted out flag set to NO, the current user should have opted in tracking")
         removeDBfile(mixpanel2.apiToken)
     }
 
     func testHasOptOutTrackingFlagBeingSetProperlyAfterInitializedWithOptedOutNO()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: false)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: false)
         XCTAssertFalse(testMixpanel.hasOptedOutTracking(), "When initialize with opted out flag set to NO, the current user should have opted out tracking")
         removeDBfile(testMixpanel.apiToken)
     }
 
     func testHasOptOutTrackingFlagBeingSetProperlyByDefault()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId())
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true)
         XCTAssertFalse(testMixpanel.hasOptedOutTracking(), "By default, the current user should not opted out tracking")
         removeDBfile(testMixpanel.apiToken)
     }
 
     func testHasOptOutTrackingFlagBeingSetProperlyForOptOut()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)
         testMixpanel.optOutTracking()
         waitForTrackingQueue(testMixpanel)
         XCTAssertTrue(testMixpanel.hasOptedOutTracking(), "When optOutTracking is called, the current user should have opted out tracking")
@@ -123,7 +123,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testHasOptOutTrackingFlagBeingSetProperlyForOptIn()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)
         testMixpanel.optOutTracking()
         waitForTrackingQueue(testMixpanel)
         XCTAssertTrue(testMixpanel.hasOptedOutTracking(), "When optOutTracking is called, the current user should have opted out tracking")
@@ -135,7 +135,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptOutTrackingWillNotGenerateEventQueue()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true, trackAutomaticEvents: false)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false, optOutTrackingByDefault: true)
         testMixpanel.optOutTracking()
         waitForTrackingQueue(testMixpanel)
         for i in 0..<50 {
@@ -148,7 +148,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptOutTrackingWillNotGeneratePeopleQueue()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)
         testMixpanel.optOutTracking()
         for i in 0..<50 {
             testMixpanel.people.set(property: "p1", to: "\(i)")
@@ -160,7 +160,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptOutTrackingWillSkipAlias()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)
         testMixpanel.optOutTracking()
         testMixpanel.createAlias("testAlias", distinctId: "aDistinctId")
         XCTAssertNotEqual(testMixpanel.alias, "testAlias", "When opted out, alias should not be set")
@@ -169,7 +169,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testEventBeingTrackedBeforeOptOutShouldNotBeCleared()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId())
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true)
         testMixpanel.track(event: "a normal event")
         waitForTrackingQueue(testMixpanel)
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "events should be queued")
@@ -181,7 +181,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptOutTrackingRegisterSuperProperties()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)
         let properties: Properties = ["p1": "a", "p2": 3, "p3": Date()]
         testMixpanel.optOutTracking()
         testMixpanel.registerSuperProperties(properties)
@@ -194,7 +194,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptOutTrackingRegisterSuperPropertiesOnce()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)
         let properties: Properties = ["p1": "a", "p2": 3, "p3": Date()]
         testMixpanel.optOutTracking()
         testMixpanel.registerSuperPropertiesOnce(properties)
@@ -207,7 +207,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptOutWilSkipTimeEvent()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true, trackAutomaticEvents: false)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false, optOutTrackingByDefault: true)
         testMixpanel.optOutTracking()
         waitForTrackingQueue(testMixpanel)
         testMixpanel.time(event: "400 Meters")
@@ -219,7 +219,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptOutWillSkipFlushPeople()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 0, optOutTrackingByDefault: true, trackAutomaticEvents: false)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false, flushInterval: 0, optOutTrackingByDefault: true)
         testMixpanel.optInTracking()
         waitForTrackingQueue(testMixpanel)
         testMixpanel.identify(distinctId: "d1")
@@ -241,7 +241,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testOptOutWillSkipFlushEvent()
     {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)
         waitForTrackingQueue(testMixpanel)
         testMixpanel.optInTracking()
         testMixpanel.identify(distinctId: "d1")

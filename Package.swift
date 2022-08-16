@@ -16,10 +16,7 @@ let package = Package(
     targets: [
         .target(
             name: "Mixpanel",
-            path: "Sources",
-            swiftSettings: [
-                .define("DECIDE", .when(platforms: [.iOS]))
-            ]
+            path: "Sources"
         )
     ]
 )

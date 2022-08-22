@@ -23,6 +23,7 @@ open class Mixpanel {
      one Mixpanel project from a single app.
 
      - parameter token:                     your project token
+     - parameter trackAutomaticEvents:      Whether or not to collect common mobile events
      - parameter flushInterval:             Optional. Interval to run background flushing
      - parameter instanceName:              Optional. The name you want to uniquely identify the Mixpanel Instance.
                                             It is useful when you want more than one Mixpanel instance under the same project token.
@@ -42,10 +43,10 @@ open class Mixpanel {
      */
     @discardableResult
     open class func initialize(token apiToken: String,
+                               trackAutomaticEvents: Bool,
                                flushInterval: Double = 60,
                                instanceName: String? = nil,
                                optOutTrackingByDefault: Bool = false,
-                               trackAutomaticEvents: Bool? = nil,
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil,
                                serverURL: String? = nil,
@@ -60,8 +61,8 @@ open class Mixpanel {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
-                                                         optOutTrackingByDefault: optOutTrackingByDefault,
                                                          trackAutomaticEvents: trackAutomaticEvents,
+                                                         optOutTrackingByDefault: optOutTrackingByDefault,
                                                          useUniqueDistinctId: useUniqueDistinctId,
                                                          superProperties: superProperties,
                                                          serverURL: serverURL,
@@ -112,6 +113,7 @@ open class Mixpanel {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
+                                                         trackAutomaticEvents: false,
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          useUniqueDistinctId: useUniqueDistinctId,
                                                          superProperties: superProperties,
@@ -151,9 +153,14 @@ open class Mixpanel {
         if let instance = MixpanelManager.sharedInstance.getMainInstance() {
             return instance
         } else {
-            assert(false, "You have to call initialize(token:) before calling the main instance, " +
+            assert(false, "You have to call initialize(token:trackAutomaticEvents:) before calling the main instance, " +
                 "or define a new main instance if removing the main one")
+            #if !os(OSX) && !os(watchOS)
+            return Mixpanel.initialize(token: "", trackAutomaticEvents: true)
+            #else
             return Mixpanel.initialize(token: "")
+            #endif
+            
         }
     }
 
@@ -240,8 +247,8 @@ class MixpanelManager {
     func initialize(token apiToken: String,
                     flushInterval: Double,
                     instanceName: String,
+                    trackAutomaticEvents: Bool,
                     optOutTrackingByDefault: Bool = false,
-                    trackAutomaticEvents: Bool? = nil,
                     useUniqueDistinctId: Bool = false,
                     superProperties: Properties? = nil,
                     serverURL: String? = nil,

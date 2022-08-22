@@ -39,8 +39,6 @@ struct MixpanelUserDefaultsKeys {
     static let suiteName = "Mixpanel"
     static let prefix = "mixpanel"
     static let optOutStatus = "OptOutStatus"
-    static let automaticEventEnabled = "AutomaticEventEnabled"
-    static let automaticEventEnabledFromDecide = "AutomaticEventEnabledFromDecide"
     static let timedEvents = "timedEvents"
     static let superProperties = "superProperties"
     static let distinctID = "MPDistinctID"
@@ -98,15 +96,6 @@ class MixpanelPersistence {
         result["$distinct_id"] = distinctId
         return result
     }
-    
-    func removeAutomaticEvents() {
-        let events = loadEntitiesInBatch(type: .events)
-        let ids = events.filter { ($0["event"] as! String).hasPrefix("$ae_") }
-            .map { $0["id"] as! Int32 }
-        if !ids.isEmpty {
-            removeEntitiesInBatch(type: .events, ids: ids)
-        }
-    }
 
     func removeEntitiesInBatch(type: PersistenceType, ids: [Int32]) {
         mpdb.deleteRows(type, ids: ids)
@@ -137,55 +126,6 @@ class MixpanelPersistence {
         }
         let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
         return defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)") as? Bool
-    }
-    
-    static func saveAutomaticEventsEnabledFlag(value: Bool, fromDecide: Bool, apiToken: String) {
-        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
-            return
-        }
-        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(apiToken)-"
-        if fromDecide {
-            defaults.setValue(value, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)")
-        } else {
-            defaults.setValue(value, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)")
-        }
-        defaults.synchronize()
-    }
-    
-    static func loadAutomaticEventsEnabledFlag(instanceName: String) -> Bool {
-        #if TV_AUTO_EVENTS
-        return true
-        #else
-        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
-        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
-            return true
-        }
-        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") == nil &&
-            defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)") == nil {
-            return true // default true
-        }
-        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") != nil {
-            return defaults.bool(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)")
-        } else { // if there is no local settings, get the value from Decide
-            return defaults.bool(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)")
-        }
-        #endif
-    }
-    
-    static func automaticEventsFlagIsSet(instanceName: String) -> Bool {
-        #if TV_AUTO_EVENTS
-        return true
-        #else
-        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
-        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
-            return false // no user defaults at all
-        }
-        if defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)") == nil &&
-            defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)") == nil {
-            return false // neither flag is set
-        }
-        return true // at least one of the flags is set
-        #endif
     }
  
     static func saveTimedEvents(timedEvents: InternalProperties, instanceName: String) {
@@ -274,8 +214,6 @@ class MixpanelPersistence {
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)")
-        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabled)")
-        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.automaticEventEnabledFromDecide)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.timedEvents)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.superProperties)")
@@ -299,8 +237,7 @@ class MixpanelPersistence {
              hadPersistedDistinctId,
              peopleDistinctId,
              peopleUnidentifiedQueue,
-             optOutStatus,
-             automaticEventsEnabled) = unarchiveFromLegacy()
+             optOutStatus) = unarchiveFromLegacy()
         saveEntities(eventsQueue, type: PersistenceType.events)
         saveEntities(peopleUnidentifiedQueue, type: PersistenceType.people, flag: PersistenceConstant.unIdentifiedFlag)
         saveEntities(peopleQueue, type: PersistenceType.people)
@@ -316,9 +253,6 @@ class MixpanelPersistence {
                         hadPersistedDistinctId: hadPersistedDistinctId), instanceName: instanceName)
         if let optOutFlag = optOutStatus {
             MixpanelPersistence.saveOptOutStatusFlag(value: optOutFlag, instanceName: instanceName)
-        }
-        if let automaticEventsFlag = automaticEventsEnabled {
-            MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: automaticEventsFlag, fromDecide: false, apiToken: self.mpdb.apiToken)
         }
         return
     }
@@ -351,8 +285,7 @@ class MixpanelPersistence {
                                             hadPersistedDistinctId: Bool?,
                                             peopleDistinctId: String?,
                                             peopleUnidentifiedQueue: Queue,
-                                            optOutStatus: Bool?,
-                                            automaticEventsEnabled: Bool?) {
+                                            optOutStatus: Bool?) {
         let eventsQueue = unarchiveEvents()
         let peopleQueue = unarchivePeople()
         let groupsQueue = unarchiveGroups()
@@ -366,8 +299,7 @@ class MixpanelPersistence {
             alias,
             hadPersistedDistinctId,
             peopleDistinctId,
-            peopleUnidentifiedQueue,
-            automaticEventsEnabled) = unarchiveProperties()
+            peopleUnidentifiedQueue) = unarchiveProperties()
         
         if let eventsFile = filePathWithType(PersistenceType.events.rawValue) {
             removeArchivedFile(atPath: eventsFile)
@@ -397,8 +329,7 @@ class MixpanelPersistence {
                 hadPersistedDistinctId,
                 peopleDistinctId,
                 peopleUnidentifiedQueue,
-                optOutStatus,
-                automaticEventsEnabled)
+                optOutStatus)
     }
 
     private func unarchiveWithFilePath(_ filePath: String) -> Any? {
@@ -455,8 +386,7 @@ class MixpanelPersistence {
         String?,
         Bool?,
         String?,
-        Queue,
-        Bool?) {
+        Queue) {
             let properties = unarchiveWithType("properties") as? InternalProperties
             let superProperties =
                 properties?["superProperties"] as? InternalProperties ?? InternalProperties()
@@ -476,8 +406,6 @@ class MixpanelPersistence {
                 properties?["peopleDistinctId"] as? String ?? nil
             let peopleUnidentifiedQueue =
                 properties?["peopleUnidentifiedQueue"] as? Queue ?? Queue()
-            let automaticEventsEnabled =
-                properties?["automaticEvents"] as? Bool ?? nil
         
             return (superProperties,
                     timedEvents,
@@ -487,8 +415,7 @@ class MixpanelPersistence {
                     alias,
                     hadPersistedDistinctId,
                     peopleDistinctId,
-                    peopleUnidentifiedQueue,
-                    automaticEventsEnabled)
+                    peopleUnidentifiedQueue)
     }
 
     private func unarchiveWithType(_ type: String) -> Any? {

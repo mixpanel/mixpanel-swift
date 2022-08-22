@@ -12,7 +12,7 @@ protocol AEDelegate: AnyObject {
     func increment(property: String, by: Double)
 }
 
-#if DECIDE || TV_AUTO_EVENTS
+#if os(iOS) || os(tvOS)
 import Foundation
 import UIKit
 import StoreKit
@@ -86,9 +86,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
                                                name: UIApplication.didBecomeActiveNotification,
                                                object: nil)
         
-        #if DECIDE
         SKPaymentQueue.default().add(self)
-        #endif
     }
     
     @objc func appWillResignActive(_ notification: Notification) {
@@ -147,5 +145,4 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
         }
     }
 }
-
 #endif

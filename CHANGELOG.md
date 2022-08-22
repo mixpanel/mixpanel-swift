@@ -1,5 +1,13 @@
 #
 
+## [v4.0.0](https://github.com/mixpanel/mixpanel-swift/tree/v4.0.0) (2022-08-16)
+
+### Enhancements
+
+- Remove Decide and make trackAutomaticEvents required parameter [\#545](https://github.com/mixpanel/mixpanel-swift/pull/545)
+
+#
+
 ## [v3.5.1](https://github.com/mixpanel/mixpanel-swift/tree/v3.5.1) (2022-07-18)
 
 ### Fixes
@@ -192,6 +200,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

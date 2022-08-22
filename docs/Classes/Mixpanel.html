@@ -17,7 +17,7 @@
     <a title="Mixpanel Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 3.5.1 Docs</a> (84% documented)</p>
+        <p><a href="../index.html">Mixpanel 4.0.0 Docs</a> (83% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
@@ -144,9 +144,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8MixpanelAAC10initialize5token13flushInterval12instanceName23optOutTrackingByDefault20trackAutomaticEvents19useUniqueDistinctId15superProperties9serverURLAA0A8InstanceCSS_SdSSSgS2bSgSbSDySSAA0A4Type_pGSgANtFZ"></a>
-                    <a name="//apple_ref/swift/Method/initialize(token:flushInterval:instanceName:optOutTrackingByDefault:trackAutomaticEvents:useUniqueDistinctId:superProperties:serverURL:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8MixpanelAAC10initialize5token13flushInterval12instanceName23optOutTrackingByDefault20trackAutomaticEvents19useUniqueDistinctId15superProperties9serverURLAA0A8InstanceCSS_SdSSSgS2bSgSbSDySSAA0A4Type_pGSgANtFZ">initialize(token:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>trackAutomaticEvents:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>)</a>
+                    <a name="/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURLAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgANtFZ"></a>
+                    <a name="//apple_ref/swift/Method/initialize(token:trackAutomaticEvents:flushInterval:instanceName:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURLAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgANtFZ">initialize(token:<wbr>trackAutomaticEvents:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -173,10 +173,10 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@discardableResult</span>
 <span class="kd">open</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">token</span> <span class="nv">apiToken</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+                           <span class="nv">trackAutomaticEvents</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">,</span>
                            <span class="nv">flushInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
                            <span class="nv">instanceName</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
                            <span class="nv">optOutTrackingByDefault</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
-                           <span class="nv">trackAutomaticEvents</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
                            <span class="nv">useUniqueDistinctId</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
                            <span class="nv">superProperties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
                            <span class="nv">serverURL</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span></code></pre>
@@ -196,6 +196,18 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                               <td>
                                 <div>
                                   <p>your project token</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>trackAutomaticEvents</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Whether or not to collect common mobile events</p>
                                 </div>
                               </td>
                             </tr>
@@ -233,18 +245,6 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                               <td>
                                 <div>
                                   <p>Optional. Whether or not to be opted out from tracking by default</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>trackAutomaticEvents</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. Whether or not to collect common mobile events, it takes precedence over Autotrack settings from the Mixpanel server.</p>
                                 </div>
                               </td>
                             </tr>
@@ -504,7 +504,7 @@ the instances with an instanceName. Then they can be reached by calling getInsta
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2022 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2022-07-18)</p>
+          <p>&copy; 2022 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2022-08-16)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

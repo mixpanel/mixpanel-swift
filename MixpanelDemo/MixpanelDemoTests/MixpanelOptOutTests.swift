@@ -228,14 +228,14 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             testMixpanel.people.set(property: "p1", to: "\(i)")
         }
         waitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).count == 2, "When opted in, people queue should have been queued")
+        XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).count == 1, "When opted in, people queue should have been queued")
 
         testMixpanel.optOutTracking()
         waitForTrackingQueue(testMixpanel)
 
         testMixpanel.flush()
         waitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).count == 2, "When opted out, people queue should not be flushed")
+        XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).count == 1, "When opted out, people queue should not be flushed")
         removeDBfile(testMixpanel.apiToken)
     }
 

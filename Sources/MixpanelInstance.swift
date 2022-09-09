@@ -284,7 +284,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
 
 #if os(iOS) || os(tvOS)
-        if !MixpanelInstance.isiOSAppExtension() {
+        if !MixpanelInstance.isiOSAppExtension() && trackAutomaticEvents {
             automaticEvents.delegate = self
             automaticEvents.initializeEvents(instanceName: self.name)
         }

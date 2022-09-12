@@ -28,9 +28,12 @@ open class Mixpanel {
      - parameter instanceName:              Optional. The name you want to uniquely identify the Mixpanel Instance.
                                             It is useful when you want more than one Mixpanel instance under the same project token.
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
-     - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
+     - parameter trackAutomaticEvents:      Optional. Whether or not to collect common mobile events, it takes precedence over Autotrack settings from the Mixpanel server.
+     - parameter useUniqueDistinctId:       Optional. Whether or not to use the unique device identifier as the distinct_id
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
      - parameter serverURL:                 Optional. Mixpanel cluster URL
+     
+     - parameter isMain:                    Whether to make the new instance primary.
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -46,7 +49,8 @@ open class Mixpanel {
                                optOutTrackingByDefault: Bool = false,
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil,
-                               serverURL: String? = nil) -> MixpanelInstance {
+                               serverURL: String? = nil,
+                               isMain: Bool = true) -> MixpanelInstance {
         #if DEBUG
         didDebugInit(
             distinctId: apiToken,
@@ -61,7 +65,8 @@ open class Mixpanel {
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          useUniqueDistinctId: useUniqueDistinctId,
                                                          superProperties: superProperties,
-                                                         serverURL: serverURL)
+                                                         serverURL: serverURL,
+                                                         isMain: isMain)
     }
     #else
     /**
@@ -76,9 +81,11 @@ open class Mixpanel {
      - parameter instanceName:              Optional. The name you want to uniquely identify the Mixpanel Instance.
                                             It is useful when you want more than one Mixpanel instance under the same project token.
      - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
-     - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
+     - parameter useUniqueDistinctId:       Optional. Whether or not to use the unique device identifier as the distinct_id
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
      - parameter serverURL:                 Optional. Mixpanel cluster URL
+     
+     - parameter isMain:                    Whether to make the new instance primary.
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -94,7 +101,8 @@ open class Mixpanel {
                                optOutTrackingByDefault: Bool = false,
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil,
-                               serverURL: String? = nil) -> MixpanelInstance {
+                               serverURL: String? = nil,
+                               isMain: Bool = true) -> MixpanelInstance {
         #if DEBUG
         didDebugInit(
             distinctId: apiToken,
@@ -109,7 +117,8 @@ open class Mixpanel {
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          useUniqueDistinctId: useUniqueDistinctId,
                                                          superProperties: superProperties,
-                                                         serverURL: serverURL)
+                                                         serverURL: serverURL,
+                                                         isMain: isMain)
     }
     #endif // os(OSX)
 
@@ -122,6 +131,15 @@ open class Mixpanel {
      */
     open class func getInstance(name: String) -> MixpanelInstance? {
         return MixpanelManager.sharedInstance.getInstance(name: name)
+    }
+    
+    /**
+     Gets all mixpanel instances
+
+     - returns: returns the array of mixpanel instances
+     */
+    public class func getAllInstances() -> [MixpanelInstance]? {
+        return MixpanelManager.sharedInstance.getAllInstances()
     }
 
     /**
@@ -233,25 +251,30 @@ class MixpanelManager {
                     optOutTrackingByDefault: Bool = false,
                     useUniqueDistinctId: Bool = false,
                     superProperties: Properties? = nil,
-                    serverURL: String? = nil
+                    serverURL: String? = nil,
+                    isMain: Bool
     ) -> MixpanelInstance {
         instanceQueue.sync {
             var instance: MixpanelInstance?
             if let instance = instances[instanceName] {
-                mainInstance = instance
+                if isMain || mainInstance == nil {
+                    mainInstance = instance
+                }
                 return
             }
             instance = MixpanelInstance(apiToken: apiToken,
-                                            flushInterval: flushInterval,
-                                            name: instanceName,
-                                            trackAutomaticEvents: trackAutomaticEvents,
-                                            optOutTrackingByDefault: optOutTrackingByDefault,
-                                            useUniqueDistinctId: useUniqueDistinctId,
-                                            superProperties: superProperties,
-                                            serverURL: serverURL)
+                                        flushInterval: flushInterval,
+                                        name: instanceName,
+                                        optOutTrackingByDefault: optOutTrackingByDefault,
+                                        trackAutomaticEvents: trackAutomaticEvents,
+                                        useUniqueDistinctId: useUniqueDistinctId,
+                                        superProperties: superProperties,
+                                        serverURL: serverURL)
             readWriteLock.write {
                 instances[instanceName] = instance!
-                mainInstance = instance!
+                if isMain || mainInstance == nil {
+                    mainInstance = instance!
+                }
             }
         }
         return mainInstance!

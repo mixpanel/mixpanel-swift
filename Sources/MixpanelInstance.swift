@@ -159,7 +159,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             if (superProperties["$lib_version"] != nil) {
                 trackProps["$lib_version"] = self.superProperties["$lib_version"] as! String
             }
-            Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: trackProps)
+            Network.sendHttpEvent(serverURL: self.serverURL, eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: trackProps)
 #endif
         }
     }
@@ -221,6 +221,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             self.serverURL = serverURL
             BasePath.namedBasePaths[name] = serverURL
         }
+#if DEBUG
+        MixpanelInstance.didDebugInit(
+            serverURL: self.serverURL,
+            distinctId: self.apiToken,
+            libName: superProperties?.get(key: "mp_lib", defaultValue: nil),
+            libVersion: superProperties?.get(key: "$lib_version", defaultValue: nil)
+        )
+#endif
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility)
         networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
@@ -282,7 +290,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let superProperties = superProperties {
             registerSuperProperties(superProperties)
         }
-
+        
 #if os(iOS) || os(tvOS)
         if !MixpanelInstance.isiOSAppExtension() && trackAutomaticEvents {
             automaticEvents.delegate = self
@@ -359,8 +367,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     static func sharedUIApplication() -> UIApplication? {
         guard let sharedApplication =
                 UIApplication.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue() as? UIApplication else {
-                    return nil
-                }
+            return nil
+        }
         return sharedApplication
     }
 #endif // !os(OSX)
@@ -524,6 +532,52 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 #endif
 #endif // os(iOS)
+    private class func didDebugInit(serverURL: String, distinctId: String, libName: String?, libVersion: String?) {
+        if distinctId.count == 32 {
+            let debugInitCount = UserDefaults.standard.integer(forKey: InternalKeys.mpDebugInitCountKey) + 1
+            var properties: Properties = ["Debug Launch Count": debugInitCount]
+            if let libName = libName {
+                properties["mp_lib"] = libName
+            }
+            if let libVersion = libVersion {
+                properties["$lib_version"] = libVersion
+            }
+            Network.sendHttpEvent(serverURL: serverURL, eventName: "SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId, properties: properties) { (_) in }
+            checkIfImplemented(serverURL: serverURL, distinctId: distinctId, properties: properties)
+            UserDefaults.standard.set(debugInitCount, forKey: InternalKeys.mpDebugInitCountKey)
+            UserDefaults.standard.synchronize()
+        }
+    }
+    
+    private class func checkIfImplemented(serverURL: String, distinctId: String, properties: Properties) {
+        let hasImplemented: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugImplementedKey)
+        if !hasImplemented {
+            var completed = 0
+            let hasTracked: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugTrackedKey)
+            completed += hasTracked ? 1 : 0
+            let hasIdentified: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugIdentifiedKey)
+            completed += hasIdentified ? 1 : 0
+            let hasAliased: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugAliasedKey)
+            completed += hasAliased ? 1 : 0
+            let hasUsedPeople: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugUsedPeopleKey)
+            completed += hasUsedPeople ? 1 : 0
+            if (completed >= 3) {
+                let trackProps = properties.merging([
+                    "Tracked": hasTracked,
+                    "Identified": hasIdentified,
+                    "Aliased": hasAliased,
+                    "Used People": hasUsedPeople,
+                ]) {(_,new) in new}
+                Network.sendHttpEvent(
+                    serverURL: serverURL,
+                    eventName: "SDK Implemented",
+                    apiToken: "metrics-1",
+                    distinctId: distinctId,
+                    properties: trackProps) { (_) in }
+                UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugImplementedKey)
+            }
+        }
+    }
     
 }
 
@@ -572,9 +626,9 @@ extension MixpanelInstance {
             }
             return
         }
-        #if DEBUG
+#if DEBUG
         UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugIdentifiedKey)
-        #endif
+#endif
         trackingQueue.async { [weak self, distinctId, usePeople] in
             guard let self = self else { return }
             
@@ -673,9 +727,9 @@ extension MixpanelInstance {
             }
             return
         }
-        #if DEBUG
+#if DEBUG
         UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugAliasedKey)
-        #endif
+#endif
         if alias != distinctId {
             trackingQueue.async { [weak self, alias] in
                 guard let self = self else {
@@ -814,8 +868,8 @@ extension MixpanelInstance {
         }
         let defaultsKey = "trackedKey"
         if !UserDefaults.standard.bool(forKey: defaultsKey) {
-            trackingQueue.async { [apiToken, defaultsKey] in
-                Network.sendHttpEvent(eventName: "Integration", apiToken: "85053bf24bba75239b16a601d9387e17", distinctId: apiToken, updatePeople: false) { [defaultsKey] (success) in
+            trackingQueue.async { [apiToken, defaultsKey, serverURL] in
+                Network.sendHttpEvent(serverURL: serverURL, eventName: "Integration", apiToken: "85053bf24bba75239b16a601d9387e17", distinctId: apiToken, updatePeople: false) { [defaultsKey] (success) in
                     if success {
                         UserDefaults.standard.set(true, forKey: defaultsKey)
                         UserDefaults.standard.synchronize()

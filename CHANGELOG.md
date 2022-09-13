@@ -1,5 +1,13 @@
 #
 
+## [v4.0.2](https://github.com/mixpanel/mixpanel-swift/tree/v4.0.2) (2022-09-13)
+
+### Fixes
+
+- always use serverURL [\#560](https://github.com/mixpanel/mixpanel-swift/pull/560)
+
+#
+
 ## [v4.0.1](https://github.com/mixpanel/mixpanel-swift/tree/v4.0.1) (2022-09-09)
 
 ### Fixes
@@ -208,6 +216,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

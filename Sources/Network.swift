@@ -183,10 +183,10 @@ class Network {
             if let engageData = engageData {
                 let engageBody = "ip=1&data=\(engageData)".data(using: String.Encoding.utf8)
                 let engageResource = Network.buildResource(path: FlushType.people.rawValue,
-                                                          method: .post,
-                                                          requestBody: engageBody,
-                                                          headers: ["Accept-Encoding": "gzip"],
-                                                          parse: responseParser)
+                                                           method: .post,
+                                                           requestBody: engageBody,
+                                                           headers: ["Accept-Encoding": "gzip"],
+                                                           parse: responseParser)
                 Network.apiRequest(base: serverURL, resource: engageResource) { _, _, _ in } success: { _, _ in }
             }
         }

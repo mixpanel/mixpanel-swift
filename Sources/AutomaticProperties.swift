@@ -145,7 +145,7 @@ class AutomaticProperties {
     }
 
     class func libVersion() -> String {
-        return "4.0.2"
+        return "4.0.3"
     }
 
 }

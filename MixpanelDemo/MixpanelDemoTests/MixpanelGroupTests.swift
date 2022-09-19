@@ -14,7 +14,7 @@ import XCTest
 class MixpanelGroupTests: MixpanelBaseTests {
 
     func testGroupSet() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let groupKey = "test_key"
         let groupID = "test_id"
         let p: Properties = ["p1": "a"]
@@ -29,7 +29,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
     }
 
     func testGroupSetIntegerID() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let groupKey = "test_key"
         let groupID = 3
         let p: Properties = ["p1": "a"]
@@ -44,7 +44,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
     }
 
     func testGroupSetOnce() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let groupKey = "test_key"
         let groupID = "test_id"
         let p: Properties = ["p1": "a"]
@@ -59,7 +59,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
     }
 
     func testGroupSetTo() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let groupKey = "test_key"
         let groupID = "test_id"
         testMixpanel.getGroup(groupKey: groupKey, groupID: groupID).set(property: "p1", to: "a")
@@ -73,7 +73,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
     }
 
     func testGroupUnset() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let groupKey = "test_key"
         let groupID = "test_id"
         testMixpanel.getGroup(groupKey: groupKey, groupID: groupID).unset(property: "p1")
@@ -86,7 +86,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
     }
 
     func testGroupRemove() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let groupKey = "test_key"
         let groupID = "test_id"
         testMixpanel.getGroup(groupKey: groupKey, groupID: groupID).remove(key: "p1", value: "a")
@@ -99,7 +99,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
     }
 
     func testGroupUnion() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let groupKey = "test_key"
         let groupID = "test_id"
         testMixpanel.getGroup(groupKey: groupKey, groupID: groupID).union(key: "p1", values: ["a"])
@@ -113,7 +113,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
 
 
     func testGroupAssertPropertyTypes() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let groupKey = "test_key"
         let groupID = "test_id"
         let p: Properties = ["URL": [Data()]]
@@ -127,7 +127,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
     }
 
     func testDeleteGroup() {
-        let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let groupKey = "test_key"
         let groupID = "test_id"
         testMixpanel.getGroup(groupKey: groupKey, groupID: groupID).deleteGroup()

@@ -80,15 +80,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var showNetworkActivityIndicator = true
     
     /// This allows enabling or disabling collecting common mobile events,
-    /// it takes precedence over Autotrack settings from the Mixpanel server.
-    /// If this is not set, it will query the Autotrack settings from the Mixpanel server
-    open var trackAutomaticEventsEnabled: Bool? {
-        didSet {
-            MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: trackAutomaticEventsEnabled ?? false,
-                                                                fromDecide: false,
-                                                                apiToken: apiToken)
-        }
-    }
+    open var trackAutomaticEventsEnabled: Bool
     
     /// Flush timer's interval.
     /// Setting a flush interval of 0 will turn off the flush timer and you need to call the flush() API manually
@@ -167,7 +159,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             if (superProperties["$lib_version"] != nil) {
                 trackProps["$lib_version"] = self.superProperties["$lib_version"] as! String
             }
-            Network.sendHttpEvent(eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: trackProps)
+            Network.sendHttpEvent(serverURL: self.serverURL, eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: trackProps)
 #endif
         }
     }
@@ -175,9 +167,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// A unique identifier for this MixpanelInstance
     public let name: String
     
-#if DECIDE
     /// The minimum session duration (ms) that is tracked in automatic events.
     /// The default value is 10000 (10 seconds).
+#if os(iOS) || os(tvOS)
     open var minimumSessionDuration: UInt64 {
         get {
             return automaticEvents.minimumSessionDuration
@@ -197,7 +189,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             automaticEvents.maximumSessionDuration = newValue
         }
     }
-#endif // DECIDE
+#endif
     var superProperties = InternalProperties()
     var trackingQueue: DispatchQueue
     var networkQueue: DispatchQueue
@@ -215,23 +207,28 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let sessionMetadata: SessionMetadata
     let flushInstance: Flush
     let trackInstance: Track
-#if DECIDE
-    let decideInstance: Decide
+#if os(iOS) || os(tvOS)
     let automaticEvents = AutomaticEvents()
-#elseif TV_AUTO_EVENTS
-    let automaticEvents = AutomaticEvents()
-#endif // DECIDE
-    
-    init(apiToken: String?, flushInterval: Double, name: String, optOutTrackingByDefault: Bool = false,
-         trackAutomaticEvents: Bool? = nil, useUniqueDistinctId: Bool = false, superProperties: Properties? = nil,
+#endif
+    init(apiToken: String?, flushInterval: Double, name: String, trackAutomaticEvents: Bool, optOutTrackingByDefault: Bool = false,
+         useUniqueDistinctId: Bool = false, superProperties: Properties? = nil,
          serverURL: String? = nil) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
+        trackAutomaticEventsEnabled = trackAutomaticEvents
         if let serverURL = serverURL {
             self.serverURL = serverURL
             BasePath.namedBasePaths[name] = serverURL
         }
+#if DEBUG
+        MixpanelInstance.didDebugInit(
+            serverURL: self.serverURL,
+            distinctId: self.apiToken,
+            libName: superProperties?.get(key: "mp_lib", defaultValue: nil),
+            libVersion: superProperties?.get(key: "$lib_version", defaultValue: nil)
+        )
+#endif
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility)
         networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
@@ -243,9 +240,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         
         readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
         flushInstance = Flush(basePathIdentifier: name)
-#if DECIDE
-        decideInstance = Decide(basePathIdentifier: name, lock: readWriteLock, mixpanelPersistence: mixpanelPersistence)
-#endif // DECIDE
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               instanceName: self.name,
@@ -297,18 +291,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             registerSuperProperties(superProperties)
         }
         
-        if let trackAutomaticEvents = trackAutomaticEvents {
-            MixpanelPersistence.saveAutomaticEventsEnabledFlag(value: trackAutomaticEvents,
-                                                                fromDecide: false,
-                                                               apiToken: self.apiToken)
-        }
-        
-#if DECIDE || TV_AUTO_EVENTS
-        if !MixpanelInstance.isiOSAppExtension() {
+#if os(iOS) || os(tvOS)
+        if !MixpanelInstance.isiOSAppExtension() && trackAutomaticEvents {
             automaticEvents.delegate = self
             automaticEvents.initializeEvents(instanceName: self.name)
         }
-#endif // DECIDE
+#endif
     }
     
 #if !os(OSX) && !os(watchOS)
@@ -379,17 +367,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     static func sharedUIApplication() -> UIApplication? {
         guard let sharedApplication =
                 UIApplication.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue() as? UIApplication else {
-                    return nil
-                }
+            return nil
+        }
         return sharedApplication
     }
 #endif // !os(OSX)
     
     @objc private func applicationDidBecomeActive(_ notification: Notification) {
         flushInstance.applicationDidBecomeActive()
-#if DECIDE
-        checkDecide()
-#endif // DECIDE
     }
     
     @objc private func applicationWillResignActive(_ notification: Notification) {
@@ -415,11 +400,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         let completionHandler: () -> Void = { [weak self] in
             guard let self = self else { return }
             
-#if DECIDE
-            self.readWriteLock.write {
-                self.decideInstance.decideFetched = false
-            }
-#endif // DECIDE
             if self.taskId != UIBackgroundTaskIdentifier.invalid {
                 sharedApplication.endBackgroundTask(self.taskId)
                 self.taskId = UIBackgroundTaskIdentifier.invalid
@@ -552,6 +532,52 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 #endif
 #endif // os(iOS)
+    private class func didDebugInit(serverURL: String, distinctId: String, libName: String?, libVersion: String?) {
+        if distinctId.count == 32 {
+            let debugInitCount = UserDefaults.standard.integer(forKey: InternalKeys.mpDebugInitCountKey) + 1
+            var properties: Properties = ["Debug Launch Count": debugInitCount]
+            if let libName = libName {
+                properties["mp_lib"] = libName
+            }
+            if let libVersion = libVersion {
+                properties["$lib_version"] = libVersion
+            }
+            Network.sendHttpEvent(serverURL: serverURL, eventName: "SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId, properties: properties) { (_) in }
+            checkIfImplemented(serverURL: serverURL, distinctId: distinctId, properties: properties)
+            UserDefaults.standard.set(debugInitCount, forKey: InternalKeys.mpDebugInitCountKey)
+            UserDefaults.standard.synchronize()
+        }
+    }
+    
+    private class func checkIfImplemented(serverURL: String, distinctId: String, properties: Properties) {
+        let hasImplemented: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugImplementedKey)
+        if !hasImplemented {
+            var completed = 0
+            let hasTracked: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugTrackedKey)
+            completed += hasTracked ? 1 : 0
+            let hasIdentified: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugIdentifiedKey)
+            completed += hasIdentified ? 1 : 0
+            let hasAliased: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugAliasedKey)
+            completed += hasAliased ? 1 : 0
+            let hasUsedPeople: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugUsedPeopleKey)
+            completed += hasUsedPeople ? 1 : 0
+            if (completed >= 3) {
+                let trackProps = properties.merging([
+                    "Tracked": hasTracked,
+                    "Identified": hasIdentified,
+                    "Aliased": hasAliased,
+                    "Used People": hasUsedPeople,
+                ]) {(_,new) in new}
+                Network.sendHttpEvent(
+                    serverURL: serverURL,
+                    eventName: "SDK Implemented",
+                    apiToken: "metrics-1",
+                    distinctId: distinctId,
+                    properties: trackProps) { (_) in }
+                UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugImplementedKey)
+            }
+        }
+    }
     
 }
 
@@ -600,9 +626,9 @@ extension MixpanelInstance {
             }
             return
         }
-        #if DEBUG
+#if DEBUG
         UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugIdentifiedKey)
-        #endif
+#endif
         trackingQueue.async { [weak self, distinctId, usePeople] in
             guard let self = self else { return }
             
@@ -701,9 +727,9 @@ extension MixpanelInstance {
             }
             return
         }
-        #if DEBUG
+#if DEBUG
         UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugAliasedKey)
-        #endif
+#endif
         if alias != distinctId {
             trackingQueue.async { [weak self, alias] in
                 guard let self = self else {
@@ -779,9 +805,7 @@ extension MixpanelInstance {
                 self.people.distinctId = nil
                 self.alias = nil
             }
-#if DECIDE
-            self.decideInstance.decideFetched = false
-#endif // DECIDE
+            
             self.mixpanelPersistence.resetEntities()
             self.archive()
             if let completion = completion {
@@ -844,8 +868,8 @@ extension MixpanelInstance {
         }
         let defaultsKey = "trackedKey"
         if !UserDefaults.standard.bool(forKey: defaultsKey) {
-            trackingQueue.async { [apiToken, defaultsKey] in
-                Network.sendHttpEvent(eventName: "Integration", apiToken: "85053bf24bba75239b16a601d9387e17", distinctId: apiToken, updatePeople: false) { [defaultsKey] (success) in
+            trackingQueue.async { [apiToken, defaultsKey, serverURL] in
+                Network.sendHttpEvent(serverURL: serverURL, eventName: "Integration", apiToken: "85053bf24bba75239b16a601d9387e17", distinctId: apiToken, updatePeople: false) { [defaultsKey] (success) in
                     if success {
                         UserDefaults.standard.set(true, forKey: defaultsKey)
                         UserDefaults.standard.synchronize()
@@ -894,7 +918,7 @@ extension MixpanelInstance {
             // automatic events will NOT be flushed until one of the flags is non-nil
             let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(
                 type: self.persistenceTypeFromFlushType(.events),
-                excludeAutomaticEvents: !MixpanelPersistence.automaticEventsFlagIsSet(instanceName: self.name)
+                excludeAutomaticEvents: !self.trackAutomaticEventsEnabled
             )
             let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.people))
             let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.groups))
@@ -1469,32 +1493,3 @@ extension MixpanelInstance {
         people?.setOnce(properties: properties)
     }
 }
-
-#if DECIDE
-extension MixpanelInstance {
-    
-    // MARK: - Decide
-    func checkDecide(forceFetch: Bool = false) {
-        networkQueue.async { [weak self, forceFetch] in
-            guard let self = self else { return }
-            var peopleDistinctIdSnapshot: String?
-            var distinctIdSnapshot: String?
-            
-            self.readWriteLock.read {
-                peopleDistinctIdSnapshot = self.people.distinctId
-                distinctIdSnapshot = self.distinctId
-            }
-            
-            self.decideInstance.checkDecide(forceFetch: forceFetch,
-                                            distinctId: peopleDistinctIdSnapshot ?? distinctIdSnapshot!,
-                                            token: self.apiToken)
-            self.trackingQueue.async { [weak self] in
-                guard let self = self else { return }
-                if !MixpanelPersistence.loadAutomaticEventsEnabledFlag(instanceName: self.name) {
-                    self.mixpanelPersistence.removeAutomaticEvents()
-                }
-            }
-        }
-    }
-}
-#endif // DECIDE

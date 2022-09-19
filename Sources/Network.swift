@@ -128,7 +128,10 @@ class Network {
                         parse: parse)
     }
     
-    class func sendHttpEvent(eventName: String, apiToken: String, distinctId: String,
+    class func sendHttpEvent(serverURL: String,
+                             eventName: String,
+                             apiToken: String,
+                             distinctId: String,
                              properties: Properties = [:],
                              updatePeople: Bool = true,
                              completion: ((Bool) -> Void)? = nil) {
@@ -158,7 +161,7 @@ class Network {
                                                  headers: ["Accept-Encoding": "gzip"],
                                                  parse: responseParser)
             
-            Network.apiRequest(base: BasePath.DefaultMixpanelAPI,
+            Network.apiRequest(base: serverURL,
                                resource: resource,
                                failure: { (_, _, _) in
                 Logger.debug(message: "failed to track \(eventName)")
@@ -180,11 +183,11 @@ class Network {
             if let engageData = engageData {
                 let engageBody = "ip=1&data=\(engageData)".data(using: String.Encoding.utf8)
                 let engageResource = Network.buildResource(path: FlushType.people.rawValue,
-                                                          method: .post,
-                                                          requestBody: engageBody,
-                                                          headers: ["Accept-Encoding": "gzip"],
-                                                          parse: responseParser)
-                Network.apiRequest(base: BasePath.DefaultMixpanelAPI, resource: engageResource) { _, _, _ in } success: { _, _ in }
+                                                           method: .post,
+                                                           requestBody: engageBody,
+                                                           headers: ["Accept-Encoding": "gzip"],
+                                                           parse: responseParser)
+                Network.apiRequest(base: serverURL, resource: engageResource) { _, _, _ in } success: { _, _ in }
             }
         }
     }

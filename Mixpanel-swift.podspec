@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'Mixpanel-swift'
-  s.version = '3.5.1'
+  s.version = '4.0.2'
   s.module_name = 'Mixpanel'
   s.license = 'Apache License, Version 2.0'
   s.summary = 'Mixpanel tracking library for iOS (Swift)'
@@ -24,7 +24,7 @@ Pod::Spec.new do |s|
   s.tvos.deployment_target = '9.0'
   s.tvos.frameworks = 'UIKit', 'Foundation'
   s.tvos.pod_target_xcconfig = {
-    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) TV_OS TV_AUTO_EVENTS'
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) TV_OS'
   }
   s.osx.deployment_target = '10.10'
   s.osx.frameworks = 'Cocoa', 'Foundation'
@@ -38,9 +38,6 @@ Pod::Spec.new do |s|
   }
 
   s.subspec 'Complete' do |ss|
-    ss.ios.pod_target_xcconfig = {
-      'OTHER_SWIFT_FLAGS' => '$(inherited) -D DECIDE'
-    }
     ss.ios.source_files = ['Sources/*.swift']
     ss.tvos.source_files = base_source_files
     ss.osx.source_files = base_source_files

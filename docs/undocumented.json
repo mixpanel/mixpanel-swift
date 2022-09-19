@@ -9,14 +9,21 @@
     },
     {
       "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 797,
+      "line": 173,
+      "symbol": "MixpanelInstance.minimumSessionDuration",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 821,
       "symbol": "MixpanelInstance.archive()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 1041,
+      "line": 1065,
       "symbol": "MixpanelInstance.getGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"

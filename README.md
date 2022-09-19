@@ -73,7 +73,7 @@ import Mixpanel
 func application(_ application: UIApplication,
                  didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
     ...
-    Mixpanel.initialize(token: "MIXPANEL_TOKEN")
+    Mixpanel.initialize(token: "MIXPANEL_TOKEN", trackAutomaticEvents: true)
     ...
 }
 ```
@@ -90,7 +90,7 @@ Mixpanel.mainInstance().track(event: "Sign Up", properties: [
 In addition to event data, you can also send [user profile data](https://developer.mixpanel.com/docs/swift#storing-user-profiles). We recommend this after completing the quickstart guide.
 
 ## 4. Check for Success
-[Open up Live View in Mixpanel](http://mixpanel.com/report/live) to view incoming events. 
+[Open up Events in Mixpanel](http://mixpanel.com/report/events) to view incoming events. 
 
 Once data hits our API, it generally takes ~60 seconds for it to be processed, stored, and queryable in your project.
 
@@ -104,7 +104,7 @@ import Mixpanel
 func application(_ application: UIApplication,
                  didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
     ...
-    Mixpanel.initialize(token: "MIXPANEL_TOKEN")
+    Mixpanel.initialize(token: "MIXPANEL_TOKEN", trackAutomaticEvents: true)
     Mixpanel.mainInstance().track(event: "Sign Up", properties: [
        "source": "Pat's affiliate site",
        "Opted out of email": true

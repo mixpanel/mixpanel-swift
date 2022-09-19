@@ -1,5 +1,18 @@
 #
 
+## [v4.0.3](https://github.com/mixpanel/mixpanel-swift/tree/v4.0.3) (2022-09-19)
+
+### Enhancements
+
+- Mark final attribute in MixpanelManager [\#553](https://github.com/mixpanel/mixpanel-swift/pull/553)
+- add an option for 'createAlias' for not calling identify [\#547](https://github.com/mixpanel/mixpanel-swift/pull/547)
+
+### Fixes
+
+- strip whitespace in MPDB token [\#561](https://github.com/mixpanel/mixpanel-swift/pull/561)
+
+#
+
 ## [v4.0.2](https://github.com/mixpanel/mixpanel-swift/tree/v4.0.2) (2022-09-13)
 
 ### Fixes
@@ -216,6 +229,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

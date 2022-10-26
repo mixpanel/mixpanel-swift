@@ -1048,6 +1048,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testMPDB() {
+        // we test with this crazy string because the "token" here can be the instanceName
+        // which can be any string the user likes, MPDB should strip the non-alphanumeric characters
         let mpdb = MPDB.init(token: "Re@lly  Bad.T0ken+\(randomId())--*🤪/0️⃣\\_? ")
         mpdb.open()
         

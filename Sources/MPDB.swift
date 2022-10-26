@@ -17,7 +17,7 @@ class MPDB {
     let apiToken: String
     
     init(token: String) {
-        apiToken = token.filter { $0.isLetter || $0.isWholeNumber }
+        apiToken = String(token.unicodeScalars.filter({ CharacterSet.alphanumerics.contains($0) }))
         open()
     }
     

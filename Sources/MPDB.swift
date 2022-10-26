@@ -17,7 +17,7 @@ class MPDB {
     let apiToken: String
     
     init(token: String) {
-        apiToken = token.filter { !$0.isWhitespace }
+        apiToken = token.filter { $0.isLetter || $0.isWholeNumber }
         open()
     }
     

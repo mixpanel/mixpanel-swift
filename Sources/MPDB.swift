@@ -149,7 +149,7 @@ class MPDB {
             var deleteStatement: OpaquePointer?
             if sqlite3_prepare_v2(db, deleteString, -1, &deleteStatement, nil) == SQLITE_OK {
                 if sqlite3_step(deleteStatement) == SQLITE_DONE {
-                    Logger.info(message: "Succesfully deleted rows from table \(tableName)")
+                    Logger.info(message: "Successfully deleted rows from table \(tableName)")
                 } else {
                     logSqlError(message: "Failed to delete rows from table \(tableName)")
                     recreate()
@@ -181,7 +181,7 @@ class MPDB {
             var updateStatement: OpaquePointer?
             if sqlite3_prepare_v2(db, updateString, -1, &updateStatement, nil) == SQLITE_OK {
                 if sqlite3_step(updateStatement) == SQLITE_DONE {
-                    Logger.info(message: "Succesfully update rows from table \(tableName)")
+                    Logger.info(message: "Successfully updated rows from table \(tableName)")
                 } else {
                     logSqlError(message: "Failed to update rows from table \(tableName)")
                     recreate()

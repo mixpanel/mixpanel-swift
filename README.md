@@ -39,7 +39,7 @@ We'd also love for you to come and work with us! Check out **[Jobs](https://mixp
 
 If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
 
-Check out our [Advanced iOS Swift Guide](swift) for additional advanced configurations and use cases, like setting up your project with European Union data storage.
+Check out our [Advanced iOS Swift Guide](https://developer.mixpanel.com/docs/swift) for additional advanced configurations and use cases, like setting up your project with European Union data storage.
 
 # Quick Start Guide
 Our master branch and our releases are on Swift 5. If you wish to use our Swift 4.2 implementation, please point to the v2.6.1 release. For Swift 4/4.1 implementation, please point to the v2.4.5 release. For Swift 3 implementation, please point to the v2.2.3 release.

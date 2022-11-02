@@ -1048,50 +1048,51 @@ class MixpanelDemoTests: MixpanelBaseTests {
     }
     
     func testMPDB() {
-        let testToken = randomId()
+        // we test with this crazy string because the "token" here can be the instanceName
+        // which can be any string the user likes, MPDB should strip the non-alphanumeric characters to prevent SQL errors
+        let mpdb = MPDB.init(token: "Re@lly  Bad.T0ken+\(randomId())--*🤪/0️⃣\\_? ")
+        mpdb.open()
+        
         let numRows = 50
         let halfRows = numRows/2
         let eventName = "Test Event"
-        func _inner() {
-            removeDBfile(testToken)
-            let mpdb = MPDB.init(token: testToken)
-            mpdb.open()
-            for pType in PersistenceType.allCases {
-                let emptyArray: [InternalProperties] = mpdb.readRows(pType, numRows: numRows)
-                XCTAssertTrue(emptyArray.isEmpty, "Table should be empty")
-                for i in 0...numRows-1 {
-                    let eventObj : InternalProperties = ["event": eventName, "properties": ["index": i]]
-                    let eventData = JSONHandler.serializeJSONObject(eventObj)!
-                    mpdb.insertRow(pType, data: eventData)
+        
+        for pType in PersistenceType.allCases {
+            let emptyArray: [InternalProperties] = mpdb.readRows(pType, numRows: numRows)
+            XCTAssertTrue(emptyArray.isEmpty, "Table should be empty")
+            for i in 0...numRows-1 {
+                let eventObj : InternalProperties = ["event": eventName, "properties": ["index": i]]
+                let eventData = JSONHandler.serializeJSONObject(eventObj)!
+                mpdb.insertRow(pType, data: eventData)
+            }
+            let dataArray : [InternalProperties] = mpdb.readRows(pType, numRows: halfRows)
+            XCTAssertEqual(dataArray.count, halfRows, "Should have read only half of the rows")
+            var ids: [Int32] = []
+            for (n, entity) in dataArray.enumerated() {
+                guard let id = entity["id"] as? Int32 else {
+                    continue
                 }
-                let dataArray : [InternalProperties] = mpdb.readRows(pType, numRows: halfRows)
-                XCTAssertEqual(dataArray.count, halfRows, "Should have read only half of the rows")
-                var ids: [Int32] = []
-                for (n, entity) in dataArray.enumerated() {
-                    guard let id = entity["id"] as? Int32 else {
-                        continue
-                    }
-                    ids.append(id)
-                    XCTAssertEqual(entity["event"] as! String, eventName, "Event name should be unchanged")
-                    // index should be oldest events, 0 - 24
-                    XCTAssertEqual(entity["properties"] as! [String : Int], ["index": n], "Should read oldest events first")
-                }
-                
-                mpdb.deleteRows(pType, ids: [1, 2, 3])
-                let dataArray2 : [InternalProperties] = mpdb.readRows(pType, numRows: numRows)
-                // even though we requested numRows, there should only be halfRows left
-                XCTAssertEqual(dataArray2.count, numRows - 3, "Should have deleted half the rows")
-                for (n, entity) in dataArray2.enumerated() {
-                    XCTAssertEqual(entity["event"] as! String, eventName, "Event name should be unchanged")
-                    // old events (0-24) should have been deleted so index should be recent events 25-49
-                    XCTAssertEqual(entity["properties"] as! [String : Int], ["index": n + halfRows], "Should have deleted oldest events first")
-                }
-                mpdb.close()
+                ids.append(id)
+                XCTAssertEqual(entity["event"] as! String, eventName, "Event name should be unchanged")
+                // index should be oldest events, 0 - 24
+                XCTAssertEqual(entity["properties"] as! [String : Int], ["index": n], "Should read oldest events first")
+            }
+            
+            mpdb.deleteRows(pType, ids: ids)
+            let dataArray2 : [InternalProperties] = mpdb.readRows(pType, numRows: numRows)
+            // even though we requested numRows, there should only be halfRows left
+            XCTAssertEqual(dataArray2.count, halfRows, "Should have deleted half the rows")
+            for (n, entity) in dataArray2.enumerated() {
+                XCTAssertEqual(entity["event"] as! String, eventName, "Event name should be unchanged")
+                // old events (0-24) should have been deleted so index should be recent events 25-49
+                XCTAssertEqual(entity["properties"] as! [String : Int], ["index": n + halfRows], "Should have deleted oldest events first")
             }
         }
-        removeDBfile(testToken)
+        
+        mpdb.close()
+        removeDBfile(mpdb.apiToken)
     }
-    
+        
     func testMigration() {
         let token = "testToken"
         // clean up

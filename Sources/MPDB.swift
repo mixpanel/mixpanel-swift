@@ -17,7 +17,8 @@ class MPDB {
     let apiToken: String
     
     init(token: String) {
-        apiToken = token.filter { !$0.isWhitespace }
+        // token can be instanceName which can be any string so we strip all non-alhpanumeric characters to prevent SQL errors
+        apiToken = String(token.unicodeScalars.filter({ CharacterSet.alphanumerics.contains($0) }))
         open()
     }
     

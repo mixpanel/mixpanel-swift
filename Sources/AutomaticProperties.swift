@@ -107,10 +107,7 @@ class AutomaticProperties {
                 }
             }
         }
-        if let model = String(validatingUTF8: modelCode) {
-            return model
-        }
-        return ""
+        return modelCode
     }
 
     #if os(watchOS)

@@ -32,7 +32,7 @@ Pod::Spec.new do |s|
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) MAC_OS'
   }
 
-  s.watchos.deployment_target = '3.0'
+  s.watchos.deployment_target = '4.0'
   s.watchos.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) WATCH_OS'
   }

@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.author       = { 'Mixpanel, Inc' => 'support@mixpanel.com' }
   s.source       = { :git => 'https://github.com/mixpanel/mixpanel-swift.git',
                      :tag => "v#{s.version}" }
-  s.ios.deployment_target = '9.0'
+  s.ios.deployment_target = '11.0'
   s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   s.ios.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) IOS'
@@ -21,12 +21,12 @@ Pod::Spec.new do |s|
     'Sources/Flush.swift','Sources/Track.swift', 'Sources/People.swift', 'Sources/AutomaticEvents.swift',
     'Sources/Group.swift',
     'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift', 'Sources/MPDB.swift', 'Sources/MixpanelPersistence.swift']
-  s.tvos.deployment_target = '9.0'
+  s.tvos.deployment_target = '11.0'
   s.tvos.frameworks = 'UIKit', 'Foundation'
   s.tvos.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) TV_OS'
   }
-  s.osx.deployment_target = '10.10'
+  s.osx.deployment_target = '10.13'
   s.osx.frameworks = 'Cocoa', 'Foundation'
   s.osx.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) MAC_OS'

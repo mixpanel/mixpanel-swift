@@ -15,7 +15,7 @@ class ReadWriteLock {
     }
 
     func read(closure: () -> Void) {
-        concurrenttQueue.sync {
+        concurrentQueue.sync {
             closure()
         }
     }

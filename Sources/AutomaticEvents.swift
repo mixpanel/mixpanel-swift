@@ -45,7 +45,7 @@ class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequest
     var sessionStartTime: TimeInterval = Date().timeIntervalSince1970
     var hasAddedObserver = false
     
-    let awaitingTransactionsWriteLock = DispatchQueue(label: "com.mixpanel.awaiting_transactions_writeLock", qos: .userInitiated)
+    let awaitingTransactionsWriteLock = DispatchQueue(label: "com.mixpanel.awaiting_transactions_writeLock", qos: .userInitiated, autoreleaseFrequency: .workItem)
     
     func initializeEvents(instanceName: String) {
         let legacyFirstOpenKey = "MPFirstOpen"

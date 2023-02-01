@@ -163,7 +163,7 @@ final class MixpanelManager {
         instances = [String: MixpanelInstance]()
         Logger.addLogging(PrintLogging())
         readWriteLock = ReadWriteLock(label: "com.mixpanel.instance.manager.lock")
-        instanceQueue = DispatchQueue(label: "com.mixpanel.instance.manager.instance", qos: .utility)
+        instanceQueue = DispatchQueue(label: "com.mixpanel.instance.manager.instance", qos: .utility, autoreleaseFrequency: .workItem)
     }
     
     func initialize(token apiToken: String,

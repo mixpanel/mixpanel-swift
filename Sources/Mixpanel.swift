@@ -121,8 +121,11 @@ open class Mixpanel {
         if let instance = MixpanelManager.sharedInstance.getMainInstance() {
             return instance
         } else {
+            #if !targetEnvironment(simulator)
             assert(false, "You have to call initialize(token:trackAutomaticEvents:) before calling the main instance, " +
                    "or define a new main instance if removing the main one")
+            #endif
+            
 #if !os(OSX) && !os(watchOS)
             return Mixpanel.initialize(token: "", trackAutomaticEvents: true)
 #else

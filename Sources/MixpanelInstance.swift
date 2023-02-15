@@ -449,7 +449,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             distinctId = nil
 #endif
         }
-        return distinctId ?? UUID().uuidString // use a random UUID by default
+        let ret =  distinctId ?? UUID().uuidString // use a random UUID by default
+        return prefix + ret
     }
     
     func uniqueIdentifierForDevice() -> String? {

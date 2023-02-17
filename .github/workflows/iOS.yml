@@ -11,7 +11,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        destination: ['OS=16.0,name="iPhone 14 Pro"']
+        destination: ['OS=16.2,name="iPhone 14 Pro"']
 
     steps:
     - uses: actions/checkout@v2

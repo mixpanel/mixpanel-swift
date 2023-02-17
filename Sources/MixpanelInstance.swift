@@ -20,6 +20,7 @@ import SystemConfiguration
 import CoreTelephony
 #endif // os(iOS)
 
+private let devicePrefix = "$device:"
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
  */
@@ -267,7 +268,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
 #endif
         flushInstance.delegate = self
-        distinctId = defaultDistinctId()
+        distinctId = devicePrefix + defaultDeviceId()
         people = People(apiToken: self.apiToken,
                         serialQueue: trackingQueue,
                         lock: self.readWriteLock,
@@ -430,8 +431,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 #endif
     
-    func defaultDistinctId() -> String {
-        let prefix = "$device:"
+    func addPrefixToDeviceId(deviceId: String?) -> String {
+        if let temp = deviceId {
+            return devicePrefix + temp
+        }
+        return ""
+    }
+    
+    func defaultDeviceId() -> String {
         let distinctId: String?
         if useUniqueDistinctId {
             distinctId = uniqueIdentifierForDevice()
@@ -442,8 +449,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             distinctId = nil
 #endif
         }
-        let ret =  distinctId ?? UUID().uuidString // use a random UUID by default
-        return prefix + ret
+        return distinctId ?? UUID().uuidString // use a random UUID by default
     }
     
     func uniqueIdentifierForDevice() -> String? {
@@ -799,8 +805,8 @@ extension MixpanelInstance {
             MixpanelPersistence.deleteMPUserDefaultsData(instanceName: self.name)
             self.readWriteLock.write {
                 self.timedEvents = InternalProperties()
-                self.distinctId = self.defaultDistinctId()
-                self.anonymousId = self.distinctId
+                self.anonymousId = self.defaultDeviceId()
+                self.distinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
                 self.hadPersistedDistinctId = true
                 self.userId = nil
                 self.superProperties = InternalProperties()
@@ -849,8 +855,8 @@ extension MixpanelInstance {
                 mixpanelIdentity.hadPersistedDistinctId
             )
             if distinctId.isEmpty {
-                distinctId = defaultDistinctId()
-                anonymousId = distinctId
+                anonymousId = defaultDeviceId()
+                distinctId = addPrefixToDeviceId(deviceId: anonymousId)
                 hadPersistedDistinctId = true
                 userId = nil
                 MixpanelPersistence.saveIdentity(MixpanelIdentity.init(
@@ -1426,8 +1432,8 @@ extension MixpanelInstance {
                 self.alias = nil
                 self.people.distinctId = nil
                 self.userId = nil
-                self.distinctId = self.defaultDistinctId()
-                self.anonymousId = self.distinctId
+                self.anonymousId = self.defaultDeviceId()
+                self.distinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
                 self.hadPersistedDistinctId = true
                 self.superProperties = InternalProperties()
                 MixpanelPersistence.saveTimedEvents(timedEvents: InternalProperties(), instanceName: self.name)

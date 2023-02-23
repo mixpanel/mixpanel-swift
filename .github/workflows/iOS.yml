@@ -17,6 +17,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Swift Lint
       run: swiftlint
+    - name: delete unpaired watch sim
+      run: |
+        xcrun simctl delete CDDADD22-64B3-43C9-84BB-9C183611432C
     - name: Run Test
       working-directory: MixpanelDemo
       run: |

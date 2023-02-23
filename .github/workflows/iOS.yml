@@ -11,7 +11,8 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        destination: ['platform=iOS Simulator,name="iPhone 14 Pro",OS=latest']
+        destination: ['platform="iOS Simulator",name="iPhone 14 Pro",OS=latest']
+
     steps:
     - uses: actions/checkout@v2
     - name: Swift Lint

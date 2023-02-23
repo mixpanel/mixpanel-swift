@@ -1156,7 +1156,12 @@ extension MixpanelInstance {
      - parameter event: the name of the event to be tracked that was passed to time(event:)
      */
     public func eventElapsedTime(event: String) -> Double {
-        if let startTime = self.timedEvents[event] as? TimeInterval {
+        var timedEvents = InternalProperties()
+        self.readWriteLock.read {
+            timedEvents = self.timedEvents
+        }
+        
+        if let startTime = timedEvents[event] as? TimeInterval {
             return Date().timeIntervalSince1970 - startTime
         }
         return 0

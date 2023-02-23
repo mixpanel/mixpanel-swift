@@ -11,23 +11,11 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        destination: ['OS=16.2,name="iPhone 14 Pro"']
-
+        destination: ['platform=iOS Simulator,name="iPhone 14 Pro",OS=latest']
     steps:
     - uses: actions/checkout@v2
     - name: Swift Lint
       run: swiftlint
-    - name: delete unpaired watch sims
-      run: |
-        xcrun simctl list --json > simulators.json
-        watch_os_udids=$(jq '.devices[] | map(select(.name | contains("Watch"))) | .[].udid' simulators.json -r)
-        paired_watch_udids=$(jq '.pairs | map(.watch) | .[].udid' simulators.json -r)
-
-        while IFS= read -r udid; do
-          if [[ ! "${paired_watch_udids[*]}" =~ "${udid}" ]]; then
-            xcrun simctl delete ${udid}
-          fi
-        done <<< "$watch_os_udids"
     - name: Run Test
       working-directory: MixpanelDemo
       run: |

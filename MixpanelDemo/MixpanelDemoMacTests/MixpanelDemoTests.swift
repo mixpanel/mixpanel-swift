@@ -10,7 +10,7 @@ import XCTest
 
 @testable import Mixpanel
 @testable import MixpanelDemoMac
-
+private let devicePrefix = "$device:"
 class MixpanelDemoTests: MixpanelBaseTests {
 
     func test5XXResponse() {
@@ -173,10 +173,10 @@ class MixpanelDemoTests: MixpanelBaseTests {
             // try this for ODIN and nil
             #if MIXPANEL_UNIQUE_DISTINCT_ID
             XCTAssertEqual(testMixpanel.distinctId,
-                           testMixpanel.defaultDistinctId(),
+                           devicePrefix + testMixpanel.defaultDeviceId(),
                            "mixpanel identify failed to set default distinct id")
             XCTAssertEqual(testMixpanel.anonymousId,
-                           testMixpanel.defaultDistinctId(),
+                           testMixpanel.defaultDeviceId(),
                            "mixpanel failed to set default anonymous id")
             #endif
             XCTAssertNil(testMixpanel.people.distinctId,
@@ -190,7 +190,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                           "events should be sent right away with default distinct id")
             #if MIXPANEL_UNIQUE_DISTINCT_ID
             XCTAssertEqual((eventsQueue.last?["properties"] as? InternalProperties)?["distinct_id"] as? String,
-                           mixpanel.defaultDistinctId(),
+                           devicePrefix + mixpanel.defaultDeviceId(),
                            "events should use default distinct id if none set")
             #endif
             XCTAssertEqual((eventsQueue.last?["properties"] as? InternalProperties)?["$lib_version"] as? String,
@@ -559,7 +559,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         #if MIXPANEL_UNIQUE_DISTINCT_ID
         XCTAssertEqual(testMixpanel.distinctId,
-                       testMixpanel.defaultDistinctId(),
+                       devicePrefix + testMixpanel.defaultDeviceId(),
                        "distinct id failed to reset")
         #endif
         XCTAssertNil(testMixpanel.people.distinctId, "people distinct id failed to reset")
@@ -570,7 +570,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let testMixpanel2 = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         waitForTrackingQueue(testMixpanel2)
         #if MIXPANEL_UNIQUE_DISTINCT_ID
-        XCTAssertEqual(testMixpanel2.distinctId, testMixpanel2.defaultDistinctId(),
+        XCTAssertEqual(testMixpanel2.distinctId, devicePrefix + testMixpanel2.defaultDeviceId(),
                        "distinct id failed to reset after archive")
         #endif
         XCTAssertNil(testMixpanel2.people.distinctId,
@@ -623,7 +623,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
         testMixpanel.serverURL = kFakeServerUrl
         #if MIXPANEL_UNIQUE_DISTINCT_ID
-        XCTAssertEqual(testMixpanel.distinctId, testMixpanel.defaultDistinctId(),
+        XCTAssertEqual(testMixpanel.distinctId, devicePrefix + testMixpanel.defaultDeviceId(),
                        "default distinct id archive failed")
         #endif
         XCTAssertTrue(testMixpanel.currentSuperProperties().isEmpty,

@@ -1,5 +1,25 @@
 #
 
+## [v4.0.5](https://github.com/mixpanel/mixpanel-swift/tree/v4.0.5) (2023-03-01)
+
+### Enhancements
+
+- Various Community PRs [\#589](https://github.com/mixpanel/mixpanel-swift/pull/589)
+- Identity v3 changes for swift sdk [\#586](https://github.com/mixpanel/mixpanel-swift/pull/586)
+- Delete .travis.yml [\#573](https://github.com/mixpanel/mixpanel-swift/pull/573)
+
+### Fixes
+
+- Access the timedEvents property inside of a readWriteLock. [\#588](https://github.com/mixpanel/mixpanel-swift/pull/588)
+- Disable watchOS builds in CI [\#587](https://github.com/mixpanel/mixpanel-swift/pull/587)
+- Check flush interval \> 0 inside the dispatch block [\#583](https://github.com/mixpanel/mixpanel-swift/pull/583)
+- SwiftUI preview fix [\#581](https://github.com/mixpanel/mixpanel-swift/pull/581)
+- Setting explicit autorelease frequency [\#579](https://github.com/mixpanel/mixpanel-swift/pull/579)
+- Update iOS.yml [\#577](https://github.com/mixpanel/mixpanel-swift/pull/577)
+- bump podspec deployment targets [\#575](https://github.com/mixpanel/mixpanel-swift/pull/575)
+
+#
+
 ## [v4.0.4](https://github.com/mixpanel/mixpanel-swift/tree/v4.0.4) (2022-11-02)
 
 ### Enhancements
@@ -243,6 +263,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

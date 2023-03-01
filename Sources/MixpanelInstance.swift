@@ -231,8 +231,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         )
 #endif
         let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility)
-        networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
+        trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility, autoreleaseFrequency: .workItem)
+        networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility, autoreleaseFrequency: .workItem)
         self.name = name
         
         mixpanelPersistence = MixpanelPersistence.init(instanceName: name)
@@ -1164,7 +1164,12 @@ extension MixpanelInstance {
      - parameter event: the name of the event to be tracked that was passed to time(event:)
      */
     public func eventElapsedTime(event: String) -> Double {
-        if let startTime = self.timedEvents[event] as? TimeInterval {
+        var timedEvents = InternalProperties()
+        self.readWriteLock.read {
+            timedEvents = self.timedEvents
+        }
+        
+        if let startTime = timedEvents[event] as? TimeInterval {
             return Date().timeIntervalSince1970 - startTime
         }
         return 0

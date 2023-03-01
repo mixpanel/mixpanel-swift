@@ -11,7 +11,7 @@ class ReadWriteLock {
     let concurentQueue: DispatchQueue
 
     init(label: String) {
-        self.concurentQueue = DispatchQueue(label: label, qos: .utility, attributes: .concurrent)
+        self.concurentQueue = DispatchQueue(label: label, qos: .utility, attributes: .concurrent, autoreleaseFrequency: .workItem)
     }
 
     func read(closure: () -> Void) {

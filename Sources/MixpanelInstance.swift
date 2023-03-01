@@ -231,8 +231,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         )
 #endif
         let label = "com.mixpanel.\(self.apiToken)"
-        trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility)
-        networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility)
+        trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility, autoreleaseFrequency: .workItem)
+        networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility, autoreleaseFrequency: .workItem)
         self.name = name
         
         mixpanelPersistence = MixpanelPersistence.init(instanceName: name)

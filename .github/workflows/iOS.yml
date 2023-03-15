@@ -20,10 +20,11 @@ jobs:
     - name: Run Test
       working-directory: MixpanelDemo
       run: |
+        gem install cocoapods
         set -o pipefail
         xcodebuild -scheme MixpanelDemo -derivedDataPath Build/ -destination ${{ matrix.destination }} -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES -enableCodeCoverage YES clean build test | xcpretty -c;
     - name: Pod Lint
-      run: pod lib lint --platforms=ios,tvos --allow-warnings
+      run: pod lib lint --allow-warnings
     - name: Code Coverage Report
       working-directory: MixpanelDemo/build/Logs/Test
       run: |

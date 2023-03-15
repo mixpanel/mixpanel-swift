@@ -40,6 +40,7 @@ def add_tag():
     subprocess.call('git push origin --tags', shell=True)
 
 def pushPod():
+    subprocess.call('sudo gem install cocoapods', shell=True)
     subprocess.call('pod trunk push Mixpanel-swift.podspec --allow-warnings', shell=True)
 
 def build_Carthage():

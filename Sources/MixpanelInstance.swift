@@ -46,6 +46,7 @@ protocol AppLifecycle {
 
 /// The class that represents the Mixpanel Instance
 open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate {
+    
     /// apiToken string that identifies the project to track data to
     open var apiToken = ""
     
@@ -410,7 +411,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         taskId = sharedApplication.beginBackgroundTask(expirationHandler: completionHandler)
         
         if flushOnBackground {
-            flush(completion: completionHandler)
+            flush(performFullFlush: true, completion: completionHandler)
         }
     }
     
@@ -899,9 +900,10 @@ extension MixpanelInstance {
      `flushOnBackground` is on by default). You only need to call this
      method manually if you want to force a flush at a particular moment.
      
+     - parameter performFullFlush: A optional boolean value indicating whether a full flush should be performed. If `true`, a full flush will be triggered, sending all events to the server. Default to `false`, a partial flush will be executed for reducing memory footprint.
      - parameter completion: an optional completion handler for when the flush has completed.
      */
-    public func flush(completion: (() -> Void)? = nil) {
+    public func flush(performFullFlush: Bool = false, completion: (() -> Void)? = nil) {
         if hasOptedOutTracking() {
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
@@ -925,11 +927,18 @@ extension MixpanelInstance {
             
             // automatic events will NOT be flushed until one of the flags is non-nil
             let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(
-                type: self.persistenceTypeFromFlushType(.events), batchSize: APIConstants.flushSize,
+                type: self.persistenceTypeFromFlushType(.events),
+                batchSize: performFullFlush ? Int.max : APIConstants.flushSize,
                 excludeAutomaticEvents: !self.trackAutomaticEventsEnabled
             )
-            let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.people), batchSize: APIConstants.flushSize)
-            let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(type: self.persistenceTypeFromFlushType(.groups), batchSize: APIConstants.flushSize)
+            let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(
+                type: self.persistenceTypeFromFlushType(.people),
+                batchSize: performFullFlush ? Int.max : APIConstants.flushSize
+            )
+            let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(
+                type: self.persistenceTypeFromFlushType(.groups),
+                batchSize: performFullFlush ? Int.max : APIConstants.flushSize
+            )
             
             self.networkQueue.async { [weak self, completion] in
                 guard let self = self else {

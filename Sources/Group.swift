@@ -67,7 +67,7 @@ open class Group {
         }
 
         if MixpanelInstance.isiOSAppExtension() {
-            delegate?.flush(completion: nil)
+            delegate?.flush(performFullFlush: false, completion: nil)
         }
     }
 

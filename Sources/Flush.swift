@@ -9,7 +9,7 @@
 import Foundation
 
 protocol FlushDelegate: AnyObject {
-    func flush(completion: (() -> Void)?)
+    func flush(performFullFlush: Bool, completion: (() -> Void)?)
     func flushSuccess(type: FlushType, ids: [Int32])
     
     #if os(iOS)
@@ -37,7 +37,7 @@ class Flush: AppLifecycle {
                 _flushInterval = newValue
             })
 
-            delegate?.flush(completion: nil)
+            delegate?.flush(performFullFlush: false, completion: nil)
             startFlushTimer()
         }
     }
@@ -73,7 +73,7 @@ class Flush: AppLifecycle {
     }
 
     @objc func flushSelector() {
-        delegate?.flush(completion: nil)
+        delegate?.flush(performFullFlush: false, completion: nil)
     }
 
     func stopFlushTimer() {

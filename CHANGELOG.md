@@ -1,5 +1,14 @@
 #
 
+## [v4.1.0](https://github.com/mixpanel/mixpanel-swift/tree/v4.1.0) (2023-03-23)
+
+### Enhancements
+
+- Set the number of events per flush to 1,000 to reduce memory footprint [\#596](https://github.com/mixpanel/mixpanel-swift/pull/596)
+- Fix CI pod lint: no longer need to exclude watchos  [\#593](https://github.com/mixpanel/mixpanel-swift/pull/593)
+
+#
+
 ## [v4.0.6](https://github.com/mixpanel/mixpanel-swift/tree/v4.0.6) (2023-03-15)
 
 ### Enhancements
@@ -271,6 +280,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

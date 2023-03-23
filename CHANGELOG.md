@@ -2,6 +2,18 @@
 
 ## [v4.1.0](https://github.com/mixpanel/mixpanel-swift/tree/v4.1.0) (2023-03-23)
 
+### NOTE:
+
+Starting from this version, we have added a new optional boolean parameter performFullFlush to the flush() method. Default to `false`, a partial flush will be executed for reducing memory footprint. The updated flush() is as follows:
+```
+    /*
+    - parameter performFullFlush: A optional boolean value indicating whether a full flush should be performed. If `true`, a full flush will be triggered, sending all events to the server. Default to `false`, a partial flush will be executed for reducing memory footprint.
+    - parameter completion: an optional completion handler for when the flush has completed.
+    */
+    public func flush(performFullFlush: Bool = false, completion: (() -> Void)? = nil) 
+```
+
+
 ### Enhancements
 
 - Set the number of events per flush to 1,000 to reduce memory footprint [\#596](https://github.com/mixpanel/mixpanel-swift/pull/596)

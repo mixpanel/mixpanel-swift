@@ -1,5 +1,13 @@
 #
 
+## [v4.1.1](https://github.com/mixpanel/mixpanel-swift/tree/v4.1.1) (2023-04-28)
+
+### Enhancements
+
+- create indexes and enable WAL journal\_mode [\#600](https://github.com/mixpanel/mixpanel-swift/pull/600)
+
+#
+
 ## [v4.1.0](https://github.com/mixpanel/mixpanel-swift/tree/v4.1.0) (2023-03-23)
 
 ### NOTE:
@@ -292,6 +300,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

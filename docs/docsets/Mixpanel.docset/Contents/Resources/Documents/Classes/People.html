@@ -17,7 +17,7 @@
     <a title="People Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 4.1.0 Docs</a> (0% documented)</p>
+        <p><a href="../index.html">Mixpanel 4.1.1 Docs</a> (83% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
@@ -118,7 +118,7 @@
             <a href="../Typealiases.html">Type Aliases</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
-                <a href="../Typealiases.html#/Properties">Properties</a>
+                <a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a>
               </li>
             </ul>
           </li>
@@ -128,6 +128,13 @@
         <section>
           <section class="section">
             <h1>People</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">People</span></code></pre>
+
+                </div>
+              </div>
             <p>Access to the Mixpanel People API, available as an accessible variable from
 the main Mixpanel instance.</p>
 
@@ -138,9 +145,9 @@ the main Mixpanel instance.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC10ignoreTimeSbvp"></a>
                     <a name="//apple_ref/swift/Property/ignoreTime" class="dashAnchor"></a>
-                    <a class="token" href="#/">ignoreTime</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC10ignoreTimeSbvp">ignoreTime</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -154,6 +161,14 @@ Mixpanel will not automatically update the &ldquo;Last Seen&rdquo; property of t
 Otherwise, Mixpanel will add a &ldquo;Last Seen&rdquo; property associated with the
 current time for all $set, $append, and $add operations</p>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="k">var</span> <span class="nv">ignoreTime</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
@@ -174,9 +189,9 @@ current time for all $set, $append, and $add operations</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC3set10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/set(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">set(properties:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC3set10propertiesySDySSAA0A4Type_pG_tF">set(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -200,15 +215,42 @@ value is overwritten. Other existing properties will not be affected.</p>
 </div>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>properties dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC3set8property2toySS_AA0A4Type_ptF"></a>
                     <a name="//apple_ref/swift/Method/set(property:to:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">set(property:<wbr>to:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC3set8property2toySS_AA0A4Type_ptF">set(property:<wbr>to:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -222,15 +264,54 @@ value is overwritten. Other existing properties will not be affected.</p>
 MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">property</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">to</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>property</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>property name</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>to</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>property value</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC7setOnce10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/setOnce(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">setOnce(properties:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC7setOnce10propertiesySDySSAA0A4Type_pG_tF">setOnce(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -247,15 +328,42 @@ data about the user&rsquo;s initial experience and source, as well as dates
 representing the first time something happened.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">setOnce</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>properties dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC5unset10propertiesySaySSG_tF"></a>
                     <a name="//apple_ref/swift/Method/unset(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">unset(properties:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC5unset10propertiesySaySSG_tF">unset(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -270,15 +378,42 @@ in Mixpanel People.</p>
 that don&rsquo;t exist there will be no effect.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">unset</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>properties array</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC9increment10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/increment(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">increment(properties:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC9increment10propertiesySDySSAA0A4Type_pG_tF">increment(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -293,15 +428,42 @@ numeric if its current value is a number. If a property does not exist, it
 will be set to the increment amount. Property values must be number objects.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">increment</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>properties array</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC9increment8property2byySS_SdtF"></a>
                     <a name="//apple_ref/swift/Method/increment(property:by:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">increment(property:<wbr>by:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC9increment8property2byySS_SdtF">increment(property:<wbr>by:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -313,15 +475,54 @@ will be set to the increment amount. Property values must be number objects.</p>
 amount.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">increment</span><span class="p">(</span><span class="nv">property</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">by</span><span class="p">:</span> <span class="kt">Double</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>property</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>property name</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>by</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>amount to increment by</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC6append10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/append(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">append(properties:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC6append10propertiesySDySSAA0A4Type_pG_tF">append(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -335,15 +536,42 @@ amount.</p>
 MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">append</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>mapping of list property names to values to append</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC6remove10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/remove(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">remove(properties:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC6remove10propertiesySDySSAA0A4Type_pG_tF">remove(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -357,15 +585,42 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
 MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">remove</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>mapping of list property names to values to remove</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC5union10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/union(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">union(properties:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC5union10propertiesySDySSAA0A4Type_pG_tF">union(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -378,15 +633,42 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
 <p>Property values must be array objects.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">union</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>mapping of list property names to lists to union</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC11trackCharge6amount10propertiesySd_SDySSAA0A4Type_pGSgtF"></a>
                     <a name="//apple_ref/swift/Method/trackCharge(amount:properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">trackCharge(amount:<wbr>properties:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC11trackCharge6amount10propertiesySd_SDySSAA0A4Type_pGSgtF">trackCharge(amount:<wbr>properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -402,15 +684,54 @@ could record a product ID with each charge so that you could segement on it in
 revenue analytics to see which products are generating the most revenue.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">trackCharge</span><span class="p">(</span><span class="nv">amount</span><span class="p">:</span> <span class="kt">Double</span><span class="p">,</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>amount</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>amount of revenue received</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Optional. properties dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC12clearChargesyyF"></a>
                     <a name="//apple_ref/swift/Method/clearCharges()" class="dashAnchor"></a>
-                    <a class="token" href="#/">clearCharges()</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC12clearChargesyyF">clearCharges()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -421,15 +742,23 @@ revenue analytics to see which products are generating the most revenue.</p>
                         <p>Delete current user&rsquo;s revenue history.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">clearCharges</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel6PeopleC10deleteUseryyF"></a>
                     <a name="//apple_ref/swift/Method/deleteUser()" class="dashAnchor"></a>
-                    <a class="token" href="#/">deleteUser()</a>
+                    <a class="token" href="#/s:8Mixpanel6PeopleC10deleteUseryyF">deleteUser()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -440,6 +769,14 @@ revenue analytics to see which products are generating the most revenue.</p>
                         <p>Delete current user&rsquo;s record from Mixpanel People.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">deleteUser</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
@@ -448,7 +785,7 @@ revenue analytics to see which products are generating the most revenue.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2023 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2023-03-22)</p>
+          <p>&copy; 2023 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2023-04-28)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

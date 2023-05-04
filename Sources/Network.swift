@@ -141,7 +141,7 @@ class Network {
                                                   "$lib_version": AutomaticProperties.libVersion(),
                                                   "Project Token": distinctId,
                                                   "DevX": true]) {(current, _) in current }
-        let requestData = JSONHandler.encodeAPIData([["event": eventName, "properties": trackProperties]])
+        let requestData = JSONHandler.encodeAPIData([["event": eventName, "properties": trackProperties] as [String : Any]])
         
         let responseParser: (Data) -> Int? = { data in
             let response = String(data: data, encoding: String.Encoding.utf8)
@@ -179,7 +179,7 @@ class Network {
             )
         }
         if updatePeople {
-            let engageData = JSONHandler.encodeAPIData([["$token": apiToken, "$distinct_id": distinctId, "$add": [eventName: 1]]])
+            let engageData = JSONHandler.encodeAPIData([["$token": apiToken, "$distinct_id": distinctId, "$add": [eventName: 1]] as [String : Any]])
             if let engageData = engageData {
                 let engageBody = "ip=1&data=\(engageData)".data(using: String.Encoding.utf8)
                 let engageResource = Network.buildResource(path: FlushType.people.rawValue,

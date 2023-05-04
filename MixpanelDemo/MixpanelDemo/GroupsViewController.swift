@@ -51,7 +51,7 @@ class GroupsViewController: UIViewController, UITableViewDelegate, UITableViewDa
         case 0:
             let p: Properties = ["a": 1,
                                  "b": 2.3,
-                                 "c": ["4", 5],
+                                 "c": ["4", 5] as [Any],
                                  "d": URL(string:"https://mixpanel.com")!,
                                  "e": NSNull(),
                                  "f": Date()]
@@ -95,7 +95,7 @@ class GroupsViewController: UIViewController, UITableViewDelegate, UITableViewDa
         case 11:
             let p: Properties = ["a": 1,
                                  "b": 2.3,
-                                 "c": ["4", 5],
+                                 "c": ["4", 5] as [Any],
                                  "d": URL(string:"https://mixpanel.com")!,
                                  "e": NSNull(),
                                  "f": Date(),

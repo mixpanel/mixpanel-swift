@@ -74,7 +74,7 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
                      "Super Property 2": "p2",
                      "Super Property 3": Date(),
                      "Super Property 4": ["a":"b"],
-                     "Super Property 5": [3, "a", Date()],
+                                 "Super Property 5": [3, "a", Date()] as [Any],
                      "Super Property 6":
                         URL(string: "https://mixpanel.com")!,
                      "Super Property 7": NSNull()]

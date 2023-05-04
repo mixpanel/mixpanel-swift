@@ -34,7 +34,7 @@ class SessionMetadata {
         let dict: [String: Any] = ["$mp_metadata": ["$mp_event_id": String.randomId(),
                     "$mp_session_id": sessionID,
                     "$mp_session_seq_id": (isEvent ? eventsCounter : peopleCounter),
-                    "$mp_session_start_sec": sessionStartEpoch]]
+                                                    "$mp_session_start_sec": sessionStartEpoch] as [String : Any]]
         isEvent ? (eventsCounter += 1) : (peopleCounter += 1)
         return dict
     }

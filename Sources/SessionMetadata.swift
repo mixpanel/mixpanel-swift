@@ -14,7 +14,7 @@ class SessionMetadata {
     var sessionID: String = String.randomId()
     var sessionStartEpoch: UInt64 = 0
     var trackingQueue: DispatchQueue
-
+    
     init(trackingQueue: DispatchQueue) {
         self.trackingQueue = trackingQueue
     }
@@ -22,18 +22,18 @@ class SessionMetadata {
     func applicationWillEnterForeground() {
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
-
+            
             self.eventsCounter = 0
             self.peopleCounter = 0
             self.sessionID = String.randomId()
             self.sessionStartEpoch = UInt64(Date().timeIntervalSince1970)
         }
     }
-
+    
     func toDict(isEvent: Bool = true) -> InternalProperties {
         let dict: [String: Any] = ["$mp_metadata": ["$mp_event_id": String.randomId(),
-                    "$mp_session_id": sessionID,
-                    "$mp_session_seq_id": (isEvent ? eventsCounter : peopleCounter),
+                                                    "$mp_session_id": sessionID,
+                                                    "$mp_session_seq_id": (isEvent ? eventsCounter : peopleCounter),
                                                     "$mp_session_start_sec": sessionStartEpoch] as [String : Any]]
         isEvent ? (eventsCounter += 1) : (peopleCounter += 1)
         return dict

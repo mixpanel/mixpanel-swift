@@ -55,7 +55,7 @@ class GDPRViewController: UIViewController, UITableViewDelegate, UITableViewData
         case 4:
             let p: Properties = ["a": 1,
                                  "b": 2.3,
-                                 "c": ["4", 5],
+                                 "c": ["4", 5] as [Any],
                                  "d": URL(string:"https://mixpanel.com")!,
                                  "e": NSNull(),
                                  "f": Date()]

@@ -1,5 +1,14 @@
 #
 
+## [v4.1.2](https://github.com/mixpanel/mixpanel-swift/tree/v4.1.2) (2023-05-17)
+
+### Fixes
+
+- Replace deprecated archiving methods [\#603](https://github.com/mixpanel/mixpanel-swift/pull/603)
+- Fix Xcode 14.3 heterogeneous collection warnings [\#602](https://github.com/mixpanel/mixpanel-swift/pull/602)
+
+#
+
 ## [v4.1.1](https://github.com/mixpanel/mixpanel-swift/tree/v4.1.1) (2023-04-28)
 
 ### Enhancements
@@ -300,6 +309,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

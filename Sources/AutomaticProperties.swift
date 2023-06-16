@@ -24,9 +24,7 @@ class AutomaticProperties {
 
         #if os(iOS) || os(tvOS)
             var screenSize: CGSize? = nil
-            DispatchQueue.main.sync {
-                screenSize = UIScreen.main.bounds.size
-            }
+            screenSize = UIScreen.main.bounds.size
             if let screenSize = screenSize {
                 p["$screen_height"]     = Int(screenSize.height)
                 p["$screen_width"]      = Int(screenSize.width)

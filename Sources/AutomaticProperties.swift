@@ -23,9 +23,12 @@ class AutomaticProperties {
         var p = InternalProperties()
 
         #if os(iOS) || os(tvOS)
-            let screenSize = UIScreen.main.bounds.size
-            p["$screen_height"]     = Int(screenSize.height)
-            p["$screen_width"]      = Int(screenSize.width)
+            var screenSize: CGSize? = nil
+            screenSize = UIScreen.main.bounds.size
+            if let screenSize = screenSize {
+                p["$screen_height"]     = Int(screenSize.height)
+                p["$screen_width"]      = Int(screenSize.width)
+            }
             #if targetEnvironment(macCatalyst)
                 p["$os"]                = "macOS"
                 p["$os_version"]        = ProcessInfo.processInfo.operatingSystemVersionString
@@ -57,11 +60,10 @@ class AutomaticProperties {
             p["$screen_height"]     = Int(screenSize.height)
         #endif
 
-        let infoDict = Bundle.main.infoDictionary
-        if let infoDict = infoDict {
-            p["$app_build_number"]     = infoDict["CFBundleVersion"]
-            p["$app_version_string"]   = infoDict["CFBundleShortVersionString"]
-        }
+        let infoDict = Bundle.main.infoDictionary ?? [:]
+        p["$app_build_number"]     = infoDict["CFBundleVersion"] as? String ?? "Unknown"
+        p["$app_version_string"]   = infoDict["CFBundleShortVersionString"] as? String ?? "Unknown"
+        
         p["mp_lib"]             = "swift"
         p["$lib_version"]       = AutomaticProperties.libVersion()
         p["$manufacturer"]      = "Apple"
@@ -89,7 +91,7 @@ class AutomaticProperties {
     }()
 
     class func deviceModel() -> String {
-        var modelCode : String
+        var modelCode : String = "Unknown"
         if AutomaticProperties.isiOSAppOnMac() {
             // iOS App Running on Apple Silicon Mac
             var size = 0

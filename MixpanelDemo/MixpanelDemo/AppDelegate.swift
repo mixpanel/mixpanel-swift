@@ -16,9 +16,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
-        Mixpanel.initialize(token: "MIXPANEL_TOKEN", trackAutomaticEvents: true)
+        // var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String;
+        let token = "6d83a31dc1373e3153a5a3d087084721"
+        Mixpanel.initialize(token: token, trackAutomaticEvents: true)
         Mixpanel.mainInstance().loggingEnabled = true
+        Mixpanel.mainInstance().anonymousId = "myAnonymousId"
 
         return true
     }

@@ -25,7 +25,6 @@ class Flush: AppLifecycle {
     var flushOnBackground = true
     var _flushInterval = 0.0
     private let flushIntervalReadWriteLock: DispatchQueue
-    
 
     var flushInterval: Double {
         get {
@@ -101,9 +100,9 @@ class Flush: AppLifecycle {
             let requestData = JSONHandler.encodeAPIData(batch)
             if let requestData = requestData {
                 #if os(iOS)
-                if !MixpanelInstance.isiOSAppExtension() {
-                    delegate?.updateNetworkActivityIndicator(true)
-                }
+                    if !MixpanelInstance.isiOSAppExtension() {
+                        delegate?.updateNetworkActivityIndicator(true)
+                    }
                 #endif // os(iOS)
                 let success = flushRequest.sendRequest(requestData,
                                                         type: type,
@@ -125,7 +124,6 @@ class Flush: AppLifecycle {
             }
         }
     }
-
     
     func removeProcessedBatch(batchSize: Int, queue: Queue, type: FlushType) -> Queue {
         var shadowQueue = queue

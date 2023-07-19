@@ -46,7 +46,7 @@ class FlushRequest: Network {
                                 result = success
                                 semaphore.signal()
         })
-        _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+        _ = semaphore.wait(timeout: .now() + 120.0)
         return result
     }
 

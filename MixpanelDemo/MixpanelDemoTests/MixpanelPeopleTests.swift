@@ -23,7 +23,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         let q = peopleQueue(token: testMixpanel.apiToken).last!["$set"] as! InternalProperties
         XCTAssertEqual(q["p1"] as? String, "a", "custom people property not queued")
         assertDefaultPeopleProperties(q)
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testPeopleSetOnce() {
@@ -35,7 +35,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         let q = peopleQueue(token: testMixpanel.apiToken).last!["$set_once"] as! InternalProperties
         XCTAssertEqual(q["p1"] as? String, "a", "custom people property not queued")
         assertDefaultPeopleProperties(q)
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testPeopleSetReservedProperty() {
@@ -49,7 +49,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
                        "override",
                        "reserved property override failed")
         assertDefaultPeopleProperties(q)
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testPeopleSetTo() {
@@ -60,7 +60,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         let p: InternalProperties = peopleQueue(token: testMixpanel.apiToken).last!["$set"] as! InternalProperties
         XCTAssertEqual(p["p1"] as? String, "a", "custom people property not queued")
         assertDefaultPeopleProperties(p)
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testDropUnidentifiedPeopleRecords() {
@@ -74,7 +74,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         XCTAssertEqual((r["$set"] as? InternalProperties)?["i"] as? Int, 0)
         r = unIdentifiedPeopleQueue(token: testMixpanel.apiToken).last!
         XCTAssertEqual((r["$set"] as? InternalProperties)?["i"] as? Int, 504)
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
 
@@ -92,7 +92,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         XCTExpectAssert("unsupported property type was allowed") {
             testMixpanel.people.increment(properties: p)
         }
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testPeopleIncrement() {
@@ -104,7 +104,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         let q = peopleQueue(token: testMixpanel.apiToken).last!["$add"] as! InternalProperties
         XCTAssertTrue(q.count == 1, "incorrect people properties: \(p)")
         XCTAssertEqual(q["p1"] as? Int, 3, "custom people property not queued")
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testPeopleIncrementBy() {
@@ -115,7 +115,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         let p: InternalProperties = peopleQueue(token: testMixpanel.apiToken).last!["$add"] as! InternalProperties
         XCTAssertTrue(p.count == 1, "incorrect people properties: \(p)")
         XCTAssertEqual(p["p1"] as? Double, 3, "custom people property not queued")
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testPeopleDeleteUser() {
@@ -125,7 +125,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         let p: InternalProperties = peopleQueue(token: testMixpanel.apiToken).last!["$delete"] as! InternalProperties
         XCTAssertTrue(p.isEmpty, "incorrect people properties: \(p)")
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
 
@@ -139,7 +139,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         let prop2 = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$time"]
         XCTAssertEqual(prop, 25.34)
         XCTAssertNotNil(prop2)
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testPeopleTrackChargeZero() {
@@ -153,7 +153,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         let prop2 = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$time"]
         XCTAssertEqual(prop, 0)
         XCTAssertNotNil(prop2)
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
     
     func testPeopleTrackChargeWithTime() {
@@ -167,7 +167,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         let prop2 = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$time"] as? String
         XCTAssertEqual(prop, 25)
         compareDate(dateString: prop2!, dateDate: p["date"] as! Date)
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testPeopleTrackChargeWithProperties() {
@@ -180,7 +180,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         let prop2 = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["p1"]
         XCTAssertEqual(prop, 25)
         XCTAssertEqual(prop2 as? String, "a")
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testPeopleTrackCharge() {
@@ -193,7 +193,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         let prop2 = ((r["$append"] as? InternalProperties)?["$transactions"] as? InternalProperties)?["$time"]
         XCTAssertEqual(prop, 25)
         XCTAssertNotNil(prop2)
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testPeopleClearCharges() {
@@ -204,6 +204,6 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         let r: InternalProperties = peopleQueue(token: testMixpanel.apiToken).last!
         let transactions = (r["$set"] as? InternalProperties)?["$transactions"] as? [MixpanelType]
         XCTAssertEqual(transactions?.count, 0)
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 }

@@ -29,7 +29,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         super.tearDown()
     }
     
-    func removeDBFileForToken(_ token: String? = nil) {
+    func removeDBfile(_ token: String? = nil) {
         do {
              let fileManager = FileManager.default
             
@@ -47,12 +47,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         }
     }
     
-    func removeDBFileForInstance(_ instance: MixpanelInstance? = nil) {
-        instance?.mixpanelPersistence.mpdb.close()
-        let token = instance?.name
-        removeDBFileForToken(token)
-    }
-    
     func dbFilePath(_ token: String? = nil) -> String {
         let manager = FileManager.default
         #if os(iOS)
@@ -64,7 +58,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
             return ""
         }
         
-        guard let urlUnwrapped = url?.appendingPathComponent("\(apiToken)_MPDB.sqlite").path else {
+        guard let urlUnwrapped = url?.appendingPathComponent("\(token ?? apiToken)_MPDB.sqlite").path else {
             return ""
         }
         return urlUnwrapped

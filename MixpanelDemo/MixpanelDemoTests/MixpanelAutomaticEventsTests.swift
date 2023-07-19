@@ -30,7 +30,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         XCTAssertNotNil(event, "Should have an event")
         XCTAssertEqual(event?["event"] as? String, "$ae_session", "should be app session event")
         XCTAssertNotNil((event?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testKeepAutomaticEventsIfNetworkNotAvailable() {
@@ -43,7 +43,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         let event = eventQueue(token: testMixpanel.apiToken).last
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "automatic events should be accumulated if device is offline")
         XCTAssertEqual(event?["event"] as? String, "$ae_session", "should be app session event")
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testDiscardAutomaticEventsIftrackAutomaticEventsEnabledIsFalse() {
@@ -53,7 +53,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
                                               with: Notification(name: Notification.Name(rawValue: "test")))
         waitForTrackingQueue(testMixpanel)
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "automatic events should not be tracked")
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testFlushAutomaticEventsIftrackAutomaticEventsEnabledIsTrue() {
@@ -66,7 +66,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         
         flushAndWaitForTrackingQueue(testMixpanel)
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "automatic events should be flushed")
-        removeDBFileForInstance(testMixpanel)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testUpdated() {
@@ -89,7 +89,6 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         mp2.minimumSessionDuration = 0;
         waitForTrackingQueue(mp2)
         XCTAssertEqual(eventQueue(token: mp2.apiToken).count, 0, "First app open should not be tracked again")
-        removeDBFileForInstance(mp)
     }
     
     func testAutomaticEventsInMultipleInstances() {
@@ -125,7 +124,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         let otherAppSessionEvent = eventQueue(token: mp2.apiToken).last
         XCTAssertEqual(otherAppSessionEvent?["event"] as? String, "$ae_session", "should be app session event")
         XCTAssertNotNil((otherAppSessionEvent?["properties"] as? [String: Any])?["$ae_session_length"], "should have session length")
-        removeDBFileForInstance(mp)
-        removeDBFileForInstance(mp2)
+        removeDBfile(mp.apiToken)
+        removeDBfile(mp2.apiToken)
     }
 }

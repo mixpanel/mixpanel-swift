@@ -1013,8 +1013,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let setValue2 = peopleQueue2_value.last!["$set"] as! InternalProperties
         XCTAssertEqual(setValue2["p2"] as? String, "b", "custom people property not queued")
         
-        instance1.mixpanelPersistence.mpdb.close()
-        instance2.mixpanelPersistence.mpdb.close()
         removeDBFileForInstance(instance1)
         removeDBFileForInstance(instance2)
     }

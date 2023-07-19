@@ -25,7 +25,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
         XCTAssertEqual(msg["$group_id"] as! String, groupID)
         let q = msg["$set"] as! InternalProperties
         XCTAssertEqual(q["p1"] as? String, "a", "custom group property not queued")
-        removeDBfile(testMixpanel.apiToken)
+        removeDBFileForInstance(testMixpanel)
     }
 
     func testGroupSetIntegerID() {
@@ -40,7 +40,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
         XCTAssertEqual(msg["$group_id"] as! Int, groupID)
         let q = msg["$set"] as! InternalProperties
         XCTAssertEqual(q["p1"] as? String, "a", "custom group property not queued")
-        removeDBfile(testMixpanel.apiToken)
+        removeDBFileForInstance(testMixpanel)
     }
 
     func testGroupSetOnce() {
@@ -55,7 +55,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
         XCTAssertEqual(msg["$group_id"] as! String, groupID)
         let q = msg["$set_once"] as! InternalProperties
         XCTAssertEqual(q["p1"] as? String, "a", "custom group property not queued")
-        removeDBfile(testMixpanel.apiToken)
+        removeDBFileForInstance(testMixpanel)
     }
 
     func testGroupSetTo() {
@@ -69,7 +69,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
         XCTAssertEqual(msg["$group_id"] as! String, groupID)
         let p = msg["$set"] as! InternalProperties
         XCTAssertEqual(p["p1"] as? String, "a", "custom group property not queued")
-        removeDBfile(testMixpanel.apiToken)
+        removeDBFileForInstance(testMixpanel)
     }
 
     func testGroupUnset() {
@@ -82,7 +82,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
         XCTAssertEqual(msg["$group_key"] as! String, groupKey)
         XCTAssertEqual(msg["$group_id"] as! String, groupID)
         XCTAssertEqual(msg["$unset"] as! [String], ["p1"], "group property unset not queued")
-        removeDBfile(testMixpanel.apiToken)
+        removeDBFileForInstance(testMixpanel)
     }
 
     func testGroupRemove() {
@@ -95,7 +95,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
         XCTAssertEqual(msg["$group_key"] as! String, groupKey)
         XCTAssertEqual(msg["$group_id"] as! String, groupID)
         XCTAssertEqual(msg["$remove"] as? [String: String], ["p1": "a"], "group property remove not queued")
-        removeDBfile(testMixpanel.apiToken)
+        removeDBFileForInstance(testMixpanel)
     }
 
     func testGroupUnion() {
@@ -108,7 +108,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
         XCTAssertEqual(msg["$group_key"] as! String, groupKey)
         XCTAssertEqual(msg["$group_id"] as! String, groupID)
         XCTAssertEqual(msg["$union"] as? [String: [String]], ["p1": ["a"]], "group property union not queued")
-        removeDBfile(testMixpanel.apiToken)
+        removeDBFileForInstance(testMixpanel)
     }
 
 
@@ -123,7 +123,7 @@ class MixpanelGroupTests: MixpanelBaseTests {
         XCTExpectAssert("unsupported property type was allowed") {
             testMixpanel.getGroup(groupKey: groupKey, groupID: groupID).set(property: "p1", to: [Data()])
         }
-        removeDBfile(testMixpanel.apiToken)
+        removeDBFileForInstance(testMixpanel)
     }
 
     func testDeleteGroup() {
@@ -137,6 +137,6 @@ class MixpanelGroupTests: MixpanelBaseTests {
         XCTAssertEqual(msg["$group_id"] as! String, groupID)
         let p: InternalProperties = msg["$delete"] as! InternalProperties
         XCTAssertTrue(p.isEmpty, "incorrect group properties: \(p)")
-        removeDBfile(testMixpanel.apiToken)
+        removeDBFileForInstance(testMixpanel)
     }
 }

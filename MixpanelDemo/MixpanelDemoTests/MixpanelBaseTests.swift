@@ -29,7 +29,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         super.tearDown()
     }
     
-    func removeDBfile(_ token: String? = nil) {
+    func removeDBFileForToken(_ token: String? = nil) {
         do {
              let fileManager = FileManager.default
             
@@ -45,6 +45,12 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         catch let error as NSError {
             print("An error took place: \(error)")
         }
+    }
+    
+    func removeDBFileForInstance(_ instance: MixpanelInstance? = nil) {
+        instance?.mixpanelPersistence.mpdb.close()
+        let token = instance?.name
+        removeDBFileForToken(token)
     }
     
     func dbFilePath(_ token: String? = nil) -> String {

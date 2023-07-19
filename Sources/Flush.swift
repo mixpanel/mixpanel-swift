@@ -25,8 +25,6 @@ class Flush: AppLifecycle {
     var flushOnBackground = true
     var _flushInterval = 0.0
     private let flushIntervalReadWriteLock: DispatchQueue
-    private let flushBatchQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.flush.batch.queue", qos: .utility, attributes: .concurrent, autoreleaseFrequency: .workItem)
-
     
 
     var flushInterval: Double {
@@ -89,42 +87,40 @@ class Flush: AppLifecycle {
     }
 
     func flushQueueInBatches(_ queue: Queue, type: FlushType) {
-        flushBatchQueue.sync {
-            var mutableQueue = queue
-            while !mutableQueue.isEmpty {
-                let batchSize = min(mutableQueue.count, APIConstants.batchSize)
-                let range = 0..<batchSize
-                let batch = Array(mutableQueue[range])
-                let ids: [Int32] = batch.map { entity in
-                    (entity["id"] as? Int32) ?? 0
+        var mutableQueue = queue
+        while !mutableQueue.isEmpty {
+            let batchSize = min(mutableQueue.count, APIConstants.batchSize)
+            let range = 0..<batchSize
+            let batch = Array(mutableQueue[range])
+            let ids: [Int32] = batch.map { entity in
+                (entity["id"] as? Int32) ?? 0
+            }
+            // Log data payload sent
+            Logger.debug(message: "Sending batch of data")
+            Logger.debug(message: batch as Any)
+            let requestData = JSONHandler.encodeAPIData(batch)
+            if let requestData = requestData {
+                #if os(iOS)
+                if !MixpanelInstance.isiOSAppExtension() {
+                    delegate?.updateNetworkActivityIndicator(true)
                 }
-                // Log data payload sent
-                Logger.debug(message: "Sending batch of data")
-                Logger.debug(message: batch as Any)
-                let requestData = JSONHandler.encodeAPIData(batch)
-                if let requestData = requestData {
-                    #if os(iOS)
-                    if !MixpanelInstance.isiOSAppExtension() {
-                        delegate?.updateNetworkActivityIndicator(true)
-                    }
-                    #endif // os(iOS)
-                    let success = flushRequest.sendRequest(requestData,
-                                                           type: type,
-                                                           useIP: useIPAddressForGeoLocation)
-                    #if os(iOS)
-                    if !MixpanelInstance.isiOSAppExtension() {
-                        delegate?.updateNetworkActivityIndicator(false)
-                    }
-                    #endif // os(iOS)
-                    if success {
-                        // remove
-                        delegate?.flushSuccess(type: type, ids: ids)
-                        mutableQueue = self.removeProcessedBatch(batchSize: batchSize,
-                                                                 queue: mutableQueue,
-                                                                 type: type)
-                    } else {
-                        break
-                    }
+                #endif // os(iOS)
+                let success = flushRequest.sendRequest(requestData,
+                                                        type: type,
+                                                        useIP: useIPAddressForGeoLocation)
+                #if os(iOS)
+                if !MixpanelInstance.isiOSAppExtension() {
+                    delegate?.updateNetworkActivityIndicator(false)
+                }
+                #endif // os(iOS)
+                if success {
+                    // remove
+                    delegate?.flushSuccess(type: type, ids: ids)
+                    mutableQueue = self.removeProcessedBatch(batchSize: batchSize,
+                                                                queue: mutableQueue,
+                                                                type: type)
+                } else {
+                    break
                 }
             }
         }

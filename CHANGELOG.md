@@ -1,5 +1,13 @@
 #
 
+## [v4.1.4](https://github.com/mixpanel/mixpanel-swift/tree/v4.1.4) (2023-07-19)
+
+### Fixes
+
+- Re-work thread safety mechanisms for flush process [\#611](https://github.com/mixpanel/mixpanel-swift/pull/611)
+
+#
+
 ## [v4.1.3](https://github.com/mixpanel/mixpanel-swift/tree/v4.1.3) (2023-06-16)
 
 ### Fixes
@@ -317,6 +325,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

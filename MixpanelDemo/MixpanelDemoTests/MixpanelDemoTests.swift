@@ -364,14 +364,21 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         let testMixpanel2 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         XCTAssertNotEqual(testMixpanel.distinctId, testMixpanel2.distinctId, "by default, distinctId should not be unique to the device")
-
+        
         let testMixpanel3 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: false)
         let testMixpanel4 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: false)
         XCTAssertNotEqual(testMixpanel3.distinctId, testMixpanel4.distinctId, "distinctId should not be unique to the device if useUniqueDistinctId is set to false")
-
+        
         let testMixpanel5 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: true)
         let testMixpanel6 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60, useUniqueDistinctId: true)
         XCTAssertEqual(testMixpanel5.distinctId, testMixpanel6.distinctId, "distinctId should be unique to the device if useUniqueDistinctId is set to true")
+        
+        removeDBfile(testMixpanel.apiToken)
+        removeDBfile(testMixpanel2.apiToken)
+        removeDBfile(testMixpanel3.apiToken)
+        removeDBfile(testMixpanel4.apiToken)
+        removeDBfile(testMixpanel5.apiToken)
+        removeDBfile(testMixpanel6.apiToken)
     }
 
     func testHadPersistedDistinctId() {
@@ -554,6 +561,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let e = eventQueue(token: testMixpanel.apiToken).last!
         let p = e["properties"] as! InternalProperties
         XCTAssertNotNil(p["mp_lib"], "flutter")
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testInvalidPropertiesTrack() {
@@ -933,6 +941,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         testMixpanel = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60)
         testMixpanel2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60)
         XCTAssertTrue(testMixpanel === testMixpanel2, "instance with same token should be reused and no sqlite db locked error should be populated")
+        removeDBfile(testToken)
     }
 
     func testMultipleInstancesWithSameTokenButDifferentInstanceNameShouldNotCrash() {
@@ -957,6 +966,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testMultipleInstancesWithSameTokenButDifferentInstanceName() {
         let testToken = randomId()
+        removeDBfile(testToken)
         let instance1 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60, instanceName: "instance1")
         let instance2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60, instanceName: "instance2")
 
@@ -974,7 +984,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
         instance1.people.set(property: "p1", to: "a")
         waitForTrackingQueue(instance1)
-
         let peopleQueue_value = peopleQueue(token: "instance1")
         let setValue = peopleQueue_value.last!["$set"] as! InternalProperties
         XCTAssertEqual(setValue["p1"] as? String, "a", "custom people property not queued")

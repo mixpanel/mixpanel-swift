@@ -58,7 +58,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
             return ""
         }
         
-        guard let urlUnwrapped = url?.appendingPathComponent("\(token ?? apiToken)_MPDB.sqlite").path else {
+        guard let urlUnwrapped = url?.appendingPathComponent("\(apiToken)_MPDB.sqlite").path else {
             return ""
         }
         return urlUnwrapped

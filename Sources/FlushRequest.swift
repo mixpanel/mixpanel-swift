@@ -49,6 +49,41 @@ class FlushRequest: Network {
         _ = semaphore.wait(timeout: .now() + 120.0)
         return result
     }
+    
+    func sendRequest(_ requestData: String, type: FlushType, useIP: Bool, resource: ServerProxyResource) -> Bool {
+        let responseParser: (Data) -> Int? = { data in
+            let response = String(data: data, encoding: String.Encoding.utf8)
+            if let response = response {
+                return Int(response) ?? 0
+            }
+            return nil
+        }
+        
+        let headers: [String: String] = resource.headers.merging(["Content-Type": "application/json"]) {(_,new) in new}
+        let ipString = useIP ? "1" : "0"
+        var queryItems: [URLQueryItem] = [URLQueryItem(name: "ip", value: ipString)]
+        if let extraQueryParams = resource.queryItems {
+            queryItems.append(contentsOf: extraQueryParams)
+        }
+        
+        let resource = Network.buildResource(path: type.rawValue,
+                                             method: .post,
+                                             requestBody: requestData.data(using: .utf8),
+                                             queryItems: queryItems,
+                                             headers:headers,
+                                             parse: responseParser)
+        
+        var result = false
+        let semaphore = DispatchSemaphore(value: 0)
+        flushRequestHandler(BasePath.getServerURL(identifier: basePathIdentifier),
+                            resource: resource,
+                            completion: { success in
+                                result = success
+                                semaphore.signal()
+        })
+        _ = semaphore.wait(timeout: .now() + 120.0)
+        return result
+    }
 
 
     private func flushRequestHandler(_ base: String,

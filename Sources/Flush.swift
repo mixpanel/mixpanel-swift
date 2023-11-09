@@ -47,11 +47,11 @@ class Flush: AppLifecycle {
         flushIntervalReadWriteLock = DispatchQueue(label: "com.mixpanel.flush_interval.lock", qos: .utility, attributes: .concurrent, autoreleaseFrequency: .workItem)
     }
 
-    func flushQueue(_ queue: Queue, type: FlushType) {
+    func flushQueue(_ queue: Queue, type: FlushType, resource: ServerProxyResource?) {
         if flushRequest.requestNotAllowed() {
             return
         }
-        flushQueueInBatches(queue, type: type)
+        flushQueueInBatches(queue, type: type, resource: resource)
     }
 
     func startFlushTimer() {
@@ -85,7 +85,7 @@ class Flush: AppLifecycle {
         }
     }
 
-    func flushQueueInBatches(_ queue: Queue, type: FlushType) {
+    func flushQueueInBatches(_ queue: Queue, type: FlushType, resource: ServerProxyResource?) {
         var mutableQueue = queue
         while !mutableQueue.isEmpty {
             let batchSize = min(mutableQueue.count, APIConstants.batchSize)
@@ -104,9 +104,18 @@ class Flush: AppLifecycle {
                         delegate?.updateNetworkActivityIndicator(true)
                     }
                 #endif // os(iOS)
-                let success = flushRequest.sendRequest(requestData,
-                                                        type: type,
-                                                        useIP: useIPAddressForGeoLocation)
+                var success: Bool = false
+                if let serverProxyResource = resource {
+                    success = flushRequest.sendRequest(requestData,
+                                                       type: type,
+                                                       useIP: useIPAddressForGeoLocation,
+                                                       resource: serverProxyResource)
+                } else {
+                    success = flushRequest.sendRequest(requestData,
+                                                            type: type,
+                                                            useIP: useIPAddressForGeoLocation)
+                }
+                
                 #if os(iOS)
                 if !MixpanelInstance.isiOSAppExtension() {
                     delegate?.updateNetworkActivityIndicator(false)

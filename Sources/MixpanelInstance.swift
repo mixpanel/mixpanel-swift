@@ -21,6 +21,21 @@ import CoreTelephony
 #endif // os(iOS)
 
 private let devicePrefix = "$device:"
+
+/**
+ *  Delegate protocol for updating the Proxy Server API's network behavior.
+ */
+public protocol MixpanelProxyServerDelegate: AnyObject {
+    /**
+     Asks the delegate to return API resource items like query params & headers for proxy Server.
+     
+     - parameter mixpanel: The mixpanel instance
+     
+     - returns: return ServerProxyResource to give custom headers and query params.
+     */
+    func mixpanelResourceForProxyServer(_ mixpanel: MixpanelInstance) -> ServerProxyResource?
+}
+
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
  */
@@ -52,6 +67,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     
     /// The a MixpanelDelegate object that gives control over Mixpanel network activity.
     open weak var delegate: MixpanelDelegate?
+    
+    /// The a MixpanelProxyServerDelegate object that gives config control over Proxy Server's network activity.
+    open weak var proxyServerDelegate: MixpanelProxyServerDelegate?
     
     /// distinctId string that uniquely identifies the current user.
     open var distinctId = ""
@@ -212,9 +230,38 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 #if os(iOS) || os(tvOS)
     let automaticEvents = AutomaticEvents()
 #endif
-    init(apiToken: String?, flushInterval: Double, name: String, trackAutomaticEvents: Bool, optOutTrackingByDefault: Bool = false,
-         useUniqueDistinctId: Bool = false, superProperties: Properties? = nil,
-         serverURL: String? = nil) {
+    
+    convenience init(
+        apiToken: String?,
+        flushInterval: Double,
+        name: String,
+        trackAutomaticEvents: Bool,
+        optOutTrackingByDefault: Bool = false,
+        useUniqueDistinctId: Bool = false,
+        superProperties: Properties? = nil,
+        proxyServerConfig: ProxyServerConfig
+    ) {
+        self.init(apiToken: apiToken,
+                  flushInterval: flushInterval,
+                  name: name,
+                  trackAutomaticEvents: trackAutomaticEvents,
+                  optOutTrackingByDefault: optOutTrackingByDefault,
+                  useUniqueDistinctId: useUniqueDistinctId,
+                  superProperties: superProperties,
+                  serverURL: proxyServerConfig.serverUrl)
+        self.proxyServerDelegate = proxyServerConfig.delegate        
+    }
+    
+    init(
+        apiToken: String?,
+        flushInterval: Double,
+        name: String,
+        trackAutomaticEvents: Bool,
+        optOutTrackingByDefault: Bool = false,
+        useUniqueDistinctId: Bool = false,
+        superProperties: Properties? = nil,
+        serverURL: String? = nil
+    ) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -947,9 +994,13 @@ extension MixpanelInstance {
                     }
                     return
                 }
-                self.flushQueue(eventQueue, type: .events)
-                self.flushQueue(peopleQueue, type: .people)
-                self.flushQueue(groupsQueue, type: .groups)
+                var resource: ServerProxyResource? = nil
+                if serverURL != BasePath.DefaultMixpanelAPI {
+                    resource = proxyServerDelegate?.mixpanelResourceForProxyServer(self)
+                }
+                self.flushQueue(eventQueue, type: .events, resource: resource)
+                self.flushQueue(peopleQueue, type: .people, resource: resource)
+                self.flushQueue(groupsQueue, type: .groups, resource: resource)
                 
                 if let completion = completion {
                     DispatchQueue.main.async(execute: completion)
@@ -969,11 +1020,11 @@ extension MixpanelInstance {
         }
     }
     
-    func flushQueue(_ queue: Queue, type: FlushType) {
+    func flushQueue(_ queue: Queue, type: FlushType, resource: ServerProxyResource?) {
         if hasOptedOutTracking() {
             return
         }
-        self.flushInstance.flushQueue(queue, type: type)
+        self.flushInstance.flushQueue(queue, type: type, resource: resource)
     }
     
     func flushSuccess(type: FlushType, ids: [Int32]) {

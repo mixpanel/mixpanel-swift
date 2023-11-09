@@ -40,9 +40,19 @@ struct Resource<A> {
     let path: String
     let method: RequestMethod
     let requestBody: Data?
+    let queryItems: [URLQueryItem]? //
+    let headers: [String: String] //
+    let parse: (Data) -> A?
+}
+
+public struct ServerProxyResource {
     let queryItems: [URLQueryItem]?
     let headers: [String: String]
-    let parse: (Data) -> A?
+}
+
+public struct ProxyServerConfig {
+    let serverUrl: String
+    let delegate: MixpanelProxyServerDelegate?
 }
 
 enum Reason {

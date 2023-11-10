@@ -58,6 +58,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(testMixpanel.flushInterval == 60, "flush interval is set correctly")
         testMixpanel.flushBatchSize = 10
         XCTAssertTrue(testMixpanel.flushBatchSize == 10, "flush batch size is set correctly")
+        testMixpanel.flushBatchSize = 60
+        XCTAssertTrue(testMixpanel.flushBatchSize == 50, "flush batch size is max at 50")
         testMixpanel.flushInterval = 30
         XCTAssertTrue(testMixpanel.flushInterval == 30, "flush interval is set correctly")
     }

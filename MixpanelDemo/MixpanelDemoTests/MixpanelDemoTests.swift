@@ -27,7 +27,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssert(waitTime >= 110, "Network backoff time is less than 2 minutes.")
         XCTAssert(testMixpanel.flushInstance.flushRequest.networkConsecutiveFailures == 2,
                   "Network failures did not equal 2")
-
+        
         XCTAssert(eventQueue(token: testMixpanel.apiToken).count == 2,
                   "Removed an event from the queue that was not sent")
         removeDBfile(testMixpanel.apiToken)
@@ -50,6 +50,16 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty,
                       "events should have been flushed")
         removeDBfile(testMixpanel.apiToken)
+    }
+    
+    func testFlushProperties() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
+        XCTAssertTrue(testMixpanel.flushBatchSize == 50, "the default flush batch size is set to 50")
+        XCTAssertTrue(testMixpanel.flushInterval == 60, "flush interval is set correctly")
+        testMixpanel.flushBatchSize = 10
+        XCTAssertTrue(testMixpanel.flushBatchSize == 10, "flush batch size is set correctly")
+        testMixpanel.flushInterval = 30
+        XCTAssertTrue(testMixpanel.flushInterval == 30, "flush interval is set correctly")
     }
 
     func testFlushPeople() {

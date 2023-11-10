@@ -119,15 +119,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
     }
     
-    /// The flushBatchSize property controls the number of events sent in a single network request to the Mixpanel server.
-    /// Batch size affects how data is flushed from the client to Mixpanel. By configuring the size of the batch, you can
-    /// optimize network usage and control how frequently the client communicates with the server.
+    /// The `flushBatchSize` property determines the number of events sent in a single network request to the Mixpanel server.
+    /// By configuring this value, you can optimize network usage and manage the frequency of communication between the client
+    /// and the server. The maximum size is 50; any value over 50 will default to 50.
     open var flushBatchSize: Int {
         get {
             return flushInstance.flushBatchSize
         }
         set {
-            flushInstance.flushBatchSize = newValue
+            flushInstance.flushBatchSize = min(newValue, APIConstants.maxBatchSize)
         }
     }
     

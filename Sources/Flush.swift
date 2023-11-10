@@ -24,7 +24,7 @@ class Flush: AppLifecycle {
     var flushRequest: FlushRequest
     var flushOnBackground = true
     var _flushInterval = 0.0
-    var _flushBatchSize = APIConstants.batchSize
+    var _flushBatchSize = APIConstants.maxBatchSize
     private let flushIntervalReadWriteLock: DispatchQueue
 
     var flushInterval: Double {

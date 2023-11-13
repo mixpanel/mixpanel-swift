@@ -37,7 +37,7 @@ struct InternalKeys {
 }
 
 
-#if !os(OSX) && !os(watchOS)
+#if !os(OSX) && !os(watchOS) && !os(visionOS)
 extension UIDevice {
     var iPhoneX: Bool {
         return UIScreen.main.nativeBounds.height == 2436

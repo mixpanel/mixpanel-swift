@@ -12,7 +12,7 @@ import Foundation
 import UIKit
 #elseif os(macOS)
 import Cocoa
-#else
+#elseif canImport(WatchKit)
 import WatchKit
 #endif
 
@@ -79,7 +79,7 @@ class AutomaticProperties {
             p["$ios_app_release"] = infoDict["CFBundleShortVersionString"]
         }
         p["$ios_device_model"]  = AutomaticProperties.deviceModel()
-        #if !os(OSX) && !os(watchOS)
+        #if !os(OSX) && !os(watchOS) && !os(visionOS)
         p["$ios_version"]       = UIDevice.current.systemVersion
         #else
         p["$ios_version"]       = ProcessInfo.processInfo.operatingSystemVersionString

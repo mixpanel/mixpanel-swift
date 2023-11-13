@@ -119,6 +119,19 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
     }
     
+    /// The `flushBatchSize` property determines the number of events sent in a single network request to the Mixpanel server.
+    /// By configuring this value, you can optimize network usage and manage the frequency of communication between the client
+    /// and the server. The maximum size is 50; any value over 50 will default to 50.
+    open var flushBatchSize: Int {
+        get {
+            return flushInstance.flushBatchSize
+        }
+        set {
+            flushInstance.flushBatchSize = min(newValue, APIConstants.maxBatchSize)
+        }
+    }
+    
+    
     /// The base URL used for Mixpanel API requests.
     /// Useful if you need to proxy Mixpanel requests. Defaults to
     /// https://api.mixpanel.com.
@@ -198,6 +211,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var optOutStatus: Bool?
     var useUniqueDistinctId: Bool
     var timedEvents = InternalProperties()
+    
     let readWriteLock: ReadWriteLock
 #if os(iOS) && !targetEnvironment(macCatalyst)
     static let reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
@@ -928,16 +942,16 @@ extension MixpanelInstance {
             // automatic events will NOT be flushed until one of the flags is non-nil
             let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(
                 type: self.persistenceTypeFromFlushType(.events),
-                batchSize: performFullFlush ? Int.max : APIConstants.flushSize,
+                batchSize: performFullFlush ? Int.max : self.flushBatchSize,
                 excludeAutomaticEvents: !self.trackAutomaticEventsEnabled
             )
             let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(
                 type: self.persistenceTypeFromFlushType(.people),
-                batchSize: performFullFlush ? Int.max : APIConstants.flushSize
+                batchSize: performFullFlush ? Int.max : self.flushBatchSize
             )
             let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(
                 type: self.persistenceTypeFromFlushType(.groups),
-                batchSize: performFullFlush ? Int.max : APIConstants.flushSize
+                batchSize: performFullFlush ? Int.max : self.flushBatchSize
             )
             
             self.networkQueue.async { [weak self, completion] in
@@ -1514,4 +1528,5 @@ extension MixpanelInstance {
     func setOnce(properties: Properties) {
         people?.setOnce(properties: properties)
     }
+    
 }

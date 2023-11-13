@@ -24,6 +24,7 @@ class Flush: AppLifecycle {
     var flushRequest: FlushRequest
     var flushOnBackground = true
     var _flushInterval = 0.0
+    var _flushBatchSize = APIConstants.maxBatchSize
     private let flushIntervalReadWriteLock: DispatchQueue
 
     var flushInterval: Double {
@@ -39,6 +40,15 @@ class Flush: AppLifecycle {
 
             delegate?.flush(performFullFlush: false, completion: nil)
             startFlushTimer()
+        }
+    }
+    
+    var flushBatchSize: Int {
+        get {
+            return _flushBatchSize
+        }
+        set {
+            _flushBatchSize = newValue
         }
     }
 
@@ -88,7 +98,7 @@ class Flush: AppLifecycle {
     func flushQueueInBatches(_ queue: Queue, type: FlushType) {
         var mutableQueue = queue
         while !mutableQueue.isEmpty {
-            let batchSize = min(mutableQueue.count, APIConstants.batchSize)
+            let batchSize = min(mutableQueue.count, flushBatchSize)
             let range = 0..<batchSize
             let batch = Array(mutableQueue[range])
             let ids: [Int32] = batch.map { entity in

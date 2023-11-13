@@ -16,7 +16,7 @@ struct QueueConstants {
 }
 
 struct APIConstants {
-    static let batchSize = 50
+    static let maxBatchSize = 50
     static let flushSize = 1000
     static let minRetryBackoff = 60.0
     static let maxRetryBackoff = 600.0

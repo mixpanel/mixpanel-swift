@@ -17,7 +17,7 @@
     <a title="Mixpanel Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 4.1.4 Docs</a> (83% documented)</p>
+        <p><a href="../index.html">Mixpanel 4.2.0 Docs</a> (0% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
@@ -118,7 +118,7 @@
             <a href="../Typealiases.html">Type Aliases</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
-                <a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a>
+                <a href="../Typealiases.html#/Properties">Properties</a>
               </li>
             </ul>
           </li>
@@ -128,13 +128,6 @@
         <section>
           <section class="section">
             <h1>Mixpanel</h1>
-              <div class="declaration">
-                <div class="language">
-                  
-                  <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">Mixpanel</span></code></pre>
-
-                </div>
-              </div>
             <p>The primary class for integrating Mixpanel with your app.</p>
 
           </section>
@@ -144,9 +137,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURLAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgANtFZ"></a>
+                    <a name="/"></a>
                     <a name="//apple_ref/swift/Method/initialize(token:trackAutomaticEvents:flushInterval:instanceName:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURLAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgANtFZ">initialize(token:<wbr>trackAutomaticEvents:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>)</a>
+                    <a class="token" href="#/">initialize(token:<wbr>trackAutomaticEvents:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -166,131 +159,6 @@ the instances with an instanceName. Then they can be reached by calling getInsta
 
 </div>
 
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">@discardableResult</span>
-<span class="kd">open</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">token</span> <span class="nv">apiToken</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
-                           <span class="nv">trackAutomaticEvents</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">,</span>
-                           <span class="nv">flushInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
-                           <span class="nv">instanceName</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-                           <span class="nv">optOutTrackingByDefault</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
-                           <span class="nv">useUniqueDistinctId</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
-                           <span class="nv">superProperties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-                           <span class="nv">serverURL</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>token</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>your project token</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>trackAutomaticEvents</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Whether or not to collect common mobile events</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>flushInterval</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. Interval to run background flushing</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>instanceName</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. The name you want to uniquely identify the Mixpanel Instance.
-It is useful when you want more than one Mixpanel instance under the same project token.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>optOutTrackingByDefault</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. Whether or not to be opted out from tracking by default</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>useUniqueDistinctId</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. whether or not to use the unique device identifier as the distinct_id</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>superProperties</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. Super properties dictionary to register during initialization</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>serverURL</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. Mixpanel cluster URL</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>returns a mixpanel instance if needed to keep throughout the project.
-You can always get the instance by calling getInstance(name)</p>
                       </div>
                     </section>
                   </div>
@@ -327,9 +195,9 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8MixpanelAAC11getInstance4nameAA0aC0CSgSS_tFZ"></a>
+                    <a name="/"></a>
                     <a name="//apple_ref/swift/Method/getInstance(name:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8MixpanelAAC11getInstance4nameAA0aC0CSgSS_tFZ">getInstance(name:<wbr>)</a>
+                    <a class="token" href="#/">getInstance(name:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -340,46 +208,15 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                         <p>Gets the mixpanel instance with the given name</p>
 
                       </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">getInstance</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span><span class="p">?</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>name</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>the instance name</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>returns the mixpanel instance</p>
-                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8MixpanelAAC12mainInstanceAA0aC0CyFZ"></a>
+                    <a name="/"></a>
                     <a name="//apple_ref/swift/Method/mainInstance()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8MixpanelAAC12mainInstanceAA0aC0CyFZ">mainInstance()</a>
+                    <a class="token" href="#/">mainInstance()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -392,27 +229,15 @@ the instances with an instanceName. Then they can be reached by calling getInsta
 <p>If not specified explicitly, the main instance is always the last instance added</p>
 
                       </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">mainInstance</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>returns the main Mixpanel instance</p>
-                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8MixpanelAAC15setMainInstance4nameySS_tFZ"></a>
+                    <a name="/"></a>
                     <a name="//apple_ref/swift/Method/setMainInstance(name:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8MixpanelAAC15setMainInstance4nameySS_tFZ">setMainInstance(name:<wbr>)</a>
+                    <a class="token" href="#/">setMainInstance(name:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -423,42 +248,15 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                         <p>Sets the main instance based on the instance name</p>
 
                       </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">setMainInstance</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>name</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>the instance name</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8MixpanelAAC14removeInstance4nameySS_tFZ"></a>
+                    <a name="/"></a>
                     <a name="//apple_ref/swift/Method/removeInstance(name:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8MixpanelAAC14removeInstance4nameySS_tFZ">removeInstance(name:<wbr>)</a>
+                    <a class="token" href="#/">removeInstance(name:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -469,33 +267,6 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                         <p>Removes an unneeded Mixpanel instance based on its name</p>
 
                       </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">removeInstance</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>name</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>the instance name</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
                     </section>
                   </div>
                 </li>
@@ -504,7 +275,7 @@ the instances with an instanceName. Then they can be reached by calling getInsta
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2023 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2023-07-19)</p>
+          <p>&copy; 2023 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2023-11-13)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

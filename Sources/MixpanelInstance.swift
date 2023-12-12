@@ -21,6 +21,21 @@ import CoreTelephony
 #endif // os(iOS)
 
 private let devicePrefix = "$device:"
+
+/**
+ *  Delegate protocol for updating the Proxy Server API's network behavior.
+ */
+public protocol MixpanelProxyServerDelegate: AnyObject {
+    /**
+     Asks the delegate to return API resource items like query params & headers for proxy Server.
+     
+     - parameter mixpanel: The mixpanel instance
+     
+     - returns: return ServerProxyResource to give custom headers and query params.
+     */
+    func mixpanelResourceForProxyServer(_ mixpanel: MixpanelInstance) -> ServerProxyResource?
+}
+
 /**
  *  Delegate protocol for controlling the Mixpanel API's network behavior.
  */
@@ -42,6 +57,21 @@ typealias Queue = [InternalProperties]
 protocol AppLifecycle {
     func applicationDidBecomeActive()
     func applicationWillResignActive()
+}
+
+public struct ProxyServerConfig {
+    public init?(serverUrl: String, delegate: MixpanelProxyServerDelegate? = nil) {
+        /// check if proxy server is not same as default mixpanel API
+        /// if same, then fail the initializer
+        /// this is to avoid case where client might inadvertently use headers intended for the proxy server
+        /// on Mixpanel's default server, leading to unexpected behavior.
+        guard serverUrl != BasePath.DefaultMixpanelAPI else { return nil }
+        self.serverUrl = serverUrl
+        self.delegate = delegate
+    }
+    
+    let serverUrl: String
+    let delegate: MixpanelProxyServerDelegate?
 }
 
 /// The class that represents the Mixpanel Instance
@@ -141,6 +171,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
     }
     
+    /// The a MixpanelProxyServerDelegate object that gives config control over Proxy Server's network activity.
+    open weak var proxyServerDelegate: MixpanelProxyServerDelegate?
+    
+    
     open var debugDescription: String {
         return "Mixpanel(\n"
         + "    Token: \(apiToken),\n"
@@ -226,9 +260,39 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 #if os(iOS) || os(tvOS)
     let automaticEvents = AutomaticEvents()
 #endif
-    init(apiToken: String?, flushInterval: Double, name: String, trackAutomaticEvents: Bool, optOutTrackingByDefault: Bool = false,
-         useUniqueDistinctId: Bool = false, superProperties: Properties? = nil,
-         serverURL: String? = nil) {
+    
+    convenience init(
+        apiToken: String?,
+        flushInterval: Double,
+        name: String,
+        trackAutomaticEvents: Bool,
+        optOutTrackingByDefault: Bool = false,
+        useUniqueDistinctId: Bool = false,
+        superProperties: Properties? = nil,
+        proxyServerConfig: ProxyServerConfig
+    ) {
+        self.init(apiToken: apiToken,
+                  flushInterval: flushInterval,
+                  name: name,
+                  trackAutomaticEvents: trackAutomaticEvents,
+                  optOutTrackingByDefault: optOutTrackingByDefault,
+                  useUniqueDistinctId: useUniqueDistinctId,
+                  superProperties: superProperties,
+                  serverURL: proxyServerConfig.serverUrl)
+        self.proxyServerDelegate = proxyServerConfig.delegate
+    }
+    
+    
+    init(
+        apiToken: String?,
+        flushInterval: Double,
+        name: String,
+        trackAutomaticEvents: Bool,
+        optOutTrackingByDefault: Bool = false,
+        useUniqueDistinctId: Bool = false,
+        superProperties: Properties? = nil,
+        serverURL: String? = nil
+    ) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -987,7 +1051,11 @@ extension MixpanelInstance {
         if hasOptedOutTracking() {
             return
         }
-        self.flushInstance.flushQueue(queue, type: type)
+        let proxyServerResource = proxyServerDelegate?.mixpanelResourceForProxyServer(self)
+        let headers: [String: String] = proxyServerResource?.headers ?? [:]
+        let queryItems = proxyServerResource?.queryItems ?? []
+       
+        self.flushInstance.flushQueue(queue, type: type, headers: headers, queryItems: queryItems)
     }
     
     func flushSuccess(type: FlushType, ids: [Int32]) {
@@ -1530,3 +1598,4 @@ extension MixpanelInstance {
     }
     
 }
+

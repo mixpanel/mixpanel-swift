@@ -52,6 +52,16 @@ enum Reason {
     case other(Error)
 }
 
+public struct ServerProxyResource {
+    public init(queryItems: [URLQueryItem]? = nil, headers: [String : String]) {
+        self.queryItems = queryItems
+        self.headers = headers
+    }
+    
+    let queryItems: [URLQueryItem]?
+    let headers: [String: String]
+}
+
 class Network {
     
     let basePathIdentifier: String
@@ -192,3 +202,4 @@ class Network {
         }
     }
 }
+

@@ -33,7 +33,7 @@ class FlushRequest: Network {
             return nil
         }
         
-        let resourceHeaders: [String: String] = headers.merging(["Content-Type": "application/json"]) {(_,new) in new}
+        let resourceHeaders: [String: String] = ["Content-Type": "application/json"].merging(headers) {(_,new) in new }
 
         let ipString = useIP ? "1" : "0"
         var resourceQueryItems: [URLQueryItem] = [URLQueryItem(name: "ip", value: ipString)]

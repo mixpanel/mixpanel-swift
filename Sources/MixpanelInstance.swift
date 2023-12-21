@@ -33,7 +33,7 @@ public protocol MixpanelProxyServerDelegate: AnyObject {
      
      - returns: return ServerProxyResource to give custom headers and query params.
      */
-    func mixpanelResourceForProxyServer(_ mixpanel: MixpanelInstance) -> ServerProxyResource?
+    func mixpanelResourceForProxyServer(_ name: String) -> ServerProxyResource?
 }
 
 /**
@@ -172,7 +172,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
     
     /// The a MixpanelProxyServerDelegate object that gives config control over Proxy Server's network activity.
-    open weak var proxyServerDelegate: MixpanelProxyServerDelegate?
+    open weak var proxyServerDelegate: MixpanelProxyServerDelegate? = nil
     
     
     open var debugDescription: String {
@@ -208,7 +208,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             if (superProperties["$lib_version"] != nil) {
                 trackProps["$lib_version"] = self.superProperties["$lib_version"] as! String
             }
-            Network.sendHttpEvent(serverURL: self.serverURL, eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: trackProps)
+            // add headers
+            let headers = self.proxyServerDelegate?.mixpanelResourceForProxyServer(name)?.headers ?? [:]
+            Network.sendHttpEvent(serverURL: self.serverURL, headers: headers, eventName: "Toggle SDK Logging", apiToken: "metrics-1", distinctId: apiToken, properties: trackProps)
 #endif
         }
     }
@@ -278,12 +280,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                   optOutTrackingByDefault: optOutTrackingByDefault,
                   useUniqueDistinctId: useUniqueDistinctId,
                   superProperties: superProperties,
-                  serverURL: proxyServerConfig.serverUrl)
-        self.proxyServerDelegate = proxyServerConfig.delegate
+                  serverURL: proxyServerConfig.serverUrl,
+                  proxyServerDelegate: proxyServerConfig.delegate)
     }
     
-    
-    init(
+    convenience init(
         apiToken: String?,
         flushInterval: Double,
         name: String,
@@ -293,6 +294,29 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         superProperties: Properties? = nil,
         serverURL: String? = nil
     ) {
+        self.init(apiToken: apiToken,
+                  flushInterval: flushInterval,
+                  name: name,
+                  trackAutomaticEvents: trackAutomaticEvents,
+                  optOutTrackingByDefault: optOutTrackingByDefault,
+                  useUniqueDistinctId: useUniqueDistinctId,
+                  superProperties: superProperties,
+                  serverURL: serverURL,
+                  proxyServerDelegate: nil)
+    }
+    
+    
+    private init(
+        apiToken: String?,
+        flushInterval: Double,
+        name: String,
+        trackAutomaticEvents: Bool,
+        optOutTrackingByDefault: Bool = false,
+        useUniqueDistinctId: Bool = false,
+        superProperties: Properties? = nil,
+        serverURL: String? = nil,
+        proxyServerDelegate: MixpanelProxyServerDelegate? = nil
+    ) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -301,9 +325,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             self.serverURL = serverURL
             BasePath.namedBasePaths[name] = serverURL
         }
+        self.proxyServerDelegate = proxyServerDelegate
 #if DEBUG
+        //add headers here
+        let headers = proxyServerDelegate?.mixpanelResourceForProxyServer(name)?.headers ?? [:]
         MixpanelInstance.didDebugInit(
             serverURL: self.serverURL,
+            headers: headers,
             distinctId: self.apiToken,
             libName: superProperties?.get(key: "mp_lib", defaultValue: nil),
             libVersion: superProperties?.get(key: "$lib_version", defaultValue: nil)
@@ -619,7 +647,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 #endif
 #endif // os(iOS)
-    private class func didDebugInit(serverURL: String, distinctId: String, libName: String?, libVersion: String?) {
+    private class func didDebugInit(serverURL: String, headers: [String: String], distinctId: String, libName: String?, libVersion: String?) {
         if distinctId.count == 32 {
             let debugInitCount = UserDefaults.standard.integer(forKey: InternalKeys.mpDebugInitCountKey) + 1
             var properties: Properties = ["Debug Launch Count": debugInitCount]
@@ -629,14 +657,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             if let libVersion = libVersion {
                 properties["$lib_version"] = libVersion
             }
-            Network.sendHttpEvent(serverURL: serverURL, eventName: "SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId, properties: properties) { (_) in }
-            checkIfImplemented(serverURL: serverURL, distinctId: distinctId, properties: properties)
+            // add headers
+            Network.sendHttpEvent(serverURL: serverURL, headers: headers, eventName: "SDK Debug Launch", apiToken: "metrics-1", distinctId: distinctId, properties: properties) { (_) in }
+            checkIfImplemented(serverURL: serverURL, headers: headers, distinctId: distinctId, properties: properties)
             UserDefaults.standard.set(debugInitCount, forKey: InternalKeys.mpDebugInitCountKey)
             UserDefaults.standard.synchronize()
         }
     }
     
-    private class func checkIfImplemented(serverURL: String, distinctId: String, properties: Properties) {
+    private class func checkIfImplemented(serverURL: String, headers: [String: String], distinctId: String, properties: Properties) {
         let hasImplemented: Bool = UserDefaults.standard.bool(forKey: InternalKeys.mpDebugImplementedKey)
         if !hasImplemented {
             var completed = 0
@@ -655,8 +684,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                     "Aliased": hasAliased,
                     "Used People": hasUsedPeople,
                 ]) {(_,new) in new}
+                // add headers
                 Network.sendHttpEvent(
-                    serverURL: serverURL,
+                    serverURL: serverURL, headers: headers,
                     eventName: "SDK Implemented",
                     apiToken: "metrics-1",
                     distinctId: distinctId,
@@ -955,8 +985,10 @@ extension MixpanelInstance {
         }
         let defaultsKey = "trackedKey"
         if !UserDefaults.standard.bool(forKey: defaultsKey) {
-            trackingQueue.async { [apiToken, defaultsKey, serverURL] in
-                Network.sendHttpEvent(serverURL: serverURL, eventName: "Integration", apiToken: "85053bf24bba75239b16a601d9387e17", distinctId: apiToken, updatePeople: false) { [defaultsKey] (success) in
+            trackingQueue.async { [apiToken, defaultsKey, serverURL, name] in
+                // add headers
+                let headers = self.proxyServerDelegate?.mixpanelResourceForProxyServer(name)?.headers ?? [:]
+                Network.sendHttpEvent(serverURL: serverURL, headers: headers, eventName: "Integration", apiToken: "85053bf24bba75239b16a601d9387e17", distinctId: apiToken, updatePeople: false) { [defaultsKey] (success) in
                     if success {
                         UserDefaults.standard.set(true, forKey: defaultsKey)
                         UserDefaults.standard.synchronize()
@@ -1051,7 +1083,7 @@ extension MixpanelInstance {
         if hasOptedOutTracking() {
             return
         }
-        let proxyServerResource = proxyServerDelegate?.mixpanelResourceForProxyServer(self)
+        let proxyServerResource = proxyServerDelegate?.mixpanelResourceForProxyServer(name)
         let headers: [String: String] = proxyServerResource?.headers ?? [:]
         let queryItems = proxyServerResource?.queryItems ?? []
        

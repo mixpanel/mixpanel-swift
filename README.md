@@ -73,7 +73,7 @@ import Mixpanel
 func application(_ application: UIApplication,
                  didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
     ...
-    Mixpanel.initialize(token: "MIXPANEL_TOKEN", trackAutomaticEvents: true)
+    Mixpanel.initialize(token: "MIXPANEL_TOKEN", trackAutomaticEvents: false)
     ...
 }
 ```
@@ -104,7 +104,7 @@ import Mixpanel
 func application(_ application: UIApplication,
                  didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
     ...
-    Mixpanel.initialize(token: "MIXPANEL_TOKEN", trackAutomaticEvents: true)
+    Mixpanel.initialize(token: "MIXPANEL_TOKEN", trackAutomaticEvents: false)
     Mixpanel.mainInstance().track(event: "Sign Up", properties: [
        "source": "Pat's affiliate site",
        "Opted out of email": true

@@ -969,25 +969,28 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testMultipleInstancesWithSameTokenButDifferentInstanceName() {
         let testToken = randomId()
-        let instance1 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60, instanceName: "instance1")
-        let instance2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60, instanceName: "instance2")
+        let instanceName1 = randomId()
+        let instanceName2 = randomId()
+        let instance1 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60, instanceName: instanceName1)
+        let instance2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true, flushInterval: 60, instanceName: instanceName2)
 
         XCTAssertNotEqual(instance1.distinctId, instance2.distinctId)
         instance1.identify(distinctId: "user1")
         instance1.track(event: "test")
         waitForTrackingQueue(instance1)
+        waitForTrackingQueue(instance2)
+        
         XCTAssertEqual(instance1.distinctId, "user1")
         XCTAssertEqual(instance1.userId, "user1")
-        let events = eventQueue(token: "instance1")
+        let events = eventQueue(token: instanceName1)
         let properties = events.last?["properties"] as? InternalProperties
-        // TODO: Need to figure out why this test is flaky
-        // event property should have the current distinct id
-        //XCTAssertEqual(properties?["distinct_id"] as? String, "user1")
+        XCTAssertEqual(properties?["distinct_id"] as? String, "user1")
 
         instance1.people.set(property: "p1", to: "a")
         waitForTrackingQueue(instance1)
-
-        let peopleQueue_value = peopleQueue(token: "instance1")
+        waitForTrackingQueue(instance2)
+        
+        let peopleQueue_value = peopleQueue(token: instanceName1)
         let setValue = peopleQueue_value.last!["$set"] as! InternalProperties
         XCTAssertEqual(setValue["p1"] as? String, "a", "custom people property not queued")
 
@@ -996,26 +999,28 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
         instance2.identify(distinctId: "user2")
         instance2.track(event: "test2")
+        waitForTrackingQueue(instance1)
         waitForTrackingQueue(instance2)
         XCTAssertEqual(instance2.distinctId, "user2")
         XCTAssertEqual(instance2.userId, "user2")
-        let events2 = eventQueue(token: "instance2")
+        let events2 = eventQueue(token: instanceName2)
         let properties2 = events2.last?["properties"] as? InternalProperties
         // event property should have the current distinct id
         XCTAssertEqual(properties2?["distinct_id"] as? String, "user2")
 
         instance2.people.set(property: "p2", to: "b")
+        waitForTrackingQueue(instance1)
         waitForTrackingQueue(instance2)
 
-        let peopleQueue2_value = peopleQueue(token: "instance2")
+        let peopleQueue2_value = peopleQueue(token: instanceName2)
         XCTAssertEqual(peopleQueue2_value.last?["$distinct_id"] as? String,
                        "user2", "distinct id not set properly on the people record")
 
         let setValue2 = peopleQueue2_value.last!["$set"] as! InternalProperties
         XCTAssertEqual(setValue2["p2"] as? String, "b", "custom people property not queued")
 
-        removeDBfile("instance1")
-        removeDBfile("instance2")
+        removeDBfile(instanceName1)
+        removeDBfile(instanceName2)
     }
 
     func testReadWriteMultiThreadShouldNotCrash() {

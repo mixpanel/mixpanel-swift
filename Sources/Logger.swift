@@ -10,7 +10,7 @@ import Foundation
 
 /// This defines the various levels of logging that a message may be tagged with. This allows hiding and
 /// showing different logging levels at run time depending on the environment
-enum LogLevel: String {
+public enum LogLevel: String {
     /// Logging displays *all* logs and additional debug information that may be useful to a developer
     case debug
 
@@ -26,18 +26,18 @@ enum LogLevel: String {
 
 /// This holds all the data for each log message, since the formatting is up to each
 /// logging object. It is a simple bag of data
-struct LogMessage {
+public struct LogMessage {
     /// The file where this log message was created
-    let file: String
+    public let file: String
 
     /// The function where this log message was created
-    let function: String
+    public let function: String
 
     /// The text of the log message
-    let text: String
+    public let text: String
 
     /// The level of the log message
-    let level: LogLevel
+    public let level: LogLevel
 
     init(path: String, function: String, text: String, level: LogLevel) {
         if let file = path.components(separatedBy: "/").last {
@@ -52,17 +52,17 @@ struct LogMessage {
 }
 
 /// Any object that conforms to this protocol may log messages
-protocol Logging {
+public protocol Logging {
     func addMessage(message: LogMessage)
 }
 
-class Logger {
+public class Logger {
     private static var loggers = [Logging]()
     private static var enabledLevels = Set<LogLevel>()
     private static let readWriteLock: ReadWriteLock = ReadWriteLock(label: "loggerLock")
 
     /// Add a `Logging` object to receive all log messages
-    class func addLogging(_ logging: Logging) {
+    public class func addLogging(_ logging: Logging) {
         readWriteLock.write {
             loggers.append(logging)
         }

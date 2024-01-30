@@ -58,6 +58,9 @@ class AutomaticProperties {
             let screenSize = watchDevice.screenBounds.size
             p["$screen_width"]      = Int(screenSize.width)
             p["$screen_height"]     = Int(screenSize.height)
+        #elseif os(visionOS)
+            p["$os"]                = "visionOS"
+            p["$os_version"]        = UIDevice.current.systemVersion
         #endif
 
         let infoDict = Bundle.main.infoDictionary ?? [:]
@@ -68,6 +71,9 @@ class AutomaticProperties {
         p["$lib_version"]       = AutomaticProperties.libVersion()
         p["$manufacturer"]      = "Apple"
         p["$model"]             = AutomaticProperties.deviceModel()
+        
+        print(p);
+        
         return p
     }()
 

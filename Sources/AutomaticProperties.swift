@@ -72,8 +72,6 @@ class AutomaticProperties {
         p["$manufacturer"]      = "Apple"
         p["$model"]             = AutomaticProperties.deviceModel()
         
-        print(p);
-        
         return p
     }()
 

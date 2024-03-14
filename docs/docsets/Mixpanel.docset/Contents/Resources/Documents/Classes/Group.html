@@ -17,7 +17,7 @@
     <a title="Group Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 4.2.0 Docs</a> (0% documented)</p>
+        <p><a href="../index.html">Mixpanel 4.2.1 Docs</a> (84% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
@@ -118,7 +118,7 @@
             <a href="../Typealiases.html">Type Aliases</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
-                <a href="../Typealiases.html#/Properties">Properties</a>
+                <a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a>
               </li>
             </ul>
           </li>
@@ -128,6 +128,13 @@
         <section>
           <section class="section">
             <h1>Group</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">Group</span></code></pre>
+
+                </div>
+              </div>
             <p>Access to the Mixpanel Groups API, available through the getGroup function from
 the main Mixpanel instance.</p>
 
@@ -147,9 +154,9 @@ the main Mixpanel instance.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel5GroupC3set10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/set(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">set(properties:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC3set10propertiesySDySSAA0A4Type_pG_tF">set(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -165,15 +172,42 @@ If the existing group record on the server already has a value for a given prope
 value is overwritten. Other existing properties will not be affected.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>properties dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel5GroupC3set8property2toySS_AA0A4Type_ptF"></a>
                     <a name="//apple_ref/swift/Method/set(property:to:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">set(property:<wbr>to:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC3set8property2toySS_AA0A4Type_ptF">set(property:<wbr>to:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -187,15 +221,54 @@ value is overwritten. Other existing properties will not be affected.</p>
 MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">property</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">to</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>property</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>property name</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>to</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>property value</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel5GroupC7setOnce10propertiesySDySSAA0A4Type_pG_tF"></a>
                     <a name="//apple_ref/swift/Method/setOnce(properties:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">setOnce(properties:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC7setOnce10propertiesySDySSAA0A4Type_pG_tF">setOnce(properties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -211,15 +284,42 @@ properties that are not already set. It is particularly useful for collecting
 data about dates representing the first time something happened.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">setOnce</span><span class="p">(</span><span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>properties dictionary</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel5GroupC5unset8propertyySS_tF"></a>
                     <a name="//apple_ref/swift/Method/unset(property:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">unset(property:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC5unset8propertyySS_tF">unset(property:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -232,15 +332,42 @@ data about dates representing the first time something happened.</p>
 <p>For properties that don&rsquo;t exist there will be no effect.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">unset</span><span class="p">(</span><span class="nv">property</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>property</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>name of the property to unset</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel5GroupC6remove3key5valueySS_AA0A4Type_ptF"></a>
                     <a name="//apple_ref/swift/Method/remove(key:value:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">remove(key:<wbr>value:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC6remove3key5valueySS_AA0A4Type_ptF">remove(key:<wbr>value:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -254,15 +381,42 @@ data about dates representing the first time something happened.</p>
 MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">remove</span><span class="p">(</span><span class="nv">key</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">value</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>mapping of list property names to values to remove</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel5GroupC5union3key6valuesySS_SayAA0A4Type_pGtF"></a>
                     <a name="//apple_ref/swift/Method/union(key:values:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">union(key:<wbr>values:<wbr>)</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC5union3key6valuesySS_SayAA0A4Type_pGtF">union(key:<wbr>values:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -275,15 +429,42 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
 <p>Property values must be array objects.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">union</span><span class="p">(</span><span class="nv">key</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">values</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>properties</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>mapping of list property names to lists to union</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:8Mixpanel5GroupC06deleteB0yyF"></a>
                     <a name="//apple_ref/swift/Method/deleteGroup()" class="dashAnchor"></a>
-                    <a class="token" href="#/">deleteGroup()</a>
+                    <a class="token" href="#/s:8Mixpanel5GroupC06deleteB0yyF">deleteGroup()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -294,6 +475,14 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                         <p>Delete group&rsquo;s record from Mixpanel Groups.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">func</span> <span class="nf">deleteGroup</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
@@ -302,7 +491,7 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2023 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2023-11-13)</p>
+          <p>&copy; 2024 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2024-03-14)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

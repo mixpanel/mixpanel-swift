@@ -95,7 +95,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		17D52EE62BA3BBE9002489F8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
 		51DD56791D306B740045D3DB /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		51DD56801D306B7B0045D3DB /* PrintLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrintLogging.swift; sourceTree = "<group>"; };
 		51DD56811D306B7B0045D3DB /* FileLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileLogging.swift; sourceTree = "<group>"; };
@@ -225,8 +225,8 @@
 		E11594891CFF14DF007F8B4F /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */,
 				E11594821CFF1491007F8B4F /* Info.plist */,
-				17D52EE62BA3BBE9002489F8 /* PrivacyInfo.xcprivacy */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";

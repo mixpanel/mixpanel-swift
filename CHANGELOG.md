@@ -1,5 +1,13 @@
 #
 
+## [v4.2.3](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.3) (2024-03-25)
+
+### Fixes
+
+- Make privacy manifest a resource [\#636](https://github.com/mixpanel/mixpanel-swift/pull/636)
+
+#
+
 ## [v4.2.2](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.2) (2024-03-18)
 
 #
@@ -354,6 +362,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

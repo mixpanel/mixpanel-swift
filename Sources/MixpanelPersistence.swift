@@ -129,7 +129,7 @@ class MixpanelPersistence {
         return defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)") as? Bool
     }
     
-    static func saveTimedEvents(timedEvents: InternalProperties, instanceName: String) {
+    static func saveTimedEvents(timedEvents: TimedEvents, instanceName: String) {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
@@ -143,19 +143,19 @@ class MixpanelPersistence {
         }
     }
     
-    static func loadTimedEvents(instanceName: String) -> InternalProperties {
+    static func loadTimedEvents(instanceName: String) -> TimedEvents {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
-            return InternalProperties()
+            return TimedEvents()
         }
         let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
         guard let timedEventsData  = defaults.data(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.timedEvents)") else {
-            return InternalProperties()
+            return TimedEvents()
         }
         do {
-            return try NSKeyedUnarchiver.unarchivedObject(ofClasses: archivedClasses, from: timedEventsData) as? InternalProperties ?? InternalProperties()
+            return try NSKeyedUnarchiver.unarchivedObject(ofClasses: archivedClasses, from: timedEventsData) as? TimedEvents ?? TimedEvents()
         } catch {
             Logger.warn(message: "Failed to unarchive timed events")
-            return InternalProperties()
+            return TimedEvents()
         }
     }
     
@@ -296,7 +296,7 @@ class MixpanelPersistence {
                                            peopleQueue: Queue,
                                            groupsQueue: Queue,
                                            superProperties: InternalProperties,
-                                           timedEvents: InternalProperties,
+                                           timedEvents: TimedEvents,
                                            distinctId: String,
                                            anonymousId: String?,
                                            userId: String?,
@@ -398,7 +398,7 @@ class MixpanelPersistence {
     }
     
     private func unarchiveProperties() -> (InternalProperties,
-                                           InternalProperties,
+                                           TimedEvents,
                                            String,
                                            String?,
                                            String?,
@@ -410,7 +410,7 @@ class MixpanelPersistence {
         let superProperties =
         properties?["superProperties"] as? InternalProperties ?? InternalProperties()
         let timedEvents =
-        properties?["timedEvents"] as? InternalProperties ?? InternalProperties()
+        properties?["timedEvents"] as? TimedEvents ?? TimedEvents()
         let distinctId =
         properties?["distinctId"] as? String ?? ""
         let anonymousId =

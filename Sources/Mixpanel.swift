@@ -56,6 +56,49 @@ open class Mixpanel {
                                                          superProperties: superProperties,
                                                          serverURL: serverURL)
     }
+    
+    /**
+     Initializes an instance of the API with the given project token.
+     
+     Returns a new Mixpanel instance API object. This allows you to create more than one instance
+     of the API object, which is convenient if you'd like to send data to more than
+     one Mixpanel project from a single app.
+     
+     - parameter token:                     your project token
+     - parameter trackAutomaticEvents:      Whether or not to collect common mobile events
+     - parameter flushInterval:             Optional. Interval to run background flushing
+     - parameter instanceName:              Optional. The name you want to uniquely identify the Mixpanel Instance.
+     It is useful when you want more than one Mixpanel instance under the same project token.
+     - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
+     - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
+     - parameter superProperties:           Optional. Super properties dictionary to register during initialization
+     - parameter proxyServerConfig:         Optional. Setup for proxy server.
+     
+     - important: If you have more than one Mixpanel instance, it is beneficial to initialize
+     the instances with an instanceName. Then they can be reached by calling getInstance with name.
+     
+     - returns: returns a mixpanel instance if needed to keep throughout the project.
+     You can always get the instance by calling getInstance(name)
+     */
+    
+    @discardableResult
+    open class func initialize(token apiToken: String,
+                               trackAutomaticEvents: Bool,
+                               flushInterval: Double = 60,
+                               instanceName: String? = nil,
+                               optOutTrackingByDefault: Bool = false,
+                               useUniqueDistinctId: Bool = false,
+                               superProperties: Properties? = nil,
+                               proxyServerConfig: ProxyServerConfig) -> MixpanelInstance {
+        return MixpanelManager.sharedInstance.initialize(token: apiToken,
+                                                         flushInterval: flushInterval,
+                                                         instanceName: ((instanceName != nil) ? instanceName! : apiToken),
+                                                         trackAutomaticEvents: trackAutomaticEvents,
+                                                         optOutTrackingByDefault: optOutTrackingByDefault,
+                                                         useUniqueDistinctId: useUniqueDistinctId,
+                                                         superProperties: superProperties,
+                                                         proxyServerConfig: proxyServerConfig)
+    }
 #else
     /**
      Initializes an instance of the API with the given project token (MAC OS ONLY).
@@ -96,6 +139,47 @@ open class Mixpanel {
                                                          useUniqueDistinctId: useUniqueDistinctId,
                                                          superProperties: superProperties,
                                                          serverURL: serverURL)
+    }
+    
+    /**
+     Initializes an instance of the API with the given project token (MAC OS ONLY).
+     
+     Returns a new Mixpanel instance API object. This allows you to create more than one instance
+     of the API object, which is convenient if you'd like to send data to more than
+     one Mixpanel project from a single app.
+     
+     - parameter token:                     your project token
+     - parameter flushInterval:             Optional. Interval to run background flushing
+     - parameter instanceName:              Optional. The name you want to uniquely identify the Mixpanel Instance.
+     It is useful when you want more than one Mixpanel instance under the same project token.
+     - parameter optOutTrackingByDefault:   Optional. Whether or not to be opted out from tracking by default
+     - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
+     - parameter superProperties:           Optional. Super properties dictionary to register during initialization
+     - parameter proxyServerConfig:         Optional. Setup for proxy server.
+     
+     - important: If you have more than one Mixpanel instance, it is beneficial to initialize
+     the instances with an instanceName. Then they can be reached by calling getInstance with name.
+     
+     - returns: returns a mixpanel instance if needed to keep throughout the project.
+     You can always get the instance by calling getInstance(name)
+     */
+    
+    @discardableResult
+    open class func initialize(token apiToken: String,
+                               flushInterval: Double = 60,
+                               instanceName: String? = nil,
+                               optOutTrackingByDefault: Bool = false,
+                               useUniqueDistinctId: Bool = false,
+                               superProperties: Properties? = nil,
+                               proxyServerConfig: ProxyServerConfig) -> MixpanelInstance {
+        return MixpanelManager.sharedInstance.initialize(token: apiToken,
+                                                         flushInterval: flushInterval,
+                                                         instanceName: ((instanceName != nil) ? instanceName! : apiToken),
+                                                         trackAutomaticEvents: false,
+                                                         optOutTrackingByDefault: optOutTrackingByDefault,
+                                                         useUniqueDistinctId: useUniqueDistinctId,
+                                                         superProperties: superProperties,
+                                                         proxyServerConfig: proxyServerConfig)
     }
 #endif // os(OSX)
     
@@ -178,20 +262,48 @@ final class MixpanelManager {
                     superProperties: Properties? = nil,
                     serverURL: String? = nil
     ) -> MixpanelInstance {
+        return dequeueInstance(instanceName: instanceName) {
+            return MixpanelInstance(apiToken: apiToken,
+                                    flushInterval: flushInterval,
+                                    name: instanceName,
+                                    trackAutomaticEvents: trackAutomaticEvents,
+                                    optOutTrackingByDefault: optOutTrackingByDefault,
+                                    useUniqueDistinctId: useUniqueDistinctId,
+                                    superProperties: superProperties,
+                                    serverURL: serverURL)
+        }
+    }
+    
+    func initialize(token apiToken: String,
+                    flushInterval: Double,
+                    instanceName: String,
+                    trackAutomaticEvents: Bool,
+                    optOutTrackingByDefault: Bool = false,
+                    useUniqueDistinctId: Bool = false,
+                    superProperties: Properties? = nil,
+                    proxyServerConfig: ProxyServerConfig
+    ) -> MixpanelInstance {
+        return dequeueInstance(instanceName: instanceName) {
+            return MixpanelInstance(apiToken: apiToken,
+                                    flushInterval: flushInterval,
+                                    name: instanceName,
+                                    trackAutomaticEvents: trackAutomaticEvents,
+                                    optOutTrackingByDefault: optOutTrackingByDefault,
+                                    useUniqueDistinctId: useUniqueDistinctId,
+                                    superProperties: superProperties,
+                                    proxyServerConfig: proxyServerConfig)
+        }
+    }
+    
+    private func dequeueInstance(instanceName: String, instanceCreation: () -> MixpanelInstance) -> MixpanelInstance {
         instanceQueue.sync {
             var instance: MixpanelInstance?
             if let instance = instances[instanceName] {
                 mainInstance = instance
                 return
             }
-            instance = MixpanelInstance(apiToken: apiToken,
-                                        flushInterval: flushInterval,
-                                        name: instanceName,
-                                        trackAutomaticEvents: trackAutomaticEvents,
-                                        optOutTrackingByDefault: optOutTrackingByDefault,
-                                        useUniqueDistinctId: useUniqueDistinctId,
-                                        superProperties: superProperties,
-                                        serverURL: serverURL)
+            
+            instance = instanceCreation()
             readWriteLock.write {
                 instances[instanceName] = instance!
                 mainInstance = instance!
@@ -245,3 +357,4 @@ final class MixpanelManager {
     }
     
 }
+

@@ -220,7 +220,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     
     /// The minimum session duration (ms) that is tracked in automatic events.
     /// The default value is 10000 (10 seconds).
-#if os(iOS) || os(tvOS)
+#if os(iOS) || os(tvOS) || os(visionOS)
     open var minimumSessionDuration: UInt64 {
         get {
             return automaticEvents.minimumSessionDuration
@@ -259,7 +259,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let sessionMetadata: SessionMetadata
     let flushInstance: Flush
     let trackInstance: Track
-#if os(iOS) || os(tvOS)
+#if os(iOS) || os(tvOS) || os(visionOS)
     let automaticEvents = AutomaticEvents()
 #endif
     
@@ -399,7 +399,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             registerSuperProperties(superProperties)
         }
         
-#if os(iOS) || os(tvOS)
+#if os(iOS) || os(tvOS) || os(visionOS)
         if !MixpanelInstance.isiOSAppExtension() && trackAutomaticEvents {
             automaticEvents.delegate = self
             automaticEvents.initializeEvents(instanceName: self.name)
@@ -1420,9 +1420,14 @@ extension MixpanelInstance {
     public func unregisterSuperProperty(_ propertyName: String) {
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
-            self.superProperties = self.trackInstance.unregisterSuperProperty(propertyName,
+            let updatedSuperProperties = self.trackInstance.unregisterSuperProperty(propertyName,
                                                                               superProperties: self.superProperties)
-            MixpanelPersistence.saveSuperProperties(superProperties: self.superProperties, instanceName: self.name)
+            self.readWriteLock.write {
+                self.superProperties = updatedSuperProperties
+            }
+            self.readWriteLock.read {
+                MixpanelPersistence.saveSuperProperties(superProperties: self.superProperties, instanceName: self.name)
+            }
         }
     }
     
@@ -1437,8 +1442,12 @@ extension MixpanelInstance {
             var superPropertiesShadow = self.superProperties
             self.trackInstance.updateSuperProperty(update,
                                                    superProperties: &superPropertiesShadow)
-            self.superProperties = superPropertiesShadow
-            MixpanelPersistence.saveSuperProperties(superProperties: self.superProperties, instanceName: self.name)
+            self.readWriteLock.write {
+                self.superProperties = superPropertiesShadow
+            }
+            self.readWriteLock.read {
+                MixpanelPersistence.saveSuperProperties(superProperties: self.superProperties, instanceName: self.name)
+            }
         }
     }
     

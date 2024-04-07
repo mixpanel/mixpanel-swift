@@ -16,7 +16,10 @@ let package = Package(
     targets: [
         .target(
             name: "Mixpanel",
-            path: "Sources"
+            path: "Sources",
+            resources: [
+                .copy("Mixpanel/PrivacyInfo.xcprivacy")
+            ]
         )
     ]
 )

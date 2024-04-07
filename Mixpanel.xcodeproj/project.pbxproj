@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		17C6547A2BB1F15C00C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
+		17C6547B2BB1F16000C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
+		17C6547C2BB1F16400C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
+		17C6547D2BB1F16800C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
 		51DD567C1D306B740045D3DB /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56791D306B740045D3DB /* Logger.swift */; };
 		51DD56831D306B7B0045D3DB /* PrintLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56801D306B7B0045D3DB /* PrintLogging.swift */; };
 		51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56811D306B7B0045D3DB /* FileLogging.swift */; };
@@ -95,6 +99,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/Mixpanel/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
 		51DD56791D306B740045D3DB /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		51DD56801D306B7B0045D3DB /* PrintLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrintLogging.swift; sourceTree = "<group>"; };
 		51DD56811D306B7B0045D3DB /* FileLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileLogging.swift; sourceTree = "<group>"; };
@@ -157,6 +162,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		17C654792BB1EF6700C8A126 /* Mixpanel */ = {
+			isa = PBXGroup;
+			children = (
+				1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */,
+			);
+			path = Mixpanel;
+			sourceTree = "<group>";
+		};
 		51DD56771D306B620045D3DB /* Log */ = {
 			isa = PBXGroup;
 			children = (
@@ -208,6 +221,7 @@
 		E11594881CFF14D3007F8B4F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				17C654792BB1EF6700C8A126 /* Mixpanel */,
 				E189D8FB1D5A6943007F3F29 /* Networking */,
 				51DD56771D306B620045D3DB /* Log */,
 				E189D8FA1D5A692A007F3F29 /* Utilities */,
@@ -427,6 +441,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17C6547D2BB1F16800C8A126 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -434,6 +449,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17C6547A2BB1F15C00C8A126 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,6 +457,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17C6547B2BB1F16000C8A126 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -448,6 +465,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17C6547C2BB1F16400C8A126 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

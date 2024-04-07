@@ -1,5 +1,34 @@
 #
 
+## [v4.2.4](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.4) (2024-03-27)
+
+#
+
+## [v4.2.3](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.3) (2024-03-25)
+
+### Fixes
+
+- Make privacy manifest a resource [\#636](https://github.com/mixpanel/mixpanel-swift/pull/636)
+
+#
+
+## [v4.2.2](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.2) (2024-03-18)
+
+#
+
+## [v4.2.1](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.1) (2024-03-14)
+
+### Enhancements
+
+- Add privacy manifest [\#633](https://github.com/mixpanel/mixpanel-swift/pull/633)
+- visionOS Operating System & Version along with Automatic Events [\#627](https://github.com/mixpanel/mixpanel-swift/pull/627)
+
+### Fixes
+
+- Prevent crashes in unregisterSuperProperty [\#623](https://github.com/mixpanel/mixpanel-swift/pull/623)
+
+#
+
 ## [v4.2.0](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.0) (2023-11-13)
 
 ### Enhancements
@@ -337,6 +366,14 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
+
+
+
+
+
+
 
 
 

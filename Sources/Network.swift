@@ -52,6 +52,16 @@ enum Reason {
     case other(Error)
 }
 
+public struct ServerProxyResource {
+    public init(queryItems: [URLQueryItem]? = nil, headers: [String : String]) {
+        self.queryItems = queryItems
+        self.headers = headers
+    }
+    
+    public let queryItems: [URLQueryItem]?
+    public let headers: [String: String]
+}
+
 class Network {
     
     let basePathIdentifier: String
@@ -129,6 +139,7 @@ class Network {
     }
     
     class func sendHttpEvent(serverURL: String,
+                             headers: [String: String],
                              eventName: String,
                              apiToken: String,
                              distinctId: String,
@@ -155,10 +166,12 @@ class Network {
             let requestBody = "ip=1&data=\(requestData)"
                 .data(using: String.Encoding.utf8)
             
+            let resourceHeaders: [String: String] = ["Accept-Encoding": "gzip"].merging(headers) {(_,new) in new }
+            
             let resource = Network.buildResource(path: FlushType.events.rawValue,
                                                  method: .post,
                                                  requestBody: requestBody,
-                                                 headers: ["Accept-Encoding": "gzip"],
+                                                 headers: resourceHeaders,
                                                  parse: responseParser)
             
             Network.apiRequest(base: serverURL,
@@ -181,14 +194,17 @@ class Network {
         if updatePeople {
             let engageData = JSONHandler.encodeAPIData([["$token": apiToken, "$distinct_id": distinctId, "$add": [eventName: 1]] as [String : Any]])
             if let engageData = engageData {
+                let resourceHeaders: [String: String] = ["Accept-Encoding": "gzip"].merging(headers) {(_,new) in new }
+
                 let engageBody = "ip=1&data=\(engageData)".data(using: String.Encoding.utf8)
                 let engageResource = Network.buildResource(path: FlushType.people.rawValue,
                                                            method: .post,
                                                            requestBody: engageBody,
-                                                           headers: ["Accept-Encoding": "gzip"],
+                                                           headers: resourceHeaders,
                                                            parse: responseParser)
                 Network.apiRequest(base: serverURL, resource: engageResource) { _, _, _ in } success: { _, _ in }
             }
         }
     }
 }
+

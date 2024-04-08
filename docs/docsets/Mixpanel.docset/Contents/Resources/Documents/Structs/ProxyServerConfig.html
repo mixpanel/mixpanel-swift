@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Int Extension Reference</title>
+    <title>ProxyServerConfig Structure Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -13,8 +13,8 @@
     <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
-    <a name="//apple_ref/swift/Extension/Int" class="dashAnchor"></a>
-    <a title="Int Extension Reference"></a>
+    <a name="//apple_ref/swift/Struct/ProxyServerConfig" class="dashAnchor"></a>
+    <a title="ProxyServerConfig Structure Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">Mixpanel 4.2.5 Docs</a> (80% documented)</p>
@@ -30,7 +30,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">Mixpanel Reference</a>
         <img id="carat" src="../img/carat.png" alt=""/>
-        Int Extension Reference
+        ProxyServerConfig Structure Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -141,15 +141,16 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>Int</h1>
+            <h1>ProxyServerConfig</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">Int</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">ProxyServerConfig</span></code></pre>
 
                 </div>
               </div>
-            
+            <p>Undocumented</p>
+
           </section>
           <section class="section task-group-section">
             <div class="task-group">
@@ -157,37 +158,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:Si8MixpanelE25isValidNestedTypeAndValueSbyF"></a>
-                    <a name="//apple_ref/swift/Method/isValidNestedTypeAndValue()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:Si8MixpanelE25isValidNestedTypeAndValueSbyF">isValidNestedTypeAndValue()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Checks if this object has nested object types that Mixpanel supports.
-Will always return true.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">isValidNestedTypeAndValue</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:Si8MixpanelE6equals3rhsSbAA0A4Type_p_tF"></a>
-                    <a name="//apple_ref/swift/Method/equals(rhs:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:Si8MixpanelE6equals3rhsSbAA0A4Type_p_tF">equals(rhs:<wbr>)</a>
+                    <a name="/s:8Mixpanel17ProxyServerConfigV9serverUrl8delegateACSgSS_AA0abC8Delegate_pSgtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(serverUrl:delegate:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel17ProxyServerConfigV9serverUrl8delegateACSgSS_AA0abC8Delegate_pSgtcfc">init(serverUrl:<wbr>delegate:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -202,7 +175,7 @@ Will always return true.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">equals</span><span class="p">(</span><span class="nv">rhs</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">?(</span><span class="nv">serverUrl</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelProxyServerDelegate.html">MixpanelProxyServerDelegate</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>

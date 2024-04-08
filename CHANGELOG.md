@@ -1,5 +1,13 @@
 #
 
+## [v4.2.5](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.5) (2024-04-08)
+
+### Enhancements
+
+- feat: Proxy server header capability [\#628](https://github.com/mixpanel/mixpanel-swift/pull/628)
+
+#
+
 ## [v4.2.4](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.4) (2024-03-27)
 
 #
@@ -366,6 +374,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

@@ -46,7 +46,7 @@ class FlushRequest: Network {
                                              parse: responseParser)
         var result = false
         let semaphore = DispatchSemaphore(value: 0)
-        flushRequestHandler(BasePath.getServerURL(identifier: basePathIdentifier),
+        flushRequestHandler(serverURL,
                             resource: resource,
                             completion: { success in
                                 result = success

@@ -167,7 +167,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// https://api.mixpanel.com.
     open var serverURL = BasePath.DefaultMixpanelAPI {
         didSet {
-            BasePath.namedBasePaths[name] = serverURL
+            flushInstance.serverURL = serverURL
         }
     }
     
@@ -323,7 +323,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         trackAutomaticEventsEnabled = trackAutomaticEvents
         if let serverURL = serverURL {
             self.serverURL = serverURL
-            BasePath.namedBasePaths[name] = serverURL
         }
         self.proxyServerDelegate = proxyServerDelegate
 #if DEBUG
@@ -347,7 +346,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         self.useUniqueDistinctId = useUniqueDistinctId
         
         readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
-        flushInstance = Flush(basePathIdentifier: name)
+        flushInstance = Flush(serverURL: self.serverURL)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               instanceName: self.name,

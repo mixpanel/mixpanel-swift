@@ -10,7 +10,6 @@ import Foundation
 
 struct BasePath {
     static let DefaultMixpanelAPI = "https://api.mixpanel.com"
-    static var namedBasePaths = [String: String]()
     
     static func buildURL(base: String, path: String, queryItems: [URLQueryItem]?) -> URL? {
         guard let url = URL(string: base) else {
@@ -24,10 +23,6 @@ struct BasePath {
         // adding workaround to replece + for %2B as it's not done by default within URLComponents
         components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
         return components.url
-    }
-    
-    static func getServerURL(identifier: String) -> String {
-        return namedBasePaths[identifier] ?? DefaultMixpanelAPI
     }
 }
 
@@ -64,10 +59,10 @@ public struct ServerProxyResource {
 
 class Network {
     
-    let basePathIdentifier: String
+    var serverURL: String
     
-    required init(basePathIdentifier: String) {
-        self.basePathIdentifier = basePathIdentifier
+    required init(serverURL: String) {
+        self.serverURL = serverURL
     }
     
     class func apiRequest<A>(base: String,

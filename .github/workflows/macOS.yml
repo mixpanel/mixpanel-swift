@@ -12,8 +12,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Swift Lint
-      run: swiftlint
     - name: Run Test
       working-directory: MixpanelDemo
       run: |

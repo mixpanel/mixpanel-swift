@@ -47,11 +47,6 @@ class Track {
             return timedEvents
         }
         assertPropertyTypes(properties)
-        #if DEBUG
-        if !ev.hasPrefix("$") {
-            UserDefaults.standard.set(true, forKey: InternalKeys.mpDebugTrackedKey)
-        }
-        #endif
         let epochMilliseconds = round(epochInterval * 1000)
         let eventStartTime = timedEvents[ev] as? Double
         var p = InternalProperties()

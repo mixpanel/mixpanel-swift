@@ -259,6 +259,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 #if os(iOS) || os(tvOS) || os(visionOS)
     let automaticEvents = AutomaticEvents()
 #endif
+    private let registerSuperPropertiesNotificationName = Notification.Name("com.mixpanel.properties.register")
+    private let unregisterSuperPropertiesNotificationName = Notification.Name("com.mixpanel.properties.unregister")
     
     convenience init(
         apiToken: String?,
@@ -421,6 +423,18 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                            selector: #selector(applicationWillEnterForeground(_:)),
                                            name: UIApplication.willEnterForegroundNotification,
                                            object: nil)
+            notificationCenter.addObserver(
+                self,
+                selector: #selector(handleSuperPropertiesRegistrationNotification(_:)),
+                name: registerSuperPropertiesNotificationName,
+                object: nil
+            )
+            notificationCenter.addObserver(
+                self,
+                selector: #selector(handleSuperPropertiesRegistrationNotification(_:)),
+                name: unregisterSuperPropertiesNotificationName,
+                object: nil
+            )
         }
     }
 #elseif os(OSX)
@@ -632,6 +646,20 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 #endif
 #endif // os(iOS)
     
+    @objc func handleSuperPropertiesRegistrationNotification(_ notification: Notification) {
+        guard let data = notification.userInfo else { return }
+        
+        if notification.name.rawValue == registerSuperPropertiesNotificationName.rawValue {
+            guard let properties = data as? Properties else { return }
+            registerSuperProperties(properties)
+        } else {
+            for (key, _) in data {
+                if let keyToUnregister = key as? String {
+                    unregisterSuperProperty(keyToUnregister)
+                }
+            }
+        }
+    }
 }
 
 extension MixpanelInstance {

@@ -1,6 +1,11 @@
 #
 
+
 ## [v4.3.0](https://github.com/mixpanel/mixpanel-swift/tree/v4.3.0) (2024-07-19)
+
+### Enhancements
+
+- Enable cross SDK communication for registering super properties.  [\#628](https://github.com/mixpanel/mixpanel-swift/pull/651)
 
 #
 

@@ -909,7 +909,7 @@ extension MixpanelInstance {
     }
     
     func unarchive() {
-        self.readWriteLock.write {
+        let didCreateIdentity = self.readWriteLock.write {
             optOutStatus = MixpanelPersistence.loadOptOutStatusFlag(instanceName: self.name)
             superProperties = MixpanelPersistence.loadSuperProperties(instanceName: self.name)
             timedEvents = MixpanelPersistence.loadTimedEvents(instanceName: self.name)
@@ -927,6 +927,14 @@ extension MixpanelInstance {
                 distinctId = addPrefixToDeviceId(deviceId: anonymousId)
                 hadPersistedDistinctId = true
                 userId = nil
+                return true
+            } else {
+                return false
+            }
+        }
+
+        if didCreateIdentity {
+            self.readWriteLock.read {
                 MixpanelPersistence.saveIdentity(MixpanelIdentity.init(
                     distinctID: distinctId,
                     peopleDistinctID: people.distinctId,

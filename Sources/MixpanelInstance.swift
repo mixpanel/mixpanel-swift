@@ -495,6 +495,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     
 #if !os(OSX) && !os(watchOS)
     @objc private func applicationDidEnterBackground(_ notification: Notification) {
+        performFullBackgroundFlush()
+    }
+    
+    private func performFullBackgroundFlush(propsToUnregister: InternalProperties? = nil) {
         guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
         }
@@ -505,6 +509,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         
         let completionHandler: () -> Void = { [weak self] in
             guard let self = self else { return }
+            
+            if let propsToUnregister {
+                for (key, _) in propsToUnregister {
+                    unregisterSuperProperty(key)
+                }
+            }
             
             if self.taskId != UIBackgroundTaskIdentifier.invalid {
                 sharedApplication.endBackgroundTask(self.taskId)
@@ -653,11 +663,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             guard let properties = data as? Properties else { return }
             registerSuperProperties(properties)
         } else {
-            for (key, _) in data {
-                if let keyToUnregister = key as? String {
-                    unregisterSuperProperty(keyToUnregister)
-                }
-            }
+            performFullBackgroundFlush(propsToUnregister: data as? InternalProperties)
         }
     }
 }

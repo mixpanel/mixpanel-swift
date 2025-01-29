@@ -494,8 +494,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
     
 #if !os(OSX) && !os(watchOS)
-    @objc private func applicationDidEnterBackground(_ notification: Notification) {
-        performFullBackgroundFlush()
+    
+    @objc func handleSuperPropertiesRegistrationNotification(_ notification: Notification) {
+        guard let data = notification.userInfo else { return }
+        
+        if notification.name.rawValue == registerSuperPropertiesNotificationName.rawValue {
+            guard let properties = data as? Properties else { return }
+            registerSuperProperties(properties)
+        } else {
+            performFullBackgroundFlush(propsToUnregister: data as? InternalProperties)
+        }
     }
     
     private func performFullBackgroundFlush(propsToUnregister: InternalProperties? = nil) {
@@ -527,6 +535,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if flushOnBackground {
             flush(performFullFlush: true, completion: completionHandler)
         }
+    }
+    
+    @objc private func applicationDidEnterBackground(_ notification: Notification) {
+        performFullBackgroundFlush()
     }
     
     @objc private func applicationWillEnterForeground(_ notification: Notification) {
@@ -656,16 +668,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 #endif
 #endif // os(iOS)
     
-    @objc func handleSuperPropertiesRegistrationNotification(_ notification: Notification) {
-        guard let data = notification.userInfo else { return }
-        
-        if notification.name.rawValue == registerSuperPropertiesNotificationName.rawValue {
-            guard let properties = data as? Properties else { return }
-            registerSuperProperties(properties)
-        } else {
-            performFullBackgroundFlush(propsToUnregister: data as? InternalProperties)
-        }
-    }
 }
 
 extension MixpanelInstance {

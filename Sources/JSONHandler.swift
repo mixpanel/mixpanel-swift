@@ -4,7 +4,7 @@
 //
 //  Created by Yarden Eitan on 6/3/16.
 //  Copyright © 2016 Mixpanel. All rights reserved.
-//
+// Modified by Jared Sorge on 6/3/21.
 
 import Foundation
 

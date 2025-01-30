@@ -11,10 +11,14 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        destination: ['platform="iOS Simulator",name="iPhone 16 Pro",OS=latest']
+        destination: ['platform=iOS Simulator,name=iPhone 15 Pro,OS=latest']
 
     steps:
       - uses: actions/checkout@v2
+
+      # (Optional) Inspect what simulators are installed
+      - name: Show simulators
+        run: xcrun simctl list
 
       - name: Run Test
         working-directory: MixpanelDemo

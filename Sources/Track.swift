@@ -41,7 +41,7 @@ class Track {
         if let event = event {
             ev = event
         } else {
-            Logger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")
+            MPLogger.info(message: "mixpanel track called with empty event parameter. using 'mp_event'")
         }
         if !(mixpanelInstance?.trackAutomaticEventsEnabled ?? false) && ev.hasPrefix("$ae_") {
             return timedEvents
@@ -140,7 +140,7 @@ class Track {
         }
         var updatedTimedEvents = timedEvents
         guard let event = event, !event.isEmpty else {
-            Logger.error(message: "mixpanel cannot time an empty event")
+            MPLogger.error(message: "mixpanel cannot time an empty event")
             return updatedTimedEvents
         }
         updatedTimedEvents[event] = startTime
@@ -156,7 +156,7 @@ class Track {
     func clearTimedEvent(event: String?, timedEvents: InternalProperties) -> InternalProperties {
         var updatedTimedEvents = timedEvents
         guard let event = event, !event.isEmpty else {
-            Logger.error(message: "mixpanel cannot clear an empty timed event")
+            MPLogger.error(message: "mixpanel cannot clear an empty timed event")
             return updatedTimedEvents
         }
         updatedTimedEvents.removeValue(forKey: event)

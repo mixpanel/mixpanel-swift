@@ -65,13 +65,13 @@ class FlushRequest: Network {
             failure: { (reason, _, response) in
                 self.networkConsecutiveFailures += 1
                 self.updateRetryDelay(response)
-                Logger.warn(message: "API request to \(resource.path) has failed with reason \(reason)")
+                MPLogger.warn(message: "API request to \(resource.path) has failed with reason \(reason)")
                 completion(false)
             }, success: { (result, response) in
                 self.networkConsecutiveFailures = 0
                 self.updateRetryDelay(response)
                 if result == 0 {
-                    Logger.info(message: "\(base) api rejected some items")
+                    MPLogger.info(message: "\(base) api rejected some items")
                 }
                 completion(true)
             })

@@ -11,16 +11,16 @@ import Foundation
 /// This defines the various levels of logging that a message may be tagged with. This allows hiding and
 /// showing different logging levels at run time depending on the environment
 public enum MixpanelLogLevel: String {
-    /// Logging displays *all* logs and additional debug information that may be useful to a developer
+    /// MixpanelLogging displays *all* logs and additional debug information that may be useful to a developer
     case debug
 
-    /// Logging displays *all* logs (**except** debug)
+    /// MixpanelLogging displays *all* logs (**except** debug)
     case info
 
-    /// Logging displays *only* warnings and above
+    /// MixpanelLogging displays *only* warnings and above
     case warning
 
-    /// Logging displays *only* errors and above
+    /// MixpanelLogging displays *only* errors and above
     case error
 }
 
@@ -61,7 +61,7 @@ public class MixpanelLogger {
     private static var enabledLevels = Set<MixpanelLogLevel>()
     private static let readWriteLock: ReadWriteLock = ReadWriteLock(label: "loggerLock")
 
-    /// Add a `Logging` object to receive all log messages
+    /// Add a `MixpanelLogging` object to receive all log messages
     public class func addLogging(_ logging: MixpanelLogging) {
         readWriteLock.write {
             loggers.append(logging)
@@ -132,7 +132,7 @@ public class MixpanelLogger {
 
     /// This forwards a `MixpanelLogMessage` to each logger that has been added
     class private func forwardLogMessage(_ message: MixpanelLogMessage) {
-        // Forward the log message to every registered Logging instance
+        // Forward the log message to every registered MixpanelLogging instance
         var loggers = [MixpanelLogging]()
         readWriteLock.read {
             loggers = self.loggers

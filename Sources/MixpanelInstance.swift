@@ -192,16 +192,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 MixpanelLogger.enableLevel(.info)
                 MixpanelLogger.enableLevel(.warning)
                 MixpanelLogger.enableLevel(.error)
-                MixpanelLogger.info(message: "Logging Enabled")
+                MixpanelLogger.info(message: "MixpanelLogging Enabled")
             } else {
-                MixpanelLogger.info(message: "Logging Disabled")
+                MixpanelLogger.info(message: "MixpanelLogging Disabled")
                 MixpanelLogger.disableLevel(.debug)
                 MixpanelLogger.disableLevel(.info)
                 MixpanelLogger.disableLevel(.warning)
                 MixpanelLogger.disableLevel(.error)
             }
 #if DEBUG
-            var trackProps: Properties = ["Logging Enabled": loggingEnabled]
+            var trackProps: Properties = ["MixpanelLogging Enabled": loggingEnabled]
             if (superProperties["mp_lib"] != nil) {
                 trackProps["mp_lib"] = self.superProperties["mp_lib"] as! String
             }

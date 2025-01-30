@@ -67,8 +67,8 @@ class MixpanelLoggerTests: XCTestCase {
     }
 }
 
-/// This is a stub that implements `Logging` to be passed to our `MixpanelLogger` instance for testing
-class CounterLogging: Logging {
+/// This is a stub that implements `MixpanelLogging` to be passed to our `MixpanelLogger` instance for testing
+class CounterLogging: MixpanelLogging {
     var count = 0
 
     func addMessage(message: MixpanelLogMessage) {

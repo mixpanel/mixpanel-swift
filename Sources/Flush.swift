@@ -25,16 +25,32 @@ class Flush: AppLifecycle {
     var flushOnBackground = true
     var _flushInterval = 0.0
     var _flushBatchSize = APIConstants.maxBatchSize
-    private let flushIntervalReadWriteLock: DispatchQueue
+    private var _serverURL =  BasePath.DefaultMixpanelAPI
+    private let flushRequestReadWriteLock: DispatchQueue
 
+    
+    var serverURL: String {
+        get {
+            flushRequestReadWriteLock.sync {
+                return _serverURL
+            }
+        }
+        set {
+            flushRequestReadWriteLock.sync(flags: .barrier, execute: {
+                _serverURL = newValue
+                self.flushRequest.serverURL = newValue
+            })
+        }
+    }
+    
     var flushInterval: Double {
         get {
-            flushIntervalReadWriteLock.sync {
+            flushRequestReadWriteLock.sync {
                 return _flushInterval
             }
         }
         set {
-            flushIntervalReadWriteLock.sync(flags: .barrier, execute: {
+            flushRequestReadWriteLock.sync(flags: .barrier, execute: {
                 _flushInterval = newValue
             })
 
@@ -52,16 +68,17 @@ class Flush: AppLifecycle {
         }
     }
 
-    required init(basePathIdentifier: String) {
-        self.flushRequest = FlushRequest(basePathIdentifier: basePathIdentifier)
-        flushIntervalReadWriteLock = DispatchQueue(label: "com.mixpanel.flush_interval.lock", qos: .utility, attributes: .concurrent, autoreleaseFrequency: .workItem)
+    required init(serverURL: String) {
+        self.flushRequest = FlushRequest(serverURL: serverURL)
+        _serverURL = serverURL
+        flushRequestReadWriteLock = DispatchQueue(label: "com.mixpanel.flush_interval.lock", qos: .utility, attributes: .concurrent, autoreleaseFrequency: .workItem)
     }
 
-    func flushQueue(_ queue: Queue, type: FlushType) {
+    func flushQueue(_ queue: Queue, type: FlushType, headers: [String: String], queryItems: [URLQueryItem]) {
         if flushRequest.requestNotAllowed() {
             return
         }
-        flushQueueInBatches(queue, type: type)
+        flushQueueInBatches(queue, type: type, headers: headers, queryItems: queryItems)
     }
 
     func startFlushTimer() {
@@ -95,7 +112,7 @@ class Flush: AppLifecycle {
         }
     }
 
-    func flushQueueInBatches(_ queue: Queue, type: FlushType) {
+    func flushQueueInBatches(_ queue: Queue, type: FlushType, headers: [String: String], queryItems: [URLQueryItem]) {
         var mutableQueue = queue
         while !mutableQueue.isEmpty {
             let batchSize = min(mutableQueue.count, flushBatchSize)
@@ -115,8 +132,10 @@ class Flush: AppLifecycle {
                     }
                 #endif // os(iOS)
                 let success = flushRequest.sendRequest(requestData,
-                                                        type: type,
-                                                        useIP: useIPAddressForGeoLocation)
+                                                       type: type,
+                                                       useIP: useIPAddressForGeoLocation,
+                                                       headers: headers,
+                                                       queryItems: queryItems)
                 #if os(iOS)
                 if !MixpanelInstance.isiOSAppExtension() {
                     delegate?.updateNetworkActivityIndicator(false)
@@ -156,3 +175,4 @@ class Flush: AppLifecycle {
     }
 
 }
+

@@ -10,7 +10,6 @@ import Foundation
 
 struct BasePath {
     static let DefaultMixpanelAPI = "https://api.mixpanel.com"
-    static var namedBasePaths = [String: String]()
     
     static func buildURL(base: String, path: String, queryItems: [URLQueryItem]?) -> URL? {
         guard let url = URL(string: base) else {
@@ -24,10 +23,6 @@ struct BasePath {
         // adding workaround to replece + for %2B as it's not done by default within URLComponents
         components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
         return components.url
-    }
-    
-    static func getServerURL(identifier: String) -> String {
-        return namedBasePaths[identifier] ?? DefaultMixpanelAPI
     }
 }
 
@@ -52,12 +47,22 @@ enum Reason {
     case other(Error)
 }
 
+public struct ServerProxyResource {
+    public init(queryItems: [URLQueryItem]? = nil, headers: [String : String]) {
+        self.queryItems = queryItems
+        self.headers = headers
+    }
+    
+    public let queryItems: [URLQueryItem]?
+    public let headers: [String: String]
+}
+
 class Network {
     
-    let basePathIdentifier: String
+    var serverURL: String
     
-    required init(basePathIdentifier: String) {
-        self.basePathIdentifier = basePathIdentifier
+    required init(serverURL: String) {
+        self.serverURL = serverURL
     }
     
     class func apiRequest<A>(base: String,
@@ -127,68 +132,5 @@ class Network {
                         headers: headers,
                         parse: parse)
     }
-    
-    class func sendHttpEvent(serverURL: String,
-                             eventName: String,
-                             apiToken: String,
-                             distinctId: String,
-                             properties: Properties = [:],
-                             updatePeople: Bool = true,
-                             completion: ((Bool) -> Void)? = nil) {
-        let trackProperties = properties.merging(["token": apiToken,
-                                                  "mp_lib": "swift",
-                                                  "distinct_id": distinctId,
-                                                  "$lib_version": AutomaticProperties.libVersion(),
-                                                  "Project Token": distinctId,
-                                                  "DevX": true]) {(current, _) in current }
-        let requestData = JSONHandler.encodeAPIData([["event": eventName, "properties": trackProperties] as [String : Any]])
-        
-        let responseParser: (Data) -> Int? = { data in
-            let response = String(data: data, encoding: String.Encoding.utf8)
-            if let response = response {
-                return Int(response) ?? 0
-            }
-            return nil
-        }
-        
-        if let requestData = requestData {
-            let requestBody = "ip=1&data=\(requestData)"
-                .data(using: String.Encoding.utf8)
-            
-            let resource = Network.buildResource(path: FlushType.events.rawValue,
-                                                 method: .post,
-                                                 requestBody: requestBody,
-                                                 headers: ["Accept-Encoding": "gzip"],
-                                                 parse: responseParser)
-            
-            Network.apiRequest(base: serverURL,
-                               resource: resource,
-                               failure: { (_, _, _) in
-                Logger.debug(message: "failed to track \(eventName)")
-                if let completion = completion {
-                    completion(false)
-                }
-                
-            },
-                               success: { (_, _) in
-                Logger.debug(message: "\(eventName) tracked")
-                if let completion = completion {
-                    completion(true)
-                }
-            }
-            )
-        }
-        if updatePeople {
-            let engageData = JSONHandler.encodeAPIData([["$token": apiToken, "$distinct_id": distinctId, "$add": [eventName: 1]] as [String : Any]])
-            if let engageData = engageData {
-                let engageBody = "ip=1&data=\(engageData)".data(using: String.Encoding.utf8)
-                let engageResource = Network.buildResource(path: FlushType.people.rawValue,
-                                                           method: .post,
-                                                           requestBody: engageBody,
-                                                           headers: ["Accept-Encoding": "gzip"],
-                                                           parse: responseParser)
-                Network.apiRequest(base: serverURL, resource: engageResource) { _, _, _ in } success: { _, _ in }
-            }
-        }
-    }
 }
+

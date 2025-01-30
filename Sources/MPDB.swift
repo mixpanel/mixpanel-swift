@@ -45,13 +45,13 @@ class MPDB {
     }
     
     private func reconnect() {
-        Logger.warn(message: "No database connection found. Calling MPDB.open()")
+        MixpanelLogger.warn(message: "No database connection found. Calling MPDB.open()")
         open()
     }
     
     func open() {
         if apiToken.isEmpty {
-            Logger.error(message: "Project token must not be empty. Database cannot be opened.")
+            MixpanelLogger.error(message: "Project token must not be empty. Database cannot be opened.")
             return
         }
         if let dbPath = pathToDb() {
@@ -59,14 +59,14 @@ class MPDB {
                 logSqlError(message: "Error opening or creating database at path: \(dbPath)")
                 close()
             } else {
-                Logger.info(message: "Successfully opened connection to database at path: \(dbPath)")
+                MixpanelLogger.info(message: "Successfully opened connection to database at path: \(dbPath)")
                 if let db = connection {
                     let pragmaString = "PRAGMA journal_mode=WAL;"
                     var pragmaStatement: OpaquePointer?
                     if sqlite3_prepare_v2(db, pragmaString, -1, &pragmaStatement, nil) == SQLITE_OK {
                         if sqlite3_step(pragmaStatement) == SQLITE_ROW {
                             let res = String(cString: sqlite3_column_text(pragmaStatement, 0))
-                            Logger.info(message: "SQLite journal mode set to \(res)")
+                            MixpanelLogger.info(message: "SQLite journal mode set to \(res)")
                         } else {
                             logSqlError(message: "Failed to enable journal_mode=WAL")
                         }
@@ -85,7 +85,7 @@ class MPDB {
     func close() {
         sqlite3_close(connection)
         connection = nil
-        Logger.info(message: "Connection to database closed.")
+        MixpanelLogger.info(message: "Connection to database closed.")
     }
     
     private func recreate() {
@@ -95,10 +95,10 @@ class MPDB {
                 let manager = FileManager.default
                 if manager.fileExists(atPath: dbPath) {
                     try manager.removeItem(atPath: dbPath)
-                    Logger.info(message: "Deleted database file at path: \(dbPath)")
+                    MixpanelLogger.info(message: "Deleted database file at path: \(dbPath)")
                 }
             } catch let error {
-                Logger.error(message: "Unable to remove database file at path: \(dbPath), error: \(error)")
+                MixpanelLogger.error(message: "Unable to remove database file at path: \(dbPath), error: \(error)")
             }
         }
         reconnect()
@@ -112,7 +112,7 @@ class MPDB {
             var createTableStatement: OpaquePointer?
             if sqlite3_prepare_v2(db, createTableString, -1, &createTableStatement, nil) == SQLITE_OK {
                 if sqlite3_step(createTableStatement) == SQLITE_DONE {
-                    Logger.info(message: "\(tableName) table created")
+                    MixpanelLogger.info(message: "\(tableName) table created")
                 } else {
                     logSqlError(message: "\(tableName) table create failed")
                 }
@@ -133,7 +133,7 @@ class MPDB {
             var createIndexStatement: OpaquePointer?
             if sqlite3_prepare_v2(db, createIndexString, -1, &createIndexStatement, nil) == SQLITE_OK {
                 if sqlite3_step(createIndexStatement) == SQLITE_DONE {
-                    Logger.info(message: "\(indexName) index created")
+                    MixpanelLogger.info(message: "\(indexName) index created")
                 } else {
                     logSqlError(message: "\(indexName) index creation failed")
                 }
@@ -167,7 +167,7 @@ class MPDB {
                         sqlite3_bind_int(insertStatement, 2, flag ? 1 : 0)
                         sqlite3_bind_double(insertStatement, 3, Date().timeIntervalSince1970)
                         if sqlite3_step(insertStatement) == SQLITE_DONE {
-                            Logger.info(message: "Successfully inserted row into table \(tableName)")
+                            MixpanelLogger.info(message: "Successfully inserted row into table \(tableName)")
                         } else {
                             logSqlError(message: "Failed to insert row into table \(tableName)")
                             recreate()
@@ -191,7 +191,7 @@ class MPDB {
             var deleteStatement: OpaquePointer?
             if sqlite3_prepare_v2(db, deleteString, -1, &deleteStatement, nil) == SQLITE_OK {
                 if sqlite3_step(deleteStatement) == SQLITE_DONE {
-                    Logger.info(message: "Successfully deleted rows from table \(tableName)")
+                    MixpanelLogger.info(message: "Successfully deleted rows from table \(tableName)")
                 } else {
                     logSqlError(message: "Failed to delete rows from table \(tableName)")
                     recreate()
@@ -223,7 +223,7 @@ class MPDB {
             var updateStatement: OpaquePointer?
             if sqlite3_prepare_v2(db, updateString, -1, &updateStatement, nil) == SQLITE_OK {
                 if sqlite3_step(updateStatement) == SQLITE_DONE {
-                    Logger.info(message: "Successfully updated rows from table \(tableName)")
+                    MixpanelLogger.info(message: "Successfully updated rows from table \(tableName)")
                 } else {
                     logSqlError(message: "Failed to update rows from table \(tableName)")
                     recreate()
@@ -266,7 +266,7 @@ class MPDB {
                     }
                 }
                 if rowsRead > 0 {
-                    Logger.info(message: "Successfully read \(rowsRead) from table \(tableName)")
+                    MixpanelLogger.info(message: "Successfully read \(rowsRead) from table \(tableName)")
                 }
             } else {
                 logSqlError(message: "SELECT statement for table \(tableName) could not be prepared")
@@ -281,10 +281,10 @@ class MPDB {
     private func logSqlError(message: String? = nil) {
         if let db = connection {
             if let msg = message {
-                Logger.error(message: msg)
+                MixpanelLogger.error(message: msg)
             }
             let sqlError = String(cString: sqlite3_errmsg(db)!)
-            Logger.error(message: sqlError)
+            MixpanelLogger.error(message: sqlError)
         } else {
             reconnect()
         }

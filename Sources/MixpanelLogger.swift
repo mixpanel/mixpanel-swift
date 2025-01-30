@@ -130,7 +130,7 @@ public class MixpanelLogger {
                                                level: .error))
     }
 
-    /// This forwards a `LogMessage` to each logger that has been added
+    /// This forwards a `MixpanelLogMessage` to each logger that has been added
     class private func forwardLogMessage(_ message: MixpanelLogMessage) {
         // Forward the log message to every registered Logging instance
         var loggers = [MixpanelLogging]()

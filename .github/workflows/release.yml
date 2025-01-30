@@ -34,8 +34,8 @@ jobs:
       - name: Commit CHANGELOG Changes
         run: |
           git add .
-          git config user.name "zihe.jia"
-          git config user.email "zihe.jia@mixpanel.com"
+          git config user.name "jared"
+          git config user.email "jared@mixpanel.com"
           git commit -m "Update CHANGELOG"
       - name: Push CHANGELOG changes
         uses: ad-m/github-push-action@v0.6.0

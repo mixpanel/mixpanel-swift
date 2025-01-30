@@ -11,21 +11,36 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        destination: ['name="iPhone 14 Pro",OS=latest']
+        destination: ['name=iPhone 15 Pro,OS=latest']
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Run Test
-      working-directory: MixpanelDemo
-      run: |
-        set -o pipefail
-        xcodebuild -scheme MixpanelDemo -derivedDataPath Build/ -destination ${{ matrix.destination }} -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES -enableCodeCoverage YES clean build test | xcpretty -c;
-    - name: Pod Lint
-      run: |
-        gem install cocoapods
-        pod lib lint --allow-warnings
-    - name: Code Coverage Report
-      working-directory: MixpanelDemo/build/Logs/Test
-      run: |
-        xcrun xccov view --report --files-for-target Mixpanel.framework  *.xcresult
-        xcrun xccov view --report --only-targets *.xcresult
+      - uses: actions/checkout@v2
+
+      # (Optional) Inspect what simulators are installed
+      - name: Show simulators
+        run: xcrun simctl list
+
+      - name: Run Test
+        working-directory: MixpanelDemo
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -scheme MixpanelDemo \
+            -derivedDataPath Build/ \
+            -destination "${{ matrix.destination }}" \
+            -configuration Debug \
+            ONLY_ACTIVE_ARCH=NO \
+            ENABLE_TESTABILITY=YES \
+            -enableCodeCoverage YES \
+            clean build test | xcpretty -c;
+
+      - name: Pod Lint
+        run: |
+          gem install cocoapods
+          pod lib lint --allow-warnings
+
+      - name: Code Coverage Report
+        working-directory: MixpanelDemo/build/Logs/Test
+        run: |
+          xcrun xccov view --report --files-for-target Mixpanel.framework  *.xcresult
+          xcrun xccov view --report --only-targets *.xcresult

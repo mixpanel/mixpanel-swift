@@ -188,17 +188,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var loggingEnabled: Bool = false {
         didSet {
             if loggingEnabled {
-                MPLogger.enableLevel(.debug)
-                MPLogger.enableLevel(.info)
-                MPLogger.enableLevel(.warning)
-                MPLogger.enableLevel(.error)
-                MPLogger.info(message: "Logging Enabled")
+                Logger.enableLevel(.debug)
+                Logger.enableLevel(.info)
+                Logger.enableLevel(.warning)
+                Logger.enableLevel(.error)
+                Logger.info(message: "Logging Enabled")
             } else {
-                MPLogger.info(message: "Logging Disabled")
-                MPLogger.disableLevel(.debug)
-                MPLogger.disableLevel(.info)
-                MPLogger.disableLevel(.warning)
-                MPLogger.disableLevel(.error)
+                Logger.info(message: "Logging Disabled")
+                Logger.disableLevel(.debug)
+                Logger.disableLevel(.info)
+                Logger.disableLevel(.warning)
+                Logger.disableLevel(.error)
             }
 #if DEBUG
             var trackProps: Properties = ["Logging Enabled": loggingEnabled]
@@ -351,7 +351,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 AutomaticProperties.automaticPropertiesLock.write {
                     AutomaticProperties.properties["$wifi"] = wifi
                 }
-                MPLogger.info(message: "reachability changed, wifi=\(wifi)")
+                Logger.info(message: "reachability changed, wifi=\(wifi)")
             }
             if SCNetworkReachabilitySetCallback(reachability, reachabilityCallback, &context) {
                 if !SCNetworkReachabilitySetDispatchQueue(reachability, trackingQueue) {
@@ -456,10 +456,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 #if os(iOS) && !os(watchOS) && !targetEnvironment(macCatalyst)
         if let reachability = MixpanelInstance.reachability {
             if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
-                MPLogger.error(message: "\(self) error unsetting reachability callback")
+                Logger.error(message: "\(self) error unsetting reachability callback")
             }
             if !SCNetworkReachabilitySetDispatchQueue(reachability, nil) {
-                MPLogger.error(message: "\(self) error unsetting reachability dispatch queue")
+                Logger.error(message: "\(self) error unsetting reachability dispatch queue")
             }
         }
 #endif
@@ -701,7 +701,7 @@ extension MixpanelInstance {
             return
         }
         if distinctId.isEmpty {
-            MPLogger.error(message: "\(self) cannot identify blank distinct id")
+            Logger.error(message: "\(self) cannot identify blank distinct id")
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
             }
@@ -791,7 +791,7 @@ extension MixpanelInstance {
         }
         
         if distinctId.isEmpty {
-            MPLogger.error(message: "\(self) cannot identify blank distinct id")
+            Logger.error(message: "\(self) cannot identify blank distinct id")
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
             }
@@ -799,7 +799,7 @@ extension MixpanelInstance {
         }
         
         if alias.isEmpty {
-            MPLogger.error(message: "\(self) create alias called with empty alias")
+            Logger.error(message: "\(self) create alias called with empty alias")
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
             }
@@ -850,7 +850,7 @@ extension MixpanelInstance {
             }
             flush(completion: completion)
         } else {
-            MPLogger.error(message: "alias: \(alias) matches distinctId: \(distinctId) - skipping api call.")
+            Logger.error(message: "alias: \(alias) matches distinctId: \(distinctId) - skipping api call.")
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
             }
@@ -1159,7 +1159,7 @@ extension MixpanelInstance {
         
         if !(group.groupKey == groupKey && group.groupID.equals(rhs: groupID)) {
             // we somehow hit a collision on the map key, return a new group with the correct key and ID
-            MPLogger.info(message: "groups dictionary key collision: \(key)")
+            Logger.info(message: "groups dictionary key collision: \(key)")
             let newGroup = Group(apiToken: apiToken,
                                  serialQueue: trackingQueue,
                                  lock: self.readWriteLock,

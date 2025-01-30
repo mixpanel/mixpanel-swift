@@ -107,8 +107,8 @@ class Network {
             return nil
         }
         
-        MPLogger.debug(message: "Fetching URL")
-        MPLogger.debug(message: url.absoluteURL)
+        Logger.debug(message: "Fetching URL")
+        Logger.debug(message: url.absoluteURL)
         var request = URLRequest(url: url)
         request.httpMethod = resource.method.rawValue
         request.httpBody = resource.requestBody

@@ -139,7 +139,7 @@ class MixpanelPersistence {
             defaults.set(timedEventsData, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.timedEvents)")
             defaults.synchronize()
         } catch {
-            MPLogger.warn(message: "Failed to archive timed events")
+            Logger.warn(message: "Failed to archive timed events")
         }
     }
     
@@ -154,7 +154,7 @@ class MixpanelPersistence {
         do {
             return try NSKeyedUnarchiver.unarchivedObject(ofClasses: archivedClasses, from: timedEventsData) as? InternalProperties ?? InternalProperties()
         } catch {
-            MPLogger.warn(message: "Failed to unarchive timed events")
+            Logger.warn(message: "Failed to unarchive timed events")
             return InternalProperties()
         }
     }
@@ -169,7 +169,7 @@ class MixpanelPersistence {
             defaults.set(superPropertiesData, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.superProperties)")
             defaults.synchronize()
         } catch {
-            MPLogger.warn(message: "Failed to archive super properties")
+            Logger.warn(message: "Failed to archive super properties")
         }
     }
     
@@ -184,7 +184,7 @@ class MixpanelPersistence {
         do {
             return try NSKeyedUnarchiver.unarchivedObject(ofClasses: archivedClasses, from: superPropertiesData) as? InternalProperties ?? InternalProperties()
         } catch {
-            MPLogger.warn(message: "Failed to unarchive super properties")
+            Logger.warn(message: "Failed to unarchive super properties")
             return InternalProperties()
         }
     }
@@ -355,14 +355,14 @@ class MixpanelPersistence {
         if #available(iOS 11.0, macOS 10.13, watchOS 4.0, tvOS 11.0, *) {
             guard let data = try? Data(contentsOf: URL(fileURLWithPath: filePath)),
                   let unarchivedData = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: MixpanelPersistence.archivedClasses, from: data) else {
-                MPLogger.info(message: "Unable to read file at path: \(filePath)")
+                Logger.info(message: "Unable to read file at path: \(filePath)")
                 removeArchivedFile(atPath: filePath)
                 return nil
             }
             return unarchivedData
         } else {
             guard let unarchivedData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath) else {
-                MPLogger.info(message: "Unable to read file at path: \(filePath)")
+                Logger.info(message: "Unable to read file at path: \(filePath)")
                 removeArchivedFile(atPath: filePath)
                 return nil
             }
@@ -374,7 +374,7 @@ class MixpanelPersistence {
         do {
             try FileManager.default.removeItem(atPath: filePath)
         } catch let err {
-            MPLogger.info(message: "Unable to remove file at path: \(filePath), error: \(err)")
+            Logger.info(message: "Unable to remove file at path: \(filePath), error: \(err)")
         }
     }
     
@@ -440,12 +440,12 @@ class MixpanelPersistence {
     private func unarchiveWithType(_ type: String) -> Any? {
         let filePath = filePathWithType(type)
         guard let path = filePath else {
-            MPLogger.info(message: "bad file path, cant fetch file")
+            Logger.info(message: "bad file path, cant fetch file")
             return nil
         }
         
         guard let unarchivedData = unarchiveWithFilePath(path) else {
-            MPLogger.info(message: "can't unarchive file")
+            Logger.info(message: "can't unarchive file")
             return nil
         }
         

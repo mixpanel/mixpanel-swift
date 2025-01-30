@@ -1,5 +1,5 @@
 //
-//  MPLogger.swift
+//  Logger.swift
 //  Logger
 //
 //  Created by Sam Green on 7/8/16.
@@ -10,7 +10,7 @@ import Foundation
 
 /// This defines the various levels of logging that a message may be tagged with. This allows hiding and
 /// showing different logging levels at run time depending on the environment
-public enum MPLogLevel: String {
+public enum LogLevel: String {
     /// Logging displays *all* logs and additional debug information that may be useful to a developer
     case debug
 
@@ -26,7 +26,7 @@ public enum MPLogLevel: String {
 
 /// This holds all the data for each log message, since the formatting is up to each
 /// logging object. It is a simple bag of data
-public struct MPLogMessage {
+public struct LogMessage {
     /// The file where this log message was created
     public let file: String
 
@@ -37,9 +37,9 @@ public struct MPLogMessage {
     public let text: String
 
     /// The level of the log message
-    public let level: MPLogLevel
+    public let level: LogLevel
 
-    init(path: String, function: String, text: String, level: MPLogLevel) {
+    init(path: String, function: String, text: String, level: LogLevel) {
         if let file = path.components(separatedBy: "/").last {
             self.file = file
         } else {
@@ -52,31 +52,31 @@ public struct MPLogMessage {
 }
 
 /// Any object that conforms to this protocol may log messages
-public protocol MPLogging {
-    func addMessage(message: MPLogMessage)
+public protocol Logging {
+    func addMessage(message: LogMessage)
 }
 
-public class MPLogger {
-    private static var loggers = [MPLogging]()
-    private static var enabledLevels = Set<MPLogLevel>()
-    private static let readWriteLock: ReadWriteLock = ReadWriteLock(label: "mpLoggerLock")
+public class Logger {
+    private static var loggers = [Logging]()
+    private static var enabledLevels = Set<LogLevel>()
+    private static let readWriteLock: ReadWriteLock = ReadWriteLock(label: "loggerLock")
 
     /// Add a `Logging` object to receive all log messages
-    public class func addLogging(_ logging: MPLogging) {
+    public class func addLogging(_ logging: Logging) {
         readWriteLock.write {
             loggers.append(logging)
         }
     }
 
     /// Enable log messages of a specific `LogLevel` to be added to the log
-    class func enableLevel(_ level: MPLogLevel) {
+    class func enableLevel(_ level: LogLevel) {
         readWriteLock.write {
             enabledLevels.insert(level)
         }
     }
 
     /// Disable log messages of a specific `LogLevel` to prevent them from being logged
-    class func disableLevel(_ level: MPLogLevel) {
+    class func disableLevel(_ level: LogLevel) {
         readWriteLock.write {
             enabledLevels.remove(level)
         }
@@ -85,55 +85,55 @@ public class MPLogger {
     /// debug: Adds a debug message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
     class func debug(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
-        var enabledLevels = Set<MPLogLevel>()
+        var enabledLevels = Set<LogLevel>()
         readWriteLock.read {
             enabledLevels = self.enabledLevels
         }
         guard enabledLevels.contains(.debug) else { return }
-        forwardLogMessage(MPLogMessage(path: path, function: function, text: "\(message())",
+        forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
                                               level: .debug))
     }
 
     /// info: Adds an informational message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
     class func info(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
-        var enabledLevels = Set<MPLogLevel>()
+        var enabledLevels = Set<LogLevel>()
         readWriteLock.read {
             enabledLevels = self.enabledLevels
         }
         guard enabledLevels.contains(.info) else { return }
-        forwardLogMessage(MPLogMessage(path: path, function: function, text: "\(message())",
+        forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
                                               level: .info))
     }
 
     /// warn: Adds a warning message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
     class func warn(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
-        var enabledLevels = Set<MPLogLevel>()
+        var enabledLevels = Set<LogLevel>()
         readWriteLock.read {
             enabledLevels = self.enabledLevels
         }
         guard enabledLevels.contains(.warning) else { return }
-        forwardLogMessage(MPLogMessage(path: path, function: function, text: "\(message())",
+        forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
                                               level: .warning))
     }
 
     /// error: Adds an error message to the Mixpanel log
     /// - Parameter message: The message to be added to the log
     class func error(message: @autoclosure() -> Any, _ path: String = #file, _ function: String = #function) {
-        var enabledLevels = Set<MPLogLevel>()
+        var enabledLevels = Set<LogLevel>()
         readWriteLock.read {
             enabledLevels = self.enabledLevels
         }
         guard enabledLevels.contains(.error) else { return }
-        forwardLogMessage(MPLogMessage(path: path, function: function, text: "\(message())",
+        forwardLogMessage(LogMessage(path: path, function: function, text: "\(message())",
                                                level: .error))
     }
 
     /// This forwards a `LogMessage` to each logger that has been added
-    class private func forwardLogMessage(_ message: MPLogMessage) {
+    class private func forwardLogMessage(_ message: LogMessage) {
         // Forward the log message to every registered Logging instance
-        var loggers = [MPLogging]()
+        var loggers = [Logging]()
         readWriteLock.read {
             loggers = self.loggers
         }

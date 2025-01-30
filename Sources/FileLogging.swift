@@ -9,7 +9,7 @@
 import Foundation
 
 /// Logs all messages to a file
-class FileLogging: MPLogging {
+class FileLogging: Logging {
     private let fileHandle: FileHandle
 
     init(path: String) {
@@ -28,7 +28,7 @@ class FileLogging: MPLogging {
         fileHandle.closeFile()
     }
 
-    func addMessage(message: MPLogMessage) {
+    func addMessage(message: LogMessage) {
         let string = "File: \(message.file) - Func: \(message.function) - " +
                      "Level: \(message.level.rawValue) - Message: \(message.text)"
         if let data = string.data(using: String.Encoding.utf8) {

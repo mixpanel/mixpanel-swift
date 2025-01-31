@@ -248,7 +248,7 @@ final class MixpanelManager {
     
     init() {
         instances = [String: MixpanelInstance]()
-        Logger.addLogging(PrintLogging())
+        MixpanelLogger.addLogging(PrintLogging())
         readWriteLock = ReadWriteLock(label: "com.mixpanel.instance.manager.lock")
         instanceQueue = DispatchQueue(label: "com.mixpanel.instance.manager.instance", qos: .utility, autoreleaseFrequency: .workItem)
     }
@@ -318,7 +318,7 @@ final class MixpanelManager {
             instance = instances[instanceName]
         }
         if instance == nil {
-            Logger.warn(message: "no such instance: \(instanceName)")
+            MixpanelLogger.warn(message: "no such instance: \(instanceName)")
             return nil
         }
         return instance

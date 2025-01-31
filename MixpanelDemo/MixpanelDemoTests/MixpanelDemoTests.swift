@@ -1189,4 +1189,14 @@ class MixpanelDemoTests: MixpanelBaseTests {
             }
         }
     }
+
+    func testGzipCompressionInit() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false, useGzipCompression: true)
+        XCTAssertTrue(testMixpanel.useGzipCompression == true, "the init of GzipCompression failed")
+    }
+
+    func testGzipCompressionDefault() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
+        XCTAssertTrue(testMixpanel.useGzipCompression == false, "the default gzip option disabled failed")
+    }
 }

@@ -45,6 +45,10 @@
 		86F86EF7224554B900B69832 /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		86F86F3622497F1200B69832 /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		86F86F3722497F2900B69832 /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
+		95ECF0682C9B851A006364D2 /* Data+Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95ECF0662C9B83D8006364D2 /* Data+Compression.swift */; };
+		95ECF0692C9B851B006364D2 /* Data+Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95ECF0662C9B83D8006364D2 /* Data+Compression.swift */; };
+		95ECF06A2C9B851B006364D2 /* Data+Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95ECF0662C9B83D8006364D2 /* Data+Compression.swift */; };
+		95ECF06B2C9B851C006364D2 /* Data+Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95ECF0662C9B83D8006364D2 /* Data+Compression.swift */; };
 		BB9614171F3BB87700C3EF3E /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
 		E10D118D1EC0F30900195CCD /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115948A1CFF1538007F8B4F /* Mixpanel.swift */; };
@@ -107,6 +111,7 @@
 		8625BEBA26D045CE0009BAA9 /* MPDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPDB.swift; sourceTree = "<group>"; };
 		868550AB2699096F001FCDDC /* MixpanelPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelPersistence.swift; sourceTree = "<group>"; };
 		86F86E81224404BD00B69832 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		95ECF0662C9B83D8006364D2 /* Data+Compression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Compression.swift"; sourceTree = "<group>"; };
 		BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadWriteLock.swift; sourceTree = "<group>"; };
 		E115947D1CFF1491007F8B4F /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E11594821CFF1491007F8B4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../Info.plist; sourceTree = "<group>"; };
@@ -254,6 +259,7 @@
 		E189D8FA1D5A692A007F3F29 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				95ECF0662C9B83D8006364D2 /* Data+Compression.swift */,
 				E11594981D01689F007F8B4F /* JSONHandler.swift */,
 				E1982BFE1D0AC2E2006B7330 /* Error.swift */,
 				E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */,
@@ -484,6 +490,7 @@
 				86F86EC522443A2C00B69832 /* People.swift in Sources */,
 				86F86EC422443A2300B69832 /* ReadWriteLock.swift in Sources */,
 				8625BEBE26D045CE0009BAA9 /* MPDB.swift in Sources */,
+				95ECF06B2C9B851C006364D2 /* Data+Compression.swift in Sources */,
 				86F86EC222443A1300B69832 /* Track.swift in Sources */,
 				86F86EC122443A0E00B69832 /* JSONHandler.swift in Sources */,
 				86F86EC022443A0800B69832 /* MixpanelType.swift in Sources */,
@@ -512,6 +519,7 @@
 				E11594971D006022007F8B4F /* Network.swift in Sources */,
 				E15FF7C81D0435670076CDE3 /* People.swift in Sources */,
 				673ABE3A21360CBE00B1784B /* Group.swift in Sources */,
+				95ECF0682C9B851A006364D2 /* Data+Compression.swift in Sources */,
 				E11594A11D01C597007F8B4F /* Track.swift in Sources */,
 				E11594991D01689F007F8B4F /* JSONHandler.swift in Sources */,
 				E1D335D01D3059A800E68E12 /* AutomaticProperties.swift in Sources */,
@@ -540,6 +548,7 @@
 				E12782BF1D4AB5CB0025FB05 /* MixpanelInstance.swift in Sources */,
 				E12782C11D4AB5CB0025FB05 /* Network.swift in Sources */,
 				8625BEBC26D045CE0009BAA9 /* MPDB.swift in Sources */,
+				95ECF0692C9B851B006364D2 /* Data+Compression.swift in Sources */,
 				E12782C21D4AB5CB0025FB05 /* JSONHandler.swift in Sources */,
 				E12782C31D4AB5CB0025FB05 /* Flush.swift in Sources */,
 				E12782C41D4AB5CB0025FB05 /* FlushRequest.swift in Sources */,
@@ -568,6 +577,7 @@
 				E1F15FD61E64B5FC00391AE3 /* FlushRequest.swift in Sources */,
 				E1F15FD71E64B60200391AE3 /* PrintLogging.swift in Sources */,
 				8625BEBD26D045CE0009BAA9 /* MPDB.swift in Sources */,
+				95ECF06A2C9B851B006364D2 /* Data+Compression.swift in Sources */,
 				E1F15FE21E64B60D00391AE3 /* Flush.swift in Sources */,
 				E1F15FD51E64B5F800391AE3 /* Network.swift in Sources */,
 				E1F15FDE1E64B60A00391AE3 /* MixpanelType.swift in Sources */,
@@ -805,7 +815,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
@@ -853,7 +863,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;

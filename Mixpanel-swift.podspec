@@ -21,7 +21,7 @@ Pod::Spec.new do |s|
     'Sources/Constants.swift', 'Sources/MixpanelType.swift', 'Sources/Mixpanel.swift', 'Sources/MixpanelInstance.swift',
     'Sources/Flush.swift','Sources/Track.swift', 'Sources/People.swift', 'Sources/AutomaticEvents.swift',
     'Sources/Group.swift',
-    'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift', 'Sources/MPDB.swift', 'Sources/MixpanelPersistence.swift']
+    'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift', 'Sources/MPDB.swift', 'Sources/MixpanelPersistence.swift', 'Sources/Data+Compression.swift']
   s.tvos.deployment_target = '11.0'
   s.tvos.frameworks = 'UIKit', 'Foundation'
   s.tvos.pod_target_xcconfig = {

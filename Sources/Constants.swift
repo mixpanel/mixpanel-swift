@@ -27,6 +27,10 @@ struct BundleConstants {
     static let ID = "com.mixpanel.Mixpanel"
 }
 
+struct GzipSettings {
+    static let gzipHeaderOffset = Int32(16)
+}
+
 #if !os(OSX) && !os(watchOS) && !os(visionOS)
 extension UIDevice {
     var iPhoneX: Bool {

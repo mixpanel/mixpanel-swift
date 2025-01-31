@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'Mixpanel-swift'
-  s.version = '4.2.0'
+  s.version = '4.3.0'
   s.module_name = 'Mixpanel'
   s.license = 'Apache License, Version 2.0'
   s.summary = 'Mixpanel tracking library for iOS (Swift)'
@@ -9,6 +9,7 @@ Pod::Spec.new do |s|
   s.author       = { 'Mixpanel, Inc' => 'support@mixpanel.com' }
   s.source       = { :git => 'https://github.com/mixpanel/mixpanel-swift.git',
                      :tag => "v#{s.version}" }
+  s.resource_bundles = {'Mixpanel' => ['Sources/Mixpanel/PrivacyInfo.xcprivacy']}
   s.ios.deployment_target = '11.0'
   s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   s.ios.pod_target_xcconfig = {
@@ -16,7 +17,7 @@ Pod::Spec.new do |s|
   }
   s.default_subspec = 'Complete'
   base_source_files = ['Sources/Network.swift', 'Sources/FlushRequest.swift', 'Sources/PrintLogging.swift', 'Sources/FileLogging.swift',
-    'Sources/Logger.swift', 'Sources/JSONHandler.swift', 'Sources/Error.swift', 'Sources/AutomaticProperties.swift',
+    'Sources/MixpanelLogger.swift', 'Sources/JSONHandler.swift', 'Sources/Error.swift', 'Sources/AutomaticProperties.swift',
     'Sources/Constants.swift', 'Sources/MixpanelType.swift', 'Sources/Mixpanel.swift', 'Sources/MixpanelInstance.swift',
     'Sources/Flush.swift','Sources/Track.swift', 'Sources/People.swift', 'Sources/AutomaticEvents.swift',
     'Sources/Group.swift',

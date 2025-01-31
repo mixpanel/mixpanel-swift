@@ -12,7 +12,7 @@ protocol AEDelegate: AnyObject {
     func increment(property: String, by: Double)
 }
 
-#if os(iOS) || os(tvOS)
+#if os(iOS) || os(tvOS) || os(visionOS)
 import Foundation
 import UIKit
 import StoreKit

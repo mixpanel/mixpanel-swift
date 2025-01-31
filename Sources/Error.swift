@@ -36,7 +36,7 @@ class ErrorHandler {
 
     class func logError(_ error: Error) {
         let stackSymbols = Thread.callStackSymbols
-        Logger.error(message: "Error: \(error) \n Stack Symbols: \(stackSymbols)")
+        MixpanelLogger.error(message: "Error: \(error) \n Stack Symbols: \(stackSymbols)")
     }
 
 }

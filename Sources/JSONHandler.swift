@@ -16,7 +16,7 @@ class JSONHandler {
         let data: Data? = serializeJSONObject(obj)
 
         guard let d = data else {
-            Logger.warn(message: "couldn't serialize object")
+            MixpanelLogger.warn(message: "couldn't serialize object")
             return nil
         }
 
@@ -28,7 +28,7 @@ class JSONHandler {
         do {
             object = try JSONSerialization.jsonObject(with: data, options: [])
         } catch {
-            Logger.warn(message: "exception decoding object data")
+            MixpanelLogger.warn(message: "exception decoding object data")
         }
         return object
     }
@@ -44,7 +44,7 @@ class JSONHandler {
         }
         
         guard JSONSerialization.isValidJSONObject(serializableJSONObject) else {
-            Logger.warn(message: "object isn't valid and can't be serialzed to JSON")
+            MixpanelLogger.warn(message: "object isn't valid and can't be serialzed to JSON")
             return nil
         }
         
@@ -53,7 +53,7 @@ class JSONHandler {
             serializedObject = try JSONSerialization
                 .data(withJSONObject: serializableJSONObject, options: [])
         } catch {
-            Logger.warn(message: "exception encoding api data")
+            MixpanelLogger.warn(message: "exception encoding api data")
         }
         return serializedObject
     }
@@ -110,7 +110,7 @@ class JSONHandler {
                 // all nil properties outside of Arrays are converted to NSNull()
                 return NSNull()
             } else {
-                Logger.info(message: "enforcing string on object")
+                MixpanelLogger.info(message: "enforcing string on object")
                 return objString
             }
         }

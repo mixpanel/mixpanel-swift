@@ -1,5 +1,67 @@
 #
 
+
+## [v4.3.0](https://github.com/mixpanel/mixpanel-swift/tree/v4.3.0) (2024-07-19)
+
+### Enhancements
+
+- Enable cross SDK communication for registering super properties.  [\#628](https://github.com/mixpanel/mixpanel-swift/pull/651)
+
+#
+
+## [v4.2.7](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.7) (2024-05-04)
+
+### Fixes
+
+- Remove all internal tracking and fix crashes caused by it [\#646](https://github.com/mixpanel/mixpanel-swift/pull/646)
+
+#
+
+## [v4.2.6](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.6) (2024-04-19)
+
+### Fixes
+
+- Fix the crash for FlushRequest.sendRequest [\#642](https://github.com/mixpanel/mixpanel-swift/pull/642)
+
+#
+
+## [v4.2.5](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.5) (2024-04-08)
+
+### Enhancements
+
+- feat: Proxy server header capability [\#628](https://github.com/mixpanel/mixpanel-swift/pull/628)
+
+#
+
+## [v4.2.4](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.4) (2024-03-27)
+
+#
+
+## [v4.2.3](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.3) (2024-03-25)
+
+### Fixes
+
+- Make privacy manifest a resource [\#636](https://github.com/mixpanel/mixpanel-swift/pull/636)
+
+#
+
+## [v4.2.2](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.2) (2024-03-18)
+
+#
+
+## [v4.2.1](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.1) (2024-03-14)
+
+### Enhancements
+
+- Add privacy manifest [\#633](https://github.com/mixpanel/mixpanel-swift/pull/633)
+- visionOS Operating System & Version along with Automatic Events [\#627](https://github.com/mixpanel/mixpanel-swift/pull/627)
+
+### Fixes
+
+- Prevent crashes in unregisterSuperProperty [\#623](https://github.com/mixpanel/mixpanel-swift/pull/623)
+
+#
+
 ## [v4.2.0](https://github.com/mixpanel/mixpanel-swift/tree/v4.2.0) (2023-11-13)
 
 ### Enhancements
@@ -337,6 +399,22 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

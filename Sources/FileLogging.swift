@@ -9,7 +9,7 @@
 import Foundation
 
 /// Logs all messages to a file
-class FileLogging: Logging {
+class FileLogging: MixpanelLogging {
     private let fileHandle: FileHandle
 
     init(path: String) {
@@ -28,7 +28,7 @@ class FileLogging: Logging {
         fileHandle.closeFile()
     }
 
-    func addMessage(message: LogMessage) {
+    func addMessage(message: MixpanelLogMessage) {
         let string = "File: \(message.file) - Func: \(message.function) - " +
                      "Level: \(message.level.rawValue) - Message: \(message.text)"
         if let data = string.data(using: String.Encoding.utf8) {

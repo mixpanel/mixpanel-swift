@@ -514,6 +514,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         
         taskId = sharedApplication.beginBackgroundTask(expirationHandler: completionHandler)
         
+        // Ensure that any session replay ID is cleared when the app enters the background
+        unregisterSuperProperty("$mp_replay_id")
+        
         if flushOnBackground {
             flush(performFullFlush: true, completion: completionHandler)
         }

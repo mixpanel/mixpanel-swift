@@ -1068,14 +1068,13 @@ extension MixpanelInstance {
      - parameter properties: properties dictionary
      */
     public func track(event: String?, properties: Properties? = nil) {
-        if hasOptedOutTracking() {
-            return
-        }
-        
         let epochInterval = Date().timeIntervalSince1970
         
         trackingQueue.async { [weak self, event, properties, epochInterval] in
-            guard let self = self else {
+            guard let self else {
+                return
+            }
+            if self.hasOptedOutTracking() {
                 return
             }
             var shadowTimedEvents = InternalProperties()

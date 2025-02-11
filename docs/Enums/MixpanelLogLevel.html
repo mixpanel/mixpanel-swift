@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>String Extension Reference</title>
+    <title>MixpanelLogLevel Enumeration Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -13,8 +13,8 @@
     <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
-    <a name="//apple_ref/swift/Extension/String" class="dashAnchor"></a>
-    <a title="String Extension Reference"></a>
+    <a name="//apple_ref/swift/Enum/MixpanelLogLevel" class="dashAnchor"></a>
+    <a title="MixpanelLogLevel Enumeration Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">Mixpanel 4.3.1 Docs</a> (81% documented)</p>
@@ -30,7 +30,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">Mixpanel Reference</a>
         <img id="carat" src="../img/carat.png" alt=""/>
-        String Extension Reference
+        MixpanelLogLevel Enumeration Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -158,15 +158,17 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>String</h1>
+            <h1>MixpanelLogLevel</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">String</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">MixpanelLogLevel</span> <span class="p">:</span> <span class="kt">String</span></code></pre>
 
                 </div>
               </div>
-            
+            <p>This defines the various levels of logging that a message may be tagged with. This allows hiding and
+showing different logging levels at run time depending on the environment</p>
+
           </section>
           <section class="section task-group-section">
             <div class="task-group">
@@ -174,9 +176,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:SS8MixpanelE25isValidNestedTypeAndValueSbyF"></a>
-                    <a name="//apple_ref/swift/Method/isValidNestedTypeAndValue()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:SS8MixpanelE25isValidNestedTypeAndValueSbyF">isValidNestedTypeAndValue()</a>
+                    <a name="/s:8Mixpanel0A8LogLevelO5debugyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/debug" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8LogLevelO5debugyA2CmF">debug</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -184,15 +186,14 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Checks if this object has nested object types that Mixpanel supports.
-Will always return true.</p>
+                        <p>MixpanelLogging displays <em>all</em> logs and additional debug information that may be useful to a developer</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">isValidNestedTypeAndValue</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">debug</span></code></pre>
 
                         </div>
                       </div>
@@ -202,9 +203,9 @@ Will always return true.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:SS8MixpanelE6equals3rhsSbAA0A4Type_p_tF"></a>
-                    <a name="//apple_ref/swift/Method/equals(rhs:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:SS8MixpanelE6equals3rhsSbAA0A4Type_p_tF">equals(rhs:<wbr>)</a>
+                    <a name="/s:8Mixpanel0A8LogLevelO4infoyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/info" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8LogLevelO4infoyA2CmF">info</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -212,14 +213,68 @@ Will always return true.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>MixpanelLogging displays <em>all</em> logs (<strong>except</strong> debug)</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">equals</span><span class="p">(</span><span class="nv">rhs</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">info</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A8LogLevelO7warningyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/warning" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8LogLevelO7warningyA2CmF">warning</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>MixpanelLogging displays <em>only</em> warnings and above</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">warning</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A8LogLevelO5erroryA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/error" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8LogLevelO5erroryA2CmF">error</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>MixpanelLogging displays <em>only</em> errors and above</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">error</span></code></pre>
 
                         </div>
                       </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>String Extension Reference</title>
+    <title>MixpanelLogMessage Structure Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -13,8 +13,8 @@
     <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
-    <a name="//apple_ref/swift/Extension/String" class="dashAnchor"></a>
-    <a title="String Extension Reference"></a>
+    <a name="//apple_ref/swift/Struct/MixpanelLogMessage" class="dashAnchor"></a>
+    <a title="MixpanelLogMessage Structure Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">Mixpanel 4.3.1 Docs</a> (81% documented)</p>
@@ -30,7 +30,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">Mixpanel Reference</a>
         <img id="carat" src="../img/carat.png" alt=""/>
-        String Extension Reference
+        MixpanelLogMessage Structure Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -158,15 +158,17 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>String</h1>
+            <h1>MixpanelLogMessage</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">String</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">MixpanelLogMessage</span></code></pre>
 
                 </div>
               </div>
-            
+            <p>This holds all the data for each log message, since the formatting is up to each
+logging object. It is a simple bag of data</p>
+
           </section>
           <section class="section task-group-section">
             <div class="task-group">
@@ -174,9 +176,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:SS8MixpanelE25isValidNestedTypeAndValueSbyF"></a>
-                    <a name="//apple_ref/swift/Method/isValidNestedTypeAndValue()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:SS8MixpanelE25isValidNestedTypeAndValueSbyF">isValidNestedTypeAndValue()</a>
+                    <a name="/s:8Mixpanel0A10LogMessageV4fileSSvp"></a>
+                    <a name="//apple_ref/swift/Property/file" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A10LogMessageV4fileSSvp">file</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -184,15 +186,14 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Checks if this object has nested object types that Mixpanel supports.
-Will always return true.</p>
+                        <p>The file where this log message was created</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">isValidNestedTypeAndValue</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">file</span><span class="p">:</span> <span class="kt">String</span></code></pre>
 
                         </div>
                       </div>
@@ -202,9 +203,9 @@ Will always return true.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:SS8MixpanelE6equals3rhsSbAA0A4Type_p_tF"></a>
-                    <a name="//apple_ref/swift/Method/equals(rhs:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:SS8MixpanelE6equals3rhsSbAA0A4Type_p_tF">equals(rhs:<wbr>)</a>
+                    <a name="/s:8Mixpanel0A10LogMessageV8functionSSvp"></a>
+                    <a name="//apple_ref/swift/Property/function" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A10LogMessageV8functionSSvp">function</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -212,14 +213,68 @@ Will always return true.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>The function where this log message was created</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">equals</span><span class="p">(</span><span class="nv">rhs</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">function</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A10LogMessageV4textSSvp"></a>
+                    <a name="//apple_ref/swift/Property/text" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A10LogMessageV4textSSvp">text</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The text of the log message</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">text</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A10LogMessageV5levelAA0aB5LevelOvp"></a>
+                    <a name="//apple_ref/swift/Property/level" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A10LogMessageV5levelAA0aB5LevelOvp">level</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The level of the log message</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">level</span><span class="p">:</span> <span class="kt"><a href="../Enums/MixpanelLogLevel.html">MixpanelLogLevel</a></span></code></pre>
 
                         </div>
                       </div>

@@ -1,5 +1,19 @@
 #
 
+## [v4.3.1](https://github.com/mixpanel/mixpanel-swift/tree/v4.3.1) (2025-02-11)
+
+### Enhancements
+
+- Expose publicly some types and methods related to the logging system [\#626](https://github.com/mixpanel/mixpanel-swift/pull/626)
+
+### Fixes
+
+- Check opt out status inside tracking queue to avoid race condition [\#664](https://github.com/mixpanel/mixpanel-swift/pull/664)
+- unregister session replay ID super prop upon backgrounding [\#663](https://github.com/mixpanel/mixpanel-swift/pull/663)
+- Avoid deadlock during first time initialisation [\#657](https://github.com/mixpanel/mixpanel-swift/pull/657)
+
+#
+
 
 ## [v4.3.0](https://github.com/mixpanel/mixpanel-swift/tree/v4.3.0) (2024-07-19)
 
@@ -399,6 +413,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

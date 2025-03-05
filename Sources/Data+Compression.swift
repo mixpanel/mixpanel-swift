@@ -42,7 +42,7 @@ extension Data {
     /// - Throws: `GzipError` if compression fails.
     public func gzipCompressed(level: Int32 = Z_DEFAULT_COMPRESSION) throws -> Data {
         guard !self.isEmpty else {
-            Logger.warn(message: "Empty Data object cannot be compressed.")
+            MixpanelLogger.warn(message: "Empty Data object cannot be compressed.")
             return Data()
         }
         
@@ -86,7 +86,7 @@ extension Data {
         let roundedCompressionRatio = floor(compressionRatio * 1000) / 1000
         let roundedCompressionPercentage = floor(compressionPercentage * 1000) / 1000
 
-        Logger.info(message: "Payload gzipped: original size = \(originalSize) bytes, compressed size = \(compressedSize) bytes, compression ratio = \(roundedCompressionRatio), compression percentage = \(roundedCompressionPercentage)%")
+        MixpanelLogger.info(message: "Payload gzipped: original size = \(originalSize) bytes, compressed size = \(compressedSize) bytes, compression ratio = \(roundedCompressionRatio), compression percentage = \(roundedCompressionPercentage)%")
 
         return compressedData
     }

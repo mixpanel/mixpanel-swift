@@ -31,6 +31,7 @@ open class Mixpanel {
      - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
      - parameter serverURL:                 Optional. Mixpanel cluster URL
+     - parameter useGzipCompression: Optional. Whether to use gzip compression for network requests.
      
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -46,7 +47,8 @@ open class Mixpanel {
                                optOutTrackingByDefault: Bool = false,
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil,
-                               serverURL: String? = nil) -> MixpanelInstance {
+                               serverURL: String? = nil,
+                               useGzipCompression: Bool = false) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
@@ -54,7 +56,8 @@ open class Mixpanel {
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          useUniqueDistinctId: useUniqueDistinctId,
                                                          superProperties: superProperties,
-                                                         serverURL: serverURL)
+                                                         serverURL: serverURL,
+                                                         useGzipCompression: useGzipCompression)
     }
     
     /**
@@ -73,6 +76,7 @@ open class Mixpanel {
      - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
      - parameter proxyServerConfig:         Optional. Setup for proxy server.
+     - parameter useGzipCompression: Optional. Whether to use gzip compression for network requests.
      
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -89,7 +93,8 @@ open class Mixpanel {
                                optOutTrackingByDefault: Bool = false,
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil,
-                               proxyServerConfig: ProxyServerConfig) -> MixpanelInstance {
+                               proxyServerConfig: ProxyServerConfig,
+                               useGzipCompression: Bool = false) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
@@ -97,7 +102,8 @@ open class Mixpanel {
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          useUniqueDistinctId: useUniqueDistinctId,
                                                          superProperties: superProperties,
-                                                         proxyServerConfig: proxyServerConfig)
+                                                         proxyServerConfig: proxyServerConfig,
+                                                         useGzipCompression: useGzipCompression)
     }
 #else
     /**
@@ -115,6 +121,7 @@ open class Mixpanel {
      - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
      - parameter serverURL:                 Optional. Mixpanel cluster URL
+     - parameter useGzipCompression: Optional. Whether to use gzip compression for network requests.
      
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -130,7 +137,8 @@ open class Mixpanel {
                                optOutTrackingByDefault: Bool = false,
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil,
-                               serverURL: String? = nil) -> MixpanelInstance {
+                               serverURL: String? = nil,
+                               useGzipCompression: Bool = false) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
@@ -138,7 +146,8 @@ open class Mixpanel {
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          useUniqueDistinctId: useUniqueDistinctId,
                                                          superProperties: superProperties,
-                                                         serverURL: serverURL)
+                                                         serverURL: serverURL,
+                                                         useGzipCompression: useGzipCompression)
     }
     
     /**
@@ -156,6 +165,7 @@ open class Mixpanel {
      - parameter useUniqueDistinctId:       Optional. whether or not to use the unique device identifier as the distinct_id
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
      - parameter proxyServerConfig:         Optional. Setup for proxy server.
+     - parameter useGzipCompression: Optional. Whether to use gzip compression for network requests.
      
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -171,7 +181,8 @@ open class Mixpanel {
                                optOutTrackingByDefault: Bool = false,
                                useUniqueDistinctId: Bool = false,
                                superProperties: Properties? = nil,
-                               proxyServerConfig: ProxyServerConfig) -> MixpanelInstance {
+                               proxyServerConfig: ProxyServerConfig,
+                               useGzipCompression: Bool = false) -> MixpanelInstance {
         return MixpanelManager.sharedInstance.initialize(token: apiToken,
                                                          flushInterval: flushInterval,
                                                          instanceName: ((instanceName != nil) ? instanceName! : apiToken),
@@ -179,7 +190,8 @@ open class Mixpanel {
                                                          optOutTrackingByDefault: optOutTrackingByDefault,
                                                          useUniqueDistinctId: useUniqueDistinctId,
                                                          superProperties: superProperties,
-                                                         proxyServerConfig: proxyServerConfig)
+                                                         proxyServerConfig: proxyServerConfig,
+                                                         useGzipCompression: useGzipCompression)
     }
 #endif // os(OSX)
     
@@ -260,7 +272,8 @@ final class MixpanelManager {
                     optOutTrackingByDefault: Bool = false,
                     useUniqueDistinctId: Bool = false,
                     superProperties: Properties? = nil,
-                    serverURL: String? = nil
+                    serverURL: String? = nil,
+                    useGzipCompression: Bool = false
     ) -> MixpanelInstance {
         return dequeueInstance(instanceName: instanceName) {
             return MixpanelInstance(apiToken: apiToken,
@@ -270,7 +283,8 @@ final class MixpanelManager {
                                     optOutTrackingByDefault: optOutTrackingByDefault,
                                     useUniqueDistinctId: useUniqueDistinctId,
                                     superProperties: superProperties,
-                                    serverURL: serverURL)
+                                    serverURL: serverURL,
+                                    useGzipCompression: useGzipCompression)
         }
     }
     
@@ -281,7 +295,8 @@ final class MixpanelManager {
                     optOutTrackingByDefault: Bool = false,
                     useUniqueDistinctId: Bool = false,
                     superProperties: Properties? = nil,
-                    proxyServerConfig: ProxyServerConfig
+                    proxyServerConfig: ProxyServerConfig,
+                    useGzipCompression: Bool = false
     ) -> MixpanelInstance {
         return dequeueInstance(instanceName: instanceName) {
             return MixpanelInstance(apiToken: apiToken,
@@ -291,7 +306,8 @@ final class MixpanelManager {
                                     optOutTrackingByDefault: optOutTrackingByDefault,
                                     useUniqueDistinctId: useUniqueDistinctId,
                                     superProperties: superProperties,
-                                    proxyServerConfig: proxyServerConfig)
+                                    proxyServerConfig: proxyServerConfig,
+                                    useGzipCompression: useGzipCompression)
         }
     }
     

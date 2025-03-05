@@ -170,6 +170,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             flushInstance.serverURL = serverURL
         }
     }
+
+    open var useGzipCompression: Bool = false {
+        didSet {
+            flushInstance.useGzipCompression = useGzipCompression
+        }
+    }
     
     /// The a MixpanelProxyServerDelegate object that gives config control over Proxy Server's network activity.
     open weak var proxyServerDelegate: MixpanelProxyServerDelegate? = nil
@@ -270,7 +276,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         optOutTrackingByDefault: Bool = false,
         useUniqueDistinctId: Bool = false,
         superProperties: Properties? = nil,
-        proxyServerConfig: ProxyServerConfig
+        proxyServerConfig: ProxyServerConfig,
+        useGzipCompression: Bool = false
     ) {
         self.init(apiToken: apiToken,
                   flushInterval: flushInterval,
@@ -280,7 +287,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                   useUniqueDistinctId: useUniqueDistinctId,
                   superProperties: superProperties,
                   serverURL: proxyServerConfig.serverUrl,
-                  proxyServerDelegate: proxyServerConfig.delegate)
+                  proxyServerDelegate: proxyServerConfig.delegate,
+                  useGzipCompression: useGzipCompression)
     }
     
     convenience init(
@@ -291,7 +299,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         optOutTrackingByDefault: Bool = false,
         useUniqueDistinctId: Bool = false,
         superProperties: Properties? = nil,
-        serverURL: String? = nil
+        serverURL: String? = nil,
+        useGzipCompression: Bool = false
     ) {
         self.init(apiToken: apiToken,
                   flushInterval: flushInterval,
@@ -301,7 +310,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                   useUniqueDistinctId: useUniqueDistinctId,
                   superProperties: superProperties,
                   serverURL: serverURL,
-                  proxyServerDelegate: nil)
+                  proxyServerDelegate: nil,
+                  useGzipCompression: useGzipCompression)
     }
     
     
@@ -314,7 +324,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         useUniqueDistinctId: Bool = false,
         superProperties: Properties? = nil,
         serverURL: String? = nil,
-        proxyServerDelegate: MixpanelProxyServerDelegate? = nil
+        proxyServerDelegate: MixpanelProxyServerDelegate? = nil,
+        useGzipCompression: Bool = false
     ) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
@@ -324,6 +335,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             self.serverURL = serverURL
         }
         self.proxyServerDelegate = proxyServerDelegate
+        self.useGzipCompression = useGzipCompression
         let label = "com.mixpanel.\(self.apiToken)"
         trackingQueue = DispatchQueue(label: "\(label).tracking)", qos: .utility, autoreleaseFrequency: .workItem)
         networkQueue = DispatchQueue(label: "\(label).network)", qos: .utility, autoreleaseFrequency: .workItem)
@@ -334,7 +346,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         self.useUniqueDistinctId = useUniqueDistinctId
         
         readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
-        flushInstance = Flush(serverURL: self.serverURL)
+        flushInstance = Flush(serverURL: self.serverURL, useGzipCompression: useGzipCompression)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         trackInstance = Track(apiToken: self.apiToken,
                               instanceName: self.name,

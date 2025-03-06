@@ -19,7 +19,7 @@ class ReadWriteLock {
             closure()
         }
     }
-    func write(closure: () -> Void) {
+    func write<T>(closure: () -> T) -> T {
         concurrentQueue.sync(flags: .barrier, execute: {
             closure()
         })

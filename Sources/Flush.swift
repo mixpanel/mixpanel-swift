@@ -124,8 +124,8 @@ class Flush: AppLifecycle {
                 (entity["id"] as? Int32) ?? 0
             }
             // Log data payload sent
-            Logger.debug(message: "Sending batch of data")
-            Logger.debug(message: batch as Any)
+            MixpanelLogger.debug(message: "Sending batch of data")
+            MixpanelLogger.debug(message: batch as Any)
             let requestData = JSONHandler.encodeAPIData(batch)
             if let requestData = requestData {
                 #if os(iOS)

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'Mixpanel-swift'
-  s.version = '4.3.0'
+  s.version = '4.3.1'
   s.module_name = 'Mixpanel'
   s.license = 'Apache License, Version 2.0'
   s.summary = 'Mixpanel tracking library for iOS (Swift)'
@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   }
   s.default_subspec = 'Complete'
   base_source_files = ['Sources/Network.swift', 'Sources/FlushRequest.swift', 'Sources/PrintLogging.swift', 'Sources/FileLogging.swift',
-    'Sources/Logger.swift', 'Sources/JSONHandler.swift', 'Sources/Error.swift', 'Sources/AutomaticProperties.swift',
+    'Sources/MixpanelLogger.swift', 'Sources/JSONHandler.swift', 'Sources/Error.swift', 'Sources/AutomaticProperties.swift',
     'Sources/Constants.swift', 'Sources/MixpanelType.swift', 'Sources/Mixpanel.swift', 'Sources/MixpanelInstance.swift',
     'Sources/Flush.swift','Sources/Track.swift', 'Sources/People.swift', 'Sources/AutomaticEvents.swift',
     'Sources/Group.swift',

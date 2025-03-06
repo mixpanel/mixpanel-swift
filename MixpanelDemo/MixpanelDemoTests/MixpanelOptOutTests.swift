@@ -66,14 +66,14 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         waitForTrackingQueue(testMixpanel)
         let eventQueueValue = eventQueue(token: testMixpanel.apiToken)
-        let props = eventQueueValue[1]["properties"] as? InternalProperties
+        let props = eventQueueValue[0]["properties"] as? InternalProperties
         XCTAssertEqual(props!["string"] as? String, "yello")
         XCTAssertEqual(props!["number"] as? NSNumber, 3)
         compareDate(dateString: props!["date"] as! String, dateDate: now)
         XCTAssertEqual(props!["$app_version"] as? String, "override", "reserved property override failed")
 
         if eventQueueValue.count > 0 {
-            let event = eventQueueValue[1]
+            let event = eventQueueValue[0]
             XCTAssertEqual((event["event"] as? String), "$opt_in", "When opted in, a track '$opt_in' should have been queued")
         }
         else {
@@ -238,6 +238,14 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).count == 1, "When opted out, people queue should not be flushed")
         removeDBfile(testMixpanel.apiToken)
     }
+    
+    func testOptOutByDefaultTrueSkipsFirstAppOpen()
+    {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 0, "When opted out, first app open should not be tracked")
+        removeDBfile(testMixpanel.apiToken)
+    }
 
     func testOptOutWillSkipFlushEvent()
     {
@@ -250,7 +258,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             testMixpanel.track(event: "event \(i)")
         }
         waitForTrackingQueue(testMixpanel)
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 3, "When opted in, events should have been queued")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "When opted in, events should have been queued")
 
         testMixpanel.optOutTracking()
         waitForTrackingQueue(testMixpanel)
@@ -258,7 +266,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         testMixpanel.flush()
         waitForTrackingQueue(testMixpanel)
         
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 3, "When opted out, events should not be flushed")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "When opted out, events should not be flushed")
         removeDBfile(testMixpanel.apiToken)
     }
 }

@@ -219,6 +219,17 @@ open class Mixpanel {
         }
     }
     
+    /// Returns the main Mixpanel instance if it has been initialized.
+    /// - Returns: An optional MixpanelInstance, or nil if not yet initialized.
+    public class func safeMainInstance() -> MixpanelInstance? {
+        if let instance = MixpanelManager.sharedInstance.getMainInstance() {
+            return instance
+        } else {
+            MixpanelLogger.warn(message: "WARNING: Mixpanel main instance is NOT initialized. Call Mixpanel.initialize(...) first.")
+            return nil
+        }
+    }
+    
     /**
      Sets the main instance based on the instance name
      

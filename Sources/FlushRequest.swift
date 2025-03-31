@@ -23,7 +23,8 @@ class FlushRequest: Network {
                      type: FlushType,
                      useIP: Bool,
                      headers: [String: String],
-                     queryItems: [URLQueryItem] = []) -> Bool {
+                     queryItems: [URLQueryItem] = [],
+                     useGzipCompression: Bool) -> Bool {
 
         let responseParser: (Data) -> Int? = { data in
             let response = String(data: data, encoding: String.Encoding.utf8)
@@ -33,14 +34,25 @@ class FlushRequest: Network {
             return nil
         }
         
-        let resourceHeaders: [String: String] = ["Content-Type": "application/json"].merging(headers) {(_,new) in new }
-
+        var resourceHeaders: [String: String] = ["Content-Type": "application/json"].merging(headers) {(_,new) in new }
+        var compressedData: Data? = nil
+        
+        if useGzipCompression && type == .events {
+            if let requestDataRaw = requestData.data(using: .utf8) {
+                do {
+                    compressedData = try requestDataRaw.gzipCompressed()
+                    resourceHeaders["Content-Encoding"] = "gzip"
+                } catch {
+                    MixpanelLogger.error(message: "Failed to compress data with gzip: \(error)")
+                }
+            }
+        }
         let ipString = useIP ? "1" : "0"
         var resourceQueryItems: [URLQueryItem] = [URLQueryItem(name: "ip", value: ipString)]
         resourceQueryItems.append(contentsOf: queryItems)
         let resource = Network.buildResource(path: type.rawValue,
                                              method: .post,
-                                             requestBody: requestData.data(using: .utf8),
+                                             requestBody: compressedData ?? requestData.data(using: .utf8),
                                              queryItems: resourceQueryItems,
                                              headers: resourceHeaders,
                                              parse: responseParser)

@@ -17,7 +17,7 @@
     <a title="Mixpanel Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 4.3.1 Docs</a> (81% documented)</p>
+        <p><a href="../index.html">Mixpanel 4.4.0 Docs</a> (77% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
@@ -60,6 +60,9 @@
             <a href="../Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a href="../Enums/GzipError.html">GzipError</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Enums/MixpanelLogLevel.html">MixpanelLogLevel</a>
               </li>
             </ul>
@@ -72,6 +75,9 @@
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/Bool.html">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Data.html">Data</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Extensions/Date.html">Date</a>
@@ -175,9 +181,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURLAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgANtFZ"></a>
-                    <a name="//apple_ref/swift/Method/initialize(token:trackAutomaticEvents:flushInterval:instanceName:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURLAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgANtFZ">initialize(token:<wbr>trackAutomaticEvents:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>)</a>
+                    <a name="/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL0P15GzipCompressionAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgAOSbtFZ"></a>
+                    <a name="//apple_ref/swift/Method/initialize(token:trackAutomaticEvents:flushInterval:instanceName:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:useGzipCompression:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL0P15GzipCompressionAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgAOSbtFZ">initialize(token:<wbr>trackAutomaticEvents:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>useGzipCompression:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -210,7 +216,8 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                            <span class="nv">optOutTrackingByDefault</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
                            <span class="nv">useUniqueDistinctId</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
                            <span class="nv">superProperties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-                           <span class="nv">serverURL</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span></code></pre>
+                           <span class="nv">serverURL</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+                           <span class="nv">useGzipCompression</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span></code></pre>
 
                         </div>
                       </div>
@@ -315,6 +322,18 @@ It is useful when you want more than one Mixpanel instance under the same projec
                                 </div>
                               </td>
                             </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>useGzipCompression</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Optional. Whether to use gzip compression for network requests.</p>
+                                </div>
+                              </td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -329,9 +348,9 @@ You can always get the instance by calling getInstance(name)</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties17proxyServerConfigAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgAA05ProxywX0VtFZ"></a>
-                    <a name="//apple_ref/swift/Method/initialize(token:trackAutomaticEvents:flushInterval:instanceName:optOutTrackingByDefault:useUniqueDistinctId:superProperties:proxyServerConfig:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties17proxyServerConfigAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgAA05ProxywX0VtFZ">initialize(token:<wbr>trackAutomaticEvents:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>proxyServerConfig:<wbr>)</a>
+                    <a name="/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties17proxyServerConfig0P15GzipCompressionAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgAA05ProxywX0VSbtFZ"></a>
+                    <a name="//apple_ref/swift/Method/initialize(token:trackAutomaticEvents:flushInterval:instanceName:optOutTrackingByDefault:useUniqueDistinctId:superProperties:proxyServerConfig:useGzipCompression:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8MixpanelAAC10initialize5token20trackAutomaticEvents13flushInterval12instanceName23optOutTrackingByDefault19useUniqueDistinctId15superProperties17proxyServerConfig0P15GzipCompressionAA0A8InstanceCSS_SbSdSSSgS2bSDySSAA0A4Type_pGSgAA05ProxywX0VSbtFZ">initialize(token:<wbr>trackAutomaticEvents:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>proxyServerConfig:<wbr>useGzipCompression:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -364,7 +383,8 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                            <span class="nv">optOutTrackingByDefault</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
                            <span class="nv">useUniqueDistinctId</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
                            <span class="nv">superProperties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-                           <span class="nv">proxyServerConfig</span><span class="p">:</span> <span class="kt"><a href="../Structs/ProxyServerConfig.html">ProxyServerConfig</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span></code></pre>
+                           <span class="nv">proxyServerConfig</span><span class="p">:</span> <span class="kt"><a href="../Structs/ProxyServerConfig.html">ProxyServerConfig</a></span><span class="p">,</span>
+                           <span class="nv">useGzipCompression</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span></code></pre>
 
                         </div>
                       </div>
@@ -469,6 +489,18 @@ It is useful when you want more than one Mixpanel instance under the same projec
                                 </div>
                               </td>
                             </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>useGzipCompression</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Optional. Whether to use gzip compression for network requests.</p>
+                                </div>
+                              </td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -484,8 +516,8 @@ You can always get the instance by calling getInstance(name)</p>
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/initialize(token:flushInterval:instanceName:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">initialize(token:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>)</a>
+                    <a name="//apple_ref/swift/Method/initialize(token:flushInterval:instanceName:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:useGzipCompression:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">initialize(token:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>useGzipCompression:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -513,8 +545,8 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/initialize(token:flushInterval:instanceName:optOutTrackingByDefault:useUniqueDistinctId:superProperties:proxyServerConfig:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">initialize(token:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>proxyServerConfig:<wbr>)</a>
+                    <a name="//apple_ref/swift/Method/initialize(token:flushInterval:instanceName:optOutTrackingByDefault:useUniqueDistinctId:superProperties:proxyServerConfig:useGzipCompression:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">initialize(token:<wbr>flushInterval:<wbr>instanceName:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>proxyServerConfig:<wbr>useGzipCompression:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -624,6 +656,37 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:8MixpanelAAC16safeMainInstanceAA0aD0CSgyFZ"></a>
+                    <a name="//apple_ref/swift/Method/safeMainInstance()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8MixpanelAAC16safeMainInstanceAA0aD0CSgyFZ">safeMainInstance()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns the main Mixpanel instance if it has been initialized.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">safeMainInstance</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>An optional MixpanelInstance, or nil if not yet initialized.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:8MixpanelAAC15setMainInstance4nameySS_tFZ"></a>
                     <a name="//apple_ref/swift/Method/setMainInstance(name:)" class="dashAnchor"></a>
                     <a class="token" href="#/s:8MixpanelAAC15setMainInstance4nameySS_tFZ">setMainInstance(name:<wbr>)</a>
@@ -718,7 +781,7 @@ the instances with an instanceName. Then they can be reached by calling getInsta
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2025 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2025-02-10)</p>
+          <p>&copy; 2025 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2025-03-31)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

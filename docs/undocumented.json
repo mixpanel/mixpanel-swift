@@ -1,6 +1,55 @@
 {
   "warnings": [
     {
+      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "line": 11,
+      "symbol": "GzipError",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "line": 12,
+      "symbol": "GzipError.stream",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "line": 13,
+      "symbol": "GzipError.data",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "line": 14,
+      "symbol": "GzipError.memory",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "line": 15,
+      "symbol": "GzipError.buffer",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "line": 16,
+      "symbol": "GzipError.version",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "line": 17,
+      "symbol": "GzipError.unknown(code:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
       "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
       "line": 53,
       "symbol": "Properties",
@@ -23,21 +72,28 @@
     },
     {
       "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 221,
+      "line": 174,
+      "symbol": "MixpanelInstance.useGzipCompression",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 227,
       "symbol": "MixpanelInstance.minimumSessionDuration",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 900,
+      "line": 912,
       "symbol": "MixpanelInstance.archive()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 1146,
+      "line": 1158,
       "symbol": "MixpanelInstance.getGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"

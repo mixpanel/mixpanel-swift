@@ -66,7 +66,11 @@ extension Data {
             if Int(stream.total_out) >= compressedData.count {
                 compressedData.count += self.count / 2
             }
-            stream.next_out = compressedData.withUnsafeMutableBytes { $0.baseAddress!.assumingMemoryBound(to: Bytef.self) }.advanced(by: Int(stream.total_out))
+            let bufferPointer = compressedData.withUnsafeMutableBytes { $0.baseAddress?.assumingMemoryBound(to: Bytef.self) }
+            guard let bufferPointer = bufferPointer else {
+                throw GzipError(code: Z_BUF_ERROR)
+            }
+            stream.next_out = bufferPointer.advanced(by: Int(stream.total_out))
             stream.avail_out = uint(compressedData.count) - uint(stream.total_out)
 
             status = deflate(&stream, Z_FINISH)

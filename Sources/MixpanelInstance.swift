@@ -77,6 +77,8 @@ public struct ProxyServerConfig {
 /// The class that represents the Mixpanel Instance
 open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate {
     
+    private let config: MixpanelConfig
+    
     /// apiToken string that identifies the project to track data to
     open var apiToken = ""
     
@@ -262,11 +264,26 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let sessionMetadata: SessionMetadata
     let flushInstance: Flush
     let trackInstance: Track
+    let featureFlagManager: FeatureFlagManager
 #if os(iOS) || os(tvOS) || os(visionOS)
     let automaticEvents = AutomaticEvents()
 #endif
     private let registerSuperPropertiesNotificationName = Notification.Name("com.mixpanel.properties.register")
     private let unregisterSuperPropertiesNotificationName = Notification.Name("com.mixpanel.properties.unregister")
+    
+    convenience init(config: MixpanelConfig) {
+        self.init(apiToken: config.token,
+                  flushInterval: config.flushInterval,
+                  name: config.instanceName ?? config.token,
+                  trackAutomaticEvents: config.trackAutomaticEvents,
+                  optOutTrackingByDefault: config.optOutTrackingByDefault,
+                  useUniqueDistinctId: config.useUniqueDistinctId,
+                  superProperties: config.superProperties,
+                  serverURL: config.serverURL,
+                  proxyServerDelegate: config.proxyServerConfig?.delegate,
+                  useGzipCompression: config.useGzipCompression,
+                  config: config)
+    }
     
     convenience init(
         apiToken: String?,
@@ -325,8 +342,22 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         superProperties: Properties? = nil,
         serverURL: String? = nil,
         proxyServerDelegate: MixpanelProxyServerDelegate? = nil,
-        useGzipCompression: Bool = false
+        useGzipCompression: Bool = false,
+        config: MixpanelConfig? = nil
     ) {
+        // Store the config if provided, otherwise create one with the current values
+        self.config = config ?? MixpanelConfig(
+            token: apiToken ?? "",
+            flushInterval: flushInterval,
+            instanceName: name,
+            trackAutomaticEvents: trackAutomaticEvents,
+            optOutTrackingByDefault: optOutTrackingByDefault,
+            useUniqueDistinctId: useUniqueDistinctId,
+            superProperties: superProperties,
+            serverURL: serverURL,
+            useGzipCompression: useGzipCompression
+        )
+        
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -352,6 +383,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                               instanceName: self.name,
                               lock: self.readWriteLock,
                               metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
+        featureFlagManager = FeatureFlagManager(serverURL: self.serverURL, instanceName: self.name)
         trackInstance.mixpanelInstance = self
 #if os(iOS) && !targetEnvironment(macCatalyst)
         if let reachability = MixpanelInstance.reachability {
@@ -404,6 +436,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             automaticEvents.initializeEvents(instanceName: self.name)
         }
 #endif
+    }
+    
+    public func getConfig() -> MixpanelConfig {
+        return config
     }
     
 #if !os(OSX) && !os(watchOS)

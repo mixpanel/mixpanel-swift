@@ -14,6 +14,17 @@ import UIKit
 /// The primary class for integrating Mixpanel with your app.
 open class Mixpanel {
     
+    @discardableResult
+    open class func initialize(config: MixpanelConfig) -> MixpanelInstance {
+        let instanceName = config.instanceName ?? config.token
+        
+        if let proxyServerConfig = config.proxyServerConfig {
+            return MixpanelManager.sharedInstance.initialize(config: config)
+        } else {
+            return MixpanelManager.sharedInstance.initialize(config: config)
+        }
+    }
+    
 #if !os(OSX) && !os(watchOS)
     /**
      Initializes an instance of the API with the given project token.
@@ -259,6 +270,15 @@ open class Mixpanel {
     open class func removeInstance(name: String) {
         MixpanelManager.sharedInstance.removeInstance(name: name)
     }
+    
+    open class func getConfig(name: String? = nil) -> MixpanelConfig? {
+        if let name, let instance = MixpanelManager.sharedInstance.getInstance(name: name) {
+            return instance.getConfig()
+        } else if let instance = MixpanelManager.sharedInstance.getMainInstance() {
+            return instance.getConfig()
+        }
+        return nil
+    }
 }
 
 final class MixpanelManager {
@@ -274,6 +294,12 @@ final class MixpanelManager {
         MixpanelLogger.addLogging(PrintLogging())
         readWriteLock = ReadWriteLock(label: "com.mixpanel.instance.manager.lock")
         instanceQueue = DispatchQueue(label: "com.mixpanel.instance.manager.instance", qos: .utility, autoreleaseFrequency: .workItem)
+    }
+    
+    func initialize(config: MixpanelConfig) -> MixpanelInstance {
+        return dequeueInstance(instanceName: config.instanceName ?? config.token) {
+            return MixpanelInstance(config: config)
+        }
     }
     
     func initialize(token apiToken: String,
@@ -382,6 +408,7 @@ final class MixpanelManager {
             instances[instanceName] = nil
         }
     }
+    
     
 }
 

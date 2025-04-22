@@ -75,8 +75,8 @@ public struct ProxyServerConfig {
 }
 
 /// The class that represents the Mixpanel Instance
-open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate {
-    
+open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate, FeatureFlagDelegate {
+
     private let config: MixpanelConfig
     
     /// apiToken string that identifies the project to track data to
@@ -383,8 +383,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                               instanceName: self.name,
                               lock: self.readWriteLock,
                               metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
-        featureFlagManager = FeatureFlagManager(serverURL: self.serverURL, instanceName: self.name)
+        featureFlagManager = FeatureFlagManager(serverURL: self.serverURL)
         trackInstance.mixpanelInstance = self
+        featureFlagManager.delegate = self
 #if os(iOS) && !targetEnvironment(macCatalyst)
         if let reachability = MixpanelInstance.reachability {
             var context = SCNetworkReachabilityContext(version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
@@ -436,10 +437,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             automaticEvents.initializeEvents(instanceName: self.name)
         }
 #endif
+        featureFlagManager.loadFlags()
     }
     
     public func getConfig() -> MixpanelConfig {
         return config
+    }
+    
+    func getDistinctId() -> String {
+        return distinctId
     }
     
 #if !os(OSX) && !os(watchOS)

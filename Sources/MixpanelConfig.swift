@@ -19,8 +19,7 @@ public class MixpanelConfig {
     public let serverURL: String?
     public let proxyServerConfig: ProxyServerConfig?
     public let useGzipCompression: Bool
-    public let flagsEnabled: Bool
-    public let flagsContext: Dictionary<String, Any>?
+    public let flagsConfig: FlagsConfig
     
     public init(token: String,
                 flushInterval: Double = 60,
@@ -32,8 +31,7 @@ public class MixpanelConfig {
                 serverURL: String? = nil,
                 proxyServerConfig: ProxyServerConfig? = nil,
                 useGzipCompression: Bool = true, // NOTE: This is a new default value!
-                flagsEnabled: Bool = false,
-                flagsContext: Dictionary<String, Any>? = nil) {
+                flagsConfig: FlagsConfig = FlagsConfig()) {
         self.token = token
         self.flushInterval = flushInterval
         self.instanceName = instanceName
@@ -44,7 +42,6 @@ public class MixpanelConfig {
         self.serverURL = serverURL
         self.proxyServerConfig = proxyServerConfig
         self.useGzipCompression = useGzipCompression
-        self.flagsEnabled = flagsEnabled
-        self.flagsContext = flagsContext
+        self.flagsConfig = flagsConfig
     }
 }

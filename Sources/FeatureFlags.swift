@@ -4,8 +4,8 @@ import Foundation
 
 // Represents the data associated with a feature flag
 struct FeatureFlagData: Decodable {
-    let key: String // Corresponds to 'variant_key' in JS
-    let value: Any? // Corresponds to 'variant_value' in JS - Use Any? for flexibility
+    let key: String // Corresponds to 'variant_key' from API
+    let value: Any? // Corresponds to 'variant_value' from API - Use Any? for flexibility
     
     // Manual decoding to handle Any? for the value
     enum CodingKeys: String, CodingKey {
@@ -83,214 +83,193 @@ struct FlagsResponse: Decodable {
     let flags: [String: FeatureFlagData]? // Dictionary where key is feature name
 }
 
+// Feature Flag Config Struct conforming to Decodable
+public struct FlagsConfig: Decodable {
+    let enabled: Bool
+    let context: [String: Any?] // Context for the request (using Any? for flexibility with nil)
+    
+    // Define the keys corresponding to the JSON structure
+    enum CodingKeys: String, CodingKey {
+        case enabled
+        case context
+    }
+    
+    // Custom initializer required by Decodable
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Decode the 'enabled' boolean directly
+        enabled = try container.decode(Bool.self, forKey: .enabled)
+        
+        // Decode the 'context' dictionary using AnyCodable for values
+        // Use decodeIfPresent if the 'context' key might be optional in the JSON
+        // If 'context' is guaranteed to exist, use decode().
+        let anyCodableContext = try container.decodeIfPresent([String: AnyCodable].self, forKey: .context) ?? [:]
+        
+        // Map the [String: AnyCodable] dictionary to [String: Any?]
+        // by extracting the 'value' from each AnyCodable wrapper.
+        context = anyCodableContext.mapValues { $0.value }
+    }
+    
+    // memberwise initializer for non-decoding instantiation
+    public init(enabled: Bool = false, context: [String: Any?] = [:]) {
+        self.enabled = enabled
+        self.context = context
+    }
+}
+
+
+// --- FeatureFlagDelegate Protocol ---
+protocol FeatureFlagDelegate: AnyObject {
+    func getConfig() -> MixpanelConfig
+    func getDistinctId() -> String
+    func track(event: String?, properties: Properties?)
+}
+
 
 // --- FeatureFlagManager Class ---
 
 class FeatureFlagManager: Network {
     
-    private var instanceName: String?
+    weak var delegate: FeatureFlagDelegate?
     
-    // Internal State
-    private var flags: [String: FeatureFlagData]? = nil // Holds the fetched flags
+    // *** Use a SERIAL queue for automatic state serialization ***
+    let accessQueue = DispatchQueue(label: "com.mixpanel.featureflagmanager.serialqueue")
+    
+    // Internal State - Protected by accessQueue
+    var flags: [String: FeatureFlagData]? = nil
+    var isFetching: Bool = false
     private var trackedFeatures: Set<String> = Set()
-    private var isFetching: Bool = false
-    private var fetchCompletionHandlers: [(Bool) -> Void] = [] // To notify callers when fetch completes
-    private let accessQueue = DispatchQueue(label: "com.mixpanel.featureflagmanager.queue", attributes: .concurrent) // For thread safety
+    private var fetchCompletionHandlers: [(Bool) -> Void] = []
     
-    // Configuration Keys
-    private let flagsConfigKey = "flags"
-    private let configContextKey = "context"
-    private let flagsRoute = "/flags/"
+    // Configuration
+    private var currentConfig: MixpanelConfig? { delegate?.getConfig() }
+    private var flagsRoute = "/flags/"
     
-    init(serverURL: String, instanceName: String) {
-        super.init(serverURL: serverURL)
-        self.instanceName = instanceName
-        // Initial fetch is triggered by an explicit call or first access usually
-        print("FeatureFlagManager initialized.") // Replaces logger.log
-    }
-    
+    // Initializers
     required init(serverURL: String) {
         super.init(serverURL: serverURL)
     }
     
-    // Public function to start loading flags
+    public init(serverURL: String, delegate: FeatureFlagDelegate?) {
+        self.delegate = delegate
+        super.init(serverURL: serverURL)
+    }
+    
+    // --- Public Methods ---
+    
     func loadFlags() {
-        fetchFlags(completion: nil)
-    }
-    
-    // --- Configuration Access ---
-    
-    private func getInstance() -> MixpanelInstance? {
-        if let instanceName, let instance = Mixpanel.getInstance(name: instanceName) {
-            return instance
-        } else if let instance = Mixpanel.safeMainInstance() {
-            return instance
+        // Dispatch fetch trigger to allow caller to continue
+        // Using the serial queue itself for this background task is fine
+        accessQueue.async { [weak self] in
+            self?._fetchFlagsIfNeeded(completion: nil)
         }
-        return nil
     }
-    
-    private func getFullConfig() -> MixpanelConfig? {
-        getInstance()?.getConfig()
-    }
-    
-    private func getContext() -> InternalProperties {
-        return getFullConfig()?.flagsContext ?? [:]
-    }
-    
-    private func isEnabled() -> Bool {
-        return getFullConfig()?.flagsEnabled ?? false
-    }
-    
-    // --- Flag State ---
     
     func areFeaturesReady() -> Bool {
-        var ready = false
-        accessQueue.sync { // Read needs sync access
-            ready = self.flags != nil
-        }
-        if !ready && isEnabled() {
-            print("Warning: Feature flags checked before being loaded.") // Replaces logger.log [cite: 21]
-        } else if !isEnabled() {
-            print("Error: Feature Flags not enabled.") // Replaces logger.error [cite: 11]
-        }
-        return ready
+        // Simple sync read - serial queue ensures this is safe
+        accessQueue.sync { flags != nil }
     }
     
-    // --- Fetching Logic ---
+    // --- Sync Flag Retrieval ---
     
-    private func fetchFlags(completion: ((Bool) -> Void)?) {
-        guard isEnabled() else { // [cite: 12]
-            print("Feature flags are disabled, not fetching.")
-            completion?(false)
-            return
+    func getFeatureSync(_ featureName: String, fallback: FeatureFlagData = FeatureFlagData(value: nil)) -> FeatureFlagData {
+        var featureData: FeatureFlagData?
+        var tracked = false
+        // === Serial Queue: Single Sync Block for Read AND Track Update ===
+        accessQueue.sync {
+            guard let currentFlags = self.flags else { return }
+            
+            if let feature = currentFlags[featureName] {
+                featureData = feature
+                
+                // Perform atomic check-and-set for tracking *within the same sync block*
+                if !self.trackedFeatures.contains(featureName) {
+                    self.trackedFeatures.insert(featureName)
+                    tracked = true
+                }
+            }
+            // If feature wasn't found, featureData remains nil
         }
+        // === End Sync Block ===
         
-        let shouldFetch = accessQueue.sync(flags: .barrier) { // Write access needs barrier
-            if self.isFetching {
-                // Queue completion if already fetching
-                if let completion = completion {
-                    self.fetchCompletionHandlers.append(completion)
-                }
-                return false // Don't start another fetch
-            }
-            // Mark as fetching and add the first completion handler
-            self.isFetching = true
-            if let completion = completion {
-                self.fetchCompletionHandlers.append(completion)
-            }
-            return true // Start fetch
-        }
+        // Now, process the results outside the lock
         
-        guard shouldFetch else { return }
-        
-        if let instance = getInstance() {
-            let distinctId = instance.distinctId
-            print("Fetching flags for distinct ID: \(distinctId)") // Replaces logger.log [cite: 13]
-            
-            // Prepare request context [cite: 14]
-            var context = getContext()
-            context["distinct_id"] = distinctId
-            
-            let requestBodyDict = ["context": context]
-            
-            guard let requestBodyData = try? JSONSerialization.data(withJSONObject: requestBodyDict, options: []) else {
-                print("Error: Failed to serialize request body for flags.")
-                completeFetch(success: false)
-                return
+        if let foundFeature = featureData {
+            // If tracking was done *in this call*, call the delegate
+            if tracked {
+                self._performTrackingDelegateCall(featureName: featureName, feature: foundFeature)
             }
-            
-            // Basic Auth Header
-            guard let authData = "\(instance.apiToken):".data(using: .utf8) else {
-                print("Error: Failed to create auth data.")
-                completeFetch(success: false)
-                return
-            }
-            let base64Auth = authData.base64EncodedString()
-            let headers = [
-                "Authorization": "Basic \(base64Auth)",
-                "Content-Type": "application/json" // Assuming JSON, though JS used octet-stream [cite: 15] adjust if needed
-            ]
-            
-            // Define the response parser
-            let responseParser: (Data) -> FlagsResponse? = { data in
-                do {
-                    let decoder = JSONDecoder()
-                    let response = try decoder.decode(FlagsResponse.self, from: data)
-                    return response
-                } catch {
-                    print("Error: Failed to parse flags response JSON: \(error)") // Replaces logger.error [cite: 18]
-                    return nil
-                }
-            }
-            
-            // Build the resource [cite: 51]
-            let resource = Network.buildResource(path: flagsRoute, // e.g., "/flags"
-                                                 method: .post,
-                                                 requestBody: requestBodyData,
-                                                 headers: headers,
-                                                 parse: responseParser) // [cite: 52]
-            
-            // Make the API request [cite: 42]
-            Network.apiRequest(base: serverURL, // e.g., "https://api.mixpanel.com" [cite: 36]
-                               resource: resource,
-                               failure: { reason, data, response in
-                print("Error: Failed to fetch flags. Reason: \(reason)") // Replaces logger.error [cite: 18]
-                if let data = data, let responseString = String(data: data, encoding: .utf8) {
-                    print("Error response body: \(responseString)")
-                }
-                self.completeFetch(success: false)
-            },
-                               success: { [weak self] (flagsResponse, response) in // [cite: 16]
-                print("Successfully fetched flags.")
-                self?.accessQueue.sync(flags: .barrier) { // Write needs barrier
-                    self?.flags = flagsResponse.flags ?? [:] // Store fetched flags [cite: 17]
-                }
-                self?.completeFetch(success: true)
-            })
+            return foundFeature
+        } else {
+            print("Info: Flag '\(featureName)' not found or flags not ready. Returning fallback.")
+            return fallback
         }
     }
     
-    private func completeFetch(success: Bool) {
-        accessQueue.sync(flags: .barrier) { // Write needs barrier
-            let handlers = self.fetchCompletionHandlers
-            self.fetchCompletionHandlers.removeAll()
-            self.isFetching = false
-            // Notify all queued handlers
-            DispatchQueue.main.async { // Call handlers on main thread
-                handlers.forEach { $0(success) }
-            }
-        }
+    func getFeatureDataSync(_ featureName: String, fallbackValue: Any? = nil) -> Any? {
+        return getFeatureSync(featureName, fallback: FeatureFlagData(value: fallbackValue)).value
+    }
+    
+    func isFeatureEnabledSync(_ featureName: String, fallbackValue: Bool = false) -> Bool {
+        let dataValue = getFeatureDataSync(featureName, fallbackValue: fallbackValue)
+        return self._evaluateBooleanFlag(featureName: featureName, dataValue: dataValue, fallbackValue: fallbackValue)
     }
     
     
-    // --- Getting Feature Flags (Async) ---
+    // --- Async Flag Retrieval ---
     
-    // Use completion handler pattern similar to Network class
     func getFeature(_ featureName: String, fallback: FeatureFlagData = FeatureFlagData(value: nil), completion: @escaping (FeatureFlagData) -> Void) {
-        accessQueue.async { // Read can be concurrent
-            if self.flags != nil {
-                // Flags already loaded, return sync result immediately on main thread
-                let result = self._getFeatureSync(featureName, fallback: fallback)
-                DispatchQueue.main.async { completion(result) }
-            } else {
-                // Flags not loaded, trigger fetch and call completion when done
-                DispatchQueue.main.async { // Ensure fetchFlags is called from a consistent thread if needed, or manage internally
-                    self.fetchFlags { [weak self] success in
-                        guard let self = self else {
-                            completion(fallback)
-                            return
-                        }
-                        if success {
-                            let result = self._getFeatureSync(featureName, fallback: fallback) // Called within fetch completion, safe to access flags
-                            completion(result)
-                        } else {
-                            print("Warning: Failed to fetch flags, returning fallback for \(featureName).")
-                            completion(fallback)
-                        }
-                    }
+        accessQueue.async { [weak self] in // Block A runs serially on accessQueue
+            guard let self = self else { return }
+            
+            var featureData: FeatureFlagData?
+            var needsTrackingCheck = false
+            var flagsAreCurrentlyReady = false
+            
+            // === Access state DIRECTLY within the async block ===
+            // No inner sync needed - we are already synchronized by the serial queue
+            flagsAreCurrentlyReady = (self.flags != nil)
+            if flagsAreCurrentlyReady, let currentFlags = self.flags {
+                if let feature = currentFlags[featureName] {
+                    featureData = feature
+                    // Also safe to access trackedFeatures directly here
+                    needsTrackingCheck = !self.trackedFeatures.contains(featureName)
                 }
             }
-        }
+            // === State access finished ===
+            
+            if flagsAreCurrentlyReady {
+                let result = featureData ?? fallback
+                if featureData != nil, needsTrackingCheck {
+                    // Perform atomic check-and-track. _trackFeatureIfNeeded uses its
+                    // own sync block, which is safe to call from here (it's not nested).
+                    self._trackFeatureIfNeeded(featureName: featureName, feature: result)
+                }
+                DispatchQueue.main.async { completion(result) }
+                
+            } else {
+                // --- Flags were NOT ready ---
+                // Trigger fetch; fetch completion will handle calling the original completion handler
+                print("Flags not ready, attempting fetch for getFeature call...")
+                self._fetchFlagsIfNeeded { success in
+                    // This completion runs *after* fetch completes (or fails)
+                    let result: FeatureFlagData
+                    if success {
+                        // Fetch succeeded, get the feature SYNCHRONOUSLY
+                        result = self.getFeatureSync(featureName, fallback: fallback)
+                    } else {
+                        print("Warning: Failed to fetch flags, returning fallback for \(featureName).")
+                        result = fallback
+                    }
+                    // Call original completion (on main thread)
+                    DispatchQueue.main.async { completion(result) }
+                }
+
+                return // Exit Block A early, fetch completion handles the callback.
+                
+            }
+        } // End accessQueue.async (Block A)
     }
     
     
@@ -301,145 +280,164 @@ class FeatureFlagManager: Network {
     }
     
     func isFeatureEnabled(_ featureName: String, fallbackValue: Bool = false, completion: @escaping (Bool) -> Void) {
-        // Fetch the data first, then evaluate if it's true/false
         getFeatureData(featureName, fallbackValue: fallbackValue) { [weak self] dataValue in
             guard let self = self else {
                 completion(fallbackValue)
                 return
             }
-            // Use the sync logic for evaluation after data is retrieved
-            completion(self._isFeatureEnabledSync(featureName: featureName, dataValue: dataValue, fallbackValue: fallbackValue))
+            let result = self._evaluateBooleanFlag(featureName: featureName, dataValue: dataValue, fallbackValue: fallbackValue)
+            completion(result)
         }
     }
     
+    // --- Fetching Logic (Simplified by Serial Queue) ---
     
-    // --- Getting Feature Flags (Sync) ---
-    
-    // Private helper to avoid queue logic repetition, assumes flags are loaded or called from within completion
-    private func _getFeatureSync(_ featureName: String, fallback: FeatureFlagData) -> FeatureFlagData {
-        // Assumes called within accessQueue.sync or after flags are confirmed non-nil
-        guard let currentFlags = self.flags else {
-            // This path should ideally not be hit if areFeaturesReady is checked, but good for safety
-            print("Warning: getFeatureSync called before flags loaded for \(featureName).") // [cite: 21]
-            return fallback
+    // Internal function to handle fetch logic and state checks
+    private func _fetchFlagsIfNeeded(completion: ((Bool) -> Void)?) {
+        
+        var shouldStartFetch = false
+        let configSnapshot = self.currentConfig // Read config directly (safe on accessQueue)
+        
+
+        guard let config = configSnapshot, config.flagsConfig.enabled else {
+            print("Feature flags are disabled, not fetching.")
+            // Call completion immediately since we know the result and are on the queue.
+            completion?(false)
+            return // Exit method
         }
         
-        guard let feature = currentFlags[featureName] else {
-            print("Info: No flag found for '\(featureName)', returning fallback.") // [cite: 23]
-            return fallback
-        }
-        
-        // Track experiment exposure [cite: 24]
-        trackFeatureCheck(featureName: featureName, feature: feature)
-        return feature
-    }
-    
-    // Public sync methods require careful usage - check areFeaturesReady() first!
-    func getFeatureSync(_ featureName: String, fallback: FeatureFlagData = FeatureFlagData(value: nil)) -> FeatureFlagData {
-        guard areFeaturesReady() else {
-            print("Warning: Flags not ready for getFeatureSync call for \(featureName). Returning fallback.") // [cite: 21]
-            return fallback
-        }
-        // Access flags safely using the queue
-        var result: FeatureFlagData!
-        accessQueue.sync { // Read needs sync access
-            // We know flags is not nil here due to areFeaturesReady check
-            result = self._getFeatureSync(featureName, fallback: fallback)
-        }
-        return result
-    }
-    
-    
-    func getFeatureDataSync(_ featureName: String, fallbackValue: Any? = nil) -> Any? {
-        return getFeatureSync(featureName, fallback: FeatureFlagData(value: fallbackValue)).value
-    }
-    
-    
-    // Private helper for boolean evaluation
-    private func _isFeatureEnabledSync(featureName: String, dataValue: Any?, fallbackValue: Bool) -> Bool {
-        guard let val = dataValue else {
-            print("Info: Feature flag '\(featureName)' value is nil; returning fallback: \(fallbackValue)")
-            return fallbackValue
-        }
-        
-        if let boolVal = val as? Bool {
-            return boolVal // [cite: 28]
-        } else {
-            // Log error if value is not a boolean [cite: 28]
-            print("Error: Feature flag '\(featureName)' value: \(val) is not a boolean; returning fallback: \(fallbackValue)")
-            return fallbackValue // [cite: 29]
-        }
-    }
-    
-    func isFeatureEnabledSync(_ featureName: String, fallbackValue: Bool = false) -> Bool { // [cite: 27]
-        let dataValue = getFeatureDataSync(featureName, fallbackValue: fallbackValue)
-        return _isFeatureEnabledSync(featureName: featureName, dataValue: dataValue, fallbackValue: fallbackValue)
-    }
-    
-    
-    // --- Tracking ---
-    
-    private func trackFeatureCheck(featureName: String, feature: FeatureFlagData) {
-        accessQueue.sync(flags: .barrier) { // Write needs barrier
-            guard !self.trackedFeatures.contains(featureName) else { // [cite: 30]
-                return
+        // Access/Modify isFetching and fetchCompletionHandlers directly (safe on accessQueue)
+        if !self.isFetching {
+            self.isFetching = true
+            shouldStartFetch = true
+            if let completion = completion {
+                self.fetchCompletionHandlers.append(completion)
             }
-            self.trackedFeatures.insert(featureName) // [cite: 31]
+        } else {
+            print("Fetch already in progress, queueing completion handler.")
+            if let completion = completion {
+                self.fetchCompletionHandlers.append(completion)
+            }
+        }
+        // State modifications related to starting the fetch are complete
+        
+        if shouldStartFetch {
+            print("Starting flag fetch (dispatching network request)...")
+            // Perform network request OUTSIDE the serial accessQueue context
+            // to avoid blocking the queue during network latency.
+            // Dispatch the network request initiation to a global queue.
+            DispatchQueue.global(qos: .utility).async { [weak self] in
+                self?._performFetchRequest()
+            }
+        }
+    }
+    
+    
+    // Performs the actual network request construction and call
+    private func _performFetchRequest() {
+        // This method runs OUTSIDE the accessQueue
+        
+        guard let delegate = self.delegate, let config = self.currentConfig else {
+            print("Error: Delegate or config missing for fetch.")
+            self._completeFetch(success: false)
+            return
         }
         
-        // Call the tracking function provided during initialization
-        let properties: Properties = [
-            "Experiment name": featureName,
-            "Variant name": feature.key,
-            "$experiment_type": "feature_flag"
-        ]
-        if let instance = getInstance() {
-            instance.track(event: "$experiment_started", properties: properties)
-            print("Tracked $experiment_started for \(featureName)")
+        let distinctId = delegate.getDistinctId()
+        print("Fetching flags for distinct ID: \(distinctId)")
+        
+        var context = config.flagsConfig.context
+        context["distinct_id"] = distinctId
+        let requestBodyDict = ["context": context]
+        
+        guard let requestBodyData = try? JSONSerialization.data(withJSONObject: requestBodyDict, options: []) else {
+            print("Error: Failed to serialize request body for flags.")
+            self._completeFetch(success: false); return
         }
+        guard let authData = "\(config.token):".data(using: .utf8) else {
+            print("Error: Failed to create auth data."); self._completeFetch(success: false); return
+        }
+        let base64Auth = authData.base64EncodedString()
+        let headers = ["Authorization": "Basic \(base64Auth)", "Content-Type": "application/json"]
+        let responseParser: (Data) -> FlagsResponse? = { data in /* ... */
+            do { return try JSONDecoder().decode(FlagsResponse.self, from: data) }
+            catch { print("Error parsing flags JSON: \(error)"); return nil }
+        }
+        let resource = Network.buildResource(path: flagsRoute, method: .post, requestBody: requestBodyData, headers: headers, parse: responseParser)
+        
+        // Make the API request
+        Network.apiRequest(
+            base: serverURL,
+            resource: resource,
+            failure: { [weak self] reason, data, response in // Completion handlers run on URLSession's queue
+                print("Error: Failed to fetch flags. Reason: \(reason)")
+                // Update state and call completions via _completeFetch on the serial queue
+                self?.accessQueue.async { // Dispatch completion handling to serial queue
+                    self?._completeFetch(success: false)
+                }
+            },
+            success: { [weak self] (flagsResponse, response) in // Completion handlers run on URLSession's queue
+                print("Successfully fetched flags.")
+                guard let self = self else { return }
+                // Update state and call completions via _completeFetch on the serial queue
+                self.accessQueue.async { [weak self] in
+                    guard let self = self else { return }
+                    // already on accessQueue – write directly
+                    self.flags = flagsResponse.flags ?? [:]
+                    self._completeFetch(success: true)   // still on accessQueue
+                }
+            }
+        )
+    }
+    
+    // Centralized fetch completion logic - MUST be called from within accessQueue
+    func _completeFetch(success: Bool) {
+        self.isFetching = false
+        let handlers = self.fetchCompletionHandlers
+        self.fetchCompletionHandlers.removeAll()
+
+        DispatchQueue.main.async {
+            handlers.forEach { $0(success) }
+        }
+    }
+    
+    
+    // --- Tracking Logic ---
+    
+    // Performs the atomic check and triggers delegate call if needed
+    private func _trackFeatureIfNeeded(featureName: String, feature: FeatureFlagData) {
+        var shouldCallDelegate = false
+        
+        // We are already executing on the serial accessQueue, so this is safe.
+        if !self.trackedFeatures.contains(featureName) {
+            self.trackedFeatures.insert(featureName)
+            shouldCallDelegate = true
+        }
+        
+        // Call delegate *outside* this conceptual block if tracking occurred
+        // This prevents holding any potential implicit lock during delegate execution
+        if shouldCallDelegate {
+            self._performTrackingDelegateCall(featureName: featureName, feature: feature)
+        }
+    }
+    
+    // Helper to just call the delegate (no locking)
+    private func _performTrackingDelegateCall(featureName: String, feature: FeatureFlagData) {
+        guard let delegate = self.delegate else { return }
+        let properties: Properties = [
+            "Experiment name": featureName, "Variant name": feature.key, "$experiment_type": "feature_flag"
+        ]
+        // Dispatch delegate call asynchronously to main thread for safety
+        DispatchQueue.main.async {
+            delegate.track(event: "$experiment_started", properties: properties)
+            print("Tracked $experiment_started for \(featureName) (dispatched to main)")
+        }
+    }
+    
+    // --- Boolean Evaluation Helper ---
+    private func _evaluateBooleanFlag(featureName: String, dataValue: Any?, fallbackValue: Bool) -> Bool {
+        guard let val = dataValue else { return fallbackValue }
+        if let boolVal = val as? Bool { return boolVal }
+        else { print("Error: Flag '\(featureName)' is not Bool"); return fallbackValue }
     }
 }
-
-// --- Example Usage Placeholder (Requires Mixpanel instance setup) ---
-/*
- // Assuming you have a Mixpanel instance and Network setup:
- let mixpanelInstance = Mixpanel.initialize(token: "YOUR_TOKEN", launchOptions: nil, flushInterval: 60)
- let network = Network(serverURL: mixpanelInstance.serverURL) // Or however Network gets initialized
- 
- let featureFlagManager = FeatureFlagManager(
- getConfigFunc: { key in mixpanelInstance.configuration.get(key) }, // Adapt based on actual config access
- getDistinctIdFunc: { mixpanelInstance.distinctId },
- trackFunc: { eventName, properties in mixpanelInstance.track(event: eventName, properties: properties) },
- network: network
- )
- 
- // Load flags initially (e.g., during app startup)
- featureFlagManager.loadFlags()
- 
- // Later, check a flag (async)
- featureFlagManager.isFeatureEnabled("new_checkout_flow", fallbackValue: false) { isEnabled in
- if isEnabled {
- print("New checkout flow is enabled!")
- // Show new UI
- } else {
- print("New checkout flow is disabled.")
- // Show old UI
- }
- }
- 
- // Or check synchronously *after* confirming flags are loaded
- if featureFlagManager.areFeaturesReady() {
- let buttonColorData = featureFlagManager.getFeatureDataSync("button_color", fallbackValue: "blue")
- if let buttonColor = buttonColorData as? String {
- print("Button color variant: \(buttonColor)")
- // Apply button color
- }
- 
- let shouldUseNewAPI = featureFlagManager.isFeatureEnabledSync("use_new_api", fallbackValue: false)
- print("Should use new API (sync): \(shouldUseNewAPI)")
- 
- } else {
- print("Flags not ready yet for sync access.")
- // Use default behavior or wait
- }
- */

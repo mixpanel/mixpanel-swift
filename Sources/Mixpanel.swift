@@ -16,13 +16,7 @@ open class Mixpanel {
     
     @discardableResult
     open class func initialize(config: MixpanelConfig) -> MixpanelInstance {
-        let instanceName = config.instanceName ?? config.token
-        
-        if let proxyServerConfig = config.proxyServerConfig {
-            return MixpanelManager.sharedInstance.initialize(config: config)
-        } else {
-            return MixpanelManager.sharedInstance.initialize(config: config)
-        }
+        return MixpanelManager.sharedInstance.initialize(config: config)
     }
     
 #if !os(OSX) && !os(watchOS)
@@ -297,7 +291,8 @@ final class MixpanelManager {
     }
     
     func initialize(config: MixpanelConfig) -> MixpanelInstance {
-        return dequeueInstance(instanceName: config.instanceName ?? config.token) {
+        let instanceName = config.instanceName ?? config.token
+        return dequeueInstance(instanceName: instanceName) {
             return MixpanelInstance(config: config)
         }
     }

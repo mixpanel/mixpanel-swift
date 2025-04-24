@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "Mixpanel",
     platforms: [
-      .iOS(.v11),
+      .iOS(.v12),
       .tvOS(.v11),
       .macOS(.v10_13),
       .watchOS(.v4)

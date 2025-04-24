@@ -513,4 +513,306 @@ class FeatureFlagManagerTests: XCTestCase {
         XCTAssertEqual(trackEvents.count, 1, "Tracking should have occurred exactly once despite concurrent calls")
     }
 
+    // --- Response Parser Tests ---
+    
+//    func testResponseParserFunction() {
+//        // Get access to the responseParser function indirectly through _performFetchRequest
+//        // by making a property wrapper to capture the API request
+//        var capturedResource: Network.Resource<FlagsResponse>?
+//        
+//        // Create a test wrapper that swizzles apiRequest just for the test
+//        let originalApiRequest = Network.apiRequest
+//        defer { Network.apiRequest = originalApiRequest } // Restore when done
+//        
+//        // Create a mock request function that captures the resource but doesn't execute
+//        Network.apiRequest = { base, resource, failure, success in
+//            // Capture the resource to inspect its parser function
+//            capturedResource = resource as? Network.Resource<FlagsResponse>
+//            // Don't actually call any callbacks since we're just testing parser
+//            return
+//        }
+//        
+//        // Trigger _performFetchRequest by calling fetchFlagsIfNeeded
+//        manager.accessQueue.sync {
+//            manager.fetchF()
+//        }
+//        
+//        // Verify resource was captured
+//        XCTAssertNotNil(capturedResource, "Request resource should be captured")
+//        
+//        // Create various test data scenarios
+//        let validJSON = """
+//        {
+//            "flags": {
+//                "test_flag": {
+//                    "variant_key": "test_variant",
+//                    "variant_value": "test_value"
+//                }
+//            }
+//        }
+//        """.data(using: .utf8)!
+//        
+//        let emptyFlagsJSON = """
+//        {
+//            "flags": {}
+//        }
+//        """.data(using: .utf8)!
+//        
+//        let nullFlagsJSON = """
+//        {
+//            "flags": null
+//        }
+//        """.data(using: .utf8)!
+//        
+//        let malformedJSON = "not json".data(using: .utf8)!
+//        
+//        // Test the parser with valid data
+//        if let resource = capturedResource {
+//            let parser = resource.parse
+//            
+//            // Test valid JSON with flags
+//            let validResult = parser(validJSON)
+//            XCTAssertNotNil(validResult, "Parser should handle valid JSON")
+//            XCTAssertNotNil(validResult?.flags, "Flags should be non-nil")
+//            XCTAssertEqual(validResult?.flags?.count, 1, "Should have one flag")
+//            XCTAssertEqual(validResult?.flags?["test_flag"]?.key, "test_variant")
+//            XCTAssertEqual(validResult?.flags?["test_flag"]?.value as? String, "test_value")
+//            
+//            // Test empty flags object
+//            let emptyResult = parser(emptyFlagsJSON)
+//            XCTAssertNotNil(emptyResult, "Parser should handle empty flags object")
+//            XCTAssertNotNil(emptyResult?.flags, "Flags should be non-nil")
+//            XCTAssertEqual(emptyResult?.flags?.count, 0, "Flags should be empty")
+//            
+//            // Test null flags field
+//            let nullResult = parser(nullFlagsJSON)
+//            XCTAssertNotNil(nullResult, "Parser should handle null flags")
+//            XCTAssertNil(nullResult?.flags, "Flags should be nil when null in JSON")
+//            
+//            // Test malformed JSON
+//            let malformedResult = parser(malformedJSON)
+//            XCTAssertNil(malformedResult, "Parser should return nil for malformed JSON")
+//        }
+//    }
+    
+    // --- Delegate Error Handling Tests ---
+    
+    func testDelegateNilHandling() {
+        // Set up with flags ready, but then remove delegate
+        simulateFetchSuccess()
+        manager.delegate = nil
+        
+        // Test all operations with nil delegate
+        
+        // Synchronous operations
+        let syncData = manager.getFeatureSync("feature_bool_true")
+        XCTAssertEqual(syncData.key, "v_true")
+        XCTAssertEqual(syncData.value as? Bool, true)
+        
+        // Async operations
+        let expectation = XCTestExpectation(description: "Async with nil delegate")
+        manager.getFeature("feature_int") { data in
+            XCTAssertEqual(data.key, "v_int")
+            XCTAssertEqual(data.value as? Int, 101)
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 1.0)
+        
+        // No tracking calls should succeed, but operations should still work
+        // This is "success" as the code doesn't crash when delegate is nil
+    }
+    
+    func testFetchWithNoDelegate() {
+        // Create manager with no delegate
+        let noDelegate = FeatureFlagManager(serverURL: "https://test.com", delegate: nil)
+        
+        // Try to load flags
+        noDelegate.loadFlags()
+        
+        // Verify no crash; attempt a flag fetch after a short delay
+        let expectation = XCTestExpectation(description: "Check after attempted fetch")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            XCTAssertFalse(noDelegate.areFeaturesReady(), "Flags should not be ready without delegate")
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    func testDelegateConfigDisabledHandling() {
+        // Set delegate config to disabled
+        mockDelegate.config = MixpanelConfig(token: "test", flagsConfig: FlagsConfig(enabled: false))
+        
+        // Try to load flags
+        manager.loadFlags()
+        
+        // Verify no fetch is triggered
+        let expectation = XCTestExpectation(description: "Check disabled config behavior")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            XCTAssertFalse(self.manager.areFeaturesReady(), "Flags should not be ready when config disabled")
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
+    
+    // --- AnyCodable Edge Cases ---
+    
+    func testAnyCodableWithComplexTypes() {
+        // Use reflection to test AnyCodable directly
+        
+        // Test with nested array
+        let nestedArrayJSON = """
+        {
+            "variant_key": "complex_array",
+            "variant_value": [1, "string", true, [2, 3], {"key": "value"}]
+        }
+        """.data(using: .utf8)!
+        
+        do {
+            let decoder = JSONDecoder()
+            let flagData = try decoder.decode(FeatureFlagData.self, from: nestedArrayJSON)
+            
+            XCTAssertEqual(flagData.key, "complex_array")
+            XCTAssertNotNil(flagData.value, "Value should not be nil")
+            
+            // Verify array structure
+            guard let array = flagData.value as? [Any?] else {
+                XCTFail("Value should be an array")
+                return
+            }
+            
+            XCTAssertEqual(array.count, 5, "Array should have 5 elements")
+            XCTAssertEqual(array[0] as? Int, 1)
+            XCTAssertEqual(array[1] as? String, "string")
+            XCTAssertEqual(array[2] as? Bool, true)
+            
+            // Nested array check
+            guard let nestedArray = array[3] as? [Any?] else {
+                XCTFail("Element 3 should be an array")
+                return
+            }
+            XCTAssertEqual(nestedArray.count, 2)
+            XCTAssertEqual(nestedArray[0] as? Int, 2)
+            XCTAssertEqual(nestedArray[1] as? Int, 3)
+            
+            // Nested dictionary check
+            guard let nestedDict = array[4] as? [String: Any?] else {
+                XCTFail("Element 4 should be a dictionary")
+                return
+            }
+            XCTAssertEqual(nestedDict.count, 1)
+            XCTAssertEqual(nestedDict["key"] as? String, "value")
+            
+        } catch {
+            XCTFail("Failed to decode nested array JSON: \(error)")
+        }
+        
+        // Test with deeply nested object
+        let nestedObjectJSON = """
+        {
+            "variant_key": "complex_object",
+            "variant_value": {
+                "str": "value",
+                "num": 42,
+                "bool": true,
+                "null": null,
+                "array": [1, 2],
+                "nested": {
+                    "deeper": {
+                        "deepest": "bottom"
+                    }
+                }
+            }
+        }
+        """.data(using: .utf8)!
+        
+        do {
+            let decoder = JSONDecoder()
+            let flagData = try decoder.decode(FeatureFlagData.self, from: nestedObjectJSON)
+            
+            XCTAssertEqual(flagData.key, "complex_object")
+            XCTAssertNotNil(flagData.value, "Value should not be nil")
+            
+            // Verify dictionary structure
+            guard let dict = flagData.value as? [String: Any?] else {
+                XCTFail("Value should be a dictionary")
+                return
+            }
+            
+            XCTAssertEqual(dict.count, 6, "Dictionary should have 6 keys")
+            XCTAssertEqual(dict["str"] as? String, "value")
+            XCTAssertEqual(dict["num"] as? Int, 42)
+            XCTAssertEqual(dict["bool"] as? Bool, true)
+            XCTAssertTrue(dict.keys.contains("null"), "Key 'null' should exist")
+            if let nullEntry = dict["null"] {
+                // Key exists with a value of nil (as wanted)
+                XCTAssertNil(nullEntry, "Value for null key should be nil")
+            } else {
+                // Key doesn't exist (which would be wrong)
+                XCTFail("'null' key should exist in dictionary")
+            }
+            
+            // Check nested array
+            guard let array = dict["array"] as? [Any?] else {
+                XCTFail("Array key should contain an array")
+                return
+            }
+            XCTAssertEqual(array.count, 2)
+            
+            // Check deeply nested structure
+            guard let nested = dict["nested"] as? [String: Any?] else {
+                XCTFail("Nested key should contain dictionary")
+                return
+            }
+            
+            guard let deeper = nested["deeper"] as? [String: Any?] else {
+                XCTFail("Deeper key should contain dictionary")
+                return
+            }
+            
+            XCTAssertEqual(deeper["deepest"] as? String, "bottom")
+            
+        } catch {
+            XCTFail("Failed to decode nested object JSON: \(error)")
+        }
+    }
+    
+    func testAnyCodableWithInvalidTypes() {
+        // Test case where variant_value has an unsupported type
+        // Note: This is harder to test directly since JSON doesn't have many "invalid" types
+        // We can test error handling by constructing invalid JSON manually
+        
+        let unsupportedTypeJSON = """
+        {
+            "variant_key": "invalid_type",
+            "variant_value": "infinity"
+        }
+        """.data(using: .utf8)!
+        
+        // This is a valid test since the string will decode properly
+        do {
+            let decoder = JSONDecoder()
+            let flagData = try decoder.decode(FeatureFlagData.self, from: unsupportedTypeJSON)
+            XCTAssertEqual(flagData.key, "invalid_type")
+            XCTAssertEqual(flagData.value as? String, "infinity")
+        } catch {
+            XCTFail("Should not fail with simple string value: \(error)")
+        }
+        
+        // Test handling of missing variant_value
+        let missingValueJSON = """
+        {
+            "variant_key": "missing_value"
+        }
+        """.data(using: .utf8)!
+        
+        do {
+            let decoder = JSONDecoder()
+            let _ = try decoder.decode(FeatureFlagData.self, from: missingValueJSON)
+            XCTFail("Decoding should fail with missing variant_value")
+        } catch {
+            // This is expected to fail, so the test passes
+            XCTAssertTrue(error is DecodingError, "Error should be a DecodingError")
+        }
+    }
+
 } // End Test Class

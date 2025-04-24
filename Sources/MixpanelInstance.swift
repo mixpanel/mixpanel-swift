@@ -448,6 +448,73 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         return distinctId
     }
     
+    // MARK: - Feature Flag Methods
+    
+    /// Triggers a fetch of feature flags from the server
+    public func loadFlags() {
+        featureFlagManager.loadFlags()
+    }
+    
+    /// Returns whether feature flags have been successfully loaded
+    /// - Returns: True if flags are loaded and ready to use, false otherwise
+    public func areFeaturesReady() -> Bool {
+        return featureFlagManager.areFeaturesReady()
+    }
+    
+    /// Returns a feature flag synchronously with the specified fallback if not available
+    /// - Parameters:
+    ///   - featureName: The name of the feature flag to retrieve
+    ///   - fallback: FeatureFlagData to return if the feature flag doesn't exist or flags aren't loaded
+    /// - Returns: The FeatureFlagData of the feature flag, or the fallback if not available
+    public func getFeatureSync(_ featureName: String, fallback: FeatureFlagData) -> FeatureFlagData {
+        return featureFlagManager.getFeatureSync(featureName, fallback: fallback)
+    }
+    
+    /// Gets a feature flag asynchronously
+    /// - Parameters:
+    ///   - featureName: The name of the feature flag to retrieve
+    ///   - fallback: FeatureFlagData to return if the feature flag doesn't exist or flags aren't loaded
+    ///   - completion: Callback function that receives the FeatureFlagData
+    public func getFeature(_ featureName: String, fallback: FeatureFlagData, completion: @escaping (FeatureFlagData) -> Void) {
+        featureFlagManager.getFeature(featureName, fallback: fallback, completion: completion)
+    }
+    
+    /// Gets feature data synchronously
+    /// - Parameters:
+    ///  - featureName: The name of the feature flag to retrieve
+    ///  - fallbackValue: Value to return if the feature flag doesn't exist or flags aren't loaded
+    ///  - Returns: The value of the feature flag, or the fallback if not available
+    public func getFeatureDataSync(_ featureName: String, fallbackValue: Any?) -> Any? {
+        return featureFlagManager.getFeatureDataSync(featureName, fallbackValue: fallbackValue)
+    }
+    
+    /// Gets feature data asynchronously
+    /// - Parameters:
+    /// - featureName: The name of the feature flag to retrieve
+    /// - fallbackValue: Value to return if the feature flag doesn't exist or flags aren't loaded
+    /// - completion: Callback function that receives the feature value
+    public func getFeatureData(_ featureName: String, fallbackValue: Any?, completion: @escaping (Any?) -> Void) {
+        featureFlagManager.getFeatureData(featureName, fallbackValue: fallbackValue, completion: completion)
+    }
+    
+    /// Check if a boolean feature flag is enabled
+    /// - Parameters:
+    ///   - featureName: The name of the feature flag to check
+    ///   - fallbackValue: Value to return if the feature flag doesn't exist or flags aren't loaded
+    /// - Returns: True if the feature is enabled, false otherwisxtee
+    public func isFeatureEnabledSync(_ featureName: String, fallbackValue: Bool = false) -> Bool {
+        return featureFlagManager.isFeatureEnabledSync(featureName, fallbackValue: fallbackValue)
+    }
+    
+    /// Check if a boolean feature flag is enabled asynchronously
+    /// - Parameters:
+    ///   - featureName: The name of the feature flag to check
+    ///   - fallbackValue: Value to return if the feature flag doesn't exist or flags aren't loaded
+    ///   - completion: Callback function that receives the boolean result
+    public func isFeatureEnabled(_ featureName: String, fallbackValue: Bool = false, completion: @escaping (Bool) -> Void) {
+        featureFlagManager.isFeatureEnabled(featureName, fallbackValue: fallbackValue, completion: completion)
+    }
+    
 #if !os(OSX) && !os(watchOS)
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default

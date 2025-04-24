@@ -1,58 +1,10 @@
 import Foundation
 
-// --- Helper Structures ---
-
-// Represents the data associated with a feature flag
-struct FeatureFlagData: Decodable {
-    let key: String // Corresponds to 'variant_key' from API
-    let value: Any? // Corresponds to 'variant_value' from API - Use Any? for flexibility
-    
-    // Manual decoding to handle Any? for the value
-    enum CodingKeys: String, CodingKey {
-        case key = "variant_key"
-        case value = "variant_value"
-    }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        key = try container.decode(String.self, forKey: .key)
-        
-        // Attempt to decode value flexibly (Bool, String, Int, Double, Array, Dictionary)
-        if let boolValue = try? container.decode(Bool.self, forKey: .value) {
-            value = boolValue
-        } else if let stringValue = try? container.decode(String.self, forKey: .value) {
-            value = stringValue
-        } else if let intValue = try? container.decode(Int.self, forKey: .value) {
-            value = intValue
-        } else if let doubleValue = try? container.decode(Double.self, forKey: .value) {
-            value = doubleValue
-        } else if let arrayValue = try? container.decode([AnyCodable].self, forKey: .value) {
-            value = arrayValue.map { $0.value } // Extract underlying values
-        } else if let dictValue = try? container.decode([String: AnyCodable].self, forKey: .value) {
-            value = dictValue.mapValues { $0.value } // Extract underlying values
-        } else if container.contains(.value) && (try? container.decodeNil(forKey: .value)) == true {
-            value = nil // Explicitly handle null
-        }
-        else {
-            // Log or handle the case where the type is unexpected or null
-            let context = DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unsupported type for variant_value or value is null.")
-            throw DecodingError.dataCorrupted(context)
-            // Or set value = nil if you prefer to silently ignore unknown types
-            // value = nil
-        }
-    }
-    
-    // Helper initializer for fallbacks
-    init(key: String = "", value: Any?) {
-        self.key = key
-        self.value = value
-    }
-}
-
 // Wrapper to help decode 'Any' types within Codable structures
+// (Keep AnyCodable as defined previously, it holds the necessary decoding logic)
 struct AnyCodable: Decodable {
     let value: Any?
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let intValue = try? container.decode(Int.self) {
@@ -69,14 +21,46 @@ struct AnyCodable: Decodable {
             value = dictValue.mapValues { $0.value }
         } else if container.decodeNil() {
             value = nil
-        }
-        else {
+        } else {
             let context = DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unsupported type in AnyCodable.")
             throw DecodingError.dataCorrupted(context)
         }
     }
 }
 
+
+// Represents the data associated with a feature flag
+public struct FeatureFlagData: Decodable {
+    public let key: String // Corresponds to 'variant_key' from API
+    public let value: Any? // Corresponds to 'variant_value' from API
+
+    enum CodingKeys: String, CodingKey {
+        case key = "variant_key"
+        case value = "variant_value"
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        key = try container.decode(String.self, forKey: .key)
+
+        // Directly decode the 'variant_value' using AnyCodable.
+        // If the key is missing, it throws.
+        // If the value is null, AnyCodable handles it.
+        // If the value is an unsupported type, AnyCodable throws.
+        let anyCodableValue = try container.decode(AnyCodable.self, forKey: .value)
+        value = anyCodableValue.value // Extract the underlying Any? value
+    }
+
+    // Helper initializer with fallbacks, value defaults to key if nil
+    public init(key: String = "", value: Any? = nil) {
+        self.key = key
+        if let value = value {
+            self.value = value
+        } else {
+             self.value = key
+        }
+    }
+}
 
 // Response structure for the /flags endpoint
 struct FlagsResponse: Decodable {
@@ -173,7 +157,7 @@ class FeatureFlagManager: Network {
     
     // --- Sync Flag Retrieval ---
     
-    func getFeatureSync(_ featureName: String, fallback: FeatureFlagData = FeatureFlagData(value: nil)) -> FeatureFlagData {
+    func getFeatureSync(_ featureName: String, fallback: FeatureFlagData) -> FeatureFlagData {
         var featureData: FeatureFlagData?
         var tracked = false
         // === Serial Queue: Single Sync Block for Read AND Track Update ===
@@ -207,19 +191,9 @@ class FeatureFlagManager: Network {
         }
     }
     
-    func getFeatureDataSync(_ featureName: String, fallbackValue: Any? = nil) -> Any? {
-        return getFeatureSync(featureName, fallback: FeatureFlagData(value: fallbackValue)).value
-    }
-    
-    func isFeatureEnabledSync(_ featureName: String, fallbackValue: Bool = false) -> Bool {
-        let dataValue = getFeatureDataSync(featureName, fallbackValue: fallbackValue)
-        return self._evaluateBooleanFlag(featureName: featureName, dataValue: dataValue, fallbackValue: fallbackValue)
-    }
-    
-    
     // --- Async Flag Retrieval ---
     
-    func getFeature(_ featureName: String, fallback: FeatureFlagData = FeatureFlagData(value: nil), completion: @escaping (FeatureFlagData) -> Void) {
+    func getFeature(_ featureName: String, fallback: FeatureFlagData, completion: @escaping (FeatureFlagData) -> Void) {
         accessQueue.async { [weak self] in // Block A runs serially on accessQueue
             guard let self = self else { return }
             
@@ -272,11 +246,19 @@ class FeatureFlagManager: Network {
         } // End accessQueue.async (Block A)
     }
     
+    func getFeatureDataSync(_ featureName: String, fallbackValue: Any?) -> Any? {
+        return getFeatureSync(featureName, fallback: FeatureFlagData(value: fallbackValue)).value
+    }
     
-    func getFeatureData(_ featureName: String, fallbackValue: Any? = nil, completion: @escaping (Any?) -> Void) {
+    func getFeatureData(_ featureName: String, fallbackValue: Any?, completion: @escaping (Any?) -> Void) {
         getFeature(featureName, fallback: FeatureFlagData(value: fallbackValue)) { featureData in
             completion(featureData.value)
         }
+    }
+    
+    func isFeatureEnabledSync(_ featureName: String, fallbackValue: Bool = false) -> Bool {
+        let dataValue = getFeatureDataSync(featureName, fallbackValue: fallbackValue)
+        return self._evaluateBooleanFlag(featureName: featureName, dataValue: dataValue, fallbackValue: fallbackValue)
     }
     
     func isFeatureEnabled(_ featureName: String, fallbackValue: Bool = false, completion: @escaping (Bool) -> Void) {
@@ -359,7 +341,7 @@ class FeatureFlagManager: Network {
         }
         let base64Auth = authData.base64EncodedString()
         let headers = ["Authorization": "Basic \(base64Auth)", "Content-Type": "application/json"]
-        let responseParser: (Data) -> FlagsResponse? = { data in /* ... */
+        let responseParser: (Data) -> FlagsResponse? = { data in
             do { return try JSONDecoder().decode(FlagsResponse.self, from: data) }
             catch { print("Error parsing flags JSON: \(error)"); return nil }
         }
@@ -384,6 +366,7 @@ class FeatureFlagManager: Network {
                     guard let self = self else { return }
                     // already on accessQueue – write directly
                     self.flags = flagsResponse.flags ?? [:]
+                    print("Flags updated: \(self.flags ?? [:])")
                     self._completeFetch(success: true)   // still on accessQueue
                 }
             }

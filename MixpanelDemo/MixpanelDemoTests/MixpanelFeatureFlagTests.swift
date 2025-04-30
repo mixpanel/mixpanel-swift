@@ -190,7 +190,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
     func testGetFeatureSync_FlagsReady_ExistingFlag() {
         simulateFetchSuccess() // Flags loaded
-        let featureData = manager.getFeatureSync("feature_string")
+        let featureData = manager.getFeatureSync("feature_string", fallback: defaultFallback)
         AssertEqual(featureData.key, "v_str")
         AssertEqual(featureData.value, "test_string")
         // Tracking check happens later
@@ -271,7 +271,7 @@ class FeatureFlagManagerTests: XCTestCase {
          var assertionError: String?
 
          // Act
-         manager.getFeature("feature_double") { data in
+         manager.getFeature("feature_double", fallback: defaultFallback) { data in
              // This completion should run on the main thread
              if !Thread.isMainThread { assertionError = "Completion not on main thread (\(Thread.current))" }
              receivedData = data
@@ -331,7 +331,7 @@ class FeatureFlagManagerTests: XCTestCase {
         mockDelegate.trackExpectation = XCTestExpectation(description: "Tracking call for fetch success")
 
         // Call getFeature - this should trigger the fetch logic internally
-        manager.getFeature("feature_int") { data in
+        manager.getFeature("feature_int", fallback: defaultFallback) { data in
              XCTAssertTrue(Thread.isMainThread, "Completion should be on main thread")
              receivedData = data
              expectation.fulfill() // Fulfill main expectation
@@ -392,13 +392,13 @@ class FeatureFlagManagerTests: XCTestCase {
         mockDelegate.trackExpectation?.expectedFulfillmentCount = 1 // Expect exactly one call
 
         // Call sync methods multiple times
-        _ = manager.getFeatureSync("feature_bool_true")
-        _ = manager.getFeatureDataSync("feature_bool_true")
+        _ = manager.getFeatureSync("feature_bool_true", fallback: defaultFallback)
+        _ = manager.getFeatureDataSync("feature_bool_true", fallbackValue: nil)
         _ = manager.isFeatureEnabledSync("feature_bool_true")
 
         // Call async method
         let asyncExpectation = XCTestExpectation(description: "Async getFeature completes for tracking test")
-        manager.getFeature("feature_bool_true") { _ in asyncExpectation.fulfill() }
+        manager.getFeature("feature_bool_true", fallback: defaultFallback) { _ in asyncExpectation.fulfill() }
 
         // Wait for async call AND the track expectation
         wait(for: [asyncExpectation, mockDelegate.trackExpectation!], timeout: 2.0)
@@ -409,7 +409,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
         // --- Call for a *different* feature ---
         mockDelegate.trackExpectation = XCTestExpectation(description: "Track called for feature_string")
-        _ = manager.getFeatureSync("feature_string")
+        _ = manager.getFeatureSync("feature_string", fallback: defaultFallback)
         wait(for: [mockDelegate.trackExpectation!], timeout: 1.0)
 
         let stringEvents = mockDelegate.trackedEvents.filter { $0.properties?["Experiment name"] as? String == "feature_string" }
@@ -423,7 +423,7 @@ class FeatureFlagManagerTests: XCTestCase {
          simulateFetchSuccess()
          mockDelegate.trackExpectation = XCTestExpectation(description: "Track called for properties check")
 
-         _ = manager.getFeatureSync("feature_int") // Trigger tracking
+         _ = manager.getFeatureSync("feature_int", fallback: defaultFallback) // Trigger tracking
 
          wait(for: [mockDelegate.trackExpectation!], timeout: 1.0)
 
@@ -480,7 +480,7 @@ class FeatureFlagManagerTests: XCTestCase {
             let exp = XCTestExpectation(description: "Async getFeature \(i) completes")
             expectations.append(exp)
             DispatchQueue.global().async { // Simulate calls from different threads
-                self.manager.getFeature("feature_bool_true") { data in
+                self.manager.getFeature("feature_bool_true", fallback: self.defaultFallback) { data in
                     print("Completion handler \(i) called.")
                     completionResults[i] = data
                     exp.fulfill()

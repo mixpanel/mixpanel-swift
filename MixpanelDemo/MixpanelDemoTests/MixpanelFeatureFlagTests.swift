@@ -605,13 +605,13 @@ class FeatureFlagManagerTests: XCTestCase {
         // Test all operations with nil delegate
         
         // Synchronous operations
-        let syncData = manager.getFeatureSync("feature_bool_true")
+        let syncData = manager.getFeatureSync("feature_bool_true", fallback: defaultFallback)
         XCTAssertEqual(syncData.key, "v_true")
         XCTAssertEqual(syncData.value as? Bool, true)
         
         // Async operations
         let expectation = XCTestExpectation(description: "Async with nil delegate")
-        manager.getFeature("feature_int") { data in
+        manager.getFeature("feature_int", fallback: defaultFallback) { data in
             XCTAssertEqual(data.key, "v_int")
             XCTAssertEqual(data.value as? Int, 101)
             expectation.fulfill()

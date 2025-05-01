@@ -18,7 +18,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         let mixpanelConfig = MixpanelConfig(token: "metrics-1", trackAutomaticEvents: false, flagsConfig: FlagsConfig(enabled: true, context: ["key": "value"]))
         Mixpanel.initialize(config: mixpanelConfig)
-        print("apiToken \(Mixpanel.mainInstance().apiToken)")
         Mixpanel.mainInstance().loggingEnabled = true
 
         return true

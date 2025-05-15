@@ -101,43 +101,43 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
             Mixpanel.mainInstance().unregisterSuperProperty(p)
             descStr = "Properties: \(p)"
         case 10:
-            Mixpanel.mainInstance().loadFlags()
+            Mixpanel.mainInstance().flags.loadFlags()
             descStr = "Flags Loaded"
         case 11:
-            let ready = Mixpanel.mainInstance().areFeaturesReady()
+            let ready = Mixpanel.mainInstance().flags.areFlagsReady()
             descStr = "Features Ready: \(ready)"
         case 12:
             var flagData = FeatureFlagData(key: "super-neat")
-            Mixpanel.mainInstance().getFeature("marks_nifty_feature_flag", fallback: flagData) { data in
+            Mixpanel.mainInstance().flags.getVariant("marks_nifty_feature_flag", fallback: flagData) { data in
                 flagData = data
                 print("Feature: \(flagData.key), Value: \(String(describing: flagData.value))")
             }
             descStr = "Feature: \(flagData.key), Value: \(String(describing: flagData.value))"
         case 13:
             var flagData = FeatureFlagData(key: "enabled")
-            flagData = Mixpanel.mainInstance().getFeatureSync("jb_qa_flag", fallback: flagData)
+            flagData = Mixpanel.mainInstance().flags.getVariantSync("jb_qa_flag", fallback: flagData)
             descStr = "Feature: \(flagData.key), Value: \(String(describing: flagData.value))"
         case 14:
             var flagValue = "NOT_donnaqacontrol"
-            Mixpanel.mainInstance().getFeatureData("new_feature_flag_1744737773860", fallbackValue: flagValue) { value in
+            Mixpanel.mainInstance().flags.getVariantValue("new_feature_flag_1744737773860", fallbackValue: flagValue) { value in
                 flagValue = value as! String
                 print("Feature Value: \(flagValue)")
             }
             descStr = "Feature Value: \(flagValue)"
         case 15:
             var flagValue = "NOT_donnaqacontrol"
-            flagValue = Mixpanel.mainInstance().getFeatureDataSync("new_feature_flag_1744737773860", fallbackValue: flagValue) as! String
+            flagValue = Mixpanel.mainInstance().flags.getVariantValueSync("new_feature_flag_1744737773860", fallbackValue: flagValue) as! String
             descStr = "Feature Value: \(flagValue)"
         case 16:
             var enabled = false
-            Mixpanel.mainInstance().isFeatureEnabled("jared_boolean_flag", fallbackValue: enabled) { isEnabled in
+            Mixpanel.mainInstance().flags.isFlagEnabled("jared_boolean_flag", fallbackValue: enabled) { isEnabled in
                 enabled = isEnabled
                 print("Feature Enabled: \(enabled)")
             }
             descStr = "Feature Enabled: \(enabled)"
         case 17:
             var enabled = false
-            enabled = Mixpanel.mainInstance().isFeatureEnabledSync("jared_boolean_flag", fallbackValue: enabled)
+            enabled = Mixpanel.mainInstance().flags.isFlagEnabledSync("jared_boolean_flag", fallbackValue: enabled)
             descStr = "Feature Enabled: \(enabled)"
         default:
             break

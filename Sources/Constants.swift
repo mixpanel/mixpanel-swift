@@ -31,6 +31,12 @@ struct GzipSettings {
     static let gzipHeaderOffset = Int32(16)
 }
 
+struct FeatureFlags {
+    static let flagsKey = "flags"
+    static let variantKey = "variant_key"
+    static let variantValue = "variant_value"
+}
+
 #if !os(OSX) && !os(watchOS) && !os(visionOS)
 extension UIDevice {
     var iPhoneX: Bool {

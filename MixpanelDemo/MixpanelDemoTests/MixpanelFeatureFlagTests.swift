@@ -147,7 +147,7 @@ class FeatureFlagManagerTests: XCTestCase {
     // --- State and Configuration Tests ---
 
     func testAreFeaturesReady_InitialState() {
-        XCTAssertFalse(manager.areFeaturesReady(), "Features should not be ready initially")
+        XCTAssertFalse(manager.areFlagsReady(), "Features should not be ready initially")
     }
 
     func testAreFeaturesReady_AfterSuccessfulFetchSimulation() {
@@ -156,7 +156,7 @@ class FeatureFlagManagerTests: XCTestCase {
         let expectation = XCTestExpectation(description: "Wait for potential completion dispatch")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
         wait(for: [expectation], timeout: 0.5)
-        XCTAssertTrue(manager.areFeaturesReady(), "Features should be ready after successful fetch simulation")
+        XCTAssertTrue(manager.areFlagsReady(), "Features should be ready after successful fetch simulation")
     }
 
     func testAreFeaturesReady_AfterFailedFetchSimulation() {
@@ -165,7 +165,7 @@ class FeatureFlagManagerTests: XCTestCase {
          let expectation = XCTestExpectation(description: "Wait for potential completion dispatch")
          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
          wait(for: [expectation], timeout: 0.5)
-        XCTAssertFalse(manager.areFeaturesReady(), "Features should not be ready after failed fetch simulation")
+        XCTAssertFalse(manager.areFlagsReady(), "Features should not be ready after failed fetch simulation")
     }
 
     // --- Load Flags Tests ---
@@ -179,7 +179,7 @@ class FeatureFlagManagerTests: XCTestCase {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
         wait(for: [expectation], timeout: 0.5)
 
-        XCTAssertFalse(manager.areFeaturesReady(), "Flags should not become ready if disabled")
+        XCTAssertFalse(manager.areFlagsReady(), "Flags should not become ready if disabled")
         // We can't easily check if _fetchFlagsIfNeeded was *not* called without more testability hooks
     }
 
@@ -188,82 +188,82 @@ class FeatureFlagManagerTests: XCTestCase {
 
     // --- Sync Flag Retrieval Tests ---
 
-    func testGetFeatureSync_FlagsReady_ExistingFlag() {
+    func testGetVariantSync_FlagsReady_ExistingFlag() {
         simulateFetchSuccess() // Flags loaded
-        let featureData = manager.getFeatureSync("feature_string", fallback: defaultFallback)
+        let featureData = manager.getVariantSync("feature_string", fallback: defaultFallback)
         AssertEqual(featureData.key, "v_str")
         AssertEqual(featureData.value, "test_string")
         // Tracking check happens later
     }
 
-    func testGetFeatureSync_FlagsReady_MissingFlag_UsesFallback() {
+    func testGetVariantSync_FlagsReady_MissingFlag_UsesFallback() {
         simulateFetchSuccess()
         let fallback = FeatureFlagData(key: "fb_key", value: "fb_value")
-        let featureData = manager.getFeatureSync("missing_feature", fallback: fallback)
+        let featureData = manager.getVariantSync("missing_feature", fallback: fallback)
         AssertEqual(featureData.key, fallback.key)
         AssertEqual(featureData.value, fallback.value)
         XCTAssertEqual(mockDelegate.trackedEvents.count, 0, "Should not track for fallback")
     }
 
-    func testGetFeatureSync_FlagsNotReady_UsesFallback() {
-        XCTAssertFalse(manager.areFeaturesReady()) // Precondition
+    func testGetVariantSync_FlagsNotReady_UsesFallback() {
+        XCTAssertFalse(manager.areFlagsReady()) // Precondition
         let fallback = FeatureFlagData(key: "fb_key", value: 999)
-        let featureData = manager.getFeatureSync("feature_bool_true", fallback: fallback)
+        let featureData = manager.getVariantSync("feature_bool_true", fallback: fallback)
         AssertEqual(featureData.key, fallback.key)
         AssertEqual(featureData.value, fallback.value)
         XCTAssertEqual(mockDelegate.trackedEvents.count, 0, "Should not track if flags not ready")
     }
 
-    func testGetFeatureDataSync_FlagsReady() {
+    func testGetVariantValueSync_FlagsReady() {
         simulateFetchSuccess()
-        let value = manager.getFeatureDataSync("feature_int", fallbackValue: -1)
+        let value = manager.getVariantValueSync("feature_int", fallbackValue: -1)
         AssertEqual(value, 101)
     }
 
-     func testGetFeatureDataSync_FlagsReady_MissingFlag() {
+     func testGetVariantValueSync_FlagsReady_MissingFlag() {
          simulateFetchSuccess()
-         let value = manager.getFeatureDataSync("missing_feature", fallbackValue: "default")
+         let value = manager.getVariantValueSync("missing_feature", fallbackValue: "default")
          AssertEqual(value, "default")
      }
 
-    func testGetFeatureDataSync_FlagsNotReady() {
-        XCTAssertFalse(manager.areFeaturesReady())
-        let value = manager.getFeatureDataSync("feature_int", fallbackValue: -1)
+    func testGetVariantValueSync_FlagsNotReady() {
+        XCTAssertFalse(manager.areFlagsReady())
+        let value = manager.getVariantValueSync("feature_int", fallbackValue: -1)
         AssertEqual(value, -1)
     }
 
-    func testIsFeatureEnabledSync_FlagsReady_True() {
+    func testIsFlagEnabledSync_FlagsReady_True() {
         simulateFetchSuccess()
-        XCTAssertTrue(manager.isFeatureEnabledSync("feature_bool_true"))
+        XCTAssertTrue(manager.isFlagEnabledSync("feature_bool_true"))
     }
 
-    func testIsFeatureEnabledSync_FlagsReady_False() {
+    func testIsFlagEnabledSync_FlagsReady_False() {
         simulateFetchSuccess()
-        XCTAssertFalse(manager.isFeatureEnabledSync("feature_bool_false"))
+        XCTAssertFalse(manager.isFlagEnabledSync("feature_bool_false"))
     }
 
-    func testIsFeatureEnabledSync_FlagsReady_MissingFlag_UsesFallback() {
+    func testIsFlagEnabledSync_FlagsReady_MissingFlag_UsesFallback() {
         simulateFetchSuccess()
-        XCTAssertTrue(manager.isFeatureEnabledSync("missing", fallbackValue: true))
-        XCTAssertFalse(manager.isFeatureEnabledSync("missing", fallbackValue: false))
+        XCTAssertTrue(manager.isFlagEnabledSync("missing", fallbackValue: true))
+        XCTAssertFalse(manager.isFlagEnabledSync("missing", fallbackValue: false))
     }
 
-    func testIsFeatureEnabledSync_FlagsReady_NonBoolValue_UsesFallback() {
+    func testIsFlagEnabledSync_FlagsReady_NonBoolValue_UsesFallback() {
         simulateFetchSuccess()
-        XCTAssertTrue(manager.isFeatureEnabledSync("feature_string", fallbackValue: true)) // String value
-        XCTAssertFalse(manager.isFeatureEnabledSync("feature_int", fallbackValue: false))   // Int value
-        XCTAssertTrue(manager.isFeatureEnabledSync("feature_null", fallbackValue: true))    // Null value
+        XCTAssertTrue(manager.isFlagEnabledSync("feature_string", fallbackValue: true)) // String value
+        XCTAssertFalse(manager.isFlagEnabledSync("feature_int", fallbackValue: false))   // Int value
+        XCTAssertTrue(manager.isFlagEnabledSync("feature_null", fallbackValue: true))    // Null value
     }
 
-    func testIsFeatureEnabledSync_FlagsNotReady_UsesFallback() {
-        XCTAssertFalse(manager.areFeaturesReady())
-        XCTAssertTrue(manager.isFeatureEnabledSync("feature_bool_true", fallbackValue: true))
-        XCTAssertFalse(manager.isFeatureEnabledSync("feature_bool_true", fallbackValue: false))
+    func testIsFlagEnabledSync_FlagsNotReady_UsesFallback() {
+        XCTAssertFalse(manager.areFlagsReady())
+        XCTAssertTrue(manager.isFlagEnabledSync("feature_bool_true", fallbackValue: true))
+        XCTAssertFalse(manager.isFlagEnabledSync("feature_bool_true", fallbackValue: false))
     }
 
     // --- Async Flag Retrieval Tests ---
 
-    func testGetFeature_Async_FlagsReady_ExistingFlag_XCTWaiter() {
+    func testGetVariant_Async_FlagsReady_ExistingFlag_XCTWaiter() {
          // Arrange
          simulateFetchSuccess() // Ensure flags are ready
          let expectation = XCTestExpectation(description: "Async getFeature ready - XCTWaiter Wait")
@@ -271,7 +271,7 @@ class FeatureFlagManagerTests: XCTestCase {
          var assertionError: String?
 
          // Act
-         manager.getFeature("feature_double", fallback: defaultFallback) { data in
+         manager.getVariant("feature_double", fallback: defaultFallback) { data in
              // This completion should run on the main thread
              if !Thread.isMainThread { assertionError = "Completion not on main thread (\(Thread.current))" }
              receivedData = data
@@ -300,13 +300,13 @@ class FeatureFlagManagerTests: XCTestCase {
          AssertEqual(receivedData?.value, 99.9)
      }
 
-    func testGetFeature_Async_FlagsReady_MissingFlag_UsesFallback() {
+    func testGetVariant_Async_FlagsReady_MissingFlag_UsesFallback() {
         simulateFetchSuccess() // Flags loaded
         let expectation = XCTestExpectation(description: "Async getFeature (Flags Ready, Missing) completes")
         let fallback = FeatureFlagData(key: "fb_async", value: -1)
         var receivedData: FeatureFlagData?
 
-        manager.getFeature("missing_feature", fallback: fallback) { data in
+        manager.getVariant("missing_feature", fallback: fallback) { data in
              XCTAssertTrue(Thread.isMainThread, "Completion should be on main thread")
              receivedData = data
              expectation.fulfill()
@@ -322,8 +322,8 @@ class FeatureFlagManagerTests: XCTestCase {
     }
 
     // Test fetch triggering and completion via getFeature when not ready
-    func testGetFeature_Async_FlagsNotReady_FetchSuccess() {
-        XCTAssertFalse(manager.areFeaturesReady())
+    func testGetVariant_Async_FlagsNotReady_FetchSuccess() {
+        XCTAssertFalse(manager.areFlagsReady())
         let expectation = XCTestExpectation(description: "Async getFeature (Flags Not Ready) triggers fetch and succeeds")
         var receivedData: FeatureFlagData?
 
@@ -331,7 +331,7 @@ class FeatureFlagManagerTests: XCTestCase {
         mockDelegate.trackExpectation = XCTestExpectation(description: "Tracking call for fetch success")
 
         // Call getFeature - this should trigger the fetch logic internally
-        manager.getFeature("feature_int", fallback: defaultFallback) { data in
+        manager.getVariant("feature_int", fallback: defaultFallback) { data in
              XCTAssertTrue(Thread.isMainThread, "Completion should be on main thread")
              receivedData = data
              expectation.fulfill() // Fulfill main expectation
@@ -350,18 +350,18 @@ class FeatureFlagManagerTests: XCTestCase {
         XCTAssertNotNil(receivedData)
         AssertEqual(receivedData?.key, "v_int") // Check correct flag data received
         AssertEqual(receivedData?.value, 101)
-        XCTAssertTrue(manager.areFeaturesReady(), "Flags should be ready after successful fetch")
+        XCTAssertTrue(manager.areFlagsReady(), "Flags should be ready after successful fetch")
         XCTAssertEqual(mockDelegate.trackedEvents.count, 1, "Tracking event should have been recorded")
     }
 
-    func testGetFeature_Async_FlagsNotReady_FetchFailure() {
-        XCTAssertFalse(manager.areFeaturesReady())
+    func testGetVariant_Async_FlagsNotReady_FetchFailure() {
+        XCTAssertFalse(manager.areFlagsReady())
         let expectation = XCTestExpectation(description: "Async getFeature (Flags Not Ready) triggers fetch and fails")
         let fallback = FeatureFlagData(key:"fb_fail", value: "failed_fetch")
         var receivedData: FeatureFlagData?
 
         // Call getFeature
-        manager.getFeature("feature_string", fallback: fallback) { data in
+        manager.getVariant("feature_string", fallback: fallback) { data in
              XCTAssertTrue(Thread.isMainThread, "Completion should be on main thread")
              receivedData = data
              expectation.fulfill()
@@ -378,7 +378,7 @@ class FeatureFlagManagerTests: XCTestCase {
         XCTAssertNotNil(receivedData)
         AssertEqual(receivedData?.key, fallback.key) // Should receive fallback
         AssertEqual(receivedData?.value, fallback.value)
-        XCTAssertFalse(manager.areFeaturesReady(), "Flags should still not be ready after failed fetch")
+        XCTAssertFalse(manager.areFlagsReady(), "Flags should still not be ready after failed fetch")
         XCTAssertEqual(mockDelegate.trackedEvents.count, 0, "Should not track on fetch failure/fallback")
     }
 
@@ -392,13 +392,13 @@ class FeatureFlagManagerTests: XCTestCase {
         mockDelegate.trackExpectation?.expectedFulfillmentCount = 1 // Expect exactly one call
 
         // Call sync methods multiple times
-        _ = manager.getFeatureSync("feature_bool_true", fallback: defaultFallback)
-        _ = manager.getFeatureDataSync("feature_bool_true", fallbackValue: nil)
-        _ = manager.isFeatureEnabledSync("feature_bool_true")
+        _ = manager.getVariantSync("feature_bool_true", fallback: defaultFallback)
+        _ = manager.getVariantValueSync("feature_bool_true", fallbackValue: nil)
+        _ = manager.isFlagEnabledSync("feature_bool_true")
 
         // Call async method
         let asyncExpectation = XCTestExpectation(description: "Async getFeature completes for tracking test")
-        manager.getFeature("feature_bool_true", fallback: defaultFallback) { _ in asyncExpectation.fulfill() }
+        manager.getVariant("feature_bool_true", fallback: defaultFallback) { _ in asyncExpectation.fulfill() }
 
         // Wait for async call AND the track expectation
         wait(for: [asyncExpectation, mockDelegate.trackExpectation!], timeout: 2.0)
@@ -409,7 +409,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
         // --- Call for a *different* feature ---
         mockDelegate.trackExpectation = XCTestExpectation(description: "Track called for feature_string")
-        _ = manager.getFeatureSync("feature_string", fallback: defaultFallback)
+        _ = manager.getVariantSync("feature_string", fallback: defaultFallback)
         wait(for: [mockDelegate.trackExpectation!], timeout: 1.0)
 
         let stringEvents = mockDelegate.trackedEvents.filter { $0.properties?["Experiment name"] as? String == "feature_string" }
@@ -423,7 +423,7 @@ class FeatureFlagManagerTests: XCTestCase {
          simulateFetchSuccess()
          mockDelegate.trackExpectation = XCTestExpectation(description: "Track called for properties check")
 
-         _ = manager.getFeatureSync("feature_int", fallback: defaultFallback) // Trigger tracking
+         _ = manager.getVariantSync("feature_int", fallback: defaultFallback) // Trigger tracking
 
          wait(for: [mockDelegate.trackExpectation!], timeout: 1.0)
 
@@ -440,7 +440,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
      func testTracking_DoesNotTrackForFallback_Sync() {
          simulateFetchSuccess() // Flags ready
-         _ = manager.getFeatureSync("missing_feature", fallback: FeatureFlagData(key:"fb", value:"v")) // Request missing flag
+         _ = manager.getVariantSync("missing_feature", fallback: FeatureFlagData(key:"fb", value:"v")) // Request missing flag
          // Wait briefly to ensure no unexpected tracking call
          let expectation = XCTestExpectation(description: "Wait briefly for no track")
          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
@@ -452,7 +452,7 @@ class FeatureFlagManagerTests: XCTestCase {
         simulateFetchSuccess() // Flags ready
         let expectation = XCTestExpectation(description: "Async getFeature (Fallback) completes")
 
-        manager.getFeature("missing_feature", fallback: FeatureFlagData(key:"fb", value:"v")) { _ in
+        manager.getVariant("missing_feature", fallback: FeatureFlagData(key:"fb", value:"v")) { _ in
             expectation.fulfill()
         }
 
@@ -465,7 +465,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
     // Test concurrent fetch attempts (via getFeature when not ready)
     func testConcurrentGetFeature_WhenNotReady_OnlyOneFetch() {
-        XCTAssertFalse(manager.areFeaturesReady())
+        XCTAssertFalse(manager.areFlagsReady())
 
         let numConcurrentCalls = 5
         var expectations: [XCTestExpectation] = []
@@ -480,7 +480,7 @@ class FeatureFlagManagerTests: XCTestCase {
             let exp = XCTestExpectation(description: "Async getFeature \(i) completes")
             expectations.append(exp)
             DispatchQueue.global().async { // Simulate calls from different threads
-                self.manager.getFeature("feature_bool_true", fallback: self.defaultFallback) { data in
+                self.manager.getVariant("feature_bool_true", fallback: self.defaultFallback) { data in
                     print("Completion handler \(i) called.")
                     completionResults[i] = data
                     exp.fulfill()
@@ -508,7 +508,7 @@ class FeatureFlagManagerTests: XCTestCase {
         }
 
         // Verify flags are ready and tracking occurred only once
-        XCTAssertTrue(manager.areFeaturesReady())
+        XCTAssertTrue(manager.areFlagsReady())
         let trackEvents = mockDelegate.trackedEvents.filter { $0.properties?["Experiment name"] as? String == "feature_bool_true" }
         XCTAssertEqual(trackEvents.count, 1, "Tracking should have occurred exactly once despite concurrent calls")
     }
@@ -605,13 +605,13 @@ class FeatureFlagManagerTests: XCTestCase {
         // Test all operations with nil delegate
         
         // Synchronous operations
-        let syncData = manager.getFeatureSync("feature_bool_true", fallback: defaultFallback)
+        let syncData = manager.getVariantSync("feature_bool_true", fallback: defaultFallback)
         XCTAssertEqual(syncData.key, "v_true")
         XCTAssertEqual(syncData.value as? Bool, true)
         
         // Async operations
         let expectation = XCTestExpectation(description: "Async with nil delegate")
-        manager.getFeature("feature_int", fallback: defaultFallback) { data in
+        manager.getVariant("feature_int", fallback: defaultFallback) { data in
             XCTAssertEqual(data.key, "v_int")
             XCTAssertEqual(data.value as? Int, 101)
             expectation.fulfill()
@@ -632,7 +632,7 @@ class FeatureFlagManagerTests: XCTestCase {
         // Verify no crash; attempt a flag fetch after a short delay
         let expectation = XCTestExpectation(description: "Check after attempted fetch")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            XCTAssertFalse(noDelegate.areFeaturesReady(), "Flags should not be ready without delegate")
+            XCTAssertFalse(noDelegate.areFlagsReady(), "Flags should not be ready without delegate")
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1.0)
@@ -648,7 +648,7 @@ class FeatureFlagManagerTests: XCTestCase {
         // Verify no fetch is triggered
         let expectation = XCTestExpectation(description: "Check disabled config behavior")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            XCTAssertFalse(self.manager.areFeaturesReady(), "Flags should not be ready when config disabled")
+            XCTAssertFalse(self.manager.areFlagsReady(), "Flags should not be ready when config disabled")
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1.0)

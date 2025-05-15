@@ -104,16 +104,118 @@ public struct FlagsConfig: Decodable {
 
 
 // --- FeatureFlagDelegate Protocol ---
-protocol FeatureFlagDelegate: AnyObject {
+public protocol FeatureFlagDelegate: AnyObject {
     func getConfig() -> MixpanelConfig
     func getDistinctId() -> String
     func track(event: String?, properties: Properties?)
 }
 
+/// A protocol defining the public interface for a feature flagging system.
+public protocol MixpanelFlags {
+    
+    /// The delegate responsible for handling feature flag lifecycle events,
+    /// such as tracking. It is declared `weak` to prevent retain cycles.
+    var delegate: FeatureFlagDelegate? { get set }
+
+    // --- Public Methods ---
+
+    /// Initiates the loading or refreshing of flag configurations from a remote source or cache.
+    /// This operation should be performed asynchronously to avoid blocking the calling thread.
+    /// Implementations should ensure that subsequent calls to retrieve flags
+    /// will use the latest data once loaded.
+    func loadFlags()
+
+    /// Synchronously checks if the flag configurations have been successfully loaded
+    /// and are available for querying.
+    ///
+    /// - Returns: `true` if the flags are loaded and ready for use, `false` otherwise.
+    func areFlagsReady() -> Bool
+
+    // --- Sync Flag Retrieval ---
+
+    /// Synchronously retrieves the complete `FeatureFlagData` for a given feature name.
+    /// If the feature flag is found and flags are ready, its data is returned.
+    /// Otherwise, the provided `fallback` `FeatureFlagData` is returned.
+    /// This method will also trigger any necessary tracking logic for the accessed flag.
+    ///
+    /// - Parameters:
+    ///   - featureName: The unique identifier for the feature flag.
+    ///   - fallback: The `FeatureFlagData` to return if the specified flag is not found
+    ///               or if the flags are not yet loaded.
+    /// - Returns: The `FeatureFlagData` associated with `featureName`, or the `fallback` data.
+    func getVariantSync(_ featureName: String, fallback: FeatureFlagData) -> FeatureFlagData
+
+    /// Asynchronously retrieves the complete `FeatureFlagData` for a given feature name.
+    /// If flags are not ready, an attempt will be made to load them.
+    /// The `completion` handler is called with the `FeatureFlagData` for the feature,
+    /// or the `fallback` data if the flag is not found or loading fails.
+    /// This method will also trigger any necessary tracking logic for the accessed flag.
+    /// The completion handler is typically invoked on the main thread.
+    ///
+    /// - Parameters:
+    ///   - featureName: The unique identifier for the feature flag.
+    ///   - fallback: The `FeatureFlagData` to use as a default if the specified flag
+    ///               is not found or an error occurs during fetching.
+    ///   - completion: A closure that is called with the resulting `FeatureFlagData`.
+    ///                 This closure will be executed on the main dispatch queue.
+    func getVariant(_ featureName: String, fallback: FeatureFlagData, completion: @escaping (FeatureFlagData) -> Void)
+
+    /// Synchronously retrieves the underlying value of a feature flag.
+    /// This is a convenience method that extracts the `value` property from the `FeatureFlagData`
+    /// obtained via `getVariantSync`.
+    ///
+    /// - Parameters:
+    ///   - featureName: The unique identifier for the feature flag.
+    ///   - fallbackValue: The default value to return if the flag is not found,
+    ///                    its data doesn't contain a value, or flags are not ready.
+    /// - Returns: The value of the feature flag, or `fallbackValue`. The type is `Any?`.
+    func getVariantValueSync(_ featureName: String, fallbackValue: Any?) -> Any?
+
+    /// Asynchronously retrieves the underlying value of a feature flag.
+    /// This is a convenience method that extracts the `value` property from the `FeatureFlagData`
+    /// obtained via `getVariant`. If flags are not ready, an attempt will be made to load them.
+    /// The `completion` handler is called with the flag's value or the `fallbackValue`.
+    /// The completion handler is typically invoked on the main thread.
+    ///
+    /// - Parameters:
+    ///   - featureName: The unique identifier for the feature flag.
+    ///   - fallbackValue: The default value to use if the flag is not found,
+    ///                    fetching fails, or its data doesn't contain a value.
+    ///   - completion: A closure that is called with the resulting value (`Any?`).
+    ///                 This closure will be executed on the main dispatch queue.
+    func getVariantValue(_ featureName: String, fallbackValue: Any?, completion: @escaping (Any?) -> Void)
+
+    /// Synchronously checks if a specific feature flag is considered "enabled".
+    /// This typically involves retrieving the flag's value and evaluating it as a boolean.
+    /// The exact logic for what constitutes "enabled" (e.g., `true`, non-nil, a specific string)
+    /// should be defined by the implementing class.
+    ///
+    /// - Parameters:
+    ///   - featureName: The unique identifier for the feature flag.
+    ///   - fallbackValue: The boolean value to return if the flag is not found,
+    ///                    cannot be evaluated as a boolean, or flags are not ready. Defaults to `false`.
+    /// - Returns: `true` if the flag is considered enabled, `false` otherwise (including if `fallbackValue` is used).
+    func isFlagEnabledSync(_ featureName: String, fallbackValue: Bool) -> Bool
+
+    /// Asynchronously checks if a specific feature flag is considered "enabled".
+    /// This typically involves retrieving the flag's value and evaluating it as a boolean.
+    /// If flags are not ready, an attempt will be made to load them.
+    /// The `completion` handler is called with the boolean result.
+    /// The completion handler is typically invoked on the main thread.
+    ///
+    /// - Parameters:
+    ///   - featureName: The unique identifier for the feature flag.
+    ///   - fallbackValue: The boolean value to use if the flag is not found, fetching fails,
+    ///                    or it cannot be evaluated as a boolean. Defaults to `false`.
+    ///   - completion: A closure that is called with the boolean result.
+    ///                 This closure will be executed on the main dispatch queue.
+    func isFlagEnabled(_ featureName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void)
+}
+
 
 // --- FeatureFlagManager Class ---
 
-class FeatureFlagManager: Network {
+class FeatureFlagManager: Network, MixpanelFlags {
     
     weak var delegate: FeatureFlagDelegate?
     
@@ -150,14 +252,14 @@ class FeatureFlagManager: Network {
         }
     }
     
-    func areFeaturesReady() -> Bool {
+    func areFlagsReady() -> Bool {
         // Simple sync read - serial queue ensures this is safe
         accessQueue.sync { flags != nil }
     }
     
     // --- Sync Flag Retrieval ---
     
-    func getFeatureSync(_ featureName: String, fallback: FeatureFlagData) -> FeatureFlagData {
+    func getVariantSync(_ featureName: String, fallback: FeatureFlagData) -> FeatureFlagData {
         var featureData: FeatureFlagData?
         var tracked = false
         // === Serial Queue: Single Sync Block for Read AND Track Update ===
@@ -193,7 +295,7 @@ class FeatureFlagManager: Network {
     
     // --- Async Flag Retrieval ---
     
-    func getFeature(_ featureName: String, fallback: FeatureFlagData, completion: @escaping (FeatureFlagData) -> Void) {
+    func getVariant(_ featureName: String, fallback: FeatureFlagData, completion: @escaping (FeatureFlagData) -> Void) {
         accessQueue.async { [weak self] in // Block A runs serially on accessQueue
             guard let self = self else { return }
             
@@ -231,7 +333,7 @@ class FeatureFlagManager: Network {
                     let result: FeatureFlagData
                     if success {
                         // Fetch succeeded, get the feature SYNCHRONOUSLY
-                        result = self.getFeatureSync(featureName, fallback: fallback)
+                        result = self.getVariantSync(featureName, fallback: fallback)
                     } else {
                         print("Warning: Failed to fetch flags, returning fallback for \(featureName).")
                         result = fallback
@@ -246,23 +348,23 @@ class FeatureFlagManager: Network {
         } // End accessQueue.async (Block A)
     }
     
-    func getFeatureDataSync(_ featureName: String, fallbackValue: Any?) -> Any? {
-        return getFeatureSync(featureName, fallback: FeatureFlagData(value: fallbackValue)).value
+    func getVariantValueSync(_ featureName: String, fallbackValue: Any?) -> Any? {
+        return getVariantSync(featureName, fallback: FeatureFlagData(value: fallbackValue)).value
     }
     
-    func getFeatureData(_ featureName: String, fallbackValue: Any?, completion: @escaping (Any?) -> Void) {
-        getFeature(featureName, fallback: FeatureFlagData(value: fallbackValue)) { featureData in
+    func getVariantValue(_ featureName: String, fallbackValue: Any?, completion: @escaping (Any?) -> Void) {
+        getVariant(featureName, fallback: FeatureFlagData(value: fallbackValue)) { featureData in
             completion(featureData.value)
         }
     }
     
-    func isFeatureEnabledSync(_ featureName: String, fallbackValue: Bool = false) -> Bool {
-        let dataValue = getFeatureDataSync(featureName, fallbackValue: fallbackValue)
+    func isFlagEnabledSync(_ featureName: String, fallbackValue: Bool = false) -> Bool {
+        let dataValue = getVariantValueSync(featureName, fallbackValue: fallbackValue)
         return self._evaluateBooleanFlag(featureName: featureName, dataValue: dataValue, fallbackValue: fallbackValue)
     }
     
-    func isFeatureEnabled(_ featureName: String, fallbackValue: Bool = false, completion: @escaping (Bool) -> Void) {
-        getFeatureData(featureName, fallbackValue: fallbackValue) { [weak self] dataValue in
+    func isFlagEnabled(_ featureName: String, fallbackValue: Bool = false, completion: @escaping (Bool) -> Void) {
+        getVariantValue(featureName, fallbackValue: fallbackValue) { [weak self] dataValue in
             guard let self = self else {
                 completion(fallbackValue)
                 return

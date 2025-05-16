@@ -284,7 +284,7 @@ final class MixpanelManager {
     func initialize(options: MixpanelOptions) -> MixpanelInstance {
         let instanceName = options.instanceName ?? options.token
         return dequeueInstance(instanceName: instanceName) {
-            return MixpanelInstance(config: options)
+            return MixpanelInstance(options: options)
         }
     }
     

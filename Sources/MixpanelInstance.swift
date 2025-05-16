@@ -77,7 +77,7 @@ public struct ProxyServerConfig {
 /// The class that represents the Mixpanel Instance
 open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate, MixpanelFlagDelegate {
 
-    private let config: MixpanelOptions
+    private let options: MixpanelOptions
     
     /// apiToken string that identifies the project to track data to
     open var apiToken = ""
@@ -273,18 +273,18 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     private let registerSuperPropertiesNotificationName = Notification.Name("com.mixpanel.properties.register")
     private let unregisterSuperPropertiesNotificationName = Notification.Name("com.mixpanel.properties.unregister")
     
-    convenience init(config: MixpanelOptions) {
-        self.init(apiToken: config.token,
-                  flushInterval: config.flushInterval,
-                  name: config.instanceName ?? config.token,
-                  trackAutomaticEvents: config.trackAutomaticEvents,
-                  optOutTrackingByDefault: config.optOutTrackingByDefault,
-                  useUniqueDistinctId: config.useUniqueDistinctId,
-                  superProperties: config.superProperties,
-                  serverURL: config.serverURL,
-                  proxyServerDelegate: config.proxyServerConfig?.delegate,
-                  useGzipCompression: config.useGzipCompression,
-                  config: config)
+    convenience init(options: MixpanelOptions) {
+        self.init(apiToken: options.token,
+                  flushInterval: options.flushInterval,
+                  name: options.instanceName ?? options.token,
+                  trackAutomaticEvents: options.trackAutomaticEvents,
+                  optOutTrackingByDefault: options.optOutTrackingByDefault,
+                  useUniqueDistinctId: options.useUniqueDistinctId,
+                  superProperties: options.superProperties,
+                  serverURL: options.serverURL,
+                  proxyServerDelegate: options.proxyServerConfig?.delegate,
+                  useGzipCompression: options.useGzipCompression,
+                  options: options)
     }
     
     convenience init(
@@ -345,10 +345,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         serverURL: String? = nil,
         proxyServerDelegate: MixpanelProxyServerDelegate? = nil,
         useGzipCompression: Bool = false,
-        config: MixpanelOptions? = nil
+        options: MixpanelOptions? = nil
     ) {
         // Store the config if provided, otherwise create one with the current values
-        self.config = config ?? MixpanelOptions(
+        self.options = options ?? MixpanelOptions(
             token: apiToken ?? "",
             flushInterval: flushInterval,
             instanceName: name,
@@ -443,7 +443,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
     
     public func getOptions() -> MixpanelOptions {
-        return config
+        return options
     }
     
     public func getDistinctId() -> String {

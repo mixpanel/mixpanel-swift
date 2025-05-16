@@ -13,21 +13,21 @@ import XCTest
 
 class MockFeatureFlagDelegate: MixpanelFlagDelegate {
     
-    var config: MixpanelOptions
+    var options: MixpanelOptions
     var distinctId: String
     var trackedEvents: [(event: String?, properties: Properties?)] = []
     var trackExpectation: XCTestExpectation?
-    var getConfigCallCount = 0
+    var getOptionsCallCount = 0
     var getDistinctIdCallCount = 0
 
-    init(config: MixpanelOptions = MixpanelOptions(token: "test", flagsConfig: FlagsConfig(enabled: true)), distinctId: String = "test_distinct_id") {
-        self.config = config
+    init(options: MixpanelOptions = MixpanelOptions(token: "test", featureFlagsEnabled: true), distinctId: String = "test_distinct_id") {
+        self.options = options
         self.distinctId = distinctId
     }
 
     func getOptions() -> MixpanelOptions {
-        getConfigCallCount += 1
-        return config
+        getOptionsCallCount += 1
+        return options
     }
 
     func getDistinctId() -> String {
@@ -171,7 +171,7 @@ class FeatureFlagManagerTests: XCTestCase {
     // --- Load Flags Tests ---
 
     func testLoadFlags_WhenDisabledInConfig() {
-        mockDelegate.config = MixpanelOptions(token:"test", flagsConfig: FlagsConfig(enabled: false)) // Explicitly disable
+        mockDelegate.options = MixpanelOptions(token:"test", featureFlagsEnabled: false) // Explicitly disable
         manager.loadFlags() // Call public API
 
         // Wait to ensure no async fetch operations started changing state
@@ -639,16 +639,16 @@ class FeatureFlagManagerTests: XCTestCase {
     }
     
     func testDelegateConfigDisabledHandling() {
-        // Set delegate config to disabled
-        mockDelegate.config = MixpanelOptions(token: "test", flagsConfig: FlagsConfig(enabled: false))
+        // Set delegate options to disabled
+        mockDelegate.options = MixpanelOptions(token: "test", featureFlagsEnabled: false)
         
         // Try to load flags
         manager.loadFlags()
         
         // Verify no fetch is triggered
-        let expectation = XCTestExpectation(description: "Check disabled config behavior")
+        let expectation = XCTestExpectation(description: "Check disabled options behavior")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            XCTAssertFalse(self.manager.areFlagsReady(), "Flags should not be ready when config disabled")
+            XCTAssertFalse(self.manager.areFlagsReady(), "Flags should not be ready when options disabled")
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1.0)

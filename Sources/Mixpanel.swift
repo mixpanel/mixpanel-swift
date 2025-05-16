@@ -16,7 +16,7 @@ open class Mixpanel {
     
     @discardableResult
     open class func initialize(options: MixpanelOptions) -> MixpanelInstance {
-        return MixpanelManager.sharedInstance.initialize(config: options)
+        return MixpanelManager.sharedInstance.initialize(options: options)
     }
     
 #if !os(OSX) && !os(watchOS)
@@ -281,10 +281,10 @@ final class MixpanelManager {
         instanceQueue = DispatchQueue(label: "com.mixpanel.instance.manager.instance", qos: .utility, autoreleaseFrequency: .workItem)
     }
     
-    func initialize(config: MixpanelOptions) -> MixpanelInstance {
-        let instanceName = config.instanceName ?? config.token
+    func initialize(options: MixpanelOptions) -> MixpanelInstance {
+        let instanceName = options.instanceName ?? options.token
         return dequeueInstance(instanceName: instanceName) {
-            return MixpanelInstance(config: config)
+            return MixpanelInstance(config: options)
         }
     }
     

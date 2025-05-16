@@ -11,21 +11,21 @@ import XCTest
 
 // MARK: - Mocks and Helpers (Largely Unchanged)
 
-class MockFeatureFlagDelegate: FeatureFlagDelegate {
+class MockFeatureFlagDelegate: MixpanelFlagDelegate {
     
-    var config: MixpanelConfig
+    var config: MixpanelOptions
     var distinctId: String
     var trackedEvents: [(event: String?, properties: Properties?)] = []
     var trackExpectation: XCTestExpectation?
     var getConfigCallCount = 0
     var getDistinctIdCallCount = 0
 
-    init(config: MixpanelConfig = MixpanelConfig(token: "test", flagsConfig: FlagsConfig(enabled: true)), distinctId: String = "test_distinct_id") {
+    init(config: MixpanelOptions = MixpanelOptions(token: "test", flagsConfig: FlagsConfig(enabled: true)), distinctId: String = "test_distinct_id") {
         self.config = config
         self.distinctId = distinctId
     }
 
-    func getConfig() -> MixpanelConfig {
+    func getOptions() -> MixpanelOptions {
         getConfigCallCount += 1
         return config
     }
@@ -93,15 +93,15 @@ class FeatureFlagManagerTests: XCTestCase {
     var mockDelegate: MockFeatureFlagDelegate!
     var manager: FeatureFlagManager!
     // Sample flag data for simulating fetch results
-    let sampleFlags: [String: FeatureFlagData] = [
-        "feature_bool_true": FeatureFlagData(key: "v_true", value: true),
-        "feature_bool_false": FeatureFlagData(key: "v_false", value: false),
-        "feature_string": FeatureFlagData(key: "v_str", value: "test_string"),
-        "feature_int": FeatureFlagData(key: "v_int", value: 101),
-        "feature_double": FeatureFlagData(key: "v_double", value: 99.9),
-        "feature_null": FeatureFlagData(key: "v_null", value: nil)
+    let sampleFlags: [String: MixpanelFlagVariant] = [
+        "feature_bool_true": MixpanelFlagVariant(key: "v_true", value: true),
+        "feature_bool_false": MixpanelFlagVariant(key: "v_false", value: false),
+        "feature_string": MixpanelFlagVariant(key: "v_str", value: "test_string"),
+        "feature_int": MixpanelFlagVariant(key: "v_int", value: 101),
+        "feature_double": MixpanelFlagVariant(key: "v_double", value: 99.9),
+        "feature_null": MixpanelFlagVariant(key: "v_null", value: nil)
     ]
-    let defaultFallback = FeatureFlagData(value: nil) // Default fallback for convenience
+    let defaultFallback = MixpanelFlagVariant(value: nil) // Default fallback for convenience
 
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -120,7 +120,7 @@ class FeatureFlagManagerTests: XCTestCase {
     // These now directly modify state and call the *internal* _completeFetch
     // Requires _completeFetch to be accessible (e.g., internal or @testable import)
 
-    private func simulateFetchSuccess(flags: [String: FeatureFlagData]? = nil) {
+    private func simulateFetchSuccess(flags: [String: MixpanelFlagVariant]? = nil) {
         let flagsToSet = flags ?? sampleFlags
         // Set flags directly *before* calling completeFetch
         manager.accessQueue.sync {
@@ -171,7 +171,7 @@ class FeatureFlagManagerTests: XCTestCase {
     // --- Load Flags Tests ---
 
     func testLoadFlags_WhenDisabledInConfig() {
-        mockDelegate.config = MixpanelConfig(token:"test", flagsConfig: FlagsConfig(enabled: false)) // Explicitly disable
+        mockDelegate.config = MixpanelOptions(token:"test", flagsConfig: FlagsConfig(enabled: false)) // Explicitly disable
         manager.loadFlags() // Call public API
 
         // Wait to ensure no async fetch operations started changing state
@@ -190,27 +190,27 @@ class FeatureFlagManagerTests: XCTestCase {
 
     func testGetVariantSync_FlagsReady_ExistingFlag() {
         simulateFetchSuccess() // Flags loaded
-        let featureData = manager.getVariantSync("feature_string", fallback: defaultFallback)
-        AssertEqual(featureData.key, "v_str")
-        AssertEqual(featureData.value, "test_string")
+        let flagVariant = manager.getVariantSync("feature_string", fallback: defaultFallback)
+        AssertEqual(flagVariant.key, "v_str")
+        AssertEqual(flagVariant.value, "test_string")
         // Tracking check happens later
     }
 
     func testGetVariantSync_FlagsReady_MissingFlag_UsesFallback() {
         simulateFetchSuccess()
-        let fallback = FeatureFlagData(key: "fb_key", value: "fb_value")
-        let featureData = manager.getVariantSync("missing_feature", fallback: fallback)
-        AssertEqual(featureData.key, fallback.key)
-        AssertEqual(featureData.value, fallback.value)
+        let fallback = MixpanelFlagVariant(key: "fb_key", value: "fb_value")
+        let flagVariant = manager.getVariantSync("missing_feature", fallback: fallback)
+        AssertEqual(flagVariant.key, fallback.key)
+        AssertEqual(flagVariant.value, fallback.value)
         XCTAssertEqual(mockDelegate.trackedEvents.count, 0, "Should not track for fallback")
     }
 
     func testGetVariantSync_FlagsNotReady_UsesFallback() {
         XCTAssertFalse(manager.areFlagsReady()) // Precondition
-        let fallback = FeatureFlagData(key: "fb_key", value: 999)
-        let featureData = manager.getVariantSync("feature_bool_true", fallback: fallback)
-        AssertEqual(featureData.key, fallback.key)
-        AssertEqual(featureData.value, fallback.value)
+        let fallback = MixpanelFlagVariant(key: "fb_key", value: 999)
+        let flagVariant = manager.getVariantSync("feature_bool_true", fallback: fallback)
+        AssertEqual(flagVariant.key, fallback.key)
+        AssertEqual(flagVariant.value, fallback.value)
         XCTAssertEqual(mockDelegate.trackedEvents.count, 0, "Should not track if flags not ready")
     }
 
@@ -267,7 +267,7 @@ class FeatureFlagManagerTests: XCTestCase {
          // Arrange
          simulateFetchSuccess() // Ensure flags are ready
          let expectation = XCTestExpectation(description: "Async getFeature ready - XCTWaiter Wait")
-         var receivedData: FeatureFlagData?
+         var receivedData: MixpanelFlagVariant?
          var assertionError: String?
 
          // Act
@@ -303,8 +303,8 @@ class FeatureFlagManagerTests: XCTestCase {
     func testGetVariant_Async_FlagsReady_MissingFlag_UsesFallback() {
         simulateFetchSuccess() // Flags loaded
         let expectation = XCTestExpectation(description: "Async getFeature (Flags Ready, Missing) completes")
-        let fallback = FeatureFlagData(key: "fb_async", value: -1)
-        var receivedData: FeatureFlagData?
+        let fallback = MixpanelFlagVariant(key: "fb_async", value: -1)
+        var receivedData: MixpanelFlagVariant?
 
         manager.getVariant("missing_feature", fallback: fallback) { data in
              XCTAssertTrue(Thread.isMainThread, "Completion should be on main thread")
@@ -325,7 +325,7 @@ class FeatureFlagManagerTests: XCTestCase {
     func testGetVariant_Async_FlagsNotReady_FetchSuccess() {
         XCTAssertFalse(manager.areFlagsReady())
         let expectation = XCTestExpectation(description: "Async getFeature (Flags Not Ready) triggers fetch and succeeds")
-        var receivedData: FeatureFlagData?
+        var receivedData: MixpanelFlagVariant?
 
         // Setup tracking expectation *before* calling getFeature
         mockDelegate.trackExpectation = XCTestExpectation(description: "Tracking call for fetch success")
@@ -357,8 +357,8 @@ class FeatureFlagManagerTests: XCTestCase {
     func testGetVariant_Async_FlagsNotReady_FetchFailure() {
         XCTAssertFalse(manager.areFlagsReady())
         let expectation = XCTestExpectation(description: "Async getFeature (Flags Not Ready) triggers fetch and fails")
-        let fallback = FeatureFlagData(key:"fb_fail", value: "failed_fetch")
-        var receivedData: FeatureFlagData?
+        let fallback = MixpanelFlagVariant(key:"fb_fail", value: "failed_fetch")
+        var receivedData: MixpanelFlagVariant?
 
         // Call getFeature
         manager.getVariant("feature_string", fallback: fallback) { data in
@@ -440,7 +440,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
      func testTracking_DoesNotTrackForFallback_Sync() {
          simulateFetchSuccess() // Flags ready
-         _ = manager.getVariantSync("missing_feature", fallback: FeatureFlagData(key:"fb", value:"v")) // Request missing flag
+         _ = manager.getVariantSync("missing_feature", fallback: MixpanelFlagVariant(key:"fb", value:"v")) // Request missing flag
          // Wait briefly to ensure no unexpected tracking call
          let expectation = XCTestExpectation(description: "Wait briefly for no track")
          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
@@ -452,7 +452,7 @@ class FeatureFlagManagerTests: XCTestCase {
         simulateFetchSuccess() // Flags ready
         let expectation = XCTestExpectation(description: "Async getFeature (Fallback) completes")
 
-        manager.getVariant("missing_feature", fallback: FeatureFlagData(key:"fb", value:"v")) { _ in
+        manager.getVariant("missing_feature", fallback: MixpanelFlagVariant(key:"fb", value:"v")) { _ in
             expectation.fulfill()
         }
 
@@ -469,7 +469,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
         let numConcurrentCalls = 5
         var expectations: [XCTestExpectation] = []
-        var completionResults: [FeatureFlagData?] = Array(repeating: nil, count: numConcurrentCalls)
+        var completionResults: [MixpanelFlagVariant?] = Array(repeating: nil, count: numConcurrentCalls)
 
         // Expect tracking only ONCE for the actual feature if fetch succeeds
         mockDelegate.trackExpectation = XCTestExpectation(description: "Track call (should be once)")
@@ -640,7 +640,7 @@ class FeatureFlagManagerTests: XCTestCase {
     
     func testDelegateConfigDisabledHandling() {
         // Set delegate config to disabled
-        mockDelegate.config = MixpanelConfig(token: "test", flagsConfig: FlagsConfig(enabled: false))
+        mockDelegate.config = MixpanelOptions(token: "test", flagsConfig: FlagsConfig(enabled: false))
         
         // Try to load flags
         manager.loadFlags()
@@ -669,7 +669,7 @@ class FeatureFlagManagerTests: XCTestCase {
         
         do {
             let decoder = JSONDecoder()
-            let flagData = try decoder.decode(FeatureFlagData.self, from: nestedArrayJSON)
+            let flagData = try decoder.decode(MixpanelFlagVariant.self, from: nestedArrayJSON)
             
             XCTAssertEqual(flagData.key, "complex_array")
             XCTAssertNotNil(flagData.value, "Value should not be nil")
@@ -727,7 +727,7 @@ class FeatureFlagManagerTests: XCTestCase {
         
         do {
             let decoder = JSONDecoder()
-            let flagData = try decoder.decode(FeatureFlagData.self, from: nestedObjectJSON)
+            let flagData = try decoder.decode(MixpanelFlagVariant.self, from: nestedObjectJSON)
             
             XCTAssertEqual(flagData.key, "complex_object")
             XCTAssertNotNil(flagData.value, "Value should not be nil")
@@ -791,7 +791,7 @@ class FeatureFlagManagerTests: XCTestCase {
         // This is a valid test since the string will decode properly
         do {
             let decoder = JSONDecoder()
-            let flagData = try decoder.decode(FeatureFlagData.self, from: unsupportedTypeJSON)
+            let flagData = try decoder.decode(MixpanelFlagVariant.self, from: unsupportedTypeJSON)
             XCTAssertEqual(flagData.key, "invalid_type")
             XCTAssertEqual(flagData.value as? String, "infinity")
         } catch {
@@ -807,7 +807,7 @@ class FeatureFlagManagerTests: XCTestCase {
         
         do {
             let decoder = JSONDecoder()
-            let _ = try decoder.decode(FeatureFlagData.self, from: missingValueJSON)
+            let _ = try decoder.decode(MixpanelFlagVariant.self, from: missingValueJSON)
             XCTFail("Decoding should fail with missing variant_value")
         } catch {
             // This is expected to fail, so the test passes

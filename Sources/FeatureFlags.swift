@@ -29,8 +29,8 @@ struct AnyCodable: Decodable {
 }
 
 
-// Represents the data associated with a feature flag
-public struct FeatureFlagData: Decodable {
+// Represents the variant associated with a feature flag
+public struct MixpanelFlagVariant: Decodable {
     public let key: String // Corresponds to 'variant_key' from API
     public let value: Any? // Corresponds to 'variant_value' from API
 
@@ -64,48 +64,12 @@ public struct FeatureFlagData: Decodable {
 
 // Response structure for the /flags endpoint
 struct FlagsResponse: Decodable {
-    let flags: [String: FeatureFlagData]? // Dictionary where key is feature name
+    let flags: [String: MixpanelFlagVariant]? // Dictionary where key is flag name
 }
-
-// Feature Flag Config Struct conforming to Decodable
-public struct FlagsConfig: Decodable {
-    let enabled: Bool
-    let context: [String: Any?] // Context for the request (using Any? for flexibility with nil)
-    
-    // Define the keys corresponding to the JSON structure
-    enum CodingKeys: String, CodingKey {
-        case enabled
-        case context
-    }
-    
-    // Custom initializer required by Decodable
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        // Decode the 'enabled' boolean directly
-        enabled = try container.decode(Bool.self, forKey: .enabled)
-        
-        // Decode the 'context' dictionary using AnyCodable for values
-        // Use decodeIfPresent if the 'context' key might be optional in the JSON
-        // If 'context' is guaranteed to exist, use decode().
-        let anyCodableContext = try container.decodeIfPresent([String: AnyCodable].self, forKey: .context) ?? [:]
-        
-        // Map the [String: AnyCodable] dictionary to [String: Any?]
-        // by extracting the 'value' from each AnyCodable wrapper.
-        context = anyCodableContext.mapValues { $0.value }
-    }
-    
-    // memberwise initializer for non-decoding instantiation
-    public init(enabled: Bool = false, context: [String: Any?] = [:]) {
-        self.enabled = enabled
-        self.context = context
-    }
-}
-
 
 // --- FeatureFlagDelegate Protocol ---
-public protocol FeatureFlagDelegate: AnyObject {
-    func getConfig() -> MixpanelConfig
+public protocol MixpanelFlagDelegate: AnyObject {
+    func getOptions() -> MixpanelOptions
     func getDistinctId() -> String
     func track(event: String?, properties: Properties?)
 }
@@ -115,17 +79,14 @@ public protocol MixpanelFlags {
     
     /// The delegate responsible for handling feature flag lifecycle events,
     /// such as tracking. It is declared `weak` to prevent retain cycles.
-    var delegate: FeatureFlagDelegate? { get set }
+    var delegate: MixpanelFlagDelegate? { get set }
 
     // --- Public Methods ---
 
-    /// Initiates the loading or refreshing of flag configurations from a remote source or cache.
-    /// This operation should be performed asynchronously to avoid blocking the calling thread.
-    /// Implementations should ensure that subsequent calls to retrieve flags
-    /// will use the latest data once loaded.
+    /// Initiates the loading or refreshing of flags
     func loadFlags()
 
-    /// Synchronously checks if the flag configurations have been successfully loaded
+    /// Synchronously checks if the flags  have been successfully loaded
     /// and are available for querying.
     ///
     /// - Returns: `true` if the flags are loaded and ready for use, `false` otherwise.
@@ -133,57 +94,57 @@ public protocol MixpanelFlags {
 
     // --- Sync Flag Retrieval ---
 
-    /// Synchronously retrieves the complete `FeatureFlagData` for a given feature name.
-    /// If the feature flag is found and flags are ready, its data is returned.
-    /// Otherwise, the provided `fallback` `FeatureFlagData` is returned.
+    /// Synchronously retrieves the complete `MixpanelFlagVariant` for a given flag name.
+    /// If the feature flag is found and flags are ready, its variant is returned.
+    /// Otherwise, the provided `fallback` `MixpanelFlagVariant` is returned.
     /// This method will also trigger any necessary tracking logic for the accessed flag.
     ///
     /// - Parameters:
-    ///   - featureName: The unique identifier for the feature flag.
-    ///   - fallback: The `FeatureFlagData` to return if the specified flag is not found
+    ///   - flagName: The unique identifier for the feature flag.
+    ///   - fallback: The `MixpanelFlagVariant` to return if the specified flag is not found
     ///               or if the flags are not yet loaded.
-    /// - Returns: The `FeatureFlagData` associated with `featureName`, or the `fallback` data.
-    func getVariantSync(_ featureName: String, fallback: FeatureFlagData) -> FeatureFlagData
+    /// - Returns: The `MixpanelFlagVariant` associated with `flagName`, or the `fallback` variant.
+    func getVariantSync(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant
 
-    /// Asynchronously retrieves the complete `FeatureFlagData` for a given feature name.
+    /// Asynchronously retrieves the complete `MixpanelFlagVariant` for a given flag name.
     /// If flags are not ready, an attempt will be made to load them.
-    /// The `completion` handler is called with the `FeatureFlagData` for the feature,
-    /// or the `fallback` data if the flag is not found or loading fails.
+    /// The `completion` handler is called with the `MixpanelFlagVariant` for the flag,
+    /// or the `fallback` variant if the flag is not found or loading fails.
     /// This method will also trigger any necessary tracking logic for the accessed flag.
     /// The completion handler is typically invoked on the main thread.
     ///
     /// - Parameters:
-    ///   - featureName: The unique identifier for the feature flag.
-    ///   - fallback: The `FeatureFlagData` to use as a default if the specified flag
+    ///   - flagName: The unique identifier for the feature flag.
+    ///   - fallback: The `MixpanelFlagVariant` to use as a default if the specified flag
     ///               is not found or an error occurs during fetching.
-    ///   - completion: A closure that is called with the resulting `FeatureFlagData`.
+    ///   - completion: A closure that is called with the resulting `MixpanelFlagVariant`.
     ///                 This closure will be executed on the main dispatch queue.
-    func getVariant(_ featureName: String, fallback: FeatureFlagData, completion: @escaping (FeatureFlagData) -> Void)
+    func getVariant(_ flagName: String, fallback: MixpanelFlagVariant, completion: @escaping (MixpanelFlagVariant) -> Void)
 
     /// Synchronously retrieves the underlying value of a feature flag.
-    /// This is a convenience method that extracts the `value` property from the `FeatureFlagData`
+    /// This is a convenience method that extracts the `value` property from the `MixpanelFlagVariant`
     /// obtained via `getVariantSync`.
     ///
     /// - Parameters:
-    ///   - featureName: The unique identifier for the feature flag.
+    ///   - flagName: The unique identifier for the feature flag.
     ///   - fallbackValue: The default value to return if the flag is not found,
-    ///                    its data doesn't contain a value, or flags are not ready.
+    ///                    its variant doesn't contain a value, or flags are not ready.
     /// - Returns: The value of the feature flag, or `fallbackValue`. The type is `Any?`.
-    func getVariantValueSync(_ featureName: String, fallbackValue: Any?) -> Any?
+    func getVariantValueSync(_ flagName: String, fallbackValue: Any?) -> Any?
 
     /// Asynchronously retrieves the underlying value of a feature flag.
-    /// This is a convenience method that extracts the `value` property from the `FeatureFlagData`
+    /// This is a convenience method that extracts the `value` property from the `MixpanelFlagVariant`
     /// obtained via `getVariant`. If flags are not ready, an attempt will be made to load them.
     /// The `completion` handler is called with the flag's value or the `fallbackValue`.
     /// The completion handler is typically invoked on the main thread.
     ///
     /// - Parameters:
-    ///   - featureName: The unique identifier for the feature flag.
+    ///   - flagName: The unique identifier for the feature flag.
     ///   - fallbackValue: The default value to use if the flag is not found,
-    ///                    fetching fails, or its data doesn't contain a value.
+    ///                    fetching fails, or its variant doesn't contain a value.
     ///   - completion: A closure that is called with the resulting value (`Any?`).
     ///                 This closure will be executed on the main dispatch queue.
-    func getVariantValue(_ featureName: String, fallbackValue: Any?, completion: @escaping (Any?) -> Void)
+    func getVariantValue(_ flagName: String, fallbackValue: Any?, completion: @escaping (Any?) -> Void)
 
     /// Synchronously checks if a specific feature flag is considered "enabled".
     /// This typically involves retrieving the flag's value and evaluating it as a boolean.
@@ -191,11 +152,11 @@ public protocol MixpanelFlags {
     /// should be defined by the implementing class.
     ///
     /// - Parameters:
-    ///   - featureName: The unique identifier for the feature flag.
+    ///   - flagName: The unique identifier for the feature flag.
     ///   - fallbackValue: The boolean value to return if the flag is not found,
     ///                    cannot be evaluated as a boolean, or flags are not ready. Defaults to `false`.
     /// - Returns: `true` if the flag is considered enabled, `false` otherwise (including if `fallbackValue` is used).
-    func isFlagEnabledSync(_ featureName: String, fallbackValue: Bool) -> Bool
+    func isFlagEnabledSync(_ flagName: String, fallbackValue: Bool) -> Bool
 
     /// Asynchronously checks if a specific feature flag is considered "enabled".
     /// This typically involves retrieving the flag's value and evaluating it as a boolean.
@@ -204,12 +165,12 @@ public protocol MixpanelFlags {
     /// The completion handler is typically invoked on the main thread.
     ///
     /// - Parameters:
-    ///   - featureName: The unique identifier for the feature flag.
+    ///   - flagName: The unique identifier for the feature flag.
     ///   - fallbackValue: The boolean value to use if the flag is not found, fetching fails,
     ///                    or it cannot be evaluated as a boolean. Defaults to `false`.
     ///   - completion: A closure that is called with the boolean result.
     ///                 This closure will be executed on the main dispatch queue.
-    func isFlagEnabled(_ featureName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void)
+    func isFlagEnabled(_ flagName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void)
 }
 
 
@@ -217,19 +178,19 @@ public protocol MixpanelFlags {
 
 class FeatureFlagManager: Network, MixpanelFlags {
     
-    weak var delegate: FeatureFlagDelegate?
+    weak var delegate: MixpanelFlagDelegate?
     
     // *** Use a SERIAL queue for automatic state serialization ***
     let accessQueue = DispatchQueue(label: "com.mixpanel.featureflagmanager.serialqueue")
     
     // Internal State - Protected by accessQueue
-    var flags: [String: FeatureFlagData]? = nil
+    var flags: [String: MixpanelFlagVariant]? = nil
     var isFetching: Bool = false
     private var trackedFeatures: Set<String> = Set()
     private var fetchCompletionHandlers: [(Bool) -> Void] = []
     
     // Configuration
-    private var currentConfig: MixpanelConfig? { delegate?.getConfig() }
+    private var currentOptions: MixpanelOptions? { delegate?.getOptions() }
     private var flagsRoute = "/flags/"
     
     // Initializers
@@ -237,7 +198,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
         super.init(serverURL: serverURL)
     }
     
-    public init(serverURL: String, delegate: FeatureFlagDelegate?) {
+    public init(serverURL: String, delegate: MixpanelFlagDelegate?) {
         self.delegate = delegate
         super.init(serverURL: serverURL)
     }
@@ -259,47 +220,47 @@ class FeatureFlagManager: Network, MixpanelFlags {
     
     // --- Sync Flag Retrieval ---
     
-    func getVariantSync(_ featureName: String, fallback: FeatureFlagData) -> FeatureFlagData {
-        var featureData: FeatureFlagData?
+    func getVariantSync(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
+        var flagVariant: MixpanelFlagVariant?
         var tracked = false
         // === Serial Queue: Single Sync Block for Read AND Track Update ===
         accessQueue.sync {
             guard let currentFlags = self.flags else { return }
             
-            if let feature = currentFlags[featureName] {
-                featureData = feature
+            if let variant = currentFlags[flagName] {
+                flagVariant = variant
                 
                 // Perform atomic check-and-set for tracking *within the same sync block*
-                if !self.trackedFeatures.contains(featureName) {
-                    self.trackedFeatures.insert(featureName)
+                if !self.trackedFeatures.contains(flagName) {
+                    self.trackedFeatures.insert(flagName)
                     tracked = true
                 }
             }
-            // If feature wasn't found, featureData remains nil
+            // If flag wasn't found, flagVariant remains nil
         }
         // === End Sync Block ===
         
         // Now, process the results outside the lock
         
-        if let foundFeature = featureData {
+        if let foundVariant = flagVariant {
             // If tracking was done *in this call*, call the delegate
             if tracked {
-                self._performTrackingDelegateCall(featureName: featureName, feature: foundFeature)
+                self._performTrackingDelegateCall(flagName: flagName, variant: foundVariant)
             }
-            return foundFeature
+            return foundVariant
         } else {
-            print("Info: Flag '\(featureName)' not found or flags not ready. Returning fallback.")
+            print("Info: Flag '\(flagName)' not found or flags not ready. Returning fallback.")
             return fallback
         }
     }
     
     // --- Async Flag Retrieval ---
     
-    func getVariant(_ featureName: String, fallback: FeatureFlagData, completion: @escaping (FeatureFlagData) -> Void) {
+    func getVariant(_ flagName: String, fallback: MixpanelFlagVariant, completion: @escaping (MixpanelFlagVariant) -> Void) {
         accessQueue.async { [weak self] in // Block A runs serially on accessQueue
             guard let self = self else { return }
             
-            var featureData: FeatureFlagData?
+            var flagVariant: MixpanelFlagVariant?
             var needsTrackingCheck = false
             var flagsAreCurrentlyReady = false
             
@@ -307,20 +268,20 @@ class FeatureFlagManager: Network, MixpanelFlags {
             // No inner sync needed - we are already synchronized by the serial queue
             flagsAreCurrentlyReady = (self.flags != nil)
             if flagsAreCurrentlyReady, let currentFlags = self.flags {
-                if let feature = currentFlags[featureName] {
-                    featureData = feature
+                if let variant = currentFlags[flagName] {
+                    flagVariant = variant
                     // Also safe to access trackedFeatures directly here
-                    needsTrackingCheck = !self.trackedFeatures.contains(featureName)
+                    needsTrackingCheck = !self.trackedFeatures.contains(flagName)
                 }
             }
             // === State access finished ===
             
             if flagsAreCurrentlyReady {
-                let result = featureData ?? fallback
-                if featureData != nil, needsTrackingCheck {
+                let result = flagVariant ?? fallback
+                if flagVariant != nil, needsTrackingCheck {
                     // Perform atomic check-and-track. _trackFeatureIfNeeded uses its
                     // own sync block, which is safe to call from here (it's not nested).
-                    self._trackFeatureIfNeeded(featureName: featureName, feature: result)
+                    self._trackFlagIfNeeded(flagName: flagName, variant: result)
                 }
                 DispatchQueue.main.async { completion(result) }
                 
@@ -330,12 +291,12 @@ class FeatureFlagManager: Network, MixpanelFlags {
                 print("Flags not ready, attempting fetch for getFeature call...")
                 self._fetchFlagsIfNeeded { success in
                     // This completion runs *after* fetch completes (or fails)
-                    let result: FeatureFlagData
+                    let result: MixpanelFlagVariant
                     if success {
-                        // Fetch succeeded, get the feature SYNCHRONOUSLY
-                        result = self.getVariantSync(featureName, fallback: fallback)
+                        // Fetch succeeded, get the flag SYNCHRONOUSLY
+                        result = self.getVariantSync(flagName, fallback: fallback)
                     } else {
-                        print("Warning: Failed to fetch flags, returning fallback for \(featureName).")
+                        print("Warning: Failed to fetch flags, returning fallback for \(flagName).")
                         result = fallback
                     }
                     // Call original completion (on main thread)
@@ -348,28 +309,28 @@ class FeatureFlagManager: Network, MixpanelFlags {
         } // End accessQueue.async (Block A)
     }
     
-    func getVariantValueSync(_ featureName: String, fallbackValue: Any?) -> Any? {
-        return getVariantSync(featureName, fallback: FeatureFlagData(value: fallbackValue)).value
+    func getVariantValueSync(_ flagName: String, fallbackValue: Any?) -> Any? {
+        return getVariantSync(flagName, fallback: MixpanelFlagVariant(value: fallbackValue)).value
     }
     
-    func getVariantValue(_ featureName: String, fallbackValue: Any?, completion: @escaping (Any?) -> Void) {
-        getVariant(featureName, fallback: FeatureFlagData(value: fallbackValue)) { featureData in
-            completion(featureData.value)
+    func getVariantValue(_ flagName: String, fallbackValue: Any?, completion: @escaping (Any?) -> Void) {
+        getVariant(flagName, fallback: MixpanelFlagVariant(value: fallbackValue)) { flagVariant in
+            completion(flagVariant.value)
         }
     }
     
-    func isFlagEnabledSync(_ featureName: String, fallbackValue: Bool = false) -> Bool {
-        let dataValue = getVariantValueSync(featureName, fallbackValue: fallbackValue)
-        return self._evaluateBooleanFlag(featureName: featureName, dataValue: dataValue, fallbackValue: fallbackValue)
+    func isFlagEnabledSync(_ flagName: String, fallbackValue: Bool = false) -> Bool {
+        let variantValue = getVariantValueSync(flagName, fallbackValue: fallbackValue)
+        return self._evaluateBooleanFlag(flagName: flagName, variantValue: variantValue, fallbackValue: fallbackValue)
     }
     
-    func isFlagEnabled(_ featureName: String, fallbackValue: Bool = false, completion: @escaping (Bool) -> Void) {
-        getVariantValue(featureName, fallbackValue: fallbackValue) { [weak self] dataValue in
+    func isFlagEnabled(_ flagName: String, fallbackValue: Bool = false, completion: @escaping (Bool) -> Void) {
+        getVariantValue(flagName, fallbackValue: fallbackValue) { [weak self] variantValue in
             guard let self = self else {
                 completion(fallbackValue)
                 return
             }
-            let result = self._evaluateBooleanFlag(featureName: featureName, dataValue: dataValue, fallbackValue: fallbackValue)
+            let result = self._evaluateBooleanFlag(flagName: flagName, variantValue: variantValue, fallbackValue: fallbackValue)
             completion(result)
         }
     }
@@ -380,10 +341,10 @@ class FeatureFlagManager: Network, MixpanelFlags {
     private func _fetchFlagsIfNeeded(completion: ((Bool) -> Void)?) {
         
         var shouldStartFetch = false
-        let configSnapshot = self.currentConfig // Read config directly (safe on accessQueue)
+        let optionsSnapshot = self.currentOptions // Read options directly (safe on accessQueue)
         
 
-        guard let config = configSnapshot, config.flagsConfig.enabled else {
+        guard let options = optionsSnapshot, options.featureFlagsEnabled else {
             print("Feature flags are disabled, not fetching.")
             // Call completion immediately since we know the result and are on the queue.
             completion?(false)
@@ -421,8 +382,8 @@ class FeatureFlagManager: Network, MixpanelFlags {
     private func _performFetchRequest() {
         // This method runs OUTSIDE the accessQueue
         
-        guard let delegate = self.delegate, let config = self.currentConfig else {
-            print("Error: Delegate or config missing for fetch.")
+        guard let delegate = self.delegate, let options = self.currentOptions else {
+            print("Error: Delegate or options missing for fetch.")
             self._completeFetch(success: false)
             return
         }
@@ -430,7 +391,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
         let distinctId = delegate.getDistinctId()
         print("Fetching flags for distinct ID: \(distinctId)")
         
-        var context = config.flagsConfig.context
+        var context = options.featureFlagsContext
         context["distinct_id"] = distinctId
         let requestBodyDict = ["context": context]
         
@@ -438,7 +399,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
             print("Error: Failed to serialize request body for flags.")
             self._completeFetch(success: false); return
         }
-        guard let authData = "\(config.token):".data(using: .utf8) else {
+        guard let authData = "\(options.token):".data(using: .utf8) else {
             print("Error: Failed to create auth data."); self._completeFetch(success: false); return
         }
         let base64Auth = authData.base64EncodedString()
@@ -490,39 +451,39 @@ class FeatureFlagManager: Network, MixpanelFlags {
     // --- Tracking Logic ---
     
     // Performs the atomic check and triggers delegate call if needed
-    private func _trackFeatureIfNeeded(featureName: String, feature: FeatureFlagData) {
+    private func _trackFlagIfNeeded(flagName: String, variant: MixpanelFlagVariant) {
         var shouldCallDelegate = false
         
         // We are already executing on the serial accessQueue, so this is safe.
-        if !self.trackedFeatures.contains(featureName) {
-            self.trackedFeatures.insert(featureName)
+        if !self.trackedFeatures.contains(flagName) {
+            self.trackedFeatures.insert(flagName)
             shouldCallDelegate = true
         }
         
         // Call delegate *outside* this conceptual block if tracking occurred
         // This prevents holding any potential implicit lock during delegate execution
         if shouldCallDelegate {
-            self._performTrackingDelegateCall(featureName: featureName, feature: feature)
+            self._performTrackingDelegateCall(flagName: flagName, variant: variant)
         }
     }
     
     // Helper to just call the delegate (no locking)
-    private func _performTrackingDelegateCall(featureName: String, feature: FeatureFlagData) {
+    private func _performTrackingDelegateCall(flagName: String, variant: MixpanelFlagVariant) {
         guard let delegate = self.delegate else { return }
         let properties: Properties = [
-            "Experiment name": featureName, "Variant name": feature.key, "$experiment_type": "feature_flag"
+            "Experiment name": flagName, "Variant name": variant.key, "$experiment_type": "feature_flag"
         ]
         // Dispatch delegate call asynchronously to main thread for safety
         DispatchQueue.main.async {
             delegate.track(event: "$experiment_started", properties: properties)
-            print("Tracked $experiment_started for \(featureName) (dispatched to main)")
+            print("Tracked $experiment_started for \(flagName) (dispatched to main)")
         }
     }
     
     // --- Boolean Evaluation Helper ---
-    private func _evaluateBooleanFlag(featureName: String, dataValue: Any?, fallbackValue: Bool) -> Bool {
-        guard let val = dataValue else { return fallbackValue }
+    private func _evaluateBooleanFlag(flagName: String, variantValue: Any?, fallbackValue: Bool) -> Bool {
+        guard let val = variantValue else { return fallbackValue }
         if let boolVal = val as? Bool { return boolVal }
-        else { print("Error: Flag '\(featureName)' is not Bool"); return fallbackValue }
+        else { print("Error: Flag '\(flagName)' is not Bool"); return fallbackValue }
     }
 }

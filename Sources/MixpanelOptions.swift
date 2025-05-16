@@ -1,5 +1,5 @@
 //
-//  public.swift
+//  MixpanelOptions.swift
 //  Mixpanel
 //
 //  Created by Jared McFarland on 4/15/25.
@@ -7,8 +7,7 @@
 //
 
 
-// New MixpanelConfig class
-public class MixpanelConfig {
+public class MixpanelOptions {
     public let token: String
     public let flushInterval: Double
     public let instanceName: String?
@@ -19,7 +18,8 @@ public class MixpanelConfig {
     public let serverURL: String?
     public let proxyServerConfig: ProxyServerConfig?
     public let useGzipCompression: Bool
-    public let flagsConfig: FlagsConfig
+    public let featureFlagsEnabled: Bool
+    public let featureFlagsContext: [String: Any]
     
     public init(token: String,
                 flushInterval: Double = 60,
@@ -31,7 +31,8 @@ public class MixpanelConfig {
                 serverURL: String? = nil,
                 proxyServerConfig: ProxyServerConfig? = nil,
                 useGzipCompression: Bool = true, // NOTE: This is a new default value!
-                flagsConfig: FlagsConfig = FlagsConfig()) {
+                featureFlagsEnabled: Bool = false,
+                featureFlagsContext: [String: Any] = [:]) {
         self.token = token
         self.flushInterval = flushInterval
         self.instanceName = instanceName
@@ -42,6 +43,7 @@ public class MixpanelConfig {
         self.serverURL = serverURL
         self.proxyServerConfig = proxyServerConfig
         self.useGzipCompression = useGzipCompression
-        self.flagsConfig = flagsConfig
+        self.featureFlagsEnabled = featureFlagsEnabled
+        self.featureFlagsContext = featureFlagsContext
     }
 }

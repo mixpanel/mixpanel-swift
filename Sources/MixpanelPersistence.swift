@@ -190,6 +190,9 @@ class MixpanelPersistence {
         }
     }
     
+    /// -- Feauture Flags --
+    /// NOT currently used
+    
     static func saveFlags(flags: InternalProperties, instanceName: String) {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return

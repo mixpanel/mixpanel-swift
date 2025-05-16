@@ -75,9 +75,9 @@ public struct ProxyServerConfig {
 }
 
 /// The class that represents the Mixpanel Instance
-open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate, FeatureFlagDelegate {
+open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate, MixpanelFlagDelegate {
 
-    private let config: MixpanelConfig
+    private let config: MixpanelOptions
     
     /// apiToken string that identifies the project to track data to
     open var apiToken = ""
@@ -273,7 +273,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     private let registerSuperPropertiesNotificationName = Notification.Name("com.mixpanel.properties.register")
     private let unregisterSuperPropertiesNotificationName = Notification.Name("com.mixpanel.properties.unregister")
     
-    convenience init(config: MixpanelConfig) {
+    convenience init(config: MixpanelOptions) {
         self.init(apiToken: config.token,
                   flushInterval: config.flushInterval,
                   name: config.instanceName ?? config.token,
@@ -345,10 +345,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         serverURL: String? = nil,
         proxyServerDelegate: MixpanelProxyServerDelegate? = nil,
         useGzipCompression: Bool = false,
-        config: MixpanelConfig? = nil
+        config: MixpanelOptions? = nil
     ) {
         // Store the config if provided, otherwise create one with the current values
-        self.config = config ?? MixpanelConfig(
+        self.config = config ?? MixpanelOptions(
             token: apiToken ?? "",
             flushInterval: flushInterval,
             instanceName: name,
@@ -442,7 +442,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         flags.loadFlags()
     }
     
-    public func getConfig() -> MixpanelConfig {
+    public func getOptions() -> MixpanelOptions {
         return config
     }
     

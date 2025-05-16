@@ -107,14 +107,14 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
             let ready = Mixpanel.mainInstance().flags.areFlagsReady()
             descStr = "Features Ready: \(ready)"
         case 12:
-            var flagData = FeatureFlagData(key: "super-neat")
+            var flagData = MixpanelFlagVariant(key: "super-neat")
             Mixpanel.mainInstance().flags.getVariant("marks_nifty_feature_flag", fallback: flagData) { data in
                 flagData = data
                 print("Feature: \(flagData.key), Value: \(String(describing: flagData.value))")
             }
             descStr = "Feature: \(flagData.key), Value: \(String(describing: flagData.value))"
         case 13:
-            var flagData = FeatureFlagData(key: "enabled")
+            var flagData = MixpanelFlagVariant(key: "enabled")
             flagData = Mixpanel.mainInstance().flags.getVariantSync("jb_qa_flag", fallback: flagData)
             descStr = "Feature: \(flagData.key), Value: \(String(describing: flagData.value))"
         case 14:

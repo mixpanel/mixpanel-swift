@@ -15,8 +15,8 @@ import UIKit
 open class Mixpanel {
     
     @discardableResult
-    open class func initialize(config: MixpanelConfig) -> MixpanelInstance {
-        return MixpanelManager.sharedInstance.initialize(config: config)
+    open class func initialize(options: MixpanelOptions) -> MixpanelInstance {
+        return MixpanelManager.sharedInstance.initialize(config: options)
     }
     
 #if !os(OSX) && !os(watchOS)
@@ -264,15 +264,6 @@ open class Mixpanel {
     open class func removeInstance(name: String) {
         MixpanelManager.sharedInstance.removeInstance(name: name)
     }
-    
-    open class func getConfig(name: String? = nil) -> MixpanelConfig? {
-        if let name, let instance = MixpanelManager.sharedInstance.getInstance(name: name) {
-            return instance.getConfig()
-        } else if let instance = MixpanelManager.sharedInstance.getMainInstance() {
-            return instance.getConfig()
-        }
-        return nil
-    }
 }
 
 final class MixpanelManager {
@@ -290,7 +281,7 @@ final class MixpanelManager {
         instanceQueue = DispatchQueue(label: "com.mixpanel.instance.manager.instance", qos: .utility, autoreleaseFrequency: .workItem)
     }
     
-    func initialize(config: MixpanelConfig) -> MixpanelInstance {
+    func initialize(config: MixpanelOptions) -> MixpanelInstance {
         let instanceName = config.instanceName ?? config.token
         return dequeueInstance(instanceName: instanceName) {
             return MixpanelInstance(config: config)

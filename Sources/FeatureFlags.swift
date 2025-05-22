@@ -156,7 +156,7 @@ public protocol MixpanelFlags {
     ///   - fallbackValue: The boolean value to return if the flag is not found,
     ///                    cannot be evaluated as a boolean, or flags are not ready. Defaults to `false`.
     /// - Returns: `true` if the flag is considered enabled, `false` otherwise (including if `fallbackValue` is used).
-    func isFlagEnabledSync(_ flagName: String, fallbackValue: Bool) -> Bool
+    func isEnabledSync(_ flagName: String, fallbackValue: Bool) -> Bool
 
     /// Asynchronously checks if a specific feature flag is considered "enabled".
     /// This typically involves retrieving the flag's value and evaluating it as a boolean.
@@ -170,7 +170,7 @@ public protocol MixpanelFlags {
     ///                    or it cannot be evaluated as a boolean. Defaults to `false`.
     ///   - completion: A closure that is called with the boolean result.
     ///                 This closure will be executed on the main dispatch queue.
-    func isFlagEnabled(_ flagName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void)
+    func isEnabled(_ flagName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void)
 }
 
 
@@ -319,12 +319,12 @@ class FeatureFlagManager: Network, MixpanelFlags {
         }
     }
     
-    func isFlagEnabledSync(_ flagName: String, fallbackValue: Bool = false) -> Bool {
+    func isEnabledSync(_ flagName: String, fallbackValue: Bool = false) -> Bool {
         let variantValue = getVariantValueSync(flagName, fallbackValue: fallbackValue)
         return self._evaluateBooleanFlag(flagName: flagName, variantValue: variantValue, fallbackValue: fallbackValue)
     }
     
-    func isFlagEnabled(_ flagName: String, fallbackValue: Bool = false, completion: @escaping (Bool) -> Void) {
+    func isEnabled(_ flagName: String, fallbackValue: Bool = false, completion: @escaping (Bool) -> Void) {
         getVariantValue(flagName, fallbackValue: fallbackValue) { [weak self] variantValue in
             guard let self = self else {
                 completion(fallbackValue)

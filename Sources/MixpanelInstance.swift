@@ -789,6 +789,7 @@ extension MixpanelInstance {
                     self.distinctId = distinctId
                     self.userId = distinctId
                 }
+                self.flags.loadFlags()
                 self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
             }
             

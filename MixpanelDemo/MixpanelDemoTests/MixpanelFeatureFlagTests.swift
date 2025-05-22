@@ -234,31 +234,31 @@ class FeatureFlagManagerTests: XCTestCase {
 
     func testIsFlagEnabledSync_FlagsReady_True() {
         simulateFetchSuccess()
-        XCTAssertTrue(manager.isFlagEnabledSync("feature_bool_true"))
+        XCTAssertTrue(manager.isEnabledSync("feature_bool_true"))
     }
 
     func testIsFlagEnabledSync_FlagsReady_False() {
         simulateFetchSuccess()
-        XCTAssertFalse(manager.isFlagEnabledSync("feature_bool_false"))
+        XCTAssertFalse(manager.isEnabledSync("feature_bool_false"))
     }
 
     func testIsFlagEnabledSync_FlagsReady_MissingFlag_UsesFallback() {
         simulateFetchSuccess()
-        XCTAssertTrue(manager.isFlagEnabledSync("missing", fallbackValue: true))
-        XCTAssertFalse(manager.isFlagEnabledSync("missing", fallbackValue: false))
+        XCTAssertTrue(manager.isEnabledSync("missing", fallbackValue: true))
+        XCTAssertFalse(manager.isEnabledSync("missing", fallbackValue: false))
     }
 
     func testIsFlagEnabledSync_FlagsReady_NonBoolValue_UsesFallback() {
         simulateFetchSuccess()
-        XCTAssertTrue(manager.isFlagEnabledSync("feature_string", fallbackValue: true)) // String value
-        XCTAssertFalse(manager.isFlagEnabledSync("feature_int", fallbackValue: false))   // Int value
-        XCTAssertTrue(manager.isFlagEnabledSync("feature_null", fallbackValue: true))    // Null value
+        XCTAssertTrue(manager.isEnabledSync("feature_string", fallbackValue: true)) // String value
+        XCTAssertFalse(manager.isEnabledSync("feature_int", fallbackValue: false))   // Int value
+        XCTAssertTrue(manager.isEnabledSync("feature_null", fallbackValue: true))    // Null value
     }
 
     func testIsFlagEnabledSync_FlagsNotReady_UsesFallback() {
         XCTAssertFalse(manager.areFlagsReady())
-        XCTAssertTrue(manager.isFlagEnabledSync("feature_bool_true", fallbackValue: true))
-        XCTAssertFalse(manager.isFlagEnabledSync("feature_bool_true", fallbackValue: false))
+        XCTAssertTrue(manager.isEnabledSync("feature_bool_true", fallbackValue: true))
+        XCTAssertFalse(manager.isEnabledSync("feature_bool_true", fallbackValue: false))
     }
 
     // --- Async Flag Retrieval Tests ---
@@ -394,7 +394,7 @@ class FeatureFlagManagerTests: XCTestCase {
         // Call sync methods multiple times
         _ = manager.getVariantSync("feature_bool_true", fallback: defaultFallback)
         _ = manager.getVariantValueSync("feature_bool_true", fallbackValue: nil)
-        _ = manager.isFlagEnabledSync("feature_bool_true")
+        _ = manager.isEnabledSync("feature_bool_true")
 
         // Call async method
         let asyncExpectation = XCTestExpectation(description: "Async getFeature completes for tracking test")

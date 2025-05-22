@@ -147,6 +147,7 @@ No worries, here are some links that you will find useful:
 * **[Advanced iOS - Swift Guide](https://developer.mixpanel.com/docs/swift)**
 * **[Sample app](https://github.com/mixpanel/mixpanel-swift/tree/master/MixpanelDemo)**
 * **[Full API Reference](https://mixpanel.github.io/mixpanel-swift)**
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/mixpanel/mixpanel-swift)
 
 Have any questions? Reach out to Mixpanel [Support](https://help.mixpanel.com/hc/en-us/requests/new) to speak to someone smart, quickly.
 

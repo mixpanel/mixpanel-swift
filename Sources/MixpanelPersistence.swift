@@ -190,7 +190,7 @@ class MixpanelPersistence {
         }
     }
     
-    /// -- Feauture Flags --
+    /// -- Feature Flags --
     /// NOT currently used
     
     static func saveFlags(flags: InternalProperties, instanceName: String) {

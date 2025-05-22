@@ -32,3 +32,6 @@ profile
 Carthage/Build/
 
 MixpanelDemo/build/
+
+# Claude.ai instructions
+CLAUDE.md

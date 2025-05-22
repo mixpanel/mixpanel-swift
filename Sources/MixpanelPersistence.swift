@@ -47,6 +47,7 @@ struct MixpanelUserDefaultsKeys {
     static let userID = "MPUserId"
     static let alias = "MPAlias"
     static let hadPersistedDistinctId = "MPHadPersistedDistinctId"
+    static let flags = "MPFlags"
 }
 
 class MixpanelPersistence {
@@ -185,6 +186,39 @@ class MixpanelPersistence {
             return try NSKeyedUnarchiver.unarchivedObject(ofClasses: archivedClasses, from: superPropertiesData) as? InternalProperties ?? InternalProperties()
         } catch {
             MixpanelLogger.warn(message: "Failed to unarchive super properties")
+            return InternalProperties()
+        }
+    }
+    
+    /// -- Feature Flags --
+    /// NOT currently used
+    
+    static func saveFlags(flags: InternalProperties, instanceName: String) {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+            return
+        }
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
+        do {
+            let flagsData = try NSKeyedArchiver.archivedData(withRootObject: flags, requiringSecureCoding: false)
+            defaults.set(flagsData, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.flags)")
+            defaults.synchronize()
+        } catch {
+            MixpanelLogger.warn(message: "Failed to archive flags")
+        }
+    }
+    
+    static func loadFlags(instanceName: String) -> InternalProperties {
+        guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+            return InternalProperties()
+        }
+        let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
+        guard let flags = defaults.data(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.flags)") else {
+            return InternalProperties()
+        }
+        do {
+            return try NSKeyedUnarchiver.unarchivedObject(ofClasses: archivedClasses, from: flags) as? InternalProperties ?? InternalProperties()
+        } catch {
+            MixpanelLogger.warn(message: "Failed to unarchive flags")
             return InternalProperties()
         }
     }

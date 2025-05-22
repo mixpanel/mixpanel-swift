@@ -179,8 +179,51 @@ class MixpanelDemoTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
+    // Mock implementation of MixpanelFlags to track loadFlags calls
+    class MockMixpanelFlags: MixpanelFlags {
+        var delegate: MixpanelFlagDelegate?
+        var loadFlagsCallCount = 0
+        
+        func loadFlags() {
+            loadFlagsCallCount += 1
+        }
+        
+        func areFlagsReady() -> Bool {
+            return true
+        }
+        
+        func getVariantSync(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
+            return fallback
+        }
+        
+        func getVariant(_ flagName: String, fallback: MixpanelFlagVariant, completion: @escaping (MixpanelFlagVariant) -> Void) {
+            completion(fallback)
+        }
+        
+        func getVariantValueSync(_ flagName: String, fallbackValue: Any?) -> Any? {
+            return fallbackValue
+        }
+        
+        func getVariantValue(_ flagName: String, fallbackValue: Any?, completion: @escaping (Any?) -> Void) {
+            completion(fallbackValue)
+        }
+        
+        func isEnabledSync(_ flagName: String, fallbackValue: Bool) -> Bool {
+            return fallbackValue
+        }
+        
+        func isEnabled(_ flagName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void) {
+            completion(fallbackValue)
+        }
+    }
+    
     func testIdentify() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
+        
+        // Inject our mock flags object
+        let mockFlags = MockMixpanelFlags()
+        testMixpanel.flags = mockFlags
+        
         for _ in 0..<2 {
             // run this twice to test reset works correctly wrt to distinct ids
             let distinctId: String = "d1"
@@ -221,8 +264,16 @@ class MixpanelDemoTests: MixpanelBaseTests {
             XCTAssertEqual(unidentifiedQueue.last?["$token"] as? String,
                            testMixpanel.apiToken,
                            "incorrect project token in people record")
+            // Record the loadFlags call count before identify
+            let loadFlagsCallCountBefore = mockFlags.loadFlagsCallCount
+            
             testMixpanel.identify(distinctId: distinctId)
             waitForTrackingQueue(testMixpanel)
+            
+            // Assert that loadFlags was called when distinctId changed
+            XCTAssertEqual(mockFlags.loadFlagsCallCount, loadFlagsCallCountBefore + 1,
+                          "loadFlags should be called when distinctId changes during identify")
+            
             let anonymousId = testMixpanel.anonymousId
             peopleQueue_value = peopleQueue(token: testMixpanel.apiToken)
             unidentifiedQueue = unIdentifiedPeopleQueue(token: testMixpanel.apiToken)
@@ -263,6 +314,14 @@ class MixpanelDemoTests: MixpanelBaseTests {
             let newDistinctId = (eventQueue(token: testMixpanel.apiToken).last?["properties"] as? InternalProperties)?["distinct_id"] as? String
             XCTAssertEqual(newDistinctId, distinctId,
                            "events should use new distinct id after identify:")
+            
+            // Test that calling identify with the same distinctId does NOT trigger loadFlags
+            let loadFlagsCountBeforeSameId = mockFlags.loadFlagsCallCount
+            testMixpanel.identify(distinctId: distinctId) // Same distinctId
+            waitForTrackingQueue(testMixpanel)
+            XCTAssertEqual(mockFlags.loadFlagsCallCount, loadFlagsCountBeforeSameId,
+                          "loadFlags should NOT be called when distinctId doesn't change")
+            
             testMixpanel.reset()
             waitForTrackingQueue(testMixpanel)
         }

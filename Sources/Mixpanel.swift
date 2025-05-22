@@ -14,6 +14,11 @@ import UIKit
 /// The primary class for integrating Mixpanel with your app.
 open class Mixpanel {
     
+    @discardableResult
+    open class func initialize(options: MixpanelOptions) -> MixpanelInstance {
+        return MixpanelManager.sharedInstance.initialize(options: options)
+    }
+    
 #if !os(OSX) && !os(watchOS)
     /**
      Initializes an instance of the API with the given project token.
@@ -276,6 +281,13 @@ final class MixpanelManager {
         instanceQueue = DispatchQueue(label: "com.mixpanel.instance.manager.instance", qos: .utility, autoreleaseFrequency: .workItem)
     }
     
+    func initialize(options: MixpanelOptions) -> MixpanelInstance {
+        let instanceName = options.instanceName ?? options.token
+        return dequeueInstance(instanceName: instanceName) {
+            return MixpanelInstance(options: options)
+        }
+    }
+    
     func initialize(token apiToken: String,
                     flushInterval: Double,
                     instanceName: String,
@@ -382,6 +394,7 @@ final class MixpanelManager {
             instances[instanceName] = nil
         }
     }
+    
     
 }
 

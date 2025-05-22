@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		171E4C1C2DB055BC00B7CB11 /* MixpanelFeatureFlagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C1B2DB055A900B7CB11 /* MixpanelFeatureFlagTests.swift */; };
 		51DD568A1D3077390045D3DB /* LoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56891D3077390045D3DB /* LoggerTests.swift */; };
 		60CB587123D77F9200F1632B /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60CB587023D77F9200F1632B /* LoginViewController.swift */; };
 		671EECAF21432E5F006DD9FA /* GroupsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 671EECAE21432E5F006DD9FA /* GroupsViewController.swift */; };
@@ -249,6 +250,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		171E4C1B2DB055A900B7CB11 /* MixpanelFeatureFlagTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelFeatureFlagTests.swift; sourceTree = "<group>"; };
 		51DD56891D3077390045D3DB /* LoggerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoggerTests.swift; sourceTree = "<group>"; };
 		60CB587023D77F9200F1632B /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		671EECAE21432E5F006DD9FA /* GroupsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroupsViewController.swift; sourceTree = "<group>"; };
@@ -590,6 +592,7 @@
 		E15FF7EA1D0461130076CDE3 /* MixpanelDemoTests */ = {
 			isa = PBXGroup;
 			children = (
+				171E4C1B2DB055A900B7CB11 /* MixpanelFeatureFlagTests.swift */,
 				E124061F1D249B2500383635 /* MixpanelBaseTests.swift */,
 				E15FF7EB1D0461130076CDE3 /* MixpanelDemoTests.swift */,
 				E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */,
@@ -1114,6 +1117,7 @@
 				E12406201D249B2500383635 /* MixpanelBaseTests.swift in Sources */,
 				E17AA05E1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift in Sources */,
 				E15FF7EC1D0461130076CDE3 /* MixpanelDemoTests.swift in Sources */,
+				171E4C1C2DB055BC00B7CB11 /* MixpanelFeatureFlagTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

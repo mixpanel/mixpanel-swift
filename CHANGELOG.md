@@ -1,5 +1,13 @@
 #
 
+## [v5.1.0](https://github.com/mixpanel/mixpanel-swift/tree/v5.1.0) (2025-05-28)
+
+### Enhancements
+
+- Initial support for Feature Flags [\#670](https://github.com/mixpanel/mixpanel-swift/pull/670)
+
+#
+
 ## [v5.0.0](https://github.com/mixpanel/mixpanel-swift/tree/v5.0.0) (2025-04-24)
 
 ### Enhancements
@@ -421,6 +429,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

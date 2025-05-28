@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		171E4C122DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
+		171E4C132DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
+		171E4C142DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
+		171E4C152DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
+		171E4C172DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */; };
+		171E4C182DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */; };
+		171E4C192DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */; };
+		171E4C1A2DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */; };
 		17C6547A2BB1F15C00C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
 		17C6547B2BB1F16000C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
 		17C6547C2BB1F16400C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
@@ -103,6 +111,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		171E4C112DAF108400B7CB11 /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
+		171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelOptions.swift; sourceTree = "<group>"; };
 		1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/Mixpanel/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
 		51DD56791D306B740045D3DB /* MixpanelLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelLogger.swift; sourceTree = "<group>"; };
 		51DD56801D306B7B0045D3DB /* PrintLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrintLogging.swift; sourceTree = "<group>"; };
@@ -226,12 +236,14 @@
 		E11594881CFF14D3007F8B4F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */,
 				17C654792BB1EF6700C8A126 /* Mixpanel */,
 				E189D8FB1D5A6943007F3F29 /* Networking */,
 				51DD56771D306B620045D3DB /* Log */,
 				E189D8FA1D5A692A007F3F29 /* Utilities */,
 				E115948A1CFF1538007F8B4F /* Mixpanel.swift */,
 				E115948D1D000709007F8B4F /* MixpanelInstance.swift */,
+				171E4C112DAF108400B7CB11 /* FeatureFlags.swift */,
 				E115949E1D01BE14007F8B4F /* Flush.swift */,
 				E11594A01D01C597007F8B4F /* Track.swift */,
 				E15FF7C71D0435670076CDE3 /* People.swift */,
@@ -488,6 +500,7 @@
 				86F86EC722443A3C00B69832 /* FileLogging.swift in Sources */,
 				86F86EC622443A3100B69832 /* Error.swift in Sources */,
 				86F86EC522443A2C00B69832 /* People.swift in Sources */,
+				171E4C172DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */,
 				86F86EC422443A2300B69832 /* ReadWriteLock.swift in Sources */,
 				8625BEBE26D045CE0009BAA9 /* MPDB.swift in Sources */,
 				95ECF06B2C9B851C006364D2 /* Data+Compression.swift in Sources */,
@@ -495,6 +508,7 @@
 				86F86EC122443A0E00B69832 /* JSONHandler.swift in Sources */,
 				86F86EC022443A0800B69832 /* MixpanelType.swift in Sources */,
 				86F86EBE224439FA00B69832 /* Network.swift in Sources */,
+				171E4C142DAF108400B7CB11 /* FeatureFlags.swift in Sources */,
 				86F86EBD224439F500B69832 /* Flush.swift in Sources */,
 				86F86EBC224439F100B69832 /* PrintLogging.swift in Sources */,
 				868550AF2699096F001FCDDC /* MixpanelPersistence.swift in Sources */,
@@ -517,6 +531,7 @@
 				E1D335CE1D30578E00E68E12 /* Constants.swift in Sources */,
 				E115949F1D01BE14007F8B4F /* Flush.swift in Sources */,
 				E11594971D006022007F8B4F /* Network.swift in Sources */,
+				171E4C182DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */,
 				E15FF7C81D0435670076CDE3 /* People.swift in Sources */,
 				673ABE3A21360CBE00B1784B /* Group.swift in Sources */,
 				95ECF0682C9B851A006364D2 /* Data+Compression.swift in Sources */,
@@ -524,6 +539,7 @@
 				E11594991D01689F007F8B4F /* JSONHandler.swift in Sources */,
 				E1D335D01D3059A800E68E12 /* AutomaticProperties.swift in Sources */,
 				51DD567C1D306B740045D3DB /* MixpanelLogger.swift in Sources */,
+				171E4C122DAF108400B7CB11 /* FeatureFlags.swift in Sources */,
 				E165228F1D6781DF000D5949 /* MixpanelType.swift in Sources */,
 				BB9614171F3BB87700C3EF3E /* ReadWriteLock.swift in Sources */,
 				E190522D1F9FC1BC00900E5D /* SessionMetadata.swift in Sources */,
@@ -546,6 +562,7 @@
 				E12782BD1D4AB5CB0025FB05 /* MixpanelLogger.swift in Sources */,
 				E12782BE1D4AB5CB0025FB05 /* Mixpanel.swift in Sources */,
 				E12782BF1D4AB5CB0025FB05 /* MixpanelInstance.swift in Sources */,
+				171E4C192DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */,
 				E12782C11D4AB5CB0025FB05 /* Network.swift in Sources */,
 				8625BEBC26D045CE0009BAA9 /* MPDB.swift in Sources */,
 				95ECF0692C9B851B006364D2 /* Data+Compression.swift in Sources */,
@@ -553,6 +570,7 @@
 				E12782C31D4AB5CB0025FB05 /* Flush.swift in Sources */,
 				E12782C41D4AB5CB0025FB05 /* FlushRequest.swift in Sources */,
 				E12782C51D4AB5CB0025FB05 /* Track.swift in Sources */,
+				171E4C132DAF108400B7CB11 /* FeatureFlags.swift in Sources */,
 				E12782C61D4AB5CB0025FB05 /* People.swift in Sources */,
 				E19052001F9548F000900E5D /* ReadWriteLock.swift in Sources */,
 				868550AD2699096F001FCDDC /* MixpanelPersistence.swift in Sources */,
@@ -575,6 +593,7 @@
 				E1F15FDC1E64B60A00391AE3 /* AutomaticProperties.swift in Sources */,
 				E1F15FD91E64B60600391AE3 /* MixpanelLogger.swift in Sources */,
 				E1F15FD61E64B5FC00391AE3 /* FlushRequest.swift in Sources */,
+				171E4C1A2DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */,
 				E1F15FD71E64B60200391AE3 /* PrintLogging.swift in Sources */,
 				8625BEBD26D045CE0009BAA9 /* MPDB.swift in Sources */,
 				95ECF06A2C9B851B006364D2 /* Data+Compression.swift in Sources */,
@@ -582,6 +601,7 @@
 				E1F15FD51E64B5F800391AE3 /* Network.swift in Sources */,
 				E1F15FDE1E64B60A00391AE3 /* MixpanelType.swift in Sources */,
 				E1F15FDA1E64B60A00391AE3 /* JSONHandler.swift in Sources */,
+				171E4C152DAF108400B7CB11 /* FeatureFlags.swift in Sources */,
 				E1F15FE31E64B60D00391AE3 /* Track.swift in Sources */,
 				E19052011F9548F000900E5D /* ReadWriteLock.swift in Sources */,
 				868550AE2699096F001FCDDC /* MixpanelPersistence.swift in Sources */,

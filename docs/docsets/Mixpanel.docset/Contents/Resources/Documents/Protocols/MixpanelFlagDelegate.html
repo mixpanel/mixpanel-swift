@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>String Extension Reference</title>
+    <title>MixpanelFlagDelegate Protocol Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -13,8 +13,8 @@
     <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
-    <a name="//apple_ref/swift/Extension/String" class="dashAnchor"></a>
-    <a title="String Extension Reference"></a>
+    <a name="//apple_ref/swift/Protocol/MixpanelFlagDelegate" class="dashAnchor"></a>
+    <a title="MixpanelFlagDelegate Protocol Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">Mixpanel 5.1.0 Docs</a> (68% documented)</p>
@@ -30,7 +30,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">Mixpanel Reference</a>
         <img id="carat" src="../img/carat.png" alt=""/>
-        String Extension Reference
+        MixpanelFlagDelegate Protocol Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -176,15 +176,16 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>String</h1>
+            <h1>MixpanelFlagDelegate</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">String</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">MixpanelFlagDelegate</span> <span class="p">:</span> <span class="kt">AnyObject</span></code></pre>
 
                 </div>
               </div>
-            
+            <p>Undocumented</p>
+
           </section>
           <section class="section task-group-section">
             <div class="task-group">
@@ -192,37 +193,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:SS8MixpanelE25isValidNestedTypeAndValueSbyF"></a>
-                    <a name="//apple_ref/swift/Method/isValidNestedTypeAndValue()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:SS8MixpanelE25isValidNestedTypeAndValueSbyF">isValidNestedTypeAndValue()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Checks if this object has nested object types that Mixpanel supports.
-Will always return true.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">isValidNestedTypeAndValue</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:SS8MixpanelE6equals3rhsSbAA0A4Type_p_tF"></a>
-                    <a name="//apple_ref/swift/Method/equals(rhs:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:SS8MixpanelE6equals3rhsSbAA0A4Type_p_tF">equals(rhs:<wbr>)</a>
+                    <a name="/s:8Mixpanel0A12FlagDelegateP10getOptionsAA0aE0CyF"></a>
+                    <a name="//apple_ref/swift/Method/getOptions()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A12FlagDelegateP10getOptionsAA0aE0CyF">getOptions()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -237,7 +210,61 @@ Will always return true.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">equals</span><span class="p">(</span><span class="nv">rhs</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">getOptions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelOptions.html">MixpanelOptions</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A12FlagDelegateP13getDistinctIdSSyF"></a>
+                    <a name="//apple_ref/swift/Method/getDistinctId()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A12FlagDelegateP13getDistinctIdSSyF">getDistinctId()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">getDistinctId</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A12FlagDelegateP5track5event10propertiesySSSg_SDySSAA0A4Type_pGSgtF"></a>
+                    <a name="//apple_ref/swift/Method/track(event:properties:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A12FlagDelegateP5track5event10propertiesySSSg_SDySSAA0A4Type_pGSgtF">track(event:<wbr>properties:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">track</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="kt">String</span><span class="p">?,</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?)</span></code></pre>
 
                         </div>
                       </div>

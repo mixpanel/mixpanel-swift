@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>MixpanelFlags Protocol Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Protocol/MixpanelFlags" class="dashAnchor"></a>
+    <a title="MixpanelFlags Protocol Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">Mixpanel 5.1.0 Docs</a> (68% documented)</p>
+        <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
+        <div class="header-right">
+          <form role="search" action="../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </div>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">Mixpanel Reference</a>
+        <img id="carat" src="../img/carat.png" alt=""/>
+        MixpanelFlags Protocol Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/Group.html">Group</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Mixpanel.html">Mixpanel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MixpanelInstance.html">MixpanelInstance</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MixpanelLogger.html">MixpanelLogger</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MixpanelOptions.html">MixpanelOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/People.html">People</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Enums/GzipError.html">GzipError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MixpanelLogLevel.html">MixpanelLogLevel</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/Array.html">Array</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Bool.html">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Data.html">Data</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Date.html">Date</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Dictionary.html">Dictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Double.html">Double</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Float.html">Float</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Int.html">Int</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/NSArray.html">NSArray</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/NSNull.html">NSNull</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/NSNumber.html">NSNumber</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/NSString.html">NSString</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Optional.html">Optional</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/String.html">String</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UInt.html">UInt</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/URL.html">URL</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelDelegate.html">MixpanelDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelFlagDelegate.html">MixpanelFlagDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelFlags.html">MixpanelFlags</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelLogging.html">MixpanelLogging</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelProxyServerDelegate.html">MixpanelProxyServerDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelType.html">MixpanelType</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MixpanelLogMessage.html">MixpanelLogMessage</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ProxyServerConfig.html">ProxyServerConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ServerProxyResource.html">ServerProxyResource</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>MixpanelFlags</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">MixpanelFlags</span></code></pre>
+
+                </div>
+              </div>
+            <p>A protocol defining the public interface for a feature flagging system.</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A5FlagsP8delegateAA0A12FlagDelegate_pSgvp"></a>
+                    <a name="//apple_ref/swift/Property/delegate" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A5FlagsP8delegateAA0A12FlagDelegate_pSgvp">delegate</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The delegate responsible for handling feature flag lifecycle events,
+such as tracking. It is declared <code>weak</code> to prevent retain cycles.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelFlagDelegate.html">MixpanelFlagDelegate</a></span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A5FlagsP04loadB0yyF"></a>
+                    <a name="//apple_ref/swift/Method/loadFlags()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A5FlagsP04loadB0yyF">loadFlags()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Initiates the loading or refreshing of flags</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">loadFlags</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A5FlagsP03areB5ReadySbyF"></a>
+                    <a name="//apple_ref/swift/Method/areFlagsReady()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A5FlagsP03areB5ReadySbyF">areFlagsReady()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Synchronously checks if the flags  have been successfully loaded
+and are available for querying.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">areFlagsReady</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p><code>true</code> if the flags are loaded and ready for use, <code>false</code> otherwise.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A5FlagsP14getVariantSync_8fallbackAA0a4FlagD0VSS_AGtF"></a>
+                    <a name="//apple_ref/swift/Method/getVariantSync(_:fallback:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A5FlagsP14getVariantSync_8fallbackAA0a4FlagD0VSS_AGtF">getVariantSync(_:<wbr>fallback:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Synchronously retrieves the complete <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code> for a given flag name.
+If the feature flag is found and flags are ready, its variant is returned.
+Otherwise, the provided <code>fallback</code> <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code> is returned.
+This method will also trigger any necessary tracking logic for the accessed flag.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">getVariantSync</span><span class="p">(</span><span class="n">_</span> <span class="nv">flagName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">fallback</span><span class="p">:</span> <span class="kt"><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>flagName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The unique identifier for the feature flag.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>fallback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code> to return if the specified flag is not found
+      or if the flags are not yet loaded.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code> associated with <code>flagName</code>, or the <code>fallback</code> variant.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A5FlagsP10getVariant_8fallback10completionySS_AA0a4FlagD0VyAHctF"></a>
+                    <a name="//apple_ref/swift/Method/getVariant(_:fallback:completion:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A5FlagsP10getVariant_8fallback10completionySS_AA0a4FlagD0VyAHctF">getVariant(_:<wbr>fallback:<wbr>completion:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Asynchronously retrieves the complete <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code> for a given flag name.
+If flags are not ready, an attempt will be made to load them.
+The <code>completion</code> handler is called with the <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code> for the flag,
+or the <code>fallback</code> variant if the flag is not found or loading fails.
+This method will also trigger any necessary tracking logic for the accessed flag.
+The completion handler is typically invoked on the main thread.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">getVariant</span><span class="p">(</span><span class="n">_</span> <span class="nv">flagName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">fallback</span><span class="p">:</span> <span class="kt"><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></span><span class="p">,</span> <span class="nv">completion</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt"><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>flagName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The unique identifier for the feature flag.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>fallback</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code> to use as a default if the specified flag
+      is not found or an error occurs during fetching.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>completion</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A closure that is called with the resulting <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code>.
+        This closure will be executed on the main dispatch queue.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A5FlagsP19getVariantValueSync_08fallbackE0ypSgSS_AFtF"></a>
+                    <a name="//apple_ref/swift/Method/getVariantValueSync(_:fallbackValue:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A5FlagsP19getVariantValueSync_08fallbackE0ypSgSS_AFtF">getVariantValueSync(_:<wbr>fallbackValue:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Synchronously retrieves the underlying value of a feature flag.
+This is a convenience method that extracts the <code>value</code> property from the <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code>
+obtained via <code>getVariantSync</code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">getVariantValueSync</span><span class="p">(</span><span class="n">_</span> <span class="nv">flagName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">fallbackValue</span><span class="p">:</span> <span class="kt">Any</span><span class="p">?)</span> <span class="o">-&gt;</span> <span class="kt">Any</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>flagName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The unique identifier for the feature flag.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>fallbackValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The default value to return if the flag is not found,
+           its variant doesn&rsquo;t contain a value, or flags are not ready.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The value of the feature flag, or <code>fallbackValue</code>. The type is <code>Any?</code>.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A5FlagsP15getVariantValue_08fallbackE010completionySS_ypSgyAGctF"></a>
+                    <a name="//apple_ref/swift/Method/getVariantValue(_:fallbackValue:completion:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A5FlagsP15getVariantValue_08fallbackE010completionySS_ypSgyAGctF">getVariantValue(_:<wbr>fallbackValue:<wbr>completion:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Asynchronously retrieves the underlying value of a feature flag.
+This is a convenience method that extracts the <code>value</code> property from the <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code>
+obtained via <code>getVariant</code>. If flags are not ready, an attempt will be made to load them.
+The <code>completion</code> handler is called with the flag&rsquo;s value or the <code>fallbackValue</code>.
+The completion handler is typically invoked on the main thread.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">getVariantValue</span><span class="p">(</span><span class="n">_</span> <span class="nv">flagName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">fallbackValue</span><span class="p">:</span> <span class="kt">Any</span><span class="p">?,</span> <span class="nv">completion</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">Any</span><span class="p">?)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>flagName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The unique identifier for the feature flag.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>fallbackValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The default value to use if the flag is not found,
+           fetching fails, or its variant doesn&rsquo;t contain a value.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>completion</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A closure that is called with the resulting value (<code>Any?</code>).
+        This closure will be executed on the main dispatch queue.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A5FlagsP13isEnabledSync_13fallbackValueSbSS_SbtF"></a>
+                    <a name="//apple_ref/swift/Method/isEnabledSync(_:fallbackValue:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A5FlagsP13isEnabledSync_13fallbackValueSbSS_SbtF">isEnabledSync(_:<wbr>fallbackValue:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Synchronously checks if a specific feature flag is considered &ldquo;enabled&rdquo;.
+This typically involves retrieving the flag&rsquo;s value and evaluating it as a boolean.
+The exact logic for what constitutes &ldquo;enabled&rdquo; (e.g., <code>true</code>, non-nil, a specific string)
+should be defined by the implementing class.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">isEnabledSync</span><span class="p">(</span><span class="n">_</span> <span class="nv">flagName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">fallbackValue</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>flagName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The unique identifier for the feature flag.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>fallbackValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The boolean value to return if the flag is not found,
+           cannot be evaluated as a boolean, or flags are not ready. Defaults to <code>false</code>.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p><code>true</code> if the flag is considered enabled, <code>false</code> otherwise (including if <code>fallbackValue</code> is used).</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A5FlagsP9isEnabled_13fallbackValue10completionySS_SbySbctF"></a>
+                    <a name="//apple_ref/swift/Method/isEnabled(_:fallbackValue:completion:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A5FlagsP9isEnabled_13fallbackValue10completionySS_SbySbctF">isEnabled(_:<wbr>fallbackValue:<wbr>completion:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Asynchronously checks if a specific feature flag is considered &ldquo;enabled&rdquo;.
+This typically involves retrieving the flag&rsquo;s value and evaluating it as a boolean.
+If flags are not ready, an attempt will be made to load them.
+The <code>completion</code> handler is called with the boolean result.
+The completion handler is typically invoked on the main thread.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">isEnabled</span><span class="p">(</span><span class="n">_</span> <span class="nv">flagName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">fallbackValue</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">,</span> <span class="nv">completion</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">Bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>flagName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The unique identifier for the feature flag.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>fallbackValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The boolean value to use if the flag is not found, fetching fails,
+           or it cannot be evaluated as a boolean. Defaults to <code>false</code>.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>completion</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A closure that is called with the boolean result.
+        This closure will be executed on the main dispatch queue.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2025 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2025-05-28)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</html>

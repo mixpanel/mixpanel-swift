@@ -7,34 +7,35 @@
 //
 
 import Foundation
+
 #if !os(OSX)
-import UIKit
-#endif // !os(OSX)
+  import UIKit
+#endif  // !os(OSX)
 
 struct QueueConstants {
-    static var queueSize = 5000
+  static var queueSize = 5000
 }
 
 struct APIConstants {
-    static let maxBatchSize = 50
-    static let flushSize = 1000
-    static let minRetryBackoff = 60.0
-    static let maxRetryBackoff = 600.0
-    static let failuresTillBackoff = 2
+  static let maxBatchSize = 50
+  static let flushSize = 1000
+  static let minRetryBackoff = 60.0
+  static let maxRetryBackoff = 600.0
+  static let failuresTillBackoff = 2
 }
 
 struct BundleConstants {
-    static let ID = "com.mixpanel.Mixpanel"
+  static let ID = "com.mixpanel.Mixpanel"
 }
 
 struct GzipSettings {
-    static let gzipHeaderOffset = Int32(16)
+  static let gzipHeaderOffset = Int32(16)
 }
 
 #if !os(OSX) && !os(watchOS) && !os(visionOS)
-extension UIDevice {
+  extension UIDevice {
     var iPhoneX: Bool {
-        return UIScreen.main.nativeBounds.height == 2436
+      return UIScreen.main.nativeBounds.height == 2436
     }
-}
-#endif // !os(OSX)
+  }
+#endif  // !os(OSX)

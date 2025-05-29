@@ -14,20 +14,22 @@ let kFakeServerUrl = "https://34a272abf23d.com"
 
 extension XCTestCase {
 
-    func XCTExpectAssert(_ expectedMessage: String, file: StaticString = #file, line: UInt = #line, block: () -> ()) {
-        let exp = expectation(description: expectedMessage)
+  func XCTExpectAssert(
+    _ expectedMessage: String, file: StaticString = #file, line: UInt = #line, block: () -> Void
+  ) {
+    let exp = expectation(description: expectedMessage)
 
-        Assertions.assertClosure = {
-            (condition, message, file, line) in
-            if !condition {
-                exp.fulfill()
-            }
-        }
-
-        // Call code.
-        block()
-        waitForExpectations(timeout: 0.5, handler: nil)
-        Assertions.assertClosure = Assertions.swiftAssertClosure
+    Assertions.assertClosure = {
+      (condition, message, file, line) in
+      if !condition {
+        exp.fulfill()
+      }
     }
+
+    // Call code.
+    block()
+    waitForExpectations(timeout: 0.5, handler: nil)
+    Assertions.assertClosure = Assertions.swiftAssertClosure
+  }
 
 }

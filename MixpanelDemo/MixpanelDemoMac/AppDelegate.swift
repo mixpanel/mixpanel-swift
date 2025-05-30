@@ -12,24 +12,19 @@ import Mixpanel
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-    
+  func applicationDidFinishLaunching(_ aNotification: Notification) {
+    // Insert code here to initialize your application
 
+    var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
 
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Insert code here to initialize your application
-        
-        var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
-        
-        Mixpanel.initialize(token: "MIXPANEL_TOKEN")
-        Mixpanel.mainInstance().loggingEnabled = true
-        Mixpanel.mainInstance().track(event: "Tracked Event")
-        
-    }
+    Mixpanel.initialize(token: "MIXPANEL_TOKEN")
+    Mixpanel.mainInstance().loggingEnabled = true
+    Mixpanel.mainInstance().track(event: "Tracked Event")
 
-    func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
-    }
+  }
 
+  func applicationWillTerminate(_ aNotification: Notification) {
+    // Insert code here to tear down your application
+  }
 
 }
-

@@ -9,35 +9,35 @@
 import UIKit
 
 class ActionCompleteViewController: UIViewController {
-    @IBOutlet weak var popupView: UIView!
-    @IBOutlet weak var actionLabel: UILabel!
-    @IBOutlet weak var descLabel: UILabel!
-    var actionStr: String?
-    var descStr: String?
+  @IBOutlet weak var popupView: UIView!
+  @IBOutlet weak var actionLabel: UILabel!
+  @IBOutlet weak var descLabel: UILabel!
+  var actionStr: String?
+  var descStr: String?
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
+  override func viewDidLoad() {
+    super.viewDidLoad()
 
-        popupView.clipsToBounds = true
-        popupView.layer.cornerRadius = 6
+    popupView.clipsToBounds = true
+    popupView.layer.cornerRadius = 6
 
-        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        view.addGestureRecognizer(tap)
+    let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+    view.addGestureRecognizer(tap)
 
-        actionLabel.text = actionStr
-        descLabel.text = descStr
+    actionLabel.text = actionStr
+    descLabel.text = descStr
+  }
+
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+      self.dismiss(animated: true, completion: nil)
     }
+  }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            self.dismiss(animated: true, completion: nil)
-        }
-    }
-
-    @objc func handleTap(gesture: UITapGestureRecognizer) {
-        dismiss(animated: true, completion: nil)
-    }
+  @objc func handleTap(gesture: UITapGestureRecognizer) {
+    dismiss(animated: true, completion: nil)
+  }
 
 }

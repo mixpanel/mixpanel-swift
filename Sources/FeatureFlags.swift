@@ -71,6 +71,7 @@ struct FlagsResponse: Decodable {
 public protocol MixpanelFlagDelegate: AnyObject {
   func getOptions() -> MixpanelOptions
   func getDistinctId() -> String
+  func getAnonymousId() -> String?
   func track(event: String?, properties: Properties?)
 }
 
@@ -398,10 +399,14 @@ class FeatureFlagManager: Network, MixpanelFlags {
     }
 
     let distinctId = delegate.getDistinctId()
+    let anonymousId = delegate.getAnonymousId()
     print("Fetching flags for distinct ID: \(distinctId)")
 
     var context = options.featureFlagsContext
     context["distinct_id"] = distinctId
+    if let anonymousId = anonymousId {
+      context["device_id"] = anonymousId
+    }
     let requestBodyDict = ["context": context]
 
     guard

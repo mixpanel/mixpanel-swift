@@ -16,17 +16,21 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
 
   var options: MixpanelOptions
   var distinctId: String
+  var anonymousId: String?
   var trackedEvents: [(event: String?, properties: Properties?)] = []
   var trackExpectation: XCTestExpectation?
   var getOptionsCallCount = 0
   var getDistinctIdCallCount = 0
+  var getAnonymousIdCallCount = 0
 
   init(
     options: MixpanelOptions = MixpanelOptions(token: "test", featureFlagsEnabled: true),
-    distinctId: String = "test_distinct_id"
+    distinctId: String = "test_distinct_id",
+    anonymousId: String? = "test_anonymous_id"
   ) {
     self.options = options
     self.distinctId = distinctId
+    self.anonymousId = anonymousId
   }
 
   func getOptions() -> MixpanelOptions {
@@ -37,6 +41,11 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
   func getDistinctId() -> String {
     getDistinctIdCallCount += 1
     return distinctId
+  }
+
+  func getAnonymousId() -> String? {
+    getAnonymousIdCallCount += 1
+    return anonymousId
   }
 
   func track(event: String?, properties: Properties?) {
@@ -873,6 +882,49 @@ class FeatureFlagManagerTests: XCTestCase {
       // This is expected to fail, so the test passes
       XCTAssertTrue(error is DecodingError, "Error should be a DecodingError")
     }
+  }
+  
+  func testFeatureFlagContextIncludesDeviceId() {
+    // Test that device_id is included in the feature flags context
+    let testAnonymousId = "test_device_id_12345"
+    let testDistinctId = "test_distinct_id_67890"
+    
+    let mockDelegate = MockFeatureFlagDelegate(
+      options: MixpanelOptions(token: "test", featureFlagsEnabled: true),
+      distinctId: testDistinctId,
+      anonymousId: testAnonymousId
+    )
+    
+    let manager = FeatureFlagManager(serverURL: "https://test.com", delegate: mockDelegate)
+    
+    // Verify the delegate methods return expected values
+    XCTAssertEqual(mockDelegate.getDistinctId(), testDistinctId)
+    XCTAssertEqual(mockDelegate.getAnonymousId(), testAnonymousId)
+    
+    // Verify call counts
+    XCTAssertEqual(mockDelegate.getDistinctIdCallCount, 1)
+    XCTAssertEqual(mockDelegate.getAnonymousIdCallCount, 1)
+  }
+  
+  func testFeatureFlagContextWithNilAnonymousId() {
+    // Test that device_id is not included when anonymous ID is nil
+    let testDistinctId = "test_distinct_id_67890"
+    
+    let mockDelegate = MockFeatureFlagDelegate(
+      options: MixpanelOptions(token: "test", featureFlagsEnabled: true),
+      distinctId: testDistinctId,
+      anonymousId: nil
+    )
+    
+    let manager = FeatureFlagManager(serverURL: "https://test.com", delegate: mockDelegate)
+    
+    // Verify the delegate methods return expected values
+    XCTAssertEqual(mockDelegate.getDistinctId(), testDistinctId)
+    XCTAssertNil(mockDelegate.getAnonymousId())
+    
+    // Verify call counts
+    XCTAssertEqual(mockDelegate.getDistinctIdCallCount, 1)
+    XCTAssertEqual(mockDelegate.getAnonymousIdCallCount, 1)
   }
 
 }  // End Test Class

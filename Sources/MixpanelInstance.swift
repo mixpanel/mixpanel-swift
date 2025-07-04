@@ -462,6 +462,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     return distinctId
   }
 
+  public func getAnonymousId() -> String? {
+    return anonymousId
+  }
+
   #if !os(OSX) && !os(watchOS)
     private func setupListeners() {
       let notificationCenter = NotificationCenter.default

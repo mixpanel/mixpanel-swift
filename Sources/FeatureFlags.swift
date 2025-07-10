@@ -514,27 +514,21 @@ class FeatureFlagManager: Network, MixpanelFlags {
   private func _performTrackingDelegateCall(flagName: String, variant: MixpanelFlagVariant) {
     guard let delegate = self.delegate else { return }
     
-    // Get timing properties from the access queue
-    var timingProperties: [String: Any] = [:]
-    accessQueue.sync {
-      if let timeLastFetched = self.timeLastFetched {
-        // Convert to Unix timestamp in seconds
-        timingProperties["timeLastFetched"] = Int(timeLastFetched.timeIntervalSince1970)
-      }
-      if let fetchLatencyMs = self.fetchLatencyMs {
-        timingProperties["fetchLatencyMs"] = fetchLatencyMs
-      }
-    }
-    
     var properties: Properties = [
       "Experiment name": flagName, 
       "Variant name": variant.key, 
       "$experiment_type": "feature_flag",
     ]
     
-    // Add timing properties
-    for (key, value) in timingProperties {
-      properties[key] = value
+    // Add timing properties from the access queue
+    accessQueue.sync {
+      if let timeLastFetched = self.timeLastFetched {
+        // Convert to Unix timestamp in seconds
+        properties["timeLastFetched"] = Int(timeLastFetched.timeIntervalSince1970)
+      }
+      if let fetchLatencyMs = self.fetchLatencyMs {
+        properties["fetchLatencyMs"] = fetchLatencyMs
+      }
     }
     
     // Dispatch delegate call asynchronously to main thread for safety

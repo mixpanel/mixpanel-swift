@@ -191,6 +191,11 @@ class FeatureFlagManager: Network, MixpanelFlags {
   var isFetching: Bool = false
   private var trackedFeatures: Set<String> = Set()
   private var fetchCompletionHandlers: [(Bool) -> Void] = []
+  
+  // Timing tracking properties
+  private var fetchStartTime: Date?
+  private var timeLastFetched: Date?
+  private var fetchLatencyMs: Int?
 
   // Configuration
   private var currentOptions: MixpanelOptions? { delegate?.getOptions() }
@@ -391,6 +396,12 @@ class FeatureFlagManager: Network, MixpanelFlags {
   // Performs the actual network request construction and call
   private func _performFetchRequest() {
     // This method runs OUTSIDE the accessQueue
+    
+    // Record fetch start time
+    let startTime = Date()
+    accessQueue.async { [weak self] in
+      self?.fetchStartTime = startTime
+    }
 
     guard let delegate = self.delegate, let options = self.currentOptions else {
       print("Error: Delegate or options missing for fetch.")
@@ -448,11 +459,20 @@ class FeatureFlagManager: Network, MixpanelFlags {
       success: { [weak self] (flagsResponse, response) in  // Completion handlers run on URLSession's queue
         print("Successfully fetched flags.")
         guard let self = self else { return }
+        let fetchEndTime = Date()
         // Update state and call completions via _completeFetch on the serial queue
         self.accessQueue.async { [weak self] in
           guard let self = self else { return }
           // already on accessQueue – write directly
           self.flags = flagsResponse.flags ?? [:]
+          
+          // Calculate timing metrics
+          if let startTime = self.fetchStartTime {
+            let latencyMs = Int(fetchEndTime.timeIntervalSince(startTime) * 1000)
+            self.fetchLatencyMs = latencyMs
+          }
+          self.timeLastFetched = fetchEndTime
+          
           print("Flags updated: \(self.flags ?? [:])")
           self._completeFetch(success: true)  // still on accessQueue
         }
@@ -493,9 +513,30 @@ class FeatureFlagManager: Network, MixpanelFlags {
   // Helper to just call the delegate (no locking)
   private func _performTrackingDelegateCall(flagName: String, variant: MixpanelFlagVariant) {
     guard let delegate = self.delegate else { return }
-    let properties: Properties = [
-      "Experiment name": flagName, "Variant name": variant.key, "$experiment_type": "feature_flag",
+    
+    // Get timing properties from the access queue
+    var timingProperties: [String: Any] = [:]
+    accessQueue.sync {
+      if let timeLastFetched = self.timeLastFetched {
+        // Convert to Unix timestamp in seconds
+        timingProperties["timeLastFetched"] = Int(timeLastFetched.timeIntervalSince1970)
+      }
+      if let fetchLatencyMs = self.fetchLatencyMs {
+        timingProperties["fetchLatencyMs"] = fetchLatencyMs
+      }
+    }
+    
+    var properties: Properties = [
+      "Experiment name": flagName, 
+      "Variant name": variant.key, 
+      "$experiment_type": "feature_flag",
     ]
+    
+    // Add timing properties
+    for (key, value) in timingProperties {
+      properties[key] = value
+    }
+    
     // Dispatch delegate call asynchronously to main thread for safety
     DispatchQueue.main.async {
       delegate.track(event: "$experiment_started", properties: properties)

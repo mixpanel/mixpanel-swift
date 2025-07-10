@@ -138,9 +138,13 @@ class FeatureFlagManagerTests: XCTestCase {
 
   private func simulateFetchSuccess(flags: [String: MixpanelFlagVariant]? = nil) {
     let flagsToSet = flags ?? sampleFlags
+    let currentTime = Date()
     // Set flags directly *before* calling completeFetch
     manager.accessQueue.sync {
       manager.flags = flagsToSet
+      // Set timing properties to simulate a successful fetch
+      manager.timeLastFetched = currentTime
+      manager.fetchLatencyMs = 150  // Simulate 150ms fetch time
       // Important: Set isFetching = true *before* calling _completeFetch,
       // as _completeFetch assumes a fetch was in progress.
       manager.isFetching = true
@@ -473,6 +477,37 @@ class FeatureFlagManagerTests: XCTestCase {
     AssertEqual(props["Experiment name"] ?? nil, "feature_int")
     AssertEqual(props["Variant name"] ?? nil, "v_int")
     AssertEqual(props["$experiment_type"] ?? nil, "feature_flag")
+    
+    // Check timing properties are included (values may be nil if not set)
+    XCTAssertTrue(props.keys.contains("timeLastFetched"), "Should include timeLastFetched property")
+    XCTAssertTrue(props.keys.contains("fetchLatencyMs"), "Should include fetchLatencyMs property")
+  }
+
+  func testTracking_IncludesTimingProperties() {
+    simulateFetchSuccess()
+    mockDelegate.trackExpectation = XCTestExpectation(
+      description: "Track called with timing properties")
+
+    _ = manager.getVariantSync("feature_string", fallback: defaultFallback)  // Trigger tracking
+
+    wait(for: [mockDelegate.trackExpectation!], timeout: 1.0)
+
+    XCTAssertEqual(mockDelegate.trackedEvents.count, 1)
+    let tracked = mockDelegate.trackedEvents[0]
+    let props = tracked.properties!
+    
+    // Verify timing properties have expected values
+    if let timeLastFetched = props["timeLastFetched"] as? Int {
+      XCTAssertGreaterThan(timeLastFetched, 0, "timeLastFetched should be a positive timestamp")
+    } else {
+      XCTFail("timeLastFetched should be present and be an Int")
+    }
+    
+    if let fetchLatencyMs = props["fetchLatencyMs"] as? Int {
+      XCTAssertEqual(fetchLatencyMs, 150, "fetchLatencyMs should match simulated value")
+    } else {
+      XCTFail("fetchLatencyMs should be present and be an Int")
+    }
   }
 
   func testTracking_DoesNotTrackForFallback_Sync() {

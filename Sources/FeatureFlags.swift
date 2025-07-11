@@ -194,8 +194,8 @@ class FeatureFlagManager: Network, MixpanelFlags {
   
   // Timing tracking properties
   private var fetchStartTime: Date?
-  private var timeLastFetched: Date?
-  private var fetchLatencyMs: Int?
+  var timeLastFetched: Date?
+  var fetchLatencyMs: Int?
 
   // Configuration
   private var currentOptions: MixpanelOptions? { delegate?.getOptions() }

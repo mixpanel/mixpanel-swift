@@ -521,14 +521,12 @@ class FeatureFlagManager: Network, MixpanelFlags {
     ]
     
     // Add timing properties from the access queue
-    accessQueue.sync {
-      if let timeLastFetched = self.timeLastFetched {
-        // Convert to Unix timestamp in seconds
-        properties["timeLastFetched"] = Int(timeLastFetched.timeIntervalSince1970)
-      }
-      if let fetchLatencyMs = self.fetchLatencyMs {
-        properties["fetchLatencyMs"] = fetchLatencyMs
-      }
+    if let timeLastFetched = self.timeLastFetched {
+      // Convert to Unix timestamp in seconds
+      properties["timeLastFetched"] = Int(timeLastFetched.timeIntervalSince1970)
+    }
+    if let fetchLatencyMs = self.fetchLatencyMs {
+      properties["fetchLatencyMs"] = fetchLatencyMs
     }
     
     // Dispatch delegate call asynchronously to main thread for safety

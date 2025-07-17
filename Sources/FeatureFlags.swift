@@ -184,14 +184,19 @@ class FeatureFlagManager: Network, MixpanelFlags {
   weak var delegate: MixpanelFlagDelegate?
 
   // *** Use a SERIAL queue for automatic state serialization ***
-  let accessQueue = DispatchQueue(label: "com.mixpanel.featureflagmanager.serialqueue")
+  private static let accessQueueKey = DispatchSpecificKey<Int>()
+  let accessQueue: DispatchQueue = {
+    let queue = DispatchQueue(label: "com.mixpanel.featureflagmanager.serialqueue")
+    queue.setSpecific(key: FeatureFlagManager.accessQueueKey, value: 1)
+    return queue
+  }()
 
   // Internal State - Protected by accessQueue
   var flags: [String: MixpanelFlagVariant]? = nil
   var isFetching: Bool = false
   private var trackedFeatures: Set<String> = Set()
   private var fetchCompletionHandlers: [(Bool) -> Void] = []
-  
+
   // Timing tracking properties
   private var fetchStartTime: Date?
   var timeLastFetched: Date?
@@ -396,7 +401,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   // Performs the actual network request construction and call
   private func _performFetchRequest() {
     // This method runs OUTSIDE the accessQueue
-    
+
     // Record fetch start time
     let startTime = Date()
     accessQueue.async { [weak self] in
@@ -465,14 +470,14 @@ class FeatureFlagManager: Network, MixpanelFlags {
           guard let self = self else { return }
           // already on accessQueue – write directly
           self.flags = flagsResponse.flags ?? [:]
-          
+
           // Calculate timing metrics
           if let startTime = self.fetchStartTime {
             let latencyMs = Int(fetchEndTime.timeIntervalSince(startTime) * 1000)
             self.fetchLatencyMs = latencyMs
           }
           self.timeLastFetched = fetchEndTime
-          
+
           print("Flags updated: \(self.flags ?? [:])")
           self._completeFetch(success: true)  // still on accessQueue
         }
@@ -513,22 +518,36 @@ class FeatureFlagManager: Network, MixpanelFlags {
   // Helper to just call the delegate (no locking)
   private func _performTrackingDelegateCall(flagName: String, variant: MixpanelFlagVariant) {
     guard let delegate = self.delegate else { return }
-    
+
     var properties: Properties = [
-      "Experiment name": flagName, 
-      "Variant name": variant.key, 
+      "Experiment name": flagName,
+      "Variant name": variant.key,
       "$experiment_type": "feature_flag",
     ]
-    
-    // Add timing properties from the access queue
-    if let timeLastFetched = self.timeLastFetched {
-      // Convert to Unix timestamp in seconds
-      properties["timeLastFetched"] = Int(timeLastFetched.timeIntervalSince1970)
+
+    // Check if we're already on the accessQueue
+    let onAccessQueue = DispatchQueue.getSpecific(key: FeatureFlagManager.accessQueueKey) != nil
+
+    if onAccessQueue {
+      // Already on accessQueue - safe to read directly
+      if let timeLastFetched = self.timeLastFetched {
+        properties["timeLastFetched"] = Int(timeLastFetched.timeIntervalSince1970)
+      }
+      if let fetchLatencyMs = self.fetchLatencyMs {
+        properties["fetchLatencyMs"] = fetchLatencyMs
+      }
+    } else {
+      // Not on accessQueue - need to sync to read safely
+      accessQueue.sync {
+        if let timeLastFetched = self.timeLastFetched {
+          properties["timeLastFetched"] = Int(timeLastFetched.timeIntervalSince1970)
+        }
+        if let fetchLatencyMs = self.fetchLatencyMs {
+          properties["fetchLatencyMs"] = fetchLatencyMs
+        }
+      }
     }
-    if let fetchLatencyMs = self.fetchLatencyMs {
-      properties["fetchLatencyMs"] = fetchLatencyMs
-    }
-    
+
     // Dispatch delegate call asynchronously to main thread for safety
     DispatchQueue.main.async {
       delegate.track(event: "$experiment_started", properties: properties)

@@ -23,6 +23,9 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
   var getDistinctIdCallCount = 0
   var getAnonymousIdCallCount = 0
 
+  // Custom track handler to allow overriding behavior
+  var customTrackHandler: ((String?, Properties?) -> Void)?
+
   init(
     options: MixpanelOptions = MixpanelOptions(token: "test", featureFlagsEnabled: true),
     distinctId: String = "test_distinct_id",
@@ -52,6 +55,9 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
     print("MOCK Delegate: Track called - Event: \(event ?? "nil"), Props: \(properties ?? [:])")
     trackedEvents.append((event: event, properties: properties))
     trackExpectation?.fulfill()
+
+    // Call custom handler if set
+    customTrackHandler?(event, properties)
   }
 }
 
@@ -477,7 +483,7 @@ class FeatureFlagManagerTests: XCTestCase {
     AssertEqual(props["Experiment name"] ?? nil, "feature_int")
     AssertEqual(props["Variant name"] ?? nil, "v_int")
     AssertEqual(props["$experiment_type"] ?? nil, "feature_flag")
-    
+
     // Check timing properties are included (values may be nil if not set)
     XCTAssertTrue(props.keys.contains("timeLastFetched"), "Should include timeLastFetched property")
     XCTAssertTrue(props.keys.contains("fetchLatencyMs"), "Should include fetchLatencyMs property")
@@ -495,14 +501,14 @@ class FeatureFlagManagerTests: XCTestCase {
     XCTAssertEqual(mockDelegate.trackedEvents.count, 1)
     let tracked = mockDelegate.trackedEvents[0]
     let props = tracked.properties!
-    
+
     // Verify timing properties have expected values
     if let timeLastFetched = props["timeLastFetched"] as? Int {
       XCTAssertGreaterThan(timeLastFetched, 0, "timeLastFetched should be a positive timestamp")
     } else {
       XCTFail("timeLastFetched should be present and be an Int")
     }
-    
+
     if let fetchLatencyMs = props["fetchLatencyMs"] as? Int {
       XCTAssertEqual(fetchLatencyMs, 150, "fetchLatencyMs should match simulated value")
     } else {
@@ -918,48 +924,158 @@ class FeatureFlagManagerTests: XCTestCase {
       XCTAssertTrue(error is DecodingError, "Error should be a DecodingError")
     }
   }
-  
+
   func testFeatureFlagContextIncludesDeviceId() {
     // Test that device_id is included in the feature flags context
     let testAnonymousId = "test_device_id_12345"
     let testDistinctId = "test_distinct_id_67890"
-    
+
     let mockDelegate = MockFeatureFlagDelegate(
       options: MixpanelOptions(token: "test", featureFlagsEnabled: true),
       distinctId: testDistinctId,
       anonymousId: testAnonymousId
     )
-    
+
     let manager = FeatureFlagManager(serverURL: "https://test.com", delegate: mockDelegate)
-    
+
     // Verify the delegate methods return expected values
     XCTAssertEqual(mockDelegate.getDistinctId(), testDistinctId)
     XCTAssertEqual(mockDelegate.getAnonymousId(), testAnonymousId)
-    
+
     // Verify call counts
     XCTAssertEqual(mockDelegate.getDistinctIdCallCount, 1)
     XCTAssertEqual(mockDelegate.getAnonymousIdCallCount, 1)
   }
-  
+
   func testFeatureFlagContextWithNilAnonymousId() {
     // Test that device_id is not included when anonymous ID is nil
     let testDistinctId = "test_distinct_id_67890"
-    
+
     let mockDelegate = MockFeatureFlagDelegate(
       options: MixpanelOptions(token: "test", featureFlagsEnabled: true),
       distinctId: testDistinctId,
       anonymousId: nil
     )
-    
+
     let manager = FeatureFlagManager(serverURL: "https://test.com", delegate: mockDelegate)
-    
+
     // Verify the delegate methods return expected values
     XCTAssertEqual(mockDelegate.getDistinctId(), testDistinctId)
     XCTAssertNil(mockDelegate.getAnonymousId())
-    
+
     // Verify call counts
     XCTAssertEqual(mockDelegate.getDistinctIdCallCount, 1)
     XCTAssertEqual(mockDelegate.getAnonymousIdCallCount, 1)
+  }
+
+  func testAccessQueueKeyFunctionality() {
+    // Test that _performTrackingDelegateCall correctly determines if it's on the accessQueue
+    simulateFetchSuccess()
+
+    // First scenario: Call from accessQueue (should read timing properties directly)
+    let syncExpectation = XCTestExpectation(description: "Sync tracking completes")
+
+    // Reset tracked events
+    mockDelegate.trackedEvents.removeAll()
+    mockDelegate.trackExpectation = syncExpectation
+
+    // Call getVariantSync which should trigger tracking from within the accessQueue
+    _ = manager.getVariantSync("feature_double", fallback: defaultFallback)
+
+    wait(for: [syncExpectation], timeout: 1.0)
+
+    // Verify tracking occurred with timing properties
+    XCTAssertEqual(mockDelegate.trackedEvents.count, 1, "Should have tracked once")
+    let syncTrackedEvent = mockDelegate.trackedEvents[0]
+    XCTAssertEqual(syncTrackedEvent.event, "$experiment_started")
+
+    // Verify timing properties are present
+    let syncProps = syncTrackedEvent.properties!
+    XCTAssertNotNil(syncProps["timeLastFetched"], "Should have timeLastFetched")
+    XCTAssertNotNil(syncProps["fetchLatencyMs"], "Should have fetchLatencyMs")
+    XCTAssertEqual(syncProps["fetchLatencyMs"] as? Int, 150, "Should have expected latency")
+
+    // Second scenario: Call from outside accessQueue (should sync to read properties)
+    let asyncExpectation = XCTestExpectation(description: "Async tracking completes")
+
+    // Reset tracked events and set up new tracking expectation
+    mockDelegate.trackedEvents.removeAll()
+    mockDelegate.trackExpectation = asyncExpectation
+
+    // Use async getVariant which may trigger tracking from different queue contexts
+    manager.getVariant("feature_null", fallback: defaultFallback) { _ in
+      // This completion runs on main queue
+    }
+
+    wait(for: [asyncExpectation], timeout: 1.0)
+
+    // Verify tracking occurred with timing properties
+    XCTAssertEqual(mockDelegate.trackedEvents.count, 1, "Should have tracked once")
+    let asyncTrackedEvent = mockDelegate.trackedEvents[0]
+    XCTAssertEqual(asyncTrackedEvent.event, "$experiment_started")
+
+    // Verify timing properties are present (should be the same regardless of queue)
+    let asyncProps = asyncTrackedEvent.properties!
+    XCTAssertNotNil(asyncProps["timeLastFetched"], "Should have timeLastFetched")
+    XCTAssertNotNil(asyncProps["fetchLatencyMs"], "Should have fetchLatencyMs")
+    XCTAssertEqual(asyncProps["fetchLatencyMs"] as? Int, 150, "Should have expected latency")
+  }
+
+  func testTrackingFromDifferentQueueContexts() {
+    // Test that tracking works correctly when called from various queue contexts
+    simulateFetchSuccess()
+
+    let testQueue = DispatchQueue(label: "test.queue")
+    let concurrentQueue = DispatchQueue(label: "test.concurrent", attributes: .concurrent)
+
+    // Track expectations for multiple calls
+    let expectationCount = 3
+    var expectations: [XCTestExpectation] = []
+    for i in 0..<expectationCount {
+      expectations.append(XCTestExpectation(description: "Track call \(i)"))
+    }
+
+    mockDelegate.trackedEvents.removeAll()
+    var trackIndex = 0
+
+    // Set custom track handler to fulfill expectations in order
+    mockDelegate.customTrackHandler = { event, properties in
+      if trackIndex < expectations.count {
+        expectations[trackIndex].fulfill()
+        trackIndex += 1
+      }
+    }
+
+    // Test 1: From custom serial queue
+    testQueue.async {
+      _ = self.manager.getVariantSync("feature_bool_true", fallback: self.defaultFallback)
+    }
+
+    // Test 2: From concurrent queue
+    concurrentQueue.async {
+      _ = self.manager.getVariantSync("feature_bool_false", fallback: self.defaultFallback)
+    }
+
+    // Test 3: From main queue
+    DispatchQueue.main.async {
+      _ = self.manager.getVariantSync("feature_string", fallback: self.defaultFallback)
+    }
+
+    // Wait for all tracking to complete
+    wait(for: expectations, timeout: 2.0)
+
+    // Verify all tracking calls included timing properties
+    XCTAssertEqual(mockDelegate.trackedEvents.count, expectationCount)
+
+    for (index, event) in mockDelegate.trackedEvents.enumerated() {
+      XCTAssertEqual(
+        event.event, "$experiment_started", "Event \(index) should be $experiment_started")
+      let props = event.properties!
+      XCTAssertNotNil(props["timeLastFetched"], "Event \(index) should have timeLastFetched")
+      XCTAssertNotNil(props["fetchLatencyMs"], "Event \(index) should have fetchLatencyMs")
+      XCTAssertEqual(
+        props["fetchLatencyMs"] as? Int, 150, "Event \(index) should have expected latency")
+    }
   }
 
 }  // End Test Class

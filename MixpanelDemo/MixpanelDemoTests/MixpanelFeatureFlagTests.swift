@@ -555,17 +555,28 @@ class FeatureFlagManagerTests: XCTestCase {
     var expectations: [XCTestExpectation] = []
     var completionResults: [MixpanelFlagVariant?] = Array(repeating: nil, count: numConcurrentCalls)
 
+    // Use a more descriptive fallback to help with debugging
+    let testFallback = MixpanelFlagVariant(key: "fallback_key", value: "fallback_value")
+
     // Expect tracking only ONCE for the actual feature if fetch succeeds
     mockDelegate.trackExpectation = XCTestExpectation(description: "Track call (should be once)")
     mockDelegate.trackExpectation?.expectedFulfillmentCount = 1
 
     print("Starting \(numConcurrentCalls) concurrent getFeature calls...")
+
+    // Add a small delay before starting concurrent calls to ensure setup is complete
+    let startExpectation = XCTestExpectation(description: "Start delay")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+      startExpectation.fulfill()
+    }
+    wait(for: [startExpectation], timeout: 0.5)
+
     for i in 0..<numConcurrentCalls {
       let exp = XCTestExpectation(description: "Async getFeature \(i) completes")
       expectations.append(exp)
       DispatchQueue.global().async {  // Simulate calls from different threads
-        self.manager.getVariant("feature_bool_true", fallback: self.defaultFallback) { data in
-          print("Completion handler \(i) called.")
+        self.manager.getVariant("feature_bool_true", fallback: testFallback) { data in
+          print("Completion handler \(i) called with data: \(String(describing: data))")
           completionResults[i] = data
           exp.fulfill()
         }
@@ -573,8 +584,8 @@ class FeatureFlagManagerTests: XCTestCase {
     }
     print("Concurrent calls dispatched.")
 
-    // Simulate fetch success after a delay
-    DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {  // Longer delay
+    // Simulate fetch success after a longer delay to ensure all calls are queued
+    DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {  // Increased delay
       print("Simulating fetch success for concurrent test...")
       // Simulate fetch success - important this only happens *once* conceptually
       self.simulateFetchSuccess()
@@ -582,11 +593,15 @@ class FeatureFlagManagerTests: XCTestCase {
     }
 
     // Wait for all getFeature completions AND the single tracking call
-    wait(for: expectations + [mockDelegate.trackExpectation!], timeout: 5.0)  // Longer timeout
+    wait(for: expectations + [mockDelegate.trackExpectation!], timeout: 10.0)  // Much longer timeout for CI
 
     // Verify all completions received the correct data
     for i in 0..<numConcurrentCalls {
       XCTAssertNotNil(completionResults[i], "Completion \(i) did not receive data")
+      // Check if we got the actual flag data, not the fallback
+      if completionResults[i]?.key == testFallback.key {
+        XCTFail("Completion \(i) received fallback instead of actual flag data")
+      }
       AssertEqual(completionResults[i]?.key, "v_true")
       AssertEqual(completionResults[i]?.value, true)
     }

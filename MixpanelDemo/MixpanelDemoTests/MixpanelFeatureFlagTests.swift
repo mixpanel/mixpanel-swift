@@ -108,6 +108,77 @@ func AssertEqual(_ value1: Any?, _ value2: Any?, file: StaticString = #file, lin
   }
 }
 
+// MARK: - Mock FeatureFlagManager for Network Isolation
+
+class MockFeatureFlagManager: FeatureFlagManager {
+  var shouldSimulateNetworkDelay = false
+  var simulatedFetchResult: (success: Bool, flags: [String: MixpanelFlagVariant]?)?
+  var fetchRequestCount = 0
+  private var fetchStartTime: Date?
+
+  // Override the now-internal method to prevent real network calls
+  override func _performFetchRequest() {
+    fetchRequestCount += 1
+    print("MockFeatureFlagManager: Intercepted fetch request #\(fetchRequestCount)")
+
+    // Record fetch start time like the real implementation
+    let startTime = Date()
+    accessQueue.async { [weak self] in
+      self?.fetchStartTime = startTime
+    }
+
+    // Instead of real network call, use simulated result
+    if let result = simulatedFetchResult {
+      if shouldSimulateNetworkDelay {
+        // Simulate network delay
+        DispatchQueue.global().asyncAfter(deadline: .now() + 0.1) { [weak self] in
+          self?.completeSimulatedFetch(
+            success: result.success, flags: result.flags, startTime: startTime)
+        }
+      } else {
+        // Complete immediately
+        self.completeSimulatedFetch(
+          success: result.success, flags: result.flags, startTime: startTime)
+      }
+    } else {
+      // No simulation configured - fail immediately
+      print("MockFeatureFlagManager: No simulation configured, failing fetch")
+      self.accessQueue.async { [weak self] in
+        self?._completeFetch(success: false)
+      }
+    }
+  }
+
+  private func completeSimulatedFetch(
+    success: Bool, flags: [String: MixpanelFlagVariant]?, startTime: Date
+  ) {
+    let fetchEndTime = Date()
+
+    if success {
+      print("MockFeatureFlagManager: Simulating successful fetch with \(flags?.count ?? 0) flags")
+      self.accessQueue.async { [weak self] in
+        guard let self = self else { return }
+
+        // Mimic the real implementation's behavior
+        self.flags = flags ?? [:]
+
+        // Calculate timing metrics like the real implementation
+        let latencyMs = Int(fetchEndTime.timeIntervalSince(startTime) * 1000)
+        self.fetchLatencyMs = latencyMs
+        self.timeLastFetched = fetchEndTime
+
+        print("Flags updated: \(self.flags ?? [:])")
+        self._completeFetch(success: true)
+      }
+    } else {
+      print("MockFeatureFlagManager: Simulating failed fetch")
+      self.accessQueue.async { [weak self] in
+        self?._completeFetch(success: false)
+      }
+    }
+  }
+}
+
 // MARK: - Refactored FeatureFlagManager Tests
 
 class FeatureFlagManagerTests: XCTestCase {
@@ -128,8 +199,15 @@ class FeatureFlagManagerTests: XCTestCase {
   override func setUpWithError() throws {
     try super.setUpWithError()
     mockDelegate = MockFeatureFlagDelegate()
-    // Ensure manager is initialized with the delegate
-    manager = FeatureFlagManager(serverURL: "https://test.com", delegate: mockDelegate)
+
+    // Use MockFeatureFlagManager to prevent real network calls
+    let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", delegate: mockDelegate)
+
+    // Configure default simulation - successful fetch with sample flags
+    mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+    mockManager.shouldSimulateNetworkDelay = true
+
+    manager = mockManager
   }
 
   override func tearDownWithError() throws {
@@ -144,30 +222,56 @@ class FeatureFlagManagerTests: XCTestCase {
 
   private func simulateFetchSuccess(flags: [String: MixpanelFlagVariant]? = nil) {
     let flagsToSet = flags ?? sampleFlags
-    let currentTime = Date()
-    // Set flags directly *before* calling completeFetch
-    manager.accessQueue.sync {
-      manager.flags = flagsToSet
-      // Set timing properties to simulate a successful fetch
-      manager.timeLastFetched = currentTime
-      manager.fetchLatencyMs = 150  // Simulate 150ms fetch time
-      // Important: Set isFetching = true *before* calling _completeFetch,
-      // as _completeFetch assumes a fetch was in progress.
-      manager.isFetching = true
+
+    // If using MockFeatureFlagManager, just set the flags directly
+    if let mockManager = manager as? MockFeatureFlagManager {
+      // For mock, we can directly set the flags without going through fetch
+      mockManager.accessQueue.async {
+        mockManager.flags = flagsToSet
+        mockManager.timeLastFetched = Date()
+        mockManager.fetchLatencyMs = 150
+        // Don't call _completeFetch - just set the state
+      }
+      // Give a moment for the async operation to complete
+      Thread.sleep(forTimeInterval: 0.01)
+    } else {
+      // Original implementation for non-mock manager
+      let currentTime = Date()
+      // Set flags directly *before* calling completeFetch
+      manager.accessQueue.sync {
+        manager.flags = flagsToSet
+        // Set timing properties to simulate a successful fetch
+        manager.timeLastFetched = currentTime
+        manager.fetchLatencyMs = 150  // Simulate 150ms fetch time
+        // Important: Set isFetching = true *before* calling _completeFetch,
+        // as _completeFetch assumes a fetch was in progress.
+        manager.isFetching = true
+      }
+      // Call internal completion logic
+      manager._completeFetch(success: true)
     }
-    // Call internal completion logic
-    manager._completeFetch(success: true)
   }
 
   private func simulateFetchFailure() {
-    // Set isFetching = true before calling _completeFetch
-    manager.accessQueue.sync {
-      manager.isFetching = true
-      // Ensure flags are nil or unchanged on failure simulation if desired
-      manager.flags = nil  // Or keep existing flags based on desired failure behavior
+    // If using MockFeatureFlagManager, just clear the flags
+    if let mockManager = manager as? MockFeatureFlagManager {
+      mockManager.accessQueue.async {
+        mockManager.flags = nil
+        // Don't call _completeFetch - just set the state
+      }
+      // Give a moment for the async operation to complete
+      Thread.sleep(forTimeInterval: 0.01)
+    } else {
+      // Original implementation for non-mock manager
+      // Set isFetching = true before calling _completeFetch
+      manager.accessQueue.sync {
+        manager.isFetching = true
+        // Ensure flags are nil or unchanged on failure simulation if desired
+        manager.flags = nil  // Or keep existing flags based on desired failure behavior
+      }
+      // Call internal completion logic
+      manager._completeFetch(success: false)
     }
-    // Call internal completion logic
-    manager._completeFetch(success: false)
   }
 
   // --- State and Configuration Tests ---
@@ -373,12 +477,8 @@ class FeatureFlagManagerTests: XCTestCase {
       expectation.fulfill()  // Fulfill main expectation
     }
 
-    // Crucially, simulate the fetch success *after* getFeature was called.
-    // Add a slight delay to mimic network latency and allow fetch logic to start.
-    DispatchQueue.global().asyncAfter(deadline: .now() + 0.2) {
-      print("Simulating fetch success...")
-      self.simulateFetchSuccess()  // This sets flags and calls _completeFetch
-    }
+    // MockFeatureFlagManager will automatically handle the fetch simulation
+    // No need for manual simulateFetchSuccess() - the mock handles it with delay
 
     // Wait for BOTH the getFeature completion AND the tracking expectation
     wait(for: [expectation, mockDelegate.trackExpectation!], timeout: 3.0)  // Increased timeout
@@ -391,24 +491,26 @@ class FeatureFlagManagerTests: XCTestCase {
   }
 
   func testGetVariant_Async_FlagsNotReady_FetchFailure() {
+    // Configure mock to simulate failure for this test
+    if let mockManager = manager as? MockFeatureFlagManager {
+      mockManager.simulatedFetchResult = (success: false, flags: nil)
+    }
+
     XCTAssertFalse(manager.areFlagsReady())
     let expectation = XCTestExpectation(
       description: "Async getFeature (Flags Not Ready) triggers fetch and fails")
     let fallback = MixpanelFlagVariant(key: "fb_fail", value: "failed_fetch")
     var receivedData: MixpanelFlagVariant?
 
-    // Call getFeature
+    // Call getFeature - mock will simulate failure automatically
     manager.getVariant("feature_string", fallback: fallback) { data in
       XCTAssertTrue(Thread.isMainThread, "Completion should be on main thread")
       receivedData = data
       expectation.fulfill()
     }
 
-    // Simulate fetch failure after a delay
-    DispatchQueue.global().asyncAfter(deadline: .now() + 0.2) {
-      print("Simulating fetch failure...")
-      self.simulateFetchFailure()  // This calls _completeFetch(success: false)
-    }
+    // MockFeatureFlagManager will automatically simulate failure
+    // No need for manual simulateFetchFailure()
 
     wait(for: [expectation], timeout: 3.0)
 
@@ -418,6 +520,11 @@ class FeatureFlagManagerTests: XCTestCase {
     XCTAssertFalse(manager.areFlagsReady(), "Flags should still not be ready after failed fetch")
     XCTAssertEqual(
       mockDelegate.trackedEvents.count, 0, "Should not track on fetch failure/fallback")
+
+    // Reset mock configuration back to success for other tests
+    if let mockManager = manager as? MockFeatureFlagManager {
+      mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+    }
   }
 
   // --- Tracking Tests ---
@@ -564,13 +671,6 @@ class FeatureFlagManagerTests: XCTestCase {
 
     print("Starting \(numConcurrentCalls) concurrent getFeature calls...")
 
-    // Add a small delay before starting concurrent calls to ensure setup is complete
-    let startExpectation = XCTestExpectation(description: "Start delay")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-      startExpectation.fulfill()
-    }
-    wait(for: [startExpectation], timeout: 0.5)
-
     for i in 0..<numConcurrentCalls {
       let exp = XCTestExpectation(description: "Async getFeature \(i) completes")
       expectations.append(exp)
@@ -584,13 +684,8 @@ class FeatureFlagManagerTests: XCTestCase {
     }
     print("Concurrent calls dispatched.")
 
-    // Simulate fetch success after a longer delay to ensure all calls are queued
-    DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {  // Increased delay
-      print("Simulating fetch success for concurrent test...")
-      // Simulate fetch success - important this only happens *once* conceptually
-      self.simulateFetchSuccess()
-      print("Fetch simulation complete.")
-    }
+    // MockFeatureFlagManager will automatically handle the fetch simulation
+    // No need for manual simulateFetchSuccess() - the mock handles it
 
     // Wait for all getFeature completions AND the single tracking call
     wait(for: expectations + [mockDelegate.trackExpectation!], timeout: 10.0)  // Much longer timeout for CI
@@ -613,6 +708,13 @@ class FeatureFlagManagerTests: XCTestCase {
     }
     XCTAssertEqual(
       trackEvents.count, 1, "Tracking should have occurred exactly once despite concurrent calls")
+
+    // Verify only one network fetch was triggered
+    if let mockManager = manager as? MockFeatureFlagManager {
+      XCTAssertEqual(
+        mockManager.fetchRequestCount, 1,
+        "Should have made exactly one fetch request despite concurrent calls")
+    }
   }
 
   // --- Response Parser Tests ---

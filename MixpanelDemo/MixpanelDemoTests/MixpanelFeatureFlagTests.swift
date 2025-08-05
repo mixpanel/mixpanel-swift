@@ -1195,4 +1195,236 @@ class FeatureFlagManagerTests: XCTestCase {
     }
   }
 
+  // MARK: - Timing Properties Sanity Tests
+
+  func testTimingPropertiesSanity() {
+    // 1. Test Initial State - Properties should be nil before any fetch
+    XCTAssertNil(manager.timeLastFetched, "timeLastFetched should be nil initially")
+    XCTAssertNil(manager.fetchLatencyMs, "fetchLatencyMs should be nil initially")
+
+    // 2. Test Accurate Timing Calculation with Real Delay
+    if let mockManager = manager as? MockFeatureFlagManager {
+      // Configure mock to simulate a realistic network delay
+      let expectedDelayMs = 250  // 250ms simulated network delay
+      mockManager.shouldSimulateNetworkDelay = true
+
+      // Create a custom expectation to measure actual time
+      let fetchExpectation = XCTestExpectation(description: "Fetch completes with timing")
+      let fetchStartTime = Date()
+
+      // Trigger async fetch
+      manager.getVariant("feature_bool_true", fallback: defaultFallback) { _ in
+        fetchExpectation.fulfill()
+      }
+
+      wait(for: [fetchExpectation], timeout: 2.0)
+
+      // Verify timing properties are set and reasonable
+      XCTAssertNotNil(
+        manager.timeLastFetched, "timeLastFetched should be set after successful fetch")
+      XCTAssertNotNil(manager.fetchLatencyMs, "fetchLatencyMs should be set after successful fetch")
+
+      // 3. Test Reasonable Bounds
+      if let latencyMs = manager.fetchLatencyMs {
+        XCTAssertGreaterThan(latencyMs, 0, "fetchLatencyMs should be positive")
+        XCTAssertLessThan(latencyMs, 30000, "fetchLatencyMs should be less than 30 seconds")
+
+        // Verify latency is in reasonable range for our simulated delay
+        // Allow some tolerance for execution overhead
+        let actualElapsedMs = Int(Date().timeIntervalSince(fetchStartTime) * 1000)
+        let tolerance = 500  // 500ms tolerance for CI/slow systems
+        XCTAssertLessThanOrEqual(
+          abs(latencyMs - actualElapsedMs), tolerance,
+          "fetchLatencyMs (\(latencyMs)ms) should be close to actual elapsed time (\(actualElapsedMs)ms)"
+        )
+      }
+
+      if let timeLastFetched = manager.timeLastFetched {
+        let timestamp = Int(timeLastFetched.timeIntervalSince1970)
+        let year2020Timestamp = 1_577_836_800  // Jan 1, 2020
+        let year2100Timestamp = 4_102_444_800  // Jan 1, 2100
+
+        XCTAssertGreaterThan(
+          timestamp, year2020Timestamp, "timeLastFetched should be after year 2020")
+        XCTAssertLessThan(
+          timestamp, year2100Timestamp, "timeLastFetched should be before year 2100")
+
+        // Verify timestamp is not in the future
+        XCTAssertLessThanOrEqual(
+          timeLastFetched.timeIntervalSinceNow, 1.0,
+          "timeLastFetched should not be in the future (allowing 1s tolerance)"
+        )
+      }
+    }
+
+    // 4. Test Update on Subsequent Fetches
+    if let mockManager = manager as? MockFeatureFlagManager {
+      // Store first fetch values
+      let firstFetchTime = manager.timeLastFetched
+      let firstLatency = manager.fetchLatencyMs
+
+      // Wait a bit to ensure time difference
+      Thread.sleep(forTimeInterval: 0.1)
+
+      // Reset flags to trigger new fetch
+      mockManager.accessQueue.sync {
+        mockManager.flags = nil
+      }
+
+      // Configure different delay for second fetch
+      mockManager.shouldSimulateNetworkDelay = true
+      mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+
+      let secondFetchExpectation = XCTestExpectation(description: "Second fetch completes")
+
+      manager.getVariant("feature_string", fallback: defaultFallback) { _ in
+        secondFetchExpectation.fulfill()
+      }
+
+      wait(for: [secondFetchExpectation], timeout: 2.0)
+
+      // Verify timing properties updated
+      XCTAssertNotNil(manager.timeLastFetched, "timeLastFetched should be set after second fetch")
+      XCTAssertNotNil(manager.fetchLatencyMs, "fetchLatencyMs should be set after second fetch")
+
+      if let firstTime = firstFetchTime, let secondTime = manager.timeLastFetched {
+        XCTAssertGreaterThan(
+          secondTime.timeIntervalSince1970, firstTime.timeIntervalSince1970,
+          "Second fetch time should be later than first fetch time"
+        )
+      }
+
+      // Latency might be similar but should be independently calculated
+      XCTAssertNotNil(
+        manager.fetchLatencyMs, "fetchLatencyMs should still be set after second fetch")
+    }
+
+    // 5. Test Failed Fetch Behavior
+    if let mockManager = manager as? MockFeatureFlagManager {
+      // Store current valid timing values
+      let validTimeLastFetched = manager.timeLastFetched
+      let validFetchLatency = manager.fetchLatencyMs
+
+      // Reset flags and configure for failure
+      mockManager.accessQueue.sync {
+        mockManager.flags = nil
+      }
+      mockManager.simulatedFetchResult = (success: false, flags: nil)
+
+      let failedFetchExpectation = XCTestExpectation(description: "Failed fetch completes")
+
+      manager.getVariant("feature_int", fallback: defaultFallback) { variant in
+        // Should get fallback on failure
+        XCTAssertEqual(
+          variant.key, self.defaultFallback.key, "Should receive fallback on fetch failure")
+        failedFetchExpectation.fulfill()
+      }
+
+      wait(for: [failedFetchExpectation], timeout: 2.0)
+
+      // Verify timing properties aren't corrupted by failed fetch
+      // They should either remain unchanged or be cleared, but not set to invalid values
+      if manager.timeLastFetched != nil {
+        // If still set, should be the previous valid value
+        XCTAssertEqual(
+          manager.timeLastFetched?.timeIntervalSince1970,
+          validTimeLastFetched?.timeIntervalSince1970,
+          "timeLastFetched should not be updated on failed fetch"
+        )
+      }
+
+      if manager.fetchLatencyMs != nil {
+        // If still set, should be the previous valid value
+        XCTAssertEqual(
+          manager.fetchLatencyMs, validFetchLatency,
+          "fetchLatencyMs should not be updated on failed fetch"
+        )
+      }
+
+      // Reset to success for cleanup
+      mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+    }
+
+    // 6. Test Consistency Between Timing Properties
+    if let mockManager = manager as? MockFeatureFlagManager {
+      // Ensure we have a successful fetch
+      mockManager.accessQueue.sync {
+        mockManager.flags = nil
+      }
+
+      let consistencyExpectation = XCTestExpectation(description: "Fetch for consistency check")
+
+      manager.getVariant("feature_double", fallback: defaultFallback) { _ in
+        consistencyExpectation.fulfill()
+      }
+
+      wait(for: [consistencyExpectation], timeout: 2.0)
+
+      // Both should be set or both should be nil
+      if manager.fetchLatencyMs != nil {
+        XCTAssertNotNil(
+          manager.timeLastFetched,
+          "If fetchLatencyMs is set, timeLastFetched should also be set"
+        )
+      }
+
+      if manager.timeLastFetched != nil {
+        XCTAssertNotNil(
+          manager.fetchLatencyMs,
+          "If timeLastFetched is set, fetchLatencyMs should also be set"
+        )
+      }
+    }
+
+    // 7. Test Timing Properties in Tracking Events
+    // Reset tracked events to test fresh tracking
+    mockDelegate.trackedEvents.removeAll()
+
+    // Use a unique flag name that hasn't been tracked yet to ensure fresh tracking
+    let uniqueFlagName = "test_timing_flag_\(UUID().uuidString.prefix(8))"
+
+    // Create a test flag for this unique name
+    if let mockManager = manager as? MockFeatureFlagManager {
+      var testFlags = sampleFlags
+      testFlags[uniqueFlagName] = MixpanelFlagVariant(key: "timing_test", value: true)
+      mockManager.accessQueue.sync {
+        mockManager.flags = testFlags
+      }
+    }
+
+    let trackingExpectation = XCTestExpectation(description: "Tracking includes timing properties")
+    mockDelegate.trackExpectation = trackingExpectation
+
+    // Trigger tracking by accessing the unique flag
+    _ = manager.getVariantSync(uniqueFlagName, fallback: defaultFallback)
+
+    wait(for: [trackingExpectation], timeout: 1.0)
+
+    XCTAssertEqual(mockDelegate.trackedEvents.count, 1, "Should have tracked one event")
+    let trackedEvent = mockDelegate.trackedEvents[0]
+    let props = trackedEvent.properties!
+
+    // Verify timing properties are included in tracking
+    if manager.timeLastFetched != nil {
+      XCTAssertNotNil(props["timeLastFetched"], "Tracking should include timeLastFetched")
+      if let trackedTimestamp = props["timeLastFetched"] as? Int {
+        let expectedTimestamp = Int(manager.timeLastFetched!.timeIntervalSince1970)
+        XCTAssertEqual(
+          trackedTimestamp, expectedTimestamp,
+          "Tracked timeLastFetched should match manager's value"
+        )
+      }
+    }
+
+    if manager.fetchLatencyMs != nil {
+      XCTAssertNotNil(props["fetchLatencyMs"], "Tracking should include fetchLatencyMs")
+      if let trackedLatency = props["fetchLatencyMs"] as? Int {
+        XCTAssertEqual(
+          trackedLatency, manager.fetchLatencyMs!,
+          "Tracked fetchLatencyMs should match manager's value"
+        )
+      }
+    }
+  }
+
 }  // End Test Class

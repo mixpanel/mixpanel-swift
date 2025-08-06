@@ -1,432 +1,446 @@
 {
   "warnings": [
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 11,
       "symbol": "GzipError",
       "symbol_kind": "source.lang.swift.decl.enum",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 12,
       "symbol": "GzipError.stream",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 13,
       "symbol": "GzipError.data",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 14,
       "symbol": "GzipError.memory",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 15,
       "symbol": "GzipError.buffer",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 16,
       "symbol": "GzipError.version",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 17,
       "symbol": "GzipError.unknown(code:)",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 33,
       "symbol": "MixpanelFlagVariant",
       "symbol_kind": "source.lang.swift.decl.struct",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 34,
       "symbol": "MixpanelFlagVariant.key",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 35,
       "symbol": "MixpanelFlagVariant.value",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 55,
       "symbol": "MixpanelFlagVariant.init(key:value:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 71,
       "symbol": "MixpanelFlagDelegate",
       "symbol_kind": "source.lang.swift.decl.protocol",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 72,
       "symbol": "MixpanelFlagDelegate.getOptions()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 73,
       "symbol": "MixpanelFlagDelegate.getDistinctId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 74,
+      "symbol": "MixpanelFlagDelegate.getAnonymousId()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/FeatureFlags.swift",
+      "line": 75,
       "symbol": "MixpanelFlagDelegate.track(event:properties:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Mixpanel.swift",
-      "line": 18,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Mixpanel.swift",
+      "line": 19,
       "symbol": "Mixpanel.initialize(options:)",
       "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 53,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 50,
       "symbol": "Properties",
       "symbol_kind": "source.lang.swift.decl.typealias",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 62,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 59,
       "symbol": "ProxyServerConfig",
       "symbol_kind": "source.lang.swift.decl.struct",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 63,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 60,
       "symbol": "ProxyServerConfig.init(serverUrl:delegate:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 179,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 177,
       "symbol": "MixpanelInstance.useGzipCompression",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 232,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 229,
       "symbol": "MixpanelInstance.minimumSessionDuration",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 445,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 457,
       "symbol": "MixpanelInstance.getOptions()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 449,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 461,
       "symbol": "MixpanelInstance.getDistinctId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 957,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 465,
+      "symbol": "MixpanelInstance.getAnonymousId()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 995,
       "symbol": "MixpanelInstance.archive()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 1203,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 1247,
       "symbol": "MixpanelInstance.getGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelLogger.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelLogger.swift",
       "line": 56,
       "symbol": "MixpanelLogging.addMessage(message:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelLogger.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelLogger.swift",
       "line": 59,
       "symbol": "MixpanelLogger",
       "symbol_kind": "source.lang.swift.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 10,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 9,
       "symbol": "MixpanelOptions",
       "symbol_kind": "source.lang.swift.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 11,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 10,
       "symbol": "MixpanelOptions.token",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 12,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 11,
       "symbol": "MixpanelOptions.flushInterval",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 13,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 12,
       "symbol": "MixpanelOptions.instanceName",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 14,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 13,
       "symbol": "MixpanelOptions.trackAutomaticEvents",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 15,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 14,
       "symbol": "MixpanelOptions.optOutTrackingByDefault",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 16,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 15,
       "symbol": "MixpanelOptions.useUniqueDistinctId",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 17,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 16,
       "symbol": "MixpanelOptions.superProperties",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 18,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 17,
       "symbol": "MixpanelOptions.serverURL",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 19,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 18,
       "symbol": "MixpanelOptions.proxyServerConfig",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 20,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 19,
       "symbol": "MixpanelOptions.useGzipCompression",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 21,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 20,
       "symbol": "MixpanelOptions.featureFlagsEnabled",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 22,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 21,
       "symbol": "MixpanelOptions.featureFlagsContext",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 24,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 23,
       "symbol": "MixpanelOptions.init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 20,
       "symbol": "MixpanelType.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 38,
       "symbol": "Optional.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 72,
       "symbol": "String.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 87,
       "symbol": "NSString.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 104,
       "symbol": "NSNumber.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 119,
       "symbol": "Int.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 134,
       "symbol": "UInt.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 150,
       "symbol": "Double.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 166,
       "symbol": "Float.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 180,
       "symbol": "Bool.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 195,
       "symbol": "Date.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 210,
       "symbol": "URL.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 225,
       "symbol": "NSNull.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 246,
       "symbol": "Array.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 283,
       "symbol": "NSArray.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 320,
       "symbol": "Dictionary.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Network.swift",
-      "line": 50,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Network.swift",
+      "line": 51,
       "symbol": "ServerProxyResource",
       "symbol_kind": "source.lang.swift.decl.struct",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Network.swift",
-      "line": 51,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Network.swift",
+      "line": 52,
       "symbol": "ServerProxyResource.init(queryItems:headers:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Network.swift",
-      "line": 56,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Network.swift",
+      "line": 57,
       "symbol": "ServerProxyResource.queryItems",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/jaredmcfarland/Developer/mixpanel-swift/Sources/Network.swift",
-      "line": 57,
+      "file": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift/Sources/Network.swift",
+      "line": 58,
       "symbol": "ServerProxyResource.headers",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     }
   ],
-  "source_directory": "/Users/jaredmcfarland/Developer/mixpanel-swift"
+  "source_directory": "/Users/jaredmcfarland/Developer/sdks/tracking/ios/mixpanel-swift"
 }

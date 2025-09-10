@@ -436,23 +436,32 @@ class FeatureFlagManager: Network, MixpanelFlags {
     if let anonymousId = anonymousId {
       context["device_id"] = anonymousId
     }
-    let requestBodyDict = ["context": context]
 
     guard
-      let requestBodyData = try? JSONSerialization.data(
-        withJSONObject: requestBodyDict, options: [])
+      let contextData = try? JSONSerialization.data(
+        withJSONObject: context, options: []),
+      let contextString = String(data: contextData, encoding: .utf8)
     else {
-      print("Error: Failed to serialize request body for flags.")
+      print("Error: Failed to serialize context for flags.")
       self._completeFetch(success: false)
       return
     }
+
     guard let authData = "\(options.token):".data(using: .utf8) else {
       print("Error: Failed to create auth data.")
       self._completeFetch(success: false)
       return
     }
     let base64Auth = authData.base64EncodedString()
-    let headers = ["Authorization": "Basic \(base64Auth)", "Content-Type": "application/json"]
+    let headers = ["Authorization": "Basic \(base64Auth)"]
+
+    let queryItems = [
+      URLQueryItem(name: "context", value: contextString),
+      URLQueryItem(name: "token", value: options.token),
+      URLQueryItem(name: "mp_lib", value: "swift"),
+      URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion())
+    ]
+
     let responseParser: (Data) -> FlagsResponse? = { data in
       do { return try JSONDecoder().decode(FlagsResponse.self, from: data) } catch {
         print("Error parsing flags JSON: \(error)")
@@ -460,7 +469,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
       }
     }
     let resource = Network.buildResource(
-      path: flagsRoute, method: .post, requestBody: requestBodyData, headers: headers,
+      path: flagsRoute, method: .get, queryItems: queryItems, headers: headers,
       parse: responseParser)
 
     // Make the API request

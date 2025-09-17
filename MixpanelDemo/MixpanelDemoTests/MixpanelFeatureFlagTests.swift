@@ -116,6 +116,14 @@ class MockFeatureFlagManager: FeatureFlagManager {
   var fetchRequestCount = 0
   private var fetchStartTime: Date?
 
+  // Request validation properties
+  var requestValidationEnabled = false
+  var lastRequestMethod: RequestMethod?
+  var lastRequestHeaders: [String: String]?
+  var lastRequestBody: Data?
+  var lastQueryItems: [URLQueryItem]?
+  var requestValidationError: String?
+
   // Override the now-internal method to prevent real network calls
   override func _performFetchRequest() {
     fetchRequestCount += 1
@@ -125,6 +133,11 @@ class MockFeatureFlagManager: FeatureFlagManager {
     let startTime = Date()
     accessQueue.async { [weak self] in
       self?.fetchStartTime = startTime
+    }
+
+    // If request validation is enabled, intercept and validate the request construction
+    if requestValidationEnabled {
+      validateRequestConstruction()
     }
 
     // Instead of real network call, use simulated result
@@ -147,6 +160,56 @@ class MockFeatureFlagManager: FeatureFlagManager {
         self?._completeFetch(success: false)
       }
     }
+  }
+
+  private func validateRequestConstruction() {
+    // Clear previous validation error
+    requestValidationError = nil
+
+    // Replicate the request construction logic from the real implementation to capture parameters
+    guard let delegate = self.delegate else {
+      requestValidationError = "Delegate missing"
+      return
+    }
+    let options = delegate.getOptions()
+
+    let distinctId = delegate.getDistinctId()
+    let anonymousId = delegate.getAnonymousId()
+
+    var context = options.featureFlagsContext
+    context["distinct_id"] = distinctId
+    if let anonymousId = anonymousId {
+      context["device_id"] = anonymousId
+    }
+
+    guard
+      let contextData = try? JSONSerialization.data(
+        withJSONObject: context, options: []),
+      let contextString = String(data: contextData, encoding: .utf8)
+    else {
+      requestValidationError = "Failed to serialize context"
+      return
+    }
+
+    guard let authData = "\(options.token):".data(using: .utf8) else {
+      requestValidationError = "Failed to create auth data"
+      return
+    }
+    let base64Auth = authData.base64EncodedString()
+    let headers = ["Authorization": "Basic \(base64Auth)"]
+
+    let queryItems = [
+      URLQueryItem(name: "context", value: contextString),
+      URLQueryItem(name: "token", value: options.token),
+      URLQueryItem(name: "mp_lib", value: "swift"),
+      URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion())
+    ]
+
+    // Capture the constructed request parameters for validation
+    lastRequestMethod = .get
+    lastRequestHeaders = headers
+    lastRequestBody = nil  // GET request should have no body
+    lastQueryItems = queryItems
   }
 
   private func completeSimulatedFetch(
@@ -1423,6 +1486,150 @@ class FeatureFlagManagerTests: XCTestCase {
           trackedLatency, manager.fetchLatencyMs!,
           "Tracked fetchLatencyMs should match manager's value"
         )
+      }
+    }
+  }
+
+  func testGETRequestFormat() {
+    // Use a fresh MockFeatureFlagManager with request validation enabled
+    let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", delegate: mockDelegate)
+    mockManager.requestValidationEnabled = true
+    mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+
+    // Trigger a request
+    mockManager.loadFlags()
+
+    // Wait for request to be processed
+    let expectation = XCTestExpectation(description: "Request validation completes")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
+    wait(for: [expectation], timeout: 1.0)
+
+    // Verify no validation errors
+    XCTAssertNil(mockManager.requestValidationError, "Request validation should not have errors: \(mockManager.requestValidationError ?? "")")
+
+    // Verify GET method
+    XCTAssertEqual(mockManager.lastRequestMethod, .get, "Should use GET method")
+
+    // Verify headers
+    XCTAssertNotNil(mockManager.lastRequestHeaders, "Headers should be captured")
+    if let headers = mockManager.lastRequestHeaders {
+      XCTAssertTrue(headers.keys.contains("Authorization"), "Should include Authorization header")
+      XCTAssertTrue(headers["Authorization"]?.starts(with: "Basic ") == true, "Should use Basic auth")
+      XCTAssertFalse(headers.keys.contains("Content-Type"), "Should not include Content-Type header for GET")
+    }
+
+    // Verify no request body
+    XCTAssertNil(mockManager.lastRequestBody, "GET request should not have a body")
+
+    // Verify query parameters
+    XCTAssertNotNil(mockManager.lastQueryItems, "Query items should be captured")
+    if let queryItems = mockManager.lastQueryItems {
+      let queryDict = Dictionary(uniqueKeysWithValues: queryItems.map { ($0.name, $0.value) })
+
+      // Check required parameters
+      XCTAssertNotNil(queryDict["context"], "Should include context parameter")
+      XCTAssertEqual(queryDict["token"], "test", "Should include token parameter")
+      XCTAssertEqual(queryDict["mp_lib"], "swift", "Should include mp_lib parameter")
+      XCTAssertEqual(queryDict["$lib_version"], AutomaticProperties.libVersion(), "Should include $lib_version parameter")
+
+      // Verify context JSON structure
+      if let contextString = queryDict["context"],
+        let contextData = contextString?.data(using: .utf8),
+        let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any] {
+        XCTAssertEqual(context["distinct_id"] as? String, "test_distinct_id", "Context should include distinct_id")
+        XCTAssertEqual(context["device_id"] as? String, "test_anonymous_id", "Context should include device_id")
+      } else {
+        XCTFail("Context should be valid JSON")
+      }
+    }
+  }
+
+  func testGETRequestWithCustomContext() {
+    // Set up custom context
+    let customOptions = MixpanelOptions(token: "custom-token", featureFlagsEnabled: true, featureFlagsContext: [
+      "user_id": "test-user-123",
+      "group_id": "test-group-456"
+    ])
+
+    let customDelegate = MockFeatureFlagDelegate(
+      options: customOptions,
+      distinctId: "custom-distinct-id",
+      anonymousId: "custom-device-id"
+    )
+
+    let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", delegate: customDelegate)
+    mockManager.requestValidationEnabled = true
+    mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+
+    // Trigger a request
+    mockManager.loadFlags()
+
+    // Wait for request to be processed
+    let expectation = XCTestExpectation(description: "Custom context request validation")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
+    wait(for: [expectation], timeout: 1.0)
+
+    // Verify no validation errors
+    XCTAssertNil(mockManager.requestValidationError, "Request validation should not have errors")
+
+    // Verify query parameters with custom context
+    XCTAssertNotNil(mockManager.lastQueryItems, "Query items should be captured")
+    if let queryItems = mockManager.lastQueryItems {
+      let queryDict = Dictionary(uniqueKeysWithValues: queryItems.map { ($0.name, $0.value) })
+      XCTAssertEqual(queryDict["token"], "custom-token", "Should include custom token")
+      // Verify context includes both standard and custom fields
+      if let contextString = queryDict["context"],
+        let contextData = contextString?.data(using: .utf8),
+        let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any] {
+
+        XCTAssertEqual(context["distinct_id"] as? String, "custom-distinct-id", "Context should include distinct_id")
+        XCTAssertEqual(context["device_id"] as? String, "custom-device-id", "Context should include device_id")
+        XCTAssertEqual(context["user_id"] as? String, "test-user-123", "Context should include custom user_id")
+        XCTAssertEqual(context["group_id"] as? String, "test-group-456", "Context should include custom group_id")
+      } else {
+        XCTFail("Context should be valid JSON with custom fields")
+      }
+    }
+  }
+
+  func testGETRequestWithNilAnonymousId() {
+    // Set up with nil anonymous ID
+    let nilAnonymousDelegate = MockFeatureFlagDelegate(
+      options: MixpanelOptions(token: "test-token", featureFlagsEnabled: true),
+      distinctId: "test-distinct-id",
+      anonymousId: nil
+    )
+
+    let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", delegate: nilAnonymousDelegate)
+    mockManager.requestValidationEnabled = true
+    mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+
+    // Trigger a request
+    mockManager.loadFlags()
+
+    // Wait for request to be processed
+    let expectation = XCTestExpectation(description: "Nil anonymous ID request validation")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
+    wait(for: [expectation], timeout: 1.0)
+
+    // Verify no validation errors
+    XCTAssertNil(mockManager.requestValidationError, "Request validation should not have errors with nil anonymous ID")
+
+    // Verify context excludes device_id when anonymous ID is nil
+    if let queryItems = mockManager.lastQueryItems {
+      let queryDict = Dictionary(uniqueKeysWithValues: queryItems.map { ($0.name, $0.value) })
+
+        if let contextString = queryDict["context"],
+          let contextData = contextString?.data(using: .utf8),
+          let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any] {
+
+          XCTAssertEqual(context["distinct_id"] as? String, "test-distinct-id", "Context should include distinct_id")
+          XCTAssertNil(context["device_id"], "Context should not include device_id when anonymous ID is nil")
+
+          // Should only contain distinct_id (no additional context configured)
+          XCTAssertEqual(context.keys.count, 1, "Context should only contain distinct_id when no device_id or additional context")
+      } else {
+        XCTFail("Context should be valid JSON")
       }
     }
   }

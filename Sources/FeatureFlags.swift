@@ -33,10 +33,14 @@ struct AnyCodable: Decodable {
 public struct MixpanelFlagVariant: Decodable {
   public let key: String  // Corresponds to 'variant_key' from API
   public let value: Any?  // Corresponds to 'variant_value' from API
+  public let isExperimentActive: Bool? // Corresponds to 'is_experiment_active' from API
+  public let isQATester: Bool? // Corresponds to 'is_qa_tester' from API
 
   enum CodingKeys: String, CodingKey {
     case key = "variant_key"
     case value = "variant_value"
+    case isExperimentActive = "is_experiment_active"
+    case isQATester = "is_qa_tester"
   }
 
   public init(from decoder: Decoder) throws {
@@ -49,16 +53,22 @@ public struct MixpanelFlagVariant: Decodable {
     // If the value is an unsupported type, AnyCodable throws.
     let anyCodableValue = try container.decode(AnyCodable.self, forKey: .value)
     value = anyCodableValue.value  // Extract the underlying Any? value
+
+    // Decode optional boolean fields
+    isExperimentActive = try container.decodeIfPresent(Bool.self, forKey: .isExperimentActive)
+    isQATester = try container.decodeIfPresent(Bool.self, forKey: .isQATester)
   }
 
   // Helper initializer with fallbacks, value defaults to key if nil
-  public init(key: String = "", value: Any? = nil) {
+  public init(key: String = "", value: Any? = nil, isExperimentActive: Bool? = nil, isQATester: Bool? = nil) {
     self.key = key
     if let value = value {
       self.value = value
     } else {
       self.value = key
     }
+    self.isExperimentActive = isExperimentActive
+    self.isQATester = isQATester
   }
 }
 
@@ -568,6 +578,13 @@ class FeatureFlagManager: Network, MixpanelFlags {
     }
     if let fetchLatencyMs = fetchLatencyMs {
       properties["fetchLatencyMs"] = fetchLatencyMs
+    }
+
+    if let isExperimentActive = variant.isExperimentActive {
+      properties["isExperimentActive"] = isExperimentActive
+    }
+    if let isQATester = variant.isQATester {
+      properties["isQATester"] = isQATester
     }
 
     // Dispatch delegate call asynchronously to main thread for safety

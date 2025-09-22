@@ -882,6 +882,56 @@ class FeatureFlagManagerTests: XCTestCase {
     let missingFieldResult = parseResponse(missingFieldJSON)
     XCTAssertNotNil(missingFieldResult, "Parser should handle missing flags field")
     XCTAssertNil(missingFieldResult?.flags, "Flags should be nil when field is missing")
+
+    let optionalExperimentPropertiesJSON = """
+      {
+          "flags": {
+              "active_experiment_flag": {
+                  "variant_key": "A",
+                  "variant_value": "A",
+                  "experiment_id": "447db52b-ec4a-4186-8d89-f9ba7bc7d7dd",
+                  "is_experiment_active": true,
+                  "is_qa_tester": false
+              },
+              "experiment_flag_for_qa_user": {
+                  "variant_key": "B",
+                  "variant_value": "B",
+                  "experiment_id": "447db52b-ec4a-4186-8d89-f9ba7bc7d7dd",
+                  "is_experiment_active": false,
+                  "is_qa_tester": true
+              },
+              "flag_with_no_optionals": {
+                  "variant_key": "C",
+                  "variant_value": "C"
+              }
+          }
+      }
+      """.data(using: .utf8)!
+
+    let experimentResult = parseResponse(optionalExperimentPropertiesJSON)
+    XCTAssertNotNil(experimentResult)
+    XCTAssertEqual(experimentResult?.flags?.count, 3)
+
+    let activeFlag = experimentResult?.flags?["active_experiment_flag"]
+    XCTAssertEqual(activeFlag?.key, "A")
+    XCTAssertEqual(activeFlag?.value as? String, "A")
+    XCTAssertEqual(activeFlag?.experimentID, "447db52b-ec4a-4186-8d89-f9ba7bc7d7dd")
+    XCTAssertEqual(activeFlag?.isExperimentActive, true)
+    XCTAssertEqual(activeFlag?.isQATester, false)
+
+    let qaFlag = experimentResult?.flags?["experiment_flag_for_qa_user"]
+    XCTAssertEqual(qaFlag?.key, "B")
+    XCTAssertEqual(qaFlag?.value as? String, "B")
+    XCTAssertEqual(qaFlag?.experimentID, "447db52b-ec4a-4186-8d89-f9ba7bc7d7dd")
+    XCTAssertEqual(qaFlag?.isExperimentActive, false)
+    XCTAssertEqual(qaFlag?.isQATester, true)
+
+    let minimalFlag = experimentResult?.flags?["flag_with_no_optionals"]
+    XCTAssertEqual(minimalFlag?.key, "C")
+    XCTAssertEqual(minimalFlag?.value as? String, "C")
+    XCTAssertNil(minimalFlag?.experimentID)
+    XCTAssertNil(minimalFlag?.isExperimentActive)
+    XCTAssertNil(minimalFlag?.isQATester)
   }
 
   // --- Delegate Error Handling Tests ---
@@ -1256,6 +1306,23 @@ class FeatureFlagManagerTests: XCTestCase {
       XCTAssertEqual(
         props["fetchLatencyMs"] as? Int, 150, "Event \(index) should have expected latency")
     }
+  }
+
+  func testTrackingIncludesOptionalProperties() {
+    // Set up flags with experiment properties
+    let flagsWithExperiment: [String: MixpanelFlagVariant] = [
+      "experiment_flag": MixpanelFlagVariant(key: "variant_a", value: true, isExperimentActive: true, isQATester: false, experimentID: "exp_123")
+    ]
+    simulateFetchSuccess(flags: flagsWithExperiment)
+
+    mockDelegate.trackExpectation = XCTestExpectation(description: "Track with experiment properties")
+    _ = manager.getVariantSync("experiment_flag", fallback: defaultFallback)
+    wait(for: [mockDelegate.trackExpectation!], timeout: 1.0)
+
+    let props = mockDelegate.trackedEvents[0].properties!
+    XCTAssertEqual(props["experimentID"] as? String, "exp_123")
+    XCTAssertEqual(props["isExperimentActive"] as? Bool, true)
+    XCTAssertEqual(props["isQATester"] as? Bool, false)
   }
 
   // MARK: - Timing Properties Sanity Tests

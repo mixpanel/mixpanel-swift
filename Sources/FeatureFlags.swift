@@ -585,13 +585,13 @@ class FeatureFlagManager: Network, MixpanelFlags {
     }
 
     if let experimentID = variant.experimentID {
-      properties["experimentID"] = experimentID
+      properties["$experiment_id"] = experimentID
     }
     if let isExperimentActive = variant.isExperimentActive {
-      properties["isExperimentActive"] = isExperimentActive
+      properties["$is_experiment_active"] = isExperimentActive
     }
     if let isQATester = variant.isQATester {
-      properties["isQATester"] = isQATester
+      properties["$is_qa_tester"] = isQATester
     }
 
     // Dispatch delegate call asynchronously to main thread for safety

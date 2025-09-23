@@ -1320,9 +1320,9 @@ class FeatureFlagManagerTests: XCTestCase {
     wait(for: [mockDelegate.trackExpectation!], timeout: 1.0)
 
     let props = mockDelegate.trackedEvents[0].properties!
-    XCTAssertEqual(props["experimentID"] as? String, "exp_123")
-    XCTAssertEqual(props["isExperimentActive"] as? Bool, true)
-    XCTAssertEqual(props["isQATester"] as? Bool, false)
+    XCTAssertEqual(props["$experiment_id"] as? String, "exp_123")
+    XCTAssertEqual(props["$is_experiment_active"] as? Bool, true)
+    XCTAssertEqual(props["$is_qa_tester"] as? Bool, false)
   }
 
   // MARK: - Timing Properties Sanity Tests

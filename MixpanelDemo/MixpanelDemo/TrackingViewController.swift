@@ -15,7 +15,8 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
   var tableViewItems = [
     "Track w/o Properties",
     "Track w Properties",
-    "Time Event 5secs",
+    "Time Event 5secs with name",
+    "Time Event 5secs with ID",
     "Clear Timed Events",
     "Get Current SuperProperties",
     "Clear SuperProperties",
@@ -57,22 +58,30 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
       Mixpanel.mainInstance().track(event: ev, properties: p)
       descStr = "Event: \"\(ev)\"\n Properties: \(p)"
     case 2:
-      let ev = "Timed Event"
+      let ev = "Timed Event with name"
       Mixpanel.mainInstance().time(event: ev)
       DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
         Mixpanel.mainInstance().track(event: ev)
       }
       descStr = "Timed Event: \"\(ev)\""
     case 3:
+      let evID = UUID()
+      let ev = "Timed Event with id"
+      Mixpanel.mainInstance().time(timedEventID: evID)
+      DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+        Mixpanel.mainInstance().track(event: ev, timedEventID: evID)
+      }
+      descStr = "Timed Event: \"\(ev)\""
+    case 4:
       Mixpanel.mainInstance().clearTimedEvents()
       descStr = "Timed Events Cleared"
-    case 4:
+    case 5:
       descStr = "Super Properties:\n"
       descStr += "\(Mixpanel.mainInstance().currentSuperProperties())"
-    case 5:
+    case 6:
       Mixpanel.mainInstance().clearSuperProperties()
       descStr = "Cleared Super Properties"
-    case 6:
+    case 7:
       let p: Properties = [
         "Super Property 1": 1,
         "Super Property 2": "p2",
@@ -85,15 +94,15 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
       ]
       Mixpanel.mainInstance().registerSuperProperties(p)
       descStr = "Properties: \(p)"
-    case 7:
+    case 8:
       let p = ["Super Property 1": 2.3]
       Mixpanel.mainInstance().registerSuperPropertiesOnce(p)
       descStr = "Properties: \(p)"
-    case 8:
+    case 9:
       let p = ["Super Property 1": 1.2]
       Mixpanel.mainInstance().registerSuperPropertiesOnce(p, defaultValue: 2.3)
       descStr = "Properties: \(p) with Default Value: 2.3"
-    case 9:
+    case 10:
       let p = "Super Property 2"
       Mixpanel.mainInstance().unregisterSuperProperty(p)
       descStr = "Properties: \(p)"

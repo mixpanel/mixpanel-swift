@@ -1,0 +1,78 @@
+name: Claude Code
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+
+jobs:
+  claude:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude'))
+    runs-on: ubuntu-24.04-mxpnl-large
+    timeout-minutes: 59
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    env:
+      # Fix standalone module compatibility with GitHub Actions
+      ANALYTICS_DIR: ${{ github.workspace }}/..
+
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2.1.4
+        with:
+          # https://github.com/organizations/mixpanel/settings/apps/mixpanel-claude-code-agent
+          app-id: 2102903
+          private-key: ${{ secrets.CLAUDE_CODE_AGENT_PRIVATE_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: ./.github/actions/setup-gcp
+        with:
+          # TODO: use claude-code-agent svc account
+          service_account: github-copilot-coding-agent@mixpanel-tools.iam.gserviceaccount.com
+
+      # TODO: this can be removed if we get rid of this onboarding-components dependency
+      # https://github.com/mixpanel/analytics/blob/41baf08aceccf3ffa4a12df3d3c1d1f85ab8b276/package.json#L394
+      - name: set git config to use token for npm
+        run: |
+          git config --global url."https://x-access-token:${{ steps.app-token.outputs.token }}@github.com".insteadOf "https://github.com"
+      - name: Enable tools/bin
+        run: echo "${GITHUB_WORKSPACE}/tools/bin" >> "$GITHUB_PATH"
+
+      - uses: ./.github/actions/setup-node
+      - uses: ./.github/actions/setup-python
+
+      - name: Generate OTEL resource attributes
+        id: otel-attrs
+        run: |
+          attrs=$(./sre/gcpdevbox/scripts/otel-user-attributes.sh)
+          echo "otel_attributes=$attrs" >> "$GITHUB_OUTPUT"
+      - uses: anthropics/claude-code-action@777ffcbfc9d2e2b07f3cfec41b7c7eadedd1f0dc # v1.0.12
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
+          trigger_phrase: '@claude'
+          use_vertex: 'true'
+          claude_args: '--max-turns 10'
+          settings: '.claude/settings.json'
+          experimental_allowed_domains: >-
+            github.com
+            mixpanel.com
+        env:
+          ANTHROPIC_VERTEX_PROJECT_ID: mixpanel-claude-code
+          CLOUD_ML_REGION: us-east5
+          OTEL_RESOURCE_ATTRIBUTES: ${{ steps.otel-attrs.outputs.otel_attributes }}

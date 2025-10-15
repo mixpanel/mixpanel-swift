@@ -1,0 +1,142 @@
+---
+description: Release process and version management
+alwaysApply: false
+---
+
+# Release Process
+
+## Version Update Locations
+When updating the SDK version, modify these files:
+1. `Mixpanel-swift.podspec` - Update `s.version`
+2. `Info.plist` - Update `CFBundleShortVersionString`
+3. `Sources/AutomaticProperties.swift` - Update `$lib_version` constant
+
+## Automated Release
+```bash
+# Full release process (recommended)
+python scripts/release.py --old 5.0.0 --new 5.1.0
+
+# This script will:
+# 1. Update version in all required files
+# 2. Generate updated documentation
+# 3. Commit changes
+# 4. Create git tag
+# 5. Push to CocoaPods trunk
+```
+
+## Manual Release Steps
+
+### 1. Update Version Numbers
+```swift
+// In AutomaticProperties.swift
+return [
+    "$lib": "swift",
+    "$lib_version": "5.1.0",  // Update this
+    "$os": currentOS(),
+    // ...
+]
+```
+
+### 2. Update Changelog
+```markdown
+## [5.1.0] - 2024-01-15
+### Added
+- New feature description
+
+### Changed
+- Updated behavior description
+
+### Fixed
+- Bug fix description
+```
+
+### 3. Generate Documentation
+```bash
+./scripts/generate_docs.sh
+git add docs/
+git commit -m "Update documentation for v5.1.0"
+```
+
+### 4. Create Release Tag
+```bash
+git tag -a v5.1.0 -m "Version 5.1.0"
+git push origin v5.1.0
+```
+
+### 5. Publish to Package Managers
+
+#### CocoaPods
+```bash
+# Validate first
+pod lib lint Mixpanel-swift.podspec
+
+# Push to trunk
+pod trunk push Mixpanel-swift.podspec
+```
+
+#### Carthage
+```bash
+# Build and verify
+carthage build --platform iOS,macOS,tvOS,watchOS --no-skip-current
+carthage archive Mixpanel
+```
+
+#### Swift Package Manager
+- No action needed, uses git tags
+
+## Pre-Release Checklist
+- [ ] All tests pass on all platforms
+- [ ] Documentation is updated
+- [ ] CHANGELOG.md is updated
+- [ ] Version numbers are consistent
+- [ ] No compiler warnings
+- [ ] Demo apps work correctly
+- [ ] API compatibility maintained
+
+## Validation Commands
+```bash
+# Run all platform tests
+for scheme in MixpanelDemo MixpanelDemoMac MixpanelDemoTV; do
+    xcodebuild test -scheme $scheme
+done
+
+# Lint the code
+swiftlint
+
+# Validate podspec
+pod lib lint
+
+# Check for API breaks
+swift api-digester -diagnose-sdk \
+    -module Mixpanel \
+    -o old-api.json \
+    -new-swift-sdk new-api.json
+```
+
+## Semantic Versioning
+Follow semver.org:
+- **Major** (X.0.0): Breaking API changes
+- **Minor** (0.X.0): New features, backward compatible
+- **Patch** (0.0.X): Bug fixes only
+
+## Post-Release
+1. Update GitHub releases page
+2. Announce in changelog/blog
+3. Update documentation site
+4. Monitor for issues
+
+## Hotfix Process
+```bash
+# Create hotfix branch from tag
+git checkout -b hotfix/5.1.1 v5.1.0
+
+# Make fixes and test thoroughly
+# Update version to 5.1.1
+
+# Merge to main and tag
+git checkout main
+git merge hotfix/5.1.1
+git tag -a v5.1.1 -m "Hotfix 5.1.1"
+
+# Release as normal
+```

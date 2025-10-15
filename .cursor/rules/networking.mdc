@@ -1,0 +1,146 @@
+---
+description: Network layer patterns and API communication
+globs: ["**/Network.swift", "**/Flush*.swift", "**/FlushRequest.swift"]
+alwaysApply: false
+---
+
+# Networking Guidelines
+
+## API Endpoints
+```swift
+struct APIConstants {
+    static let trackEndpoint = "https://api.mixpanel.com/track"
+    static let engageEndpoint = "https://api.mixpanel.com/engage"
+    static let groupsEndpoint = "https://api.mixpanel.com/groups"
+    static let decideEndpoint = "https://api.mixpanel.com/decide"
+}
+```
+
+## Request Construction
+```swift
+// Build form-encoded request
+var request = URLRequest(url: endpoint)
+request.httpMethod = "POST"
+request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+
+// Encode data
+let jsonData = try JSONSerialization.data(withJSONObject: events)
+let base64String = jsonData.base64EncodedString()
+
+// Add gzip if enabled
+if useGzip {
+    let compressedData = try jsonData.gzipped()
+    let compressedBase64 = compressedData.base64EncodedString()
+    request.setValue("gzip", forHTTPHeaderField: "Content-Encoding")
+    request.httpBody = "data=\(compressedBase64)".data(using: .utf8)
+} else {
+    request.httpBody = "data=\(base64String)".data(using: .utf8)
+}
+```
+
+## Batch Processing
+```swift
+// Maximum 50 events per batch
+let batchSize = min(events.count, 50)
+let batch = Array(events.prefix(batchSize))
+
+// Calculate payload size
+let payloadSize = batch.reduce(0) { sum, event in
+    sum + (try? JSONSerialization.data(withJSONObject: event))?.count ?? 0
+}
+
+// Split if too large (>1MB recommended)
+if payloadSize > 1_000_000 {
+    let midPoint = batch.count / 2
+    sendBatch(Array(batch.prefix(midPoint)))
+    sendBatch(Array(batch.suffix(from: midPoint)))
+}
+```
+
+## Network Queue Usage
+```swift
+networkQueue.async { [weak self] in
+    guard let self = self else { return }
+    
+    let request = self.buildRequest(for: batch)
+    
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            self.handleNetworkError(error, batch: batch)
+        } else if let httpResponse = response as? HTTPURLResponse {
+            self.handleResponse(httpResponse, data: data, batch: batch)
+        }
+    }
+    
+    task.resume()
+}
+```
+
+## Error Handling & Retry Logic
+```swift
+func handleResponse(_ response: HTTPURLResponse, data: Data?, batch: [Event]) {
+    switch response.statusCode {
+    case 200:
+        // Success - remove from queue
+        removeFromQueue(batch)
+        
+    case 400:
+        // Client error - don't retry
+        Logger.error(message: "Invalid request: \(parseError(data))")
+        removeFromQueue(batch)
+        
+    case 500, 502, 503, 504:
+        // Server error - retry with backoff
+        retryWithBackoff(batch)
+        
+    default:
+        Logger.warning(message: "Unexpected status: \(response.statusCode)")
+    }
+}
+
+func retryWithBackoff(_ batch: [Event]) {
+    let retryCount = getRetryCount(for: batch)
+    let delay = min(pow(2.0, Double(retryCount)), 60.0) // Max 60s
+    
+    DispatchQueue.global().asyncAfter(deadline: .now() + delay) { [weak self] in
+        self?.sendBatch(batch)
+    }
+}
+```
+
+## Flush Behavior
+```swift
+// Automatic flush triggers
+- Timer-based (default 60 seconds)
+- App entering background (if flushOnBackground = true)
+- Reaching batch size limit
+- Manual flush() call
+
+// Flush implementation
+func flush(completion: (() -> Void)? = nil) {
+    flushQueue.async { [weak self] in
+        self?.flushEventsQueue()
+        self?.flushPeopleQueue()
+        self?.flushGroupsQueue()
+        
+        DispatchQueue.main.async {
+            completion?()
+        }
+    }
+}
+```
+
+## Response Parsing
+```swift
+// Parse JSON response
+if let data = data,
+   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+   let status = json["status"] as? Int {
+    
+    if status == 1 {
+        // Success
+    } else if let error = json["error"] as? String {
+        Logger.error(message: "API error: \(error)")
+    }
+}
+```

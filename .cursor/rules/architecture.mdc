@@ -1,0 +1,54 @@
+---
+description: Core architecture and flow patterns for Mixpanel Swift SDK
+alwaysApply: true
+---
+
+# Architecture Overview
+
+## Core Components Flow
+```
+Mixpanel (static entry) → MixpanelManager (singleton) → MixpanelInstance → Core Components
+                                                                        ↓
+                                                        MixpanelPersistence (SQLite)
+                                                                        ↓
+                                                                  Flush → Network
+```
+
+## Component Responsibilities
+- **Mixpanel**: Static entry point, manages default instance
+- **MixpanelManager**: Singleton managing multiple instances
+- **MixpanelInstance**: Core SDK functionality per project token
+- **Track**: Event tracking operations
+- **People**: User profile operations
+- **Groups**: Group analytics operations
+- **Flush**: Batch processing and sending
+- **Network**: API communication
+- **MixpanelPersistence**: SQLite storage layer
+- **FeatureFlags**: Feature flag management
+
+## Key Multi-File Patterns
+
+### Event Tracking Flow
+1. User calls `track()` in `Mixpanel.swift`
+2. Routes through `MixpanelInstance.swift` to `Track.swift`
+3. Persisted via `MixpanelPersistence.swift` (SQLite operations)
+4. Batched and sent by `Flush.swift` through `Network.swift`
+
+### Threading Model
+- **ReadWriteLock**: Custom read-write lock using concurrent dispatch queue
+- **trackingQueue**: Serial queue for event operations (QoS: .utility)
+- **networkQueue**: Serial queue for network operations (QoS: .utility)
+- All shared state protected by ReadWriteLock
+
+## Swift Conventions
+- Use trailing closures for completion handlers
+- Use guard statements for early returns
+- Prefix internal properties with underscore (_)
+- Use property observers (didSet) for reactive updates
+- Mark completion handlers as @escaping when stored
+
+## Error Handling
+- Log errors via MixpanelLogger, don't throw
+- Use MPAssert for debug assertions
+- Fail gracefully with default values
+- Return discardable results for fluent API

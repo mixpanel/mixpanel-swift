@@ -1,0 +1,232 @@
+---
+description: Common implementation patterns and workflows for SDK development
+alwaysApply: false
+---
+
+# Common SDK Development Workflows
+
+## Adding a New Event Property
+
+### 1. Update Automatic Properties
+```swift
+// In AutomaticProperties.swift
+func collectAutomaticProperties() -> InternalProperties {
+    var properties: InternalProperties = [
+        // Existing properties...
+        "$new_property": getNewPropertyValue()  // Add new property
+    ]
+    return properties
+}
+
+private func getNewPropertyValue() -> MixpanelType {
+    // Implementation
+    return value
+}
+```
+
+### 2. Add to Constants if Reserved
+```swift
+// In Constants.swift
+struct ReservedProperties {
+    static let newProperty = "$new_property"
+}
+```
+
+### 3. Add Validation
+```swift
+// In Track.swift
+func validateEventProperties(_ properties: Properties) {
+    assertPropertyTypes(properties)
+    // Add specific validation if needed
+}
+```
+
+### 4. Write Tests
+```swift
+func testNewProperty() {
+    let instance = MixpanelInstance(apiToken: testToken)
+    instance.track(event: "Test")
+    waitForTrackingQueue(instance)
+    
+    let event = instance.eventsQueue.first
+    XCTAssertNotNil(event?["$new_property"])
+}
+```
+
+## Implementing a New API Endpoint
+
+### 1. Add Endpoint Constant
+```swift
+// In Network.swift or Constants
+struct APIConstants {
+    static let newEndpoint = "\(baseURL)/new_endpoint"
+}
+```
+
+### 2. Create Request Builder
+```swift
+func buildNewEndpointRequest(data: [String: Any]) -> URLRequest? {
+    guard let url = URL(string: APIConstants.newEndpoint) else { return nil }
+    
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    
+    do {
+        request.httpBody = try JSONSerialization.data(withJSONObject: data)
+        return request
+    } catch {
+        Logger.error(message: "Failed to serialize request: \(error)")
+        return nil
+    }
+}
+```
+
+### 3. Add to Network Layer
+```swift
+func callNewEndpoint(data: [String: Any], completion: @escaping (Bool) -> Void) {
+    networkQueue.async { [weak self] in
+        guard let request = self?.buildNewEndpointRequest(data: data) else {
+            completion(false)
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            let success = self?.handleResponse(data, response, error) ?? false
+            completion(success)
+        }
+        task.resume()
+    }
+}
+```
+
+## Fixing Thread Safety Issues
+
+### 1. Identify Shared State
+```swift
+// Before (unsafe)
+class Component {
+    var sharedData: [String: Any] = [:]
+    
+    func updateData(key: String, value: Any) {
+        sharedData[key] = value  // Race condition!
+    }
+}
+```
+
+### 2. Add ReadWriteLock
+```swift
+// After (thread-safe)
+class Component {
+    private let readWriteLock = ReadWriteLock(label: "com.mixpanel.component")
+    private var _sharedData: [String: Any] = [:]
+    
+    var sharedData: [String: Any] {
+        return readWriteLock.read { _sharedData }
+    }
+    
+    func updateData(key: String, value: Any) {
+        readWriteLock.write {
+            _sharedData[key] = value
+        }
+    }
+}
+```
+
+### 3. Test Concurrent Access
+```swift
+func testThreadSafety() {
+    let expectation = XCTestExpectation(description: "Concurrent access")
+    expectation.expectedFulfillmentCount = 100
+    
+    let component = Component()
+    
+    DispatchQueue.concurrentPerform(iterations: 100) { index in
+        if index % 2 == 0 {
+            component.updateData(key: "key\(index)", value: index)
+        } else {
+            _ = component.sharedData
+        }
+        expectation.fulfill()
+    }
+    
+    wait(for: [expectation], timeout: 5.0)
+}
+```
+
+## Database Migration
+
+### 1. Check Current Version
+```swift
+func getDatabaseVersion() -> Int {
+    // Read from metadata table or pragma
+    return currentVersion
+}
+```
+
+### 2. Implement Migration
+```swift
+func migrateDatabase(from oldVersion: Int, to newVersion: Int) {
+    if oldVersion < 2 {
+        migrateToV2()
+    }
+    if oldVersion < 3 {
+        migrateToV3()
+    }
+    updateDatabaseVersion(newVersion)
+}
+
+private func migrateToV2() {
+    // Add new column
+    executeSQL("ALTER TABLE events ADD COLUMN retry_count INTEGER DEFAULT 0")
+}
+```
+
+### 3. Handle Migration Errors
+```swift
+do {
+    try migrateDatabase(from: 1, to: 3)
+} catch {
+    Logger.error(message: "Migration failed: \(error)")
+    // Fallback: recreate database
+    recreateDatabase()
+}
+```
+
+## Performance Optimization
+
+### 1. Profile Current Performance
+```swift
+func measureEventTracking() {
+    measure {
+        for i in 0..<1000 {
+            instance.track(event: "Event \(i)")
+        }
+        flushAndWaitForTrackingQueue(instance)
+    }
+}
+```
+
+### 2. Identify Bottlenecks
+- Use Instruments for profiling
+- Check Time Profiler for hot paths
+- Monitor Allocations for memory usage
+
+### 3. Optimize Critical Paths
+```swift
+// Before: Creating many temporary objects
+func processEvents(_ events: [Event]) {
+    for event in events {
+        let processed = processEvent(event)
+        let encoded = encode(processed)
+        save(encoded)
+    }
+}
+
+// After: Batch processing
+func processEvents(_ events: [Event]) {
+    let processed = events.map { processEvent($0) }
+    let encoded = batchEncode(processed)
+    batchSave(encoded)
+}
+```

@@ -1,0 +1,94 @@
+---
+description: Public API design guidelines and patterns
+globs: ["**/Mixpanel.swift", "**/MixpanelInstance.swift", "**/People.swift", "**/Group.swift"]
+alwaysApply: false
+---
+
+# Public API Design Guidelines
+
+## Method Design Principles
+```swift
+// Return self or @discardableResult for chaining
+@discardableResult
+public func track(event: String, properties: Properties? = nil) -> Self {
+    // Implementation
+    return self
+}
+
+// Provide sensible defaults
+public func identify(distinctId: String, 
+                    usePeople: Bool = true,
+                    completion: (() -> Void)? = nil)
+
+// Clear parameter names and types
+public func setServerURL(serverURL: String) // Good
+public func setURL(_ u: String) // Bad
+```
+
+## Backward Compatibility
+- NEVER remove or rename public methods
+- Use @available for deprecation:
+```swift
+@available(*, deprecated, message: "Use track(event:properties:) instead")
+public func trackEvent(_ event: String) {
+    track(event: event)
+}
+```
+
+## Documentation Pattern
+```swift
+/// Tracks an event with optional properties.
+///
+/// - Parameters:
+///   - event: The name of the event to track
+///   - properties: Optional properties dictionary conforming to MixpanelType
+/// - Returns: The current instance for method chaining
+///
+/// - Note: Event names are case-sensitive and should follow your naming convention
+///
+/// Example:
+/// ```swift
+/// Mixpanel.mainInstance().track(event: "Sign Up", properties: [
+///     "source": "invite",
+///     "referring_user_id": 12345
+/// ])
+/// ```
+```
+
+## Error Handling in Public API
+- Never throw from public methods
+- Log errors internally
+- Provide completion handlers for async operations:
+```swift
+public func flush(completion: (() -> Void)? = nil) {
+    flushQueue.async { [weak self, completion] in
+        self?.flushEventsQueue()
+        self?.flushPeopleQueue()
+        DispatchQueue.main.async {
+            completion?()
+        }
+    }
+}
+```
+
+## Objective-C Compatibility
+```swift
+// Mark compatible methods
+@objc public func track(event: String)
+
+// Provide type-safe wrappers
+@objc public func trackWithProperties(event: String, properties: [String: Any]) {
+    let validProps = properties.compactMapValues { $0 as? MixpanelType }
+    track(event: event, properties: validProps)
+}
+```
+
+## Fluent Interface Pattern
+Enable method chaining for better developer experience:
+```swift
+Mixpanel.mainInstance()
+    .identify(distinctId: "user123")
+    .people.set(properties: ["name": "John"])
+    .track(event: "Profile Updated")
+    .flush()
+```

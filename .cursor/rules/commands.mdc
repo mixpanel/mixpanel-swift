@@ -1,0 +1,136 @@
+---
+description: Essential build, test, and development commands
+alwaysApply: false
+---
+
+# Build & Development Commands
+
+## Building the SDK
+
+### All Platforms
+```bash
+# iOS
+xcodebuild -scheme Mixpanel -destination 'generic/platform=iOS'
+
+# macOS
+xcodebuild -scheme Mixpanel_macOS
+
+# tvOS
+xcodebuild -scheme Mixpanel_tvOS -destination 'generic/platform=tvOS'
+
+# watchOS
+xcodebuild -scheme Mixpanel_watchOS -destination 'generic/platform=watchOS'
+
+# Carthage build (all platforms)
+./scripts/carthage.sh
+```
+
+### Swift Package Manager
+```bash
+swift build
+swift test
+```
+
+## Running Tests
+
+### Platform-Specific Tests
+```bash
+# iOS Simulator
+xcodebuild test -scheme MixpanelDemo -destination 'platform=iOS Simulator,name=iPhone 15'
+
+# macOS
+xcodebuild test -scheme MixpanelDemoMac
+
+# tvOS Simulator
+xcodebuild test -scheme MixpanelDemoTV -destination 'platform=tvOS Simulator,name=Apple TV'
+```
+
+### Specific Test Execution
+```bash
+# Run specific test class
+xcodebuild test -scheme MixpanelDemo \
+  -destination 'platform=iOS Simulator,name=iPhone 15' \
+  -only-testing:MixpanelDemoTests/MixpanelPeopleTests
+
+# Run specific test method
+xcodebuild test -scheme MixpanelDemo \
+  -destination 'platform=iOS Simulator,name=iPhone 15' \
+  -only-testing:MixpanelDemoTests/MixpanelPeopleTests/testPeopleSet
+
+# With code coverage
+xcodebuild test -scheme MixpanelDemo \
+  -destination 'platform=iOS Simulator,name=iPhone 15' \
+  -enableCodeCoverage YES
+```
+
+## Code Quality
+
+### Linting
+```bash
+# SwiftLint (must be installed: brew install swiftlint)
+swiftlint
+swiftlint autocorrect
+
+# Swift-format (automated via pre-commit hook)
+swift-format --recursive Sources/ --in-place
+swift-format --recursive MixpanelDemo/ --in-place
+```
+
+### Documentation
+```bash
+# Generate API documentation with Jazzy
+./scripts/generate_docs.sh
+
+# Preview docs locally
+open docs/index.html
+```
+
+## Demo Apps
+```bash
+# Run iOS demo
+open MixpanelDemo/MixpanelDemo.xcodeproj
+# Select MixpanelDemo scheme and run
+
+# Run macOS demo
+open MixpanelDemo/MixpanelDemo.xcodeproj
+# Select MixpanelDemoMac scheme and run
+
+# Run tvOS demo
+open MixpanelDemo/MixpanelDemo.xcodeproj
+# Select MixpanelDemoTV scheme and run
+```
+
+## Dependency Management
+
+### CocoaPods
+```bash
+# Validate podspec
+pod lib lint Mixpanel-swift.podspec
+
+# Install in demo
+cd MixpanelDemo
+pod install
+```
+
+### Carthage
+```bash
+# Build framework
+carthage build --platform iOS,macOS,tvOS,watchOS
+
+# Update dependencies
+carthage update --platform iOS
+```
+
+## Debugging
+```bash
+# Enable verbose logging
+# Set in code: Mixpanel.mainInstance().loggingEnabled = true
+
+# View SQLite database (macOS)
+sqlite3 ~/Library/Developer/CoreSimulator/Devices/[DEVICE_ID]/data/Containers/Data/Application/[APP_ID]/Library/mixpanel-[TOKEN].sqlite
+
+# Common queries
+.tables
+SELECT COUNT(*) FROM events;
+SELECT * FROM events LIMIT 10;
+```

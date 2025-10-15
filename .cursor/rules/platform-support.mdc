@@ -1,0 +1,166 @@
+---
+description: Platform-specific implementation patterns and considerations
+alwaysApply: false
+---
+
+# Platform Support Guidelines
+
+## Supported Platforms
+- iOS 11.0+
+- tvOS 11.0+
+- macOS 10.13+
+- watchOS 4.0+
+
+## Platform Detection
+```swift
+#if os(iOS)
+    // iOS-specific code
+#elseif os(tvOS)
+    // tvOS-specific code
+#elseif os(OSX)
+    // macOS-specific code
+#elseif os(watchOS)
+    // watchOS-specific code
+#endif
+
+// Combined checks
+#if !os(OSX)
+    // Mobile platforms (iOS, tvOS, watchOS)
+#endif
+
+// App extension check
+if Bundle.main.bundlePath.hasSuffix(".appex") {
+    // Running in app extension
+}
+```
+
+## Automatic Events Support
+```swift
+// Only available on iOS
+#if os(iOS)
+if trackAutomaticEvents && !isiOSAppExtension() {
+    automaticEvents.initializeAutomaticEvents()
+}
+#endif
+
+// Automatic events include:
+- $ae_first_open
+- $ae_updated
+- $ae_session
+- $ae_session_length
+```
+
+## UI Framework Differences
+```swift
+#if os(iOS) || os(tvOS)
+import UIKit
+typealias MPColor = UIColor
+typealias MPViewController = UIViewController
+#elseif os(OSX)
+import Cocoa
+typealias MPColor = NSColor
+typealias MPViewController = NSViewController
+#endif
+```
+
+## App Lifecycle Handling
+```swift
+#if os(iOS) || os(tvOS)
+// Background task handling
+var backgroundTaskId = UIBackgroundTaskIdentifier.invalid
+
+func startBackgroundTask() {
+    backgroundTaskId = UIApplication.shared.beginBackgroundTask {
+        self.endBackgroundTask()
+    }
+}
+#endif
+
+// Notification observers
+#if os(iOS)
+NotificationCenter.default.addObserver(
+    self,
+    selector: #selector(applicationDidEnterBackground),
+    name: UIApplication.didEnterBackgroundNotification,
+    object: nil
+)
+#elseif os(OSX)
+NotificationCenter.default.addObserver(
+    self,
+    selector: #selector(applicationWillTerminate),
+    name: NSApplication.willTerminateNotification,
+    object: nil
+)
+#endif
+```
+
+## File System Access
+```swift
+// iOS/tvOS/watchOS use sandboxed paths
+#if os(iOS) || os(tvOS) || os(watchOS)
+let documentsPath = NSSearchPathForDirectoriesInDomains(
+    .documentDirectory,
+    .userDomainMask,
+    true
+).first!
+#elseif os(OSX)
+// macOS may have different permissions
+let applicationSupport = FileManager.default.urls(
+    for: .applicationSupportDirectory,
+    in: .userDomainMask
+).first!
+let appBundleID = Bundle.main.bundleIdentifier ?? "com.mixpanel"
+let appDirectory = applicationSupport.appendingPathComponent(appBundleID)
+#endif
+```
+
+## Network Configuration
+```swift
+// watchOS limitations
+#if os(watchOS)
+// Limited background networking
+// Smaller payload sizes recommended
+let maxBatchSize = 25 // vs 50 for other platforms
+#endif
+
+// tvOS considerations
+#if os(tvOS)
+// No web views available
+// Limited local storage
+// Consider user attention patterns
+#endif
+```
+
+## Testing Considerations
+```swift
+// Platform-specific test setup
+#if os(iOS)
+let testDestination = "platform=iOS Simulator,name=iPhone 15"
+#elseif os(tvOS)
+let testDestination = "platform=tvOS Simulator,name=Apple TV"
+#elseif os(OSX)
+let testDestination = "platform=macOS"
+#endif
+
+// Skip tests on unsupported platforms
+#if !os(iOS)
+func testAutomaticEvents() {
+    XCTSkip("Automatic events only supported on iOS")
+}
+#endif
+```
+
+## Memory Management
+```swift
+#if os(watchOS)
+// More aggressive memory limits
+let maxQueueSize = 100 // vs 500 for other platforms
+let flushInterval = 30.0 // vs 60.0 default
+#endif
+```
+
+## Platform-Specific Features
+- **iOS**: Full feature set including automatic events
+- **macOS**: No automatic events by default, different UI lifecycle
+- **tvOS**: Limited input methods, consider focus engine
+- **watchOS**: Limited resources, shorter session times

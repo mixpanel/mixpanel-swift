@@ -1,0 +1,110 @@
+---
+description: Database persistence and storage patterns
+globs: ["**/MixpanelPersistence.swift", "**/MPDB.swift"]
+alwaysApply: false
+---
+
+# Persistence Layer Guidelines
+
+## SQLite Operations
+```swift
+// Always use parameterized queries
+let insertSQL = """
+    INSERT INTO \(tableName) (TOKEN, DATA, UUID, METADATA)
+    VALUES (?, ?, ?, ?)
+"""
+sqlite3_bind_text(statement, 1, token, -1, SQLITE_TRANSIENT)
+
+// Handle errors gracefully
+if sqlite3_prepare_v2(db, sql, -1, &statement, nil) != SQLITE_OK {
+    Logger.error(message: "Failed to prepare statement: \(errorMessage)")
+    return []
+}
+
+// Always finalize statements
+defer { sqlite3_finalize(statement) }
+```
+
+## Entity Storage Patterns
+```swift
+// Saving entities
+func saveEntity(_ entity: InternalProperties, 
+                type: EntityType,
+                flag: Int32 = 0) {
+    let data = JSONHandler.encodeAPIData(entity.apiProperties())
+    let metadata = MixpanelPersistenceMetadata(
+        flag: flag,
+        retryCount: 0
+    )
+    persistence.saveEntity(entity, type: type, data: data, metadata: metadata)
+}
+
+// Loading entities
+func loadEntitiesInBatch(type: EntityType, limit: Int = 50) -> [InternalProperties] {
+    let entities = persistence.loadEntitiesInBatch(type: type, limit: limit)
+    return entities.compactMap { data in
+        JSONHandler.decodeAPIData(data) as? InternalProperties
+    }
+}
+```
+
+## UserDefaults Usage
+Store lightweight metadata only:
+```swift
+// Identifiers
+static let distinctId = "mixpanel-\(token)-distinctId"
+static let anonymousId = "mixpanel-\(token)-anonymousId"
+static let userId = "mixpanel-\(token)-userId"
+static let alias = "mixpanel-\(token)-alias"
+
+// Collections
+static let superProperties = "mixpanel-\(token)-superProperties"
+static let timedEvents = "mixpanel-\(token)-timedEvents"
+static let optOutStatus = "mixpanel-\(token)-optOutStatus"
+```
+
+## Batch Operations
+```swift
+// Process in batches of 50
+let batchSize = 50
+var processedCount = 0
+
+while true {
+    let batch = loadEntitiesInBatch(type: .events, limit: batchSize)
+    if batch.isEmpty { break }
+    
+    processBatch(batch)
+    processedCount += batch.count
+}
+```
+
+## Migration Support
+```swift
+// Check and migrate if needed
+if !fileExists(at: databasePath) {
+    migrateFromArchiveIfNeeded()
+}
+
+// Version-based migrations
+let currentVersion = getDatabaseVersion()
+if currentVersion < targetVersion {
+    performMigration(from: currentVersion, to: targetVersion)
+}
+```
+
+## Performance Optimizations
+- Use transactions for bulk operations
+- Index on (TOKEN, UUID) columns
+- Limit batch sizes to prevent memory issues
+- Regular cleanup of old data:
+```swift
+let cutoffDate = Date().addingTimeInterval(-30 * 24 * 60 * 60) // 30 days
+deleteEntitiesOlderThan(cutoffDate)
+```
+
+## Error Recovery
+- Log but don't crash on SQLite errors
+- Return empty results on read failures
+- Skip corrupted entities
+- Implement retry for transient errors
+- Backup critical data before migrations

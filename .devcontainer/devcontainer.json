@@ -1,0 +1,95 @@
+{
+  "name": "Mixpanel Swift SDK Development",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "TZ": "${localEnv:TZ:America/Los_Angeles}"
+    }
+  },
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW",
+    "--security-opt", "seccomp=unconfined"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "swiftlang.swift-vscode",
+        "vknabel.vscode-swiftlint",
+        "vknabel.vscode-swiftformat",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "donjayamanne.githistory",
+        "streetsidesoftware.code-spell-checker",
+        "GitHub.vscode-github-actions",
+        "redhat.vscode-yaml",
+        "ms-vscode.makefile-tools",
+        "hbenl.vscode-test-explorer",
+        "littlefoxteam.vscode-python"
+      ],
+      "settings": {
+        "swift.path": "/usr/bin",
+        "swift.buildArguments": [
+          "-Xswiftc", "-target", "-Xswiftc", "aarch64-unknown-linux-gnu"
+        ],
+        "swift.testArguments": [
+          "--enable-code-coverage"
+        ],
+        "swiftlint.enable": true,
+        "swiftlint.path": "/usr/local/bin/swiftlint",
+        "swiftlint.configFile": ".swiftlint.yml",
+        "swiftformat.enable": true,
+        "swiftformat.path": "/usr/local/bin/swift-format",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "[swift]": {
+          "editor.defaultFormatter": "vknabel.vscode-swiftformat"
+        },
+        "terminal.integrated.fontFamily": "MesloLGS NF, Menlo, Monaco, 'Courier New', monospace",
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+          },
+          "zsh": {
+            "path": "zsh"
+          }
+        },
+        "files.associations": {
+          "*.swift": "swift",
+          "Package.resolved": "json",
+          "*.podspec": "ruby"
+        },
+        "files.exclude": {
+          "**/.build": true,
+          "**/.swiftpm": true,
+          "**/DerivedData": true
+        }
+      }
+    }
+  },
+  "remoteUser": "developer",
+  "mounts": [
+    "source=mixpanel-swift-bashhistory,target=/commandhistory,type=volume",
+    "source=mixpanel-swift-config,target=/home/developer/.claude,type=volume",
+    "source=${localEnv:HOME}/.gitconfig,target=/home/developer/.gitconfig,type=bind,readonly",
+    "source=${localEnv:HOME}/.ssh,target=/home/developer/.ssh,type=bind,readonly"
+  ],
+  "remoteEnv": {
+    "SWIFT_VERSION": "5.9",
+    "CLAUDE_CONFIG_DIR": "/home/developer/.claude",
+    "STARSHIP_CONFIG": "/home/developer/.config/starship.toml",
+    "SWIFTPM_ENABLE_GLOBAL_CACHE": "true"
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": "sudo /usr/local/bin/init-firewall.sh && ~/.local/bin/setup-shell.sh",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+---
+description: MixpanelType protocol and property validation rules
+globs: ["**/Track.swift", "**/People.swift", "**/Group.swift", "**/*Properties*.swift"]
+alwaysApply: false
+---
+
+# Property Type System
+
+## MixpanelType Protocol Conformance
+Valid types that conform to MixpanelType:
+- `String`, `Int`, `UInt`, `Double`, `Float`, `Bool`
+- `[MixpanelType]` (arrays of valid types)
+- `[String: MixpanelType]` (dictionaries with String keys)
+- `Date`, `URL`, `NSNull`
+- `Optional<MixpanelType>` (optionals of valid types)
+
+## Type Validation
+```swift
+// Always validate before use
+assertPropertyTypes(properties)
+
+// Check individual values
+if let validValue = value as? MixpanelType {
+    // Safe to use
+}
+
+// Filter dictionary values
+let validProperties = properties.filter { isValidNestedTypeAndValue($0.value) }
+```
+
+## Type Conversion Patterns
+```swift
+// Convert Any to MixpanelType
+func convertToMixpanelType(_ value: Any) -> MixpanelType? {
+    if let mixpanelValue = value as? MixpanelType {
+        return mixpanelValue
+    }
+    // Handle special cases (e.g., NSNumber)
+    return nil
+}
+
+// Properties typealias
+typealias Properties = [String: MixpanelType]
+```
+
+## Reserved Properties
+Never use these property names:
+- Mixpanel internal: `mp_lib`, `$lib_version`, `$os`, `$os_version`
+- Device info: `$manufacturer`, `$brand`, `$model`
+- Core properties: `time`, `distinct_id`, `$device_id`
+
+## Property Naming Conventions
+- Use snake_case for property names (Mixpanel standard)
+- Prefix internal properties with `$` or `mp_`
+- Keep names under 255 characters
+- Use descriptive, meaningful names
+
+## Validation Example
+```swift
+func track(event: String, properties: Properties? = nil) {
+    var props = properties ?? [:]
+    
+    // Validate all properties
+    assertPropertyTypes(props)
+    
+    // Add automatic properties
+    props.merge(automaticProperties) { (_, new) in new }
+    
+    // Process event
+    processTrackEvent(event, properties: props)
+}
+```

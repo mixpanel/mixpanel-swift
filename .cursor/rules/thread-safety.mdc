@@ -1,0 +1,65 @@
+---
+description: Thread safety patterns and queue management
+globs: ["**/*.swift"]
+alwaysApply: false
+---
+
+# Thread Safety Requirements
+
+## Always use ReadWriteLock for shared state
+```swift
+// Reading a property
+var value: String {
+    return readWriteLock.read { _value }
+}
+
+// Writing a property
+func setValue(_ newValue: String) {
+    readWriteLock.write { _value = newValue }
+}
+
+// Updating with current value
+readWriteLock.write {
+    _value = transform(_value)
+}
+```
+
+## Queue Usage Patterns
+```swift
+// Event tracking operations
+trackingQueue.async { [weak self] in
+    self?.performTrackingOperation()
+}
+
+// Network operations
+networkQueue.async { [weak self] in
+    self?.sendNetworkRequest()
+}
+```
+
+## Queue Properties
+- Both queues use QoS: .utility
+- Both use autoreleaseFrequency: .workItem
+- Serial queues to maintain operation order
+- Use weak self in closures to prevent retain cycles
+
+## Deadlock Prevention
+- NEVER call readWriteLock.write from within readWriteLock.read
+- Order lock acquisition consistently
+- Avoid nested locks when possible
+- Use async dispatch for long operations
+
+## Common Thread-Safe Property Pattern
+```swift
+private var _property: Type
+var property: Type {
+    get { readWriteLock.read { _property } }
+    set { readWriteLock.write { _property = newValue } }
+}
+```
+
+## Testing Thread Safety
+- Use `waitForTrackingQueue()` to ensure operations complete
+- Test concurrent access scenarios
+- Enable Thread Sanitizer in scheme
+- Verify no data races or deadlocks

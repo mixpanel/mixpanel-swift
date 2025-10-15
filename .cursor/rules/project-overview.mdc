@@ -1,0 +1,35 @@
+---
+description: Mixpanel Swift SDK project overview and key principles
+alwaysApply: true
+---
+
+# Mixpanel Swift SDK
+
+Official Mixpanel SDK for iOS 11.0+, tvOS 11.0+, macOS 10.13+, watchOS 4.0+.
+
+## Core Principles
+- **Thread Safety**: All shared state protected by ReadWriteLock
+- **Type Safety**: MixpanelType protocol enforces valid property types
+- **Backward Compatibility**: Never break existing public APIs
+- **Performance**: Batch operations, async processing, SQLite persistence
+- **Error Resilience**: Log errors, fail gracefully, provide defaults
+
+## Key Patterns
+- Static `Mixpanel` class → `MixpanelManager` singleton → `MixpanelInstance`
+- Serial queues for operations: trackingQueue, networkQueue (QoS: .utility)
+- Properties must conform to MixpanelType (String, Int, Double, Bool, etc.)
+- SQLite for persistence, UserDefaults for metadata
+- Automatic batching and retry with exponential backoff
+
+## Quick Commands
+- Test: `xcodebuild test -scheme MixpanelDemo -destination 'platform=iOS Simulator,name=iPhone 15'`
+- Lint: `swiftlint`
+- Docs: `./scripts/generate_docs.sh`
+- Release: `python scripts/release.py --old X.Y.Z --new X.Y.Z`
+
+## When Making Changes
+1. Check thread safety with ReadWriteLock
+2. Validate property types with assertPropertyTypes()
+3. Test on all platforms
+4. Update CHANGELOG.md for user-facing changes
+5. Maintain backward compatibility

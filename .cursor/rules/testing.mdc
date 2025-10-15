@@ -1,0 +1,113 @@
+---
+description: Testing patterns and best practices
+globs: ["**/*Tests.swift", "**/*Test.swift"]
+alwaysApply: false
+---
+
+# Testing Guidelines
+
+## Test Class Structure
+```swift
+class MyFeatureTests: MixpanelBaseTests {
+    var instance: MixpanelInstance!
+    
+    override func setUp() {
+        super.setUp()
+        instance = MixpanelInstance(
+            apiToken: testToken,
+            flushInterval: 0,
+            trackAutomaticEvents: false
+        )
+    }
+    
+    override func tearDown() {
+        instance.reset()
+        super.tearDown()
+    }
+}
+```
+
+## Queue Synchronization
+Always wait for async operations:
+```swift
+// Wait for tracking queue
+waitForTrackingQueue(instance)
+
+// Flush and wait
+flushAndWaitForTrackingQueue(instance)
+
+// With expectations
+let expectation = XCTestExpectation(description: "flush complete")
+instance.flush {
+    expectation.fulfill()
+}
+wait(for: [expectation], timeout: 10.0)
+```
+
+## Test Data Patterns
+```swift
+// Generate unique test data
+let distinctId = randomId()
+let eventName = "Test Event \(randomId())"
+let properties: Properties = [
+    "test_id": randomId(),
+    "timestamp": Date(),
+    "is_test": true
+]
+
+// Use constants from TestConstants.swift
+let token = testToken
+```
+
+## Common Test Assertions
+```swift
+// Event tracking
+instance.track(event: "Test Event", properties: props)
+waitForTrackingQueue(instance)
+XCTAssertEqual(instance.eventsQueue.count, 1)
+XCTAssertEqual(instance.eventsQueue.first?["event"] as? String, "Test Event")
+
+// People operations
+instance.people.set(properties: ["name": "Test User"])
+waitForTrackingQueue(instance)
+XCTAssertEqual(instance.peopleQueue.count, 1)
+
+// Persistence
+let savedEvents = instance.persistence.loadEntitiesInBatch(type: .events)
+XCTAssertEqual(savedEvents.count, 1)
+```
+
+## Platform-Specific Testing
+```swift
+#if os(iOS)
+func testAutomaticEvents() {
+    // iOS-specific automatic events
+}
+#endif
+
+#if !os(OSX)
+func testMobileSpecificFeature() {
+    // Mobile platform tests
+}
+#endif
+```
+
+## Performance Testing
+```swift
+func testLargeEventVolume() {
+    measure {
+        for i in 0..<1000 {
+            instance.track(event: "Event \(i)")
+        }
+        flushAndWaitForTrackingQueue(instance)
+    }
+}
+```
+
+## Edge Case Testing
+- Empty strings and nil values
+- Very long property names (>255 chars)
+- Concurrent access from multiple threads
+- Network failures and retries
+- App lifecycle transitions
+- Memory pressure scenarios

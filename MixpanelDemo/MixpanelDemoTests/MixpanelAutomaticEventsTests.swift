@@ -158,4 +158,150 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
     removeDBfile(mp.apiToken)
     removeDBfile(mp2.apiToken)
   }
+
+  // MARK: - Tests for Deferred Automatic Event Initialization (SwiftUI Early Init Fix)
+
+  func testEnableAutomaticEventsAfterInitializationWithFalse() {
+    let testToken = randomId()
+    // Initialize with trackAutomaticEvents: false (simulating SwiftUI early init scenario)
+    let testMixpanel = Mixpanel.initialize(
+      token: testToken, trackAutomaticEvents: false, flushInterval: 60)
+    testMixpanel.minimumSessionDuration = 0
+
+    // At this point, no automatic events should be tracked
+    waitForTrackingQueue(testMixpanel)
+    XCTAssertTrue(
+      eventQueue(token: testMixpanel.apiToken).count == 0,
+      "No automatic events should be tracked when initialized with trackAutomaticEvents: false")
+
+    // Now enable automatic events (simulating the app UI being ready)
+    testMixpanel.trackAutomaticEventsEnabled = true
+    waitForTrackingQueue(testMixpanel)
+
+    // After enabling, first open event should be tracked
+    XCTAssertTrue(
+      eventQueue(token: testMixpanel.apiToken).count >= 1,
+      "First open event should be tracked after enabling automatic events")
+    let firstOpenEvent = eventQueue(token: testMixpanel.apiToken).first
+    XCTAssertEqual(
+      firstOpenEvent?["event"] as? String, "$ae_first_open",
+      "Should have first open event after re-initialization")
+
+    removeDBfile(testMixpanel.apiToken)
+  }
+
+  func testEnableAutomaticEventsMethodAfterInitializationWithFalse() {
+    let testToken = randomId()
+    let testMixpanel = Mixpanel.initialize(
+      token: testToken, trackAutomaticEvents: false, flushInterval: 60)
+    testMixpanel.minimumSessionDuration = 0
+
+    waitForTrackingQueue(testMixpanel)
+    XCTAssertTrue(
+      eventQueue(token: testMixpanel.apiToken).count == 0,
+      "No automatic events should be tracked initially")
+
+    // Use the explicit enableAutomaticEvents() method
+    testMixpanel.enableAutomaticEvents()
+    waitForTrackingQueue(testMixpanel)
+
+    // Verify automatic events are now enabled
+    XCTAssertTrue(
+      testMixpanel.trackAutomaticEventsEnabled,
+      "trackAutomaticEventsEnabled should be true after calling enableAutomaticEvents()")
+    XCTAssertTrue(
+      eventQueue(token: testMixpanel.apiToken).count >= 1,
+      "First open event should be tracked after calling enableAutomaticEvents()")
+
+    removeDBfile(testMixpanel.apiToken)
+  }
+
+  func testSessionTrackingAfterDeferredAutomaticEventsEnable() {
+    let testToken = randomId()
+    let testMixpanel = Mixpanel.initialize(
+      token: testToken, trackAutomaticEvents: false, flushInterval: 60)
+    testMixpanel.minimumSessionDuration = 0
+
+    // Enable automatic events after initial setup
+    testMixpanel.enableAutomaticEvents()
+    waitForTrackingQueue(testMixpanel)
+
+    // Clear previous events (first open)
+    let countBefore = eventQueue(token: testMixpanel.apiToken).count
+
+    // Simulate app resignation
+    testMixpanel.automaticEvents.perform(
+      #selector(AutomaticEvents.appWillResignActive(_:)),
+      with: Notification(name: Notification.Name(rawValue: "test")))
+    waitForTrackingQueue(testMixpanel)
+
+    // Session event should be tracked
+    let countAfter = eventQueue(token: testMixpanel.apiToken).count
+    XCTAssertTrue(
+      countAfter > countBefore,
+      "Session event should be tracked after enabling deferred automatic events")
+
+    let sessionEvent = eventQueue(token: testMixpanel.apiToken).last
+    XCTAssertEqual(
+      sessionEvent?["event"] as? String, "$ae_session",
+      "Should track session event after deferred enable")
+
+    removeDBfile(testMixpanel.apiToken)
+  }
+
+  func testMultipleDeferredEnablesAreIdempotent() {
+    let testToken = randomId()
+    let testMixpanel = Mixpanel.initialize(
+      token: testToken, trackAutomaticEvents: false, flushInterval: 60)
+    testMixpanel.minimumSessionDuration = 0
+
+    // Enable multiple times
+    testMixpanel.trackAutomaticEventsEnabled = true
+    waitForTrackingQueue(testMixpanel)
+    let countAfterFirstEnable = eventQueue(token: testMixpanel.apiToken).count
+
+    testMixpanel.trackAutomaticEventsEnabled = true
+    waitForTrackingQueue(testMixpanel)
+    let countAfterSecondEnable = eventQueue(token: testMixpanel.apiToken).count
+
+    testMixpanel.enableAutomaticEvents()
+    waitForTrackingQueue(testMixpanel)
+    let countAfterThirdEnable = eventQueue(token: testMixpanel.apiToken).count
+
+    // The first event count should remain the same despite multiple enables
+    XCTAssertEqual(
+      countAfterFirstEnable, countAfterSecondEnable,
+      "Second enable should not duplicate first open event")
+    XCTAssertEqual(
+      countAfterSecondEnable, countAfterThirdEnable,
+      "Third enable should not duplicate first open event")
+
+    removeDBfile(testMixpanel.apiToken)
+  }
+
+  func testDisablingAndReEnablingAutomaticEvents() {
+    let testToken = randomId()
+    let testMixpanel = Mixpanel.initialize(
+      token: testToken, trackAutomaticEvents: true, flushInterval: 60)
+    testMixpanel.minimumSessionDuration = 0
+
+    waitForTrackingQueue(testMixpanel)
+    let initialEventCount = eventQueue(token: testMixpanel.apiToken).count
+    XCTAssertTrue(
+      initialEventCount > 0, "Should have first open event initially")
+
+    // Disable automatic events
+    testMixpanel.trackAutomaticEventsEnabled = false
+    XCTAssertFalse(
+      testMixpanel.trackAutomaticEventsEnabled,
+      "Should be disabled after setting to false")
+
+    // Re-enable automatic events
+    testMixpanel.trackAutomaticEventsEnabled = true
+    XCTAssertTrue(
+      testMixpanel.trackAutomaticEventsEnabled,
+      "Should be re-enabled after setting to true")
+
+    removeDBfile(testMixpanel.apiToken)
+  }
 }

@@ -114,9 +114,30 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   /// Controls whether to show spinning network activity indicator when flushing
   /// data to the Mixpanel servers. Defaults to true.
   open var showNetworkActivityIndicator = true
-
+  private var _trackAutomaticEventsEnabled: Bool
   /// This allows enabling or disabling collecting common mobile events,
-  open var trackAutomaticEventsEnabled: Bool
+  open var trackAutomaticEventsEnabled: Bool {
+    get {
+      return _trackAutomaticEventsEnabled
+    }
+    set {
+      _trackAutomaticEventsEnabled = newValue
+      #if os(iOS) || os(tvOS) || os(visionOS)
+        if newValue && !MixpanelInstance.isiOSAppExtension() {
+          // Re-initialize automatic event tracking if being enabled
+          automaticEvents.delegate = self
+          automaticEvents.initializeEvents(instanceName: self.name)
+        }
+      #endif
+    }
+  }
+
+  #if os(iOS) || os(tvOS) || os(visionOS)
+    /// Enables automatic event tracking for the Mixpanel instance.
+    public func enableAutomaticEvents() {
+      self.trackAutomaticEventsEnabled = true
+    }
+  #endif
 
   /// Flush timer's interval.
   /// Setting a flush interval of 0 will turn off the flush timer and you need to call the flush() API manually
@@ -366,7 +387,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     if let apiToken = apiToken, !apiToken.isEmpty {
       self.apiToken = apiToken
     }
-    trackAutomaticEventsEnabled = trackAutomaticEvents
+    _trackAutomaticEventsEnabled = trackAutomaticEvents
     if let serverURL = serverURL {
       self.serverURL = serverURL
     }

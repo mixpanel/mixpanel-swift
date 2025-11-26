@@ -124,6 +124,12 @@ class MockFeatureFlagManager: FeatureFlagManager {
   var lastQueryItems: [URLQueryItem]?
   var requestValidationError: String?
 
+  // First-time event recording tracking
+  var recordFirstTimeEventCallCount = 0
+  var lastRecordedFlagId: String?
+  var lastRecordedProjectId: Int?
+  var lastRecordedCohortHash: String?
+
   // Override the now-internal method to prevent real network calls
   override func _performFetchRequest() {
     fetchRequestCount += 1
@@ -239,6 +245,18 @@ class MockFeatureFlagManager: FeatureFlagManager {
         self?._completeFetch(success: false)
       }
     }
+  }
+
+  // Override recordFirstTimeEvent to prevent real network calls and track invocations
+  override func recordFirstTimeEvent(flagId: String, projectId: Int, cohortHash: String) {
+    recordFirstTimeEventCallCount += 1
+    lastRecordedFlagId = flagId
+    lastRecordedProjectId = projectId
+    lastRecordedCohortHash = cohortHash
+
+    print("MockFeatureFlagManager: Intercepted recordFirstTimeEvent call #\(recordFirstTimeEventCallCount) for flag: \(flagId)")
+
+    // DO NOT call super - prevents actual network calls
   }
 }
 
@@ -1699,6 +1717,351 @@ class FeatureFlagManagerTests: XCTestCase {
         XCTFail("Context should be valid JSON")
       }
     }
+  }
+
+  // MARK: - First-Time Event Targeting Tests
+
+  // MARK: Response Parsing Tests
+
+  func testParsePendingFirstTimeEvents() {
+    let json = """
+    {
+      "flags": {
+        "test-flag": {
+          "variant_key": "control",
+          "variant_value": false
+        }
+      },
+      "pending_first_time_events": [
+        {
+          "flag_key": "test-flag",
+          "flag_id": "flag-123",
+          "project_id": 3,
+          "cohort_hash": "abc123",
+          "event_name": "Purchase Complete",
+          "property_filters": {
+            ">": [{"var": "properties.amount"}, 100]
+          },
+          "pending_variant": {
+            "variant_key": "treatment",
+            "variant_value": true,
+            "experiment_id": "exp-456",
+            "is_experiment_active": true
+          }
+        }
+      ]
+    }
+    """.data(using: .utf8)!
+
+    do {
+      let response = try JSONDecoder().decode(FlagsResponse.self, from: json)
+      XCTAssertNotNil(response.flags)
+      XCTAssertNotNil(response.pendingFirstTimeEvents)
+      XCTAssertEqual(response.pendingFirstTimeEvents?.count, 1)
+
+      let pendingEvent = response.pendingFirstTimeEvents![0]
+      XCTAssertEqual(pendingEvent.flagKey, "test-flag")
+      XCTAssertEqual(pendingEvent.flagId, "flag-123")
+      XCTAssertEqual(pendingEvent.projectId, 3)
+      XCTAssertEqual(pendingEvent.cohortHash, "abc123")
+      XCTAssertEqual(pendingEvent.eventName, "Purchase Complete")
+      XCTAssertNotNil(pendingEvent.propertyFilters)
+      XCTAssertEqual(pendingEvent.pendingVariant.key, "treatment")
+      XCTAssertEqual(pendingEvent.pendingVariant.value as? Bool, true)
+    } catch {
+      XCTFail("Failed to parse response: \(error)")
+    }
+  }
+
+  func testParseEmptyPendingFirstTimeEvents() {
+    let json = """
+    {
+      "flags": {},
+      "pending_first_time_events": []
+    }
+    """.data(using: .utf8)!
+
+    do {
+      let response = try JSONDecoder().decode(FlagsResponse.self, from: json)
+      XCTAssertNotNil(response.pendingFirstTimeEvents)
+      XCTAssertEqual(response.pendingFirstTimeEvents?.count, 0)
+    } catch {
+      XCTFail("Failed to parse response: \(error)")
+    }
+  }
+
+  // MARK: First-Time Event Matching Tests
+
+  func testFirstTimeEventMatching_ExactNameMatch() {
+    // Set up mock with pending event
+    if let mockManager = manager as? MockFeatureFlagManager {
+      let pendingVariant = MixpanelFlagVariant(
+        key: "activated", value: true, isExperimentActive: true, isQATester: false, experimentID: "exp-123")
+
+      let pendingEvent = createPendingEvent(
+        flagKey: "welcome-modal",
+        eventName: "Dashboard Viewed",
+        filters: nil,
+        pendingVariant: pendingVariant
+      )
+
+      mockManager.accessQueue.sync {
+        mockManager.flags = ["welcome-modal": MixpanelFlagVariant(key: "control", value: false)]
+        mockManager.pendingFirstTimeEvents = ["welcome-modal:hash123": pendingEvent]
+      }
+
+      // Trigger the event
+      mockManager.checkFirstTimeEvents(eventName: "Dashboard Viewed", properties: [:])
+
+      // Wait for async processing
+      let expectation = XCTestExpectation(description: "Event processing completes")
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
+      wait(for: [expectation], timeout: 1.0)
+
+      // Verify variant was switched
+      mockManager.accessQueue.sync {
+        let flag = mockManager.flags?["welcome-modal"]
+        XCTAssertEqual(flag?.key, "activated")
+        XCTAssertEqual(flag?.value as? Bool, true)
+        XCTAssertTrue(mockManager.activatedFirstTimeEvents.contains("welcome-modal:hash123"))
+      }
+    }
+  }
+
+  func testFirstTimeEventMatching_WithPropertyFilters() {
+    // Set up mock with pending event that has property filters
+    if let mockManager = manager as? MockFeatureFlagManager {
+      let pendingVariant = MixpanelFlagVariant(
+        key: "premium", value: ["discount": 20], isExperimentActive: true, isQATester: false, experimentID: "exp-456")
+
+      let filters: [String: Any] = [">": [["var": "properties.amount"], 100]]
+
+      let pendingEvent = createPendingEvent(
+        flagKey: "premium-welcome",
+        eventName: "Purchase Complete",
+        filters: filters,
+        pendingVariant: pendingVariant
+      )
+
+      mockManager.accessQueue.sync {
+        mockManager.flags = ["premium-welcome": MixpanelFlagVariant(key: "control", value: nil)]
+        mockManager.pendingFirstTimeEvents = ["premium-welcome:hash456": pendingEvent]
+      }
+
+      // Trigger event with amount > 100 (should match)
+      mockManager.checkFirstTimeEvents(eventName: "Purchase Complete", properties: ["amount": 150])
+
+      let expectation = XCTestExpectation(description: "Event processing completes")
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
+      wait(for: [expectation], timeout: 1.0)
+
+      // Verify variant was switched
+      mockManager.accessQueue.sync {
+        let flag = mockManager.flags?["premium-welcome"]
+        XCTAssertEqual(flag?.key, "premium")
+        XCTAssertTrue(mockManager.activatedFirstTimeEvents.contains("premium-welcome:hash456"))
+      }
+    }
+  }
+
+  func testFirstTimeEventMatching_PropertyFilterNoMatch() {
+    // Set up mock with pending event that has property filters
+    if let mockManager = manager as? MockFeatureFlagManager {
+      let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
+
+      let filters: [String: Any] = [">": [["var": "properties.amount"], 100]]
+
+      let pendingEvent = createPendingEvent(
+        flagKey: "premium-welcome",
+        eventName: "Purchase Complete",
+        filters: filters,
+        pendingVariant: pendingVariant
+      )
+
+      mockManager.accessQueue.sync {
+        mockManager.flags = ["premium-welcome": MixpanelFlagVariant(key: "control", value: false)]
+        mockManager.pendingFirstTimeEvents = ["premium-welcome:hash456": pendingEvent]
+      }
+
+      // Trigger event with amount < 100 (should NOT match)
+      mockManager.checkFirstTimeEvents(eventName: "Purchase Complete", properties: ["amount": 50])
+
+      let expectation = XCTestExpectation(description: "Event processing completes")
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
+      wait(for: [expectation], timeout: 1.0)
+
+      // Verify variant was NOT switched
+      mockManager.accessQueue.sync {
+        let flag = mockManager.flags?["premium-welcome"]
+        XCTAssertEqual(flag?.key, "control")
+        XCTAssertFalse(mockManager.activatedFirstTimeEvents.contains("premium-welcome:hash456"))
+      }
+    }
+  }
+
+  func testFirstTimeEventMatching_CaseInsensitiveProperties() {
+    // Test that property matching is case-insensitive
+    if let mockManager = manager as? MockFeatureFlagManager {
+      let pendingVariant = MixpanelFlagVariant(key: "matched", value: true)
+
+      let filters: [String: Any] = ["==": [["var": "properties.plan"], "PREMIUM"]]
+
+      let pendingEvent = createPendingEvent(
+        flagKey: "case-test",
+        eventName: "Test Event",
+        filters: filters,
+        pendingVariant: pendingVariant
+      )
+
+      mockManager.accessQueue.sync {
+        mockManager.flags = ["case-test": MixpanelFlagVariant(key: "control", value: false)]
+        mockManager.pendingFirstTimeEvents = ["case-test:hash789": pendingEvent]
+      }
+
+      // Trigger event with lowercase plan (should match due to case-insensitive comparison)
+      mockManager.checkFirstTimeEvents(eventName: "Test Event", properties: ["plan": "premium"])
+
+      let expectation = XCTestExpectation(description: "Event processing completes")
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
+      wait(for: [expectation], timeout: 1.0)
+
+      // Verify variant was switched
+      mockManager.accessQueue.sync {
+        let flag = mockManager.flags?["case-test"]
+        XCTAssertEqual(flag?.key, "matched")
+      }
+    }
+  }
+
+  // MARK: Activation State Tests
+
+  func testFirstTimeEventActivatesOnlyOnce() {
+    if let mockManager = manager as? MockFeatureFlagManager {
+      let pendingVariant = MixpanelFlagVariant(key: "activated", value: true)
+
+      let pendingEvent = createPendingEvent(
+        flagKey: "once-only",
+        eventName: "Test Event",
+        filters: nil,
+        pendingVariant: pendingVariant
+      )
+
+      mockManager.accessQueue.sync {
+        mockManager.flags = ["once-only": MixpanelFlagVariant(key: "control", value: false)]
+        mockManager.pendingFirstTimeEvents = ["once-only:hash999": pendingEvent]
+        // Reset tracking state
+        mockManager.recordFirstTimeEventCallCount = 0
+      }
+
+      // Trigger event multiple times
+      mockManager.checkFirstTimeEvents(eventName: "Test Event", properties: [:])
+      mockManager.checkFirstTimeEvents(eventName: "Test Event", properties: [:])
+      mockManager.checkFirstTimeEvents(eventName: "Test Event", properties: [:])
+
+      let expectation = XCTestExpectation(description: "Event processing completes")
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { expectation.fulfill() }
+      wait(for: [expectation], timeout: 1.0)
+
+      // Verify activation occurred and is tracked
+      mockManager.accessQueue.sync {
+        XCTAssertTrue(mockManager.activatedFirstTimeEvents.contains("once-only:hash999"))
+
+        // Verify recordFirstTimeEvent was called exactly once
+        XCTAssertEqual(mockManager.recordFirstTimeEventCallCount, 1,
+          "recordFirstTimeEvent should be called exactly once, not \(mockManager.recordFirstTimeEventCallCount) times")
+
+        // Verify the correct parameters were recorded
+        XCTAssertEqual(mockManager.lastRecordedFlagId, "test-flag-id")
+        XCTAssertEqual(mockManager.lastRecordedProjectId, 1)
+        XCTAssertEqual(mockManager.lastRecordedCohortHash, "hash123")
+      }
+    }
+  }
+
+  // MARK: Flag Refresh Edge Cases
+
+  func testFlagRefresh_PreservesActivatedVariants() {
+    if let mockManager = manager as? MockFeatureFlagManager {
+      // Set up initial state with activated variant
+      mockManager.accessQueue.sync {
+        mockManager.flags = ["test-flag": MixpanelFlagVariant(key: "activated", value: true)]
+        mockManager.activatedFirstTimeEvents.insert("test-flag:hash123")
+      }
+
+      // Simulate fetch response with different variant for same flag
+      let newFlags = ["test-flag": MixpanelFlagVariant(key: "control", value: false)]
+      mockManager.simulatedFetchResult = (success: true, flags: newFlags)
+
+      // Trigger fetch
+      mockManager.loadFlags()
+
+      let expectation = XCTestExpectation(description: "Fetch completes")
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { expectation.fulfill() }
+      wait(for: [expectation], timeout: 1.0)
+
+      // Verify activated variant was preserved
+      mockManager.accessQueue.sync {
+        let flag = mockManager.flags?["test-flag"]
+        XCTAssertEqual(flag?.key, "activated", "Activated variant should be preserved")
+        XCTAssertEqual(flag?.value as? Bool, true)
+      }
+    }
+  }
+
+  func testFlagRefresh_KeepsOrphanedActivatedFlags() {
+    if let mockManager = manager as? MockFeatureFlagManager {
+      // Set up initial state with activated variant
+      mockManager.accessQueue.sync {
+        mockManager.flags = ["orphaned-flag": MixpanelFlagVariant(key: "activated", value: true)]
+        mockManager.activatedFirstTimeEvents.insert("orphaned-flag:hash123")
+      }
+
+      // Simulate fetch response WITHOUT the orphaned flag
+      let newFlags = ["other-flag": MixpanelFlagVariant(key: "control", value: false)]
+      mockManager.simulatedFetchResult = (success: true, flags: newFlags)
+
+      // Trigger fetch
+      mockManager.loadFlags()
+
+      let expectation = XCTestExpectation(description: "Fetch completes")
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { expectation.fulfill() }
+      wait(for: [expectation], timeout: 1.0)
+
+      // Verify orphaned flag was kept
+      mockManager.accessQueue.sync {
+        let flag = mockManager.flags?["orphaned-flag"]
+        XCTAssertNotNil(flag, "Orphaned activated flag should be kept")
+        XCTAssertEqual(flag?.key, "activated")
+      }
+    }
+  }
+
+  // MARK: Helper Methods
+
+  private func createPendingEvent(
+    flagKey: String,
+    eventName: String,
+    filters: [String: Any]?,
+    pendingVariant: MixpanelFlagVariant
+  ) -> PendingFirstTimeEvent {
+    let json: [String: Any] = [
+      "flag_key": flagKey,
+      "flag_id": "test-flag-id",
+      "project_id": 1,
+      "cohort_hash": "hash123",
+      "event_name": eventName,
+      "property_filters": filters as Any,
+      "pending_variant": [
+        "variant_key": pendingVariant.key,
+        "variant_value": pendingVariant.value as Any,
+        "experiment_id": pendingVariant.experimentID as Any,
+        "is_experiment_active": pendingVariant.isExperimentActive as Any,
+        "is_qa_tester": pendingVariant.isQATester as Any
+      ]
+    ]
+
+    let data = try! JSONSerialization.data(withJSONObject: json)
+    return try! JSONDecoder().decode(PendingFirstTimeEvent.self, from: data)
   }
 
 }  // End Test Class

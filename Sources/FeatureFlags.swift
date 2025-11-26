@@ -1,4 +1,7 @@
 import Foundation
+import jsonlogic
+
+// MARK: - AnyCodable
 
 // Wrapper to help decode 'Any' types within Codable structures
 // (Keep AnyCodable as defined previously, it holds the necessary decoding logic)
@@ -76,9 +79,55 @@ public struct MixpanelFlagVariant: Decodable {
   }
 }
 
+// MARK: - PendingFirstTimeEvent
+
+/// Represents a pending first-time event definition from the flags endpoint
+struct PendingFirstTimeEvent: Decodable {
+    let flagKey: String
+    let flagId: String
+    let projectId: Int
+    let cohortHash: String
+    let eventName: String
+    let propertyFilters: [String: Any]?
+    let pendingVariant: MixpanelFlagVariant
+
+    enum CodingKeys: String, CodingKey {
+        case flagKey = "flag_key"
+        case flagId = "flag_id"
+        case projectId = "project_id"
+        case cohortHash = "cohort_hash"
+        case eventName = "event_name"
+        case propertyFilters = "property_filters"
+        case pendingVariant = "pending_variant"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        flagKey = try container.decode(String.self, forKey: .flagKey)
+        flagId = try container.decode(String.self, forKey: .flagId)
+        projectId = try container.decode(Int.self, forKey: .projectId)
+        cohortHash = try container.decode(String.self, forKey: .cohortHash)
+        eventName = try container.decode(String.self, forKey: .eventName)
+        pendingVariant = try container.decode(MixpanelFlagVariant.self, forKey: .pendingVariant)
+
+        // Decode propertyFilters using AnyCodable
+        if let filtersContainer = try? container.decode([String: AnyCodable].self, forKey: .propertyFilters) {
+            propertyFilters = filtersContainer.mapValues { $0.value }
+        } else {
+            propertyFilters = nil
+        }
+    }
+}
+
 // Response structure for the /flags endpoint
 struct FlagsResponse: Decodable {
   let flags: [String: MixpanelFlagVariant]?  // Dictionary where key is flag name
+  let pendingFirstTimeEvents: [PendingFirstTimeEvent]?  // Array of pending first-time event definitions
+
+  enum CodingKeys: String, CodingKey {
+    case flags
+    case pendingFirstTimeEvents = "pending_first_time_events"
+  }
 }
 
 // --- FeatureFlagDelegate Protocol ---
@@ -189,6 +238,14 @@ public protocol MixpanelFlags {
   ///   - completion: A closure that is called with the boolean result.
   ///                 This closure will be executed on the main dispatch queue.
   func isEnabled(_ flagName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void)
+
+  /// Checks if a tracked event matches any pending first-time events and activates the corresponding variant.
+  /// This method is called automatically from the tracking flow.
+  ///
+  /// - Parameters:
+  ///   - eventName: The name of the tracked event
+  ///   - properties: The properties associated with the event
+  func checkFirstTimeEvents(eventName: String, properties: [String: Any])
 }
 
 // --- FeatureFlagManager Class ---
@@ -210,6 +267,10 @@ class FeatureFlagManager: Network, MixpanelFlags {
   var isFetching: Bool = false
   private var trackedFeatures: Set<String> = Set()
   private var fetchCompletionHandlers: [(Bool) -> Void] = []
+
+  // First-time event targeting state
+  private var pendingFirstTimeEvents: [String: PendingFirstTimeEvent] = [:]  // Keyed by "flagKey:cohortHash"
+  private var activatedFirstTimeEvents: Set<String> = Set()  // Stores "flagKey:cohortHash" keys
 
   // Timing tracking properties
   private var fetchStartTime: Date?
@@ -461,13 +522,11 @@ class FeatureFlagManager: Network, MixpanelFlags {
       return
     }
 
-    guard let authData = "\(options.token):".data(using: .utf8) else {
-      print("Error: Failed to create auth data.")
+    guard let headers = createAuthHeaders(token: options.token) else {
+      print("Error: Failed to create auth headers.")
       self._completeFetch(success: false)
       return
     }
-    let base64Auth = authData.base64EncodedString()
-    let headers = ["Authorization": "Basic \(base64Auth)"]
 
     let queryItems = [
       URLQueryItem(name: "context", value: contextString),
@@ -505,7 +564,14 @@ class FeatureFlagManager: Network, MixpanelFlags {
         self.accessQueue.async { [weak self] in
           guard let self = self else { return }
           // already on accessQueue – write directly
-          self.flags = flagsResponse.flags ?? [:]
+
+          let (mergedFlags, mergedPendingEvents) = self.mergeFlags(
+            responseFlags: flagsResponse.flags,
+            responsePendingEvents: flagsResponse.pendingFirstTimeEvents
+          )
+
+          self.flags = mergedFlags
+          self.pendingFirstTimeEvents = mergedPendingEvents
 
           // Calculate timing metrics
           if let startTime = self.fetchStartTime {
@@ -514,7 +580,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
           }
           self.timeLastFetched = fetchEndTime
 
-          print("Flags updated: \(self.flags ?? [:])")
+          print("Flags updated: \(self.flags ?? [:]), Pending events: \(self.pendingFirstTimeEvents.count)")
           self._completeFetch(success: true)  // still on accessQueue
         }
       }
@@ -530,6 +596,60 @@ class FeatureFlagManager: Network, MixpanelFlags {
     DispatchQueue.main.async {
       handlers.forEach { $0(success) }
     }
+  }
+
+  // --- Flag Merging Helper ---
+  private func mergeFlags(
+    responseFlags: [String: MixpanelFlagVariant]?,
+    responsePendingEvents: [PendingFirstTimeEvent]?
+  ) -> (flags: [String: MixpanelFlagVariant], pendingEvents: [String: PendingFirstTimeEvent]) {
+    var newFlags: [String: MixpanelFlagVariant] = [:]
+    var newPendingEvents: [String: PendingFirstTimeEvent] = [:]
+
+    // Process flags from response
+    if let responseFlags = responseFlags {
+      for (flagKey, variant) in responseFlags {
+        // Check if any event for this flag was activated
+        let hasActivatedEvent = self.activatedFirstTimeEvents.contains { eventKey in
+          eventKey.hasPrefix("\(flagKey):")
+        }
+
+        if hasActivatedEvent, let currentFlag = self.flags?[flagKey] {
+          // Preserve activated variant
+          newFlags[flagKey] = currentFlag
+        } else {
+          // Use server's current variant
+          newFlags[flagKey] = variant
+        }
+      }
+    }
+
+    // Process pending first-time events from response
+    if let responsePendingEvents = responsePendingEvents {
+      for pendingEvent in responsePendingEvents {
+        let eventKey = self.getPendingEventKey(pendingEvent.flagKey, pendingEvent.cohortHash)
+
+        // Skip if already activated
+        if self.activatedFirstTimeEvents.contains(eventKey) {
+          continue
+        }
+
+        newPendingEvents[eventKey] = pendingEvent
+      }
+    }
+
+    // Preserve orphaned activated flags
+    for eventKey in self.activatedFirstTimeEvents {
+      guard let flagKey = self.getFlagKeyFromPendingEventKey(eventKey) else {
+        print("Warning: Failed to parse flag key from event key: \(eventKey)")
+        continue
+      }
+      if newFlags[flagKey] == nil, let orphanedFlag = self.flags?[flagKey] {
+        newFlags[flagKey] = orphanedFlag
+      }
+    }
+
+    return (flags: newFlags, pendingEvents: newPendingEvents)
   }
 
   // --- Tracking Logic ---
@@ -612,5 +732,187 @@ class FeatureFlagManager: Network, MixpanelFlags {
       print("Error: Flag '\(flagName)' is not Bool")
       return fallbackValue
     }
+  }
+
+  // --- Auth Header Helper ---
+  private func createAuthHeaders(token: String, includeContentType: Bool = false) -> [String: String]? {
+    guard let authData = "\(token):".data(using: .utf8) else {
+      return nil
+    }
+
+    var headers = ["Authorization": "Basic \(authData.base64EncodedString())"]
+
+    if includeContentType {
+      headers["Content-Type"] = "application/json"
+    }
+
+    return headers
+  }
+
+  // MARK: - First-Time Event Helpers
+
+  /// Generic recursive transformation function for nested structures
+  private func transformStringsRecursively(
+    _ val: Any,
+    transformDictKey: (String) -> String = { $0 }
+  ) -> Any {
+    if let stringValue = val as? String {
+      return stringValue.lowercased()
+    } else if let arrayValue = val as? [Any] {
+      return arrayValue.map { transformStringsRecursively($0, transformDictKey: transformDictKey) }
+    } else if let dictValue = val as? [String: Any] {
+      var result: [String: Any] = [:]
+      for (key, value) in dictValue {
+        let newKey = transformDictKey(key)
+        result[newKey] = transformStringsRecursively(value, transformDictKey: transformDictKey)
+      }
+      return result
+    } else {
+      return val
+    }
+  }
+
+  /// Lowercase all string keys and values in a nested structure
+  private func lowercaseKeysAndValues(_ val: Any) -> Any {
+    return transformStringsRecursively(val, transformDictKey: { $0.lowercased() })
+  }
+
+  /// Lowercase only leaf node string values in a nested structure (keys unchanged)
+  private func lowercaseOnlyLeafNodes(_ val: Any) -> Any {
+    return transformStringsRecursively(val)
+  }
+
+  /// Generate a unique key for a pending first-time event
+  private func getPendingEventKey(_ flagKey: String, _ cohortHash: String) -> String {
+    return "\(flagKey):\(cohortHash)"
+  }
+
+  /// Extract the flag key from a pending event key
+  private func getFlagKeyFromPendingEventKey(_ eventKey: String) -> String? {
+    return eventKey.components(separatedBy: ":").first
+  }
+
+  // MARK: - First-Time Event Checking
+
+  /// Checks if a tracked event matches any pending first-time events and activates the corresponding variant
+  func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
+    accessQueue.async { [weak self] in
+      guard let self = self else { return }
+
+      // Iterate through all pending first-time events
+      for (eventKey, pendingEvent) in self.pendingFirstTimeEvents {
+        // Skip if already activated
+        if self.activatedFirstTimeEvents.contains(eventKey) {
+          continue
+        }
+
+        // Check exact event name match (case-sensitive)
+        if eventName != pendingEvent.eventName {
+          continue
+        }
+
+        // Evaluate property filters using json-logic-swift library
+        if let filters = pendingEvent.propertyFilters, !filters.isEmpty {
+          // Lowercase all keys and values in event properties for case-insensitive matching
+          let lowercasedProperties = self.lowercaseKeysAndValues(properties)
+
+          // Lowercase only leaf nodes in JsonLogic filters (keep operators intact)
+          let lowercasedFilters = self.lowercaseOnlyLeafNodes(filters)
+
+          // Prepare data for JsonLogic evaluation
+          let data = ["properties": lowercasedProperties]
+
+          // Convert to JSON strings for json-logic-swift library
+          guard let rulesData = try? JSONSerialization.data(withJSONObject: lowercasedFilters),
+                let rulesString = String(data: rulesData, encoding: .utf8),
+                let dataJSON = try? JSONSerialization.data(withJSONObject: data),
+                let dataString = String(data: dataJSON, encoding: .utf8) else {
+            print("Warning: Failed to serialize JsonLogic filters for event '\(eventKey)' matching '\(eventName)'")
+            continue
+          }
+
+          // Evaluate the filter
+          guard let result: Bool = try? applyRule(rulesString, to: dataString),
+                result == true else {
+            continue
+          }
+        }
+
+        // Event matched! Activate the variant
+        let flagKey = pendingEvent.flagKey
+        print("First-time event matched for flag '\(flagKey)': \(eventName)")
+
+        // Update or create the flag with the pending variant
+        if self.flags == nil {
+          self.flags = [:]
+        }
+        self.flags![flagKey] = pendingEvent.pendingVariant
+
+        // Mark this specific event as activated
+        self.activatedFirstTimeEvents.insert(eventKey)
+
+        // Track the feature flag check event with the new variant
+        self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
+
+        // Record to backend (fire-and-forget)
+        self.recordFirstTimeEvent(
+          flagId: pendingEvent.flagId,
+          projectId: pendingEvent.projectId,
+          cohortHash: pendingEvent.cohortHash
+        )
+      }
+    }
+  }
+
+  /// Records a first-time event activation to the backend
+  internal func recordFirstTimeEvent(flagId: String, projectId: Int, cohortHash: String) {
+    guard let delegate = self.delegate else {
+      print("Error: Delegate missing for recording first-time event")
+      return
+    }
+
+    let distinctId = delegate.getDistinctId()
+    let url = "/flags/\(flagId)/first-time-events"
+
+    let payload: [String: Any] = [
+      "distinct_id": distinctId,
+      "project_id": projectId,
+      "cohort_hash": cohortHash
+    ]
+
+    guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+          let options = currentOptions else {
+      print("Error: Failed to prepare first-time event recording request")
+      return
+    }
+
+    guard let headers = createAuthHeaders(token: options.token, includeContentType: true) else {
+      print("Error: Failed to create auth headers for first-time event recording")
+      return
+    }
+
+    let responseParser: (Data) -> Bool? = { _ in true }
+    let resource = Network.buildResource(
+      path: url,
+      method: .post,
+      requestBody: jsonData,
+      headers: headers,
+      parse: responseParser
+    )
+
+    print("Recording first-time event for flag: \(flagId)")
+
+    // Fire-and-forget POST request
+    Network.apiRequest(
+      base: serverURL,
+      resource: resource,
+      failure: { reason, _, _ in
+        // Silent failure - cohort sync will catch up
+        print("Failed to record first-time event for flag \(flagId): \(reason)")
+      },
+      success: { _, _ in
+        print("Successfully recorded first-time event for flag \(flagId)")
+      }
+    )
   }
 }

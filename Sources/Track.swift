@@ -81,6 +81,11 @@ class Track {
       p += properties
     }
 
+    // Check for first-time event matches
+    if let mixpanelInstance = mixpanelInstance {
+      mixpanelInstance.flags.checkFirstTimeEvents(eventName: ev, properties: p)
+    }
+
     var trackEvent: InternalProperties = ["event": ev, "properties": p]
     metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
 

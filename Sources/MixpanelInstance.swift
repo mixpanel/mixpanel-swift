@@ -118,10 +118,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   /// This allows enabling or disabling collecting common mobile events,
   open var trackAutomaticEventsEnabled: Bool {
     get {
-      return _trackAutomaticEventsEnabled
+      var value = false
+      readWriteLock.read {
+        value = _trackAutomaticEventsEnabled
+      }
+      return value
     }
     set {
-      _trackAutomaticEventsEnabled = newValue
+      readWriteLock.write {
+        _trackAutomaticEventsEnabled = newValue
+      }
       #if os(iOS) || os(tvOS) || os(visionOS)
         if newValue && !MixpanelInstance.isiOSAppExtension() {
           // Re-initialize automatic event tracking if being enabled

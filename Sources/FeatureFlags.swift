@@ -269,8 +269,8 @@ class FeatureFlagManager: Network, MixpanelFlags {
   private var fetchCompletionHandlers: [(Bool) -> Void] = []
 
   // First-time event targeting state
-  private var pendingFirstTimeEvents: [String: PendingFirstTimeEvent] = [:]  // Keyed by "flagKey:cohortHash"
-  private var activatedFirstTimeEvents: Set<String> = Set()  // Stores "flagKey:cohortHash" keys
+  internal var pendingFirstTimeEvents: [String: PendingFirstTimeEvent] = [:]  // Keyed by "flagKey:cohortHash"
+  internal var activatedFirstTimeEvents: Set<String> = Set()  // Stores "flagKey:cohortHash" keys
 
   // Timing tracking properties
   private var fetchStartTime: Date?

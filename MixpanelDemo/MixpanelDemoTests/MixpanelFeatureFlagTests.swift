@@ -355,6 +355,332 @@ class FeatureFlagManagerTests: XCTestCase {
     }
   }
 
+  // MARK: - Test Helpers
+
+  // Expectation & Waiting Helpers
+
+  private func waitBriefly(timeout: TimeInterval = 0.5, file: StaticString = #file, line: UInt = #line) {
+    let expectation = XCTestExpectation(description: "Brief wait")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
+    wait(for: [expectation], timeout: timeout)
+  }
+
+  private func waitForAsyncOperation<T>(
+    timeout: TimeInterval = 2.0,
+    description: String,
+    operation: (@escaping (T) -> Void) -> Void,
+    validation: (T) -> Void
+  ) {
+    let expectation = XCTestExpectation(description: description)
+    var result: T?
+
+    operation { value in
+      result = value
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: timeout)
+
+    if let result = result {
+      validation(result)
+    } else {
+      XCTFail("Operation did not complete in time")
+    }
+  }
+
+  // Tracking Helpers
+
+  private func expectTracking(
+    expectedCount: Int = 1,
+    description: String = "Track called",
+    timeout: TimeInterval = 1.0,
+    operation: () -> Void
+  ) {
+    mockDelegate.trackedEvents.removeAll()
+    mockDelegate.trackExpectation = XCTestExpectation(description: description)
+    mockDelegate.trackExpectation?.expectedFulfillmentCount = expectedCount
+
+    operation()
+
+    wait(for: [mockDelegate.trackExpectation!], timeout: timeout)
+    XCTAssertEqual(mockDelegate.trackedEvents.count, expectedCount)
+  }
+
+  private func verifyTrackingProperties(
+    _ properties: [String: Any?],
+    experimentName: String,
+    variantName: String,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) {
+    AssertEqual(properties["Experiment name"] ?? nil, experimentName, file: file, line: line)
+    AssertEqual(properties["Variant name"] ?? nil, variantName, file: file, line: line)
+    AssertEqual(properties["$experiment_type"] ?? nil, "feature_flag", file: file, line: line)
+  }
+
+  private func verifyTimingProperties(
+    _ properties: [String: Any?],
+    expectedLatency: Int? = nil,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) {
+    XCTAssertTrue(properties.keys.contains("timeLastFetched"), "Should include timeLastFetched", file: file, line: line)
+    XCTAssertTrue(properties.keys.contains("fetchLatencyMs"), "Should include fetchLatencyMs", file: file, line: line)
+
+    if let expected = expectedLatency,
+       let actual = properties["fetchLatencyMs"] as? Int {
+      XCTAssertEqual(actual, expected, file: file, line: line)
+    }
+  }
+
+  // Event Verification Helper
+
+  private func verifyTrackedEvent(
+    at index: Int = 0,
+    expectedEvent: String = "$experiment_started",
+    experimentName: String,
+    variantName: String,
+    checkTimingProperties: Bool = false,
+    expectedLatency: Int? = nil,
+    additionalChecks: ((Properties) -> Void)? = nil,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) {
+    guard index < mockDelegate.trackedEvents.count else {
+      XCTFail("No tracked event at index \(index)", file: file, line: line)
+      return
+    }
+
+    let tracked = mockDelegate.trackedEvents[index]
+    XCTAssertEqual(tracked.event, expectedEvent, file: file, line: line)
+    XCTAssertNotNil(tracked.properties, file: file, line: line)
+
+    guard let props = tracked.properties else { return }
+
+    verifyTrackingProperties(props, experimentName: experimentName,
+                            variantName: variantName, file: file, line: line)
+
+    if checkTimingProperties {
+      verifyTimingProperties(props, expectedLatency: expectedLatency,
+                           file: file, line: line)
+    }
+
+    additionalChecks?(props)
+  }
+
+  // Async Operation Helper
+
+  @discardableResult
+  private func getVariantAsync(
+    _ flagName: String,
+    fallback: MixpanelFlagVariant? = nil,
+    timeout: TimeInterval = 2.0,
+    description: String? = nil,
+    verifyMainThread: Bool = true,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) -> MixpanelFlagVariant? {
+    let expectation = XCTestExpectation(
+      description: description ?? "Get variant async for \(flagName)"
+    )
+    var receivedData: MixpanelFlagVariant?
+
+    manager.getVariant(flagName, fallback: fallback ?? defaultFallback) { data in
+      if verifyMainThread {
+        XCTAssertTrue(Thread.isMainThread,
+                     "Completion should be on main thread",
+                     file: file, line: line)
+      }
+      receivedData = data
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: timeout)
+    return receivedData
+  }
+
+  // Fetch Setup Helpers
+
+  private func setupReadyFlags(flags: [String: MixpanelFlagVariant]? = nil) {
+    simulateFetchSuccess(flags: flags)
+    waitBriefly()
+  }
+
+  private func setupReadyFlagsAndVerify(flags: [String: MixpanelFlagVariant]? = nil) {
+    setupReadyFlags(flags: flags)
+    XCTAssertTrue(manager.areFlagsReady(), "Flags should be ready after setup")
+  }
+
+  // JSON Parsing Helpers
+
+  private func decodeJSON<T: Decodable>(
+    _ jsonString: String,
+    as type: T.Type,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) -> T? {
+    guard let data = jsonString.data(using: .utf8) else {
+      XCTFail("Failed to convert JSON string to data", file: file, line: line)
+      return nil
+    }
+
+    do {
+      return try JSONDecoder().decode(type, from: data)
+    } catch {
+      XCTFail("Failed to decode JSON: \(error)", file: file, line: line)
+      return nil
+    }
+  }
+
+  private func assertJSONDecodes<T: Decodable>(
+    _ jsonString: String,
+    as type: T.Type,
+    file: StaticString = #file,
+    line: UInt = #line,
+    validation: (T) -> Void
+  ) {
+    if let result = decodeJSON(jsonString, as: type, file: file, line: line) {
+      validation(result)
+    }
+  }
+
+  // Mock Configuration Helpers
+
+  private var mockManager: MockFeatureFlagManager? {
+    return manager as? MockFeatureFlagManager
+  }
+
+  private func configureMockFetch(
+    success: Bool,
+    flags: [String: MixpanelFlagVariant]? = nil,
+    withDelay: Bool = true
+  ) {
+    guard let mock = mockManager else {
+      XCTFail("Manager is not a MockFeatureFlagManager")
+      return
+    }
+    mock.simulatedFetchResult = (success: success, flags: flags ?? sampleFlags)
+    mock.shouldSimulateNetworkDelay = withDelay
+  }
+
+  private func resetMockToSuccess() {
+    configureMockFetch(success: true, flags: sampleFlags, withDelay: true)
+  }
+
+  // Context Verification Helper
+
+  private func verifyRequestContext(
+    expectedDistinctId: String,
+    expectedDeviceId: String? = nil,
+    additionalChecks: (([String: Any]) -> Void)? = nil,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) {
+    guard let mockMgr = mockManager,
+          let queryItems = mockMgr.lastQueryItems else {
+      XCTFail("No query items captured", file: file, line: line)
+      return
+    }
+
+    let queryDict = Dictionary(uniqueKeysWithValues: queryItems.map { ($0.name, $0.value) })
+
+    guard let contextString = queryDict["context"],
+          let contextData = contextString?.data(using: .utf8),
+          let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any] else {
+      XCTFail("Failed to parse context", file: file, line: line)
+      return
+    }
+
+    XCTAssertEqual(context["distinct_id"] as? String, expectedDistinctId, file: file, line: line)
+
+    if let expectedDeviceId = expectedDeviceId {
+      XCTAssertEqual(context["device_id"] as? String, expectedDeviceId, file: file, line: line)
+    } else {
+      XCTAssertNil(context["device_id"], file: file, line: line)
+    }
+
+    additionalChecks?(context)
+  }
+
+  // Variant Creation Helpers
+
+  private func createExperimentVariant(
+    key: String,
+    value: Any?,
+    experimentID: String = "test-exp-id",
+    isActive: Bool = true,
+    isQATester: Bool = false
+  ) -> MixpanelFlagVariant {
+    return MixpanelFlagVariant(
+      key: key,
+      value: value,
+      isExperimentActive: isActive,
+      isQATester: isQATester,
+      experimentID: experimentID
+    )
+  }
+
+  private func createControlVariant(key: String = "control", value: Any? = false) -> MixpanelFlagVariant {
+    return MixpanelFlagVariant(key: key, value: value)
+  }
+
+  // First-Time Event Helper
+
+  private func setupAndTriggerFirstTimeEvent(
+    flagKey: String,
+    eventName: String,
+    eventProperties: [String: Any] = [:],
+    filters: [String: Any]? = nil,
+    pendingVariant: MixpanelFlagVariant,
+    initialVariant: MixpanelFlagVariant? = nil,
+    cohortHash: String = "hash123",
+    validation: ((MockFeatureFlagManager) -> Void)? = nil
+  ) {
+    guard let mockMgr = mockManager else {
+      XCTFail("Manager is not a MockFeatureFlagManager")
+      return
+    }
+
+    let pendingEvent = createPendingEvent(
+      flagKey: flagKey,
+      eventName: eventName,
+      filters: filters,
+      pendingVariant: pendingVariant
+    )
+
+    let cohortKey = "\(flagKey):\(cohortHash)"
+
+    mockMgr.accessQueue.sync {
+      let initial = initialVariant ?? createControlVariant()
+      mockMgr.flags = [flagKey: initial]
+      mockMgr.pendingFirstTimeEvents = [cohortKey: pendingEvent]
+    }
+
+    mockMgr.checkFirstTimeEvents(eventName: eventName, properties: eventProperties)
+    waitBriefly(timeout: 1.0)
+
+    mockMgr.accessQueue.sync {
+      validation?(mockMgr)
+    }
+  }
+
+  // Manager State Helpers
+
+  private func resetManagerFlags(_ flags: [String: MixpanelFlagVariant]? = nil) {
+    mockManager?.accessQueue.sync {
+      mockManager?.flags = flags
+    }
+    Thread.sleep(forTimeInterval: 0.01)
+  }
+
+  private func clearManagerFlags() {
+    resetManagerFlags(nil)
+  }
+
+  private func setManagerFlags(_ flags: [String: MixpanelFlagVariant]) {
+    resetManagerFlags(flags)
+  }
+
   // --- State and Configuration Tests ---
 
   func testAreFeaturesReady_InitialState() {
@@ -362,21 +688,12 @@ class FeatureFlagManagerTests: XCTestCase {
   }
 
   func testAreFeaturesReady_AfterSuccessfulFetchSimulation() {
-    simulateFetchSuccess()
-    // Need to wait briefly for the main queue dispatch in _completeFetch to potentially run
-    let expectation = XCTestExpectation(description: "Wait for potential completion dispatch")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 0.5)
-    XCTAssertTrue(
-      manager.areFlagsReady(), "Features should be ready after successful fetch simulation")
+    setupReadyFlagsAndVerify()
   }
 
   func testAreFeaturesReady_AfterFailedFetchSimulation() {
     simulateFetchFailure()
-    // Need to wait briefly for the main queue dispatch in _completeFetch to potentially run
-    let expectation = XCTestExpectation(description: "Wait for potential completion dispatch")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 0.5)
+    waitBriefly()
     XCTAssertFalse(
       manager.areFlagsReady(), "Features should not be ready after failed fetch simulation")
   }
@@ -387,10 +704,7 @@ class FeatureFlagManagerTests: XCTestCase {
     mockDelegate.options = MixpanelOptions(token: "test", featureFlagsEnabled: false)  // Explicitly disable
     manager.loadFlags()  // Call public API
 
-    // Wait to ensure no async fetch operations started changing state
-    let expectation = XCTestExpectation(description: "Wait briefly")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 0.5)
+    waitBriefly()
 
     XCTAssertFalse(manager.areFlagsReady(), "Flags should not become ready if disabled")
     // We can't easily check if _fetchFlagsIfNeeded was *not* called without more testability hooks
@@ -402,7 +716,7 @@ class FeatureFlagManagerTests: XCTestCase {
   // --- Sync Flag Retrieval Tests ---
 
   func testGetVariantSync_FlagsReady_ExistingFlag() {
-    simulateFetchSuccess()  // Flags loaded
+    setupReadyFlags()
     let flagVariant = manager.getVariantSync("feature_string", fallback: defaultFallback)
     AssertEqual(flagVariant.key, "v_str")
     AssertEqual(flagVariant.value, "test_string")
@@ -410,7 +724,7 @@ class FeatureFlagManagerTests: XCTestCase {
   }
 
   func testGetVariantSync_FlagsReady_MissingFlag_UsesFallback() {
-    simulateFetchSuccess()
+    setupReadyFlags()
     let fallback = MixpanelFlagVariant(key: "fb_key", value: "fb_value")
     let flagVariant = manager.getVariantSync("missing_feature", fallback: fallback)
     AssertEqual(flagVariant.key, fallback.key)
@@ -428,13 +742,13 @@ class FeatureFlagManagerTests: XCTestCase {
   }
 
   func testGetVariantValueSync_FlagsReady() {
-    simulateFetchSuccess()
+    setupReadyFlags()
     let value = manager.getVariantValueSync("feature_int", fallbackValue: -1)
     AssertEqual(value, 101)
   }
 
   func testGetVariantValueSync_FlagsReady_MissingFlag() {
-    simulateFetchSuccess()
+    setupReadyFlags()
     let value = manager.getVariantValueSync("missing_feature", fallbackValue: "default")
     AssertEqual(value, "default")
   }
@@ -446,23 +760,23 @@ class FeatureFlagManagerTests: XCTestCase {
   }
 
   func testIsFlagEnabledSync_FlagsReady_True() {
-    simulateFetchSuccess()
+    setupReadyFlags()
     XCTAssertTrue(manager.isEnabledSync("feature_bool_true"))
   }
 
   func testIsFlagEnabledSync_FlagsReady_False() {
-    simulateFetchSuccess()
+    setupReadyFlags()
     XCTAssertFalse(manager.isEnabledSync("feature_bool_false"))
   }
 
   func testIsFlagEnabledSync_FlagsReady_MissingFlag_UsesFallback() {
-    simulateFetchSuccess()
+    setupReadyFlags()
     XCTAssertTrue(manager.isEnabledSync("missing", fallbackValue: true))
     XCTAssertFalse(manager.isEnabledSync("missing", fallbackValue: false))
   }
 
   func testIsFlagEnabledSync_FlagsReady_NonBoolValue_UsesFallback() {
-    simulateFetchSuccess()
+    setupReadyFlags()
     XCTAssertTrue(manager.isEnabledSync("feature_string", fallbackValue: true))  // String value
     XCTAssertFalse(manager.isEnabledSync("feature_int", fallbackValue: false))  // Int value
     XCTAssertTrue(manager.isEnabledSync("feature_null", fallbackValue: true))  // Null value
@@ -477,95 +791,37 @@ class FeatureFlagManagerTests: XCTestCase {
   // --- Async Flag Retrieval Tests ---
 
   func testGetVariant_Async_FlagsReady_ExistingFlag_XCTWaiter() {
-    // Arrange
-    simulateFetchSuccess()  // Ensure flags are ready
-    let expectation = XCTestExpectation(description: "Async getFeature ready - XCTWaiter Wait")
-    var receivedData: MixpanelFlagVariant?
-    var assertionError: String?
-
-    // Act
-    manager.getVariant("feature_double", fallback: defaultFallback) { data in
-      // This completion should run on the main thread
-      if !Thread.isMainThread {
-        assertionError = "Completion not on main thread (\(Thread.current))"
-      }
-      receivedData = data
-      // Perform crucial checks inside completion
-      if receivedData == nil { assertionError = (assertionError ?? "") + "; Received data was nil" }
-      if receivedData?.key != "v_double" {
-        assertionError = (assertionError ?? "") + "; Received key mismatch"
-      }
-      // Add other essential checks if needed
-      expectation.fulfill()
-    }
-
-    // Assert - Wait using an explicit XCTWaiter instance
-    let waiter = XCTWaiter()
-    let result = waiter.wait(for: [expectation], timeout: 2.0)  // Increased timeout
-
-    // Check waiter result and any errors captured in completion
-    if result != .completed {
-      XCTFail(
-        "XCTWaiter timed out waiting for expectation. Error captured: \(assertionError ?? "None")")
-    } else if let error = assertionError {
-      XCTFail("Assertions failed within completion block: \(error)")
-    }
-
-    // Final check on data after wait
-    // These might be redundant if checked thoroughly in completion, but good final check
+    setupReadyFlags()
+    let receivedData = getVariantAsync("feature_double")
     XCTAssertNotNil(receivedData, "Received data should be non-nil after successful wait")
     AssertEqual(receivedData?.key, "v_double")
     AssertEqual(receivedData?.value, 99.9)
   }
 
   func testGetVariant_Async_FlagsReady_MissingFlag_UsesFallback() {
-    simulateFetchSuccess()  // Flags loaded
-    let expectation = XCTestExpectation(
-      description: "Async getFeature (Flags Ready, Missing) completes")
+    setupReadyFlags()
     let fallback = MixpanelFlagVariant(key: "fb_async", value: -1)
-    var receivedData: MixpanelFlagVariant?
-
-    manager.getVariant("missing_feature", fallback: fallback) { data in
-      XCTAssertTrue(Thread.isMainThread, "Completion should be on main thread")
-      receivedData = data
-      expectation.fulfill()
-    }
-
-    wait(for: [expectation], timeout: 1.0)
-
+    let receivedData = getVariantAsync("missing_feature", fallback: fallback)
     XCTAssertNotNil(receivedData)
     AssertEqual(receivedData?.key, fallback.key)
     AssertEqual(receivedData?.value, fallback.value)
-    // Check delegate tracking after wait (should not have tracked)
     XCTAssertEqual(mockDelegate.trackedEvents.count, 0, "Should not track fallback")
   }
 
   // Test fetch triggering and completion via getFeature when not ready
   func testGetVariant_Async_FlagsNotReady_FetchSuccess() {
     XCTAssertFalse(manager.areFlagsReady())
-    let expectation = XCTestExpectation(
-      description: "Async getFeature (Flags Not Ready) triggers fetch and succeeds")
-    var receivedData: MixpanelFlagVariant?
 
     // Setup tracking expectation *before* calling getFeature
-    mockDelegate.trackExpectation = XCTestExpectation(
-      description: "Tracking call for fetch success")
+    mockDelegate.trackExpectation = XCTestExpectation(description: "Tracking call for fetch success")
 
-    // Call getFeature - this should trigger the fetch logic internally
-    manager.getVariant("feature_int", fallback: defaultFallback) { data in
-      XCTAssertTrue(Thread.isMainThread, "Completion should be on main thread")
-      receivedData = data
-      expectation.fulfill()  // Fulfill main expectation
-    }
+    let receivedData = getVariantAsync("feature_int", timeout: 3.0)
 
-    // MockFeatureFlagManager will automatically handle the fetch simulation
-    // No need for manual simulateFetchSuccess() - the mock handles it with delay
-
-    // Wait for BOTH the getFeature completion AND the tracking expectation
-    wait(for: [expectation, mockDelegate.trackExpectation!], timeout: 3.0)  // Increased timeout
+    // Wait for tracking to complete
+    wait(for: [mockDelegate.trackExpectation!], timeout: 3.0)
 
     XCTAssertNotNil(receivedData)
-    AssertEqual(receivedData?.key, "v_int")  // Check correct flag data received
+    AssertEqual(receivedData?.key, "v_int")
     AssertEqual(receivedData?.value, 101)
     XCTAssertTrue(manager.areFlagsReady(), "Flags should be ready after successful fetch")
     XCTAssertEqual(mockDelegate.trackedEvents.count, 1, "Tracking event should have been recorded")
@@ -573,27 +829,11 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testGetVariant_Async_FlagsNotReady_FetchFailure() {
     // Configure mock to simulate failure for this test
-    if let mockManager = manager as? MockFeatureFlagManager {
-      mockManager.simulatedFetchResult = (success: false, flags: nil)
-    }
+    configureMockFetch(success: false, flags: nil)
 
     XCTAssertFalse(manager.areFlagsReady())
-    let expectation = XCTestExpectation(
-      description: "Async getFeature (Flags Not Ready) triggers fetch and fails")
     let fallback = MixpanelFlagVariant(key: "fb_fail", value: "failed_fetch")
-    var receivedData: MixpanelFlagVariant?
-
-    // Call getFeature - mock will simulate failure automatically
-    manager.getVariant("feature_string", fallback: fallback) { data in
-      XCTAssertTrue(Thread.isMainThread, "Completion should be on main thread")
-      receivedData = data
-      expectation.fulfill()
-    }
-
-    // MockFeatureFlagManager will automatically simulate failure
-    // No need for manual simulateFetchFailure()
-
-    wait(for: [expectation], timeout: 3.0)
+    let receivedData = getVariantAsync("feature_string", fallback: fallback, timeout: 3.0)
 
     XCTAssertNotNil(receivedData)
     AssertEqual(receivedData?.key, fallback.key)  // Should receive fallback
@@ -603,9 +843,7 @@ class FeatureFlagManagerTests: XCTestCase {
       mockDelegate.trackedEvents.count, 0, "Should not track on fetch failure/fallback")
 
     // Reset mock configuration back to success for other tests
-    if let mockManager = manager as? MockFeatureFlagManager {
-      mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
-    }
+    resetMockToSuccess()
   }
 
   // --- Tracking Tests ---
@@ -654,80 +892,33 @@ class FeatureFlagManagerTests: XCTestCase {
   }
 
   func testTracking_SendsCorrectProperties() {
-    simulateFetchSuccess()
-    mockDelegate.trackExpectation = XCTestExpectation(
-      description: "Track called for properties check")
-
-    _ = manager.getVariantSync("feature_int", fallback: defaultFallback)  // Trigger tracking
-
-    wait(for: [mockDelegate.trackExpectation!], timeout: 1.0)
-
-    XCTAssertEqual(mockDelegate.trackedEvents.count, 1)
-    let tracked = mockDelegate.trackedEvents[0]
-    XCTAssertEqual(tracked.event, "$experiment_started")
-    XCTAssertNotNil(tracked.properties)
-
-    let props = tracked.properties!
-    AssertEqual(props["Experiment name"] ?? nil, "feature_int")
-    AssertEqual(props["Variant name"] ?? nil, "v_int")
-    AssertEqual(props["$experiment_type"] ?? nil, "feature_flag")
-
-    // Check timing properties are included (values may be nil if not set)
-    XCTAssertTrue(props.keys.contains("timeLastFetched"), "Should include timeLastFetched property")
-    XCTAssertTrue(props.keys.contains("fetchLatencyMs"), "Should include fetchLatencyMs property")
+    setupReadyFlags()
+    expectTracking {
+      _ = manager.getVariantSync("feature_int", fallback: defaultFallback)
+    }
+    verifyTrackedEvent(experimentName: "feature_int", variantName: "v_int", checkTimingProperties: true)
   }
 
   func testTracking_IncludesTimingProperties() {
-    simulateFetchSuccess()
-    mockDelegate.trackExpectation = XCTestExpectation(
-      description: "Track called with timing properties")
-
-    _ = manager.getVariantSync("feature_string", fallback: defaultFallback)  // Trigger tracking
-
-    wait(for: [mockDelegate.trackExpectation!], timeout: 1.0)
-
-    XCTAssertEqual(mockDelegate.trackedEvents.count, 1)
-    let tracked = mockDelegate.trackedEvents[0]
-    let props = tracked.properties!
-
-    // Verify timing properties have expected values
-    if let timeLastFetched = props["timeLastFetched"] as? Int {
-      XCTAssertGreaterThan(timeLastFetched, 0, "timeLastFetched should be a positive timestamp")
-    } else {
-      XCTFail("timeLastFetched should be present and be an Int")
+    setupReadyFlags()
+    expectTracking {
+      _ = manager.getVariantSync("feature_string", fallback: defaultFallback)
     }
-
-    if let fetchLatencyMs = props["fetchLatencyMs"] as? Int {
-      XCTAssertEqual(fetchLatencyMs, 150, "fetchLatencyMs should match simulated value")
-    } else {
-      XCTFail("fetchLatencyMs should be present and be an Int")
-    }
+    verifyTrackedEvent(experimentName: "feature_string", variantName: "v_str", checkTimingProperties: true, expectedLatency: 150)
   }
 
   func testTracking_DoesNotTrackForFallback_Sync() {
-    simulateFetchSuccess()  // Flags ready
-    _ = manager.getVariantSync(
-      "missing_feature", fallback: MixpanelFlagVariant(key: "fb", value: "v"))  // Request missing flag
-    // Wait briefly to ensure no unexpected tracking call
-    let expectation = XCTestExpectation(description: "Wait briefly for no track")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 0.5)
+    setupReadyFlags()
+    _ = manager.getVariantSync("missing_feature", fallback: MixpanelFlagVariant(key: "fb", value: "v"))
+    waitBriefly()
     XCTAssertEqual(
       mockDelegate.trackedEvents.count, 0,
       "Track should not be called when a fallback is used (sync)")
   }
 
   func testTracking_DoesNotTrackForFallback_Async() {
-    simulateFetchSuccess()  // Flags ready
-    let expectation = XCTestExpectation(description: "Async getFeature (Fallback) completes")
-
-    manager.getVariant("missing_feature", fallback: MixpanelFlagVariant(key: "fb", value: "v")) {
-      _ in
-      expectation.fulfill()
-    }
-
-    wait(for: [expectation], timeout: 1.0)
-    // Check delegate tracking after wait
+    setupReadyFlags()
+    getVariantAsync("missing_feature", fallback: MixpanelFlagVariant(key: "fb", value: "v"))
     XCTAssertEqual(
       mockDelegate.trackedEvents.count, 0,
       "Track should not be called when a fallback is used (async)")
@@ -1793,143 +1984,80 @@ class FeatureFlagManagerTests: XCTestCase {
   // MARK: First-Time Event Matching Tests
 
   func testFirstTimeEventMatching_ExactNameMatch() {
-    // Set up mock with pending event
-    if let mockManager = manager as? MockFeatureFlagManager {
-      let pendingVariant = MixpanelFlagVariant(
-        key: "activated", value: true, isExperimentActive: true, isQATester: false, experimentID: "exp-123")
+    let pendingVariant = createExperimentVariant(key: "activated", value: true, experimentID: "exp-123")
+    let initialVariant = createControlVariant(value: false)
 
-      let pendingEvent = createPendingEvent(
-        flagKey: "welcome-modal",
-        eventName: "Dashboard Viewed",
-        filters: nil,
-        pendingVariant: pendingVariant
-      )
-
-      mockManager.accessQueue.sync {
-        mockManager.flags = ["welcome-modal": MixpanelFlagVariant(key: "control", value: false)]
-        mockManager.pendingFirstTimeEvents = ["welcome-modal:hash123": pendingEvent]
-      }
-
-      // Trigger the event
-      mockManager.checkFirstTimeEvents(eventName: "Dashboard Viewed", properties: [:])
-
-      // Wait for async processing
-      let expectation = XCTestExpectation(description: "Event processing completes")
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
-      wait(for: [expectation], timeout: 1.0)
-
-      // Verify variant was switched
-      mockManager.accessQueue.sync {
-        let flag = mockManager.flags?["welcome-modal"]
-        XCTAssertEqual(flag?.key, "activated")
-        XCTAssertEqual(flag?.value as? Bool, true)
-        XCTAssertTrue(mockManager.activatedFirstTimeEvents.contains("welcome-modal:hash123"))
-      }
+    setupAndTriggerFirstTimeEvent(
+      flagKey: "welcome-modal",
+      eventName: "Dashboard Viewed",
+      pendingVariant: pendingVariant,
+      initialVariant: initialVariant
+    ) { mockMgr in
+      let flag = mockMgr.flags?["welcome-modal"]
+      XCTAssertEqual(flag?.key, "activated")
+      XCTAssertEqual(flag?.value as? Bool, true)
+      XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("welcome-modal:hash123"))
     }
   }
 
   func testFirstTimeEventMatching_WithPropertyFilters() {
-    // Set up mock with pending event that has property filters
-    if let mockManager = manager as? MockFeatureFlagManager {
-      let pendingVariant = MixpanelFlagVariant(
-        key: "premium", value: ["discount": 20], isExperimentActive: true, isQATester: false, experimentID: "exp-456")
+    let pendingVariant = createExperimentVariant(key: "premium", value: ["discount": 20], experimentID: "exp-456")
+    let initialVariant = createControlVariant(value: nil)
+    let filters: [String: Any] = [">": [["var": "properties.amount"], 100]]
 
-      let filters: [String: Any] = [">": [["var": "properties.amount"], 100]]
-
-      let pendingEvent = createPendingEvent(
-        flagKey: "premium-welcome",
-        eventName: "Purchase Complete",
-        filters: filters,
-        pendingVariant: pendingVariant
-      )
-
-      mockManager.accessQueue.sync {
-        mockManager.flags = ["premium-welcome": MixpanelFlagVariant(key: "control", value: nil)]
-        mockManager.pendingFirstTimeEvents = ["premium-welcome:hash456": pendingEvent]
-      }
-
-      // Trigger event with amount > 100 (should match)
-      mockManager.checkFirstTimeEvents(eventName: "Purchase Complete", properties: ["amount": 150])
-
-      let expectation = XCTestExpectation(description: "Event processing completes")
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
-      wait(for: [expectation], timeout: 1.0)
-
-      // Verify variant was switched
-      mockManager.accessQueue.sync {
-        let flag = mockManager.flags?["premium-welcome"]
-        XCTAssertEqual(flag?.key, "premium")
-        XCTAssertTrue(mockManager.activatedFirstTimeEvents.contains("premium-welcome:hash456"))
-      }
+    setupAndTriggerFirstTimeEvent(
+      flagKey: "premium-welcome",
+      eventName: "Purchase Complete",
+      eventProperties: ["amount": 150],
+      filters: filters,
+      pendingVariant: pendingVariant,
+      initialVariant: initialVariant,
+      cohortHash: "hash456"
+    ) { mockMgr in
+      let flag = mockMgr.flags?["premium-welcome"]
+      XCTAssertEqual(flag?.key, "premium")
+      XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("premium-welcome:hash456"))
     }
   }
 
   func testFirstTimeEventMatching_PropertyFilterNoMatch() {
-    // Set up mock with pending event that has property filters
-    if let mockManager = manager as? MockFeatureFlagManager {
-      let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
+    let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
+    let initialVariant = createControlVariant(value: false)
+    let filters: [String: Any] = [">": [["var": "properties.amount"], 100]]
 
-      let filters: [String: Any] = [">": [["var": "properties.amount"], 100]]
-
-      let pendingEvent = createPendingEvent(
-        flagKey: "premium-welcome",
-        eventName: "Purchase Complete",
-        filters: filters,
-        pendingVariant: pendingVariant
-      )
-
-      mockManager.accessQueue.sync {
-        mockManager.flags = ["premium-welcome": MixpanelFlagVariant(key: "control", value: false)]
-        mockManager.pendingFirstTimeEvents = ["premium-welcome:hash456": pendingEvent]
-      }
-
-      // Trigger event with amount < 100 (should NOT match)
-      mockManager.checkFirstTimeEvents(eventName: "Purchase Complete", properties: ["amount": 50])
-
-      let expectation = XCTestExpectation(description: "Event processing completes")
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
-      wait(for: [expectation], timeout: 1.0)
-
-      // Verify variant was NOT switched
-      mockManager.accessQueue.sync {
-        let flag = mockManager.flags?["premium-welcome"]
-        XCTAssertEqual(flag?.key, "control")
-        XCTAssertFalse(mockManager.activatedFirstTimeEvents.contains("premium-welcome:hash456"))
-      }
+    // Trigger event with amount < 100 (should NOT match)
+    setupAndTriggerFirstTimeEvent(
+      flagKey: "premium-welcome",
+      eventName: "Purchase Complete",
+      eventProperties: ["amount": 50],
+      filters: filters,
+      pendingVariant: pendingVariant,
+      initialVariant: initialVariant,
+      cohortHash: "hash456"
+    ) { mockMgr in
+      let flag = mockMgr.flags?["premium-welcome"]
+      XCTAssertEqual(flag?.key, "control")
+      XCTAssertFalse(mockMgr.activatedFirstTimeEvents.contains("premium-welcome:hash456"))
     }
   }
 
   func testFirstTimeEventMatching_CaseInsensitiveProperties() {
-    // Test that property matching is case-insensitive
-    if let mockManager = manager as? MockFeatureFlagManager {
-      let pendingVariant = MixpanelFlagVariant(key: "matched", value: true)
+    let pendingVariant = MixpanelFlagVariant(key: "matched", value: true)
+    let initialVariant = createControlVariant(value: false)
+    let filters: [String: Any] = ["==": [["var": "properties.plan"], "PREMIUM"]]
 
-      let filters: [String: Any] = ["==": [["var": "properties.plan"], "PREMIUM"]]
-
-      let pendingEvent = createPendingEvent(
-        flagKey: "case-test",
-        eventName: "Test Event",
-        filters: filters,
-        pendingVariant: pendingVariant
-      )
-
-      mockManager.accessQueue.sync {
-        mockManager.flags = ["case-test": MixpanelFlagVariant(key: "control", value: false)]
-        mockManager.pendingFirstTimeEvents = ["case-test:hash789": pendingEvent]
-      }
-
-      // Trigger event with lowercase plan (should match due to case-insensitive comparison)
-      mockManager.checkFirstTimeEvents(eventName: "Test Event", properties: ["plan": "premium"])
-
-      let expectation = XCTestExpectation(description: "Event processing completes")
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
-      wait(for: [expectation], timeout: 1.0)
-
-      // Verify variant was switched
-      mockManager.accessQueue.sync {
-        let flag = mockManager.flags?["case-test"]
-        XCTAssertEqual(flag?.key, "matched")
-      }
+    // Trigger event with lowercase plan (should match due to case-insensitive comparison)
+    setupAndTriggerFirstTimeEvent(
+      flagKey: "case-test",
+      eventName: "Test Event",
+      eventProperties: ["plan": "premium"],
+      filters: filters,
+      pendingVariant: pendingVariant,
+      initialVariant: initialVariant,
+      cohortHash: "hash789"
+    ) { mockMgr in
+      let flag = mockMgr.flags?["case-test"]
+      XCTAssertEqual(flag?.key, "matched")
     }
   }
 

@@ -599,7 +599,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   }
 
   // --- Flag Merging Helper ---
-  private func mergeFlags(
+  func mergeFlags(
     responseFlags: [String: MixpanelFlagVariant]?,
     responsePendingEvents: [PendingFirstTimeEvent]?
   ) -> (flags: [String: MixpanelFlagVariant], pendingEvents: [String: PendingFirstTimeEvent]) {

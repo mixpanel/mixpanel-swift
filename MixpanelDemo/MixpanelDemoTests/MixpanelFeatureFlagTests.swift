@@ -228,8 +228,13 @@ class MockFeatureFlagManager: FeatureFlagManager {
       self.accessQueue.async { [weak self] in
         guard let self = self else { return }
 
-        // Mimic the real implementation's behavior
-        self.flags = flags ?? [:]
+        // Mimic the real implementation's behavior - use mergeFlags like the real impl
+        let (mergedFlags, mergedPendingEvents) = self.mergeFlags(
+          responseFlags: flags,
+          responsePendingEvents: nil
+        )
+        self.flags = mergedFlags
+        self.pendingFirstTimeEvents = mergedPendingEvents
 
         // Calculate timing metrics like the real implementation
         let latencyMs = Int(fetchEndTime.timeIntervalSince(startTime) * 1000)

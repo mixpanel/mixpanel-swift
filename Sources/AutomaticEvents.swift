@@ -50,6 +50,14 @@ protocol AEDelegate: AnyObject {
       autoreleaseFrequency: .workItem)
 
     func initializeEvents(instanceName: String) {
+      // Defer UserDefaults access to avoid interfering with SwiftUI's
+      // initialization (e.g., accent color resolution)
+      DispatchQueue.main.async { [weak self] in
+        self?.setupAutomaticEvents(instanceName: instanceName)
+      }
+    }
+
+    private func setupAutomaticEvents(instanceName: String) {
       let legacyFirstOpenKey = "MPFirstOpen"
       let firstOpenKey = "MPFirstOpen-\(instanceName)"
       // do not track `$ae_first_open` again if the legacy key exist,

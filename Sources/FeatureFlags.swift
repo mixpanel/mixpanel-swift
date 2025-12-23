@@ -86,7 +86,7 @@ struct PendingFirstTimeEvent: Decodable {
     let flagKey: String
     let flagId: String
     let projectId: Int
-    let cohortHash: String
+    let firstTimeEventHash: String
     let eventName: String
     let propertyFilters: [String: Any]?
     let pendingVariant: MixpanelFlagVariant
@@ -95,7 +95,7 @@ struct PendingFirstTimeEvent: Decodable {
         case flagKey = "flag_key"
         case flagId = "flag_id"
         case projectId = "project_id"
-        case cohortHash = "cohort_hash"
+        case firstTimeEventHash = "first_time_event_hash"
         case eventName = "event_name"
         case propertyFilters = "property_filters"
         case pendingVariant = "pending_variant"
@@ -106,7 +106,7 @@ struct PendingFirstTimeEvent: Decodable {
         flagKey = try container.decode(String.self, forKey: .flagKey)
         flagId = try container.decode(String.self, forKey: .flagId)
         projectId = try container.decode(Int.self, forKey: .projectId)
-        cohortHash = try container.decode(String.self, forKey: .cohortHash)
+        firstTimeEventHash = try container.decode(String.self, forKey: .firstTimeEventHash)
         eventName = try container.decode(String.self, forKey: .eventName)
         pendingVariant = try container.decode(MixpanelFlagVariant.self, forKey: .pendingVariant)
 
@@ -269,8 +269,8 @@ class FeatureFlagManager: Network, MixpanelFlags {
   private var fetchCompletionHandlers: [(Bool) -> Void] = []
 
   // First-time event targeting state
-  internal var pendingFirstTimeEvents: [String: PendingFirstTimeEvent] = [:]  // Keyed by "flagKey:cohortHash"
-  internal var activatedFirstTimeEvents: Set<String> = Set()  // Stores "flagKey:cohortHash" keys
+  internal var pendingFirstTimeEvents: [String: PendingFirstTimeEvent] = [:]  // Keyed by "flagKey:firstTimeEventHash"
+  internal var activatedFirstTimeEvents: Set<String> = Set()  // Stores "flagKey:firstTimeEventHash" keys
 
   // Timing tracking properties
   private var fetchStartTime: Date?
@@ -627,7 +627,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     // Process pending first-time events from response
     if let responsePendingEvents = responsePendingEvents {
       for pendingEvent in responsePendingEvents {
-        let eventKey = self.getPendingEventKey(pendingEvent.flagKey, pendingEvent.cohortHash)
+        let eventKey = self.getPendingEventKey(pendingEvent.flagKey, pendingEvent.firstTimeEventHash)
 
         // Skip if already activated
         if self.activatedFirstTimeEvents.contains(eventKey) {
@@ -783,8 +783,8 @@ class FeatureFlagManager: Network, MixpanelFlags {
   }
 
   /// Generate a unique key for a pending first-time event
-  private func getPendingEventKey(_ flagKey: String, _ cohortHash: String) -> String {
-    return "\(flagKey):\(cohortHash)"
+  private func getPendingEventKey(_ flagKey: String, _ firstTimeEventHash: String) -> String {
+    return "\(flagKey):\(firstTimeEventHash)"
   }
 
   /// Extract the flag key from a pending event key
@@ -858,14 +858,14 @@ class FeatureFlagManager: Network, MixpanelFlags {
         self.recordFirstTimeEvent(
           flagId: pendingEvent.flagId,
           projectId: pendingEvent.projectId,
-          cohortHash: pendingEvent.cohortHash
+          firstTimeEventHash: pendingEvent.firstTimeEventHash
         )
       }
     }
   }
 
   /// Records a first-time event activation to the backend
-  internal func recordFirstTimeEvent(flagId: String, projectId: Int, cohortHash: String) {
+  internal func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String) {
     guard let delegate = self.delegate else {
       print("Error: Delegate missing for recording first-time event")
       return
@@ -874,10 +874,15 @@ class FeatureFlagManager: Network, MixpanelFlags {
     let distinctId = delegate.getDistinctId()
     let url = "/flags/\(flagId)/first-time-events"
 
+    let queryItems = [
+      URLQueryItem(name: "mp_lib", value: "swift"),
+      URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion())
+    ]
+
     let payload: [String: Any] = [
       "distinct_id": distinctId,
       "project_id": projectId,
-      "cohort_hash": cohortHash
+      "first_time_event_hash": firstTimeEventHash
     ]
 
     guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
@@ -896,6 +901,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
       path: url,
       method: .post,
       requestBody: jsonData,
+      queryItems: queryItems,
       headers: headers,
       parse: responseParser
     )

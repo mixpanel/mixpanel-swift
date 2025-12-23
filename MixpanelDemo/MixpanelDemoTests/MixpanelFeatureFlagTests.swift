@@ -128,7 +128,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
   var recordFirstTimeEventCallCount = 0
   var lastRecordedFlagId: String?
   var lastRecordedProjectId: Int?
-  var lastRecordedCohortHash: String?
+  var lastRecordedFirstTimeEventHash: String?
 
   // Override the now-internal method to prevent real network calls
   override func _performFetchRequest() {
@@ -253,11 +253,11 @@ class MockFeatureFlagManager: FeatureFlagManager {
   }
 
   // Override recordFirstTimeEvent to prevent real network calls and track invocations
-  override func recordFirstTimeEvent(flagId: String, projectId: Int, cohortHash: String) {
+  override func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String) {
     recordFirstTimeEventCallCount += 1
     lastRecordedFlagId = flagId
     lastRecordedProjectId = projectId
-    lastRecordedCohortHash = cohortHash
+    lastRecordedFirstTimeEventHash = firstTimeEventHash
 
     print("MockFeatureFlagManager: Intercepted recordFirstTimeEvent call #\(recordFirstTimeEventCallCount) for flag: \(flagId)")
 
@@ -638,7 +638,7 @@ class FeatureFlagManagerTests: XCTestCase {
     filters: [String: Any]? = nil,
     pendingVariant: MixpanelFlagVariant,
     initialVariant: MixpanelFlagVariant? = nil,
-    cohortHash: String = "hash123",
+    firstTimeEventHash: String = "hash123",
     validation: ((MockFeatureFlagManager) -> Void)? = nil
   ) {
     guard let mockMgr = mockManager else {
@@ -653,12 +653,12 @@ class FeatureFlagManagerTests: XCTestCase {
       pendingVariant: pendingVariant
     )
 
-    let cohortKey = "\(flagKey):\(cohortHash)"
+    let eventKey = "\(flagKey):\(firstTimeEventHash)"
 
     mockMgr.accessQueue.sync {
       let initial = initialVariant ?? createControlVariant()
       mockMgr.flags = [flagKey: initial]
-      mockMgr.pendingFirstTimeEvents = [cohortKey: pendingEvent]
+      mockMgr.pendingFirstTimeEvents = [eventKey: pendingEvent]
     }
 
     mockMgr.checkFirstTimeEvents(eventName: eventName, properties: eventProperties)
@@ -1933,7 +1933,7 @@ class FeatureFlagManagerTests: XCTestCase {
           "flag_key": "test-flag",
           "flag_id": "flag-123",
           "project_id": 3,
-          "cohort_hash": "abc123",
+          "first_time_event_hash": "abc123",
           "event_name": "Purchase Complete",
           "property_filters": {
             ">": [{"var": "properties.amount"}, 100]
@@ -1959,7 +1959,7 @@ class FeatureFlagManagerTests: XCTestCase {
       XCTAssertEqual(pendingEvent.flagKey, "test-flag")
       XCTAssertEqual(pendingEvent.flagId, "flag-123")
       XCTAssertEqual(pendingEvent.projectId, 3)
-      XCTAssertEqual(pendingEvent.cohortHash, "abc123")
+      XCTAssertEqual(pendingEvent.firstTimeEventHash, "abc123")
       XCTAssertEqual(pendingEvent.eventName, "Purchase Complete")
       XCTAssertNotNil(pendingEvent.propertyFilters)
       XCTAssertEqual(pendingEvent.pendingVariant.key, "treatment")
@@ -2017,7 +2017,7 @@ class FeatureFlagManagerTests: XCTestCase {
       filters: filters,
       pendingVariant: pendingVariant,
       initialVariant: initialVariant,
-      cohortHash: "hash456"
+      firstTimeEventHash: "hash456"
     ) { mockMgr in
       let flag = mockMgr.flags?["premium-welcome"]
       XCTAssertEqual(flag?.key, "premium")
@@ -2038,7 +2038,7 @@ class FeatureFlagManagerTests: XCTestCase {
       filters: filters,
       pendingVariant: pendingVariant,
       initialVariant: initialVariant,
-      cohortHash: "hash456"
+      firstTimeEventHash: "hash456"
     ) { mockMgr in
       let flag = mockMgr.flags?["premium-welcome"]
       XCTAssertEqual(flag?.key, "control")
@@ -2059,7 +2059,7 @@ class FeatureFlagManagerTests: XCTestCase {
       filters: filters,
       pendingVariant: pendingVariant,
       initialVariant: initialVariant,
-      cohortHash: "hash789"
+      firstTimeEventHash: "hash789"
     ) { mockMgr in
       let flag = mockMgr.flags?["case-test"]
       XCTAssertEqual(flag?.key, "matched")
@@ -2106,7 +2106,7 @@ class FeatureFlagManagerTests: XCTestCase {
         // Verify the correct parameters were recorded
         XCTAssertEqual(mockManager.lastRecordedFlagId, "test-flag-id")
         XCTAssertEqual(mockManager.lastRecordedProjectId, 1)
-        XCTAssertEqual(mockManager.lastRecordedCohortHash, "hash123")
+        XCTAssertEqual(mockManager.lastRecordedFirstTimeEventHash, "hash123")
       }
     }
   }
@@ -2181,7 +2181,7 @@ class FeatureFlagManagerTests: XCTestCase {
       "flag_key": flagKey,
       "flag_id": "test-flag-id",
       "project_id": 1,
-      "cohort_hash": "hash123",
+      "first_time_event_hash": "hash123",
       "event_name": eventName,
       "property_filters": filters as Any,
       "pending_variant": [

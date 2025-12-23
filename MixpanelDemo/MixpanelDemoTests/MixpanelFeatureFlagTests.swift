@@ -2066,6 +2066,43 @@ class FeatureFlagManagerTests: XCTestCase {
     }
   }
 
+  func testFirstTimeEventMatching_EventNameMismatch() {
+    guard let mockMgr = mockManager else {
+      XCTFail("Manager is not a MockFeatureFlagManager")
+      return
+    }
+
+    let pendingVariant = createExperimentVariant(key: "activated", value: true, experimentID: "exp-789")
+    let initialVariant = createControlVariant(value: false)
+
+    // Set up pending event for "Purchase Complete" (with specific case)
+    let pendingEvent = createPendingEvent(
+      flagKey: "purchase-modal",
+      eventName: "Purchase Complete",
+      filters: nil,
+      pendingVariant: pendingVariant
+    )
+
+    let eventKey = "purchase-modal:hash999"
+
+    mockMgr.accessQueue.sync {
+      mockMgr.flags = ["purchase-modal": initialVariant]
+      mockMgr.pendingFirstTimeEvents = [eventKey: pendingEvent]
+    }
+
+    // Trigger event with different case - should NOT match (case-sensitive)
+    mockMgr.checkFirstTimeEvents(eventName: "purchase complete", properties: [:])
+    waitBriefly(timeout: 1.0)
+
+    mockMgr.accessQueue.sync {
+      let flag = mockMgr.flags?["purchase-modal"]
+      // Should remain at control variant since event name doesn't match
+      XCTAssertEqual(flag?.key, "control")
+      XCTAssertEqual(flag?.value as? Bool, false)
+      XCTAssertFalse(mockMgr.activatedFirstTimeEvents.contains(eventKey))
+    }
+  }
+
   // MARK: Activation State Tests
 
   func testFirstTimeEventActivatesOnlyOnce() {

@@ -794,8 +794,17 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   // MARK: - First-Time Event Checking
 
-  /// Checks if a tracked event matches any pending first-time events and activates the corresponding variant
+  /// Checks if a tracked event matches any pending first-time events and activates the corresponding variant.
+  ///
+  /// - Note:
+  ///   This method is **asynchronous** with respect to the caller. It dispatches its work onto
+  ///   `accessQueue` and returns immediately, without waiting for first-time event processing to
+  ///   complete. As a result, there is a short window during which a subsequent `getVariant` call
+  ///   may not yet observe the newly activated variant. Callers should not rely on immediate
+  ///   visibility of first-time event activations in the same synchronous call chain.
   func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
+    // Intentionally execute on `accessQueue` asynchronously to avoid blocking the tracking path.
+    // This means activation is eventually consistent rather than immediately visible to readers.
     accessQueue.async { [weak self] in
       guard let self = self else { return }
 

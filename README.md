@@ -67,9 +67,9 @@ Check out the [Carthage docs](https://github.com/Carthage/Carthage#if-youre-buil
 
 ### Dependencies
 
-The Mixpanel Swift SDK includes the following third-party dependency:
+The Mixpanel Swift SDK includes the following third-party dependencies:
 
-- **json-logic-swift** (v1.2.0+) - Used for evaluating property filters in first-time event targeting for Feature Flags. This library enables the SDK to perform complex conditional logic on event properties when determining whether a tracked event matches a first-time event targeting rule.
+- **json-logic-swift** (v1.2.0+) - Used for evaluating property filters in first-time event targeting for Feature Flags.
 
 This dependency is automatically managed by your package manager (Swift Package Manager, CocoaPods, or Carthage) and does not require manual installation.
 

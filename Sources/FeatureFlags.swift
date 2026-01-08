@@ -238,14 +238,6 @@ public protocol MixpanelFlags {
   ///   - completion: A closure that is called with the boolean result.
   ///                 This closure will be executed on the main dispatch queue.
   func isEnabled(_ flagName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void)
-
-  /// Checks if a tracked event matches any pending first-time events and activates the corresponding variant.
-  /// This method is called automatically from the tracking flow.
-  ///
-  /// - Parameters:
-  ///   - eventName: The name of the tracked event
-  ///   - properties: The properties associated with the event
-  func checkFirstTimeEvents(eventName: String, properties: [String: Any])
 }
 
 // --- FeatureFlagManager Class ---
@@ -254,15 +246,10 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   weak var delegate: MixpanelFlagDelegate?
 
-  // *** Use a SERIAL queue for automatic state serialization ***
-  private static let accessQueueKey = DispatchSpecificKey<Int>()
-  let accessQueue: DispatchQueue = {
-    let queue = DispatchQueue(label: "com.mixpanel.featureflagmanager.serialqueue")
-    queue.setSpecific(key: FeatureFlagManager.accessQueueKey, value: 1)
-    return queue
-  }()
+  // Thread safety using ReadWriteLock (consistent with Track, People, MixpanelInstance)
+  private let flagsLock = ReadWriteLock(label: "com.mixpanel.featureflagmanager")
 
-  // Internal State - Protected by accessQueue
+  // Internal State - Protected by flagsLock
   var flags: [String: MixpanelFlagVariant]? = nil
   var isFetching: Bool = false
   private var trackedFeatures: Set<String> = Set()
@@ -270,7 +257,11 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   // First-time event targeting state
   internal var pendingFirstTimeEvents: [String: PendingFirstTimeEvent] = [:]  // Keyed by "flagKey:firstTimeEventHash"
-  internal var activatedFirstTimeEvents: Set<String> = Set()  // Stores "flagKey:firstTimeEventHash" keys
+
+  /// Stores "flagKey:firstTimeEventHash" keys for activated first-time events.
+  /// This set grows throughout the session as events are activated.
+  /// It is session-scoped and cleared on app restart.
+  internal var activatedFirstTimeEvents: Set<String> = Set()
 
   // Timing tracking properties
   private var fetchStartTime: Date?
@@ -295,15 +286,17 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   func loadFlags() {
     // Dispatch fetch trigger to allow caller to continue
-    // Using the serial queue itself for this background task is fine
-    accessQueue.async { [weak self] in
+    DispatchQueue.global(qos: .utility).async { [weak self] in
       self?._fetchFlagsIfNeeded(completion: nil)
     }
   }
 
   func areFlagsReady() -> Bool {
-    // Simple sync read - serial queue ensures this is safe
-    accessQueue.sync { flags != nil }
+    var result: Bool = false
+    flagsLock.read {
+      result = (flags != nil)
+    }
+    return result
   }
 
   // --- Sync Flag Retrieval ---
@@ -314,25 +307,24 @@ class FeatureFlagManager: Network, MixpanelFlags {
     var capturedTimeLastFetched: Date?
     var capturedFetchLatencyMs: Int?
 
-    // === Serial Queue: Single Sync Block for Read AND Track Update ===
-    accessQueue.sync {
+    // Use write lock to perform atomic check-and-set for tracking
+    flagsLock.write {
       guard let currentFlags = self.flags else { return }
 
       if let variant = currentFlags[flagName] {
         flagVariant = variant
 
-        // Perform atomic check-and-set for tracking *within the same sync block*
+        // Perform atomic check-and-set for tracking
         if !self.trackedFeatures.contains(flagName) {
           self.trackedFeatures.insert(flagName)
           tracked = true
-          // Capture timing data while on queue
+          // Capture timing data while in lock
           capturedTimeLastFetched = self.timeLastFetched
           capturedFetchLatencyMs = self.fetchLatencyMs
         }
       }
       // If flag wasn't found, flagVariant remains nil
     }
-    // === End Sync Block ===
 
     // Now, process the results outside the lock
 
@@ -348,7 +340,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
       }
       return foundVariant
     } else {
-      print("Info: Flag '\(flagName)' not found or flags not ready. Returning fallback.")
+      MixpanelLogger.info(message: "Flag '\(flagName)' not found or flags not ready. Returning fallback.")
       return fallback
     }
   }
@@ -359,30 +351,28 @@ class FeatureFlagManager: Network, MixpanelFlags {
     _ flagName: String, fallback: MixpanelFlagVariant,
     completion: @escaping (MixpanelFlagVariant) -> Void
   ) {
-    accessQueue.async { [weak self] in  // Block A runs serially on accessQueue
+    DispatchQueue.global(qos: .utility).async { [weak self] in
       guard let self = self else { return }
 
       var flagVariant: MixpanelFlagVariant?
       var needsTrackingCheck = false
       var flagsAreCurrentlyReady = false
 
-      // === Access state DIRECTLY within the async block ===
-      // No inner sync needed - we are already synchronized by the serial queue
-      flagsAreCurrentlyReady = (self.flags != nil)
-      if flagsAreCurrentlyReady, let currentFlags = self.flags {
-        if let variant = currentFlags[flagName] {
-          flagVariant = variant
-          // Also safe to access trackedFeatures directly here
-          needsTrackingCheck = !self.trackedFeatures.contains(flagName)
+      // Read state with lock
+      self.flagsLock.read {
+        flagsAreCurrentlyReady = (self.flags != nil)
+        if flagsAreCurrentlyReady, let currentFlags = self.flags {
+          if let variant = currentFlags[flagName] {
+            flagVariant = variant
+            needsTrackingCheck = !self.trackedFeatures.contains(flagName)
+          }
         }
       }
-      // === State access finished ===
 
       if flagsAreCurrentlyReady {
         let result = flagVariant ?? fallback
         if flagVariant != nil, needsTrackingCheck {
-          // Perform atomic check-and-track. _trackFeatureIfNeeded uses its
-          // own sync block, which is safe to call from here (it's not nested).
+          // Perform atomic check-and-track
           self._trackFlagIfNeeded(flagName: flagName, variant: result)
         }
         DispatchQueue.main.async { completion(result) }
@@ -390,7 +380,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
       } else {
         // --- Flags were NOT ready ---
         // Trigger fetch; fetch completion will handle calling the original completion handler
-        print("Flags not ready, attempting fetch for getFeature call...")
+        MixpanelLogger.debug(message: "Flags not ready, attempting fetch for getFeature call...")
         self._fetchFlagsIfNeeded { success in
           // This completion runs *after* fetch completes (or fails)
           let result: MixpanelFlagVariant
@@ -398,17 +388,14 @@ class FeatureFlagManager: Network, MixpanelFlags {
             // Fetch succeeded, get the flag SYNCHRONOUSLY
             result = self.getVariantSync(flagName, fallback: fallback)
           } else {
-            print("Warning: Failed to fetch flags, returning fallback for \(flagName).")
+            MixpanelLogger.warn(message: "Failed to fetch flags, returning fallback for \(flagName).")
             result = fallback
           }
           // Call original completion (on main thread)
           DispatchQueue.main.async { completion(result) }
         }
-
-        return  // Exit Block A early, fetch completion handles the callback.
-
       }
-    }  // End accessQueue.async (Block A)
+    }
   }
 
   func getVariantValueSync(_ flagName: String, fallbackValue: Any?) -> Any? {
@@ -447,12 +434,10 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   // Internal function to handle fetch logic and state checks
   private func _fetchFlagsIfNeeded(completion: ((Bool) -> Void)?) {
-
-    var shouldStartFetch = false
-    let optionsSnapshot = self.currentOptions  // Read options directly (safe on accessQueue)
+    let optionsSnapshot = self.currentOptions
 
     guard let options = optionsSnapshot, options.featureFlagsEnabled else {
-      print("Feature flags are disabled, not fetching.")
+      MixpanelLogger.debug(message: "Feature flags are disabled, not fetching.")
       // Dispatch completion to main queue to avoid potential deadlock
       DispatchQueue.main.async {
         completion?(false)
@@ -460,26 +445,27 @@ class FeatureFlagManager: Network, MixpanelFlags {
       return  // Exit method
     }
 
-    // Access/Modify isFetching and fetchCompletionHandlers directly (safe on accessQueue)
-    if !self.isFetching {
-      self.isFetching = true
-      shouldStartFetch = true
-      if let completion = completion {
-        self.fetchCompletionHandlers.append(completion)
-      }
-    } else {
-      print("Fetch already in progress, queueing completion handler.")
-      if let completion = completion {
-        self.fetchCompletionHandlers.append(completion)
+    var shouldStartFetch = false
+
+    // Access/Modify isFetching and fetchCompletionHandlers with write lock
+    flagsLock.write {
+      if !self.isFetching {
+        self.isFetching = true
+        shouldStartFetch = true
+        if let completion = completion {
+          self.fetchCompletionHandlers.append(completion)
+        }
+      } else {
+        MixpanelLogger.debug(message: "Fetch already in progress, queueing completion handler.")
+        if let completion = completion {
+          self.fetchCompletionHandlers.append(completion)
+        }
       }
     }
-    // State modifications related to starting the fetch are complete
 
     if shouldStartFetch {
-      print("Starting flag fetch (dispatching network request)...")
-      // Perform network request OUTSIDE the serial accessQueue context
-      // to avoid blocking the queue during network latency.
-      // Dispatch the network request initiation to a global queue.
+      MixpanelLogger.info(message: "Starting flag fetch (dispatching network request)...")
+      // Perform network request on a global queue
       DispatchQueue.global(qos: .utility).async { [weak self] in
         self?._performFetchRequest()
       }
@@ -488,23 +474,21 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   // Performs the actual network request construction and call
   internal func _performFetchRequest() {
-    // This method runs OUTSIDE the accessQueue
-
     // Record fetch start time
     let startTime = Date()
-    accessQueue.async { [weak self] in
-      self?.fetchStartTime = startTime
+    flagsLock.write {
+      self.fetchStartTime = startTime
     }
 
     guard let delegate = self.delegate, let options = self.currentOptions else {
-      print("Error: Delegate or options missing for fetch.")
+      MixpanelLogger.error(message: "Delegate or options missing for fetch.")
       self._completeFetch(success: false)
       return
     }
 
     let distinctId = delegate.getDistinctId()
     let anonymousId = delegate.getAnonymousId()
-    print("Fetching flags for distinct ID: \(distinctId)")
+    MixpanelLogger.debug(message: "Fetching flags for distinct ID: \(distinctId)")
 
     var context = options.featureFlagsContext
     context["distinct_id"] = distinctId
@@ -517,13 +501,13 @@ class FeatureFlagManager: Network, MixpanelFlags {
         withJSONObject: context, options: []),
       let contextString = String(data: contextData, encoding: .utf8)
     else {
-      print("Error: Failed to serialize context for flags.")
+      MixpanelLogger.error(message: "Failed to serialize context for flags.")
       self._completeFetch(success: false)
       return
     }
 
     guard let headers = createAuthHeaders(token: options.token) else {
-      print("Error: Failed to create auth headers.")
+      MixpanelLogger.error(message: "Failed to create auth headers.")
       self._completeFetch(success: false)
       return
     }
@@ -537,7 +521,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
     let responseParser: (Data) -> FlagsResponse? = { data in
       do { return try JSONDecoder().decode(FlagsResponse.self, from: data) } catch {
-        print("Error parsing flags JSON: \(error)")
+        MixpanelLogger.error(message: "Error parsing flags JSON: \(error)")
         return nil
       }
     }
@@ -549,27 +533,22 @@ class FeatureFlagManager: Network, MixpanelFlags {
     Network.apiRequest(
       base: serverURL,
       resource: resource,
-      failure: { [weak self] reason, data, response in  // Completion handlers run on URLSession's queue
-        print("Error: Failed to fetch flags. Reason: \(reason)")
-        // Update state and call completions via _completeFetch on the serial queue
-        self?.accessQueue.async {  // Dispatch completion handling to serial queue
-          self?._completeFetch(success: false)
-        }
+      failure: { [weak self] reason, data, response in
+        MixpanelLogger.error(message: "Failed to fetch flags. Reason: \(reason)")
+        self?._completeFetch(success: false)
       },
-      success: { [weak self] (flagsResponse, response) in  // Completion handlers run on URLSession's queue
-        print("Successfully fetched flags.")
+      success: { [weak self] (flagsResponse, response) in
+        MixpanelLogger.info(message: "Successfully fetched flags.")
         guard let self = self else { return }
         let fetchEndTime = Date()
-        // Update state and call completions via _completeFetch on the serial queue
-        self.accessQueue.async { [weak self] in
-          guard let self = self else { return }
-          // already on accessQueue – write directly
 
-          let (mergedFlags, mergedPendingEvents) = self.mergeFlags(
-            responseFlags: flagsResponse.flags,
-            responsePendingEvents: flagsResponse.pendingFirstTimeEvents
-          )
+        // Merge flags and update state with write lock
+        let (mergedFlags, mergedPendingEvents) = self.mergeFlags(
+          responseFlags: flagsResponse.flags,
+          responsePendingEvents: flagsResponse.pendingFirstTimeEvents
+        )
 
+        self.flagsLock.write {
           self.flags = mergedFlags
           self.pendingFirstTimeEvents = mergedPendingEvents
 
@@ -580,18 +559,23 @@ class FeatureFlagManager: Network, MixpanelFlags {
           }
           self.timeLastFetched = fetchEndTime
 
-          print("Flags updated: \(self.flags ?? [:]), Pending events: \(self.pendingFirstTimeEvents.count)")
-          self._completeFetch(success: true)  // still on accessQueue
+          MixpanelLogger.debug(message: "Flags updated: \(self.flags ?? [:]), Pending events: \(self.pendingFirstTimeEvents.count)")
         }
+
+        self._completeFetch(success: true)
       }
     )
   }
 
-  // Centralized fetch completion logic - MUST be called from within accessQueue
+  // Centralized fetch completion logic
   func _completeFetch(success: Bool) {
-    self.isFetching = false
-    let handlers = self.fetchCompletionHandlers
-    self.fetchCompletionHandlers.removeAll()
+    var handlers: [(Bool) -> Void] = []
+
+    flagsLock.write {
+      self.isFetching = false
+      handlers = self.fetchCompletionHandlers
+      self.fetchCompletionHandlers.removeAll()
+    }
 
     DispatchQueue.main.async {
       handlers.forEach { $0(success) }
@@ -606,15 +590,24 @@ class FeatureFlagManager: Network, MixpanelFlags {
     var newFlags: [String: MixpanelFlagVariant] = [:]
     var newPendingEvents: [String: PendingFirstTimeEvent] = [:]
 
+    var currentFlags: [String: MixpanelFlagVariant]?
+    var activatedEvents: Set<String> = []
+
+    // Read current state with lock
+    flagsLock.read {
+      currentFlags = self.flags
+      activatedEvents = self.activatedFirstTimeEvents
+    }
+
     // Process flags from response
     if let responseFlags = responseFlags {
       for (flagKey, variant) in responseFlags {
         // Check if any event for this flag was activated
-        let hasActivatedEvent = self.activatedFirstTimeEvents.contains { eventKey in
+        let hasActivatedEvent = activatedEvents.contains { eventKey in
           eventKey.hasPrefix("\(flagKey):")
         }
 
-        if hasActivatedEvent, let currentFlag = self.flags?[flagKey] {
+        if hasActivatedEvent, let currentFlag = currentFlags?[flagKey] {
           // Preserve activated variant
           newFlags[flagKey] = currentFlag
         } else {
@@ -630,7 +623,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
         let eventKey = self.getPendingEventKey(pendingEvent.flagKey, pendingEvent.firstTimeEventHash)
 
         // Skip if already activated
-        if self.activatedFirstTimeEvents.contains(eventKey) {
+        if activatedEvents.contains(eventKey) {
           continue
         }
 
@@ -639,12 +632,12 @@ class FeatureFlagManager: Network, MixpanelFlags {
     }
 
     // Preserve orphaned activated flags
-    for eventKey in self.activatedFirstTimeEvents {
+    for eventKey in activatedEvents {
       guard let flagKey = self.getFlagKeyFromPendingEventKey(eventKey) else {
-        print("Warning: Failed to parse flag key from event key: \(eventKey)")
+        MixpanelLogger.warn(message: "Failed to parse flag key from event key: \(eventKey)")
         continue
       }
-      if newFlags[flagKey] == nil, let orphanedFlag = self.flags?[flagKey] {
+      if newFlags[flagKey] == nil, let orphanedFlag = currentFlags?[flagKey] {
         newFlags[flagKey] = orphanedFlag
       }
     }
@@ -660,17 +653,18 @@ class FeatureFlagManager: Network, MixpanelFlags {
     var capturedTimeLastFetched: Date?
     var capturedFetchLatencyMs: Int?
 
-    // We are already executing on the serial accessQueue, so this is safe.
-    if !self.trackedFeatures.contains(flagName) {
-      self.trackedFeatures.insert(flagName)
-      shouldCallDelegate = true
-      // Capture timing data while on queue
-      capturedTimeLastFetched = self.timeLastFetched
-      capturedFetchLatencyMs = self.fetchLatencyMs
+    // Use write lock for atomic check-and-set
+    flagsLock.write {
+      if !self.trackedFeatures.contains(flagName) {
+        self.trackedFeatures.insert(flagName)
+        shouldCallDelegate = true
+        // Capture timing data while in lock
+        capturedTimeLastFetched = self.timeLastFetched
+        capturedFetchLatencyMs = self.fetchLatencyMs
+      }
     }
 
-    // Call delegate *outside* this conceptual block if tracking occurred
-    // This prevents holding any potential implicit lock during delegate execution
+    // Call delegate outside the lock if tracking occurred
     if shouldCallDelegate {
       self._performTrackingDelegateCall(
         flagName: flagName,
@@ -717,7 +711,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     // Dispatch delegate call asynchronously to main thread for safety
     DispatchQueue.main.async {
       delegate.track(event: "$experiment_started", properties: properties)
-      print("Tracked $experiment_started for \(flagName) (dispatched to main)")
+      MixpanelLogger.debug(message: "Tracked $experiment_started for \(flagName) (dispatched to main)")
     }
   }
 
@@ -729,7 +723,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     if let boolVal = val as? Bool {
       return boolVal
     } else {
-      print("Error: Flag '\(flagName)' is not Bool")
+      MixpanelLogger.error(message: "Flag '\(flagName)' is not Bool")
       return fallbackValue
     }
   }
@@ -772,12 +766,20 @@ class FeatureFlagManager: Network, MixpanelFlags {
     }
   }
 
-  /// Lowercase all string keys and values in a nested structure
+  /// Lowercase all string keys and values in a nested structure.
+  ///
+  /// **Important:** This performs case-insensitive matching for both property keys AND values.
+  /// String values like "ABC-123" will be lowercased to "abc-123" for comparison.
+  /// This is intentional to ensure consistent matching regardless of case in tracked properties.
   private func lowercaseKeysAndValues(_ val: Any) -> Any {
     return transformStringsRecursively(val, transformDictKey: { $0.lowercased() })
   }
 
-  /// Lowercase only leaf node string values in a nested structure (keys unchanged)
+  /// Lowercase only leaf node string values in a nested structure (keys unchanged).
+  ///
+  /// **Important:** Operators and dictionary keys remain unchanged, only string values are lowercased.
+  /// This is used for JsonLogic filter expressions to enable case-insensitive value matching
+  /// while preserving operator keywords.
   private func lowercaseOnlyLeafNodes(_ val: Any) -> Any {
     return transformStringsRecursively(val)
   }
@@ -789,7 +791,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   /// Extract the flag key from a pending event key
   private func getFlagKeyFromPendingEventKey(_ eventKey: String) -> String? {
-    return eventKey.components(separatedBy: ":").first
+    return eventKey.split(separator: ":", maxSplits: 1).first.map { String($0) }
   }
 
   // MARK: - First-Time Event Checking
@@ -798,20 +800,27 @@ class FeatureFlagManager: Network, MixpanelFlags {
   ///
   /// - Note:
   ///   This method is **asynchronous** with respect to the caller. It dispatches its work onto
-  ///   `accessQueue` and returns immediately, without waiting for first-time event processing to
+  ///   the queue and returns immediately, without waiting for first-time event processing to
   ///   complete. As a result, there is a short window during which a subsequent `getVariant` call
   ///   may not yet observe the newly activated variant. Callers should not rely on immediate
   ///   visibility of first-time event activations in the same synchronous call chain.
-  func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
-    // Intentionally execute on `accessQueue` asynchronously to avoid blocking the tracking path.
-    // This means activation is eventually consistent rather than immediately visible to readers.
-    accessQueue.async { [weak self] in
+  internal func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
+    DispatchQueue.global(qos: .utility).async { [weak self] in
       guard let self = self else { return }
 
+      // Read pending events with lock
+      var pendingEventsCopy: [String: PendingFirstTimeEvent] = [:]
+      var activatedEventsCopy: Set<String> = []
+
+      self.flagsLock.read {
+        pendingEventsCopy = self.pendingFirstTimeEvents
+        activatedEventsCopy = self.activatedFirstTimeEvents
+      }
+
       // Iterate through all pending first-time events
-      for (eventKey, pendingEvent) in self.pendingFirstTimeEvents {
+      for (eventKey, pendingEvent) in pendingEventsCopy {
         // Skip if already activated
-        if self.activatedFirstTimeEvents.contains(eventKey) {
+        if activatedEventsCopy.contains(eventKey) {
           continue
         }
 
@@ -836,29 +845,37 @@ class FeatureFlagManager: Network, MixpanelFlags {
                 let rulesString = String(data: rulesData, encoding: .utf8),
                 let dataJSON = try? JSONSerialization.data(withJSONObject: data),
                 let dataString = String(data: dataJSON, encoding: .utf8) else {
-            print("Warning: Failed to serialize JsonLogic filters for event '\(eventKey)' matching '\(eventName)'")
+            MixpanelLogger.warn(message: "Failed to serialize JsonLogic filters for event '\(eventKey)' matching '\(eventName)'")
             continue
           }
 
           // Evaluate the filter
-          guard let result: Bool = try? applyRule(rulesString, to: dataString),
-                result == true else {
+          do {
+            let result: Bool = try applyRule(rulesString, to: dataString)
+            if !result {
+              MixpanelLogger.debug(message: "JsonLogic filter evaluated to false for event '\(eventKey)'")
+              continue
+            }
+          } catch {
+            MixpanelLogger.error(message: "JsonLogic evaluation error for event '\(eventKey)': \(error)")
             continue
           }
         }
 
         // Event matched! Activate the variant
         let flagKey = pendingEvent.flagKey
-        print("First-time event matched for flag '\(flagKey)': \(eventName)")
+        MixpanelLogger.info(message: "First-time event matched for flag '\(flagKey)': \(eventName)")
 
-        // Update or create the flag with the pending variant
-        if self.flags == nil {
-          self.flags = [:]
+        // Update or create the flag with the pending variant using write lock
+        self.flagsLock.write {
+          if self.flags == nil {
+            self.flags = [:]
+          }
+          self.flags![flagKey] = pendingEvent.pendingVariant
+
+          // Mark this specific event as activated
+          self.activatedFirstTimeEvents.insert(eventKey)
         }
-        self.flags![flagKey] = pendingEvent.pendingVariant
-
-        // Mark this specific event as activated
-        self.activatedFirstTimeEvents.insert(eventKey)
 
         // Track the feature flag check event with the new variant
         self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
@@ -876,7 +893,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   /// Records a first-time event activation to the backend
   internal func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String) {
     guard let delegate = self.delegate else {
-      print("Error: Delegate missing for recording first-time event")
+      MixpanelLogger.error(message: "Delegate missing for recording first-time event")
       return
     }
 
@@ -896,12 +913,12 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
     guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
           let options = currentOptions else {
-      print("Error: Failed to prepare first-time event recording request")
+      MixpanelLogger.error(message: "Failed to prepare first-time event recording request")
       return
     }
 
     guard let headers = createAuthHeaders(token: options.token, includeContentType: true) else {
-      print("Error: Failed to create auth headers for first-time event recording")
+      MixpanelLogger.error(message: "Failed to create auth headers for first-time event recording")
       return
     }
 
@@ -915,18 +932,20 @@ class FeatureFlagManager: Network, MixpanelFlags {
       parse: responseParser
     )
 
-    print("Recording first-time event for flag: \(flagId)")
+    MixpanelLogger.debug(message: "Recording first-time event for flag: \(flagId)")
 
     // Fire-and-forget POST request
     Network.apiRequest(
       base: serverURL,
       resource: resource,
-      failure: { reason, _, _ in
+      failure: { [weak self] reason, _, _ in
+        guard let self = self else { return }
         // Silent failure - cohort sync will catch up
-        print("Failed to record first-time event for flag \(flagId): \(reason)")
+        MixpanelLogger.warn(message: "Failed to record first-time event for flag \(flagId): \(reason)")
       },
-      success: { _, _ in
-        print("Successfully recorded first-time event for flag \(flagId)")
+      success: { [weak self] _, _ in
+        guard let self = self else { return }
+        MixpanelLogger.debug(message: "Successfully recorded first-time event for flag \(flagId)")
       }
     )
   }

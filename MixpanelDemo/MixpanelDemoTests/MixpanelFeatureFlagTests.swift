@@ -129,6 +129,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
   var lastRecordedFlagId: String?
   var lastRecordedProjectId: Int?
   var lastRecordedFirstTimeEventHash: String?
+  var simulateRecordFirstTimeEventFailure = false
 
   // Override the now-internal method to prevent real network calls
   override func _performFetchRequest() {
@@ -137,8 +138,8 @@ class MockFeatureFlagManager: FeatureFlagManager {
 
     // Record fetch start time like the real implementation
     let startTime = Date()
-    accessQueue.async { [weak self] in
-      self?.fetchStartTime = startTime
+    flagsLock.write {
+      self.fetchStartTime = startTime
     }
 
     // If request validation is enabled, intercept and validate the request construction
@@ -162,9 +163,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
     } else {
       // No simulation configured - fail immediately
       print("MockFeatureFlagManager: No simulation configured, failing fetch")
-      self.accessQueue.async { [weak self] in
-        self?._completeFetch(success: false)
-      }
+      self._completeFetch(success: false)
     }
   }
 
@@ -225,14 +224,14 @@ class MockFeatureFlagManager: FeatureFlagManager {
 
     if success {
       print("MockFeatureFlagManager: Simulating successful fetch with \(flags?.count ?? 0) flags")
-      self.accessQueue.async { [weak self] in
-        guard let self = self else { return }
 
-        // Mimic the real implementation's behavior - use mergeFlags like the real impl
-        let (mergedFlags, mergedPendingEvents) = self.mergeFlags(
-          responseFlags: flags,
-          responsePendingEvents: nil
-        )
+      // Mimic the real implementation's behavior - use mergeFlags like the real impl
+      let (mergedFlags, mergedPendingEvents) = self.mergeFlags(
+        responseFlags: flags,
+        responsePendingEvents: nil
+      )
+
+      self.flagsLock.write {
         self.flags = mergedFlags
         self.pendingFirstTimeEvents = mergedPendingEvents
 
@@ -242,13 +241,12 @@ class MockFeatureFlagManager: FeatureFlagManager {
         self.timeLastFetched = fetchEndTime
 
         print("Flags updated: \(self.flags ?? [:])")
-        self._completeFetch(success: true)
       }
+
+      self._completeFetch(success: true)
     } else {
       print("MockFeatureFlagManager: Simulating failed fetch")
-      self.accessQueue.async { [weak self] in
-        self?._completeFetch(success: false)
-      }
+      self._completeFetch(success: false)
     }
   }
 
@@ -312,7 +310,7 @@ class FeatureFlagManagerTests: XCTestCase {
     // If using MockFeatureFlagManager, just set the flags directly
     if let mockManager = manager as? MockFeatureFlagManager {
       // For mock, we can directly set the flags without going through fetch
-      mockManager.accessQueue.async {
+      mockManager.flagsLock.write {
         mockManager.flags = flagsToSet
         mockManager.timeLastFetched = Date()
         mockManager.fetchLatencyMs = 150
@@ -324,7 +322,7 @@ class FeatureFlagManagerTests: XCTestCase {
       // Original implementation for non-mock manager
       let currentTime = Date()
       // Set flags directly *before* calling completeFetch
-      manager.accessQueue.sync {
+      manager.flagsLock.read {
         manager.flags = flagsToSet
         // Set timing properties to simulate a successful fetch
         manager.timeLastFetched = currentTime
@@ -341,7 +339,7 @@ class FeatureFlagManagerTests: XCTestCase {
   private func simulateFetchFailure() {
     // If using MockFeatureFlagManager, just clear the flags
     if let mockManager = manager as? MockFeatureFlagManager {
-      mockManager.accessQueue.async {
+      mockManager.flagsLock.write {
         mockManager.flags = nil
         // Don't call _completeFetch - just set the state
       }
@@ -350,7 +348,7 @@ class FeatureFlagManagerTests: XCTestCase {
     } else {
       // Original implementation for non-mock manager
       // Set isFetching = true before calling _completeFetch
-      manager.accessQueue.sync {
+      manager.flagsLock.read {
         manager.isFetching = true
         // Ensure flags are nil or unchanged on failure simulation if desired
         manager.flags = nil  // Or keep existing flags based on desired failure behavior
@@ -655,7 +653,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
     let eventKey = "\(flagKey):\(firstTimeEventHash)"
 
-    mockMgr.accessQueue.sync {
+    mockMgr.flagsLock.write {
       let initial = initialVariant ?? createControlVariant()
       mockMgr.flags = [flagKey: initial]
       mockMgr.pendingFirstTimeEvents = [eventKey: pendingEvent]
@@ -664,7 +662,7 @@ class FeatureFlagManagerTests: XCTestCase {
     mockMgr.checkFirstTimeEvents(eventName: eventName, properties: eventProperties)
     waitBriefly(timeout: 1.0)
 
-    mockMgr.accessQueue.sync {
+    mockMgr.flagsLock.read {
       validation?(mockMgr)
     }
   }
@@ -672,7 +670,7 @@ class FeatureFlagManagerTests: XCTestCase {
   // Manager State Helpers
 
   private func resetManagerFlags(_ flags: [String: MixpanelFlagVariant]? = nil) {
-    mockManager?.accessQueue.sync {
+    mockManager?.flagsLock.write {
       mockManager?.flags = flags
     }
     Thread.sleep(forTimeInterval: 0.01)
@@ -1611,7 +1609,7 @@ class FeatureFlagManagerTests: XCTestCase {
       Thread.sleep(forTimeInterval: 0.1)
 
       // Reset flags to trigger new fetch
-      mockManager.accessQueue.sync {
+      mockManager.flagsLock.read {
         mockManager.flags = nil
       }
 
@@ -1650,7 +1648,7 @@ class FeatureFlagManagerTests: XCTestCase {
       let validFetchLatency = manager.fetchLatencyMs
 
       // Reset flags and configure for failure
-      mockManager.accessQueue.sync {
+      mockManager.flagsLock.read {
         mockManager.flags = nil
       }
       mockManager.simulatedFetchResult = (success: false, flags: nil)
@@ -1692,7 +1690,7 @@ class FeatureFlagManagerTests: XCTestCase {
     // 6. Test Consistency Between Timing Properties
     if let mockManager = manager as? MockFeatureFlagManager {
       // Ensure we have a successful fetch
-      mockManager.accessQueue.sync {
+      mockManager.flagsLock.read {
         mockManager.flags = nil
       }
 
@@ -1731,7 +1729,7 @@ class FeatureFlagManagerTests: XCTestCase {
     if let mockManager = manager as? MockFeatureFlagManager {
       var testFlags = sampleFlags
       testFlags[uniqueFlagName] = MixpanelFlagVariant(key: "timing_test", value: true)
-      mockManager.accessQueue.sync {
+      mockManager.flagsLock.read {
         mockManager.flags = testFlags
       }
     }
@@ -2116,7 +2114,7 @@ class FeatureFlagManagerTests: XCTestCase {
         pendingVariant: pendingVariant
       )
 
-      mockManager.accessQueue.sync {
+      mockManager.flagsLock.read {
         mockManager.flags = ["once-only": MixpanelFlagVariant(key: "control", value: false)]
         mockManager.pendingFirstTimeEvents = ["once-only:hash999": pendingEvent]
         // Reset tracking state
@@ -2133,7 +2131,7 @@ class FeatureFlagManagerTests: XCTestCase {
       wait(for: [expectation], timeout: 1.0)
 
       // Verify activation occurred and is tracked
-      mockManager.accessQueue.sync {
+      mockManager.flagsLock.read {
         XCTAssertTrue(mockManager.activatedFirstTimeEvents.contains("once-only:hash999"))
 
         // Verify recordFirstTimeEvent was called exactly once
@@ -2153,7 +2151,7 @@ class FeatureFlagManagerTests: XCTestCase {
   func testFlagRefresh_PreservesActivatedVariants() {
     if let mockManager = manager as? MockFeatureFlagManager {
       // Set up initial state with activated variant
-      mockManager.accessQueue.sync {
+      mockManager.flagsLock.read {
         mockManager.flags = ["test-flag": MixpanelFlagVariant(key: "activated", value: true)]
         mockManager.activatedFirstTimeEvents.insert("test-flag:hash123")
       }
@@ -2170,7 +2168,7 @@ class FeatureFlagManagerTests: XCTestCase {
       wait(for: [expectation], timeout: 1.0)
 
       // Verify activated variant was preserved
-      mockManager.accessQueue.sync {
+      mockManager.flagsLock.read {
         let flag = mockManager.flags?["test-flag"]
         XCTAssertEqual(flag?.key, "activated", "Activated variant should be preserved")
         XCTAssertEqual(flag?.value as? Bool, true)
@@ -2181,7 +2179,7 @@ class FeatureFlagManagerTests: XCTestCase {
   func testFlagRefresh_KeepsOrphanedActivatedFlags() {
     if let mockManager = manager as? MockFeatureFlagManager {
       // Set up initial state with activated variant
-      mockManager.accessQueue.sync {
+      mockManager.flagsLock.read {
         mockManager.flags = ["orphaned-flag": MixpanelFlagVariant(key: "activated", value: true)]
         mockManager.activatedFirstTimeEvents.insert("orphaned-flag:hash123")
       }
@@ -2198,11 +2196,137 @@ class FeatureFlagManagerTests: XCTestCase {
       wait(for: [expectation], timeout: 1.0)
 
       // Verify orphaned flag was kept
-      mockManager.accessQueue.sync {
+      mockManager.flagsLock.read {
         let flag = mockManager.flags?["orphaned-flag"]
         XCTAssertNotNil(flag, "Orphaned activated flag should be kept")
         XCTAssertEqual(flag?.key, "activated")
       }
+    }
+  }
+
+  // MARK: Additional Coverage Tests
+
+  func testFirstTimeEventMatching_EventNameMismatch() {
+    // Test that event name matching is case-sensitive
+    let pendingVariant = MixpanelFlagVariant(key: "activated", value: true)
+    let initialVariant = createControlVariant(value: false)
+
+    setupAndTriggerFirstTimeEvent(
+      flagKey: "event-name-test",
+      eventName: "Purchase Complete",  // Configured event name
+      eventProperties: [:],
+      filters: nil,
+      pendingVariant: pendingVariant,
+      initialVariant: initialVariant,
+      firstTimeEventHash: "hash-mismatch"
+    ) { mockMgr in
+      // Store initial state
+      let initialFlag = mockMgr.flags?["event-name-test"]
+      XCTAssertEqual(initialFlag?.key, "control", "Flag should remain at control variant")
+      XCTAssertEqual(initialFlag?.value as? Bool, false)
+    }
+
+    // Now try with different case - should NOT match
+    if let mockMgr = mockManager as? MockFeatureFlagManager {
+      mockMgr.checkFirstTimeEvents(eventName: "purchase complete", properties: [:])  // lowercase
+      waitBriefly(timeout: 1.0)
+
+      mockMgr.flagsLock.read {
+        let flag = mockMgr.flags?["event-name-test"]
+        XCTAssertEqual(flag?.key, "control", "Event name matching should be case-sensitive")
+        XCTAssertFalse(mockMgr.activatedFirstTimeEvents.contains("event-name-test:hash-mismatch"))
+      }
+    }
+  }
+
+  func testMultiplePendingEventsOnSameFlag() {
+    // Test that multiple pending events on the same flag work correctly
+    if let mockMgr = mockManager as? MockFeatureFlagManager {
+      let controlVariant = createControlVariant(value: false)
+      let variant1 = MixpanelFlagVariant(key: "variant1", value: "first")
+      let variant2 = MixpanelFlagVariant(key: "variant2", value: "second")
+
+      let event1 = createPendingEvent(
+        flagKey: "multi-event-flag",
+        eventName: "Event A",
+        filters: nil,
+        pendingVariant: variant1
+      )
+
+      let event2 = createPendingEvent(
+        flagKey: "multi-event-flag",
+        eventName: "Event B",
+        filters: nil,
+        pendingVariant: variant2
+      )
+
+      mockMgr.flagsLock.write {
+        mockMgr.flags = ["multi-event-flag": controlVariant]
+        mockMgr.pendingFirstTimeEvents = [
+          "multi-event-flag:hash1": event1,
+          "multi-event-flag:hash2": event2
+        ]
+      }
+
+      // Trigger first event
+      mockMgr.checkFirstTimeEvents(eventName: "Event A", properties: [:])
+      waitBriefly(timeout: 1.0)
+
+      // Verify first event activated
+      mockMgr.flagsLock.read {
+        let flag = mockMgr.flags?["multi-event-flag"]
+        XCTAssertEqual(flag?.key, "variant1", "First event should activate")
+        XCTAssertEqual(flag?.value as? String, "first")
+        XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("multi-event-flag:hash1"))
+      }
+
+      // Trigger second event - should not change the flag since first is already activated
+      mockMgr.checkFirstTimeEvents(eventName: "Event B", properties: [:])
+      waitBriefly(timeout: 1.0)
+
+      mockMgr.flagsLock.read {
+        let flag = mockMgr.flags?["multi-event-flag"]
+        XCTAssertEqual(flag?.key, "variant1", "Flag should stay with first activated variant")
+        XCTAssertEqual(flag?.value as? String, "first")
+        // Second event should also be marked as activated (whichever one fires first)
+        XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("multi-event-flag:hash1"))
+      }
+    }
+  }
+
+  func testRecordFirstTimeEvent_NetworkFailure() {
+    // Test that network failures are handled gracefully
+    if let mockMgr = mockManager as? MockFeatureFlagManager {
+      // Set up test to simulate network failure
+      mockMgr.simulateRecordFirstTimeEventFailure = true
+
+      let pendingVariant = MixpanelFlagVariant(key: "activated", value: true)
+      let pendingEvent = createPendingEvent(
+        flagKey: "network-fail-test",
+        eventName: "Test Event",
+        filters: nil,
+        pendingVariant: pendingVariant
+      )
+
+      mockMgr.flagsLock.write {
+        mockMgr.flags = ["network-fail-test": createControlVariant()]
+        mockMgr.pendingFirstTimeEvents = ["network-fail-test:hash123": pendingEvent]
+      }
+
+      // Trigger event
+      mockMgr.checkFirstTimeEvents(eventName: "Test Event", properties: [:])
+      waitBriefly(timeout: 1.0)
+
+      // Verify flag is still activated despite network failure
+      mockMgr.flagsLock.read {
+        let flag = mockMgr.flags?["network-fail-test"]
+        XCTAssertEqual(flag?.key, "activated", "Flag should be activated even if network call fails")
+        XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("network-fail-test:hash123"))
+      }
+
+      // Verify recordFirstTimeEvent was called (even though it failed)
+      XCTAssertGreaterThan(mockMgr.recordFirstTimeEventCallCount, 0,
+        "recordFirstTimeEvent should be called even when network fails")
     }
   }
 

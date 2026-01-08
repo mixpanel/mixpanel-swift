@@ -250,8 +250,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
     func isEnabled(_ flagName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void) {
       completion(fallbackValue)
     }
-
-    func checkFirstTimeEvents(eventName: String, properties: [String : Any]) {}
   }
 
   func testIdentify() {

@@ -808,22 +808,17 @@ class FeatureFlagManager: Network, MixpanelFlags {
     DispatchQueue.global(qos: .utility).async { [weak self] in
       guard let self = self else { return }
 
-      // Read pending events with lock
+      // Snapshot pending events with lock
+      // Note: We don't snapshot activatedFirstTimeEvents because we'll check it
+      // atomically later under write lock to avoid TOCTOU race
       var pendingEventsCopy: [String: PendingFirstTimeEvent] = [:]
-      var activatedEventsCopy: Set<String> = []
 
       self.flagsLock.read {
         pendingEventsCopy = self.pendingFirstTimeEvents
-        activatedEventsCopy = self.activatedFirstTimeEvents
       }
 
       // Iterate through all pending first-time events
       for (eventKey, pendingEvent) in pendingEventsCopy {
-        // Skip if already activated
-        if activatedEventsCopy.contains(eventKey) {
-          continue
-        }
-
         // Check exact event name match (case-sensitive)
         if eventName != pendingEvent.eventName {
           continue
@@ -862,30 +857,40 @@ class FeatureFlagManager: Network, MixpanelFlags {
           }
         }
 
-        // Event matched! Activate the variant
+        // Event matched! Try to activate the variant atomically
         let flagKey = pendingEvent.flagKey
-        MixpanelLogger.info(message: "First-time event matched for flag '\(flagKey)': \(eventName)")
+        var shouldActivate = false
 
-        // Update or create the flag with the pending variant using write lock
+        // Atomic check-and-set: Ensure only one thread activates this event.
+        // This prevents duplicate recordFirstTimeEvent calls and flag variant changes
+        // when multiple threads concurrently process the same event.
         self.flagsLock.write {
-          if self.flags == nil {
-            self.flags = [:]
-          }
-          self.flags![flagKey] = pendingEvent.pendingVariant
+          if !self.activatedFirstTimeEvents.contains(eventKey) {
+            // We won the race - activate this event
+            self.activatedFirstTimeEvents.insert(eventKey)
 
-          // Mark this specific event as activated
-          self.activatedFirstTimeEvents.insert(eventKey)
+            if self.flags == nil {
+              self.flags = [:]
+            }
+            self.flags![flagKey] = pendingEvent.pendingVariant
+            shouldActivate = true
+          }
         }
 
-        // Track the feature flag check event with the new variant
-        self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
+        // Only proceed with external calls if we successfully activated
+        if shouldActivate {
+          MixpanelLogger.info(message: "First-time event matched for flag '\(flagKey)': \(eventName)")
 
-        // Record to backend (fire-and-forget)
-        self.recordFirstTimeEvent(
-          flagId: pendingEvent.flagId,
-          projectId: pendingEvent.projectId,
-          firstTimeEventHash: pendingEvent.firstTimeEventHash
-        )
+          // Track the feature flag check event with the new variant
+          self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
+
+          // Record to backend (fire-and-forget)
+          self.recordFirstTimeEvent(
+            flagId: pendingEvent.flagId,
+            projectId: pendingEvent.projectId,
+            firstTimeEventHash: pendingEvent.firstTimeEventHash
+          )
+        }
       }
     }
   }

@@ -955,3 +955,69 @@ class FeatureFlagManager: Network, MixpanelFlags {
     )
   }
 }
+
+// MARK: - DEBUG Extensions for MixpanelDemo
+
+#if DEBUG
+extension PendingFirstTimeEvent {
+    init(flagKey: String, flagId: String, projectId: Int,
+         firstTimeEventHash: String, eventName: String,
+         propertyFilters: [String: Any]?, pendingVariant: MixpanelFlagVariant) {
+        self.flagKey = flagKey
+        self.flagId = flagId
+        self.projectId = projectId
+        self.firstTimeEventHash = firstTimeEventHash
+        self.eventName = eventName
+        self.propertyFilters = propertyFilters
+        self.pendingVariant = pendingVariant
+    }
+}
+
+extension FeatureFlagManager {
+    internal func injectMockFirstTimeEvents(_ mockEvents: [PendingFirstTimeEvent],
+                                           _ mockFlags: [String: MixpanelFlagVariant]) {
+        flagsLock.write {
+            self.activatedFirstTimeEvents.removeAll()
+            self.flags = mockFlags
+            self.pendingFirstTimeEvents.removeAll()
+            for event in mockEvents {
+                let key = getPendingEventKey(event.flagKey, event.firstTimeEventHash)
+                self.pendingFirstTimeEvents[key] = event
+            }
+        }
+    }
+
+    internal func resetFirstTimeEventsForDemo() {
+        flagsLock.write {
+            self.activatedFirstTimeEvents.removeAll()
+            for (_, event) in self.pendingFirstTimeEvents {
+                self.flags?[event.flagKey] = event.pendingVariant
+            }
+        }
+    }
+
+    internal func getPendingEventsForDebug() -> [(eventKey: String, event: PendingFirstTimeEvent)] {
+        var result: [(eventKey: String, event: PendingFirstTimeEvent)] = []
+        flagsLock.read {
+            result = self.pendingFirstTimeEvents.map { (eventKey: $0.key, event: $0.value) }
+        }
+        return result.sorted { $0.eventKey < $1.eventKey }
+    }
+
+    internal func getActivatedEventsForDebug() -> [String] {
+        var result: [String] = []
+        flagsLock.read {
+            result = Array(self.activatedFirstTimeEvents)
+        }
+        return result.sorted()
+    }
+
+    internal func getFlagsForDebug() -> [String: MixpanelFlagVariant] {
+        var result: [String: MixpanelFlagVariant] = [:]
+        flagsLock.read {
+            result = self.flags ?? [:]
+        }
+        return result
+    }
+}
+#endif

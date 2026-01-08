@@ -632,6 +632,7 @@ class FeatureFlagManagerTests: XCTestCase {
   private func setupAndTriggerFirstTimeEvent(
     flagKey: String,
     eventName: String,
+    triggeredEventName: String? = nil,
     eventProperties: [String: Any] = [:],
     filters: [String: Any]? = nil,
     pendingVariant: MixpanelFlagVariant,
@@ -659,7 +660,8 @@ class FeatureFlagManagerTests: XCTestCase {
       mockMgr.pendingFirstTimeEvents = [eventKey: pendingEvent]
     }
 
-    mockMgr.checkFirstTimeEvents(eventName: eventName, properties: eventProperties)
+    let nameToTrigger = triggeredEventName ?? eventName
+    mockMgr.checkFirstTimeEvents(eventName: nameToTrigger, properties: eventProperties)
     waitBriefly(timeout: 1.0)
 
     mockMgr.flagsLock.read {
@@ -2177,19 +2179,20 @@ class FeatureFlagManagerTests: XCTestCase {
     setupAndTriggerFirstTimeEvent(
       flagKey: "event-name-test",
       eventName: "Purchase Complete",  // Configured event name
+      triggeredEventName: "Purchase Completed",  // Call with different name (mismatch)
       eventProperties: [:],
       filters: nil,
       pendingVariant: pendingVariant,
       initialVariant: initialVariant,
       firstTimeEventHash: "hash-mismatch"
     ) { mockMgr in
-      // Store initial state
+      // Verify flag stayed at control due to name mismatch
       let initialFlag = mockMgr.flags?["event-name-test"]
       XCTAssertEqual(initialFlag?.key, "control", "Flag should remain at control variant")
       XCTAssertEqual(initialFlag?.value as? Bool, false)
     }
 
-    // Now try with different case - should NOT match
+    // Now try with different case - should also NOT match (case-sensitive)
     if let mockMgr = mockManager as? MockFeatureFlagManager {
       mockMgr.checkFirstTimeEvents(eventName: "purchase complete", properties: [:])  // lowercase
       waitBriefly(timeout: 1.0)
@@ -2243,16 +2246,17 @@ class FeatureFlagManagerTests: XCTestCase {
         XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("multi-event-flag:hash1"))
       }
 
-      // Trigger second event - should not change the flag since first is already activated
+      // Trigger second event - should overwrite the flag with the second variant
       mockMgr.checkFirstTimeEvents(eventName: "Event B", properties: [:])
       waitBriefly(timeout: 1.0)
 
       mockMgr.flagsLock.read {
         let flag = mockMgr.flags?["multi-event-flag"]
-        XCTAssertEqual(flag?.key, "variant1", "Flag should stay with first activated variant")
-        XCTAssertEqual(flag?.value as? String, "first")
-        // Second event should also be marked as activated (whichever one fires first)
+        XCTAssertEqual(flag?.key, "variant2", "Flag should update to second activated variant")
+        XCTAssertEqual(flag?.value as? String, "second")
+        // Both events should be marked as activated
         XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("multi-event-flag:hash1"))
+        XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("multi-event-flag:hash2"))
       }
     }
   }

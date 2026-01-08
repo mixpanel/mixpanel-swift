@@ -247,7 +247,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   weak var delegate: MixpanelFlagDelegate?
 
   // Thread safety using ReadWriteLock (consistent with Track, People, MixpanelInstance)
-  private let flagsLock = ReadWriteLock(label: "com.mixpanel.featureflagmanager")
+  internal let flagsLock = ReadWriteLock(label: "com.mixpanel.featureflagmanager")
 
   // Internal State - Protected by flagsLock
   var flags: [String: MixpanelFlagVariant]? = nil

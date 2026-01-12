@@ -630,7 +630,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   func defaultDeviceId() -> String {
     // Check if a custom device ID provider is set
     if let provider = options.deviceIdProvider {
-      let providedId = provider()
+      let providedId = provider().trimmingCharacters(in: .whitespacesAndNewlines)
       if !providedId.isEmpty {
         return providedId
       }
@@ -1044,13 +1044,13 @@ extension MixpanelInstance {
         // Check if a deviceIdProvider is set and would return a different value
         // than the persisted anonymousId. This helps detect potential identity
         // discontinuity when adding a provider to an existing app.
-        if let provider = options.deviceIdProvider,
+        if options.deviceIdProvider != nil,
           let existingId = anonymousId,
           !existingId.isEmpty
         {
-          let providerValue = provider()
-          if !providerValue.isEmpty && providerValue != existingId {
-            MixpanelLogger.warn(
+          let providerValue = defaultDeviceId()
+          if providerValue != existingId {
+            MixpanelLogger.error(
               message:
                 "deviceIdProvider returned '\(providerValue)' but existing anonymousId is '\(existingId)'. "
                 + "Using persisted value to preserve identity continuity. "
@@ -1688,7 +1688,7 @@ extension MixpanelInstance {
   
      This method will internally track an opt in event to your project.
   
-     - parameter distintId: an optional string to use as the distinct ID for events
+     - parameter distinctId: an optional string to use as the distinct ID for events
      - parameter properties: an optional properties dictionary that could be passed to add properties to the opt-in event
      that is sent to Mixpanel
      */

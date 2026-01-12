@@ -367,7 +367,37 @@ class MixpanelDeviceIdProviderTests: MixpanelBaseTests {
     removeDBfile(testMixpanel.apiToken)
   }
 
-  /// Test 6.2: Multiple instances can have different providers
+  /// Test 6.2: Verify identify() works correctly with provider-generated device ID
+  func testIdentifyWithDeviceIdProvider() {
+    let customDeviceId = "provider-device-id"
+    let options = MixpanelOptions(
+      token: randomId(),
+      deviceIdProvider: { customDeviceId }
+    )
+
+    let testMixpanel = Mixpanel.initialize(options: options)
+    waitForTrackingQueue(testMixpanel)
+
+    // Before identify
+    XCTAssertEqual(
+      testMixpanel.distinctId, "$device:\(customDeviceId)",
+      "distinctId should use provider value before identify")
+
+    // After identify
+    let userId = "user@example.com"
+    testMixpanel.identify(distinctId: userId)
+    waitForTrackingQueue(testMixpanel)
+
+    XCTAssertEqual(testMixpanel.distinctId, userId, "distinctId should be userId after identify")
+    XCTAssertEqual(testMixpanel.userId, userId, "userId should be set after identify")
+    XCTAssertEqual(
+      testMixpanel.anonymousId, customDeviceId,
+      "anonymousId should still be provider value after identify")
+
+    removeDBfile(testMixpanel.apiToken)
+  }
+
+  /// Test 6.3: Multiple instances can have different providers
   func testMultipleInstancesWithDifferentProviders() {
     let options1 = MixpanelOptions(
       token: randomId(),

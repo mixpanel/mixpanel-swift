@@ -31,14 +31,14 @@ let mixpanel = Mixpanel.initialize(options: options)
 
 The `deviceIdProvider` closure is invoked:
 
-| Scenario | Provider Called? |
-|----------|-----------------|
-| First SDK initialization (no persisted identity) | ✅ Yes |
-| Subsequent initialization (identity persisted) | ⚠️ For comparison only* |
-| After `reset()` | ✅ Yes |
-| After `optOutTracking()` | ✅ Yes |
+| Scenario | Provider Called? | Value Used? |
+|----------|------------------|-------------|
+| First SDK initialization (no persisted identity) | ✅ Yes | ✅ Provider value |
+| Subsequent initialization (identity persisted) | ✅ For comparison | ❌ Persisted value* |
+| After `reset()` | ✅ Yes | ✅ Provider value |
+| After `optOutTracking()` | ✅ Yes | ✅ Provider value |
 
-*When persisted identity exists, the provider is called to check if it returns a different value (triggers a warning log), but the persisted value is used.
+*When persisted identity exists, the provider is called to compare with the existing value. If different, an error is logged but the persisted value is used to preserve identity continuity.
 
 ## Controlling Reset Behavior
 
@@ -50,6 +50,8 @@ Return the **same value** each time the closure is called:
 
 ```swift
 // Store device ID in Keychain for persistence across reinstalls
+// Note: KeychainHelper is a pseudocode wrapper. See Apple's Keychain Services documentation
+// for implementation details: https://developer.apple.com/documentation/security/keychain_services
 class DeviceIdManager {
     static let shared = DeviceIdManager()
 

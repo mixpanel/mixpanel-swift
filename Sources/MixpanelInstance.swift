@@ -978,9 +978,10 @@ extension MixpanelInstance {
      Clears all stored properties including the distinct Id.
      Useful if your app's user logs out.
 
+     - parameter customDeviceId: optional custom device id to use after reset. If nil, existing custom device id will be used if present or a new device id will be generated.
      - parameter completion: an optional completion handler for when the reset has completed.
      */
-  public func reset(completion: (() -> Void)? = nil) {
+    public func reset(customDeviceId: String? = nil, completion: (() -> Void)? = nil) {
     flush()
     trackingQueue.async { [weak self] in
       guard let self = self else {
@@ -990,7 +991,7 @@ extension MixpanelInstance {
       MixpanelPersistence.deleteMPUserDefaultsData(instanceName: self.name)
       self.readWriteLock.write {
         self.timedEvents = InternalProperties()
-        self.anonymousId = self.defaultDeviceId()
+        self.anonymousId = customDeviceId ?? self.defaultDeviceId()
         self.distinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
         self.hadPersistedDistinctId = true
         self.userId = nil
@@ -1636,8 +1637,10 @@ extension MixpanelInstance {
 
      This method is used to opt out tracking. This causes all events and people request no longer
      to be sent back to the Mixpanel server.
+   
+   - parameter customDeviceId: optional custom device id to use post optout. If nil, existing custom device id will be used if present or a new device id will be generated.
      */
-  public func optOutTracking() {
+  public func optOutTracking(customDeviceId: String? = nil) {
     trackingQueue.async { [weak self] in
       guard let self = self else { return }
       if self.people.distinctId != nil {
@@ -1653,7 +1656,7 @@ extension MixpanelInstance {
         self.alias = nil
         self.people.distinctId = nil
         self.userId = nil
-        self.anonymousId = self.defaultDeviceId()
+        self.anonymousId = customDeviceId ?? self.defaultDeviceId()
         self.distinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
         self.hadPersistedDistinctId = true
         self.superProperties = InternalProperties()

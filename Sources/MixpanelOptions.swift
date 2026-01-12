@@ -20,6 +20,45 @@ public class MixpanelOptions {
   public let featureFlagsEnabled: Bool
   public let featureFlagsContext: [String: Any]
 
+  /// A closure that provides a custom device ID.
+  ///
+  /// Use this to control device ID generation instead of relying on the SDK's default behavior
+  /// (random UUID or IDFV based on `useUniqueDistinctId`).
+  ///
+  /// **Important: Choose your device ID strategy up front.** This closure is called:
+  /// - Once during initialization (if no persisted identity exists)
+  /// - On each call to `reset()`
+  /// - On each call to `optOutTracking()`
+  ///
+  /// **Controlling Reset Behavior:**
+  /// - Return the **same value** each time = Device ID never changes (persistent identity)
+  /// - Return a **different value** each time = Device ID changes on reset (ephemeral identity)
+  ///
+  /// **Warning:** Adding a `deviceIdProvider` to an existing app that previously used the default
+  /// device ID may cause identity discontinuity. The SDK will log a warning if the provider
+  /// returns a value different from the persisted anonymous ID.
+  ///
+  /// **Example - Persistent Device ID:**
+  /// ```swift
+  /// let options = MixpanelOptions(
+  ///     token: "YOUR_TOKEN",
+  ///     deviceIdProvider: {
+  ///         return MyKeychainHelper.getOrCreatePersistentId()
+  ///     }
+  /// )
+  /// ```
+  ///
+  /// **Example - Ephemeral Device ID (resets each time):**
+  /// ```swift
+  /// let options = MixpanelOptions(
+  ///     token: "YOUR_TOKEN",
+  ///     deviceIdProvider: {
+  ///         return UUID().uuidString
+  ///     }
+  /// )
+  /// ```
+  public let deviceIdProvider: (() -> String)?
+
   public init(
     token: String,
     flushInterval: Double = 60,
@@ -32,7 +71,8 @@ public class MixpanelOptions {
     proxyServerConfig: ProxyServerConfig? = nil,
     useGzipCompression: Bool = true,  // NOTE: This is a new default value!
     featureFlagsEnabled: Bool = false,
-    featureFlagsContext: [String: Any] = [:]
+    featureFlagsContext: [String: Any] = [:],
+    deviceIdProvider: (() -> String)? = nil
   ) {
     self.token = token
     self.flushInterval = flushInterval
@@ -46,5 +86,6 @@ public class MixpanelOptions {
     self.useGzipCompression = useGzipCompression
     self.featureFlagsEnabled = featureFlagsEnabled
     self.featureFlagsContext = featureFlagsContext
+    self.deviceIdProvider = deviceIdProvider
   }
 }

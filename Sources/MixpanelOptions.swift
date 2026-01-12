@@ -33,6 +33,7 @@ public class MixpanelOptions {
   /// **Controlling Reset Behavior:**
   /// - Return the **same value** each time = Device ID never changes (persistent identity)
   /// - Return a **different value** each time = Device ID changes on reset (ephemeral identity)
+  /// - Return `nil` = Use SDK's default device ID (useful for error handling)
   ///
   /// **Warning:** Adding a `deviceIdProvider` to an existing app that previously used the default
   /// device ID may cause identity discontinuity. The SDK will log a warning if the provider
@@ -57,7 +58,20 @@ public class MixpanelOptions {
   ///     }
   /// )
   /// ```
-  public let deviceIdProvider: (() -> String)?
+  ///
+  /// **Example - Fallback to SDK default on failure:**
+  /// ```swift
+  /// let options = MixpanelOptions(
+  ///     token: "YOUR_TOKEN",
+  ///     deviceIdProvider: {
+  ///         guard let id = fetchDeviceIdFromServer() else {
+  ///             return nil  // Fall back to SDK default
+  ///         }
+  ///         return id
+  ///     }
+  /// )
+  /// ```
+  public let deviceIdProvider: (() -> String?)?
 
   public init(
     token: String,
@@ -72,7 +86,7 @@ public class MixpanelOptions {
     useGzipCompression: Bool = true,  // NOTE: This is a new default value!
     featureFlagsEnabled: Bool = false,
     featureFlagsContext: [String: Any] = [:],
-    deviceIdProvider: (() -> String)? = nil
+    deviceIdProvider: (() -> String?)? = nil
   ) {
     self.token = token
     self.flushInterval = flushInterval

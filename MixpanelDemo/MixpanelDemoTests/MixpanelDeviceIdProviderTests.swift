@@ -348,7 +348,26 @@ class MixpanelDeviceIdProviderTests: MixpanelBaseTests {
 
   // MARK: - Test Group 6: Edge Cases
 
-  /// Test 6.1: Provider returning empty string should fall back to default
+  /// Test 6.1a: Provider returning nil should fall back to default
+  func testProviderReturningNilFallsBackToDefault() {
+    let options = MixpanelOptions(
+      token: randomId(),
+      deviceIdProvider: { nil }  // Return nil
+    )
+
+    let testMixpanel = Mixpanel.initialize(options: options)
+    waitForTrackingQueue(testMixpanel)
+
+    // Should fall back to default behavior (UUID or IDFV)
+    XCTAssertNotNil(testMixpanel.anonymousId, "Should have anonymousId")
+    XCTAssertFalse(
+      testMixpanel.anonymousId?.isEmpty ?? true,
+      "Should not have empty anonymousId - should fall back to default")
+
+    removeDBfile(testMixpanel.apiToken)
+  }
+
+  /// Test 6.1b: Provider returning empty string should fall back to default
   func testProviderReturningEmptyStringFallsBackToDefault() {
     let options = MixpanelOptions(
       token: randomId(),

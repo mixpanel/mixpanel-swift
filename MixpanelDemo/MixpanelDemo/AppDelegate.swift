@@ -18,7 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   /// Option 1: PERSISTENT Device ID - survives reset() and app reinstalls
   /// The same device ID is returned every time, stored in UserDefaults (use Keychain in production)
-  private lazy var persistentDeviceIdProvider: (() -> String) = {
+  private lazy var persistentDeviceIdProvider: (() -> String?) = {
     let key = "com.mixpanel.demo.persistentDeviceId"
     if let existingId = UserDefaults.standard.string(forKey: key) {
       print("📱 [Persistent] Returning existing device ID: \(existingId)")
@@ -32,10 +32,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   /// Option 2: EPHEMERAL Device ID - changes on every reset()
   /// A new UUID is generated each time the provider is called
-  private lazy var ephemeralDeviceIdProvider: (() -> String) = {
+  private lazy var ephemeralDeviceIdProvider: (() -> String?) = {
     let newId = "ephemeral-\(UUID().uuidString)"
     print("📱 [Ephemeral] Generated new device ID: \(newId)")
     return newId
+  }
+
+  /// Option 3: FAILING Provider - returns nil to test fallback behavior
+  /// Simulates a provider that cannot generate a device ID (e.g., server fetch failed)
+  private lazy var failingDeviceIdProvider: (() -> String?) = {
+    print("📱 [Failing] Returning nil - will use SDK default")
+    return nil
   }
 
   func application(
@@ -54,8 +61,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Test 2: EPHEMERAL - Device ID changes on every reset() call
     // let deviceIdProvider = ephemeralDeviceIdProvider
 
-    // Test 3: NO PROVIDER - Default SDK behavior (UUID or IDFV)
-    let deviceIdProvider: (() -> String)? = nil
+    // Test 3: FAILING Provider - returns nil to test SDK fallback
+    // let deviceIdProvider = failingDeviceIdProvider
+
+    // Test 4: NO PROVIDER - Default SDK behavior (UUID or IDFV)
+    let deviceIdProvider: (() -> String?)? = nil
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

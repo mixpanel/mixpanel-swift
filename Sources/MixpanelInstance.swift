@@ -630,13 +630,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   func defaultDeviceId() -> String {
     // Check if a custom device ID provider is set
     if let provider = options.deviceIdProvider {
-      let providedId = provider().trimmingCharacters(in: .whitespacesAndNewlines)
-      if !providedId.isEmpty {
+      if let providedId = provider()?.trimmingCharacters(in: .whitespacesAndNewlines),
+        !providedId.isEmpty
+      {
         return providedId
       }
-      // Fall through to default behavior if empty
+      // Fall through to default behavior if nil or empty
       MixpanelLogger.warn(
-        message: "deviceIdProvider returned empty string, using default device ID")
+        message: "deviceIdProvider returned nil or empty string, using default device ID")
     }
 
     // Default behavior: use IDFV or random UUID

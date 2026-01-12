@@ -151,13 +151,24 @@ mixpanel.track(event: "Purchase Completed")
 
 ## Edge Cases
 
-### Empty String Handling
+### Returning nil or Empty String
 
-If your provider returns an empty string, the SDK falls back to default behavior and logs a warning:
+If your provider returns `nil` or an empty string, the SDK falls back to default behavior and logs a warning:
 
 ```swift
+// Return nil to signal "use default" - useful for error handling
+deviceIdProvider: {
+    guard let id = fetchDeviceIdFromServer() else {
+        return nil  // Fall back to SDK default
+    }
+    return id
+}
+
+// Empty string also falls back to default
 deviceIdProvider: { "" }  // Falls back to UUID/IDFV
 ```
+
+This allows graceful error handling when your device ID source is unavailable.
 
 ### Multiple Instances
 

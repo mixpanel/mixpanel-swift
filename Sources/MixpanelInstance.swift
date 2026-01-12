@@ -434,6 +434,20 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif
     unarchive()
 
+      /// Handles migration for existing SDK users who switch from auto-generated device IDs to custom device IDs.
+      /// If a custom device ID is provided in options and the user has not yet been identified,
+      /// the SDK immediately adopts the custom device ID, replacing the previously stored value.
+      if let customDeviceId = options?.customDeviceId, !customDeviceId.isEmpty {
+          // Check if the anonymousId and customDeviceId are different. If they are, we need to update.
+          if anonymousId != customDeviceId {
+              self.readWriteLock.write {
+                  self.anonymousId = customDeviceId
+                  self.distinctId = addPrefixToDeviceId(deviceId: customDeviceId)
+              }
+              archive()
+          }
+      }
+      
     // check whether we should opt out by default
     // note: we don't override opt out persistence here since opt-out default state is often
     // used as an initial state while GDPR information is being collected
@@ -628,6 +642,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   }
 
   func defaultDeviceId() -> String {
+      // Check if custom deviceId is provided in options
+      if let customDeviceId = options.customDeviceId, !customDeviceId.isEmpty {
+          return customDeviceId
+      }
+    
     let distinctId: String?
     if useUniqueDistinctId {
       distinctId = uniqueIdentifierForDevice()

@@ -129,7 +129,7 @@ Using persisted value to preserve identity continuity.
 
 ## Integration with Mixpanel Identity Management
 
-The `deviceIdProvider` works with Mixpanel's [Simplified ID Merge](https://docs.mixpanel.com/docs/tracking-methods/id-management/identifying-users-simplified) system:
+The `deviceIdProvider` is designed for Mixpanel's [Simplified ID Merge](https://docs.mixpanel.com/docs/tracking-methods/id-management/identifying-users-simplified) system (the default for new projects):
 
 1. Your custom device ID becomes the `$device_id` property on all events
 2. When you call `identify(userId)`, the `$user_id` is set
@@ -148,6 +148,8 @@ mixpanel.identify(distinctId: "user@email.com")
 // All future events attributed to user@email.com
 mixpanel.track(event: "Purchase Completed")
 ```
+
+> **Note:** If using [Original ID Merge](https://docs.mixpanel.com/docs/tracking-methods/id-management/identifying-users-original), persistent device IDs require careful handling on shared devices. With Original ID Merge, calling `createAlias()` with the same device ID for different users will incorrectly merge their identities. Consider using an ephemeral provider strategy or migrating to Simplified ID Merge.
 
 ## Edge Cases
 

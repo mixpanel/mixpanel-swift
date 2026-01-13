@@ -16,18 +16,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   // MARK: - Device ID Provider Options (uncomment ONE to test)
 
+  // Cache for persistent device ID - populated once at app launch
+  private var cachedPersistentDeviceId: String?
+
   /// Option 1: PERSISTENT Device ID - survives reset() and app reinstalls
-  /// The same device ID is returned every time, stored in UserDefaults (use Keychain in production)
-  private lazy var persistentDeviceIdProvider: (() -> String?) = {
+  /// IMPORTANT: Cache is populated BEFORE Mixpanel init to avoid blocking in the provider.
+  /// In production, use Keychain instead of UserDefaults for reinstall persistence.
+  private lazy var persistentDeviceIdProvider: (() -> String?) = { [weak self] in
+    print("📱 [Persistent] Returning cached device ID: \(self?.cachedPersistentDeviceId ?? "nil")")
+    return self?.cachedPersistentDeviceId
+  }
+
+  /// Populate the device ID cache - call this BEFORE initializing Mixpanel
+  private func loadPersistentDeviceId() {
     let key = "com.mixpanel.demo.persistentDeviceId"
     if let existingId = UserDefaults.standard.string(forKey: key) {
-      print("📱 [Persistent] Returning existing device ID: \(existingId)")
-      return existingId
+      print("📱 [Persistent] Loaded existing device ID: \(existingId)")
+      cachedPersistentDeviceId = existingId
+      return
     }
     let newId = "persistent-\(UUID().uuidString)"
     UserDefaults.standard.set(newId, forKey: key)
     print("📱 [Persistent] Created new device ID: \(newId)")
-    return newId
+    cachedPersistentDeviceId = newId
   }
 
   /// Option 2: EPHEMERAL Device ID - changes on every reset()
@@ -56,6 +67,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     // Test 1: PERSISTENT - Device ID survives reset() calls
+    // loadPersistentDeviceId()  // ⚠️ MUST call before Mixpanel init!
     // let deviceIdProvider = persistentDeviceIdProvider
 
     // Test 2: EPHEMERAL - Device ID changes on every reset() call

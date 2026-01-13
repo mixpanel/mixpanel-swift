@@ -35,17 +35,22 @@ public class MixpanelOptions {
   /// - Return a **different value** each time = Device ID changes on reset (ephemeral identity)
   /// - Return `nil` = Use SDK's default device ID (useful for error handling)
   ///
+  /// **Thread Safety:** This closure is called synchronously while holding internal locks.
+  /// Keep implementations fast and non-blocking. For Keychain or network-fetched IDs,
+  /// retrieve and cache the value at app launch, then return the cached value from the provider.
+  ///
   /// **Warning:** Adding a `deviceIdProvider` to an existing app that previously used the default
   /// device ID may cause identity discontinuity. The SDK will log a warning if the provider
   /// returns a value different from the persisted anonymous ID.
   ///
-  /// **Example - Persistent Device ID:**
+  /// **Example - Persistent Device ID (cached at launch):**
   /// ```swift
+  /// // Cache the device ID at app launch (before Mixpanel init)
+  /// let cachedDeviceId = MyKeychainHelper.getOrCreatePersistentId()
+  ///
   /// let options = MixpanelOptions(
   ///     token: "YOUR_TOKEN",
-  ///     deviceIdProvider: {
-  ///         return MyKeychainHelper.getOrCreatePersistentId()
-  ///     }
+  ///     deviceIdProvider: { cachedDeviceId }  // Return cached value
   /// )
   /// ```
   ///
@@ -55,19 +60,6 @@ public class MixpanelOptions {
   ///     token: "YOUR_TOKEN",
   ///     deviceIdProvider: {
   ///         return UUID().uuidString
-  ///     }
-  /// )
-  /// ```
-  ///
-  /// **Example - Fallback to SDK default on failure:**
-  /// ```swift
-  /// let options = MixpanelOptions(
-  ///     token: "YOUR_TOKEN",
-  ///     deviceIdProvider: {
-  ///         guard let id = fetchDeviceIdFromServer() else {
-  ///             return nil  // Fall back to SDK default
-  ///         }
-  ///         return id
   ///     }
   /// )
   /// ```

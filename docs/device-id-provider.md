@@ -9,8 +9,8 @@ By default, Mixpanel generates a device ID using:
 - **Random UUID** otherwise
 
 The `deviceIdProvider` closure allows you to supply your own device ID, enabling:
-- Persistent device IDs stored in Keychain (survive app reinstalls)
-- Server-generated device IDs
+- Persistent device IDs that survive app reinstalls (via Keychain, cached at launch)
+- Pre-fetched server-generated device IDs
 - Cross-platform device ID consistency
 - Custom device ID formats
 
@@ -40,38 +40,47 @@ The `deviceIdProvider` closure is invoked:
 
 *When persisted identity exists, the provider is called to compare with the existing value. If different, an error is logged but the persisted value is used to preserve identity continuity.
 
+> **Thread Safety:** This closure is called synchronously while holding internal locks. Keep implementations fast and non-blocking. **Do not** perform Keychain access, network calls, or other blocking operations directly inside the closure. Instead, retrieve and cache your device ID at app launch, then return the cached value from the provider.
+
 ## Controlling Reset Behavior
 
 The closure's return value determines how device ID behaves across resets:
 
 ### Persistent Device ID (Never Resets)
 
-Return the **same value** each time the closure is called:
+Return the **same value** each time the closure is called. **Important:** Cache the value at app launch to avoid blocking operations inside the provider.
 
 ```swift
-// Store device ID in Keychain for persistence across reinstalls
+// DeviceIdManager: cache the ID at app launch, return cached value in provider
 // Note: KeychainHelper is a pseudocode wrapper. See Apple's Keychain Services documentation
 // for implementation details: https://developer.apple.com/documentation/security/keychain_services
 class DeviceIdManager {
     static let shared = DeviceIdManager()
 
+    // Cache populated at app launch (in AppDelegate, before Mixpanel init)
+    private(set) var cachedDeviceId: String?
+
     private let keychainKey = "com.yourapp.mixpanel.deviceId"
 
-    func getOrCreateDeviceId() -> String {
+    /// Call this ONCE at app launch, before initializing Mixpanel
+    func loadDeviceId() {
         if let existing = KeychainHelper.get(keychainKey) {
-            return existing
+            cachedDeviceId = existing
+            return
         }
         let newId = UUID().uuidString
         KeychainHelper.set(keychainKey, value: newId)
-        return newId
+        cachedDeviceId = newId
     }
 }
 
-// Usage
+// In AppDelegate.didFinishLaunchingWithOptions:
+DeviceIdManager.shared.loadDeviceId()  // Cache before Mixpanel init
+
 let options = MixpanelOptions(
     token: "YOUR_TOKEN",
     deviceIdProvider: {
-        return DeviceIdManager.shared.getOrCreateDeviceId()
+        return DeviceIdManager.shared.cachedDeviceId  // Fast: returns cached value
     }
 )
 ```
@@ -80,6 +89,7 @@ With this pattern:
 - Device ID survives `reset()` and `optOutTracking()` calls
 - Device ID survives app reinstalls (if using Keychain)
 - User identity continuity is maintained
+- No blocking operations inside the provider closure
 
 ### Ephemeral Device ID (Resets Each Time)
 
@@ -190,11 +200,13 @@ let marketingOptions = MixpanelOptions(
 
 ## Best Practices
 
-1. **Use Keychain** for persistent device IDs that survive reinstalls
-2. **Generate UUIDs** - they're format-compatible with Mixpanel's expectations
-3. **Set provider on first app version** - don't add it later
-4. **Test thoroughly** - verify identity flows work as expected before shipping
-5. **Monitor the warning log** - it indicates potential identity issues
+1. **Cache at launch** - retrieve Keychain/server IDs before Mixpanel init, return cached values
+2. **Keep the closure fast** - no blocking I/O, network, or Keychain access inside the provider
+3. **Use Keychain** for persistent device IDs that survive reinstalls (cached at launch)
+4. **Generate UUIDs** - they're format-compatible with Mixpanel's expectations
+5. **Set provider on first app version** - don't add it later
+6. **Test thoroughly** - verify identity flows work as expected before shipping
+7. **Monitor the warning log** - it indicates potential identity issues
 
 ## See Also
 

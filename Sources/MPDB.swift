@@ -15,10 +15,12 @@ class MPDB {
   private let DB_FILE_NAME: String = "MPDB.sqlite"
 
   let apiToken: String
+  let containerURL: URL?
 
-  init(token: String) {
+  init(token: String, containerURL: URL? = nil) {
     // token can be instanceName which can be any string so we strip all non-alhpanumeric characters to prevent SQL errors
     apiToken = String(token.unicodeScalars.filter({ CharacterSet.alphanumerics.contains($0) }))
+    self.containerURL = containerURL
     open()
   }
 
@@ -27,6 +29,10 @@ class MPDB {
   }
 
   private func pathToDb() -> String? {
+    if let customURL = containerURL {
+      return customURL.appendingPathComponent(apiToken + "_" + DB_FILE_NAME).path
+    }
+
     let manager = FileManager.default
     #if os(iOS)
       let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last

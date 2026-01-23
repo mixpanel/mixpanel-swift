@@ -379,7 +379,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       label: "\(label).network)", qos: .utility, autoreleaseFrequency: .workItem)
     self.name = name
 
-    mixpanelPersistence = MixpanelPersistence.init(instanceName: name)
+    mixpanelPersistence = MixpanelPersistence.init(
+      instanceName: name,
+      userDefaultsSuiteName: self.options.userDefaultsSuiteName,
+      containerURL: self.options.containerURL
+    )
     mixpanelPersistence.migrate()
     self.useUniqueDistinctId = useUniqueDistinctId
 
@@ -646,10 +650,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if os(OSX)
       distinctId = MixpanelInstance.macOSIdentifier()
     #elseif !os(watchOS)
-      if NSClassFromString("UIDevice") != nil {
-        distinctId = UIDevice.current.identifierForVendor?.uuidString
-      } else {
-        distinctId = nil
+      // App Clips return a nil UUID (all zeros) for identifierForVendor
+      if NSClassFromString("UIDevice") != nil,
+         let idfv = UIDevice.current.identifierForVendor?.uuidString,
+         idfv != "00000000-0000-0000-0000-000000000000" {
+        distinctId = idfv
       }
     #else
       distinctId = nil
@@ -841,7 +846,7 @@ extension MixpanelInstance {
           anonymousId: self.anonymousId,
           userId: self.userId,
           alias: self.alias,
-          hadPersistedDistinctId: self.hadPersistedDistinctId), instanceName: self.name)
+          hadPersistedDistinctId: self.hadPersistedDistinctId), instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       if let completion = completion {
         DispatchQueue.main.async(execute: completion)
       }
@@ -937,7 +942,7 @@ extension MixpanelInstance {
             anonymousId: anonymousIdSnapshot,
             userId: userIdSnapshot,
             alias: aliasSnapshot,
-            hadPersistedDistinctId: hadPersistedDistinctIdSnapshot), instanceName: self.name)
+            hadPersistedDistinctId: hadPersistedDistinctIdSnapshot), instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       }
 
       let properties = ["distinct_id": distinctId, "alias": alias]
@@ -994,9 +999,9 @@ extension MixpanelInstance {
 
   public func archive() {
     self.readWriteLock.read {
-      MixpanelPersistence.saveTimedEvents(timedEvents: timedEvents, instanceName: self.name)
+      MixpanelPersistence.saveTimedEvents(timedEvents: timedEvents, instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       MixpanelPersistence.saveSuperProperties(
-        superProperties: superProperties, instanceName: self.name)
+        superProperties: superProperties, instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       MixpanelPersistence.saveIdentity(
         MixpanelIdentity.init(
           distinctID: distinctId,
@@ -1004,16 +1009,16 @@ extension MixpanelInstance {
           anonymousId: anonymousId,
           userId: userId,
           alias: alias,
-          hadPersistedDistinctId: hadPersistedDistinctId), instanceName: self.name)
+          hadPersistedDistinctId: hadPersistedDistinctId), instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
     }
   }
 
   func unarchive() {
     let didCreateIdentity = self.readWriteLock.write {
-      optOutStatus = MixpanelPersistence.loadOptOutStatusFlag(instanceName: self.name)
-      superProperties = MixpanelPersistence.loadSuperProperties(instanceName: self.name)
-      timedEvents = MixpanelPersistence.loadTimedEvents(instanceName: self.name)
-      let mixpanelIdentity = MixpanelPersistence.loadIdentity(instanceName: self.name)
+      optOutStatus = MixpanelPersistence.loadOptOutStatusFlag(instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
+      superProperties = MixpanelPersistence.loadSuperProperties(instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
+      timedEvents = MixpanelPersistence.loadTimedEvents(instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
+      let mixpanelIdentity = MixpanelPersistence.loadIdentity(instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       (distinctId, people.distinctId, anonymousId, userId, alias, hadPersistedDistinctId) = (
         mixpanelIdentity.distinctID,
         mixpanelIdentity.peopleDistinctID,
@@ -1042,7 +1047,7 @@ extension MixpanelInstance {
             anonymousId: anonymousId,
             userId: userId,
             alias: alias,
-            hadPersistedDistinctId: hadPersistedDistinctId), instanceName: self.name)
+            hadPersistedDistinctId: hadPersistedDistinctId), instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       }
     }
   }
@@ -1331,7 +1336,7 @@ extension MixpanelInstance {
       self.readWriteLock.write {
         self.timedEvents = timedEvents
       }
-      MixpanelPersistence.saveTimedEvents(timedEvents: timedEvents, instanceName: self.name)
+      MixpanelPersistence.saveTimedEvents(timedEvents: timedEvents, instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
     }
   }
 
@@ -1362,7 +1367,7 @@ extension MixpanelInstance {
         self.timedEvents = InternalProperties()
       }
       MixpanelPersistence.saveTimedEvents(
-        timedEvents: InternalProperties(), instanceName: self.name)
+        timedEvents: InternalProperties(), instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
     }
   }
 
@@ -1377,7 +1382,7 @@ extension MixpanelInstance {
 
       let updatedTimedEvents = self.trackInstance.clearTimedEvent(
         event: event, timedEvents: self.timedEvents)
-      MixpanelPersistence.saveTimedEvents(timedEvents: updatedTimedEvents, instanceName: self.name)
+      MixpanelPersistence.saveTimedEvents(timedEvents: updatedTimedEvents, instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
     }
   }
 
@@ -1402,7 +1407,7 @@ extension MixpanelInstance {
       guard let self = self else { return }
       self.superProperties = self.trackInstance.clearSuperProperties(self.superProperties)
       MixpanelPersistence.saveSuperProperties(
-        superProperties: self.superProperties, instanceName: self.name)
+        superProperties: self.superProperties, instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
     }
   }
 
@@ -1428,7 +1433,7 @@ extension MixpanelInstance {
       }
       self.readWriteLock.read {
         MixpanelPersistence.saveSuperProperties(
-          superProperties: self.superProperties, instanceName: self.name)
+          superProperties: self.superProperties, instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       }
     }
   }
@@ -1458,7 +1463,7 @@ extension MixpanelInstance {
       }
       self.readWriteLock.read {
         MixpanelPersistence.saveSuperProperties(
-          superProperties: self.superProperties, instanceName: self.name)
+          superProperties: self.superProperties, instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       }
     }
   }
@@ -1487,7 +1492,7 @@ extension MixpanelInstance {
       }
       self.readWriteLock.read {
         MixpanelPersistence.saveSuperProperties(
-          superProperties: self.superProperties, instanceName: self.name)
+          superProperties: self.superProperties, instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       }
     }
   }
@@ -1511,7 +1516,7 @@ extension MixpanelInstance {
       }
       self.readWriteLock.read {
         MixpanelPersistence.saveSuperProperties(
-          superProperties: self.superProperties, instanceName: self.name)
+          superProperties: self.superProperties, instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       }
     }
   }
@@ -1639,14 +1644,14 @@ extension MixpanelInstance {
         self.hadPersistedDistinctId = true
         self.superProperties = InternalProperties()
         MixpanelPersistence.saveTimedEvents(
-          timedEvents: InternalProperties(), instanceName: self.name)
+          timedEvents: InternalProperties(), instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       }
       self.archive()
       self.readWriteLock.write {
         self.optOutStatus = true
       }
       self.readWriteLock.read {
-        MixpanelPersistence.saveOptOutStatusFlag(value: self.optOutStatus!, instanceName: self.name)
+        MixpanelPersistence.saveOptOutStatusFlag(value: self.optOutStatus!, instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       }
 
     }
@@ -1671,7 +1676,7 @@ extension MixpanelInstance {
         self.optOutStatus = false
       }
       self.readWriteLock.read {
-        MixpanelPersistence.saveOptOutStatusFlag(value: self.optOutStatus!, instanceName: self.name)
+        MixpanelPersistence.saveOptOutStatusFlag(value: self.optOutStatus!, instanceName: self.name, userDefaultsSuiteName: self.options.userDefaultsSuiteName)
       }
       if let distinctId = distinctId {
         self.identify(distinctId: distinctId)

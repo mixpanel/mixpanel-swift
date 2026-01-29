@@ -250,6 +250,14 @@ class MixpanelDemoTests: MixpanelBaseTests {
     func isEnabled(_ flagName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void) {
       completion(fallbackValue)
     }
+
+    func getAllVariantsSync() -> [String: MixpanelFlagVariant] {
+      return [:]
+    }
+
+    func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void) {
+      completion([:])
+    }
   }
 
   func testIdentify() {

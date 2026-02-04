@@ -255,7 +255,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
   let readWriteLock: ReadWriteLock
   #if os(iOS) && !targetEnvironment(macCatalyst)
-    static let reachability = SCNetworkReachabilityCreateWithName(nil, "api.mixpanel.com")
+    var reachability: SCNetworkReachability?
     static let telephonyInfo = CTTelephonyNetworkInfo()
   #endif
   #if !os(OSX) && !os(watchOS)
@@ -395,7 +395,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     trackInstance.mixpanelInstance = self
     flags.delegate = self
     #if os(iOS) && !targetEnvironment(macCatalyst)
-      if let reachability = MixpanelInstance.reachability {
+      // Extract hostname from serverURL and create reachability
+      if let url = URL(string: self.serverURL),
+         let host = url.host {
+        self.reachability = SCNetworkReachabilityCreateWithName(nil, host)
+      }
+      if let reachability = self.reachability {
         var context = SCNetworkReachabilityContext(
           version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
         func reachabilityCallback(
@@ -532,7 +537,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   deinit {
     NotificationCenter.default.removeObserver(self)
     #if os(iOS) && !os(watchOS) && !targetEnvironment(macCatalyst)
-      if let reachability = MixpanelInstance.reachability {
+      if let reachability = self.reachability {
         if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
           MixpanelLogger.error(message: "\(self) error unsetting reachability callback")
         }

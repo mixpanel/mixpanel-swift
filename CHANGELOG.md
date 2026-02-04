@@ -1,5 +1,16 @@
 #
 
+## [v5.1.5](https://github.com/mixpanel/mixpanel-swift/tree/v5.1.5) (2026-02-04)
+
+### Fixes
+
+- SPM not showing default version release by default [\#693](https://github.com/mixpanel/mixpanel-swift/issues/693)
+- Refactor reachability handling to use server URL for network reachability checks [\#694](https://github.com/mixpanel/mixpanel-swift/pull/694)
+
+## [v5.1.4](https://github.com/mixpanel/mixpanel-swift/tree/v5.1.4) (2025-12-01)
+
+#
+
 ## [v5.1.4](https://github.com/mixpanel/mixpanel-swift/tree/v5.1.4) (2025-12-01)
 
 #
@@ -457,6 +468,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

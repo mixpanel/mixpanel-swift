@@ -6,6 +6,8 @@
 //  Copyright © 2025 Mixpanel. All rights reserved.
 //
 
+import Foundation
+
 public class MixpanelOptions {
   public let token: String
   public let flushInterval: Double
@@ -19,6 +21,8 @@ public class MixpanelOptions {
   public let useGzipCompression: Bool
   public let featureFlagsEnabled: Bool
   public let featureFlagsContext: [String: Any]
+  public let userDefaultsSuiteName: String?
+  public let containerURL: URL?
 
   public init(
     token: String,
@@ -32,7 +36,9 @@ public class MixpanelOptions {
     proxyServerConfig: ProxyServerConfig? = nil,
     useGzipCompression: Bool = true,  // NOTE: This is a new default value!
     featureFlagsEnabled: Bool = false,
-    featureFlagsContext: [String: Any] = [:]
+    featureFlagsContext: [String: Any] = [:],
+    userDefaultsSuiteName: String? = nil,
+    containerURL: URL? = nil
   ) {
     self.token = token
     self.flushInterval = flushInterval
@@ -46,5 +52,7 @@ public class MixpanelOptions {
     self.useGzipCompression = useGzipCompression
     self.featureFlagsEnabled = featureFlagsEnabled
     self.featureFlagsContext = featureFlagsContext
+    self.userDefaultsSuiteName = userDefaultsSuiteName
+    self.containerURL = containerURL
   }
 }

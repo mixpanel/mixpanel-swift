@@ -53,15 +53,19 @@ struct MixpanelUserDefaultsKeys {
 class MixpanelPersistence {
 
   let instanceName: String
+  let userDefaultsSuiteName: String?
+  let containerURL: URL?
   let mpdb: MPDB
   private static let archivedClasses = [
     NSArray.self, NSDictionary.self, NSSet.self, NSString.self, NSDate.self, NSURL.self,
     NSNumber.self, NSNull.self,
   ]
 
-  init(instanceName: String) {
+  init(instanceName: String, userDefaultsSuiteName: String? = nil, containerURL: URL? = nil) {
     self.instanceName = instanceName
-    mpdb = MPDB.init(token: instanceName)
+    self.userDefaultsSuiteName = userDefaultsSuiteName
+    self.containerURL = containerURL
+    mpdb = MPDB.init(token: instanceName, containerURL: containerURL)
   }
 
   deinit {
@@ -121,8 +125,8 @@ class MixpanelPersistence {
     }
   }
 
-  static func saveOptOutStatusFlag(value: Bool, instanceName: String) {
-    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+  static func saveOptOutStatusFlag(value: Bool, instanceName: String, userDefaultsSuiteName: String? = nil) {
+    guard let defaults = UserDefaults(suiteName: userDefaultsSuiteName ?? MixpanelUserDefaultsKeys.suiteName) else {
       return
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
@@ -130,16 +134,16 @@ class MixpanelPersistence {
     defaults.synchronize()
   }
 
-  static func loadOptOutStatusFlag(instanceName: String) -> Bool? {
-    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+  static func loadOptOutStatusFlag(instanceName: String, userDefaultsSuiteName: String? = nil) -> Bool? {
+    guard let defaults = UserDefaults(suiteName: userDefaultsSuiteName ?? MixpanelUserDefaultsKeys.suiteName) else {
       return nil
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
     return defaults.object(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)") as? Bool
   }
 
-  static func saveTimedEvents(timedEvents: InternalProperties, instanceName: String) {
-    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+  static func saveTimedEvents(timedEvents: InternalProperties, instanceName: String, userDefaultsSuiteName: String? = nil) {
+    guard let defaults = UserDefaults(suiteName: userDefaultsSuiteName ?? MixpanelUserDefaultsKeys.suiteName) else {
       return
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
@@ -153,8 +157,8 @@ class MixpanelPersistence {
     }
   }
 
-  static func loadTimedEvents(instanceName: String) -> InternalProperties {
-    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+  static func loadTimedEvents(instanceName: String, userDefaultsSuiteName: String? = nil) -> InternalProperties {
+    guard let defaults = UserDefaults(suiteName: userDefaultsSuiteName ?? MixpanelUserDefaultsKeys.suiteName) else {
       return InternalProperties()
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
@@ -174,8 +178,8 @@ class MixpanelPersistence {
     }
   }
 
-  static func saveSuperProperties(superProperties: InternalProperties, instanceName: String) {
-    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+  static func saveSuperProperties(superProperties: InternalProperties, instanceName: String, userDefaultsSuiteName: String? = nil) {
+    guard let defaults = UserDefaults(suiteName: userDefaultsSuiteName ?? MixpanelUserDefaultsKeys.suiteName) else {
       return
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
@@ -190,8 +194,8 @@ class MixpanelPersistence {
     }
   }
 
-  static func loadSuperProperties(instanceName: String) -> InternalProperties {
-    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+  static func loadSuperProperties(instanceName: String, userDefaultsSuiteName: String? = nil) -> InternalProperties {
+    guard let defaults = UserDefaults(suiteName: userDefaultsSuiteName ?? MixpanelUserDefaultsKeys.suiteName) else {
       return InternalProperties()
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
@@ -214,8 +218,8 @@ class MixpanelPersistence {
   /// -- Feature Flags --
   /// NOT currently used
 
-  static func saveFlags(flags: InternalProperties, instanceName: String) {
-    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+  static func saveFlags(flags: InternalProperties, instanceName: String, userDefaultsSuiteName: String? = nil) {
+    guard let defaults = UserDefaults(suiteName: userDefaultsSuiteName ?? MixpanelUserDefaultsKeys.suiteName) else {
       return
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
@@ -229,8 +233,8 @@ class MixpanelPersistence {
     }
   }
 
-  static func loadFlags(instanceName: String) -> InternalProperties {
-    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+  static func loadFlags(instanceName: String, userDefaultsSuiteName: String? = nil) -> InternalProperties {
+    guard let defaults = UserDefaults(suiteName: userDefaultsSuiteName ?? MixpanelUserDefaultsKeys.suiteName) else {
       return InternalProperties()
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
@@ -246,8 +250,8 @@ class MixpanelPersistence {
     }
   }
 
-  static func saveIdentity(_ mixpanelIdentity: MixpanelIdentity, instanceName: String) {
-    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+  static func saveIdentity(_ mixpanelIdentity: MixpanelIdentity, instanceName: String, userDefaultsSuiteName: String? = nil) {
+    guard let defaults = UserDefaults(suiteName: userDefaultsSuiteName ?? MixpanelUserDefaultsKeys.suiteName) else {
       return
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
@@ -266,8 +270,8 @@ class MixpanelPersistence {
     defaults.synchronize()
   }
 
-  static func loadIdentity(instanceName: String) -> MixpanelIdentity {
-    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+  static func loadIdentity(instanceName: String, userDefaultsSuiteName: String? = nil) -> MixpanelIdentity {
+    guard let defaults = UserDefaults(suiteName: userDefaultsSuiteName ?? MixpanelUserDefaultsKeys.suiteName) else {
       return MixpanelIdentity.init(
         distinctID: "",
         peopleDistinctID: nil,
@@ -288,8 +292,8 @@ class MixpanelPersistence {
         forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)"))
   }
 
-  static func deleteMPUserDefaultsData(instanceName: String) {
-    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+  static func deleteMPUserDefaultsData(instanceName: String, userDefaultsSuiteName: String? = nil) {
+    guard let defaults = UserDefaults(suiteName: userDefaultsSuiteName ?? MixpanelUserDefaultsKeys.suiteName) else {
       return
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
@@ -350,8 +354,12 @@ class MixpanelPersistence {
 
   private func filePathWithType(_ type: String) -> String? {
     let filename = "mixpanel-\(instanceName)-\(type)"
-    let manager = FileManager.default
 
+    if let customURL = containerURL {
+      return customURL.appendingPathComponent(filename).path
+    }
+
+    let manager = FileManager.default
     #if os(iOS)
       let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
     #else

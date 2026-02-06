@@ -1,5 +1,17 @@
 #
 
+## [v5.2.0](https://github.com/mixpanel/mixpanel-swift/tree/v5.2.0) (2026-02-06)
+
+## [5.2.0](https://github.com/mixpanel/mixpanel-swift/tree/5.2.0) (2026-02-06)
+
+**Merged pull requests:**
+
+- Add deviceIdProvider closure for custom device ID generation [\#692](https://github.com/mixpanel/mixpanel-swift/pull/692)
+
+## [v5.1.5](https://github.com/mixpanel/mixpanel-swift/tree/v5.1.5) (2026-02-04)
+
+#
+
 ## [v5.1.5](https://github.com/mixpanel/mixpanel-swift/tree/v5.1.5) (2026-02-04)
 
 ### Fixes
@@ -468,6 +480,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

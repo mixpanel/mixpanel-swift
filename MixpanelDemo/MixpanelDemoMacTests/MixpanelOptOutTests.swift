@@ -262,6 +262,20 @@ class MixpanelOptOutTests: MixpanelBaseTests {
       "When opted out, this event should not be timed.")
     removeDBfile(testMixpanel)
   }
+  
+  func testOptOutWilSkipTimeEventWithId() {
+    let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)
+    testMixpanel.optOutTracking()
+    waitForTrackingQueue(testMixpanel)
+    let eventUUID = uuid(1)
+    testMixpanel.time(timedEventID: eventUUID)
+    testMixpanel.track(event: "400 Meters", timedEventID: eventUUID)
+    waitForTrackingQueue(testMixpanel)
+    XCTAssertNil(
+      eventQueue(token: testMixpanel.apiToken).last,
+      "When opted out, this event should not be timed.")
+    removeDBfile(testMixpanel)
+  }
 
   func testOptOutWillSkipFlushPeople() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), optOutTrackingByDefault: true)

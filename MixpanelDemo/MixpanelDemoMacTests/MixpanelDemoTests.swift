@@ -131,37 +131,37 @@ class MixpanelDemoTests: MixpanelBaseTests {
     removeDBfile(testMixpanel)
   }
 
-  func testAddEventContainsInvalidJsonObjectDoubleNaN() {
-    let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
-    XCTExpectAssert("unsupported property type was allowed") {
-      testMixpanel.track(event: "bad event", properties: ["BadProp": Double.nan])
-    }
-    removeDBfile(testMixpanel)
-  }
+ func testAddEventContainsInvalidJsonObjectDoubleNaN() {
+   let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+   XCTExpectAssert("unsupported property type was allowed") {
+     testMixpanel.track(event: "bad event", properties: ["BadProp": Double.nan])
+   }
+   removeDBfile(testMixpanel)
+ }
 
-  func testAddEventContainsInvalidJsonObjectFloatNaN() {
-    let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
-    XCTExpectAssert("unsupported property type was allowed") {
-      testMixpanel.track(event: "bad event", properties: ["BadProp": Float.nan])
-    }
-    removeDBfile(testMixpanel)
-  }
+ func testAddEventContainsInvalidJsonObjectFloatNaN() {
+   let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+   XCTExpectAssert("unsupported property type was allowed") {
+     testMixpanel.track(event: "bad event", properties: ["BadProp": Float.nan])
+   }
+   removeDBfile(testMixpanel)
+ }
 
-  func testAddEventContainsInvalidJsonObjectDoubleInfinity() {
-    let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
-    XCTExpectAssert("unsupported property type was allowed") {
-      testMixpanel.track(event: "bad event", properties: ["BadProp": Double.infinity])
-    }
-    removeDBfile(testMixpanel)
-  }
+ func testAddEventContainsInvalidJsonObjectDoubleInfinity() {
+   let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+   XCTExpectAssert("unsupported property type was allowed") {
+     testMixpanel.track(event: "bad event", properties: ["BadProp": Double.infinity])
+   }
+   removeDBfile(testMixpanel)
+ }
 
-  func testAddEventContainsInvalidJsonObjectFloatInfinity() {
-    let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
-    XCTExpectAssert("unsupported property type was allowed") {
-      testMixpanel.track(event: "bad event", properties: ["BadProp": Float.infinity])
-    }
-    removeDBfile(testMixpanel)
-  }
+ func testAddEventContainsInvalidJsonObjectFloatInfinity() {
+   let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+   XCTExpectAssert("unsupported property type was allowed") {
+     testMixpanel.track(event: "bad event", properties: ["BadProp": Float.infinity])
+   }
+   removeDBfile(testMixpanel)
+ }
 
   func testAddingEventsAfterFlush() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
@@ -349,7 +349,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     waitForTrackingQueue(testMixpanel)
     testMixpanel.createAlias(alias, distinctId: testMixpanel.distinctId)
     waitForTrackingQueue(testMixpanel)
-    var mixpanelIdentity = MixpanelPersistence.loadIdentity(apiToken: testMixpanel.apiToken)
+    var mixpanelIdentity = MixpanelPersistence.loadIdentity(instanceName: testMixpanel.apiToken)
     XCTAssertTrue(
       distinctId == mixpanelIdentity.distinctID && distinctId == mixpanelIdentity.peopleDistinctID
         && distinctId == mixpanelIdentity.userId && alias == mixpanelIdentity.alias)
@@ -357,16 +357,16 @@ class MixpanelDemoTests: MixpanelBaseTests {
     waitForTrackingQueue(testMixpanel)
     testMixpanel.unarchive()
     waitForTrackingQueue(testMixpanel)
-    mixpanelIdentity = MixpanelPersistence.loadIdentity(apiToken: testMixpanel.apiToken)
+    mixpanelIdentity = MixpanelPersistence.loadIdentity(instanceName: testMixpanel.apiToken)
     XCTAssertTrue(
       testMixpanel.distinctId == mixpanelIdentity.distinctID
         && testMixpanel.people.distinctId == mixpanelIdentity.peopleDistinctID
         && testMixpanel.anonymousId == mixpanelIdentity.anonymousId
         && testMixpanel.userId == mixpanelIdentity.userId
         && testMixpanel.alias == mixpanelIdentity.alias)
-    MixpanelPersistence.deleteMPUserDefaultsData(apiToken: testMixpanel.apiToken)
+    MixpanelPersistence.deleteMPUserDefaultsData(instanceName: testMixpanel.apiToken)
     waitForTrackingQueue(testMixpanel)
-    mixpanelIdentity = MixpanelPersistence.loadIdentity(apiToken: testMixpanel.apiToken)
+    mixpanelIdentity = MixpanelPersistence.loadIdentity(instanceName: testMixpanel.apiToken)
     XCTAssertTrue(
       "" == mixpanelIdentity.distinctID && nil == mixpanelIdentity.peopleDistinctID
         && nil == mixpanelIdentity.anonymousId && nil == mixpanelIdentity.userId
@@ -778,7 +778,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     XCTAssertTrue(
       peopleQueue(token: testMixpanel2.apiToken).count == 1, "pending people queue archive failed")
     XCTAssertEqual(
-      testMixpanel2.timedEvents["e2"] as? Int, 5,
+      testMixpanel2.timedEvents["e2"], 5,
       "timedEvents archive failed")
     testMixpanel2.mixpanelPersistence.closeDB()
     let testMixpanel3 = Mixpanel.initialize(token: testToken, flushInterval: 60)
@@ -848,20 +848,111 @@ class MixpanelDemoTests: MixpanelBaseTests {
     testMixpanel.time(event: "Time Event B")
     testMixpanel.time(event: "Time Event C")
     waitForTrackingQueue(testMixpanel)
-    var testTimedEvents = MixpanelPersistence.loadTimedEvents(apiToken: testMixpanel.apiToken)
+    var testTimedEvents = MixpanelPersistence.loadTimedEvents(instanceName: testMixpanel.apiToken)
     XCTAssertTrue(
       testTimedEvents.count == 3, "Each call to time() should add an event to timedEvents")
     XCTAssertNotNil(testTimedEvents["Time Event A"], "Keys in timedEvents should be event names")
     testMixpanel.clearTimedEvent(event: "Time Event A")
     waitForTrackingQueue(testMixpanel)
-    testTimedEvents = MixpanelPersistence.loadTimedEvents(apiToken: testMixpanel.apiToken)
+    testTimedEvents = MixpanelPersistence.loadTimedEvents(instanceName: testMixpanel.apiToken)
     XCTAssertNil(testTimedEvents["Time Event A"], "clearTimedEvent should remove key/value pair")
     XCTAssertTrue(
       testTimedEvents.count == 2, "clearTimedEvent shoud remove only one key/value pair")
     testMixpanel.clearTimedEvents()
     waitForTrackingQueue(testMixpanel)
     XCTAssertTrue(
-      MixpanelPersistence.loadTimedEvents(apiToken: testMixpanel.apiToken).count == 0,
+      MixpanelPersistence.loadTimedEvents(instanceName: testMixpanel.apiToken).count == 0,
+      "clearTimedEvents should remove all key/value pairs")
+    removeDBfile(testMixpanel)
+  }
+    
+  func testEventTimingWithTimedEventID() {
+    let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+    testMixpanel.track(event: "Something Happened")
+    waitForTrackingQueue(testMixpanel)
+    var e: InternalProperties = eventQueue(token: testMixpanel.apiToken).last!
+    var p = e["properties"] as! InternalProperties
+    XCTAssertNil(p["$duration"], "New events should not be timed.")
+    let event1UUID = uuid(1)
+    let event2UUID = uuid(2)
+    testMixpanel.time(timedEventID: event1UUID)
+    testMixpanel.track(event: "Event 1", timedEventID: event2UUID)
+    waitForTrackingQueue(testMixpanel)
+    e = eventQueue(token: testMixpanel.apiToken).last!
+    p = e["properties"] as! InternalProperties
+    XCTAssertNil(p["$duration"], "The exact same timedEventID is required for timing, regardless of name")
+    testMixpanel.track(event: "Event 1", timedEventID: event1UUID)
+    waitForTrackingQueue(testMixpanel)
+    e = eventQueue(token: testMixpanel.apiToken).last!
+    p = e["properties"] as! InternalProperties
+    XCTAssertNotNil(p["$duration"], "This event should be timed.")
+    testMixpanel.track(event: "Event 1", timedEventID: event1UUID)
+    waitForTrackingQueue(testMixpanel)
+    e = eventQueue(token: testMixpanel.apiToken).last!
+    p = e["properties"] as! InternalProperties
+    XCTAssertNil(
+      p["$duration"],
+      "Tracking the same event should require a second call to timeEvent.")
+    removeDBfile(testMixpanel)
+  }
+    
+  func testClearingTimedEventsWithId() {
+    let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+    let event1UUID = uuid(1)
+    let event2UUID = uuid(2)
+    testMixpanel.time(timedEventID: event1UUID)
+    testMixpanel.time(timedEventID: event2UUID)
+    waitForTrackingQueue(testMixpanel)
+    var testTimedEvents = MixpanelPersistence.loadTimedEvents(instanceName: testMixpanel.apiToken)
+    XCTAssertTrue(
+      testTimedEvents.count == 2, "Each call to time() should add an event to timedEvents")
+    XCTAssertNotNil(testTimedEvents[event1UUID.uuidString], "Keys in timedEvents should be timedEventID's uuidString")
+    XCTAssertNotNil(testTimedEvents[event2UUID.uuidString], "Keys in timedEvents should be timedEventID's uuidString")
+    testMixpanel.clearTimedEvent(timedEventID: event1UUID)
+    waitForTrackingQueue(testMixpanel)
+    testTimedEvents = MixpanelPersistence.loadTimedEvents(instanceName: testMixpanel.apiToken)
+    XCTAssertNil(testTimedEvents[event1UUID.uuidString], "clearTimedEvent should remove key/value pair")
+    XCTAssertNotNil(testTimedEvents[event2UUID.uuidString], "clearTimedEvent should only remove the correct timedEventID's uuidString")
+    XCTAssertTrue(
+      testTimedEvents.count == 1, "clearTimedEvent shoud remove only one key/value pair")
+    removeDBfile(testMixpanel)
+  }
+  
+  func testEventTimingMultipleTimedEventsWithId() {
+    let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+    let event1UUID = uuid(1)
+    let event2UUID = uuid(2)
+    let event3UUID = uuid(3)
+    let event4UUID = uuid(4)
+    testMixpanel.time(timedEventID: event1UUID)
+    testMixpanel.time(timedEventID: event2UUID)
+    testMixpanel.time(timedEventID: event3UUID)
+    testMixpanel.time(timedEventID: event4UUID)
+    waitForTrackingQueue(testMixpanel)
+    var testTimedEvents = MixpanelPersistence.loadTimedEvents(instanceName: testMixpanel.apiToken)
+    XCTAssertTrue(
+      testTimedEvents.count == 4, "Each call to time() should add an event to timedEvents")
+    testMixpanel.track(event: "Recurring Event", timedEventID: event1UUID)
+    waitForTrackingQueue(testMixpanel)
+    let event4 = eventQueue(token: testMixpanel.apiToken).last!
+    let event4Properties = event4["properties"] as! InternalProperties
+    XCTAssertNotNil(event4Properties["$duration"], "This event should be timed.")
+    testTimedEvents = MixpanelPersistence.loadTimedEvents(instanceName: testMixpanel.apiToken)
+    XCTAssertTrue(
+      testTimedEvents.count == 3, "tracking and event shoud remove only one key/value pair")
+    testMixpanel.track(event: "Recurring Event", timedEventID: event2UUID)
+    waitForTrackingQueue(testMixpanel)
+    let event5 = eventQueue(token: testMixpanel.apiToken).last!
+    let event5Properties = event5["properties"] as! InternalProperties
+    XCTAssertNotNil(
+      event5Properties["$duration"], "This event should be timed. Event though there was another event with the same name.")
+    testTimedEvents = MixpanelPersistence.loadTimedEvents(instanceName: testMixpanel.apiToken)
+    XCTAssertTrue(
+      testTimedEvents.count == 2, "tracking and event shoud remove only one key/value pair")
+    testMixpanel.clearTimedEvents()
+    waitForTrackingQueue(testMixpanel)
+    testTimedEvents = MixpanelPersistence.loadTimedEvents(instanceName: testMixpanel.apiToken)
+    XCTAssertTrue(testTimedEvents.count == 0,
       "clearTimedEvents should remove all key/value pairs")
     removeDBfile(testMixpanel)
   }

@@ -287,7 +287,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
       }
       return foundVariant
     } else {
-      print("Info: Flag '\(flagName)' not found or flags not ready. Returning fallback.")
+      MixpanelLogger.info(message: "Flag '\(flagName)' not found or flags not ready. Returning fallback.")
       return fallback
     }
   }
@@ -329,7 +329,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
       } else {
         // --- Flags were NOT ready ---
         // Trigger fetch; fetch completion will handle calling the original completion handler
-        print("Flags not ready, attempting fetch for getFeature call...")
+        MixpanelLogger.debug(message: "Flags not ready, attempting fetch for getFeature call...")
         self._fetchFlagsIfNeeded { success in
           // This completion runs *after* fetch completes (or fails)
           let result: MixpanelFlagVariant
@@ -337,7 +337,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
             // Fetch succeeded, get the flag SYNCHRONOUSLY
             result = self.getVariantSync(flagName, fallback: fallback)
           } else {
-            print("Warning: Failed to fetch flags, returning fallback for \(flagName).")
+            MixpanelLogger.warn(message: "Failed to fetch flags, returning fallback for \(flagName).")
             result = fallback
           }
           // Call original completion (on main thread)
@@ -391,7 +391,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     let optionsSnapshot = self.currentOptions  // Read options directly (safe on accessQueue)
 
     guard let options = optionsSnapshot, options.featureFlagsEnabled else {
-      print("Feature flags are disabled, not fetching.")
+      MixpanelLogger.debug(message: "Feature flags are disabled, not fetching.")
       // Dispatch completion to main queue to avoid potential deadlock
       DispatchQueue.main.async {
         completion?(false)
@@ -407,7 +407,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
         self.fetchCompletionHandlers.append(completion)
       }
     } else {
-      print("Fetch already in progress, queueing completion handler.")
+      MixpanelLogger.debug(message: "Fetch already in progress, queueing completion handler.")
       if let completion = completion {
         self.fetchCompletionHandlers.append(completion)
       }
@@ -415,7 +415,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     // State modifications related to starting the fetch are complete
 
     if shouldStartFetch {
-      print("Starting flag fetch (dispatching network request)...")
+      MixpanelLogger.debug(message: "Starting flag fetch (dispatching network request)...")
       // Perform network request OUTSIDE the serial accessQueue context
       // to avoid blocking the queue during network latency.
       // Dispatch the network request initiation to a global queue.
@@ -436,14 +436,14 @@ class FeatureFlagManager: Network, MixpanelFlags {
     }
 
     guard let delegate = self.delegate, let options = self.currentOptions else {
-      print("Error: Delegate or options missing for fetch.")
+      MixpanelLogger.error(message: "Delegate or options missing for fetch.")
       self._completeFetch(success: false)
       return
     }
 
     let distinctId = delegate.getDistinctId()
     let anonymousId = delegate.getAnonymousId()
-    print("Fetching flags for distinct ID: \(distinctId)")
+    MixpanelLogger.debug(message: "Fetching flags for distinct ID: \(distinctId)")
 
     var context = options.featureFlagsContext
     context["distinct_id"] = distinctId
@@ -456,13 +456,13 @@ class FeatureFlagManager: Network, MixpanelFlags {
         withJSONObject: context, options: []),
       let contextString = String(data: contextData, encoding: .utf8)
     else {
-      print("Error: Failed to serialize context for flags.")
+      MixpanelLogger.error(message: "Failed to serialize context for flags.")
       self._completeFetch(success: false)
       return
     }
 
     guard let authData = "\(options.token):".data(using: .utf8) else {
-      print("Error: Failed to create auth data.")
+      MixpanelLogger.error(message: "Failed to create auth data.")
       self._completeFetch(success: false)
       return
     }
@@ -478,7 +478,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
     let responseParser: (Data) -> FlagsResponse? = { data in
       do { return try JSONDecoder().decode(FlagsResponse.self, from: data) } catch {
-        print("Error parsing flags JSON: \(error)")
+        MixpanelLogger.error(message: "Error parsing flags JSON: \(error)")
         return nil
       }
     }
@@ -491,14 +491,14 @@ class FeatureFlagManager: Network, MixpanelFlags {
       base: serverURL,
       resource: resource,
       failure: { [weak self] reason, data, response in  // Completion handlers run on URLSession's queue
-        print("Error: Failed to fetch flags. Reason: \(reason)")
+        MixpanelLogger.error(message: "Failed to fetch flags. Reason: \(reason)")
         // Update state and call completions via _completeFetch on the serial queue
         self?.accessQueue.async {  // Dispatch completion handling to serial queue
           self?._completeFetch(success: false)
         }
       },
       success: { [weak self] (flagsResponse, response) in  // Completion handlers run on URLSession's queue
-        print("Successfully fetched flags.")
+        MixpanelLogger.info(message: "Successfully fetched flags.")
         guard let self = self else { return }
         let fetchEndTime = Date()
         // Update state and call completions via _completeFetch on the serial queue
@@ -514,7 +514,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
           }
           self.timeLastFetched = fetchEndTime
 
-          print("Flags updated: \(self.flags ?? [:])")
+          MixpanelLogger.debug(message: "Flags updated: \(self.flags ?? [:])")
           self._completeFetch(success: true)  // still on accessQueue
         }
       }
@@ -597,7 +597,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     // Dispatch delegate call asynchronously to main thread for safety
     DispatchQueue.main.async {
       delegate.track(event: "$experiment_started", properties: properties)
-      print("Tracked $experiment_started for \(flagName) (dispatched to main)")
+      MixpanelLogger.debug(message: "Tracked $experiment_started for \(flagName)")
     }
   }
 
@@ -609,7 +609,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     if let boolVal = val as? Bool {
       return boolVal
     } else {
-      print("Error: Flag '\(flagName)' is not Bool")
+      MixpanelLogger.error(message: "Flag '\(flagName)' is not Bool")
       return fallbackValue
     }
   }

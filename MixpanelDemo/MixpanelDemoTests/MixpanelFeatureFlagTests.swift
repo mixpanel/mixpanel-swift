@@ -590,6 +590,128 @@ class FeatureFlagManagerTests: XCTestCase {
     }
   }
 
+  // --- Bulk Flag Retrieval Tests (getAllVariants) ---
+
+  func testGetAllVariantsSync_FlagsReady() {
+    simulateFetchSuccess()
+    let allVariants = manager.getAllVariantsSync()
+    XCTAssertEqual(allVariants.count, sampleFlags.count, "Should return all flags")
+    // Verify specific flags exist
+    XCTAssertNotNil(allVariants["feature_bool_true"], "Should contain feature_bool_true")
+    XCTAssertNotNil(allVariants["feature_string"], "Should contain feature_string")
+    XCTAssertNotNil(allVariants["feature_int"], "Should contain feature_int")
+    // Verify values
+    AssertEqual(allVariants["feature_bool_true"]?.key, "v_true")
+    AssertEqual(allVariants["feature_bool_true"]?.value, true)
+    AssertEqual(allVariants["feature_string"]?.value, "test_string")
+  }
+
+  func testGetAllVariantsSync_FlagsNotReady() {
+    XCTAssertFalse(manager.areFlagsReady(), "Precondition: flags should not be ready")
+    let allVariants = manager.getAllVariantsSync()
+    XCTAssertTrue(allVariants.isEmpty, "Should return empty dictionary when flags not ready")
+  }
+
+  func testGetAllVariantsSync_NoTracking() {
+    simulateFetchSuccess()
+    _ = manager.getAllVariantsSync()
+    // Wait briefly to ensure no unexpected tracking call
+    let expectation = XCTestExpectation(description: "Wait briefly for no track")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
+    wait(for: [expectation], timeout: 0.5)
+    XCTAssertTrue(mockDelegate.trackedEvents.isEmpty, "getAllVariantsSync should not trigger tracking")
+  }
+
+  func testGetAllVariants_Async_FlagsReady() {
+    simulateFetchSuccess()
+    let expectation = XCTestExpectation(description: "getAllVariants completion")
+    var receivedVariants: [String: MixpanelFlagVariant]?
+    var assertionError: String?
+
+    manager.getAllVariants { variants in
+      if !Thread.isMainThread {
+        assertionError = "Completion not on main thread"
+      }
+      receivedVariants = variants
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: 2.0)
+
+    if let error = assertionError {
+      XCTFail(error)
+    }
+    XCTAssertNotNil(receivedVariants, "Should receive variants")
+    XCTAssertEqual(receivedVariants?.count, sampleFlags.count, "Should return all flags")
+    AssertEqual(receivedVariants?["feature_double"]?.key, "v_double")
+    AssertEqual(receivedVariants?["feature_double"]?.value, 99.9)
+  }
+
+  func testGetAllVariants_Async_FlagsNotReady_FetchSucceeds() {
+    XCTAssertFalse(manager.areFlagsReady(), "Precondition: flags should not be ready")
+    let expectation = XCTestExpectation(description: "getAllVariants triggers fetch and succeeds")
+    var receivedVariants: [String: MixpanelFlagVariant]?
+
+    manager.getAllVariants { variants in
+      XCTAssertTrue(Thread.isMainThread, "Completion should be on main thread")
+      receivedVariants = variants
+      expectation.fulfill()
+    }
+
+    // MockFeatureFlagManager will automatically handle the fetch simulation
+    wait(for: [expectation], timeout: 3.0)
+
+    XCTAssertNotNil(receivedVariants, "Should receive variants after fetch")
+    XCTAssertEqual(receivedVariants?.count, sampleFlags.count, "Should return all flags after fetch")
+    XCTAssertTrue(manager.areFlagsReady(), "Flags should be ready after successful fetch")
+  }
+
+  func testGetAllVariants_Async_FlagsNotReady_FetchFails() {
+    // Configure mock to simulate failure
+    if let mockManager = manager as? MockFeatureFlagManager {
+      mockManager.simulatedFetchResult = (success: false, flags: nil)
+    }
+
+    XCTAssertFalse(manager.areFlagsReady(), "Precondition: flags should not be ready")
+    let expectation = XCTestExpectation(description: "getAllVariants triggers fetch and fails")
+    var receivedVariants: [String: MixpanelFlagVariant]?
+
+    manager.getAllVariants { variants in
+      XCTAssertTrue(Thread.isMainThread, "Completion should be on main thread")
+      receivedVariants = variants
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: 3.0)
+
+    XCTAssertNotNil(receivedVariants, "Should receive result even on failure")
+    XCTAssertTrue(receivedVariants?.isEmpty ?? false, "Should return empty dictionary on fetch failure")
+    XCTAssertFalse(manager.areFlagsReady(), "Flags should not be ready after failed fetch")
+
+    // Reset mock configuration back to success for other tests
+    if let mockManager = manager as? MockFeatureFlagManager {
+      mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+    }
+  }
+
+  func testGetAllVariants_Async_NoTracking() {
+    simulateFetchSuccess()
+    let expectation = XCTestExpectation(description: "getAllVariants completion for tracking test")
+
+    manager.getAllVariants { _ in
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: 2.0)
+
+    // Wait briefly to ensure no unexpected tracking call
+    let waitExpectation = XCTestExpectation(description: "Wait briefly for no track")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { waitExpectation.fulfill() }
+    wait(for: [waitExpectation], timeout: 0.5)
+
+    XCTAssertTrue(mockDelegate.trackedEvents.isEmpty, "getAllVariants should not trigger tracking")
+  }
+
   // --- Tracking Tests ---
 
   func testTracking_CalledOncePerFeature() {

@@ -282,6 +282,15 @@ open class Mixpanel {
   open class func removeInstance(name: String) {
     MixpanelManager.sharedInstance.removeInstance(name: name)
   }
+
+  /**
+    Returns a `MixpanelFlags` instance that the client can manage
+
+    - parameter serverURL: Optional. Mixpanel cluster URL
+  */
+  public class func flags(serverUrl: String? = nil) -> MixpanelFlags {
+    return FeatureFlagManager(serverURL: serverUrl ?? BasePath.DefaultMixpanelAPI)
+  }
 }
 
 final class MixpanelManager {

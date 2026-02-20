@@ -456,7 +456,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         automaticEvents.initializeEvents(instanceName: self.name)
       }
     #endif
-    flags.loadFlags()
+    if options.flagsOptions.loadOnFirstForeground {
+      flags.loadFlags()
+    }
   }
 
   public func getOptions() -> MixpanelOptions {

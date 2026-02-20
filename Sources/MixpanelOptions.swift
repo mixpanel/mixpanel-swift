@@ -25,9 +25,12 @@
 ///     flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: false)
 /// )
 /// let mp = Mixpanel.initialize(options: options)
+/// // identify() triggers loadFlags() internally when the distinctId changes
 /// mp.identify(distinctId: "user123")
-/// mp.flags.loadFlags()
 /// ```
+///
+/// If `identify` may be called with the same persisted distinctId (no change),
+/// call `mp.flags.loadFlags()` explicitly to ensure flags are fetched.
 public struct FlagOptions {
   /// Whether feature flags are enabled. Defaults to `false`.
   public let enabled: Bool

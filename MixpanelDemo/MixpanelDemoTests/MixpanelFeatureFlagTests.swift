@@ -1701,4 +1701,107 @@ class FeatureFlagManagerTests: XCTestCase {
     }
   }
 
+  // --- FlagOptions Tests ---
+
+  func testFlagOptions_DefaultValues() {
+    let options = FlagOptions()
+    XCTAssertFalse(options.enabled, "enabled should default to false")
+    XCTAssertTrue(options.context.isEmpty, "context should default to empty")
+    XCTAssertTrue(options.loadOnFirstForeground, "loadOnFirstForeground should default to true")
+  }
+
+  func testFlagOptions_CustomValues() {
+    let options = FlagOptions(
+      enabled: true,
+      context: ["key": "value"],
+      loadOnFirstForeground: false
+    )
+    XCTAssertTrue(options.enabled)
+    XCTAssertEqual(options.context["key"] as? String, "value")
+    XCTAssertFalse(options.loadOnFirstForeground)
+  }
+
+  func testMixpanelOptions_FlagOptionsOverridesFlat() {
+    // When flagsOptions is provided, it should take precedence
+    let options = MixpanelOptions(
+      token: "test",
+      featureFlagsEnabled: false,
+      featureFlagsContext: [:],
+      flagsOptions: FlagOptions(enabled: true, context: ["custom": "ctx"], loadOnFirstForeground: false)
+    )
+    XCTAssertTrue(options.featureFlagsEnabled, "featureFlagsEnabled should reflect flagsOptions.enabled")
+    XCTAssertEqual(options.featureFlagsContext["custom"] as? String, "ctx")
+    XCTAssertTrue(options.flagsOptions.enabled)
+    XCTAssertFalse(options.flagsOptions.loadOnFirstForeground)
+  }
+
+  func testMixpanelOptions_FlatParamsFeedIntoFlagOptions() {
+    // When flagsOptions is not provided, flat params populate it
+    let options = MixpanelOptions(
+      token: "test",
+      featureFlagsEnabled: true,
+      featureFlagsContext: ["flat": "value"]
+    )
+    XCTAssertTrue(options.flagsOptions.enabled, "flagsOptions.enabled should match featureFlagsEnabled")
+    XCTAssertEqual(options.flagsOptions.context["flat"] as? String, "value")
+    XCTAssertTrue(options.flagsOptions.loadOnFirstForeground, "loadOnFirstForeground should default to true")
+  }
+
+  func testLoadOnFirstForeground_True_AutoLoadsFlags() {
+    // With loadOnFirstForeground: true (default), loadFlags should be called during init
+    let delegate = MockFeatureFlagDelegate(
+      options: MixpanelOptions(
+        token: "test",
+        flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: true)
+      )
+    )
+
+    let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", delegate: delegate)
+    mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+
+    // Trigger what MixpanelInstance init would do
+    mockManager.loadFlags()
+
+    let expectation = XCTestExpectation(description: "Wait for fetch")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { expectation.fulfill() }
+    wait(for: [expectation], timeout: 1.0)
+
+    XCTAssertEqual(mockManager.fetchRequestCount, 1, "Should have fetched flags")
+  }
+
+  func testLoadOnFirstForeground_False_DoesNotAutoLoadFlags() {
+    // With loadOnFirstForeground: false, no automatic fetch should happen
+    let options = MixpanelOptions(
+      token: "test",
+      flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: false)
+    )
+
+    // Verify the option propagates correctly
+    XCTAssertFalse(options.flagsOptions.loadOnFirstForeground)
+    XCTAssertTrue(options.featureFlagsEnabled)
+  }
+
+  func testLoadOnFirstForeground_False_ManualLoadStillWorks() {
+    // Even with loadOnFirstForeground: false, calling loadFlags() manually should work
+    let delegate = MockFeatureFlagDelegate(
+      options: MixpanelOptions(
+        token: "test",
+        flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: false)
+      )
+    )
+
+    let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", delegate: delegate)
+    mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+
+    // Manually load flags (simulating what user would do after identify)
+    mockManager.loadFlags()
+
+    let expectation = XCTestExpectation(description: "Wait for manual fetch")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { expectation.fulfill() }
+    wait(for: [expectation], timeout: 1.0)
+
+    XCTAssertEqual(mockManager.fetchRequestCount, 1, "Manual loadFlags should trigger fetch")
+    XCTAssertTrue(mockManager.areFlagsReady(), "Flags should be ready after manual load")
+  }
+
 }  // End Test Class

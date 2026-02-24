@@ -176,7 +176,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
     let distinctId = delegate.getDistinctId()
     let anonymousId = delegate.getAnonymousId()
 
-    var context = options.featureFlagsContext
+    var context = options.flagsOptions.context
     context["distinct_id"] = distinctId
     if let anonymousId = anonymousId {
       context["device_id"] = anonymousId
@@ -1748,37 +1748,41 @@ class FeatureFlagManagerTests: XCTestCase {
   }
 
   func testLoadOnFirstForeground_True_AutoLoadsFlags() {
-    // With loadOnFirstForeground: true (default), loadFlags should be called during init
-    let delegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(
-        token: "test",
-        flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: true)
-      )
+    // With loadOnFirstForeground: true (default), MixpanelInstance.init should call loadFlags()
+    let options = MixpanelOptions(
+      token: UUID().uuidString,
+      flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: true)
     )
+    let instance = Mixpanel.initialize(options: options)
+    let flagManager = instance.flags as! FeatureFlagManager
 
-    let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", delegate: delegate)
-    mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+    // loadFlags() dispatches async to accessQueue, so syncing on it
+    // guarantees the fetch block has executed by the time we check
+    var fetching = false
+    flagManager.accessQueue.sync {
+      fetching = flagManager.isFetching
+    }
 
-    // Trigger what MixpanelInstance init would do
-    mockManager.loadFlags()
-
-    let expectation = XCTestExpectation(description: "Wait for fetch")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 1.0)
-
-    XCTAssertEqual(mockManager.fetchRequestCount, 1, "Should have fetched flags")
+    XCTAssertTrue(fetching, "Init with loadOnFirstForeground: true should auto-trigger a flag fetch")
   }
 
   func testLoadOnFirstForeground_False_DoesNotAutoLoadFlags() {
-    // With loadOnFirstForeground: false, no automatic fetch should happen
+    // With loadOnFirstForeground: false, MixpanelInstance.init should NOT call loadFlags()
     let options = MixpanelOptions(
-      token: "test",
+      token: UUID().uuidString,
       flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: false)
     )
+    let instance = Mixpanel.initialize(options: options)
+    let flagManager = instance.flags as! FeatureFlagManager
 
-    // Verify the option propagates correctly
-    XCTAssertFalse(options.flagsOptions.loadOnFirstForeground)
-    XCTAssertTrue(options.featureFlagsEnabled)
+    // Sync on accessQueue to drain any pending work
+    var fetching = false
+    flagManager.accessQueue.sync {
+      fetching = flagManager.isFetching
+    }
+
+    XCTAssertFalse(fetching, "Init with loadOnFirstForeground: false should not trigger a flag fetch")
+    XCTAssertFalse(flagManager.areFlagsReady(), "No flags should be loaded")
   }
 
   func testLoadOnFirstForeground_False_ManualLoadStillWorks() {

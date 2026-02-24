@@ -456,7 +456,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         automaticEvents.initializeEvents(instanceName: self.name)
       }
     #endif
-    if options.flagsOptions.loadOnFirstForeground {
+    if self.options.flagsOptions.loadOnFirstForeground {
       flags.loadFlags()
     }
   }

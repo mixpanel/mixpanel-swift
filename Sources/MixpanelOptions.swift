@@ -67,8 +67,11 @@ public class MixpanelOptions {
   public let serverURL: String?
   public let proxyServerConfig: ProxyServerConfig?
   public let useGzipCompression: Bool
-  public let featureFlagsEnabled: Bool
-  public let featureFlagsContext: [String: Any]
+  @available(*, deprecated, message: "Use flagsOptions.enabled instead")
+  public var featureFlagsEnabled: Bool { return flagsOptions.enabled }
+
+  @available(*, deprecated, message: "Use flagsOptions.context instead")
+  public var featureFlagsContext: [String: Any] { return flagsOptions.context }
 
   /// Grouped configuration for feature flags behavior.
   ///
@@ -152,11 +155,7 @@ public class MixpanelOptions {
     // When flagsOptions is explicitly provided, it takes precedence
     if let flagsOptions = flagsOptions {
       self.flagsOptions = flagsOptions
-      self.featureFlagsEnabled = flagsOptions.enabled
-      self.featureFlagsContext = flagsOptions.context
     } else {
-      self.featureFlagsEnabled = featureFlagsEnabled
-      self.featureFlagsContext = featureFlagsContext
       self.flagsOptions = FlagOptions(
         enabled: featureFlagsEnabled,
         context: featureFlagsContext

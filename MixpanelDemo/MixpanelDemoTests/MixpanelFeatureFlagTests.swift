@@ -27,7 +27,7 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
   var customTrackHandler: ((String?, Properties?) -> Void)?
 
   init(
-    options: MixpanelOptions = MixpanelOptions(token: "test", featureFlagsEnabled: true),
+    options: MixpanelOptions = MixpanelOptions(token: "test", flagsOptions: FlagOptions(enabled: true)),
     distinctId: String = "test_distinct_id",
     anonymousId: String? = "test_anonymous_id"
   ) {
@@ -366,7 +366,7 @@ class FeatureFlagManagerTests: XCTestCase {
   // --- Load Flags Tests ---
 
   func testLoadFlags_WhenDisabledInConfig() {
-    mockDelegate.options = MixpanelOptions(token: "test", featureFlagsEnabled: false)  // Explicitly disable
+    mockDelegate.options = MixpanelOptions(token: "test", flagsOptions: FlagOptions(enabled: false))  // Explicitly disable
     manager.loadFlags()  // Call public API
 
     // Wait to ensure no async fetch operations started changing state
@@ -979,7 +979,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testDelegateConfigDisabledHandling() {
     // Set delegate options to disabled
-    mockDelegate.options = MixpanelOptions(token: "test", featureFlagsEnabled: false)
+    mockDelegate.options = MixpanelOptions(token: "test", flagsOptions: FlagOptions(enabled: false))
 
     // Try to load flags
     manager.loadFlags()
@@ -1161,7 +1161,7 @@ class FeatureFlagManagerTests: XCTestCase {
     let testDistinctId = "test_distinct_id_67890"
 
     let mockDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test", featureFlagsEnabled: true),
+      options: MixpanelOptions(token: "test", flagsOptions: FlagOptions(enabled: true)),
       distinctId: testDistinctId,
       anonymousId: testAnonymousId
     )
@@ -1182,7 +1182,7 @@ class FeatureFlagManagerTests: XCTestCase {
     let testDistinctId = "test_distinct_id_67890"
 
     let mockDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test", featureFlagsEnabled: true),
+      options: MixpanelOptions(token: "test", flagsOptions: FlagOptions(enabled: true)),
       distinctId: testDistinctId,
       anonymousId: nil
     )
@@ -1613,10 +1613,10 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testGETRequestWithCustomContext() {
     // Set up custom context
-    let customOptions = MixpanelOptions(token: "custom-token", featureFlagsEnabled: true, featureFlagsContext: [
+    let customOptions = MixpanelOptions(token: "custom-token", flagsOptions: FlagOptions(enabled: true, context: [
       "user_id": "test-user-123",
       "group_id": "test-group-456"
-    ])
+    ]))
 
     let customDelegate = MockFeatureFlagDelegate(
       options: customOptions,
@@ -1662,7 +1662,7 @@ class FeatureFlagManagerTests: XCTestCase {
   func testGETRequestWithNilAnonymousId() {
     // Set up with nil anonymous ID
     let nilAnonymousDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test-token", featureFlagsEnabled: true),
+      options: MixpanelOptions(token: "test-token", flagsOptions: FlagOptions(enabled: true)),
       distinctId: "test-distinct-id",
       anonymousId: nil
     )

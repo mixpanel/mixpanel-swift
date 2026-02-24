@@ -544,7 +544,7 @@ class FeatureFlagManagerTests: XCTestCase {
     // No need for manual simulateFetchSuccess() - the mock handles it with delay
 
     // Wait for BOTH the getFeature completion AND the tracking expectation
-    wait(for: [expectation, mockDelegate.trackExpectation!], timeout: 3.0)  // Increased timeout
+    wait(for: [expectation, mockDelegate.trackExpectation!], timeout: 10.0)  // CI needs generous timeout for .utility QoS dispatch
 
     XCTAssertNotNil(receivedData)
     AssertEqual(receivedData?.key, "v_int")  // Check correct flag data received
@@ -1566,10 +1566,10 @@ class FeatureFlagManagerTests: XCTestCase {
     // Trigger a request
     mockManager.loadFlags()
 
-    // Wait for request to be processed
-    let expectation = XCTestExpectation(description: "Request validation completes")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 1.0)
+    // Wait for request to be processed (use predicate to handle slow CI dispatch queues)
+    let validatedPredicate = NSPredicate { _, _ in mockManager.lastRequestMethod != nil }
+    let expectation = XCTNSPredicateExpectation(predicate: validatedPredicate, object: nil)
+    wait(for: [expectation], timeout: 10.0)
 
     // Verify no validation errors
     XCTAssertNil(mockManager.requestValidationError, "Request validation should not have errors: \(mockManager.requestValidationError ?? "")")
@@ -1631,10 +1631,10 @@ class FeatureFlagManagerTests: XCTestCase {
     // Trigger a request
     mockManager.loadFlags()
 
-    // Wait for request to be processed
-    let expectation = XCTestExpectation(description: "Custom context request validation")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 1.0)
+    // Wait for request to be processed (use predicate to handle slow CI dispatch queues)
+    let validatedPredicate = NSPredicate { _, _ in mockManager.lastRequestMethod != nil }
+    let expectation = XCTNSPredicateExpectation(predicate: validatedPredicate, object: nil)
+    wait(for: [expectation], timeout: 10.0)
 
     // Verify no validation errors
     XCTAssertNil(mockManager.requestValidationError, "Request validation should not have errors")
@@ -1674,10 +1674,10 @@ class FeatureFlagManagerTests: XCTestCase {
     // Trigger a request
     mockManager.loadFlags()
 
-    // Wait for request to be processed
-    let expectation = XCTestExpectation(description: "Nil anonymous ID request validation")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 1.0)
+    // Wait for request to be processed (use predicate to handle slow CI dispatch queues)
+    let validatedPredicate = NSPredicate { _, _ in mockManager.lastRequestMethod != nil }
+    let expectation = XCTNSPredicateExpectation(predicate: validatedPredicate, object: nil)
+    wait(for: [expectation], timeout: 10.0)
 
     // Verify no validation errors
     XCTAssertNil(mockManager.requestValidationError, "Request validation should not have errors with nil anonymous ID")
@@ -1800,9 +1800,10 @@ class FeatureFlagManagerTests: XCTestCase {
     // Manually load flags (simulating what user would do after identify)
     mockManager.loadFlags()
 
-    let expectation = XCTestExpectation(description: "Wait for manual fetch")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 1.0)
+    // Wait for flags to become ready (use predicate to handle slow CI dispatch queues)
+    let readyPredicate = NSPredicate { _, _ in mockManager.areFlagsReady() }
+    let readyExpectation = XCTNSPredicateExpectation(predicate: readyPredicate, object: nil)
+    wait(for: [readyExpectation], timeout: 10.0)
 
     XCTAssertEqual(mockManager.fetchRequestCount, 1, "Manual loadFlags should trigger fetch")
     XCTAssertTrue(mockManager.areFlagsReady(), "Flags should be ready after manual load")

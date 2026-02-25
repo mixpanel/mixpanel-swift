@@ -6,6 +6,56 @@
 //  Copyright © 2025 Mixpanel. All rights reserved.
 //
 
+/// Configuration options for feature flags behavior.
+///
+/// Use this to control how and when feature flags are loaded by the SDK.
+///
+/// **Example — Default behavior (auto-loads flags on first foreground):**
+/// ```swift
+/// let options = MixpanelOptions(
+///     token: "YOUR_TOKEN",
+///     flagsOptions: FlagOptions(enabled: true)
+/// )
+/// ```
+///
+/// **Example — Deferred loading (for use with identify):**
+/// ```swift
+/// let options = MixpanelOptions(
+///     token: "YOUR_TOKEN",
+///     flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: false)
+/// )
+/// let mp = Mixpanel.initialize(options: options)
+/// // identify() triggers loadFlags() internally when the distinctId changes
+/// mp.identify(distinctId: "user123")
+/// ```
+///
+/// If `identify` may be called with the same persisted distinctId (no change),
+/// call `mp.flags.loadFlags()` explicitly to ensure flags are fetched.
+public struct FlagOptions {
+  /// Whether feature flags are enabled. Defaults to `false`.
+  public let enabled: Bool
+
+  /// Custom context dictionary sent with flag fetch requests.
+  public let context: [String: Any]
+
+  /// Whether the SDK should automatically load flags when the app first enters
+  /// the foreground (i.e., during initialization). Defaults to `true`.
+  ///
+  /// Set to `false` if you need to call `identify` before the first flag fetch,
+  /// then manually trigger loading via `flags.loadFlags()`.
+  public let loadOnFirstForeground: Bool
+
+  public init(
+    enabled: Bool = false,
+    context: [String: Any] = [:],
+    loadOnFirstForeground: Bool = true
+  ) {
+    self.enabled = enabled
+    self.context = context
+    self.loadOnFirstForeground = loadOnFirstForeground
+  }
+}
+
 public class MixpanelOptions {
   public let token: String
   public let flushInterval: Double
@@ -17,8 +67,17 @@ public class MixpanelOptions {
   public let serverURL: String?
   public let proxyServerConfig: ProxyServerConfig?
   public let useGzipCompression: Bool
-  public let featureFlagsEnabled: Bool
-  public let featureFlagsContext: [String: Any]
+  @available(*, deprecated, message: "Use flagsOptions.enabled instead")
+  public var featureFlagsEnabled: Bool { return flagsOptions.enabled }
+
+  @available(*, deprecated, message: "Use flagsOptions.context instead")
+  public var featureFlagsContext: [String: Any] { return flagsOptions.context }
+
+  /// Grouped configuration for feature flags behavior.
+  ///
+  /// When provided to the initializer, this takes precedence over the
+  /// `featureFlagsEnabled` and `featureFlagsContext` parameters.
+  public let flagsOptions: FlagOptions
 
   /// A closure that provides a custom device ID.
   ///
@@ -78,7 +137,8 @@ public class MixpanelOptions {
     useGzipCompression: Bool = true,  // NOTE: This is a new default value!
     featureFlagsEnabled: Bool = false,
     featureFlagsContext: [String: Any] = [:],
-    deviceIdProvider: (() -> String?)? = nil
+    deviceIdProvider: (() -> String?)? = nil,
+    flagsOptions: FlagOptions? = nil
   ) {
     self.token = token
     self.flushInterval = flushInterval
@@ -90,8 +150,16 @@ public class MixpanelOptions {
     self.serverURL = serverURL
     self.proxyServerConfig = proxyServerConfig
     self.useGzipCompression = useGzipCompression
-    self.featureFlagsEnabled = featureFlagsEnabled
-    self.featureFlagsContext = featureFlagsContext
     self.deviceIdProvider = deviceIdProvider
+
+    // When flagsOptions is explicitly provided, it takes precedence
+    if let flagsOptions = flagsOptions {
+      self.flagsOptions = flagsOptions
+    } else {
+      self.flagsOptions = FlagOptions(
+        enabled: featureFlagsEnabled,
+        context: featureFlagsContext
+      )
+    }
   }
 }

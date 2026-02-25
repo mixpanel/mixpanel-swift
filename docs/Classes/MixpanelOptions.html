@@ -17,7 +17,7 @@
     <a title="MixpanelOptions Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 5.1.5 Docs</a> (67% documented)</p>
+        <p><a href="../index.html">Mixpanel 5.2.0 Docs</a> (67% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
@@ -28,7 +28,9 @@
     </header>
     <div class="content-wrapper">
       <p id="breadcrumbs">
-        <a href="../index.html">Mixpanel Reference</a>
+        <a href="../index.html">Mixpanel</a>
+        <img id="carat" src="../img/carat.png" alt=""/>
+        <a href="../Classes.html">Classes</a>
         <img id="carat" src="../img/carat.png" alt=""/>
         MixpanelOptions Class Reference
       </p>
@@ -517,9 +519,82 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContextACSS_SdSSSgS3bSDySSAA0A4Type_pGSgApA05ProxyyZ0VSgS2bSDySSypGtcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContextACSS_SdSSSgS3bSDySSAA0A4Type_pGSgApA05ProxyyZ0VSgS2bSDySSypGtcfc">init(token:<wbr>flushInterval:<wbr>instanceName:<wbr>trackAutomaticEvents:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>proxyServerConfig:<wbr>useGzipCompression:<wbr>featureFlagsEnabled:<wbr>featureFlagsContext:<wbr>)</a>
+                    <a name="/s:8Mixpanel0A7OptionsC16deviceIdProviderSSSgycSgvp"></a>
+                    <a name="//apple_ref/swift/Property/deviceIdProvider" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A7OptionsC16deviceIdProviderSSSgycSgvp">deviceIdProvider</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A closure that provides a custom device ID.</p>
+
+<p>Use this to control device ID generation instead of relying on the SDK&rsquo;s default behavior
+(random UUID or IDFV based on <code><a href="../Classes/MixpanelOptions.html#/s:8Mixpanel0A7OptionsC19useUniqueDistinctIdSbvp">useUniqueDistinctId</a></code>).</p>
+
+<p><strong>Important: Choose your device ID strategy up front.</strong> This closure is called:</p>
+
+<ul>
+<li>Once during initialization (if no persisted identity exists)</li>
+<li>On each call to <code>reset()</code></li>
+<li>On each call to <code>optOutTracking()</code></li>
+</ul>
+
+<p><strong>Controlling Reset Behavior:</strong></p>
+
+<ul>
+<li>Return the <strong>same value</strong> each time = Device ID never changes (persistent identity)</li>
+<li>Return a <strong>different value</strong> each time = Device ID changes on reset (ephemeral identity)</li>
+<li>Return <code>nil</code> = Use SDK&rsquo;s default device ID (useful for error handling)</li>
+</ul>
+
+<p><strong>Thread Safety:</strong> This closure is called synchronously while holding internal locks.
+Keep implementations fast and non-blocking. For Keychain or network-fetched IDs,
+retrieve and cache the value at app launch, then return the cached value from the provider.</p>
+
+<p><strong>Warning:</strong> Adding a <code>deviceIdProvider</code> to an existing app that previously used the default
+device ID may cause identity discontinuity. The SDK will log a warning if the provider
+returns a value different from the persisted anonymous ID.</p>
+
+<p><strong>Example - Persistent Device ID (cached at launch):</strong></p>
+<pre class="highlight swift"><code><span class="c1">// Cache the device ID at app launch (before Mixpanel init)</span>
+<span class="k">let</span> <span class="nv">cachedDeviceId</span> <span class="o">=</span> <span class="kt">MyKeychainHelper</span><span class="o">.</span><span class="nf">getOrCreatePersistentId</span><span class="p">()</span>
+
+<span class="k">let</span> <span class="nv">options</span> <span class="o">=</span> <span class="kt">MixpanelOptions</span><span class="p">(</span>
+    <span class="nv">token</span><span class="p">:</span> <span class="s">"YOUR_TOKEN"</span><span class="p">,</span>
+    <span class="nv">deviceIdProvider</span><span class="p">:</span> <span class="p">{</span> <span class="n">cachedDeviceId</span> <span class="p">}</span>  <span class="c1">// Return cached value</span>
+<span class="p">)</span>
+</code></pre>
+
+<p><strong>Example - Ephemeral Device ID (resets each time):</strong></p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">options</span> <span class="o">=</span> <span class="kt">MixpanelOptions</span><span class="p">(</span>
+    <span class="nv">token</span><span class="p">:</span> <span class="s">"YOUR_TOKEN"</span><span class="p">,</span>
+    <span class="nv">deviceIdProvider</span><span class="p">:</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kt">UUID</span><span class="p">()</span><span class="o">.</span><span class="n">uuidString</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">deviceIdProvider</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">String</span><span class="p">?)?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContext06deviceS8ProviderACSS_SdSSSgS3bSDySSAA0A4Type_pGSgAqA05ProxyyZ0VSgS2bSDySSypGAQycSgtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:deviceIdProvider:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContext06deviceS8ProviderACSS_SdSSSgS3bSDySSAA0A4Type_pGSgAqA05ProxyyZ0VSgS2bSDySSypGAQycSgtcfc">init(token:<wbr>flushInterval:<wbr>instanceName:<wbr>trackAutomaticEvents:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>proxyServerConfig:<wbr>useGzipCompression:<wbr>featureFlagsEnabled:<wbr>featureFlagsContext:<wbr>deviceIdProvider:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -546,7 +621,8 @@
   <span class="nv">proxyServerConfig</span><span class="p">:</span> <span class="kt"><a href="../Structs/ProxyServerConfig.html">ProxyServerConfig</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
   <span class="nv">useGzipCompression</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span>  <span class="c1">// NOTE: This is a new default value!</span>
   <span class="nv">featureFlagsEnabled</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
-  <span class="nv">featureFlagsContext</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[:]</span>
+  <span class="nv">featureFlagsContext</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[:],</span>
+  <span class="nv">deviceIdProvider</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">String</span><span class="p">?)?</span> <span class="o">=</span> <span class="kc">nil</span>
 <span class="p">)</span></code></pre>
 
                         </div>
@@ -559,8 +635,8 @@
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-02-03)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-02-25)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>
     </div>

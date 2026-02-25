@@ -189,6 +189,26 @@ public protocol MixpanelFlags {
   ///   - completion: A closure that is called with the boolean result.
   ///                 This closure will be executed on the main dispatch queue.
   func isEnabled(_ flagName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void)
+
+  // --- Bulk Flag Retrieval ---
+
+  /// Synchronously retrieves all currently fetched feature flag variants.
+  /// Returns an empty dictionary if flags have not been loaded yet.
+  /// This method does not trigger tracking for any flags.
+  ///
+  /// - Returns: A dictionary mapping flag names to their `MixpanelFlagVariant` values,
+  ///            or an empty dictionary if flags are not ready.
+  func getAllVariantsSync() -> [String: MixpanelFlagVariant]
+
+  /// Asynchronously retrieves all feature flag variants.
+  /// If flags are not ready, an attempt will be made to load them first.
+  /// This method does not trigger tracking for any flags.
+  /// The completion handler is invoked on the main thread.
+  ///
+  /// - Parameter completion: A closure that is called with a dictionary mapping flag names
+  ///                         to their `MixpanelFlagVariant` values. Returns an empty dictionary
+  ///                         if fetching fails.
+  func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void)
 }
 
 // --- FeatureFlagManager Class ---
@@ -379,6 +399,43 @@ class FeatureFlagManager: Network, MixpanelFlags {
       let result = self._evaluateBooleanFlag(
         flagName: flagName, variantValue: variantValue, fallbackValue: fallbackValue)
       completion(result)
+    }
+  }
+
+  // --- Bulk Flag Retrieval ---
+
+  func getAllVariantsSync() -> [String: MixpanelFlagVariant] {
+    return accessQueue.sync {
+      return self.flags ?? [:]
+    }
+  }
+
+  func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void) {
+    accessQueue.async { [weak self] in
+      guard let self = self else {
+        DispatchQueue.main.async { completion([:]) }
+        return
+      }
+
+      let flagsAreCurrentlyReady = (self.flags != nil)
+
+      if flagsAreCurrentlyReady {
+        let result = self.flags ?? [:]
+        DispatchQueue.main.async { completion(result) }
+      } else {
+        // Flags not ready, trigger fetch
+        print("Flags not ready, attempting fetch for getAllVariants call...")
+        self._fetchFlagsIfNeeded { [weak self] success in
+          let result: [String: MixpanelFlagVariant]
+          if success {
+            result = self?.getAllVariantsSync() ?? [:]
+          } else {
+            print("Warning: Failed to fetch flags, returning empty dictionary.")
+            result = [:]
+          }
+          DispatchQueue.main.async { completion(result) }
+        }
+      }
     }
   }
 

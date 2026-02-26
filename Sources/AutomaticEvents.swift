@@ -50,6 +50,29 @@ protocol AEDelegate: AnyObject {
       autoreleaseFrequency: .workItem)
 
     func initializeEvents(instanceName: String) {
+      // Register lifecycle observers synchronously to avoid missing notifications
+      NotificationCenter.default.addObserver(
+        self,
+        selector: #selector(appWillResignActive(_:)),
+        name: UIApplication.willResignActiveNotification,
+        object: nil)
+
+      NotificationCenter.default.addObserver(
+        self,
+        selector: #selector(appDidBecomeActive(_:)),
+        name: UIApplication.didBecomeActiveNotification,
+        object: nil)
+
+      SKPaymentQueue.default().add(self)
+
+      // Defer UserDefaults access to avoid interfering with SwiftUI's
+      // initialization (e.g., accent color resolution)
+      DispatchQueue.main.async { [weak self] in
+        self?.trackFirstOpenAndAppUpdated(instanceName: instanceName)
+      }
+    }
+
+    private func trackFirstOpenAndAppUpdated(instanceName: String) {
       let legacyFirstOpenKey = "MPFirstOpen"
       let firstOpenKey = "MPFirstOpen-\(instanceName)"
       // do not track `$ae_first_open` again if the legacy key exist,
@@ -80,20 +103,6 @@ protocol AEDelegate: AnyObject {
           defaults.synchronize()
         }
       }
-
-      NotificationCenter.default.addObserver(
-        self,
-        selector: #selector(appWillResignActive(_:)),
-        name: UIApplication.willResignActiveNotification,
-        object: nil)
-
-      NotificationCenter.default.addObserver(
-        self,
-        selector: #selector(appDidBecomeActive(_:)),
-        name: UIApplication.didBecomeActiveNotification,
-        object: nil)
-
-      SKPaymentQueue.default().add(self)
     }
 
     @objc func appWillResignActive(_ notification: Notification) {

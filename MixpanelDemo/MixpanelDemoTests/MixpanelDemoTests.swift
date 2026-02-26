@@ -17,6 +17,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
   func test5XXResponse() {
     let testMixpanel = Mixpanel.initialize(
       token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
+    waitForAsyncTasks()
     testMixpanel.serverURL = kFakeServerUrl
     testMixpanel.track(event: "Fake Event")
     flushAndWaitForTrackingQueue(testMixpanel)
@@ -114,6 +115,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
   func testFlushNetworkFailure() {
     let testMixpanel = Mixpanel.initialize(
       token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
+    waitForAsyncTasks()
     testMixpanel.serverURL = kFakeServerUrl
     for i in 0..<50 {
       testMixpanel.track(event: "event \(UInt(i))")
@@ -190,6 +192,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
   func testAddingEventsAfterFlush() {
     let testMixpanel = Mixpanel.initialize(
       token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
+    waitForAsyncTasks()
     for i in 0..<10 {
       testMixpanel.track(event: "event \(UInt(i))")
     }
@@ -840,6 +843,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty, "people queue failed to reset")
     let testMixpanel2 = Mixpanel.initialize(
       token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
+    waitForAsyncTasks()
     waitForTrackingQueue(testMixpanel2)
     #if MIXPANEL_UNIQUE_DISTINCT_ID
       XCTAssertEqual(
@@ -866,6 +870,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
     let testToken = randomId()
     let testMixpanel = Mixpanel.initialize(
       token: testToken, trackAutomaticEvents: true, flushInterval: 60)
+    waitForAsyncTasks()
     testMixpanel.serverURL = kFakeServerUrl
     let aBoolNumber: Bool = true
     let aBoolNSNumber = NSNumber(value: aBoolNumber)
@@ -879,6 +884,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     let testMixpanel2 = Mixpanel.initialize(
       token: testToken, trackAutomaticEvents: true, flushInterval: 60)
+    waitForAsyncTasks()
     testMixpanel2.serverURL = kFakeServerUrl
     waitForTrackingQueue(testMixpanel2)
 
@@ -1006,6 +1012,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
   func testMixpanelDelegate() {
     let testMixpanel = Mixpanel.initialize(
       token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
+    waitForAsyncTasks()
     testMixpanel.delegate = self
     testMixpanel.identify(distinctId: "d1")
     testMixpanel.track(event: "e1")

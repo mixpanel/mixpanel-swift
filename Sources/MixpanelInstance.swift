@@ -48,6 +48,8 @@ public protocol MixpanelDelegate: AnyObject {
 }
 
 public typealias Properties = [String: MixpanelType]
+typealias TimedEventID = String
+typealias TimedEvents = [TimedEventID: TimeInterval]
 typealias InternalProperties = [String: Any]
 typealias Queue = [InternalProperties]
 
@@ -251,7 +253,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   var networkQueue: DispatchQueue
   var optOutStatus: Bool?
   var useUniqueDistinctId: Bool
-  var timedEvents = InternalProperties()
+  var timedEvents = TimedEvents()
 
   let readWriteLock: ReadWriteLock
   #if os(iOS) && !targetEnvironment(macCatalyst)
@@ -988,7 +990,7 @@ extension MixpanelInstance {
 
       MixpanelPersistence.deleteMPUserDefaultsData(instanceName: self.name)
       self.readWriteLock.write {
-        self.timedEvents = InternalProperties()
+        self.timedEvents = TimedEvents()
         self.anonymousId = self.defaultDeviceId()
         self.distinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
         self.hadPersistedDistinctId = true
@@ -1201,16 +1203,36 @@ extension MixpanelInstance {
      - parameter properties: properties dictionary
      */
   public func track(event: String?, properties: Properties? = nil) {
+    track(eventName: event, timedEventID: nil, properties: properties)
+  }
+  
+  /**
+  Tracks an event with properties.
+  Properties are optional and can be added only if needed.
+ 
+  Properties will allow you to segment your events in your Mixpanel reports.
+  Property keys must be String objects and the supported value types need to conform to MixpanelType.
+  MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
+  If the event is being timed, the timer will stop and be added as a property.
+ 
+  - parameter event:      	event name
+  - parameter timedEventID: the `UUID` used to link timed events previously timed using `time(timedEventID)`
+  - parameter properties: 	properties dictionary
+  */
+  public func track(event: String?, timedEventID: UUID, properties: Properties? = nil) {
+    track(eventName: event, timedEventID: timedEventID, properties: properties)
+  }
+  
+  func track(eventName: String?, timedEventID: UUID?, properties: Properties? = nil) {
     let epochInterval = Date().timeIntervalSince1970
-
-    trackingQueue.async { [weak self, event, properties, epochInterval] in
+    trackingQueue.async { [weak self, eventName, timedEventID, properties, epochInterval] in
       guard let self else {
         return
       }
       if self.hasOptedOutTracking() {
         return
       }
-      var shadowTimedEvents = InternalProperties()
+      var shadowTimedEvents = TimedEvents()
       var shadowSuperProperties = InternalProperties()
 
       self.readWriteLock.read {
@@ -1226,7 +1248,8 @@ extension MixpanelInstance {
         alias: nil,
         hadPersistedDistinctId: self.hadPersistedDistinctId)
       let timedEventsSnapshot = self.trackInstance.track(
-        event: event,
+        event: eventName,
+        timedEventID: timedEventID,
         properties: properties,
         timedEvents: shadowTimedEvents,
         superProperties: shadowSuperProperties,
@@ -1357,11 +1380,54 @@ extension MixpanelInstance {
   
      */
   public func time(event: String) {
+    time(eventID: event)
+  }
+
+  /**
+     Starts a timer that will be stopped and added as a property when a
+     corresponding event with the same `timedEventID:UUID` is tracked.
+     
+     This method is intended to be used in advance of events that have
+     a duration. For example, if a developer were to track an "Image Upload" event
+     she might want to also know how long the upload took. Calling this method
+     before the upload code would implicitly cause the `track`
+     call to record its duration.
+   
+     This method allows you to link a `time(timedEventID:)` call with a corresponding
+     `track(event:,timedEventID:)` call which is needed when you have multiple
+     events with the same name that you want to distinguish from one another by using a distinct Id.
+   
+     This method also allows you to name the event at the time of tracking rather than needing to
+     know the name of the event when you start timing the event. This is useful for events whose name
+     may be dependent on the result of a call and whose outcome at the start is unknown.
+     
+     - precondition:
+     // Create a uuid to track this event
+     let eventId = UUID("0000-...-0000")
+     // begin timing the image upload:
+     mixpanelInstance.time(timedEventID:eventId)
+     // upload the image:
+     self.uploadImageWithSuccessHandler() { _ in
+     // track the event in the success case
+     mixpanelInstance.track("Image Upload Succeeded", timedEventID: eventId)
+     } failed: {
+     // track the event in the failure case
+     mixpanelInstance.track("Image Upload Failed", timedEventID: eventId)
+     }
+     
+     - parameter event: the event name to be timed
+     
+     */
+  public func time(timedEventID: UUID) {
+    time(eventID: timedEventID.uuidString)
+  }
+    
+  func time(eventID: TimedEventID) {
     let startTime = Date().timeIntervalSince1970
-    trackingQueue.async { [weak self, startTime, event] in
+    trackingQueue.async { [weak self, startTime, eventID] in
       guard let self = self else { return }
       let timedEvents = self.trackInstance.time(
-        event: event, timedEvents: self.timedEvents, startTime: startTime)
+        eventID: eventID, timedEvents: self.timedEvents, startTime: startTime)
       self.readWriteLock.write {
         self.timedEvents = timedEvents
       }
@@ -1374,13 +1440,26 @@ extension MixpanelInstance {
   
      - parameter event: the name of the event to be tracked that was passed to time(event:)
      */
-  public func eventElapsedTime(event: String) -> Double {
-    var timedEvents = InternalProperties()
+  public func eventElapsedTime(event: String) -> TimeInterval {
+    eventElapsedTime(eventID: event)
+  }
+    
+  /**
+     Retrieves the time elapsed for the timed event since `time(timedEventId:)` was called.
+	  
+     - parameter timedEventID: the UUID of the event to be tracked that was passed to time(timedEventId:)
+     */
+  public func eventElapsedTime(timedEventID: UUID) -> TimeInterval {
+    eventElapsedTime(eventID: timedEventID.uuidString)
+  }
+
+  func eventElapsedTime(eventID: TimedEventID) -> TimeInterval {
+    var timedEvents = TimedEvents()
     self.readWriteLock.read {
       timedEvents = self.timedEvents
     }
 
-    if let startTime = timedEvents[event] as? TimeInterval {
+    if let startTime = timedEvents[eventID] {
       return Date().timeIntervalSince1970 - startTime
     }
     return 0
@@ -1393,10 +1472,10 @@ extension MixpanelInstance {
     trackingQueue.async { [weak self] in
       guard let self = self else { return }
       self.readWriteLock.write {
-        self.timedEvents = InternalProperties()
+        self.timedEvents = TimedEvents()
       }
       MixpanelPersistence.saveTimedEvents(
-        timedEvents: InternalProperties(), instanceName: self.name)
+        timedEvents: TimedEvents(), instanceName: self.name)
     }
   }
 
@@ -1406,11 +1485,24 @@ extension MixpanelInstance {
      - parameter event: the name of the event to clear the timer for
      */
   public func clearTimedEvent(event: String) {
-    trackingQueue.async { [weak self, event] in
+	clearTimedEvent(eventID: event)
+  }
+
+  /**
+     Clears the event timer for the timed event.
+   
+     - parameter timedEventID: the UUID of the event to clear the timer for
+     */
+  public func clearTimedEvent(timedEventID: UUID) {
+      clearTimedEvent(eventID: timedEventID.uuidString)
+  }
+    
+  func clearTimedEvent(eventID: TimedEventID) {
+    trackingQueue.async { [weak self, eventID] in
       guard let self = self else { return }
 
       let updatedTimedEvents = self.trackInstance.clearTimedEvent(
-        event: event, timedEvents: self.timedEvents)
+        eventID: eventID, timedEvents: self.timedEvents)
       MixpanelPersistence.saveTimedEvents(timedEvents: updatedTimedEvents, instanceName: self.name)
     }
   }
@@ -1673,7 +1765,7 @@ extension MixpanelInstance {
         self.hadPersistedDistinctId = true
         self.superProperties = InternalProperties()
         MixpanelPersistence.saveTimedEvents(
-          timedEvents: InternalProperties(), instanceName: self.name)
+          timedEvents: TimedEvents(), instanceName: self.name)
       }
       self.archive()
       self.readWriteLock.write {

@@ -89,6 +89,10 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
   func randomId() -> String {
     return String(format: "%08x%08x", arc4random(), arc4random())
   }
+  
+  func uuid(_ intValue: Int) -> UUID {
+    return UUID.init(uuidString: "00000000-0000-0000-0000-\(String(format: "%012x", intValue))")!
+  }
 
   func waitForAsyncTasks() {
     var hasCompletedTask = false
@@ -103,20 +107,20 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
   }
 
   func eventQueue(token: String) -> Queue {
-    return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .events)
+    return MixpanelPersistence.init(instanceName: token).loadEntitiesInBatch(type: .events)
   }
 
   func peopleQueue(token: String) -> Queue {
-    return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .people)
+    return MixpanelPersistence.init(instanceName: token).loadEntitiesInBatch(type: .people)
   }
 
   func unIdentifiedPeopleQueue(token: String) -> Queue {
-    return MixpanelPersistence.init(token: token).loadEntitiesInBatch(
+    return MixpanelPersistence.init(instanceName: token).loadEntitiesInBatch(
       type: .people, flag: PersistenceConstant.unIdentifiedFlag)
   }
 
   func groupQueue(token: String) -> Queue {
-    return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .groups)
+    return MixpanelPersistence.init(instanceName: token).loadEntitiesInBatch(type: .groups)
   }
 
   func flushAndWaitForTrackingQueue(_ mixpanel: MixpanelInstance) {

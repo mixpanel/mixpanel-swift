@@ -27,7 +27,7 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
   var customTrackHandler: ((String?, Properties?) -> Void)?
 
   init(
-    options: MixpanelOptions = MixpanelOptions(token: "test", flagsOptions: FlagOptions(enabled: true)),
+    options: MixpanelOptions = MixpanelOptions(token: "test", flagsOptions: FeatureFlagOptions(enabled: true)),
     distinctId: String = "test_distinct_id",
     anonymousId: String? = "test_anonymous_id"
   ) {
@@ -366,7 +366,7 @@ class FeatureFlagManagerTests: XCTestCase {
   // --- Load Flags Tests ---
 
   func testLoadFlags_WhenDisabledInConfig() {
-    mockDelegate.options = MixpanelOptions(token: "test", flagsOptions: FlagOptions(enabled: false))  // Explicitly disable
+    mockDelegate.options = MixpanelOptions(token: "test", flagsOptions: FeatureFlagOptions(enabled: false))  // Explicitly disable
     manager.loadFlags()  // Call public API
 
     // Wait to ensure no async fetch operations started changing state
@@ -979,7 +979,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testDelegateConfigDisabledHandling() {
     // Set delegate options to disabled
-    mockDelegate.options = MixpanelOptions(token: "test", flagsOptions: FlagOptions(enabled: false))
+    mockDelegate.options = MixpanelOptions(token: "test", flagsOptions: FeatureFlagOptions(enabled: false))
 
     // Try to load flags
     manager.loadFlags()
@@ -1161,7 +1161,7 @@ class FeatureFlagManagerTests: XCTestCase {
     let testDistinctId = "test_distinct_id_67890"
 
     let mockDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test", flagsOptions: FlagOptions(enabled: true)),
+      options: MixpanelOptions(token: "test", flagsOptions: FeatureFlagOptions(enabled: true)),
       distinctId: testDistinctId,
       anonymousId: testAnonymousId
     )
@@ -1182,7 +1182,7 @@ class FeatureFlagManagerTests: XCTestCase {
     let testDistinctId = "test_distinct_id_67890"
 
     let mockDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test", flagsOptions: FlagOptions(enabled: true)),
+      options: MixpanelOptions(token: "test", flagsOptions: FeatureFlagOptions(enabled: true)),
       distinctId: testDistinctId,
       anonymousId: nil
     )
@@ -1613,7 +1613,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testGETRequestWithCustomContext() {
     // Set up custom context
-    let customOptions = MixpanelOptions(token: "custom-token", flagsOptions: FlagOptions(enabled: true, context: [
+    let customOptions = MixpanelOptions(token: "custom-token", flagsOptions: FeatureFlagOptions(enabled: true, context: [
       "user_id": "test-user-123",
       "group_id": "test-group-456"
     ]))
@@ -1662,7 +1662,7 @@ class FeatureFlagManagerTests: XCTestCase {
   func testGETRequestWithNilAnonymousId() {
     // Set up with nil anonymous ID
     let nilAnonymousDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test-token", flagsOptions: FlagOptions(enabled: true)),
+      options: MixpanelOptions(token: "test-token", flagsOptions: FeatureFlagOptions(enabled: true)),
       distinctId: "test-distinct-id",
       anonymousId: nil
     )
@@ -1701,41 +1701,41 @@ class FeatureFlagManagerTests: XCTestCase {
     }
   }
 
-  // --- FlagOptions Tests ---
+  // --- FeatureFlagOptions Tests ---
 
-  func testFlagOptions_DefaultValues() {
-    let options = FlagOptions()
+  func testFeatureFlagOptions_DefaultValues() {
+    let options = FeatureFlagOptions()
     XCTAssertFalse(options.enabled, "enabled should default to false")
     XCTAssertTrue(options.context.isEmpty, "context should default to empty")
-    XCTAssertTrue(options.loadOnFirstForeground, "loadOnFirstForeground should default to true")
+    XCTAssertTrue(options.prefetchFlags, "prefetchFlags should default to true")
   }
 
-  func testFlagOptions_CustomValues() {
-    let options = FlagOptions(
+  func testFeatureFlagOptions_CustomValues() {
+    let options = FeatureFlagOptions(
       enabled: true,
       context: ["key": "value"],
-      loadOnFirstForeground: false
+      prefetchFlags: false
     )
     XCTAssertTrue(options.enabled)
     XCTAssertEqual(options.context["key"] as? String, "value")
-    XCTAssertFalse(options.loadOnFirstForeground)
+    XCTAssertFalse(options.prefetchFlags)
   }
 
-  func testMixpanelOptions_FlagOptionsOverridesFlat() {
+  func testMixpanelOptions_FeatureFlagOptionsOverridesFlat() {
     // When flagsOptions is provided, it should take precedence
     let options = MixpanelOptions(
       token: "test",
       featureFlagsEnabled: false,
       featureFlagsContext: [:],
-      flagsOptions: FlagOptions(enabled: true, context: ["custom": "ctx"], loadOnFirstForeground: false)
+      flagsOptions: FeatureFlagOptions(enabled: true, context: ["custom": "ctx"], prefetchFlags: false)
     )
     XCTAssertTrue(options.featureFlagsEnabled, "featureFlagsEnabled should reflect flagsOptions.enabled")
     XCTAssertEqual(options.featureFlagsContext["custom"] as? String, "ctx")
     XCTAssertTrue(options.flagsOptions.enabled)
-    XCTAssertFalse(options.flagsOptions.loadOnFirstForeground)
+    XCTAssertFalse(options.flagsOptions.prefetchFlags)
   }
 
-  func testMixpanelOptions_FlatParamsFeedIntoFlagOptions() {
+  func testMixpanelOptions_FlatParamsFeedIntoFeatureFlagOptions() {
     // When flagsOptions is not provided, flat params populate it
     let options = MixpanelOptions(
       token: "test",
@@ -1744,14 +1744,14 @@ class FeatureFlagManagerTests: XCTestCase {
     )
     XCTAssertTrue(options.flagsOptions.enabled, "flagsOptions.enabled should match featureFlagsEnabled")
     XCTAssertEqual(options.flagsOptions.context["flat"] as? String, "value")
-    XCTAssertTrue(options.flagsOptions.loadOnFirstForeground, "loadOnFirstForeground should default to true")
+    XCTAssertTrue(options.flagsOptions.prefetchFlags, "prefetchFlags should default to true")
   }
 
-  func testLoadOnFirstForeground_True_AutoLoadsFlags() {
-    // With loadOnFirstForeground: true (default), MixpanelInstance.init should call loadFlags()
+  func testPrefetchFlags_True_AutoLoadsFlags() {
+    // With prefetchFlags: true (default), MixpanelInstance.init should call loadFlags()
     let options = MixpanelOptions(
       token: UUID().uuidString,
-      flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: true)
+      flagsOptions: FeatureFlagOptions(enabled: true, prefetchFlags: true)
     )
     let instance = Mixpanel.initialize(options: options)
     let flagManager = instance.flags as! FeatureFlagManager
@@ -1763,14 +1763,14 @@ class FeatureFlagManagerTests: XCTestCase {
       fetching = flagManager.isFetching
     }
 
-    XCTAssertTrue(fetching, "Init with loadOnFirstForeground: true should auto-trigger a flag fetch")
+    XCTAssertTrue(fetching, "Init with prefetchFlags: true should auto-trigger a flag fetch")
   }
 
-  func testLoadOnFirstForeground_False_DoesNotAutoLoadFlags() {
-    // With loadOnFirstForeground: false, MixpanelInstance.init should NOT call loadFlags()
+  func testPrefetchFlags_False_DoesNotAutoLoadFlags() {
+    // With prefetchFlags: false, MixpanelInstance.init should NOT call loadFlags()
     let options = MixpanelOptions(
       token: UUID().uuidString,
-      flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: false)
+      flagsOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
     )
     let instance = Mixpanel.initialize(options: options)
     let flagManager = instance.flags as! FeatureFlagManager
@@ -1781,16 +1781,16 @@ class FeatureFlagManagerTests: XCTestCase {
       fetching = flagManager.isFetching
     }
 
-    XCTAssertFalse(fetching, "Init with loadOnFirstForeground: false should not trigger a flag fetch")
+    XCTAssertFalse(fetching, "Init with prefetchFlags: false should not trigger a flag fetch")
     XCTAssertFalse(flagManager.areFlagsReady(), "No flags should be loaded")
   }
 
-  func testLoadOnFirstForeground_False_ManualLoadStillWorks() {
-    // Even with loadOnFirstForeground: false, calling loadFlags() manually should work
+  func testPrefetchFlags_False_ManualLoadStillWorks() {
+    // Even with prefetchFlags: false, calling loadFlags() manually should work
     let delegate = MockFeatureFlagDelegate(
       options: MixpanelOptions(
         token: "test",
-        flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: false)
+        flagsOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
       )
     )
 

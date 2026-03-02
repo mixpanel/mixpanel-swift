@@ -10,11 +10,11 @@
 ///
 /// Use this to control how and when feature flags are loaded by the SDK.
 ///
-/// **Example — Default behavior (auto-loads flags on first foreground):**
+/// **Example — Default behavior (prefetches flags during initialization):**
 /// ```swift
 /// let options = MixpanelOptions(
 ///     token: "YOUR_TOKEN",
-///     flagsOptions: FlagOptions(enabled: true)
+///     flagsOptions: FeatureFlagOptions(enabled: true)
 /// )
 /// ```
 ///
@@ -22,7 +22,7 @@
 /// ```swift
 /// let options = MixpanelOptions(
 ///     token: "YOUR_TOKEN",
-///     flagsOptions: FlagOptions(enabled: true, loadOnFirstForeground: false)
+///     flagsOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
 /// )
 /// let mp = Mixpanel.initialize(options: options)
 /// // identify() triggers loadFlags() internally when the distinctId changes
@@ -31,28 +31,28 @@
 ///
 /// If `identify` may be called with the same persisted distinctId (no change),
 /// call `mp.flags.loadFlags()` explicitly to ensure flags are fetched.
-public struct FlagOptions {
+public struct FeatureFlagOptions {
   /// Whether feature flags are enabled. Defaults to `false`.
   public let enabled: Bool
 
   /// Custom context dictionary sent with flag fetch requests.
   public let context: [String: Any]
 
-  /// Whether the SDK should automatically load flags when the app first enters
-  /// the foreground (i.e., during initialization). Defaults to `true`.
+  /// Whether the SDK should prefetch feature flags during initialization.
+  /// Defaults to `true`.
   ///
   /// Set to `false` if you need to call `identify` before the first flag fetch,
   /// then manually trigger loading via `flags.loadFlags()`.
-  public let loadOnFirstForeground: Bool
+  public let prefetchFlags: Bool
 
   public init(
     enabled: Bool = false,
     context: [String: Any] = [:],
-    loadOnFirstForeground: Bool = true
+    prefetchFlags: Bool = true
   ) {
     self.enabled = enabled
     self.context = context
-    self.loadOnFirstForeground = loadOnFirstForeground
+    self.prefetchFlags = prefetchFlags
   }
 }
 
@@ -77,7 +77,7 @@ public class MixpanelOptions {
   ///
   /// When provided to the initializer, this takes precedence over the
   /// `featureFlagsEnabled` and `featureFlagsContext` parameters.
-  public let flagsOptions: FlagOptions
+  public let flagsOptions: FeatureFlagOptions
 
   /// A closure that provides a custom device ID.
   ///
@@ -138,7 +138,7 @@ public class MixpanelOptions {
     featureFlagsEnabled: Bool = false,
     featureFlagsContext: [String: Any] = [:],
     deviceIdProvider: (() -> String?)? = nil,
-    flagsOptions: FlagOptions? = nil
+    flagsOptions: FeatureFlagOptions? = nil
   ) {
     self.token = token
     self.flushInterval = flushInterval
@@ -156,7 +156,7 @@ public class MixpanelOptions {
     if let flagsOptions = flagsOptions {
       self.flagsOptions = flagsOptions
     } else {
-      self.flagsOptions = FlagOptions(
+      self.flagsOptions = FeatureFlagOptions(
         enabled: featureFlagsEnabled,
         context: featureFlagsContext
       )

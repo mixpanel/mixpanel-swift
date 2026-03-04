@@ -219,6 +219,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
 
   func testEventBeingTrackedBeforeOptOutShouldNotBeCleared() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true)
+    waitForAsyncTasks()
     testMixpanel.track(event: "a normal event")
     waitForTrackingQueue(testMixpanel)
     XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).count == 2, "events should be queued")

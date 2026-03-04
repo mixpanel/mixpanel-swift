@@ -343,6 +343,9 @@
 			dependencies = (
 			);
 			name = Mixpanel_watchOS;
+			packageProductDependencies = (
+				17JSONLOGIC00000005 /* jsonlogic */,
+			);
 			productName = Mixpanel_watchOS;
 			productReference = 86F86E81224404BD00B69832 /* Mixpanel.framework */;
 			productType = "com.apple.product-type.framework";
@@ -361,6 +364,9 @@
 			dependencies = (
 			);
 			name = Mixpanel;
+			packageProductDependencies = (
+				17JSONLOGIC00000002 /* jsonlogic */,
+			);
 			productName = Mixpanel;
 			productReference = E115947D1CFF1491007F8B4F /* Mixpanel.framework */;
 			productType = "com.apple.product-type.framework";
@@ -379,6 +385,9 @@
 			dependencies = (
 			);
 			name = Mixpanel_tvOS;
+			packageProductDependencies = (
+				17JSONLOGIC00000003 /* jsonlogic */,
+			);
 			productName = Mixpanel_tvOS;
 			productReference = E12782B31D4AB4B30025FB05 /* Mixpanel.framework */;
 			productType = "com.apple.product-type.framework";
@@ -397,6 +406,9 @@
 			dependencies = (
 			);
 			name = Mixpanel_macOS;
+			packageProductDependencies = (
+				17JSONLOGIC00000004 /* jsonlogic */,
+			);
 			productName = Mixpanel_OSX;
 			productReference = E1F15FC91E64A10700391AE3 /* Mixpanel.framework */;
 			productType = "com.apple.product-type.framework";
@@ -443,6 +455,9 @@
 			);
 			mainGroup = E11594731CFF1491007F8B4F;
 			productRefGroup = E115947E1CFF1491007F8B4F /* Products */;
+			packageReferences = (
+				17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */,
+			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -1063,6 +1078,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/advantagefse/json-logic-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		17JSONLOGIC00000002 /* jsonlogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = jsonlogic;
+		};
+		17JSONLOGIC00000003 /* jsonlogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = jsonlogic;
+		};
+		17JSONLOGIC00000004 /* jsonlogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = jsonlogic;
+		};
+		17JSONLOGIC00000005 /* jsonlogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = jsonlogic;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E11594741CFF1491007F8B4F /* Project object */;
 }

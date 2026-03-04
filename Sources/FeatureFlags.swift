@@ -201,9 +201,9 @@ public protocol MixpanelFlags {
   func getAllVariantsSync() -> [String: MixpanelFlagVariant]
 
   /// Asynchronously retrieves all feature flag variants.
-  /// If flags are not ready, an attempt will be made to load them first.
+  /// If flags are not ready, an attempt will be made to load them.
   /// This method does not trigger tracking for any flags.
-  /// The completion handler is invoked on the main thread.
+  /// The completion handler is typically invoked on the main thread.
   ///
   /// - Parameter completion: A closure that is called with a dictionary mapping flag names
   ///                         to their `MixpanelFlagVariant` values. Returns an empty dictionary
@@ -417,18 +417,15 @@ class FeatureFlagManager: Network, MixpanelFlags {
         return
       }
 
-      let flagsAreCurrentlyReady = (self.flags != nil)
-
-      if flagsAreCurrentlyReady {
-        let result = self.flags ?? [:]
-        DispatchQueue.main.async { completion(result) }
+      if let currentFlags = self.flags {
+        DispatchQueue.main.async { completion(currentFlags) }
       } else {
         // Flags not ready, trigger fetch
         print("Flags not ready, attempting fetch for getAllVariants call...")
-        self._fetchFlagsIfNeeded { [weak self] success in
+        self._fetchFlagsIfNeeded { success in
           let result: [String: MixpanelFlagVariant]
           if success {
-            result = self?.getAllVariantsSync() ?? [:]
+            result = self.getAllVariantsSync()
           } else {
             print("Warning: Failed to fetch flags, returning empty dictionary.")
             result = [:]

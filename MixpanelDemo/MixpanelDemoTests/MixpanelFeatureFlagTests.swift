@@ -687,11 +687,6 @@ class FeatureFlagManagerTests: XCTestCase {
     XCTAssertNotNil(receivedVariants, "Should receive result even on failure")
     XCTAssertTrue(receivedVariants?.isEmpty ?? false, "Should return empty dictionary on fetch failure")
     XCTAssertFalse(manager.areFlagsReady(), "Flags should not be ready after failed fetch")
-
-    // Reset mock configuration back to success for other tests
-    if let mockManager = manager as? MockFeatureFlagManager {
-      mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
-    }
   }
 
   func testGetAllVariants_Async_NoTracking() {

@@ -436,7 +436,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   private func _fetchFlagsIfNeeded(completion: ((Bool) -> Void)?) {
     let optionsSnapshot = self.currentOptions
 
-    guard let options = optionsSnapshot, options.featureFlagsEnabled else {
+    guard let options = optionsSnapshot, options.featureFlagOptions.enabled else {
       MixpanelLogger.debug(message: "Feature flags are disabled, not fetching.")
       // Dispatch completion to main queue to avoid potential deadlock
       DispatchQueue.main.async {
@@ -490,7 +490,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     let anonymousId = delegate.getAnonymousId()
     MixpanelLogger.debug(message: "Fetching flags for distinct ID: \(distinctId)")
 
-    var context = options.featureFlagsContext
+    var context = options.featureFlagOptions.context
     context["distinct_id"] = distinctId
     if let anonymousId = anonymousId {
       context["device_id"] = anonymousId

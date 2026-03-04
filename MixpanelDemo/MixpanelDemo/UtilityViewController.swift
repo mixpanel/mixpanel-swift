@@ -49,8 +49,22 @@ class UtilityViewController: UIViewController, UITableViewDelegate, UITableViewD
         "New Alias", distinctId: Mixpanel.mainInstance().distinctId)
       descStr = "Alias: New Alias, from: \(Mixpanel.mainInstance().distinctId)"
     case 1:
-      Mixpanel.mainInstance().reset()
-      descStr = "Reset Instance"
+      let beforeId = Mixpanel.mainInstance().anonymousId ?? "nil"
+      let beforeDistinctId = Mixpanel.mainInstance().distinctId
+      print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+      print("🔄 BEFORE reset()")
+      print("   anonymousId: \(beforeId)")
+      print("   distinctId:  \(beforeDistinctId)")
+
+      Mixpanel.mainInstance().reset {
+        let afterId = Mixpanel.mainInstance().anonymousId ?? "nil"
+        print("🔄 AFTER reset()")
+        print("   anonymousId: \(afterId)")
+        print("   distinctId:  \(Mixpanel.mainInstance().distinctId)")
+        print("   ID changed:  \(beforeId != afterId ? "✅ YES" : "❌ NO (persistent)")")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+      }
+      descStr = "Reset Instance (check console)"
     case 2:
       Mixpanel.mainInstance().archive()
       descStr = "Archived Data"

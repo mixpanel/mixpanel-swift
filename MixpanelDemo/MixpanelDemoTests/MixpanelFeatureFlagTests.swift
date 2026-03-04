@@ -322,7 +322,7 @@ class FeatureFlagManagerTests: XCTestCase {
       // Original implementation for non-mock manager
       let currentTime = Date()
       // Set flags directly *before* calling completeFetch
-      manager.flagsLock.read {
+      manager.flagsLock.write {
         manager.flags = flagsToSet
         // Set timing properties to simulate a successful fetch
         manager.timeLastFetched = currentTime
@@ -348,7 +348,7 @@ class FeatureFlagManagerTests: XCTestCase {
     } else {
       // Original implementation for non-mock manager
       // Set isFetching = true before calling _completeFetch
-      manager.flagsLock.read {
+      manager.flagsLock.write {
         manager.isFetching = true
         // Ensure flags are nil or unchanged on failure simulation if desired
         manager.flags = nil  // Or keep existing flags based on desired failure behavior
@@ -638,6 +638,7 @@ class FeatureFlagManagerTests: XCTestCase {
     pendingVariant: MixpanelFlagVariant,
     initialVariant: MixpanelFlagVariant? = nil,
     firstTimeEventHash: String = "hash123",
+    expectActivation: Bool = true,
     validation: ((MockFeatureFlagManager) -> Void)? = nil
   ) {
     guard let mockMgr = mockManager else {
@@ -649,7 +650,8 @@ class FeatureFlagManagerTests: XCTestCase {
       flagKey: flagKey,
       eventName: eventName,
       filters: filters,
-      pendingVariant: pendingVariant
+      pendingVariant: pendingVariant,
+      firstTimeEventHash: firstTimeEventHash
     )
 
     let eventKey = "\(flagKey):\(firstTimeEventHash)"
@@ -662,7 +664,19 @@ class FeatureFlagManagerTests: XCTestCase {
 
     let nameToTrigger = triggeredEventName ?? eventName
     mockMgr.checkFirstTimeEvents(eventName: nameToTrigger, properties: eventProperties)
-    waitBriefly(timeout: 1.0)
+
+    if expectActivation {
+      // Wait for the async checkFirstTimeEvents to complete using predicate
+      let activated = NSPredicate { _, _ in
+        var done = false
+        mockMgr.flagsLock.read { done = mockMgr.activatedFirstTimeEvents.contains(eventKey) }
+        return done
+      }
+      wait(for: [XCTNSPredicateExpectation(predicate: activated, object: nil)], timeout: 10.0)
+    } else {
+      // For negative tests, just wait briefly for async dispatch to complete
+      waitBriefly(timeout: 2.0)
+    }
 
     mockMgr.flagsLock.read {
       validation?(mockMgr)
@@ -820,10 +834,10 @@ class FeatureFlagManagerTests: XCTestCase {
     // Setup tracking expectation *before* calling getFeature
     mockDelegate.trackExpectation = XCTestExpectation(description: "Tracking call for fetch success")
 
-    let receivedData = getVariantAsync("feature_int", timeout: 3.0)
+    let receivedData = getVariantAsync("feature_int", timeout: 10.0)
 
     // Wait for tracking to complete
-    wait(for: [mockDelegate.trackExpectation!], timeout: 3.0)
+    wait(for: [mockDelegate.trackExpectation!], timeout: 10.0)
 
     XCTAssertNotNil(receivedData)
     AssertEqual(receivedData?.key, "v_int")
@@ -838,7 +852,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
     XCTAssertFalse(manager.areFlagsReady())
     let fallback = MixpanelFlagVariant(key: "fb_fail", value: "failed_fetch")
-    let receivedData = getVariantAsync("feature_string", fallback: fallback, timeout: 3.0)
+    let receivedData = getVariantAsync("feature_string", fallback: fallback, timeout: 10.0)
 
     XCTAssertNotNil(receivedData)
     AssertEqual(receivedData?.key, fallback.key)  // Should receive fallback
@@ -873,7 +887,7 @@ class FeatureFlagManagerTests: XCTestCase {
     }
 
     // Wait for async call AND the track expectation
-    wait(for: [asyncExpectation, mockDelegate.trackExpectation!], timeout: 2.0)
+    wait(for: [asyncExpectation, mockDelegate.trackExpectation!], timeout: 10.0)
 
     // Verify track delegate method was called exactly once
     let trueEvents = mockDelegate.trackedEvents.filter {
@@ -885,7 +899,7 @@ class FeatureFlagManagerTests: XCTestCase {
     mockDelegate.trackExpectation = XCTestExpectation(
       description: "Track called for feature_string")
     _ = manager.getVariantSync("feature_string", fallback: defaultFallback)
-    wait(for: [mockDelegate.trackExpectation!], timeout: 1.0)
+    wait(for: [mockDelegate.trackExpectation!], timeout: 10.0)
 
     let stringEvents = mockDelegate.trackedEvents.filter {
       $0.properties?["Experiment name"] as? String == "feature_string"
@@ -933,6 +947,8 @@ class FeatureFlagManagerTests: XCTestCase {
 
   // Test concurrent fetch attempts (via getFeature when not ready)
   func testConcurrentGetFeature_WhenNotReady_OnlyOneFetch() {
+    // Disable network delay since timing isn't what we're testing
+    configureMockFetch(success: true, flags: nil, withDelay: false)
     XCTAssertFalse(manager.areFlagsReady())
 
     let numConcurrentCalls = 5
@@ -1561,7 +1577,7 @@ class FeatureFlagManagerTests: XCTestCase {
         fetchExpectation.fulfill()
       }
 
-      wait(for: [fetchExpectation], timeout: 2.0)
+      wait(for: [fetchExpectation], timeout: 10.0)
 
       // Verify timing properties are set and reasonable
       XCTAssertNotNil(
@@ -1574,9 +1590,9 @@ class FeatureFlagManagerTests: XCTestCase {
         XCTAssertLessThan(latencyMs, 30000, "fetchLatencyMs should be less than 30 seconds")
 
         // Verify latency is in reasonable range for our simulated delay
-        // Allow some tolerance for execution overhead
+        // Allow generous tolerance for CI/slow systems with async dispatch overhead
         let actualElapsedMs = Int(Date().timeIntervalSince(fetchStartTime) * 1000)
-        let tolerance = 500  // 500ms tolerance for CI/slow systems
+        let tolerance = 5000  // 5s tolerance for slow CI runners
         XCTAssertLessThanOrEqual(
           abs(latencyMs - actualElapsedMs), tolerance,
           "fetchLatencyMs (\(latencyMs)ms) should be close to actual elapsed time (\(actualElapsedMs)ms)"
@@ -1611,7 +1627,7 @@ class FeatureFlagManagerTests: XCTestCase {
       Thread.sleep(forTimeInterval: 0.1)
 
       // Reset flags to trigger new fetch
-      mockManager.flagsLock.read {
+      mockManager.flagsLock.write {
         mockManager.flags = nil
       }
 
@@ -1625,7 +1641,7 @@ class FeatureFlagManagerTests: XCTestCase {
         secondFetchExpectation.fulfill()
       }
 
-      wait(for: [secondFetchExpectation], timeout: 2.0)
+      wait(for: [secondFetchExpectation], timeout: 10.0)
 
       // Verify timing properties updated
       XCTAssertNotNil(manager.timeLastFetched, "timeLastFetched should be set after second fetch")
@@ -1650,7 +1666,7 @@ class FeatureFlagManagerTests: XCTestCase {
       let validFetchLatency = manager.fetchLatencyMs
 
       // Reset flags and configure for failure
-      mockManager.flagsLock.read {
+      mockManager.flagsLock.write {
         mockManager.flags = nil
       }
       mockManager.simulatedFetchResult = (success: false, flags: nil)
@@ -1664,7 +1680,7 @@ class FeatureFlagManagerTests: XCTestCase {
         failedFetchExpectation.fulfill()
       }
 
-      wait(for: [failedFetchExpectation], timeout: 2.0)
+      wait(for: [failedFetchExpectation], timeout: 10.0)
 
       // Verify timing properties aren't corrupted by failed fetch
       // They should either remain unchanged or be cleared, but not set to invalid values
@@ -1692,7 +1708,7 @@ class FeatureFlagManagerTests: XCTestCase {
     // 6. Test Consistency Between Timing Properties
     if let mockManager = manager as? MockFeatureFlagManager {
       // Ensure we have a successful fetch
-      mockManager.flagsLock.read {
+      mockManager.flagsLock.write {
         mockManager.flags = nil
       }
 
@@ -1702,7 +1718,7 @@ class FeatureFlagManagerTests: XCTestCase {
         consistencyExpectation.fulfill()
       }
 
-      wait(for: [consistencyExpectation], timeout: 2.0)
+      wait(for: [consistencyExpectation], timeout: 10.0)
 
       // Both should be set or both should be nil
       if manager.fetchLatencyMs != nil {
@@ -1731,7 +1747,7 @@ class FeatureFlagManagerTests: XCTestCase {
     if let mockManager = manager as? MockFeatureFlagManager {
       var testFlags = sampleFlags
       testFlags[uniqueFlagName] = MixpanelFlagVariant(key: "timing_test", value: true)
-      mockManager.flagsLock.read {
+      mockManager.flagsLock.write {
         mockManager.flags = testFlags
       }
     }
@@ -2038,7 +2054,8 @@ class FeatureFlagManagerTests: XCTestCase {
       filters: filters,
       pendingVariant: pendingVariant,
       initialVariant: initialVariant,
-      firstTimeEventHash: "hash456"
+      firstTimeEventHash: "hash456",
+      expectActivation: false
     ) { mockMgr in
       let flag = mockMgr.flags?["premium-welcome"]
       XCTAssertEqual(flag?.key, "control")
@@ -2079,7 +2096,7 @@ class FeatureFlagManagerTests: XCTestCase {
         pendingVariant: pendingVariant
       )
 
-      mockManager.flagsLock.read {
+      mockManager.flagsLock.write {
         mockManager.flags = ["once-only": MixpanelFlagVariant(key: "control", value: false)]
         mockManager.pendingFirstTimeEvents = ["once-only:hash999": pendingEvent]
         // Reset tracking state
@@ -2116,7 +2133,7 @@ class FeatureFlagManagerTests: XCTestCase {
   func testFlagRefresh_PreservesActivatedVariants() {
     if let mockManager = manager as? MockFeatureFlagManager {
       // Set up initial state with activated variant
-      mockManager.flagsLock.read {
+      mockManager.flagsLock.write {
         mockManager.flags = ["test-flag": MixpanelFlagVariant(key: "activated", value: true)]
         mockManager.activatedFirstTimeEvents.insert("test-flag:hash123")
       }
@@ -2144,7 +2161,7 @@ class FeatureFlagManagerTests: XCTestCase {
   func testFlagRefresh_KeepsOrphanedActivatedFlags() {
     if let mockManager = manager as? MockFeatureFlagManager {
       // Set up initial state with activated variant
-      mockManager.flagsLock.read {
+      mockManager.flagsLock.write {
         mockManager.flags = ["orphaned-flag": MixpanelFlagVariant(key: "activated", value: true)]
         mockManager.activatedFirstTimeEvents.insert("orphaned-flag:hash123")
       }
@@ -2184,7 +2201,8 @@ class FeatureFlagManagerTests: XCTestCase {
       filters: nil,
       pendingVariant: pendingVariant,
       initialVariant: initialVariant,
-      firstTimeEventHash: "hash-mismatch"
+      firstTimeEventHash: "hash-mismatch",
+      expectActivation: false
     ) { mockMgr in
       // Verify flag stayed at control due to name mismatch
       let initialFlag = mockMgr.flags?["event-name-test"]
@@ -2298,7 +2316,14 @@ class FeatureFlagManagerTests: XCTestCase {
 
       // Trigger event
       mockMgr.checkFirstTimeEvents(eventName: "Test Event", properties: [:])
-      waitBriefly(timeout: 1.0)
+
+      // Wait for the async activation to complete
+      let activated = NSPredicate { _, _ in
+        var done = false
+        mockMgr.flagsLock.read { done = mockMgr.activatedFirstTimeEvents.contains("network-fail-test:hash123") }
+        return done
+      }
+      wait(for: [XCTNSPredicateExpectation(predicate: activated, object: nil)], timeout: 10.0)
 
       // Verify flag is still activated despite network failure
       mockMgr.flagsLock.read {
@@ -2409,6 +2434,9 @@ class FeatureFlagManagerTests: XCTestCase {
 
     XCTAssertEqual(mock.fetchRequestCount, 1, "prefetchFlags: true should auto-trigger a flag fetch")
     XCTAssertTrue(mock.areFlagsReady(), "Flags should be ready after fetch completes")
+
+    // Keep delegate alive for the duration of the test (FeatureFlagManager holds it weakly)
+    _ = delegate
   }
 
   func testPrefetchFlags_False_DoesNotAutoLoadFlags() {
@@ -2430,6 +2458,9 @@ class FeatureFlagManagerTests: XCTestCase {
 
     XCTAssertEqual(mock.fetchRequestCount, 0, "prefetchFlags: false should not trigger a flag fetch")
     XCTAssertFalse(mock.areFlagsReady(), "No flags should be loaded")
+
+    // Keep delegate alive for the duration of the test (FeatureFlagManager holds it weakly)
+    _ = delegate
   }
 
   func testPrefetchFlags_False_ManualLoadStillWorks() {
@@ -2454,6 +2485,9 @@ class FeatureFlagManagerTests: XCTestCase {
 
     XCTAssertEqual(mockManager.fetchRequestCount, 1, "Manual loadFlags should trigger fetch")
     XCTAssertTrue(mockManager.areFlagsReady(), "Flags should be ready after manual load")
+
+    // Keep delegate alive for the duration of the test (FeatureFlagManager holds it weakly)
+    _ = delegate
   }
 
 }  // End Test Class

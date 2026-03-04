@@ -84,6 +84,10 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
   func randomId() -> String {
     return String(format: "%08x%08x", arc4random(), arc4random())
   }
+  
+  func uuid(_ intValue: Int) -> UUID {
+    return UUID.init(uuidString: "00000000-0000-0000-0000-\(String(format: "%012x", intValue))")!
+  }
 
   func waitForAsyncTasks() {
     var hasCompletedTask = false

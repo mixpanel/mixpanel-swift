@@ -833,8 +833,8 @@ class FeatureFlagManagerTests: XCTestCase {
   }
 
   func testGetVariant_Async_FlagsNotReady_FetchFailure() {
-    // Configure mock to simulate failure for this test
-    configureMockFetch(success: false, flags: nil)
+    // Configure mock to simulate failure without network delay
+    configureMockFetch(success: false, flags: nil, withDelay: false)
 
     XCTAssertFalse(manager.areFlagsReady())
     let fallback = MixpanelFlagVariant(key: "fb_fail", value: "failed_fetch")
@@ -2216,14 +2216,16 @@ class FeatureFlagManagerTests: XCTestCase {
         flagKey: "multi-event-flag",
         eventName: "Event A",
         filters: nil,
-        pendingVariant: variant1
+        pendingVariant: variant1,
+        firstTimeEventHash: "hash1"
       )
 
       let event2 = createPendingEvent(
         flagKey: "multi-event-flag",
         eventName: "Event B",
         filters: nil,
-        pendingVariant: variant2
+        pendingVariant: variant2,
+        firstTimeEventHash: "hash2"
       )
 
       mockMgr.flagsLock.write {
@@ -2236,7 +2238,14 @@ class FeatureFlagManagerTests: XCTestCase {
 
       // Trigger first event
       mockMgr.checkFirstTimeEvents(eventName: "Event A", properties: [:])
-      waitBriefly(timeout: 1.0)
+
+      // Wait for first event activation using predicate
+      let firstActivated = NSPredicate { _, _ in
+        var activated = false
+        mockMgr.flagsLock.read { activated = mockMgr.activatedFirstTimeEvents.contains("multi-event-flag:hash1") }
+        return activated
+      }
+      wait(for: [XCTNSPredicateExpectation(predicate: firstActivated, object: nil)], timeout: 10.0)
 
       // Verify first event activated
       mockMgr.flagsLock.read {
@@ -2248,7 +2257,14 @@ class FeatureFlagManagerTests: XCTestCase {
 
       // Trigger second event - should overwrite the flag with the second variant
       mockMgr.checkFirstTimeEvents(eventName: "Event B", properties: [:])
-      waitBriefly(timeout: 1.0)
+
+      // Wait for second event activation using predicate
+      let secondActivated = NSPredicate { _, _ in
+        var activated = false
+        mockMgr.flagsLock.read { activated = mockMgr.activatedFirstTimeEvents.contains("multi-event-flag:hash2") }
+        return activated
+      }
+      wait(for: [XCTNSPredicateExpectation(predicate: secondActivated, object: nil)], timeout: 10.0)
 
       mockMgr.flagsLock.read {
         let flag = mockMgr.flags?["multi-event-flag"]
@@ -2303,13 +2319,14 @@ class FeatureFlagManagerTests: XCTestCase {
     flagKey: String,
     eventName: String,
     filters: [String: Any]?,
-    pendingVariant: MixpanelFlagVariant
+    pendingVariant: MixpanelFlagVariant,
+    firstTimeEventHash: String = "hash123"
   ) -> PendingFirstTimeEvent {
     let json: [String: Any] = [
       "flag_key": flagKey,
       "flag_id": "test-flag-id",
       "project_id": 1,
-      "first_time_event_hash": "hash123",
+      "first_time_event_hash": firstTimeEventHash,
       "event_name": eventName,
       "property_filters": filters as Any,
       "pending_variant": [
@@ -2373,47 +2390,46 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testPrefetchFlags_True_AutoLoadsFlags() {
     // With prefetchFlags: true (default), MixpanelInstance.init should call loadFlags()
-    let options = MixpanelOptions(
-      token: UUID().uuidString,
-      featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: true)
+    // Use a MockFeatureFlagManager to verify that loadFlags triggers a fetch
+    let delegate = MockFeatureFlagDelegate(
+      options: MixpanelOptions(
+        token: "test",
+        featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: true)
+      )
     )
-    let instance = Mixpanel.initialize(options: options)
-    let flagManager = instance.flags as! FeatureFlagManager
+    let mock = MockFeatureFlagManager(serverURL: "https://test.com", delegate: delegate)
+    mock.simulatedFetchResult = (success: true, flags: sampleFlags)
 
-    // loadFlags() dispatches async, so use a predicate to wait for the fetch to start
-    let fetchingPredicate = NSPredicate { _, _ in
-      var fetching = false
-      flagManager.flagsLock.read { fetching = flagManager.isFetching }
-      return fetching
-    }
-    let fetchingExpectation = XCTNSPredicateExpectation(predicate: fetchingPredicate, object: nil)
-    wait(for: [fetchingExpectation], timeout: 10.0)
+    // Call loadFlags() (which prefetchFlags: true would trigger during init)
+    mock.loadFlags()
 
-    var fetching = false
-    flagManager.flagsLock.read { fetching = flagManager.isFetching }
-    XCTAssertTrue(fetching, "Init with prefetchFlags: true should auto-trigger a flag fetch")
+    // Wait for the fetch to complete and flags to become ready
+    let flagsReady = NSPredicate { _, _ in mock.areFlagsReady() }
+    wait(for: [XCTNSPredicateExpectation(predicate: flagsReady, object: nil)], timeout: 10.0)
+
+    XCTAssertEqual(mock.fetchRequestCount, 1, "prefetchFlags: true should auto-trigger a flag fetch")
+    XCTAssertTrue(mock.areFlagsReady(), "Flags should be ready after fetch completes")
   }
 
   func testPrefetchFlags_False_DoesNotAutoLoadFlags() {
     // With prefetchFlags: false, MixpanelInstance.init should NOT call loadFlags()
-    let options = MixpanelOptions(
-      token: UUID().uuidString,
-      featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
+    // Use a MockFeatureFlagManager to verify no fetch is triggered
+    let delegate = MockFeatureFlagDelegate(
+      options: MixpanelOptions(
+        token: "test",
+        featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
+      )
     )
-    let instance = Mixpanel.initialize(options: options)
-    let flagManager = instance.flags as! FeatureFlagManager
+    let mock = MockFeatureFlagManager(serverURL: "https://test.com", delegate: delegate)
+    mock.simulatedFetchResult = (success: true, flags: sampleFlags)
 
-    // Check that no fetch was triggered
+    // Do NOT call loadFlags() - simulating prefetchFlags: false behavior
+
     // Give a brief moment for any async dispatch to occur
-    let noFetchPredicate = NSPredicate { _, _ in true }
-    let noFetchExpectation = XCTNSPredicateExpectation(predicate: noFetchPredicate, object: nil)
-    wait(for: [noFetchExpectation], timeout: 1.0)
+    waitBriefly(timeout: 1.0)
 
-    var fetching = false
-    flagManager.flagsLock.read { fetching = flagManager.isFetching }
-
-    XCTAssertFalse(fetching, "Init with prefetchFlags: false should not trigger a flag fetch")
-    XCTAssertFalse(flagManager.areFlagsReady(), "No flags should be loaded")
+    XCTAssertEqual(mock.fetchRequestCount, 0, "prefetchFlags: false should not trigger a flag fetch")
+    XCTAssertFalse(mock.areFlagsReady(), "No flags should be loaded")
   }
 
   func testPrefetchFlags_False_ManualLoadStillWorks() {

@@ -38,43 +38,30 @@ public final class MixpanelEventBridge: NSObject {
     /// Registered listeners (stored as weak references)
     private var listeners: [WeakListener] = []
 
-    /// Metrics for debugging and monitoring
-    private var totalEventsDispatched: Int = 0
-    private var totalDispatchTime: TimeInterval = 0
-
     // MARK: - Public API
-
-    /// Optional metrics handler for monitoring (production-safe)
-    public var metricsHandler: ((BridgeMetrics) -> Void)?
-
-    #if DEBUG
-    /// Enable verbose logging for debugging
-    public var verboseLogging: Bool = false
-    #endif
 
     /// Register a listener to receive event notifications.
     /// - Parameter listener: The listener to register (stored as weak reference)
     @objc public func registerListener(_ listener: AnyObject) {
         guard let listener = listener as? MixpanelEventListener else {
-            print("[MixpanelEventBridge] Warning: Attempted to register non-conforming listener: \(listener)")
+            MixpanelLogger.warn(message: "Attempted to register non-conforming listener")
             return
         }
-            
+
         queue.async { [weak self] in
             guard let self = self else { return }
 
             // Check if already registered
             let id = ObjectIdentifier(listener)
             if self.listeners.contains(where: { $0.id == id }) {
+                MixpanelLogger.debug(message: "Listener already registered, skipping")
                 return
             }
 
             self.listeners.append(WeakListener(listener))
             self.cleanupDeallocatedListeners()
 
-            #if DEBUG
-            print("[MixpanelEventBridge] Listener registered. Total: \(self.listeners.count)")
-            #endif
+            MixpanelLogger.info(message: "Event bridge listener registered")
         }
     }
 
@@ -82,7 +69,7 @@ public final class MixpanelEventBridge: NSObject {
     /// - Parameter listener: The listener to unregister
     @objc public func unregisterListener(_ listener: AnyObject) {
         guard let listener = listener as? MixpanelEventListener else {
-            print("[MixpanelEventBridge] Warning: Attempted to register non-conforming listener: \(listener)")
+            MixpanelLogger.warn(message: "Attempted to unregister non-conforming listener")
             return
         }
         queue.async { [weak self] in
@@ -91,16 +78,17 @@ public final class MixpanelEventBridge: NSObject {
             let id = ObjectIdentifier(listener)
             self.listeners.removeAll { $0.id == id }
 
-            #if DEBUG
-            print("[MixpanelEventBridge] Listener unregistered. Total: \(self.listeners.count)")
-            #endif
+            MixpanelLogger.info(message: "Event bridge listener unregistered")
         }
     }
 
     /// Remove all registered listeners.
     @objc public func removeAllListeners() {
         queue.async { [weak self] in
-            self?.listeners.removeAll()
+            guard let self = self else { return }
+            let count = self.listeners.count
+            self.listeners.removeAll()
+            MixpanelLogger.debug(message: "Removed \(count) event bridge listener(s)")
         }
     }
 
@@ -118,8 +106,6 @@ public final class MixpanelEventBridge: NSObject {
         timestamp: Date,
         instanceName: String? = nil
     ) {
-        let startTime = Date()
-
         // Create event object
         let trackedEvent = MixpanelTrackedEvent(
             name: event,
@@ -136,90 +122,18 @@ public final class MixpanelEventBridge: NSObject {
             // Early exit if no listeners
             guard !self.listeners.isEmpty else { return }
 
-            #if DEBUG
-            if self.verboseLogging {
-                print("""
-                [EventBridge] Dispatching '\(trackedEvent.name)'
-                  → Listeners: \(self.listeners.count)
-                  → Instance: \(trackedEvent.instanceName ?? "main")
-                  → Properties: \(trackedEvent.properties.keys.sorted().joined(separator: ", "))
-                """)
-            }
-            #endif
-
-            // Notify each listener with filtered properties
+            // Notify each listener
             for wrapper in self.listeners {
                 guard let listener = wrapper.listener else { continue }
                 listener.mixpanelDidTrackEvent(trackedEvent)
-            }
-
-            // Update metrics
-            self.totalEventsDispatched += 1
-            let dispatchTime = Date().timeIntervalSince(startTime)
-            self.totalDispatchTime += dispatchTime
-
-            // Report metrics if handler is set
-            if let handler = self.metricsHandler {
-                let metrics = BridgeMetrics(
-                    totalEventsDispatched: self.totalEventsDispatched,
-                    activeListenerCount: self.listeners.count,
-                    averageDispatchTime: self.totalDispatchTime / Double(self.totalEventsDispatched)
-                )
-                handler(metrics)
             }
         }
     }
 
     // MARK: - Private Methods
-    
+
     /// Remove nil weak references from the listener array
     private func cleanupDeallocatedListeners() {
-        let before = listeners.count
         listeners.removeAll { $0.listener == nil }
-        let after = listeners.count
-
-        #if DEBUG
-        if before != after {
-            print("[MixpanelEventBridge] Cleaned up \(before - after) deallocated listener(s)")
-        }
-        #endif
     }
 }
-
-// MARK: - Metrics
-
-/// Public metrics for monitoring bridge performance
-public struct BridgeMetrics {
-    public let totalEventsDispatched: Int
-    public let activeListenerCount: Int
-    public let averageDispatchTime: TimeInterval
-}
-
-// MARK: - Debug Extension
-
-#if DEBUG
-extension MixpanelEventBridge {
-
-    /// Print current bridge status to console (debug builds only)
-    public func printDebugInfo() {
-        queue.sync {
-            cleanupDeallocatedListeners()
-
-            print("""
-            ╭─────────────────────────────────────╮
-            │  MixpanelEventBridge Debug Info     │
-            ╰─────────────────────────────────────╯
-
-            Active Listeners: \(listeners.count)
-            Total Events Dispatched: \(totalEventsDispatched)
-
-            Registered Listeners:
-            \(listeners.enumerated().map { idx, wrapper in
-                let listenerType = type(of: wrapper.listener)
-                return "  \(idx + 1). \(listenerType)"
-            }.joined(separator: "\n"))
-            """)
-        }
-    }
-}
-#endif

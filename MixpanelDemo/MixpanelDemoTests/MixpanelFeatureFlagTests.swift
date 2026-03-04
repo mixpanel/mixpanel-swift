@@ -27,7 +27,7 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
   var customTrackHandler: ((String?, Properties?) -> Void)?
 
   init(
-    options: MixpanelOptions = MixpanelOptions(token: "test", featureFlagsEnabled: true),
+    options: MixpanelOptions = MixpanelOptions(token: "test", featureFlagOptions: FeatureFlagOptions(enabled: true)),
     distinctId: String = "test_distinct_id",
     anonymousId: String? = "test_anonymous_id"
   ) {
@@ -176,7 +176,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
     let distinctId = delegate.getDistinctId()
     let anonymousId = delegate.getAnonymousId()
 
-    var context = options.featureFlagsContext
+    var context = options.featureFlagOptions.context
     context["distinct_id"] = distinctId
     if let anonymousId = anonymousId {
       context["device_id"] = anonymousId
@@ -366,7 +366,7 @@ class FeatureFlagManagerTests: XCTestCase {
   // --- Load Flags Tests ---
 
   func testLoadFlags_WhenDisabledInConfig() {
-    mockDelegate.options = MixpanelOptions(token: "test", featureFlagsEnabled: false)  // Explicitly disable
+    mockDelegate.options = MixpanelOptions(token: "test", featureFlagOptions: FeatureFlagOptions(enabled: false))  // Explicitly disable
     manager.loadFlags()  // Call public API
 
     // Wait to ensure no async fetch operations started changing state
@@ -544,7 +544,7 @@ class FeatureFlagManagerTests: XCTestCase {
     // No need for manual simulateFetchSuccess() - the mock handles it with delay
 
     // Wait for BOTH the getFeature completion AND the tracking expectation
-    wait(for: [expectation, mockDelegate.trackExpectation!], timeout: 3.0)  // Increased timeout
+    wait(for: [expectation, mockDelegate.trackExpectation!], timeout: 10.0)  // CI needs generous timeout for .utility QoS dispatch
 
     XCTAssertNotNil(receivedData)
     AssertEqual(receivedData?.key, "v_int")  // Check correct flag data received
@@ -979,7 +979,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testDelegateConfigDisabledHandling() {
     // Set delegate options to disabled
-    mockDelegate.options = MixpanelOptions(token: "test", featureFlagsEnabled: false)
+    mockDelegate.options = MixpanelOptions(token: "test", featureFlagOptions: FeatureFlagOptions(enabled: false))
 
     // Try to load flags
     manager.loadFlags()
@@ -1161,7 +1161,7 @@ class FeatureFlagManagerTests: XCTestCase {
     let testDistinctId = "test_distinct_id_67890"
 
     let mockDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test", featureFlagsEnabled: true),
+      options: MixpanelOptions(token: "test", featureFlagOptions: FeatureFlagOptions(enabled: true)),
       distinctId: testDistinctId,
       anonymousId: testAnonymousId
     )
@@ -1182,7 +1182,7 @@ class FeatureFlagManagerTests: XCTestCase {
     let testDistinctId = "test_distinct_id_67890"
 
     let mockDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test", featureFlagsEnabled: true),
+      options: MixpanelOptions(token: "test", featureFlagOptions: FeatureFlagOptions(enabled: true)),
       distinctId: testDistinctId,
       anonymousId: nil
     )
@@ -1566,10 +1566,10 @@ class FeatureFlagManagerTests: XCTestCase {
     // Trigger a request
     mockManager.loadFlags()
 
-    // Wait for request to be processed
-    let expectation = XCTestExpectation(description: "Request validation completes")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 1.0)
+    // Wait for request to be processed (use predicate to handle slow CI dispatch queues)
+    let validatedPredicate = NSPredicate { _, _ in mockManager.lastRequestMethod != nil }
+    let expectation = XCTNSPredicateExpectation(predicate: validatedPredicate, object: nil)
+    wait(for: [expectation], timeout: 10.0)
 
     // Verify no validation errors
     XCTAssertNil(mockManager.requestValidationError, "Request validation should not have errors: \(mockManager.requestValidationError ?? "")")
@@ -1613,10 +1613,10 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testGETRequestWithCustomContext() {
     // Set up custom context
-    let customOptions = MixpanelOptions(token: "custom-token", featureFlagsEnabled: true, featureFlagsContext: [
+    let customOptions = MixpanelOptions(token: "custom-token", featureFlagOptions: FeatureFlagOptions(enabled: true, context: [
       "user_id": "test-user-123",
       "group_id": "test-group-456"
-    ])
+    ]))
 
     let customDelegate = MockFeatureFlagDelegate(
       options: customOptions,
@@ -1631,10 +1631,10 @@ class FeatureFlagManagerTests: XCTestCase {
     // Trigger a request
     mockManager.loadFlags()
 
-    // Wait for request to be processed
-    let expectation = XCTestExpectation(description: "Custom context request validation")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 1.0)
+    // Wait for request to be processed (use predicate to handle slow CI dispatch queues)
+    let validatedPredicate = NSPredicate { _, _ in mockManager.lastRequestMethod != nil }
+    let expectation = XCTNSPredicateExpectation(predicate: validatedPredicate, object: nil)
+    wait(for: [expectation], timeout: 10.0)
 
     // Verify no validation errors
     XCTAssertNil(mockManager.requestValidationError, "Request validation should not have errors")
@@ -1662,7 +1662,7 @@ class FeatureFlagManagerTests: XCTestCase {
   func testGETRequestWithNilAnonymousId() {
     // Set up with nil anonymous ID
     let nilAnonymousDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test-token", featureFlagsEnabled: true),
+      options: MixpanelOptions(token: "test-token", featureFlagOptions: FeatureFlagOptions(enabled: true)),
       distinctId: "test-distinct-id",
       anonymousId: nil
     )
@@ -1674,10 +1674,10 @@ class FeatureFlagManagerTests: XCTestCase {
     // Trigger a request
     mockManager.loadFlags()
 
-    // Wait for request to be processed
-    let expectation = XCTestExpectation(description: "Nil anonymous ID request validation")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { expectation.fulfill() }
-    wait(for: [expectation], timeout: 1.0)
+    // Wait for request to be processed (use predicate to handle slow CI dispatch queues)
+    let validatedPredicate = NSPredicate { _, _ in mockManager.lastRequestMethod != nil }
+    let expectation = XCTNSPredicateExpectation(predicate: validatedPredicate, object: nil)
+    wait(for: [expectation], timeout: 10.0)
 
     // Verify no validation errors
     XCTAssertNil(mockManager.requestValidationError, "Request validation should not have errors with nil anonymous ID")
@@ -1699,6 +1699,114 @@ class FeatureFlagManagerTests: XCTestCase {
         XCTFail("Context should be valid JSON")
       }
     }
+  }
+
+  // --- FeatureFlagOptions Tests ---
+
+  func testFeatureFlagOptions_DefaultValues() {
+    let options = FeatureFlagOptions()
+    XCTAssertFalse(options.enabled, "enabled should default to false")
+    XCTAssertTrue(options.context.isEmpty, "context should default to empty")
+    XCTAssertTrue(options.prefetchFlags, "prefetchFlags should default to true")
+  }
+
+  func testFeatureFlagOptions_CustomValues() {
+    let options = FeatureFlagOptions(
+      enabled: true,
+      context: ["key": "value"],
+      prefetchFlags: false
+    )
+    XCTAssertTrue(options.enabled)
+    XCTAssertEqual(options.context["key"] as? String, "value")
+    XCTAssertFalse(options.prefetchFlags)
+  }
+
+  func testMixpanelOptions_FeatureFlagOptionsOverridesFlat() {
+    // When featureFlagOptions is provided, it should take precedence
+    let options = MixpanelOptions(
+      token: "test",
+      featureFlagsEnabled: false,
+      featureFlagsContext: [:],
+      featureFlagOptions: FeatureFlagOptions(enabled: true, context: ["custom": "ctx"], prefetchFlags: false)
+    )
+    XCTAssertTrue(options.featureFlagsEnabled, "featureFlagsEnabled should reflect featureFlagOptions.enabled")
+    XCTAssertEqual(options.featureFlagsContext["custom"] as? String, "ctx")
+    XCTAssertTrue(options.featureFlagOptions.enabled)
+    XCTAssertFalse(options.featureFlagOptions.prefetchFlags)
+  }
+
+  func testMixpanelOptions_FlatParamsFeedIntoFeatureFlagOptions() {
+    // When featureFlagOptions is not provided, flat params populate it
+    let options = MixpanelOptions(
+      token: "test",
+      featureFlagsEnabled: true,
+      featureFlagsContext: ["flat": "value"]
+    )
+    XCTAssertTrue(options.featureFlagOptions.enabled, "featureFlagOptions.enabled should match featureFlagsEnabled")
+    XCTAssertEqual(options.featureFlagOptions.context["flat"] as? String, "value")
+    XCTAssertTrue(options.featureFlagOptions.prefetchFlags, "prefetchFlags should default to true")
+  }
+
+  func testPrefetchFlags_True_AutoLoadsFlags() {
+    // With prefetchFlags: true (default), MixpanelInstance.init should call loadFlags()
+    let options = MixpanelOptions(
+      token: UUID().uuidString,
+      featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: true)
+    )
+    let instance = Mixpanel.initialize(options: options)
+    let flagManager = instance.flags as! FeatureFlagManager
+
+    // loadFlags() dispatches async to accessQueue, so syncing on it
+    // guarantees the fetch block has executed by the time we check
+    var fetching = false
+    flagManager.accessQueue.sync {
+      fetching = flagManager.isFetching
+    }
+
+    XCTAssertTrue(fetching, "Init with prefetchFlags: true should auto-trigger a flag fetch")
+  }
+
+  func testPrefetchFlags_False_DoesNotAutoLoadFlags() {
+    // With prefetchFlags: false, MixpanelInstance.init should NOT call loadFlags()
+    let options = MixpanelOptions(
+      token: UUID().uuidString,
+      featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
+    )
+    let instance = Mixpanel.initialize(options: options)
+    let flagManager = instance.flags as! FeatureFlagManager
+
+    // Sync on accessQueue to drain any pending work
+    var fetching = false
+    flagManager.accessQueue.sync {
+      fetching = flagManager.isFetching
+    }
+
+    XCTAssertFalse(fetching, "Init with prefetchFlags: false should not trigger a flag fetch")
+    XCTAssertFalse(flagManager.areFlagsReady(), "No flags should be loaded")
+  }
+
+  func testPrefetchFlags_False_ManualLoadStillWorks() {
+    // Even with prefetchFlags: false, calling loadFlags() manually should work
+    let delegate = MockFeatureFlagDelegate(
+      options: MixpanelOptions(
+        token: "test",
+        featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
+      )
+    )
+
+    let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", delegate: delegate)
+    mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
+
+    // Manually load flags (simulating what user would do after identify)
+    mockManager.loadFlags()
+
+    // Wait for flags to become ready (use predicate to handle slow CI dispatch queues)
+    let readyPredicate = NSPredicate { _, _ in mockManager.areFlagsReady() }
+    let readyExpectation = XCTNSPredicateExpectation(predicate: readyPredicate, object: nil)
+    wait(for: [readyExpectation], timeout: 10.0)
+
+    XCTAssertEqual(mockManager.fetchRequestCount, 1, "Manual loadFlags should trigger fetch")
+    XCTAssertTrue(mockManager.areFlagsReady(), "Flags should be ready after manual load")
   }
 
 }  // End Test Class

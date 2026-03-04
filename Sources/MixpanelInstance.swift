@@ -456,7 +456,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         automaticEvents.initializeEvents(instanceName: self.name)
       }
     #endif
-    if self.options.flagsOptions.prefetchFlags {
+    if self.options.featureFlagOptions.prefetchFlags {
       flags.loadFlags()
     }
   }

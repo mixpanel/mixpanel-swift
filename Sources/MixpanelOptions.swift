@@ -14,7 +14,7 @@
 /// ```swift
 /// let options = MixpanelOptions(
 ///     token: "YOUR_TOKEN",
-///     flagsOptions: FeatureFlagOptions(enabled: true)
+///     featureFlagOptions: FeatureFlagOptions(enabled: true)
 /// )
 /// ```
 ///
@@ -22,7 +22,7 @@
 /// ```swift
 /// let options = MixpanelOptions(
 ///     token: "YOUR_TOKEN",
-///     flagsOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
+///     featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
 /// )
 /// let mp = Mixpanel.initialize(options: options)
 /// // identify() triggers loadFlags() internally when the distinctId changes
@@ -67,17 +67,17 @@ public class MixpanelOptions {
   public let serverURL: String?
   public let proxyServerConfig: ProxyServerConfig?
   public let useGzipCompression: Bool
-  @available(*, deprecated, message: "Use flagsOptions.enabled instead")
-  public var featureFlagsEnabled: Bool { return flagsOptions.enabled }
+  @available(*, deprecated, message: "Use featureFlagOptions.enabled instead")
+  public var featureFlagsEnabled: Bool { return featureFlagOptions.enabled }
 
-  @available(*, deprecated, message: "Use flagsOptions.context instead")
-  public var featureFlagsContext: [String: Any] { return flagsOptions.context }
+  @available(*, deprecated, message: "Use featureFlagOptions.context instead")
+  public var featureFlagsContext: [String: Any] { return featureFlagOptions.context }
 
   /// Grouped configuration for feature flags behavior.
   ///
   /// When provided to the initializer, this takes precedence over the
   /// `featureFlagsEnabled` and `featureFlagsContext` parameters.
-  public let flagsOptions: FeatureFlagOptions
+  public let featureFlagOptions: FeatureFlagOptions
 
   /// A closure that provides a custom device ID.
   ///
@@ -138,7 +138,7 @@ public class MixpanelOptions {
     featureFlagsEnabled: Bool = false,
     featureFlagsContext: [String: Any] = [:],
     deviceIdProvider: (() -> String?)? = nil,
-    flagsOptions: FeatureFlagOptions? = nil
+    featureFlagOptions: FeatureFlagOptions? = nil
   ) {
     self.token = token
     self.flushInterval = flushInterval
@@ -152,11 +152,11 @@ public class MixpanelOptions {
     self.useGzipCompression = useGzipCompression
     self.deviceIdProvider = deviceIdProvider
 
-    // When flagsOptions is explicitly provided, it takes precedence
-    if let flagsOptions = flagsOptions {
-      self.flagsOptions = flagsOptions
+    // When featureFlagOptions is explicitly provided, it takes precedence
+    if let featureFlagOptions = featureFlagOptions {
+      self.featureFlagOptions = featureFlagOptions
     } else {
-      self.flagsOptions = FeatureFlagOptions(
+      self.featureFlagOptions = FeatureFlagOptions(
         enabled: featureFlagsEnabled,
         context: featureFlagsContext
       )

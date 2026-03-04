@@ -27,7 +27,7 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
   var customTrackHandler: ((String?, Properties?) -> Void)?
 
   init(
-    options: MixpanelOptions = MixpanelOptions(token: "test", flagsOptions: FeatureFlagOptions(enabled: true)),
+    options: MixpanelOptions = MixpanelOptions(token: "test", featureFlagOptions: FeatureFlagOptions(enabled: true)),
     distinctId: String = "test_distinct_id",
     anonymousId: String? = "test_anonymous_id"
   ) {
@@ -176,7 +176,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
     let distinctId = delegate.getDistinctId()
     let anonymousId = delegate.getAnonymousId()
 
-    var context = options.flagsOptions.context
+    var context = options.featureFlagOptions.context
     context["distinct_id"] = distinctId
     if let anonymousId = anonymousId {
       context["device_id"] = anonymousId
@@ -366,7 +366,7 @@ class FeatureFlagManagerTests: XCTestCase {
   // --- Load Flags Tests ---
 
   func testLoadFlags_WhenDisabledInConfig() {
-    mockDelegate.options = MixpanelOptions(token: "test", flagsOptions: FeatureFlagOptions(enabled: false))  // Explicitly disable
+    mockDelegate.options = MixpanelOptions(token: "test", featureFlagOptions: FeatureFlagOptions(enabled: false))  // Explicitly disable
     manager.loadFlags()  // Call public API
 
     // Wait to ensure no async fetch operations started changing state
@@ -979,7 +979,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testDelegateConfigDisabledHandling() {
     // Set delegate options to disabled
-    mockDelegate.options = MixpanelOptions(token: "test", flagsOptions: FeatureFlagOptions(enabled: false))
+    mockDelegate.options = MixpanelOptions(token: "test", featureFlagOptions: FeatureFlagOptions(enabled: false))
 
     // Try to load flags
     manager.loadFlags()
@@ -1161,7 +1161,7 @@ class FeatureFlagManagerTests: XCTestCase {
     let testDistinctId = "test_distinct_id_67890"
 
     let mockDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test", flagsOptions: FeatureFlagOptions(enabled: true)),
+      options: MixpanelOptions(token: "test", featureFlagOptions: FeatureFlagOptions(enabled: true)),
       distinctId: testDistinctId,
       anonymousId: testAnonymousId
     )
@@ -1182,7 +1182,7 @@ class FeatureFlagManagerTests: XCTestCase {
     let testDistinctId = "test_distinct_id_67890"
 
     let mockDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test", flagsOptions: FeatureFlagOptions(enabled: true)),
+      options: MixpanelOptions(token: "test", featureFlagOptions: FeatureFlagOptions(enabled: true)),
       distinctId: testDistinctId,
       anonymousId: nil
     )
@@ -1613,7 +1613,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testGETRequestWithCustomContext() {
     // Set up custom context
-    let customOptions = MixpanelOptions(token: "custom-token", flagsOptions: FeatureFlagOptions(enabled: true, context: [
+    let customOptions = MixpanelOptions(token: "custom-token", featureFlagOptions: FeatureFlagOptions(enabled: true, context: [
       "user_id": "test-user-123",
       "group_id": "test-group-456"
     ]))
@@ -1662,7 +1662,7 @@ class FeatureFlagManagerTests: XCTestCase {
   func testGETRequestWithNilAnonymousId() {
     // Set up with nil anonymous ID
     let nilAnonymousDelegate = MockFeatureFlagDelegate(
-      options: MixpanelOptions(token: "test-token", flagsOptions: FeatureFlagOptions(enabled: true)),
+      options: MixpanelOptions(token: "test-token", featureFlagOptions: FeatureFlagOptions(enabled: true)),
       distinctId: "test-distinct-id",
       anonymousId: nil
     )
@@ -1722,36 +1722,36 @@ class FeatureFlagManagerTests: XCTestCase {
   }
 
   func testMixpanelOptions_FeatureFlagOptionsOverridesFlat() {
-    // When flagsOptions is provided, it should take precedence
+    // When featureFlagOptions is provided, it should take precedence
     let options = MixpanelOptions(
       token: "test",
       featureFlagsEnabled: false,
       featureFlagsContext: [:],
-      flagsOptions: FeatureFlagOptions(enabled: true, context: ["custom": "ctx"], prefetchFlags: false)
+      featureFlagOptions: FeatureFlagOptions(enabled: true, context: ["custom": "ctx"], prefetchFlags: false)
     )
-    XCTAssertTrue(options.featureFlagsEnabled, "featureFlagsEnabled should reflect flagsOptions.enabled")
+    XCTAssertTrue(options.featureFlagsEnabled, "featureFlagsEnabled should reflect featureFlagOptions.enabled")
     XCTAssertEqual(options.featureFlagsContext["custom"] as? String, "ctx")
-    XCTAssertTrue(options.flagsOptions.enabled)
-    XCTAssertFalse(options.flagsOptions.prefetchFlags)
+    XCTAssertTrue(options.featureFlagOptions.enabled)
+    XCTAssertFalse(options.featureFlagOptions.prefetchFlags)
   }
 
   func testMixpanelOptions_FlatParamsFeedIntoFeatureFlagOptions() {
-    // When flagsOptions is not provided, flat params populate it
+    // When featureFlagOptions is not provided, flat params populate it
     let options = MixpanelOptions(
       token: "test",
       featureFlagsEnabled: true,
       featureFlagsContext: ["flat": "value"]
     )
-    XCTAssertTrue(options.flagsOptions.enabled, "flagsOptions.enabled should match featureFlagsEnabled")
-    XCTAssertEqual(options.flagsOptions.context["flat"] as? String, "value")
-    XCTAssertTrue(options.flagsOptions.prefetchFlags, "prefetchFlags should default to true")
+    XCTAssertTrue(options.featureFlagOptions.enabled, "featureFlagOptions.enabled should match featureFlagsEnabled")
+    XCTAssertEqual(options.featureFlagOptions.context["flat"] as? String, "value")
+    XCTAssertTrue(options.featureFlagOptions.prefetchFlags, "prefetchFlags should default to true")
   }
 
   func testPrefetchFlags_True_AutoLoadsFlags() {
     // With prefetchFlags: true (default), MixpanelInstance.init should call loadFlags()
     let options = MixpanelOptions(
       token: UUID().uuidString,
-      flagsOptions: FeatureFlagOptions(enabled: true, prefetchFlags: true)
+      featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: true)
     )
     let instance = Mixpanel.initialize(options: options)
     let flagManager = instance.flags as! FeatureFlagManager
@@ -1770,7 +1770,7 @@ class FeatureFlagManagerTests: XCTestCase {
     // With prefetchFlags: false, MixpanelInstance.init should NOT call loadFlags()
     let options = MixpanelOptions(
       token: UUID().uuidString,
-      flagsOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
+      featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
     )
     let instance = Mixpanel.initialize(options: options)
     let flagManager = instance.flags as! FeatureFlagManager
@@ -1790,7 +1790,7 @@ class FeatureFlagManagerTests: XCTestCase {
     let delegate = MockFeatureFlagDelegate(
       options: MixpanelOptions(
         token: "test",
-        flagsOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
+        featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
       )
     )
 

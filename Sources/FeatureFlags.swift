@@ -453,29 +453,33 @@ class FeatureFlagManager: Network, MixpanelFlags {
   // --- Bulk Flag Retrieval ---
 
   func getAllVariantsSync() -> [String: MixpanelFlagVariant] {
-    return accessQueue.sync {
-      return self.flags ?? [:]
+    var result: [String: MixpanelFlagVariant] = [:]
+    flagsLock.read {
+      result = self.flags ?? [:]
     }
+    return result
   }
 
   func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void) {
-    accessQueue.async { [weak self] in
+    DispatchQueue.global(qos: .utility).async { [weak self] in
       guard let self = self else {
         DispatchQueue.main.async { completion([:]) }
         return
       }
 
-      if let currentFlags = self.flags {
+      var currentFlags: [String: MixpanelFlagVariant]?
+      self.flagsLock.read { currentFlags = self.flags }
+      if let currentFlags = currentFlags {
         DispatchQueue.main.async { completion(currentFlags) }
       } else {
         // Flags not ready, trigger fetch
-        print("Flags not ready, attempting fetch for getAllVariants call...")
+        MixpanelLogger.debug(message: "Flags not ready, attempting fetch for getAllVariants call...")
         self._fetchFlagsIfNeeded { success in
           let result: [String: MixpanelFlagVariant]
           if success {
             result = self.getAllVariantsSync()
           } else {
-            print("Warning: Failed to fetch flags, returning empty dictionary.")
+            MixpanelLogger.warn(message: "Failed to fetch flags, returning empty dictionary.")
             result = [:]
           }
           DispatchQueue.main.async { completion(result) }

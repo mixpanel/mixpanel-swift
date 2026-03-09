@@ -26,10 +26,10 @@ public final class MixpanelEventBridge: NSObject {
 
     /// Weak wrapper to avoid retain cycles with listeners
     private struct WeakListener {
-        weak var listener: MixpanelEventListener?
+        weak var listener: MixpanelEventBridgeListener?
         let id: ObjectIdentifier
 
-        init(_ listener: MixpanelEventListener) {
+        init(_ listener: MixpanelEventBridgeListener) {
             self.listener = listener
             self.id = ObjectIdentifier(listener)
         }
@@ -43,7 +43,7 @@ public final class MixpanelEventBridge: NSObject {
     /// Register a listener to receive event notifications.
     /// - Parameter listener: The listener to register (stored as weak reference)
     @objc public func registerListener(_ listener: AnyObject) {
-        guard let listener = listener as? MixpanelEventListener else {
+        guard let listener = listener as? MixpanelEventBridgeListener else {
             MixpanelLogger.warn(message: "Attempted to register non-conforming listener")
             return
         }
@@ -68,7 +68,7 @@ public final class MixpanelEventBridge: NSObject {
     /// Unregister a specific listener.
     /// - Parameter listener: The listener to unregister
     @objc public func unregisterListener(_ listener: AnyObject) {
-        guard let listener = listener as? MixpanelEventListener else {
+        guard let listener = listener as? MixpanelEventBridgeListener else {
             MixpanelLogger.warn(message: "Attempted to unregister non-conforming listener")
             return
         }
@@ -98,34 +98,34 @@ public final class MixpanelEventBridge: NSObject {
     /// - Parameters:
     ///   - event: Event name
     ///   - properties: Event properties
-    ///   - timestamp: When the event was tracked
-    ///   - instanceName: Mixpanel instance name (nil = main)
     internal func notifyListeners(
         event: String,
-        properties: [String: Any],
-        timestamp: Date,
-        instanceName: String? = nil
+        properties: [String: Any]
     ) {
-        // Create event object
-        let trackedEvent = MixpanelTrackedEvent(
-            name: event,
-            properties: properties,
-            timestamp: timestamp,
-            instanceName: instanceName
-        )
+        // Create event data dictionary
+        let eventData: [String: Any] = [
+            "eventName": event,
+            "properties": properties
+        ]
 
         queue.async { [weak self] in
             guard let self = self else { return }
 
-            self.cleanupDeallocatedListeners()
-
             // Early exit if no listeners
             guard !self.listeners.isEmpty else { return }
 
+            var isDeallocated = false
             // Notify each listener
             for wrapper in self.listeners {
-                guard let listener = wrapper.listener else { continue }
-                listener.mixpanelDidTrackEvent(trackedEvent)
+                guard let listener = wrapper.listener else {
+                    isDeallocated = true
+                    continue
+                }
+                listener.mixpanelDidTrackEvent(eventData)
+            }
+            
+            if isDeallocated {
+                cleanupDeallocatedListeners()
             }
         }
     }

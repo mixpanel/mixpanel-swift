@@ -1246,9 +1246,7 @@ extension MixpanelInstance {
 
         MixpanelEventBridge.shared.notifyListeners(
           event: eventName,
-          properties: eventProperties,
-          timestamp: timestamp,
-          instanceName: self.name
+          properties: eventProperties
         )
       }
     }

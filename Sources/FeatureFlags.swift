@@ -278,6 +278,11 @@ class FeatureFlagManager: Network, MixpanelFlags {
   // First-time event targeting state
   internal var pendingFirstTimeEvents: [String: PendingFirstTimeEvent] = [:]  // Keyed by "flagKey:firstTimeEventHash"
 
+  /// O(1) lookup set of event names that have pending first-time events.
+  /// Maintained in parallel with `pendingFirstTimeEvents` to avoid iterating
+  /// the full dictionary on every tracked event.
+  internal var pendingFirstTimeEventNames: Set<String> = Set()
+
   /// Stores "flagKey:firstTimeEventHash" keys for activated first-time events.
   /// This set grows throughout the session as events are activated.
   /// It is session-scoped and cleared on app restart.
@@ -601,7 +606,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
         let fetchEndTime = Date()
 
         // Merge flags and update state with write lock
-        let (mergedFlags, mergedPendingEvents) = self.mergeFlags(
+        let (mergedFlags, mergedPendingEvents, mergedPendingEventNames) = self.mergeFlags(
           responseFlags: flagsResponse.flags,
           responsePendingEvents: flagsResponse.pendingFirstTimeEvents
         )
@@ -609,6 +614,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
         self.flagsLock.write {
           self.flags = mergedFlags
           self.pendingFirstTimeEvents = mergedPendingEvents
+          self.pendingFirstTimeEventNames = mergedPendingEventNames
 
           // Calculate timing metrics
           if let startTime = self.fetchStartTime {
@@ -644,9 +650,10 @@ class FeatureFlagManager: Network, MixpanelFlags {
   func mergeFlags(
     responseFlags: [String: MixpanelFlagVariant]?,
     responsePendingEvents: [PendingFirstTimeEvent]?
-  ) -> (flags: [String: MixpanelFlagVariant], pendingEvents: [String: PendingFirstTimeEvent]) {
+  ) -> (flags: [String: MixpanelFlagVariant], pendingEvents: [String: PendingFirstTimeEvent], pendingEventNames: Set<String>) {
     var newFlags: [String: MixpanelFlagVariant] = [:]
     var newPendingEvents: [String: PendingFirstTimeEvent] = [:]
+    var newPendingEventNames: Set<String> = Set()
 
     var currentFlags: [String: MixpanelFlagVariant]?
     var activatedEvents: Set<String> = []
@@ -686,6 +693,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
         }
 
         newPendingEvents[eventKey] = pendingEvent
+        newPendingEventNames.insert(pendingEvent.eventName)
       }
     }
 
@@ -700,7 +708,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
       }
     }
 
-    return (flags: newFlags, pendingEvents: newPendingEvents)
+    return (flags: newFlags, pendingEvents: newPendingEvents, pendingEventNames: newPendingEventNames)
   }
 
   // --- Tracking Logic ---
@@ -865,6 +873,13 @@ class FeatureFlagManager: Network, MixpanelFlags {
   internal func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
     DispatchQueue.global(qos: .utility).async { [weak self] in
       guard let self = self else { return }
+
+      // O(1) check: skip iteration if no pending event matches this event name
+      var hasPendingEvent = false
+      self.flagsLock.read {
+        hasPendingEvent = self.pendingFirstTimeEventNames.contains(eventName)
+      }
+      guard hasPendingEvent else { return }
 
       // Snapshot pending events with lock
       // Note: We don't snapshot activatedFirstTimeEvents because we'll check it
@@ -1038,9 +1053,11 @@ extension FeatureFlagManager {
             self.activatedFirstTimeEvents.removeAll()
             self.flags = mockFlags
             self.pendingFirstTimeEvents.removeAll()
+            self.pendingFirstTimeEventNames.removeAll()
             for event in mockEvents {
                 let key = getPendingEventKey(event.flagKey, event.firstTimeEventHash)
                 self.pendingFirstTimeEvents[key] = event
+                self.pendingFirstTimeEventNames.insert(event.eventName)
             }
         }
     }

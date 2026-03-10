@@ -226,7 +226,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
       print("MockFeatureFlagManager: Simulating successful fetch with \(flags?.count ?? 0) flags")
 
       // Mimic the real implementation's behavior - use mergeFlags like the real impl
-      let (mergedFlags, mergedPendingEvents) = self.mergeFlags(
+      let (mergedFlags, mergedPendingEvents, mergedPendingEventNames) = self.mergeFlags(
         responseFlags: flags,
         responsePendingEvents: nil
       )
@@ -234,6 +234,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
       self.flagsLock.write {
         self.flags = mergedFlags
         self.pendingFirstTimeEvents = mergedPendingEvents
+        self.pendingFirstTimeEventNames = mergedPendingEventNames
 
         // Calculate timing metrics like the real implementation
         let latencyMs = Int(fetchEndTime.timeIntervalSince(startTime) * 1000)
@@ -660,6 +661,7 @@ class FeatureFlagManagerTests: XCTestCase {
       let initial = initialVariant ?? createControlVariant()
       mockMgr.flags = [flagKey: initial]
       mockMgr.pendingFirstTimeEvents = [eventKey: pendingEvent]
+      mockMgr.pendingFirstTimeEventNames = [pendingEvent.eventName]
     }
 
     let nameToTrigger = triggeredEventName ?? eventName
@@ -2216,6 +2218,7 @@ class FeatureFlagManagerTests: XCTestCase {
       mockManager.flagsLock.write {
         mockManager.flags = ["once-only": MixpanelFlagVariant(key: "control", value: false)]
         mockManager.pendingFirstTimeEvents = ["once-only:hash999": pendingEvent]
+        mockManager.pendingFirstTimeEventNames = [pendingEvent.eventName]
         // Reset tracking state
         mockManager.recordFirstTimeEventCallCount = 0
       }
@@ -2369,6 +2372,7 @@ class FeatureFlagManagerTests: XCTestCase {
           "multi-event-flag:hash1": event1,
           "multi-event-flag:hash2": event2
         ]
+        mockMgr.pendingFirstTimeEventNames = [event1.eventName, event2.eventName]
       }
 
       // Trigger first event
@@ -2429,6 +2433,7 @@ class FeatureFlagManagerTests: XCTestCase {
       mockMgr.flagsLock.write {
         mockMgr.flags = ["network-fail-test": createControlVariant()]
         mockMgr.pendingFirstTimeEvents = ["network-fail-test:hash123": pendingEvent]
+        mockMgr.pendingFirstTimeEventNames = [pendingEvent.eventName]
       }
 
       // Trigger event

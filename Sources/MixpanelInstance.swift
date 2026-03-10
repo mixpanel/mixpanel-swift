@@ -1202,7 +1202,6 @@ extension MixpanelInstance {
      */
   public func track(event: String?, properties: Properties? = nil) {
     let epochInterval = Date().timeIntervalSince1970
-    let timestamp = Date()
 
     trackingQueue.async { [weak self, event, properties, epochInterval] in
       guard let self else {
@@ -1238,17 +1237,16 @@ extension MixpanelInstance {
         self.timedEvents = timedEventsSnapshot
       }
 
-      // Notify event bridge listeners (non-blocking)
-      if let eventName = event {
-        let eventProperties = properties?.reduce(into: [String: Any]()) { result, pair in
-          result[pair.key] = pair.value
-        } ?? [:]
-
-        MixpanelEventBridge.shared.notifyListeners(
-          event: eventName,
-          properties: eventProperties
-        )
-      }
+        #if os(iOS)
+        // Session replay is only availabl on the iOS ATM
+        // Notify event bridge listeners (non-blocking)
+        if let eventName = event {
+            MixpanelEventBridge.shared.notifyListeners(
+                eventName: eventName,
+                properties: properties ?? [:]
+            )
+        }
+        #endif
     }
 
     if MixpanelInstance.isiOSAppExtension() {

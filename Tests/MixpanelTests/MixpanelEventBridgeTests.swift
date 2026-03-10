@@ -26,30 +26,14 @@ class MixpanelEventBridgeTests: XCTestCase {
     // MARK: - Event Struct Tests
 
     func testEventStructCreation() {
-        let timestamp = Date()
-        let event = MixpanelTrackedEvent(
+        let event = MixpanelEventBridgeEvent(
             name: "test_event",
-            properties: ["key": "value", "number": 42],
-            timestamp: timestamp,
-            instanceName: "test"
+            properties: ["key": "value", "number": 42]
         )
 
         XCTAssertEqual(event.name, "test_event")
         XCTAssertEqual(event.properties["key"] as? String, "value")
         XCTAssertEqual(event.properties["number"] as? Int, 42)
-        XCTAssertEqual(event.timestamp, timestamp)
-        XCTAssertEqual(event.instanceName, "test")
-    }
-
-    func testEventStructWithNilInstanceName() {
-        let event = MixpanelTrackedEvent(
-            name: "test",
-            properties: [:],
-            timestamp: Date(),
-            instanceName: nil
-        )
-
-        XCTAssertNil(event.instanceName)
     }
 
     // MARK: - Listener Registration Tests
@@ -66,8 +50,7 @@ class MixpanelEventBridgeTests: XCTestCase {
 
         bridge.notifyListeners(
             event: "test",
-            properties: [:],
-            timestamp: Date()
+            properties: [:]
         )
 
         wait(for: [expectation], timeout: 1.0)
@@ -84,8 +67,7 @@ class MixpanelEventBridgeTests: XCTestCase {
 
         bridge.notifyListeners(
             event: "test",
-            properties: [:],
-            timestamp: Date()
+            properties: [:]
         )
 
         // Wait a bit to ensure no events are received
@@ -108,8 +90,7 @@ class MixpanelEventBridgeTests: XCTestCase {
 
         bridge.notifyListeners(
             event: "test",
-            properties: [:],
-            timestamp: Date()
+            properties: [:]
         )
 
         // Wait a bit to ensure no events are received
@@ -140,8 +121,7 @@ class MixpanelEventBridgeTests: XCTestCase {
 
         bridge.notifyListeners(
             event: "test",
-            properties: [:],
-            timestamp: Date()
+            properties: [:]
         )
 
         wait(for: [expectation], timeout: 1.0)
@@ -167,7 +147,6 @@ class MixpanelEventBridgeTests: XCTestCase {
         bridge.notifyListeners(
             event: "test",
             properties: ["name": "John", "email": "john@example.com", "phone": "123"],
-            timestamp: Date()
         )
 
         wait(for: [expectation], timeout: 1.0)
@@ -190,7 +169,6 @@ class MixpanelEventBridgeTests: XCTestCase {
         bridge.notifyListeners(
             event: "test",
             properties: ["name": "John", "email": "john@example.com", "phone": "123"],
-            timestamp: Date()
         )
 
         wait(for: [expectation], timeout: 1.0)
@@ -213,7 +191,6 @@ class MixpanelEventBridgeTests: XCTestCase {
         bridge.notifyListeners(
             event: "test",
             properties: ["name": "John", "email": "john@example.com", "phone": "123"],
-            timestamp: Date()
         )
 
         wait(for: [expectation], timeout: 1.0)
@@ -247,52 +224,9 @@ class MixpanelEventBridgeTests: XCTestCase {
         bridge.notifyListeners(
             event: "test",
             properties: ["name": "John", "email": "john@example.com"],
-            timestamp: Date()
         )
 
         wait(for: [expectation1, expectation2], timeout: 1.0)
-    }
-
-    // MARK: - Instance Name Filtering Tests
-
-    func testInstanceNamePassed() {
-        let listener = MockEventListener()
-        bridge.registerListener(listener)
-
-        let expectation = XCTestExpectation(description: "Listener receives instance name")
-        listener.onEventTracked = { event in
-            XCTAssertEqual(event.instanceName, "test_instance")
-            expectation.fulfill()
-        }
-
-        bridge.notifyListeners(
-            event: "test",
-            properties: [:],
-            timestamp: Date(),
-            instanceName: "test_instance"
-        )
-
-        wait(for: [expectation], timeout: 1.0)
-    }
-
-    func testNilInstanceName() {
-        let listener = MockEventListener()
-        bridge.registerListener(listener)
-
-        let expectation = XCTestExpectation(description: "Listener receives nil instance name")
-        listener.onEventTracked = { event in
-            XCTAssertNil(event.instanceName)
-            expectation.fulfill()
-        }
-
-        bridge.notifyListeners(
-            event: "test",
-            properties: [:],
-            timestamp: Date(),
-            instanceName: nil
-        )
-
-        wait(for: [expectation], timeout: 1.0)
     }
 
     // MARK: - Weak Reference Tests
@@ -317,8 +251,7 @@ class MixpanelEventBridgeTests: XCTestCase {
 
         bridge.notifyListeners(
             event: "test",
-            properties: [:],
-            timestamp: Date()
+            properties: [:]
         )
 
         wait(for: [expectation], timeout: 0.5)
@@ -340,8 +273,7 @@ class MixpanelEventBridgeTests: XCTestCase {
 
         bridge.notifyListeners(
             event: "test",
-            properties: [:],
-            timestamp: Date()
+            properties: [:]
         )
 
         wait(for: [expectation], timeout: 1.0)
@@ -353,13 +285,13 @@ class MixpanelEventBridgeTests: XCTestCase {
 class MockEventListener: MixpanelEventListener {
 
     var filterMode: PropertyFilterMode = .allowAll
-    var onEventTracked: ((MixpanelTrackedEvent) -> Void)?
+    var onEventTracked: ((MixpanelEventBridgeEvent) -> Void)?
 
     var propertyFilterMode: PropertyFilterMode {
         return filterMode
     }
 
-    func mixpanelDidTrackEvent(_ event: MixpanelTrackedEvent) {
+    func mixpanelDidTrackEvent(_ event: MixpanelEventBridgeEvent) {
         onEventTracked?(event)
     }
 }

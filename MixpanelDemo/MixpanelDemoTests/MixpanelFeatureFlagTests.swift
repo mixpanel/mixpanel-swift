@@ -2071,7 +2071,7 @@ class FeatureFlagManagerTests: XCTestCase {
           "first_time_event_hash": "abc123",
           "event_name": "Purchase Complete",
           "property_filters": {
-            ">": [{"var": "properties.amount"}, 100]
+            ">": [{"var": "amount"}, 100]
           },
           "pending_variant": {
             "variant_key": "treatment",
@@ -2143,7 +2143,7 @@ class FeatureFlagManagerTests: XCTestCase {
   func testFirstTimeEventMatching_WithPropertyFilters() {
     let pendingVariant = createExperimentVariant(key: "premium", value: ["discount": 20], experimentID: "exp-456")
     let initialVariant = createControlVariant(value: nil)
-    let filters: [String: Any] = [">": [["var": "properties.amount"], 100]]
+    let filters: [String: Any] = [">": [["var": "amount"], 100]]
 
     setupAndTriggerFirstTimeEvent(
       flagKey: "premium-welcome",
@@ -2163,7 +2163,7 @@ class FeatureFlagManagerTests: XCTestCase {
   func testFirstTimeEventMatching_PropertyFilterNoMatch() {
     let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
     let initialVariant = createControlVariant(value: false)
-    let filters: [String: Any] = [">": [["var": "properties.amount"], 100]]
+    let filters: [String: Any] = [">": [["var": "amount"], 100]]
 
     // Trigger event with amount < 100 (should NOT match)
     setupAndTriggerFirstTimeEvent(
@@ -2179,26 +2179,6 @@ class FeatureFlagManagerTests: XCTestCase {
       let flag = mockMgr.flags?["premium-welcome"]
       XCTAssertEqual(flag?.key, "control")
       XCTAssertFalse(mockMgr.activatedFirstTimeEvents.contains("premium-welcome:hash456"))
-    }
-  }
-
-  func testFirstTimeEventMatching_CaseInsensitiveProperties() {
-    let pendingVariant = MixpanelFlagVariant(key: "matched", value: true)
-    let initialVariant = createControlVariant(value: false)
-    let filters: [String: Any] = ["==": [["var": "properties.plan"], "PREMIUM"]]
-
-    // Trigger event with lowercase plan (should match due to case-insensitive comparison)
-    setupAndTriggerFirstTimeEvent(
-      flagKey: "case-test",
-      eventName: "Test Event",
-      eventProperties: ["plan": "premium"],
-      filters: filters,
-      pendingVariant: pendingVariant,
-      initialVariant: initialVariant,
-      firstTimeEventHash: "hash789"
-    ) { mockMgr in
-      let flag = mockMgr.flags?["case-test"]
-      XCTAssertEqual(flag?.key, "matched")
     }
   }
 

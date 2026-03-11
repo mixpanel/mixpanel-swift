@@ -811,45 +811,6 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   // MARK: - First-Time Event Helpers
 
-  /// Generic recursive transformation function for nested structures
-  private func transformStringsRecursively(
-    _ val: Any,
-    transformDictKey: (String) -> String = { $0 }
-  ) -> Any {
-    if let stringValue = val as? String {
-      return stringValue.lowercased()
-    } else if let arrayValue = val as? [Any] {
-      return arrayValue.map { transformStringsRecursively($0, transformDictKey: transformDictKey) }
-    } else if let dictValue = val as? [String: Any] {
-      var result: [String: Any] = [:]
-      for (key, value) in dictValue {
-        let newKey = transformDictKey(key)
-        result[newKey] = transformStringsRecursively(value, transformDictKey: transformDictKey)
-      }
-      return result
-    } else {
-      return val
-    }
-  }
-
-  /// Lowercase all string keys and values in a nested structure.
-  ///
-  /// **Important:** This performs case-insensitive matching for both property keys AND values.
-  /// String values like "ABC-123" will be lowercased to "abc-123" for comparison.
-  /// This is intentional to ensure consistent matching regardless of case in tracked properties.
-  private func lowercaseKeysAndValues(_ val: Any) -> Any {
-    return transformStringsRecursively(val, transformDictKey: { $0.lowercased() })
-  }
-
-  /// Lowercase only leaf node string values in a nested structure (keys unchanged).
-  ///
-  /// **Important:** Operators and dictionary keys remain unchanged, only string values are lowercased.
-  /// This is used for JsonLogic filter expressions to enable case-insensitive value matching
-  /// while preserving operator keywords.
-  private func lowercaseOnlyLeafNodes(_ val: Any) -> Any {
-    return transformStringsRecursively(val)
-  }
-
   /// Generate a unique key for a pending first-time event
   private func getPendingEventKey(_ flagKey: String, _ firstTimeEventHash: String) -> String {
     return "\(flagKey):\(firstTimeEventHash)"
@@ -899,19 +860,10 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
         // Evaluate property filters using json-logic-swift library
         if let filters = pendingEvent.propertyFilters, !filters.isEmpty {
-          // Lowercase all keys and values in event properties for case-insensitive matching
-          let lowercasedProperties = self.lowercaseKeysAndValues(properties)
-
-          // Lowercase only leaf nodes in JsonLogic filters (keep operators intact)
-          let lowercasedFilters = self.lowercaseOnlyLeafNodes(filters)
-
-          // Prepare data for JsonLogic evaluation
-          let data = ["properties": lowercasedProperties]
-
           // Convert to JSON strings for json-logic-swift library
-          guard let rulesData = try? JSONSerialization.data(withJSONObject: lowercasedFilters),
+          guard let rulesData = try? JSONSerialization.data(withJSONObject: filters),
                 let rulesString = String(data: rulesData, encoding: .utf8),
-                let dataJSON = try? JSONSerialization.data(withJSONObject: data),
+                let dataJSON = try? JSONSerialization.data(withJSONObject: properties),
                 let dataString = String(data: dataJSON, encoding: .utf8) else {
             MixpanelLogger.warn(message: "Failed to serialize JsonLogic filters for event '\(eventKey)' matching '\(eventName)'")
             continue

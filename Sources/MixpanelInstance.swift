@@ -1236,17 +1236,6 @@ extension MixpanelInstance {
       self.readWriteLock.write {
         self.timedEvents = timedEventsSnapshot
       }
-
-        #if os(iOS)
-        // Session replay is only availabl on the iOS ATM
-        // Notify event bridge listeners (non-blocking)
-        if let eventName = event {
-            MixpanelEventBridge.shared.notifyListeners(
-                eventName: eventName,
-                properties: properties ?? [:]
-            )
-        }
-        #endif
     }
 
     if MixpanelInstance.isiOSAppExtension() {

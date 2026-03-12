@@ -80,6 +80,17 @@ class Track {
     if let properties = properties {
       p += properties
     }
+      
+    #if os(iOS)
+      // Session replay is only availabl on the iOS ATM
+      // Notify event bridge listeners (non-blocking)
+      if let eventName = event {
+          MixpanelEventBridge.shared.notifyListeners(
+            eventName: eventName,
+            properties: properties ?? [:]
+          )
+      }
+    #endif
 
     var trackEvent: InternalProperties = ["event": ev, "properties": p]
     metadata.toDict().forEach { (k, v) in trackEvent[k] = v }

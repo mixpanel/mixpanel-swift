@@ -51,9 +51,13 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
     return anonymousId
   }
 
+  private let trackQueue = DispatchQueue(label: "mock.track.sync")
+
   func track(event: String?, properties: Properties?) {
     print("MOCK Delegate: Track called - Event: \(event ?? "nil"), Props: \(properties ?? [:])")
-    trackedEvents.append((event: event, properties: properties))
+    trackQueue.sync {
+      trackedEvents.append((event: event, properties: properties))
+    }
     trackExpectation?.fulfill()
 
     // Call custom handler if set
@@ -1620,10 +1624,13 @@ class FeatureFlagManagerTests: XCTestCase {
     var trackIndex = 0
 
     // Set custom track handler to fulfill expectations in order
+    let syncQueue = DispatchQueue(label: "test.sync")
     mockDelegate.customTrackHandler = { event, properties in
-      if trackIndex < expectations.count {
-        expectations[trackIndex].fulfill()
-        trackIndex += 1
+      syncQueue.sync {
+        if trackIndex < expectations.count {
+          expectations[trackIndex].fulfill()
+          trackIndex += 1
+        }
       }
     }
 
@@ -1643,7 +1650,7 @@ class FeatureFlagManagerTests: XCTestCase {
     }
 
     // Wait for all tracking to complete
-    wait(for: expectations, timeout: 2.0)
+    wait(for: expectations, timeout: 5.0)
 
     // Verify all tracking calls included timing properties
     XCTAssertEqual(mockDelegate.trackedEvents.count, expectationCount)

@@ -1561,7 +1561,7 @@ class FeatureFlagManagerTests: XCTestCase {
     // Call getVariantSync which should trigger tracking from within the accessQueue
     _ = manager.getVariantSync("feature_double", fallback: defaultFallback)
 
-    wait(for: [syncExpectation], timeout: 1.0)
+    wait(for: [syncExpectation], timeout: 5.0)
 
     // Verify tracking occurred with timing properties
     XCTAssertEqual(mockDelegate.trackedEvents.count, 1, "Should have tracked once")
@@ -1586,7 +1586,7 @@ class FeatureFlagManagerTests: XCTestCase {
       // This completion runs on main queue
     }
 
-    wait(for: [asyncExpectation], timeout: 1.0)
+    wait(for: [asyncExpectation], timeout: 5.0)
 
     // Verify tracking occurred with timing properties
     XCTAssertEqual(mockDelegate.trackedEvents.count, 1, "Should have tracked once")

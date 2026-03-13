@@ -89,6 +89,7 @@ struct PendingFirstTimeEvent: Decodable {
     let firstTimeEventHash: String
     let eventName: String
     let propertyFilters: [String: Any]?
+    let propertyFiltersJSON: String?
     let pendingVariant: MixpanelFlagVariant
 
     enum CodingKeys: String, CodingKey {
@@ -112,9 +113,16 @@ struct PendingFirstTimeEvent: Decodable {
 
         // Decode propertyFilters using AnyCodable
         if let filtersContainer = try? container.decode([String: AnyCodable].self, forKey: .propertyFilters) {
-            propertyFilters = filtersContainer.mapValues { $0.value }
+            let filters = filtersContainer.mapValues { $0.value as Any }
+            propertyFilters = filters
+            if let jsonData = try? JSONSerialization.data(withJSONObject: filters) {
+                propertyFiltersJSON = String(data: jsonData, encoding: .utf8)
+            } else {
+                propertyFiltersJSON = nil
+            }
         } else {
             propertyFilters = nil
+            propertyFiltersJSON = nil
         }
     }
 }
@@ -861,8 +869,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
         // Evaluate property filters using json-logic-swift library
         if let filters = pendingEvent.propertyFilters, !filters.isEmpty {
           // Convert to JSON strings for json-logic-swift library
-          guard let rulesData = try? JSONSerialization.data(withJSONObject: filters),
-                let rulesString = String(data: rulesData, encoding: .utf8),
+          guard let rulesString = pendingEvent.propertyFiltersJSON,
                 let dataJSON = try? JSONSerialization.data(withJSONObject: properties),
                 let dataString = String(data: dataJSON, encoding: .utf8) else {
             MixpanelLogger.warn(message: "Failed to serialize JsonLogic filters for event '\(eventKey)' matching '\(eventName)'")
@@ -969,12 +976,12 @@ class FeatureFlagManager: Network, MixpanelFlags {
       base: serverURL,
       resource: resource,
       failure: { [weak self] reason, _, _ in
-        guard let self = self else { return }
+        guard self != nil else { return }
         // Silent failure - cohort sync will catch up
         MixpanelLogger.warn(message: "Failed to record first-time event for flag \(flagId): \(reason)")
       },
       success: { [weak self] _, _ in
-        guard let self = self else { return }
+        guard self != nil else { return }
         MixpanelLogger.debug(message: "Successfully recorded first-time event for flag \(flagId)")
       }
     )
@@ -994,6 +1001,11 @@ extension PendingFirstTimeEvent {
         self.firstTimeEventHash = firstTimeEventHash
         self.eventName = eventName
         self.propertyFilters = propertyFilters
+        if let filters = propertyFilters, let jsonData = try? JSONSerialization.data(withJSONObject: filters) {
+            self.propertyFiltersJSON = String(data: jsonData, encoding: .utf8)
+        } else {
+            self.propertyFiltersJSON = nil
+        }
         self.pendingVariant = pendingVariant
     }
 }

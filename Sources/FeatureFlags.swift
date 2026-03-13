@@ -319,7 +319,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   func loadFlags() {
     // Dispatch fetch trigger to allow caller to continue
-    DispatchQueue.global(qos: .utility).async { [weak self] in
+    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
       self?._fetchFlagsIfNeeded(completion: nil)
     }
   }
@@ -384,7 +384,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     _ flagName: String, fallback: MixpanelFlagVariant,
     completion: @escaping (MixpanelFlagVariant) -> Void
   ) {
-    DispatchQueue.global(qos: .utility).async { [weak self] in
+    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
       guard let self = self else { return }
 
       var flagVariant: MixpanelFlagVariant?
@@ -474,7 +474,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   }
 
   func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void) {
-    DispatchQueue.global(qos: .utility).async { [weak self] in
+    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
       guard let self = self else {
         DispatchQueue.main.async { completion([:]) }
         return
@@ -535,11 +535,9 @@ class FeatureFlagManager: Network, MixpanelFlags {
     }
 
     if shouldStartFetch {
-      MixpanelLogger.info(message: "Starting flag fetch (dispatching network request)...")
-      // Perform network request on a global queue
-      DispatchQueue.global(qos: .utility).async { [weak self] in
-        self?._performFetchRequest()
-      }
+      MixpanelLogger.info(message: "Starting flag fetch...")
+      // Already on a background queue (callers dispatch before calling this method)
+      self._performFetchRequest()
     }
   }
 
@@ -840,7 +838,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   ///   may not yet observe the newly activated variant. Callers should not rely on immediate
   ///   visibility of first-time event activations in the same synchronous call chain.
   internal func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
-    DispatchQueue.global(qos: .utility).async { [weak self] in
+    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
       guard let self = self else { return }
 
       // O(1) check: skip iteration if no pending event matches this event name

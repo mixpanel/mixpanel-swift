@@ -130,6 +130,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
   var lastRecordedProjectId: Int?
   var lastRecordedFirstTimeEventHash: String?
   var simulateRecordFirstTimeEventFailure = false
+  var recordFirstTimeEventExpectation: XCTestExpectation?
 
   // Override the now-internal method to prevent real network calls
   override func _performFetchRequest() {
@@ -259,6 +260,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
     lastRecordedFirstTimeEventHash = firstTimeEventHash
 
     print("MockFeatureFlagManager: Intercepted recordFirstTimeEvent call #\(recordFirstTimeEventCallCount) for flag: \(flagId)")
+    recordFirstTimeEventExpectation?.fulfill()
 
     // DO NOT call super - prevents actual network calls
   }
@@ -2203,14 +2205,16 @@ class FeatureFlagManagerTests: XCTestCase {
         mockManager.recordFirstTimeEventCallCount = 0
       }
 
+      // Set up expectation before triggering events
+      let expectation = XCTestExpectation(description: "recordFirstTimeEvent called")
+      mockManager.recordFirstTimeEventExpectation = expectation
+
       // Trigger event multiple times
       mockManager.checkFirstTimeEvents(eventName: "Test Event", properties: [:])
       mockManager.checkFirstTimeEvents(eventName: "Test Event", properties: [:])
       mockManager.checkFirstTimeEvents(eventName: "Test Event", properties: [:])
 
-      let expectation = XCTestExpectation(description: "Event processing completes")
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { expectation.fulfill() }
-      wait(for: [expectation], timeout: 1.0)
+      wait(for: [expectation], timeout: 5.0)
 
       // Verify activation occurred and is tracked
       mockManager.flagsLock.read {
@@ -2247,7 +2251,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
       let expectation = XCTestExpectation(description: "Fetch completes")
       DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { expectation.fulfill() }
-      wait(for: [expectation], timeout: 1.0)
+      wait(for: [expectation], timeout: 5.0)
 
       // Verify activated variant was preserved
       mockManager.flagsLock.read {
@@ -2275,7 +2279,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
       let expectation = XCTestExpectation(description: "Fetch completes")
       DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { expectation.fulfill() }
-      wait(for: [expectation], timeout: 1.0)
+      wait(for: [expectation], timeout: 5.0)
 
       // Verify orphaned flag was kept
       mockManager.flagsLock.read {

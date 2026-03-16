@@ -1,5 +1,15 @@
 #
 
+## [v6.0.0](https://github.com/mixpanel/mixpanel-swift/tree/v6.0.0) (2026-03-16)
+
+## [6.0.0](https://github.com/mixpanel/mixpanel-swift/tree/6.0.0) (2026-03-16)
+
+**Merged pull requests:**
+
+- First time event targeting [\#685](https://github.com/mixpanel/mixpanel-swift/pull/685)
+
+#
+
 ## [v5.2.0](https://github.com/mixpanel/mixpanel-swift/tree/v5.2.0) (2026-02-06)
 
 ## [5.2.0](https://github.com/mixpanel/mixpanel-swift/tree/5.2.0) (2026-02-06)
@@ -480,6 +490,8 @@ When you call the API `createAlias`, there is an implicit `identify` call inside
 
 - Stop serialize data through NSKeyedArchiver [\#433](https://github.com/mixpanel/mixpanel-swift/issues/433)
 - Sending many events in a row causes OOM crash [\#429](https://github.com/mixpanel/mixpanel-swift/issues/429)
+
+
 
 
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>NSNumber Extension Reference</title>
+    <title>FeatureFlagOptions Structure Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -13,8 +13,8 @@
     <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
-    <a name="//apple_ref/swift/Extension/NSNumber" class="dashAnchor"></a>
-    <a title="NSNumber Extension Reference"></a>
+    <a name="//apple_ref/swift/Struct/FeatureFlagOptions" class="dashAnchor"></a>
+    <a title="FeatureFlagOptions Structure Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">Mixpanel 6.0.0 Docs</a> (68% documented)</p>
@@ -31,9 +31,9 @@
       <p id="breadcrumbs">
         <a href="../index.html">Mixpanel</a>
         <img id="carat" src="../img/carat.png" alt=""/>
-        <a href="../Extensions.html">Extensions</a>
+        <a href="../Structs.html">Structures</a>
         <img id="carat" src="../img/carat.png" alt=""/>
-        Foundation.NSNumber Extension Reference
+        FeatureFlagOptions Structure Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -182,15 +182,38 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>NSNumber</h1>
+            <h1>FeatureFlagOptions</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">NSNumber</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">FeatureFlagOptions</span></code></pre>
 
                 </div>
               </div>
-            
+            <p>Configuration options for feature flags behavior.</p>
+
+<p>Use this to control how and when feature flags are loaded by the SDK.</p>
+
+<p><strong>Example — Default behavior (prefetches flags during initialization):</strong></p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">options</span> <span class="o">=</span> <span class="kt">MixpanelOptions</span><span class="p">(</span>
+    <span class="nv">token</span><span class="p">:</span> <span class="s">"YOUR_TOKEN"</span><span class="p">,</span>
+    <span class="nv">featureFlagOptions</span><span class="p">:</span> <span class="kt">FeatureFlagOptions</span><span class="p">(</span><span class="nv">enabled</span><span class="p">:</span> <span class="kc">true</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+
+<p><strong>Example — Deferred loading (for use with identify):</strong></p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">options</span> <span class="o">=</span> <span class="kt">MixpanelOptions</span><span class="p">(</span>
+    <span class="nv">token</span><span class="p">:</span> <span class="s">"YOUR_TOKEN"</span><span class="p">,</span>
+    <span class="nv">featureFlagOptions</span><span class="p">:</span> <span class="kt">FeatureFlagOptions</span><span class="p">(</span><span class="nv">enabled</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nv">prefetchFlags</span><span class="p">:</span> <span class="kc">false</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="k">let</span> <span class="nv">mp</span> <span class="o">=</span> <span class="kt">Mixpanel</span><span class="o">.</span><span class="nf">initialize</span><span class="p">(</span><span class="nv">options</span><span class="p">:</span> <span class="n">options</span><span class="p">)</span>
+<span class="c1">// identify() triggers loadFlags() internally when the distinctId changes</span>
+<span class="n">mp</span><span class="o">.</span><span class="nf">identify</span><span class="p">(</span><span class="nv">distinctId</span><span class="p">:</span> <span class="s">"user123"</span><span class="p">)</span>
+</code></pre>
+
+<p>If <code>identify</code> may be called with the same persisted distinctId (no change),
+call <code>mp.flags.loadFlags()</code> explicitly to ensure flags are fetched.</p>
+
           </section>
           <section class="section task-group-section">
             <div class="task-group">
@@ -198,9 +221,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:So8NSNumberC8MixpanelE25isValidNestedTypeAndValueSbyF"></a>
-                    <a name="//apple_ref/swift/Method/isValidNestedTypeAndValue()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:So8NSNumberC8MixpanelE25isValidNestedTypeAndValueSbyF">isValidNestedTypeAndValue()</a>
+                    <a name="/s:8Mixpanel18FeatureFlagOptionsV7enabledSbvp"></a>
+                    <a name="//apple_ref/swift/Property/enabled" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel18FeatureFlagOptionsV7enabledSbvp">enabled</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -208,15 +231,14 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Checks if this object has nested object types that Mixpanel supports.
-Will always return true.</p>
+                        <p>Whether feature flags are enabled. Defaults to <code>false</code>.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">isValidNestedTypeAndValue</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">enabled</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -226,9 +248,67 @@ Will always return true.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:So8NSNumberC8MixpanelE6equals3rhsSbAC0B4Type_p_tF"></a>
-                    <a name="//apple_ref/swift/Method/equals(rhs:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:So8NSNumberC8MixpanelE6equals3rhsSbAC0B4Type_p_tF">equals(rhs:<wbr>)</a>
+                    <a name="/s:8Mixpanel18FeatureFlagOptionsV7contextSDySSypGvp"></a>
+                    <a name="//apple_ref/swift/Property/context" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel18FeatureFlagOptionsV7contextSDySSypGvp">context</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Custom context dictionary sent with flag fetch requests.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">context</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel18FeatureFlagOptionsV13prefetchFlagsSbvp"></a>
+                    <a name="//apple_ref/swift/Property/prefetchFlags" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel18FeatureFlagOptionsV13prefetchFlagsSbvp">prefetchFlags</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Whether the SDK should prefetch feature flags during initialization.
+Defaults to <code>true</code>.</p>
+
+<p>Set to <code>false</code> if you need to call <code>identify</code> before the first flag fetch,
+then manually trigger loading via <code>flags.loadFlags()</code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">prefetchFlags</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel18FeatureFlagOptionsV7enabled7context13prefetchFlagsACSb_SDySSypGSbtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(enabled:context:prefetchFlags:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel18FeatureFlagOptionsV7enabled7context13prefetchFlagsACSb_SDySSypGSbtcfc">init(enabled:<wbr>context:<wbr>prefetchFlags:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -243,7 +323,11 @@ Will always return true.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">equals</span><span class="p">(</span><span class="nv">rhs</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span>
+  <span class="nv">enabled</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="nv">context</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[:],</span>
+  <span class="nv">prefetchFlags</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span>
+<span class="p">)</span></code></pre>
 
                         </div>
                       </div>

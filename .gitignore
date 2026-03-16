@@ -26,6 +26,7 @@ profile
 # Swift Package Manager
 .swiftpm/
 .build/
+Package.resolved
 
 # Carthage
 

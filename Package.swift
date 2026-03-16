@@ -6,7 +6,7 @@ let package = Package(
   name: "Mixpanel",
   platforms: [
     .iOS(.v12),
-    .tvOS(.v11),
+    .tvOS(.v12),
     .macOS(.v10_13),
     .watchOS(.v4),
   ],

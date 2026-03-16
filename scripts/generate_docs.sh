@@ -18,7 +18,7 @@ jazzy \
   -a Mixpanel \
   -u http://mixpanel.com \
   --github_url https://github.com/mixpanel/mixpanel-swift \
-  --module-version 5.2.0 \
+  --module-version 6.0.0 \
   --framework-root . \
   --module Mixpanel \
   --xcodebuild-arguments \

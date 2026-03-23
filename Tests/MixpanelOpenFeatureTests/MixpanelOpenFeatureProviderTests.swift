@@ -11,8 +11,14 @@ class MockMixpanelFlags: MixpanelFlags {
 
   var variants: [String: MixpanelFlagVariant] = [:]
   var ready: Bool = true
+  var lastSetContext: [String: Any]?
 
   func loadFlags() {}
+
+  func setContext(_ context: [String: Any], completion: @escaping () -> Void) {
+    lastSetContext = context
+    completion()
+  }
 
   func areFlagsReady() -> Bool { ready }
 
@@ -61,6 +67,11 @@ class SentinelReturningMockFlags: MixpanelFlags {
   var delegate: MixpanelFlagDelegate?
 
   func loadFlags() {}
+
+  func setContext(_ context: [String: Any], completion: @escaping () -> Void) {
+    completion()
+  }
+
   func areFlagsReady() -> Bool { true }
 
   func getVariantSync(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
@@ -313,33 +324,66 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
     }
   }
 
-  // MARK: - Context No-Op Verification
+  // MARK: - Context Forwarding
 
-  func testInitializeIsNoOp() async throws {
+  func testInitializeForwardsContext() async throws {
     let mock = MockMixpanelFlags()
     mock.variants["flag"] = MixpanelFlagVariant(key: "v", value: true)
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    // initialize with a non-nil context should complete without error
     try await provider.initialize(initialContext: ImmutableContext(targetingKey: "user-123"))
 
-    // Provider still works normally after initialize — context was ignored
+    XCTAssertEqual(mock.lastSetContext?["targeting_key"] as? String, "user-123")
+
     let result = try provider.getBooleanEvaluation(key: "flag", defaultValue: false, context: nil)
     XCTAssertEqual(result.value, true)
   }
 
-  func testOnContextSetIsNoOp() async throws {
+  func testInitializeWithNilContextSkipsSetContext() async throws {
+    let mock = MockMixpanelFlags()
+    mock.variants["flag"] = MixpanelFlagVariant(key: "v", value: true)
+    let provider = MixpanelOpenFeatureProvider(flags: mock)
+
+    try await provider.initialize(initialContext: nil)
+
+    XCTAssertNil(mock.lastSetContext)
+  }
+
+  func testOnContextSetForwardsContext() async throws {
     let mock = MockMixpanelFlags()
     mock.variants["flag"] = MixpanelFlagVariant(key: "v", value: "hello")
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    let oldCtx = ImmutableContext(targetingKey: "user-123")
-    let newCtx = ImmutableContext(targetingKey: "user-123")
+    let oldCtx = ImmutableContext(targetingKey: "user-old")
+    let newCtx = ImmutableContext(targetingKey: "user-new")
     try await provider.onContextSet(oldContext: oldCtx, newContext: newCtx)
 
-    // Provider still works normally after context set — context was ignored
+    XCTAssertEqual(mock.lastSetContext?["targeting_key"] as? String, "user-new")
+
     let result = try provider.getStringEvaluation(key: "flag", defaultValue: "default", context: nil)
     XCTAssertEqual(result.value, "hello")
+  }
+
+  func testInitializeForwardsAttributes() async throws {
+    let mock = MockMixpanelFlags()
+    let provider = MixpanelOpenFeatureProvider(flags: mock)
+
+    let context = ImmutableContext(
+      targetingKey: "user-123",
+      structure: ImmutableStructure(attributes: [
+        "plan": .string("premium"),
+        "age": .integer(30),
+        "score": .double(9.5),
+        "active": .boolean(true),
+      ])
+    )
+    try await provider.initialize(initialContext: context)
+
+    XCTAssertEqual(mock.lastSetContext?["targeting_key"] as? String, "user-123")
+    XCTAssertEqual(mock.lastSetContext?["plan"] as? String, "premium")
+    XCTAssertEqual(mock.lastSetContext?["age"] as? Int64, 30)
+    XCTAssertEqual(mock.lastSetContext?["score"] as? Double, 9.5)
+    XCTAssertEqual(mock.lastSetContext?["active"] as? Bool, true)
   }
 
   func testPerEvaluationContextIsIgnored() throws {

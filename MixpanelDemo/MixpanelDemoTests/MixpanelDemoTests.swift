@@ -218,6 +218,10 @@ class MixpanelDemoTests: MixpanelBaseTests {
       loadFlagsCallCount += 1
     }
 
+    func setContext(_ context: [String: Any], completion: @escaping () -> Void) {
+      completion()
+    }
+
     func areFlagsReady() -> Bool {
       return true
     }

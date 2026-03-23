@@ -25,13 +25,24 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
   }
 
   public func initialize(initialContext: (any EvaluationContext)?) async throws {
-    // No-op: context is managed by the Mixpanel SDK
+    guard let context = initialContext else { return }
+    let contextDict = Self.convertContext(context)
+    await withCheckedContinuation { continuation in
+      flags.setContext(contextDict) {
+        continuation.resume()
+      }
+    }
   }
 
   public func onContextSet(
     oldContext: (any EvaluationContext)?, newContext: any EvaluationContext
   ) async throws {
-    // No-op: context is managed by the Mixpanel SDK
+    let contextDict = Self.convertContext(newContext)
+    await withCheckedContinuation { continuation in
+      flags.setContext(contextDict) {
+        continuation.resume()
+      }
+    }
   }
 
   public func getBooleanEvaluation(
@@ -83,6 +94,31 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
   }
 
   // MARK: - Private
+
+  private static func convertContext(_ context: any EvaluationContext) -> [String: Any] {
+    var dict: [String: Any] = [:]
+    let targetingKey = context.getTargetingKey()
+    if !targetingKey.isEmpty {
+      dict["targeting_key"] = targetingKey
+    }
+    for (key, value) in context.asMap() {
+      dict[key] = convertValue(value)
+    }
+    return dict
+  }
+
+  private static func convertValue(_ value: Value) -> Any {
+    switch value {
+    case .boolean(let v): return v
+    case .string(let v): return v
+    case .integer(let v): return v
+    case .double(let v): return v
+    case .date(let v): return v.timeIntervalSince1970
+    case .list(let v): return v.map { convertValue($0) }
+    case .structure(let v): return v.mapValues { convertValue($0) }
+    case .null: return NSNull()
+    }
+  }
 
   private func resolve(_ key: String) throws -> MixpanelFlagVariant {
     guard flags.areFlagsReady() else {

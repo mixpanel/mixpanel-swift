@@ -266,6 +266,13 @@ public protocol MixpanelFlags {
   ///                         to their `MixpanelFlagVariant` values. Returns an empty dictionary
   ///                         if fetching fails.
   func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void)
+
+  /// Replaces the current custom flag evaluation context entirely and triggers a flag re-fetch.
+  ///
+  /// - Parameters:
+  ///   - context: The new context dictionary to use for flag evaluation.
+  ///   - completion: A closure called when the fetch completes (success or failure).
+  func setContext(_ context: [String: Any], completion: @escaping () -> Void)
 }
 
 // --- FeatureFlagManager Class ---
@@ -296,6 +303,9 @@ class FeatureFlagManager: Network, MixpanelFlags {
   /// It is session-scoped and cleared on app restart.
   internal var activatedFirstTimeEvents: Set<String> = Set()
 
+  // Context override for dynamic context updates (protected by flagsLock)
+  private var contextOverride: [String: Any]?
+
   // Timing tracking properties
   private var fetchStartTime: Date?
   var timeLastFetched: Date?
@@ -321,6 +331,17 @@ class FeatureFlagManager: Network, MixpanelFlags {
     // Dispatch fetch trigger to allow caller to continue
     DispatchQueue.global(qos: .userInitiated).async { [weak self] in
       self?._fetchFlagsIfNeeded(completion: nil)
+    }
+  }
+
+  func setContext(_ context: [String: Any], completion: @escaping () -> Void) {
+    flagsLock.write {
+      self.contextOverride = context
+    }
+    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+      self?._fetchFlagsIfNeeded { _ in
+        completion()
+      }
     }
   }
 
@@ -559,7 +580,10 @@ class FeatureFlagManager: Network, MixpanelFlags {
     let anonymousId = delegate.getAnonymousId()
     MixpanelLogger.debug(message: "Fetching flags for distinct ID: \(distinctId)")
 
-    var context = options.featureFlagOptions.context
+    var context: [String: Any] = [:]
+    flagsLock.read {
+      context = self.contextOverride ?? options.featureFlagOptions.context
+    }
     context["distinct_id"] = distinctId
     if let anonymousId = anonymousId {
       context["device_id"] = anonymousId

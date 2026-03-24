@@ -99,7 +99,7 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
     var dict: [String: Any] = [:]
     let targetingKey = context.getTargetingKey()
     if !targetingKey.isEmpty {
-      dict["targeting_key"] = targetingKey
+      dict["targetingKey"] = targetingKey
     }
     for (key, value) in context.asMap() {
       dict[key] = convertValue(value)
@@ -121,18 +121,24 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
   }
 
   private func resolve(_ key: String) throws -> MixpanelFlagVariant {
-    guard flags.areFlagsReady() else {
-      throw OpenFeatureError.providerNotReadyError
+    do {
+      guard flags.areFlagsReady() else {
+        throw OpenFeatureError.providerNotReadyError
+      }
+
+      let fallback = MixpanelFlagVariant(key: Self.sentinelKey)
+      let variant = flags.getVariantSync(key, fallback: fallback)
+
+      guard variant.key != Self.sentinelKey else {
+        throw OpenFeatureError.flagNotFoundError(key: key)
+      }
+
+      return variant
+    } catch let error as OpenFeatureError {
+      throw error
+    } catch {
+      throw OpenFeatureError.generalError(message: error.localizedDescription)
     }
-
-    let fallback = MixpanelFlagVariant(key: Self.sentinelKey)
-    let variant = flags.getVariantSync(key, fallback: fallback)
-
-    guard variant.key != Self.sentinelKey else {
-      throw OpenFeatureError.flagNotFoundError(key: key)
-    }
-
-    return variant
   }
 
   private func toInt64(_ value: Any?) -> Int64? {

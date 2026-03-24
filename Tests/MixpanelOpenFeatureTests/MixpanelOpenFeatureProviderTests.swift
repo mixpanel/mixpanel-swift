@@ -333,7 +333,7 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
 
     try await provider.initialize(initialContext: ImmutableContext(targetingKey: "user-123"))
 
-    XCTAssertEqual(mock.lastSetContext?["targeting_key"] as? String, "user-123")
+    XCTAssertEqual(mock.lastSetContext?["targetingKey"] as? String, "user-123")
 
     let result = try provider.getBooleanEvaluation(key: "flag", defaultValue: false, context: nil)
     XCTAssertEqual(result.value, true)
@@ -358,7 +358,7 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
     let newCtx = ImmutableContext(targetingKey: "user-new")
     try await provider.onContextSet(oldContext: oldCtx, newContext: newCtx)
 
-    XCTAssertEqual(mock.lastSetContext?["targeting_key"] as? String, "user-new")
+    XCTAssertEqual(mock.lastSetContext?["targetingKey"] as? String, "user-new")
 
     let result = try provider.getStringEvaluation(key: "flag", defaultValue: "default", context: nil)
     XCTAssertEqual(result.value, "hello")
@@ -379,7 +379,7 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
     )
     try await provider.initialize(initialContext: context)
 
-    XCTAssertEqual(mock.lastSetContext?["targeting_key"] as? String, "user-123")
+    XCTAssertEqual(mock.lastSetContext?["targetingKey"] as? String, "user-123")
     XCTAssertEqual(mock.lastSetContext?["plan"] as? String, "premium")
     XCTAssertEqual(mock.lastSetContext?["age"] as? Int64, 30)
     XCTAssertEqual(mock.lastSetContext?["score"] as? Double, 9.5)

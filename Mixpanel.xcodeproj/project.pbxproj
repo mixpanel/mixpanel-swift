@@ -3,14 +3,18 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1667D4A22F7B97740007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4A02F7B97740007AA55 /* MixpanelEventBridge.swift */; };
-		1667D4A32F7B97740007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4A02F7B97740007AA55 /* MixpanelEventBridge.swift */; };
-		1667D4A42F7B97740007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4A02F7B97740007AA55 /* MixpanelEventBridge.swift */; };
-		1667D4A52F7B97740007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4A02F7B97740007AA55 /* MixpanelEventBridge.swift */; };
+		16178FD12F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000002 /* jsonlogic */; };
+		16178FD22F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000003 /* jsonlogic */; };
+		16178FD32F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000004 /* jsonlogic */; };
+		16178FD42F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000005 /* jsonlogic */; };
+		1667D4A82F7B9A060007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4A62F7B9A060007AA55 /* MixpanelEventBridge.swift */; };
+		1667D4A92F7B9A060007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4A62F7B9A060007AA55 /* MixpanelEventBridge.swift */; };
+		1667D4AA2F7B9A060007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4A62F7B9A060007AA55 /* MixpanelEventBridge.swift */; };
+		1667D4AB2F7B9A060007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4A62F7B9A060007AA55 /* MixpanelEventBridge.swift */; };
 		171E4C122DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C132DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C142DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
@@ -115,7 +119,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1667D4A02F7B97740007AA55 /* MixpanelEventBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelEventBridge.swift; sourceTree = "<group>"; };
+		1667D4A62F7B9A060007AA55 /* MixpanelEventBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelEventBridge.swift; sourceTree = "<group>"; };
 		171E4C112DAF108400B7CB11 /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 		171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelOptions.swift; sourceTree = "<group>"; };
 		1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/Mixpanel/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
@@ -154,6 +158,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16178FD42F687EE200E022F2 /* jsonlogic in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -161,6 +166,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16178FD12F687EE200E022F2 /* jsonlogic in Frameworks */,
 				E15FF7C61D02C9E10076CDE3 /* CoreTelephony.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -169,6 +175,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16178FD22F687EE200E022F2 /* jsonlogic in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -176,16 +183,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16178FD32F687EE200E022F2 /* jsonlogic in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1667D4A12F7B97740007AA55 /* MixpanelEventBridge */ = {
+		1667D4A72F7B9A060007AA55 /* MixpanelEventBridge */ = {
 			isa = PBXGroup;
 			children = (
-				1667D4A02F7B97740007AA55 /* MixpanelEventBridge.swift */,
+				1667D4A62F7B9A060007AA55 /* MixpanelEventBridge.swift */,
 			);
 			path = MixpanelEventBridge;
 			sourceTree = "<group>";
@@ -249,7 +257,7 @@
 		E11594881CFF14D3007F8B4F /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1667D4A12F7B97740007AA55 /* MixpanelEventBridge */,
+				1667D4A72F7B9A060007AA55 /* MixpanelEventBridge */,
 				171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */,
 				17C654792BB1EF6700C8A126 /* Mixpanel */,
 				E189D8FB1D5A6943007F3F29 /* Networking */,
@@ -357,6 +365,9 @@
 			dependencies = (
 			);
 			name = Mixpanel_watchOS;
+			packageProductDependencies = (
+				17JSONLOGIC00000005 /* jsonlogic */,
+			);
 			productName = Mixpanel_watchOS;
 			productReference = 86F86E81224404BD00B69832 /* Mixpanel.framework */;
 			productType = "com.apple.product-type.framework";
@@ -375,6 +386,9 @@
 			dependencies = (
 			);
 			name = Mixpanel;
+			packageProductDependencies = (
+				17JSONLOGIC00000002 /* jsonlogic */,
+			);
 			productName = Mixpanel;
 			productReference = E115947D1CFF1491007F8B4F /* Mixpanel.framework */;
 			productType = "com.apple.product-type.framework";
@@ -393,6 +407,9 @@
 			dependencies = (
 			);
 			name = Mixpanel_tvOS;
+			packageProductDependencies = (
+				17JSONLOGIC00000003 /* jsonlogic */,
+			);
 			productName = Mixpanel_tvOS;
 			productReference = E12782B31D4AB4B30025FB05 /* Mixpanel.framework */;
 			productType = "com.apple.product-type.framework";
@@ -411,6 +428,9 @@
 			dependencies = (
 			);
 			name = Mixpanel_macOS;
+			packageProductDependencies = (
+				17JSONLOGIC00000004 /* jsonlogic */,
+			);
 			productName = Mixpanel_OSX;
 			productReference = E1F15FC91E64A10700391AE3 /* Mixpanel.framework */;
 			productType = "com.apple.product-type.framework";
@@ -456,6 +476,9 @@
 				Base,
 			);
 			mainGroup = E11594731CFF1491007F8B4F;
+			packageReferences = (
+				17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */,
+			);
 			productRefGroup = E115947E1CFF1491007F8B4F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -529,7 +552,7 @@
 				86F86EBB224439EB00B69832 /* FlushRequest.swift in Sources */,
 				86F86EBA224439E300B69832 /* MixpanelLogger.swift in Sources */,
 				86F86EB9224439DC00B69832 /* AutomaticProperties.swift in Sources */,
-				1667D4A42F7B97740007AA55 /* MixpanelEventBridge.swift in Sources */,
+				1667D4AB2F7B9A060007AA55 /* MixpanelEventBridge.swift in Sources */,
 				86F86F3722497F2900B69832 /* AutomaticEvents.swift in Sources */,
 				86F86EB7224439D300B69832 /* Mixpanel.swift in Sources */,
 				86F86EB8224439D300B69832 /* MixpanelInstance.swift in Sources */,
@@ -561,7 +584,7 @@
 				8625BEBB26D045CE0009BAA9 /* MPDB.swift in Sources */,
 				868550AC2699096F001FCDDC /* MixpanelPersistence.swift in Sources */,
 				E1982BFF1D0AC2E2006B7330 /* Error.swift in Sources */,
-				1667D4A52F7B97740007AA55 /* MixpanelEventBridge.swift in Sources */,
+				1667D4A82F7B9A060007AA55 /* MixpanelEventBridge.swift in Sources */,
 				51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */,
 				E1D335CC1D303A0D00E68E12 /* FlushRequest.swift in Sources */,
 				E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */,
@@ -593,7 +616,7 @@
 				E12782C71D4AB5CB0025FB05 /* Error.swift in Sources */,
 				E16522901D67D421000D5949 /* MixpanelType.swift in Sources */,
 				E12782C81D4AB5CB0025FB05 /* Constants.swift in Sources */,
-				1667D4A22F7B97740007AA55 /* MixpanelEventBridge.swift in Sources */,
+				1667D4AA2F7B9A060007AA55 /* MixpanelEventBridge.swift in Sources */,
 				E10D118D1EC0F30900195CCD /* AutomaticEvents.swift in Sources */,
 				E12782C91D4AB5CB0025FB05 /* AutomaticProperties.swift in Sources */,
 				E1ECD00B1FA001AD002104E8 /* SessionMetadata.swift in Sources */,
@@ -625,7 +648,7 @@
 				E1F15FE41E64B60D00391AE3 /* People.swift in Sources */,
 				E1F15FDB1E64B60A00391AE3 /* Error.swift in Sources */,
 				E1F15FD81E64B60200391AE3 /* FileLogging.swift in Sources */,
-				1667D4A32F7B97740007AA55 /* MixpanelEventBridge.swift in Sources */,
+				1667D4A92F7B9A060007AA55 /* MixpanelEventBridge.swift in Sources */,
 				86F86F3622497F1200B69832 /* AutomaticEvents.swift in Sources */,
 				E1F15FDD1E64B60A00391AE3 /* Constants.swift in Sources */,
 				E1ECD00C1FA001AD002104E8 /* SessionMetadata.swift in Sources */,
@@ -654,7 +677,11 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				NEW_SETTING = "";
@@ -689,7 +716,11 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MTL_FAST_MATH = YES;
 				NEW_SETTING = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
@@ -698,7 +729,8 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				WATCHOS_DEPLOYMENT_TARGET = 4.0;
@@ -854,7 +886,11 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -902,15 +938,20 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "${inherited}";
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_INCLUDE_PATHS = "${SRCROOT}";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
 				USER_HEADER_SEARCH_PATHS = "";
@@ -931,7 +972,11 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = Mixpanel;
@@ -941,7 +986,7 @@
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 11.0;
+				TVOS_DEPLOYMENT_TARGET = 12.0;
 			};
 			name = Debug;
 		};
@@ -958,18 +1003,23 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = Mixpanel;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 11.0;
+				TVOS_DEPLOYMENT_TARGET = 12.0;
 			};
 			name = Release;
 		};
@@ -989,7 +1039,11 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
@@ -1018,7 +1072,11 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
@@ -1026,7 +1084,8 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
 			};
@@ -1081,6 +1140,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/advantagefse/json-logic-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		17JSONLOGIC00000002 /* jsonlogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = jsonlogic;
+		};
+		17JSONLOGIC00000003 /* jsonlogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = jsonlogic;
+		};
+		17JSONLOGIC00000004 /* jsonlogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = jsonlogic;
+		};
+		17JSONLOGIC00000005 /* jsonlogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = jsonlogic;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E11594741CFF1491007F8B4F /* Project object */;
 }

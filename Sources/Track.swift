@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import MixpanelSwiftShared
 
 func += <K, V>(left: inout [K: V], right: [K: V]) {
   for (k, v) in right {
@@ -80,16 +81,14 @@ class Track {
     if let properties = properties {
       p += properties
     }
-      
-      // Notify event bridge listeners (non-blocking)
-      if let eventName = event {
-          if #available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *) {
-              MixpanelEventBridge.shared.notifyListeners(
-                eventName: eventName,
-                properties: properties ?? [:]
-              )
-          }
-      }
+
+    // Notify event bridge listeners (non-blocking)
+    if #available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *) {
+      MixpanelEventBridge.shared.notifyListeners(
+        eventName: ev,
+        properties: p
+      )
+    }
 
     // Check for first-time event matches
     if let mixpanelInstance = mixpanelInstance,

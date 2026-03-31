@@ -11,10 +11,7 @@
 		16178FD22F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000003 /* jsonlogic */; };
 		16178FD32F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000004 /* jsonlogic */; };
 		16178FD42F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000005 /* jsonlogic */; };
-		1667D4AE2F7B9AC30007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4AC2F7B9AC30007AA55 /* MixpanelEventBridge.swift */; };
-		1667D4AF2F7B9AC30007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4AC2F7B9AC30007AA55 /* MixpanelEventBridge.swift */; };
-		1667D4B02F7B9AC30007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4AC2F7B9AC30007AA55 /* MixpanelEventBridge.swift */; };
-		1667D4B12F7B9AC30007AA55 /* MixpanelEventBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1667D4AC2F7B9AC30007AA55 /* MixpanelEventBridge.swift */; };
+		1654EDC52F7BABF500D5FAF7 /* MixpanelSwiftShared in Frameworks */ = {isa = PBXBuildFile; productRef = 1654EDC42F7BABF500D5FAF7 /* MixpanelSwiftShared */; };
 		171E4C122DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C132DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C142DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
@@ -119,7 +116,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1667D4AC2F7B9AC30007AA55 /* MixpanelEventBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelEventBridge.swift; sourceTree = "<group>"; };
 		171E4C112DAF108400B7CB11 /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 		171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelOptions.swift; sourceTree = "<group>"; };
 		1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/Mixpanel/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
@@ -166,6 +162,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1654EDC52F7BABF500D5FAF7 /* MixpanelSwiftShared in Frameworks */,
 				16178FD12F687EE200E022F2 /* jsonlogic in Frameworks */,
 				E15FF7C61D02C9E10076CDE3 /* CoreTelephony.framework in Frameworks */,
 			);
@@ -190,14 +187,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1667D4AD2F7B9AC30007AA55 /* MixpanelEventBridge */ = {
-			isa = PBXGroup;
-			children = (
-				1667D4AC2F7B9AC30007AA55 /* MixpanelEventBridge.swift */,
-			);
-			path = MixpanelEventBridge;
-			sourceTree = "<group>";
-		};
 		17C654792BB1EF6700C8A126 /* Mixpanel */ = {
 			isa = PBXGroup;
 			children = (
@@ -257,7 +246,6 @@
 		E11594881CFF14D3007F8B4F /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1667D4AD2F7B9AC30007AA55 /* MixpanelEventBridge */,
 				171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */,
 				17C654792BB1EF6700C8A126 /* Mixpanel */,
 				E189D8FB1D5A6943007F3F29 /* Networking */,
@@ -388,6 +376,7 @@
 			name = Mixpanel;
 			packageProductDependencies = (
 				17JSONLOGIC00000002 /* jsonlogic */,
+				1654EDC42F7BABF500D5FAF7 /* MixpanelSwiftShared */,
 			);
 			productName = Mixpanel;
 			productReference = E115947D1CFF1491007F8B4F /* Mixpanel.framework */;
@@ -478,6 +467,7 @@
 			mainGroup = E11594731CFF1491007F8B4F;
 			packageReferences = (
 				17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */,
+				1654EDC32F7BABF500D5FAF7 /* XCRemoteSwiftPackageReference "mixpanel-swift-shared" */,
 			);
 			productRefGroup = E115947E1CFF1491007F8B4F /* Products */;
 			projectDirPath = "";
@@ -552,7 +542,6 @@
 				86F86EBB224439EB00B69832 /* FlushRequest.swift in Sources */,
 				86F86EBA224439E300B69832 /* MixpanelLogger.swift in Sources */,
 				86F86EB9224439DC00B69832 /* AutomaticProperties.swift in Sources */,
-				1667D4AF2F7B9AC30007AA55 /* MixpanelEventBridge.swift in Sources */,
 				86F86F3722497F2900B69832 /* AutomaticEvents.swift in Sources */,
 				86F86EB7224439D300B69832 /* Mixpanel.swift in Sources */,
 				86F86EB8224439D300B69832 /* MixpanelInstance.swift in Sources */,
@@ -584,7 +573,6 @@
 				8625BEBB26D045CE0009BAA9 /* MPDB.swift in Sources */,
 				868550AC2699096F001FCDDC /* MixpanelPersistence.swift in Sources */,
 				E1982BFF1D0AC2E2006B7330 /* Error.swift in Sources */,
-				1667D4B02F7B9AC30007AA55 /* MixpanelEventBridge.swift in Sources */,
 				51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */,
 				E1D335CC1D303A0D00E68E12 /* FlushRequest.swift in Sources */,
 				E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */,
@@ -616,7 +604,6 @@
 				E12782C71D4AB5CB0025FB05 /* Error.swift in Sources */,
 				E16522901D67D421000D5949 /* MixpanelType.swift in Sources */,
 				E12782C81D4AB5CB0025FB05 /* Constants.swift in Sources */,
-				1667D4B12F7B9AC30007AA55 /* MixpanelEventBridge.swift in Sources */,
 				E10D118D1EC0F30900195CCD /* AutomaticEvents.swift in Sources */,
 				E12782C91D4AB5CB0025FB05 /* AutomaticProperties.swift in Sources */,
 				E1ECD00B1FA001AD002104E8 /* SessionMetadata.swift in Sources */,
@@ -648,7 +635,6 @@
 				E1F15FE41E64B60D00391AE3 /* People.swift in Sources */,
 				E1F15FDB1E64B60A00391AE3 /* Error.swift in Sources */,
 				E1F15FD81E64B60200391AE3 /* FileLogging.swift in Sources */,
-				1667D4AE2F7B9AC30007AA55 /* MixpanelEventBridge.swift in Sources */,
 				86F86F3622497F1200B69832 /* AutomaticEvents.swift in Sources */,
 				E1F15FDD1E64B60A00391AE3 /* Constants.swift in Sources */,
 				E1ECD00C1FA001AD002104E8 /* SessionMetadata.swift in Sources */,
@@ -1142,6 +1128,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		1654EDC32F7BABF500D5FAF7 /* XCRemoteSwiftPackageReference "mixpanel-swift-shared" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mixpanel/mixpanel-swift-shared";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 		17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/advantagefse/json-logic-swift";
@@ -1153,6 +1147,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		1654EDC42F7BABF500D5FAF7 /* MixpanelSwiftShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1654EDC32F7BABF500D5FAF7 /* XCRemoteSwiftPackageReference "mixpanel-swift-shared" */;
+			productName = MixpanelSwiftShared;
+		};
 		17JSONLOGIC00000002 /* jsonlogic */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;

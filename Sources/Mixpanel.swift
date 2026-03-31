@@ -134,6 +134,7 @@ open class Mixpanel {
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
      - parameter serverURL:                 Optional. Mixpanel cluster URL
      - parameter useGzipCompression:        Optional. Whether to use gzip compression for network requests.
+     - parameter trackAutomaticEvents:      Optional. Whether or not to collect common events. Defaults to false.
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -151,13 +152,14 @@ open class Mixpanel {
       useUniqueDistinctId: Bool = false,
       superProperties: Properties? = nil,
       serverURL: String? = nil,
-      useGzipCompression: Bool = false
+      useGzipCompression: Bool = false,
+      trackAutomaticEvents: Bool = false
     ) -> MixpanelInstance {
       return MixpanelManager.sharedInstance.initialize(
         token: apiToken,
         flushInterval: flushInterval,
         instanceName: ((instanceName != nil) ? instanceName! : apiToken),
-        trackAutomaticEvents: false,
+        trackAutomaticEvents: trackAutomaticEvents,
         optOutTrackingByDefault: optOutTrackingByDefault,
         useUniqueDistinctId: useUniqueDistinctId,
         superProperties: superProperties,
@@ -181,6 +183,7 @@ open class Mixpanel {
      - parameter superProperties:           Optional. Super properties dictionary to register during initialization
      - parameter proxyServerConfig:         Optional. Setup for proxy server.
      - parameter useGzipCompression:        Optional. Whether to use gzip compression for network requests.
+     - parameter trackAutomaticEvents:      Optional. Whether or not to collect common events. Defaults to false.
 
      - important: If you have more than one Mixpanel instance, it is beneficial to initialize
      the instances with an instanceName. Then they can be reached by calling getInstance with name.
@@ -198,13 +201,14 @@ open class Mixpanel {
       useUniqueDistinctId: Bool = false,
       superProperties: Properties? = nil,
       proxyServerConfig: ProxyServerConfig,
-      useGzipCompression: Bool = false
+      useGzipCompression: Bool = false,
+      trackAutomaticEvents: Bool = false
     ) -> MixpanelInstance {
       return MixpanelManager.sharedInstance.initialize(
         token: apiToken,
         flushInterval: flushInterval,
         instanceName: ((instanceName != nil) ? instanceName! : apiToken),
-        trackAutomaticEvents: false,
+        trackAutomaticEvents: trackAutomaticEvents,
         optOutTrackingByDefault: optOutTrackingByDefault,
         useUniqueDistinctId: useUniqueDistinctId,
         superProperties: superProperties,

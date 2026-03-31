@@ -46,6 +46,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
   }
 
   func removeDBfile(_ mixpanel: MixpanelInstance) {
+    waitForTrackingQueue(mixpanel)
     mixpanel.mixpanelPersistence.closeDB()
     removeDBfile(apiToken: mixpanel.apiToken)
   }

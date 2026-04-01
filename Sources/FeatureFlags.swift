@@ -158,6 +158,10 @@ public protocol MixpanelFlags {
   /// Initiates the loading or refreshing of flags
   func loadFlags()
 
+  /// Initiates the loading or refreshing of flags with a completion callback.
+  /// The completion handler is called with `true` on success and `false` on failure.
+  func loadFlags(completion: ((Bool) -> Void)?)
+
   /// Synchronously checks if the flags  have been successfully loaded
   /// and are available for querying.
   ///
@@ -318,9 +322,13 @@ class FeatureFlagManager: Network, MixpanelFlags {
   // --- Public Methods ---
 
   func loadFlags() {
+    loadFlags(completion: nil)
+  }
+
+  func loadFlags(completion: ((Bool) -> Void)?) {
     // Dispatch fetch trigger to allow caller to continue
     DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-      self?._fetchFlagsIfNeeded(completion: nil)
+      self?._fetchFlagsIfNeeded(completion: completion)
     }
   }
 

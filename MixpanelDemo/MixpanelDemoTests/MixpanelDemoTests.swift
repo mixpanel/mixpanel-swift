@@ -222,6 +222,11 @@ class MixpanelDemoTests: MixpanelBaseTests {
       completion()
     }
 
+    func loadFlags(completion: ((Bool) -> Void)?) {
+      loadFlagsCallCount += 1
+      completion?(true)
+    }
+
     func areFlagsReady() -> Bool {
       return true
     }

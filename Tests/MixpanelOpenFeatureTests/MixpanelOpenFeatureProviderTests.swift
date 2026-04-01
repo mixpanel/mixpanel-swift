@@ -60,59 +60,6 @@ class MockMixpanelFlags: MixpanelFlags {
   }
 }
 
-/// A mock that always returns the sentinel key, simulating an SDK failure where
-/// the flag cannot be resolved (e.g., an internal error that falls through to
-/// the fallback).
-class SentinelReturningMockFlags: MixpanelFlags {
-  var delegate: MixpanelFlagDelegate?
-
-  func loadFlags() {}
-
-  func setContext(_ context: [String: Any], completion: @escaping () -> Void) {
-    completion()
-  }
-
-  func areFlagsReady() -> Bool { true }
-
-  func getVariantSync(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
-    // Always return the fallback, simulating the SDK failing to resolve
-    return fallback
-  }
-
-  func getVariant(
-    _ flagName: String, fallback: MixpanelFlagVariant,
-    completion: @escaping (MixpanelFlagVariant) -> Void
-  ) {
-    completion(getVariantSync(flagName, fallback: fallback))
-  }
-
-  func getVariantValueSync(_ flagName: String, fallbackValue: Any?) -> Any? {
-    return fallbackValue
-  }
-
-  func getVariantValue(
-    _ flagName: String, fallbackValue: Any?, completion: @escaping (Any?) -> Void
-  ) {
-    completion(fallbackValue)
-  }
-
-  func isEnabledSync(_ flagName: String, fallbackValue: Bool) -> Bool {
-    return fallbackValue
-  }
-
-  func isEnabled(_ flagName: String, fallbackValue: Bool, completion: @escaping (Bool) -> Void) {
-    completion(fallbackValue)
-  }
-
-  func getAllVariantsSync() -> [String: MixpanelFlagVariant] {
-    return [:]
-  }
-
-  func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void) {
-    completion([:])
-  }
-}
-
 // MARK: - Tests
 
 final class MixpanelOpenFeatureProviderTests: XCTestCase {
@@ -495,7 +442,7 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
   func testSDKReturnsUnexpectedResultBooleanThrowsFlagNotFound() {
     // When getVariantSync returns the sentinel fallback (simulating SDK failure),
     // the provider should throw flagNotFoundError.
-    let mock = SentinelReturningMockFlags()
+    let mock = MockMixpanelFlags()
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
     XCTAssertThrowsError(
@@ -506,7 +453,7 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
   }
 
   func testSDKReturnsUnexpectedResultStringThrowsFlagNotFound() {
-    let mock = SentinelReturningMockFlags()
+    let mock = MockMixpanelFlags()
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
     XCTAssertThrowsError(
@@ -517,7 +464,7 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
   }
 
   func testSDKReturnsUnexpectedResultIntegerThrowsFlagNotFound() {
-    let mock = SentinelReturningMockFlags()
+    let mock = MockMixpanelFlags()
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
     XCTAssertThrowsError(
@@ -528,7 +475,7 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
   }
 
   func testSDKReturnsUnexpectedResultDoubleThrowsFlagNotFound() {
-    let mock = SentinelReturningMockFlags()
+    let mock = MockMixpanelFlags()
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
     XCTAssertThrowsError(
@@ -539,7 +486,7 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
   }
 
   func testSDKReturnsUnexpectedResultObjectThrowsFlagNotFound() {
-    let mock = SentinelReturningMockFlags()
+    let mock = MockMixpanelFlags()
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
     XCTAssertThrowsError(

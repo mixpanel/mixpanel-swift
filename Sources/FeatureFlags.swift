@@ -541,17 +541,14 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
     // Access/Modify isFetching and fetchCompletionHandlers with write lock
     flagsLock.write {
+      if let completion = completion {
+        self.fetchCompletionHandlers.append(completion)
+      }
       if !self.isFetching {
         self.isFetching = true
         shouldStartFetch = true
-        if let completion = completion {
-          self.fetchCompletionHandlers.append(completion)
-        }
       } else {
         MixpanelLogger.debug(message: "Fetch already in progress, queueing completion handler.")
-        if let completion = completion {
-          self.fetchCompletionHandlers.append(completion)
-        }
       }
     }
 
@@ -997,13 +994,11 @@ class FeatureFlagManager: Network, MixpanelFlags {
     Network.apiRequest(
       base: serverURL,
       resource: resource,
-      failure: { [weak self] reason, _, _ in
-        guard self != nil else { return }
+      failure: { reason, _, _ in
         // Silent failure - cohort sync will catch up
         MixpanelLogger.warn(message: "Failed to record first-time event for flag \(flagId): \(reason)")
       },
-      success: { [weak self] _, _ in
-        guard self != nil else { return }
+      success: { _, _ in
         MixpanelLogger.debug(message: "Successfully recorded first-time event for flag \(flagId)")
       }
     )

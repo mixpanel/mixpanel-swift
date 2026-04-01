@@ -303,8 +303,8 @@ class FeatureFlagManager: Network, MixpanelFlags {
   /// It is session-scoped and cleared on app restart.
   internal var activatedFirstTimeEvents: Set<String> = Set()
 
-  // Context override for dynamic context updates (protected by flagsLock)
-  private var contextOverride: [String: Any]?
+  // Flag evaluation context (protected by flagsLock)
+  private var flagContext: [String: Any]
 
   // Timing tracking properties
   private var fetchStartTime: Date?
@@ -317,11 +317,13 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   // Initializers
   required init(serverURL: String) {
+    self.flagContext = [:]
     super.init(serverURL: serverURL)
   }
 
   public init(serverURL: String, delegate: MixpanelFlagDelegate?) {
     self.delegate = delegate
+    self.flagContext = delegate?.getOptions().featureFlagOptions.context ?? [:]
     super.init(serverURL: serverURL)
   }
 
@@ -336,7 +338,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   func setContext(_ context: [String: Any], completion: @escaping () -> Void) {
     flagsLock.write {
-      self.contextOverride = context
+      self.flagContext = context
     }
     DispatchQueue.global(qos: .userInitiated).async { [weak self] in
       self?._fetchFlagsIfNeeded { _ in
@@ -579,7 +581,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
     var context: [String: Any] = [:]
     flagsLock.read {
-      context = self.contextOverride ?? options.featureFlagOptions.context
+      context = self.flagContext
     }
     context["distinct_id"] = distinctId
     if let anonymousId = anonymousId {

@@ -51,14 +51,14 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
     let variant: MixpanelFlagVariant
     do {
       guard let v = try resolve(key) else {
-        return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .flagNotFound)
+        return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .flagNotFound)
       }
       variant = v
     } catch {
-      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .providerNotReady)
+      return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .providerNotReady)
     }
     guard let boolValue = variant.value as? Bool else {
-      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .typeMismatch)
+      return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .typeMismatch)
     }
     return ProviderEvaluation(value: boolValue, variant: variant.key, reason: "STATIC")
   }
@@ -69,14 +69,14 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
     let variant: MixpanelFlagVariant
     do {
       guard let v = try resolve(key) else {
-        return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .flagNotFound)
+        return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .flagNotFound)
       }
       variant = v
     } catch {
-      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .providerNotReady)
+      return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .providerNotReady)
     }
     guard let stringValue = variant.value as? String else {
-      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .typeMismatch)
+      return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .typeMismatch)
     }
     return ProviderEvaluation(value: stringValue, variant: variant.key, reason: "STATIC")
   }
@@ -87,14 +87,14 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
     let variant: MixpanelFlagVariant
     do {
       guard let v = try resolve(key) else {
-        return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .flagNotFound)
+        return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .flagNotFound)
       }
       variant = v
     } catch {
-      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .providerNotReady)
+      return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .providerNotReady)
     }
     guard let intValue = toInt64(variant.value) else {
-      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .typeMismatch)
+      return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .typeMismatch)
     }
     return ProviderEvaluation(value: intValue, variant: variant.key, reason: "STATIC")
   }
@@ -105,14 +105,14 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
     let variant: MixpanelFlagVariant
     do {
       guard let v = try resolve(key) else {
-        return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .flagNotFound)
+        return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .flagNotFound)
       }
       variant = v
     } catch {
-      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .providerNotReady)
+      return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .providerNotReady)
     }
     guard let doubleValue = toDouble(variant.value) else {
-      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .typeMismatch)
+      return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .typeMismatch)
     }
     return ProviderEvaluation(value: doubleValue, variant: variant.key, reason: "STATIC")
   }
@@ -123,11 +123,11 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
     let variant: MixpanelFlagVariant
     do {
       guard let v = try resolve(key) else {
-        return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .flagNotFound)
+        return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .flagNotFound)
       }
       variant = v
     } catch {
-      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .providerNotReady)
+      return ProviderEvaluation(value: defaultValue, reason: "ERROR", errorCode: .providerNotReady)
     }
     let value = toValue(variant.value)
     return ProviderEvaluation(value: value, variant: variant.key, reason: "STATIC")

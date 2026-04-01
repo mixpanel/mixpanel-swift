@@ -48,9 +48,17 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
   public func getBooleanEvaluation(
     key: String, defaultValue: Bool, context: (any EvaluationContext)?
   ) throws -> ProviderEvaluation<Bool> {
-    let variant = try resolve(key)
+    let variant: MixpanelFlagVariant
+    do {
+      guard let v = try resolve(key) else {
+        return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .flagNotFound)
+      }
+      variant = v
+    } catch {
+      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .providerNotReady)
+    }
     guard let boolValue = variant.value as? Bool else {
-      throw OpenFeatureError.typeMismatchError
+      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .typeMismatch)
     }
     return ProviderEvaluation(value: boolValue, variant: variant.key, reason: "STATIC")
   }
@@ -58,9 +66,17 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
   public func getStringEvaluation(
     key: String, defaultValue: String, context: (any EvaluationContext)?
   ) throws -> ProviderEvaluation<String> {
-    let variant = try resolve(key)
+    let variant: MixpanelFlagVariant
+    do {
+      guard let v = try resolve(key) else {
+        return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .flagNotFound)
+      }
+      variant = v
+    } catch {
+      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .providerNotReady)
+    }
     guard let stringValue = variant.value as? String else {
-      throw OpenFeatureError.typeMismatchError
+      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .typeMismatch)
     }
     return ProviderEvaluation(value: stringValue, variant: variant.key, reason: "STATIC")
   }
@@ -68,9 +84,17 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
   public func getIntegerEvaluation(
     key: String, defaultValue: Int64, context: (any EvaluationContext)?
   ) throws -> ProviderEvaluation<Int64> {
-    let variant = try resolve(key)
+    let variant: MixpanelFlagVariant
+    do {
+      guard let v = try resolve(key) else {
+        return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .flagNotFound)
+      }
+      variant = v
+    } catch {
+      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .providerNotReady)
+    }
     guard let intValue = toInt64(variant.value) else {
-      throw OpenFeatureError.typeMismatchError
+      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .typeMismatch)
     }
     return ProviderEvaluation(value: intValue, variant: variant.key, reason: "STATIC")
   }
@@ -78,9 +102,17 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
   public func getDoubleEvaluation(
     key: String, defaultValue: Double, context: (any EvaluationContext)?
   ) throws -> ProviderEvaluation<Double> {
-    let variant = try resolve(key)
+    let variant: MixpanelFlagVariant
+    do {
+      guard let v = try resolve(key) else {
+        return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .flagNotFound)
+      }
+      variant = v
+    } catch {
+      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .providerNotReady)
+    }
     guard let doubleValue = toDouble(variant.value) else {
-      throw OpenFeatureError.typeMismatchError
+      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .typeMismatch)
     }
     return ProviderEvaluation(value: doubleValue, variant: variant.key, reason: "STATIC")
   }
@@ -88,7 +120,15 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
   public func getObjectEvaluation(
     key: String, defaultValue: Value, context: (any EvaluationContext)?
   ) throws -> ProviderEvaluation<Value> {
-    let variant = try resolve(key)
+    let variant: MixpanelFlagVariant
+    do {
+      guard let v = try resolve(key) else {
+        return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .flagNotFound)
+      }
+      variant = v
+    } catch {
+      return ProviderEvaluation(value: defaultValue, reason: "DEFAULT", errorCode: .providerNotReady)
+    }
     let value = toValue(variant.value)
     return ProviderEvaluation(value: value, variant: variant.key, reason: "STATIC")
   }
@@ -120,7 +160,7 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
     }
   }
 
-  private func resolve(_ key: String) throws -> MixpanelFlagVariant {
+  private func resolve(_ key: String) throws -> MixpanelFlagVariant? {
     guard flags.areFlagsReady() else {
       throw OpenFeatureError.providerNotReadyError
     }
@@ -129,7 +169,7 @@ public class MixpanelOpenFeatureProvider: FeatureProvider {
     let variant = flags.getVariantSync(key, fallback: fallback)
 
     guard variant.key != Self.sentinelKey else {
-      throw OpenFeatureError.flagNotFoundError(key: key)
+      return nil
     }
 
     return variant

@@ -89,16 +89,15 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
     XCTAssertEqual(result.reason, "STATIC")
   }
 
-  func testBooleanEvaluationTypeMismatch() {
+  func testBooleanEvaluationTypeMismatch() throws {
     let mock = MockMixpanelFlags()
     mock.variants["str-flag"] = MixpanelFlagVariant(key: "v", value: "not-a-bool")
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getBooleanEvaluation(key: "str-flag", defaultValue: false, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .typeMismatchError)
-    }
+    let result = try provider.getBooleanEvaluation(key: "str-flag", defaultValue: false, context: nil)
+    XCTAssertEqual(result.value, false)
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .typeMismatch)
   }
 
   // MARK: - String Evaluation
@@ -114,16 +113,15 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
     XCTAssertEqual(result.reason, "STATIC")
   }
 
-  func testStringEvaluationTypeMismatch() {
+  func testStringEvaluationTypeMismatch() throws {
     let mock = MockMixpanelFlags()
     mock.variants["bool-flag"] = MixpanelFlagVariant(key: "on", value: true)
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getStringEvaluation(key: "bool-flag", defaultValue: "default", context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .typeMismatchError)
-    }
+    let result = try provider.getStringEvaluation(key: "bool-flag", defaultValue: "default", context: nil)
+    XCTAssertEqual(result.value, "default")
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .typeMismatch)
   }
 
   // MARK: - Integer Evaluation
@@ -147,28 +145,26 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
     XCTAssertEqual(result.value, Int64(42))
   }
 
-  func testIntegerEvaluationTypeMismatch() {
+  func testIntegerEvaluationTypeMismatch() throws {
     let mock = MockMixpanelFlags()
     mock.variants["str-flag"] = MixpanelFlagVariant(key: "v", value: "not-an-int")
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getIntegerEvaluation(key: "str-flag", defaultValue: 0, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .typeMismatchError)
-    }
+    let result = try provider.getIntegerEvaluation(key: "str-flag", defaultValue: 0, context: nil)
+    XCTAssertEqual(result.value, Int64(0))
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .typeMismatch)
   }
 
-  func testIntegerEvaluationFractionalDoubleTypeMismatch() {
+  func testIntegerEvaluationFractionalDoubleTypeMismatch() throws {
     let mock = MockMixpanelFlags()
     mock.variants["float-flag"] = MixpanelFlagVariant(key: "v", value: 3.14)
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getIntegerEvaluation(key: "float-flag", defaultValue: 0, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .typeMismatchError)
-    }
+    let result = try provider.getIntegerEvaluation(key: "float-flag", defaultValue: 0, context: nil)
+    XCTAssertEqual(result.value, Int64(0))
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .typeMismatch)
   }
 
   // MARK: - Double Evaluation
@@ -192,16 +188,15 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
     XCTAssertEqual(result.value, 42.0)
   }
 
-  func testDoubleEvaluationTypeMismatch() {
+  func testDoubleEvaluationTypeMismatch() throws {
     let mock = MockMixpanelFlags()
     mock.variants["str-flag"] = MixpanelFlagVariant(key: "v", value: "not-a-double")
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getDoubleEvaluation(key: "str-flag", defaultValue: 1.0, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .typeMismatchError)
-    }
+    let result = try provider.getDoubleEvaluation(key: "str-flag", defaultValue: 1.0, context: nil)
+    XCTAssertEqual(result.value, 1.0)
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .typeMismatch)
   }
 
   // MARK: - Object Evaluation
@@ -229,46 +224,37 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
 
   // MARK: - Flag Not Found
 
-  func testFlagNotFound() {
+  func testFlagNotFound() throws {
     let mock = MockMixpanelFlags()
     mock.ready = true
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getBooleanEvaluation(key: "missing-flag", defaultValue: false, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .flagNotFoundError(key: "missing-flag"))
-    }
+    let result = try provider.getBooleanEvaluation(key: "missing-flag", defaultValue: false, context: nil)
+    XCTAssertEqual(result.value, false)
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .flagNotFound)
   }
 
-  func testFlagNotFoundAllTypes() {
+  func testFlagNotFoundAllTypes() throws {
     let mock = MockMixpanelFlags()
     mock.ready = true
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getStringEvaluation(key: "missing", defaultValue: "", context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .flagNotFoundError(key: "missing"))
-    }
+    let strResult = try provider.getStringEvaluation(key: "missing", defaultValue: "fallback", context: nil)
+    XCTAssertEqual(strResult.value, "fallback")
+    XCTAssertEqual(strResult.errorCode, .flagNotFound)
 
-    XCTAssertThrowsError(
-      try provider.getIntegerEvaluation(key: "missing", defaultValue: 0, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .flagNotFoundError(key: "missing"))
-    }
+    let intResult = try provider.getIntegerEvaluation(key: "missing", defaultValue: 99, context: nil)
+    XCTAssertEqual(intResult.value, Int64(99))
+    XCTAssertEqual(intResult.errorCode, .flagNotFound)
 
-    XCTAssertThrowsError(
-      try provider.getDoubleEvaluation(key: "missing", defaultValue: 0.0, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .flagNotFoundError(key: "missing"))
-    }
+    let dblResult = try provider.getDoubleEvaluation(key: "missing", defaultValue: 3.14, context: nil)
+    XCTAssertEqual(dblResult.value, 3.14)
+    XCTAssertEqual(dblResult.errorCode, .flagNotFound)
 
-    XCTAssertThrowsError(
-      try provider.getObjectEvaluation(key: "missing", defaultValue: .null, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .flagNotFoundError(key: "missing"))
-    }
+    let objResult = try provider.getObjectEvaluation(key: "missing", defaultValue: .string("obj-default"), context: nil)
+    XCTAssertEqual(objResult.value, .string("obj-default"))
+    XCTAssertEqual(objResult.errorCode, .flagNotFound)
   }
 
   // MARK: - Context Forwarding
@@ -439,104 +425,184 @@ final class MixpanelOpenFeatureProviderTests: XCTestCase {
 
   // MARK: - SDK Exception Handling
 
-  func testSDKReturnsUnexpectedResultBooleanThrowsFlagNotFound() {
-    // When getVariantSync returns the sentinel fallback (simulating SDK failure),
-    // the provider should throw flagNotFoundError.
+  func testSDKReturnsUnexpectedResultBooleanReturnsDefault() throws {
     let mock = MockMixpanelFlags()
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getBooleanEvaluation(key: "some-flag", defaultValue: false, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .flagNotFoundError(key: "some-flag"))
-    }
+    let result = try provider.getBooleanEvaluation(key: "some-flag", defaultValue: true, context: nil)
+    XCTAssertEqual(result.value, true)
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .flagNotFound)
   }
 
-  func testSDKReturnsUnexpectedResultStringThrowsFlagNotFound() {
+  func testSDKReturnsUnexpectedResultStringReturnsDefault() throws {
     let mock = MockMixpanelFlags()
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getStringEvaluation(key: "some-flag", defaultValue: "default", context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .flagNotFoundError(key: "some-flag"))
-    }
+    let result = try provider.getStringEvaluation(key: "some-flag", defaultValue: "default", context: nil)
+    XCTAssertEqual(result.value, "default")
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .flagNotFound)
   }
 
-  func testSDKReturnsUnexpectedResultIntegerThrowsFlagNotFound() {
+  func testSDKReturnsUnexpectedResultIntegerReturnsDefault() throws {
     let mock = MockMixpanelFlags()
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getIntegerEvaluation(key: "some-flag", defaultValue: 0, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .flagNotFoundError(key: "some-flag"))
-    }
+    let result = try provider.getIntegerEvaluation(key: "some-flag", defaultValue: 7, context: nil)
+    XCTAssertEqual(result.value, Int64(7))
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .flagNotFound)
   }
 
-  func testSDKReturnsUnexpectedResultDoubleThrowsFlagNotFound() {
+  func testSDKReturnsUnexpectedResultDoubleReturnsDefault() throws {
     let mock = MockMixpanelFlags()
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getDoubleEvaluation(key: "some-flag", defaultValue: 0.0, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .flagNotFoundError(key: "some-flag"))
-    }
+    let result = try provider.getDoubleEvaluation(key: "some-flag", defaultValue: 2.71, context: nil)
+    XCTAssertEqual(result.value, 2.71)
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .flagNotFound)
   }
 
-  func testSDKReturnsUnexpectedResultObjectThrowsFlagNotFound() {
+  func testSDKReturnsUnexpectedResultObjectReturnsDefault() throws {
     let mock = MockMixpanelFlags()
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getObjectEvaluation(key: "some-flag", defaultValue: .null, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .flagNotFoundError(key: "some-flag"))
-    }
+    let result = try provider.getObjectEvaluation(key: "some-flag", defaultValue: .string("sentinel-default"), context: nil)
+    XCTAssertEqual(result.value, .string("sentinel-default"))
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .flagNotFound)
   }
 
   // MARK: - Provider Not Ready
 
-  func testProviderNotReady() {
+  func testProviderNotReady() throws {
     let mock = MockMixpanelFlags()
     mock.ready = false
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getBooleanEvaluation(key: "any-flag", defaultValue: false, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .providerNotReadyError)
-    }
+    let result = try provider.getBooleanEvaluation(key: "any-flag", defaultValue: false, context: nil)
+    XCTAssertEqual(result.value, false)
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .providerNotReady)
   }
 
-  func testProviderNotReadyAllTypes() {
+  func testProviderNotReadyAllTypes() throws {
     let mock = MockMixpanelFlags()
     mock.ready = false
     let provider = MixpanelOpenFeatureProvider(flags: mock)
 
-    XCTAssertThrowsError(
-      try provider.getStringEvaluation(key: "f", defaultValue: "d", context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .providerNotReadyError)
-    }
+    let strResult = try provider.getStringEvaluation(key: "f", defaultValue: "d", context: nil)
+    XCTAssertEqual(strResult.value, "d")
+    XCTAssertEqual(strResult.errorCode, .providerNotReady)
 
-    XCTAssertThrowsError(
-      try provider.getIntegerEvaluation(key: "f", defaultValue: 0, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .providerNotReadyError)
-    }
+    let intResult = try provider.getIntegerEvaluation(key: "f", defaultValue: 0, context: nil)
+    XCTAssertEqual(intResult.value, Int64(0))
+    XCTAssertEqual(intResult.errorCode, .providerNotReady)
 
-    XCTAssertThrowsError(
-      try provider.getDoubleEvaluation(key: "f", defaultValue: 0.0, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .providerNotReadyError)
-    }
+    let dblResult = try provider.getDoubleEvaluation(key: "f", defaultValue: 0.0, context: nil)
+    XCTAssertEqual(dblResult.value, 0.0)
+    XCTAssertEqual(dblResult.errorCode, .providerNotReady)
 
-    XCTAssertThrowsError(
-      try provider.getObjectEvaluation(key: "f", defaultValue: .null, context: nil)
-    ) { error in
-      XCTAssertEqual(error as? OpenFeatureError, .providerNotReadyError)
-    }
+    let objResult = try provider.getObjectEvaluation(key: "f", defaultValue: .null, context: nil)
+    XCTAssertEqual(objResult.value, .null)
+    XCTAssertEqual(objResult.errorCode, .providerNotReady)
+  }
+
+  // MARK: - Default Value Fallback
+
+  func testBooleanFlagNotFoundReturnsDefault() throws {
+    let mock = MockMixpanelFlags()
+    let provider = MixpanelOpenFeatureProvider(flags: mock)
+
+    let result = try provider.getBooleanEvaluation(key: "missing", defaultValue: true, context: nil)
+    XCTAssertEqual(result.value, true)
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .flagNotFound)
+  }
+
+  func testStringFlagNotFoundReturnsDefault() throws {
+    let mock = MockMixpanelFlags()
+    let provider = MixpanelOpenFeatureProvider(flags: mock)
+
+    let result = try provider.getStringEvaluation(key: "missing", defaultValue: "fallback", context: nil)
+    XCTAssertEqual(result.value, "fallback")
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .flagNotFound)
+  }
+
+  func testIntegerFlagNotFoundReturnsDefault() throws {
+    let mock = MockMixpanelFlags()
+    let provider = MixpanelOpenFeatureProvider(flags: mock)
+
+    let result = try provider.getIntegerEvaluation(key: "missing", defaultValue: 42, context: nil)
+    XCTAssertEqual(result.value, Int64(42))
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .flagNotFound)
+  }
+
+  func testDoubleFlagNotFoundReturnsDefault() throws {
+    let mock = MockMixpanelFlags()
+    let provider = MixpanelOpenFeatureProvider(flags: mock)
+
+    let result = try provider.getDoubleEvaluation(key: "missing", defaultValue: 1.5, context: nil)
+    XCTAssertEqual(result.value, 1.5)
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .flagNotFound)
+  }
+
+  func testObjectFlagNotFoundReturnsDefault() throws {
+    let mock = MockMixpanelFlags()
+    let provider = MixpanelOpenFeatureProvider(flags: mock)
+
+    let result = try provider.getObjectEvaluation(key: "missing", defaultValue: .boolean(true), context: nil)
+    XCTAssertEqual(result.value, .boolean(true))
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .flagNotFound)
+  }
+
+  func testBooleanTypeMismatchReturnsDefault() throws {
+    let mock = MockMixpanelFlags()
+    mock.variants["flag"] = MixpanelFlagVariant(key: "v", value: 42)
+    let provider = MixpanelOpenFeatureProvider(flags: mock)
+
+    let result = try provider.getBooleanEvaluation(key: "flag", defaultValue: false, context: nil)
+    XCTAssertEqual(result.value, false)
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .typeMismatch)
+  }
+
+  func testStringTypeMismatchReturnsDefault() throws {
+    let mock = MockMixpanelFlags()
+    mock.variants["flag"] = MixpanelFlagVariant(key: "v", value: 99)
+    let provider = MixpanelOpenFeatureProvider(flags: mock)
+
+    let result = try provider.getStringEvaluation(key: "flag", defaultValue: "my-default", context: nil)
+    XCTAssertEqual(result.value, "my-default")
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .typeMismatch)
+  }
+
+  func testIntegerTypeMismatchReturnsDefault() throws {
+    let mock = MockMixpanelFlags()
+    mock.variants["flag"] = MixpanelFlagVariant(key: "v", value: "not-an-int")
+    let provider = MixpanelOpenFeatureProvider(flags: mock)
+
+    let result = try provider.getIntegerEvaluation(key: "flag", defaultValue: 100, context: nil)
+    XCTAssertEqual(result.value, Int64(100))
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .typeMismatch)
+  }
+
+  func testDoubleTypeMismatchReturnsDefault() throws {
+    let mock = MockMixpanelFlags()
+    mock.variants["flag"] = MixpanelFlagVariant(key: "v", value: false)
+    let provider = MixpanelOpenFeatureProvider(flags: mock)
+
+    let result = try provider.getDoubleEvaluation(key: "flag", defaultValue: 9.99, context: nil)
+    XCTAssertEqual(result.value, 9.99)
+    XCTAssertEqual(result.reason, "DEFAULT")
+    XCTAssertEqual(result.errorCode, .typeMismatch)
   }
 }

@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
   s.homepage = 'https://mixpanel.com'
   s.author       = { 'Mixpanel, Inc' => 'support@mixpanel.com' }
   s.source       = { :git => 'https://github.com/mixpanel/mixpanel-swift.git',
-                     :tag => "v#{s.version}" }
+                     :tag => "#{s.version}" }
   s.resource_bundles = {'Mixpanel' => ['Sources/Mixpanel/PrivacyInfo.xcprivacy']}
   s.dependency 'jsonlogic', '~> 1.2.0'
   s.ios.deployment_target = '12.0'

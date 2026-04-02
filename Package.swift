@@ -28,7 +28,7 @@ let package = Package(
       name: "Mixpanel",
       dependencies: [
         .product(name: "jsonlogic", package: "json-logic-swift"),
-        .product(name: "MixpanelSwiftShared", package: "MixpanelSwiftShared")
+        .product(name: "MixpanelSwiftShared", package: "mixpanel-swift-shared")
       ],
       path: "Sources",
       resources: [

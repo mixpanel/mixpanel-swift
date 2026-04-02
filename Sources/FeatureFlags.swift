@@ -283,7 +283,17 @@ public protocol MixpanelFlags {
 
 class FeatureFlagManager: Network, MixpanelFlags {
 
-  weak var delegate: MixpanelFlagDelegate?
+  weak var delegate: MixpanelFlagDelegate? {
+    didSet {
+      if let context = delegate?.getOptions().featureFlagOptions.context, !context.isEmpty {
+        flagsLock.write {
+          if self.flagContext.isEmpty {
+            self.flagContext = context
+          }
+        }
+      }
+    }
+  }
 
   // Thread safety using ReadWriteLock (consistent with Track, People, MixpanelInstance)
   internal let flagsLock = ReadWriteLock(label: "com.mixpanel.featureflagmanager")

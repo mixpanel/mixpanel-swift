@@ -1,23 +1,23 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.3
 
 import PackageDescription
 
 let package = Package(
   name: "Mixpanel",
   platforms: [
-    .iOS(.v14),
-    .tvOS(.v14),
-    .macOS(.v11),
-    .watchOS(.v7),
+    .iOS(.v12),
+    .tvOS(.v12),
+    .macOS(.v10_13),
+    .watchOS(.v4),
   ],
   products: [
-    .library(name: "Mixpanel", targets: ["Mixpanel"]),
+    .library(name: "Mixpanel", targets: ["Mixpanel"])
   ],
   dependencies: [
     .package(
       url: "https://github.com/advantagefse/json-logic-swift",
       from: "1.2.0"
-    ),
+    )
   ],
   targets: [
     .target(
@@ -29,6 +29,6 @@ let package = Package(
       resources: [
         .copy("Mixpanel/PrivacyInfo.xcprivacy")
       ]
-    ),
+    )
   ]
 )

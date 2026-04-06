@@ -19,7 +19,7 @@ let package = Package(
       from: "1.2.0"
     ),
     .package(
-      url: "https://github.com/mixpanel/mixpanel-swift-shared.git",
+      url: "https://github.com/mixpanel/mixpanel-swift-common.git",
       from: "1.0.0"
     )
   ],
@@ -28,7 +28,7 @@ let package = Package(
       name: "Mixpanel",
       dependencies: [
         .product(name: "jsonlogic", package: "json-logic-swift"),
-        .product(name: "MixpanelSwiftShared", package: "mixpanel-swift-shared")
+        .product(name: "MixpanelSwiftCommon", package: "mixpanel-swift-common")
       ],
       path: "Sources",
       resources: [

@@ -270,13 +270,30 @@ public protocol MixpanelFlags {
   ///                         to their `MixpanelFlagVariant` values. Returns an empty dictionary
   ///                         if fetching fails.
   func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void)
+
+  /// Replaces the current custom flag evaluation context entirely and triggers a flag re-fetch.
+  ///
+  /// - Parameters:
+  ///   - context: The new context dictionary to use for flag evaluation.
+  ///   - completion: A closure called when the fetch completes (success or failure).
+  func setContext(_ context: [String: Any], completion: @escaping () -> Void)
 }
 
 // --- FeatureFlagManager Class ---
 
 class FeatureFlagManager: Network, MixpanelFlags {
 
-  weak var delegate: MixpanelFlagDelegate?
+  weak var delegate: MixpanelFlagDelegate? {
+    didSet {
+      if let context = delegate?.getOptions().featureFlagOptions.context, !context.isEmpty {
+        flagsLock.write {
+          if self.flagContext.isEmpty {
+            self.flagContext = context
+          }
+        }
+      }
+    }
+  }
 
   // Thread safety using ReadWriteLock (consistent with Track, People, MixpanelInstance)
   internal let flagsLock = ReadWriteLock(label: "com.mixpanel.featureflagmanager")
@@ -300,6 +317,9 @@ class FeatureFlagManager: Network, MixpanelFlags {
   /// It is session-scoped and cleared on app restart.
   internal var activatedFirstTimeEvents: Set<String> = Set()
 
+  // Flag evaluation context (protected by flagsLock)
+  private var flagContext: [String: Any]
+
   // Timing tracking properties
   private var fetchStartTime: Date?
   var timeLastFetched: Date?
@@ -311,11 +331,13 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   // Initializers
   required init(serverURL: String) {
+    self.flagContext = [:]
     super.init(serverURL: serverURL)
   }
 
   public init(serverURL: String, delegate: MixpanelFlagDelegate?) {
     self.delegate = delegate
+    self.flagContext = delegate?.getOptions().featureFlagOptions.context ?? [:]
     super.init(serverURL: serverURL)
   }
 
@@ -329,6 +351,17 @@ class FeatureFlagManager: Network, MixpanelFlags {
     // Dispatch fetch trigger to allow caller to continue
     DispatchQueue.global(qos: .userInitiated).async { [weak self] in
       self?._fetchFlagsIfNeeded(completion: completion)
+    }
+  }
+
+  func setContext(_ context: [String: Any], completion: @escaping () -> Void) {
+    flagsLock.write {
+      self.flagContext = context
+    }
+    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+      self?._fetchFlagsIfNeeded { _ in
+        completion()
+      }
     }
   }
 
@@ -528,17 +561,14 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
     // Access/Modify isFetching and fetchCompletionHandlers with write lock
     flagsLock.write {
+      if let completion = completion {
+        self.fetchCompletionHandlers.append(completion)
+      }
       if !self.isFetching {
         self.isFetching = true
         shouldStartFetch = true
-        if let completion = completion {
-          self.fetchCompletionHandlers.append(completion)
-        }
       } else {
         MixpanelLogger.debug(message: "Fetch already in progress, queueing completion handler.")
-        if let completion = completion {
-          self.fetchCompletionHandlers.append(completion)
-        }
       }
     }
 
@@ -567,7 +597,10 @@ class FeatureFlagManager: Network, MixpanelFlags {
     let anonymousId = delegate.getAnonymousId()
     MixpanelLogger.debug(message: "Fetching flags for distinct ID: \(distinctId)")
 
-    var context = options.featureFlagOptions.context
+    var context: [String: Any] = [:]
+    flagsLock.read {
+      context = self.flagContext
+    }
     context["distinct_id"] = distinctId
     if let anonymousId = anonymousId {
       context["device_id"] = anonymousId
@@ -981,13 +1014,11 @@ class FeatureFlagManager: Network, MixpanelFlags {
     Network.apiRequest(
       base: serverURL,
       resource: resource,
-      failure: { [weak self] reason, _, _ in
-        guard self != nil else { return }
+      failure: { reason, _, _ in
         // Silent failure - cohort sync will catch up
         MixpanelLogger.warn(message: "Failed to record first-time event for flag \(flagId): \(reason)")
       },
-      success: { [weak self] _, _ in
-        guard self != nil else { return }
+      success: { _, _ in
         MixpanelLogger.debug(message: "Successfully recorded first-time event for flag \(flagId)")
       }
     )

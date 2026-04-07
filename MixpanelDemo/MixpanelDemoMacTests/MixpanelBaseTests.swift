@@ -46,6 +46,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
   }
 
   func removeDBfile(_ mixpanel: MixpanelInstance) {
+    waitForTrackingQueue(mixpanel)
     mixpanel.mixpanelPersistence.closeDB()
     removeDBfile(apiToken: mixpanel.apiToken)
   }
@@ -103,20 +104,20 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
   }
 
   func eventQueue(token: String) -> Queue {
-    return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .events)
+    return MixpanelPersistence.init(instanceName: token).loadEntitiesInBatch(type: .events)
   }
 
   func peopleQueue(token: String) -> Queue {
-    return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .people)
+    return MixpanelPersistence.init(instanceName: token).loadEntitiesInBatch(type: .people)
   }
 
   func unIdentifiedPeopleQueue(token: String) -> Queue {
-    return MixpanelPersistence.init(token: token).loadEntitiesInBatch(
+    return MixpanelPersistence.init(instanceName: token).loadEntitiesInBatch(
       type: .people, flag: PersistenceConstant.unIdentifiedFlag)
   }
 
   func groupQueue(token: String) -> Queue {
-    return MixpanelPersistence.init(token: token).loadEntitiesInBatch(type: .groups)
+    return MixpanelPersistence.init(instanceName: token).loadEntitiesInBatch(type: .groups)
   }
 
   func flushAndWaitForTrackingQueue(_ mixpanel: MixpanelInstance) {

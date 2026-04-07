@@ -12,10 +12,14 @@ protocol AEDelegate: AnyObject {
   func increment(property: String, by: Double)
 }
 
-#if os(iOS) || os(tvOS) || os(visionOS)
+#if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
   import Foundation
-  import UIKit
   import StoreKit
+  #if os(macOS)
+    import Cocoa
+  #else
+    import UIKit
+  #endif
 
   class AutomaticEvents: NSObject, SKPaymentTransactionObserver, SKProductsRequestDelegate {
 
@@ -81,17 +85,31 @@ protocol AEDelegate: AnyObject {
         }
       }
 
-      NotificationCenter.default.addObserver(
-        self,
-        selector: #selector(appWillResignActive(_:)),
-        name: UIApplication.willResignActiveNotification,
-        object: nil)
+      #if os(macOS)
+        NotificationCenter.default.addObserver(
+          self,
+          selector: #selector(appWillResignActive(_:)),
+          name: NSApplication.willResignActiveNotification,
+          object: nil)
 
-      NotificationCenter.default.addObserver(
-        self,
-        selector: #selector(appDidBecomeActive(_:)),
-        name: UIApplication.didBecomeActiveNotification,
-        object: nil)
+        NotificationCenter.default.addObserver(
+          self,
+          selector: #selector(appDidBecomeActive(_:)),
+          name: NSApplication.didBecomeActiveNotification,
+          object: nil)
+      #else
+        NotificationCenter.default.addObserver(
+          self,
+          selector: #selector(appWillResignActive(_:)),
+          name: UIApplication.willResignActiveNotification,
+          object: nil)
+
+        NotificationCenter.default.addObserver(
+          self,
+          selector: #selector(appDidBecomeActive(_:)),
+          name: UIApplication.didBecomeActiveNotification,
+          object: nil)
+      #endif
 
       SKPaymentQueue.default().add(self)
     }

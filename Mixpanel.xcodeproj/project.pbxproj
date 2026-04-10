@@ -1150,7 +1150,7 @@
 			repositoryURL = "https://github.com/mixpanel/mixpanel-swift-common";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
+				minimumVersion = 1.0.0;
 			};
 		};
 		17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */ = {

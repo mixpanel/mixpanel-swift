@@ -453,7 +453,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
       if !MixpanelInstance.isiOSAppExtension() && trackAutomaticEvents {
         automaticEvents.delegate = self
-        automaticEvents.initializeEvents(instanceName: self.name)
+        // Defer automatic events initialization to the next run loop iteration
+        // to avoid interfering with SwiftUI's accent color setup when
+        // Mixpanel.initialize() is called from a SwiftUI App's init().
+        // See: https://github.com/mixpanel/mixpanel-swift/issues/522
+        DispatchQueue.main.async { [weak self] in
+          guard let self = self else { return }
+          self.automaticEvents.initializeEvents(instanceName: self.name)
+        }
       }
     #endif
     if self.options.featureFlagOptions.prefetchFlags {

@@ -69,9 +69,6 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
   }
 
   func waitForTrackingQueue(_ mixpanel: MixpanelInstance) {
-    // Drain the main run loop first to ensure any deferred initialization
-    // (e.g. automatic events) has been dispatched to the tracking queue.
-    waitForAsyncTasks()
     mixpanel.trackingQueue.sync {
       mixpanel.networkQueue.sync {
         return

@@ -34,6 +34,53 @@ class Track {
     self.mixpanelPersistence = mixpanelPersistence
   }
 
+  /// Builds event properties for tracking and first-time event checking.
+  /// This is the single source of truth for property building to ensure consistency.
+  ///
+  /// - Parameters:
+  ///   - userProperties: User-provided properties
+  ///   - superProperties: Super properties from MixpanelInstance
+  ///   - mixpanelIdentity: Identity information
+  ///   - epochInterval: Epoch timestamp
+  /// - Returns: Complete event properties dictionary
+  func buildEventProperties(
+    userProperties: Properties?,
+    superProperties: InternalProperties,
+    mixpanelIdentity: MixpanelIdentity,
+    epochInterval: Double
+  ) -> [String: Any] {
+    var p: [String: Any] = [:]
+
+    // Add timestamp (milliseconds)
+    let epochMilliseconds = round(epochInterval * 1000)
+    p["time"] = epochMilliseconds
+
+    // Add identity properties
+    p["distinct_id"] = mixpanelIdentity.distinctID
+
+    if let anonymousId = mixpanelIdentity.anonymousId {
+      p["$device_id"] = anonymousId
+    }
+
+    if let userId = mixpanelIdentity.userId {
+      p["$user_id"] = userId
+    }
+
+    if let hadPersistedDistinctId = mixpanelIdentity.hadPersistedDistinctId {
+      p["$had_persisted_distinct_id"] = hadPersistedDistinctId
+    }
+
+    // Add super properties
+    p += superProperties
+
+    // Add user properties (override super properties if keys conflict)
+    if let userProperties = userProperties {
+      p += userProperties
+    }
+
+    return p
+  }
+
   func track(
     event: String?,
     properties: Properties? = nil,
@@ -53,33 +100,27 @@ class Track {
       return timedEvents
     }
     assertPropertyTypes(properties)
-    let epochMilliseconds = round(epochInterval * 1000)
-    let eventStartTime = timedEvents[ev] as? Double
-    var p = InternalProperties()
+
+    // Use shared property builder for consistency
+    var p = buildEventProperties(
+      userProperties: properties,
+      superProperties: superProperties,
+      mixpanelIdentity: mixpanelIdentity,
+      epochInterval: epochInterval
+    )
+
+    // Add SDK-specific properties for persistence
     AutomaticProperties.automaticPropertiesLock.read {
       p += AutomaticProperties.properties
     }
     p["token"] = apiToken
-    p["time"] = epochMilliseconds
+
+    // Handle timed events
+    let eventStartTime = timedEvents[ev] as? Double
     var shadowTimedEvents = timedEvents
     if let eventStartTime = eventStartTime {
       shadowTimedEvents.removeValue(forKey: ev)
       p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
-    }
-    p["distinct_id"] = mixpanelIdentity.distinctID
-    if mixpanelIdentity.anonymousId != nil {
-      p["$device_id"] = mixpanelIdentity.anonymousId
-    }
-    if mixpanelIdentity.userId != nil {
-      p["$user_id"] = mixpanelIdentity.userId
-    }
-    if mixpanelIdentity.hadPersistedDistinctId != nil {
-      p["$had_persisted_distinct_id"] = mixpanelIdentity.hadPersistedDistinctId
-    }
-
-    p += superProperties
-    if let properties = properties {
-      p += properties
     }
 
     // Notify event bridge listeners (non-blocking)
@@ -90,11 +131,10 @@ class Track {
       )
     }
 
-    // Check for first-time event matches
-    if let mixpanelInstance = mixpanelInstance,
-       let flagManager = mixpanelInstance.flags as? FeatureFlagManager {
-      flagManager.checkFirstTimeEvents(eventName: ev, properties: p)
-    }
+    // Note: First-time event checking is now done synchronously in MixpanelInstance.track()
+    // before dispatching to trackingQueue. This ensures proper ordering when track() and
+    // getVariantSync() are called sequentially. The check was removed from here to avoid
+    // duplicate work and matches the Android SDK fix in PR #936.
 
     var trackEvent: InternalProperties = ["event": ev, "properties": p]
     metadata.toDict().forEach { (k, v) in trackEvent[k] = v }

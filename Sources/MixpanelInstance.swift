@@ -1205,6 +1205,42 @@ extension MixpanelInstance {
   public func track(event: String?, properties: Properties? = nil) {
     let epochInterval = Date().timeIntervalSince1970
 
+    // Check first-time events synchronously on the calling thread before queuing
+    // This ensures proper ordering when track() and getVariantSync() are called sequentially
+    // Uses lazy property builder to avoid overhead when there are no pending first-time events
+    if let event = event, let flagManager = self.flags as? FeatureFlagManager {
+      // Pass a closure that builds properties only if there's a pending first-time event
+      // This avoids the cost of building properties for 99% of track() calls
+      flagManager.checkFirstTimeEvents(eventName: event) { [weak self] in
+        guard let self = self else { return [:] }
+
+        // Get super properties
+        var superProps = InternalProperties()
+        self.readWriteLock.read {
+          superProps = self.superProperties
+        }
+
+        // Build identity
+        let mixpanelIdentity = MixpanelIdentity(
+          distinctID: self.distinctId,
+          peopleDistinctID: nil,
+          anonymousId: self.anonymousId,
+          userId: self.userId,
+          alias: nil,
+          hadPersistedDistinctId: self.hadPersistedDistinctId
+        )
+
+        // Use shared property builder from Track for consistency
+        return self.trackInstance.buildEventProperties(
+          userProperties: properties,
+          superProperties: superProps,
+          mixpanelIdentity: mixpanelIdentity,
+          epochInterval: epochInterval
+        )
+      }
+    }
+
+    // Then dispatch to trackingQueue for persistence (existing tracking logic)
     trackingQueue.async { [weak self, event, properties, epochInterval] in
       guard let self else {
         return
@@ -1719,7 +1755,7 @@ extension MixpanelInstance {
 
   /**
      Returns if the current user has opted out tracking.
-  
+
      - returns: the current super opted out tracking status
      */
   public func hasOptedOutTracking() -> Bool {

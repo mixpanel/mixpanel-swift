@@ -872,22 +872,34 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   /// Checks if a tracked event matches any pending first-time events and activates the corresponding variant.
   ///
-  /// - Note:
-  ///   This method is **asynchronous** with respect to the caller. It dispatches its work onto
-  ///   the queue and returns immediately, without waiting for first-time event processing to
-  ///   complete. As a result, there is a short window during which a subsequent `getVariant` call
-  ///   may not yet observe the newly activated variant. Callers should not rely on immediate
-  ///   visibility of first-time event activations in the same synchronous call chain.
-  internal func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-      guard let self = self else { return }
+  /// This method executes synchronously to ensure proper ordering when track() and getVariant()/getVariantSync()
+  /// are called sequentially. The flag variant will be activated before returning, allowing
+  /// subsequent getVariantSync() calls to observe the newly activated variant.
+  ///
+  /// Uses lazy property evaluation to avoid overhead when there are no pending first-time events.
+  /// Properties are only built (via the buildProperties closure) if there's a pending event for this event name.
+  ///
+  /// - Parameters:
+  ///   - eventName: The name of the tracked event
+  ///   - buildProperties: A closure that builds event properties on-demand. Only called if needed.
+  ///
+  /// - Note: Only the backend recording API call is dispatched asynchronously (fire-and-forget).
+  ///         The actual flag activation happens synchronously on the calling thread.
+  internal func checkFirstTimeEvents(eventName: String, buildProperties: () -> [String: Any]) {
+    // Execute synchronously to preserve ordering with getVariant() calls
+    // This fixes the race condition where getVariant() could be called before
+    // the flag variant is activated when track() and getVariant() are called sequentially.
 
-      // O(1) check: skip iteration if no pending event matches this event name
-      var hasPendingEvent = false
-      self.flagsLock.read {
-        hasPendingEvent = self.pendingFirstTimeEventNames.contains(eventName)
-      }
-      guard hasPendingEvent else { return }
+    // O(1) check: skip iteration if no pending event matches this event name
+    // Properties are NOT built yet - this is the fast path for 99% of calls!
+    var hasPendingEvent = false
+    flagsLock.read {
+      hasPendingEvent = self.pendingFirstTimeEventNames.contains(eventName)
+    }
+    guard hasPendingEvent else { return }  // ← Exit immediately for non-matching events
+
+    // Only build properties when we actually need them (lazy evaluation)
+    let properties = buildProperties()
 
       // Snapshot pending events with lock
       // Note: We don't snapshot activatedFirstTimeEvents because we'll check it
@@ -935,15 +947,15 @@ class FeatureFlagManager: Network, MixpanelFlags {
         // Atomic check-and-set: Ensure only one thread activates this event.
         // This prevents duplicate recordFirstTimeEvent calls and flag variant changes
         // when multiple threads concurrently process the same event.
-        self.flagsLock.write {
-          if !self.activatedFirstTimeEvents.contains(eventKey) {
+        flagsLock.write {
+          if !activatedFirstTimeEvents.contains(eventKey) {
             // We won the race - activate this event
-            self.activatedFirstTimeEvents.insert(eventKey)
+            activatedFirstTimeEvents.insert(eventKey)
 
-            if self.flags == nil {
-              self.flags = [:]
+            if flags == nil {
+              flags = [:]
             }
-            self.flags![flagKey] = pendingEvent.pendingVariant
+            flags![flagKey] = pendingEvent.pendingVariant
             shouldActivate = true
           }
         }
@@ -953,10 +965,12 @@ class FeatureFlagManager: Network, MixpanelFlags {
           MixpanelLogger.info(message: "First-time event matched for flag '\(flagKey)': \(eventName)")
 
           // Track the feature flag check event with the new variant
-          self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
+          _trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
 
           // Record to backend (fire-and-forget)
-          self.recordFirstTimeEvent(
+          // Dispatch only the network call async to avoid blocking the caller
+          DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.recordFirstTimeEvent(
             flagId: pendingEvent.flagId,
             projectId: pendingEvent.projectId,
             firstTimeEventHash: pendingEvent.firstTimeEventHash

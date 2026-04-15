@@ -298,6 +298,10 @@ class FeatureFlagManager: Network, MixpanelFlags {
   // Thread safety using ReadWriteLock (consistent with Track, People, MixpanelInstance)
   internal let flagsLock = ReadWriteLock(label: "com.mixpanel.featureflagmanager")
 
+  // Serial queue for feature flag operations (consistent with trackingQueue, networkQueue pattern)
+  private let flagsQueue = DispatchQueue(
+    label: "com.mixpanel.feature_flags", qos: .userInitiated, autoreleaseFrequency: .workItem)
+
   // Internal State - Protected by flagsLock
   var flags: [String: MixpanelFlagVariant]? = nil
   var isFetching: Bool = false
@@ -349,7 +353,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   func loadFlags(completion: ((Bool) -> Void)?) {
     // Dispatch fetch trigger to allow caller to continue
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+    flagsQueue.async { [weak self] in
       self?._fetchFlagsIfNeeded(completion: completion)
     }
   }
@@ -358,7 +362,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     flagsLock.write {
       self.flagContext = context
     }
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+    flagsQueue.async { [weak self] in
       self?._fetchFlagsIfNeeded { _ in
         completion()
       }
@@ -376,46 +380,50 @@ class FeatureFlagManager: Network, MixpanelFlags {
   // --- Sync Flag Retrieval ---
 
   func getVariantSync(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
-    var flagVariant: MixpanelFlagVariant?
-    var tracked = false
-    var capturedTimeLastFetched: Date?
-    var capturedFetchLatencyMs: Int?
+    // Execute synchronously on flagQueue to respect serial ordering
+    // This ensures proper FIFO ordering with checkFirstTimeEvents calls
+    return flagsQueue.sync {
+      var flagVariant: MixpanelFlagVariant?
+      var tracked = false
+      var capturedTimeLastFetched: Date?
+      var capturedFetchLatencyMs: Int?
 
-    // Use write lock to perform atomic check-and-set for tracking
-    flagsLock.write {
-      guard let currentFlags = self.flags else { return }
+      // Use write lock to perform atomic check-and-set for tracking
+      flagsLock.write {
+        guard let currentFlags = self.flags else { return }
 
-      if let variant = currentFlags[flagName] {
-        flagVariant = variant
+        if let variant = currentFlags[flagName] {
+          flagVariant = variant
 
-        // Perform atomic check-and-set for tracking
-        if !self.trackedFeatures.contains(flagName) {
-          self.trackedFeatures.insert(flagName)
-          tracked = true
-          // Capture timing data while in lock
-          capturedTimeLastFetched = self.timeLastFetched
-          capturedFetchLatencyMs = self.fetchLatencyMs
+          // Perform atomic check-and-set for tracking
+          if !self.trackedFeatures.contains(flagName) {
+            self.trackedFeatures.insert(flagName)
+            tracked = true
+            // Capture timing data while in lock
+            capturedTimeLastFetched = self.timeLastFetched
+            capturedFetchLatencyMs = self.fetchLatencyMs
+          }
         }
+        // If flag wasn't found, flagVariant remains nil
       }
-      // If flag wasn't found, flagVariant remains nil
-    }
 
-    // Now, process the results outside the lock
+      // Now, process the results outside the lock
 
-    if let foundVariant = flagVariant {
-      // If tracking was done *in this call*, call the delegate with timing data
-      if tracked {
-        self._performTrackingDelegateCall(
-          flagName: flagName,
-          variant: foundVariant,
-          timeLastFetched: capturedTimeLastFetched,
-          fetchLatencyMs: capturedFetchLatencyMs
-        )
+      if let foundVariant = flagVariant {
+        // If tracking was done *in this call*, call the delegate with timing data
+        if tracked {
+          self._performTrackingDelegateCall(
+            flagName: flagName,
+            variant: foundVariant,
+            timeLastFetched: capturedTimeLastFetched,
+            fetchLatencyMs: capturedFetchLatencyMs
+          )
+        }
+        return foundVariant
+      } else {
+        MixpanelLogger.info(message: "Flag '\(flagName)' not found or flags not ready. Returning fallback.")
+        return fallback
       }
-      return foundVariant
-    } else {
-      MixpanelLogger.info(message: "Flag '\(flagName)' not found or flags not ready. Returning fallback.")
-      return fallback
     }
   }
 
@@ -425,7 +433,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     _ flagName: String, fallback: MixpanelFlagVariant,
     completion: @escaping (MixpanelFlagVariant) -> Void
   ) {
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+    flagsQueue.async { [weak self] in
       guard let self = self else { return }
 
       var flagVariant: MixpanelFlagVariant?
@@ -515,7 +523,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   }
 
   func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void) {
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+    flagsQueue.async { [weak self] in
       guard let self = self else {
         DispatchQueue.main.async { completion([:]) }
         return
@@ -872,34 +880,29 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   /// Checks if a tracked event matches any pending first-time events and activates the corresponding variant.
   ///
-  /// This method executes synchronously to ensure proper ordering when track() and getVariant()/getVariantSync()
-  /// are called sequentially. The flag variant will be activated before returning, allowing
-  /// subsequent getVariantSync() calls to observe the newly activated variant.
-  ///
-  /// Uses lazy property evaluation to avoid overhead when there are no pending first-time events.
-  /// Properties are only built (via the buildProperties closure) if there's a pending event for this event name.
+  /// This method dispatches asynchronously to the serial flagQueue to ensure proper FIFO ordering
+  /// when track() and getVariant()/getVariantSync() are called sequentially. Because all flag operations
+  /// use the same serial queue, the flag variant will be activated before any subsequent getVariant() calls
+  /// execute, fixing the race condition.
   ///
   /// - Parameters:
   ///   - eventName: The name of the tracked event
-  ///   - buildProperties: A closure that builds event properties on-demand. Only called if needed.
+  ///   - properties: Event properties to match against property filters
   ///
-  /// - Note: Only the backend recording API call is dispatched asynchronously (fire-and-forget).
-  ///         The actual flag activation happens synchronously on the calling thread.
-  internal func checkFirstTimeEvents(eventName: String, buildProperties: () -> [String: Any]) {
-    // Execute synchronously to preserve ordering with getVariant() calls
-    // This fixes the race condition where getVariant() could be called before
-    // the flag variant is activated when track() and getVariant() are called sequentially.
+  /// - Note: Dispatches asynchronously to flagQueue. The backend recording API call is also dispatched asynchronously.
+  internal func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
+    // Dispatch to flagQueue to ensure serial execution with getVariant() calls
+    // This guarantees FIFO ordering: if track() is called before getVariant(),
+    // the flag will be activated before getVariant() reads it.
+    flagsQueue.async { [weak self] in
+      guard let self = self else { return }
 
-    // O(1) check: skip iteration if no pending event matches this event name
-    // Properties are NOT built yet - this is the fast path for 99% of calls!
-    var hasPendingEvent = false
-    flagsLock.read {
-      hasPendingEvent = self.pendingFirstTimeEventNames.contains(eventName)
-    }
-    guard hasPendingEvent else { return }  // ← Exit immediately for non-matching events
-
-    // Only build properties when we actually need them (lazy evaluation)
-    let properties = buildProperties()
+      // O(1) check: skip iteration if no pending event matches this event name
+      var hasPendingEvent = false
+      self.flagsLock.read {
+        hasPendingEvent = self.pendingFirstTimeEventNames.contains(eventName)
+      }
+      guard hasPendingEvent else { return }  // ← Exit immediately for non-matching events
 
       // Snapshot pending events with lock
       // Note: We don't snapshot activatedFirstTimeEvents because we'll check it
@@ -947,15 +950,15 @@ class FeatureFlagManager: Network, MixpanelFlags {
         // Atomic check-and-set: Ensure only one thread activates this event.
         // This prevents duplicate recordFirstTimeEvent calls and flag variant changes
         // when multiple threads concurrently process the same event.
-        flagsLock.write {
-          if !activatedFirstTimeEvents.contains(eventKey) {
+        self.flagsLock.write {
+          if !self.activatedFirstTimeEvents.contains(eventKey) {
             // We won the race - activate this event
-            activatedFirstTimeEvents.insert(eventKey)
+            self.activatedFirstTimeEvents.insert(eventKey)
 
-            if flags == nil {
-              flags = [:]
+            if self.flags == nil {
+              self.flags = [:]
             }
-            flags![flagKey] = pendingEvent.pendingVariant
+            self.flags![flagKey] = pendingEvent.pendingVariant
             shouldActivate = true
           }
         }
@@ -965,16 +968,17 @@ class FeatureFlagManager: Network, MixpanelFlags {
           MixpanelLogger.info(message: "First-time event matched for flag '\(flagKey)': \(eventName)")
 
           // Track the feature flag check event with the new variant
-          _trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
+          self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
 
           // Record to backend (fire-and-forget)
-          // Dispatch only the network call async to avoid blocking the caller
+          // Network call dispatched separately to avoid blocking the flag queue
           DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             self?.recordFirstTimeEvent(
-            flagId: pendingEvent.flagId,
-            projectId: pendingEvent.projectId,
-            firstTimeEventHash: pendingEvent.firstTimeEventHash
-          )
+              flagId: pendingEvent.flagId,
+              projectId: pendingEvent.projectId,
+              firstTimeEventHash: pendingEvent.firstTimeEventHash
+            )
+          }
         }
       }
     }

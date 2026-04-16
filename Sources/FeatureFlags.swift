@@ -179,6 +179,8 @@ public protocol MixpanelFlags {
   ///   It is NOT recommended to call this from the main UI thread.
   ///   If flags are not ready (`areFlagsReady()` is false), this method returns the `fallback`
   ///   value, but it may still block while waiting for queued tracking or activation work to complete.
+  ///   If called immediately after track(), variants may not be activated yet due to a
+  ///   race condition as track is executed asynchronously. Use `getVariant` instead.
   ///
   /// - Parameters:
   ///   - flagName: The unique identifier for the feature flag.
@@ -212,6 +214,8 @@ public protocol MixpanelFlags {
   ///   It is NOT recommended to call this from the main UI thread.
   ///   If flags are not ready (`areFlagsReady()` is false), this method returns the `fallbackValue`,
   ///   but it may still block while waiting for queued tracking or activation work to complete.
+  ///   If called immediately after track(), variants may not be activated yet due to a
+  ///   race condition as track is executed asynchronously. Use `getVariantValue` instead.
   ///
   /// - Parameters:
   ///   - flagName: The unique identifier for the feature flag.
@@ -277,6 +281,8 @@ public protocol MixpanelFlags {
   ///   If flags are not ready (`areFlagsReady()` is false), it returns an empty dictionary
   ///   immediately without fetching, but it may still block while waiting for queued tracking
   ///   or activation work to complete.
+  ///   If called immediately after track(), variants may not be activated yet due to a
+  ///   race condition as track is executed asynchronously. Use `getAllVariants` instead.
   ///
   /// - Returns: A dictionary mapping flag names to their `MixpanelFlagVariant` values,
   ///            or an empty dictionary if flags are not ready.
@@ -355,11 +361,11 @@ class FeatureFlagManager: MixpanelFlags {
   private var trackingQueue: DispatchQueue
 
   // Initializers
-    internal init(serverURL: String, delegate: MixpanelFlagDelegate? = nil, trackingQueue: DispatchQueue) {
+    internal init(serverURL: String, trackingQueue: DispatchQueue, delegate: MixpanelFlagDelegate? = nil) {
         self.serverURL = serverURL
+        self.trackingQueue = trackingQueue
         self.delegate = delegate
         self.flagContext = delegate?.getOptions().featureFlagOptions.context ?? [:]
-        self.trackingQueue = trackingQueue
     }
 
   // --- Public Methods ---
@@ -397,17 +403,12 @@ class FeatureFlagManager: MixpanelFlags {
   // --- Sync Flag Retrieval ---
 
   func getVariantSync(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
-    #if DEBUG
     if Thread.isMainThread {
       MixpanelLogger.warn(
         message: "It is NOT recommended to call this method from the main thread as it might block the calling thread until the value can be retrieved. Consider using async getVariant() instead."
       )
     }
-    #endif
-
-      return trackingQueue.sync {
-        return _getVariantSyncImpl(flagName, fallback: fallback)
-      }
+      return _getVariantSyncImpl(flagName, fallback: fallback)
   }
 
   private func _getVariantSyncImpl(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
@@ -494,9 +495,7 @@ class FeatureFlagManager: MixpanelFlags {
           // This completion runs *after* fetch completes (or fails)
           let result: MixpanelFlagVariant
           if success {
-            // Fetch succeeded – call the private impl directly to avoid re-entering
-            // trackingQueue.sync (which would block the main thread unnecessarily
-            // and fire a false positive DEBUG warning).
+            // Fetch succeeded – call the private impl directly to avoid false positive DEBUG warning
             result = self._getVariantSyncImpl(flagName, fallback: fallback)
           } else {
             MixpanelLogger.warn(message: "Failed to fetch flags, returning fallback for \(flagName).")
@@ -544,17 +543,12 @@ class FeatureFlagManager: MixpanelFlags {
   // --- Bulk Flag Retrieval ---
 
     func getAllVariantsSync() -> [String: MixpanelFlagVariant] {
-        #if DEBUG
         if Thread.isMainThread {
             MixpanelLogger.warn(
                 message: "It is NOT recommended to call this method from the main thread as it might block the calling thread until the value can be retrieved. Consider using async getAllVariants() instead."
             )
         }
-        #endif
-        
-        return trackingQueue.sync {
-            return _getAllVariantsSyncImpl()
-        }
+        return _getAllVariantsSyncImpl()
     }
 
   private func _getAllVariantsSyncImpl() -> [String: MixpanelFlagVariant] {
@@ -582,9 +576,7 @@ class FeatureFlagManager: MixpanelFlags {
         self._fetchFlagsIfNeeded { success in
           let result: [String: MixpanelFlagVariant]
           if success {
-            // Fetch succeeded – call the private impl directly to avoid re-entering
-            // trackingQueue.sync (which would block the main thread unnecessarily
-            // and fire a false positive DEBUG warning).
+            // Fetch succeeded – call the private impl directly to avoid false positive DEBUG warning
             result = self._getAllVariantsSyncImpl()
           } else {
             MixpanelLogger.warn(message: "Failed to fetch flags, returning empty dictionary.")

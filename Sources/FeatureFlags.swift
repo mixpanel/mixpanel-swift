@@ -175,6 +175,10 @@ public protocol MixpanelFlags {
   /// Otherwise, the provided `fallback` `MixpanelFlagVariant` is returned.
   /// This method will also trigger any necessary tracking logic for the accessed flag.
   ///
+  /// - Important:This method will block the calling thread until the value can be retrieved
+  ///   It is NOT recommended to call this from the main UI thread.
+  ///   If flags are not ready (`areFlagsReady()` is false), it returns the fallback immediately without blocking or fetching.
+  ///
   /// - Parameters:
   ///   - flagName: The unique identifier for the feature flag.
   ///   - fallback: The `MixpanelFlagVariant` to return if the specified flag is not found
@@ -203,6 +207,10 @@ public protocol MixpanelFlags {
   /// This is a convenience method that extracts the `value` property from the `MixpanelFlagVariant`
   /// obtained via `getVariantSync`.
   ///
+  /// - Important:This method will block the calling thread until the value can be retrieved
+  ///   It is NOT recommended to call this from the main UI thread.
+  ///   If flags are not ready (`areFlagsReady()` is false), it returns the fallback immediately without blocking or fetching.
+  ///
   /// - Parameters:
   ///   - flagName: The unique identifier for the feature flag.
   ///   - fallbackValue: The default value to return if the flag is not found,
@@ -230,6 +238,10 @@ public protocol MixpanelFlags {
   /// The exact logic for what constitutes "enabled" (e.g., `true`, non-nil, a specific string)
   /// should be defined by the implementing class.
   ///
+  /// - Important:This method will block the calling thread until the value can be retrieved
+  ///   It is NOT recommended to call this from the main UI thread.
+  ///   If flags are not ready (`areFlagsReady()` is false), it returns the fallback immediately without blocking or fetching.
+  ///
   /// - Parameters:
   ///   - flagName: The unique identifier for the feature flag.
   ///   - fallbackValue: The boolean value to return if the flag is not found,
@@ -256,6 +268,10 @@ public protocol MixpanelFlags {
   /// Synchronously retrieves all currently fetched feature flag variants.
   /// Returns an empty dictionary if flags have not been loaded yet.
   /// This method does not trigger tracking for any flags.
+  ///
+  /// - Important:This method will block the calling thread until the value can be retrieved
+  ///   It is NOT recommended to call this from the main UI thread.
+  ///   If flags are not ready (`areFlagsReady()` is false), it returns the fallback immediately without blocking or fetching.
   ///
   /// - Returns: A dictionary mapping flag names to their `MixpanelFlagVariant` values,
   ///            or an empty dictionary if flags are not ready.
@@ -329,6 +345,9 @@ class FeatureFlagManager: Network, MixpanelFlags {
   private var currentOptions: MixpanelOptions? { delegate?.getOptions() }
   private var flagsRoute = "/flags/"
 
+  // Queue for synchronizing flag operations with tracking
+  private var trackingQueue: DispatchQueue?
+
   // Initializers
   required init(serverURL: String) {
     self.flagContext = [:]
@@ -341,6 +360,17 @@ class FeatureFlagManager: Network, MixpanelFlags {
     super.init(serverURL: serverURL)
   }
 
+  convenience init(serverURL: String, trackingQueue: DispatchQueue?) {
+    self.init(serverURL: serverURL)
+    self.trackingQueue = trackingQueue
+  }
+
+  // --- Helper Methods ---
+
+  private func getTrackingQueue() -> DispatchQueue {
+    return trackingQueue ?? DispatchQueue.global(qos: .userInitiated)
+  }
+
   // --- Public Methods ---
 
   func loadFlags() {
@@ -349,7 +379,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   func loadFlags(completion: ((Bool) -> Void)?) {
     // Dispatch fetch trigger to allow caller to continue
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+    getTrackingQueue().async { [weak self] in
       self?._fetchFlagsIfNeeded(completion: completion)
     }
   }
@@ -358,7 +388,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     flagsLock.write {
       self.flagContext = context
     }
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+    getTrackingQueue().async { [weak self] in
       self?._fetchFlagsIfNeeded { _ in
         completion()
       }
@@ -376,6 +406,24 @@ class FeatureFlagManager: Network, MixpanelFlags {
   // --- Sync Flag Retrieval ---
 
   func getVariantSync(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
+    #if DEBUG
+    if Thread.isMainThread, trackingQueue != nil {
+      MixpanelLogger.warn(
+        message: "It is NOT recommended to call this method from the main thread as it might block the calling thread until the value can be retrieved. Consider using async getVariant() instead."
+      )
+    }
+    #endif
+
+    if let trackingQueue = trackingQueue {
+      return trackingQueue.sync {
+        return _getVariantSyncImpl(flagName, fallback: fallback)
+      }
+    } else {
+      return _getVariantSyncImpl(flagName, fallback: fallback)
+    }
+  }
+
+  private func _getVariantSyncImpl(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
     var flagVariant: MixpanelFlagVariant?
     var tracked = false
     var capturedTimeLastFetched: Date?
@@ -425,7 +473,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     _ flagName: String, fallback: MixpanelFlagVariant,
     completion: @escaping (MixpanelFlagVariant) -> Void
   ) {
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+    getTrackingQueue().async { [weak self] in
       guard let self = self else { return }
 
       var flagVariant: MixpanelFlagVariant?
@@ -507,6 +555,24 @@ class FeatureFlagManager: Network, MixpanelFlags {
   // --- Bulk Flag Retrieval ---
 
   func getAllVariantsSync() -> [String: MixpanelFlagVariant] {
+    #if DEBUG
+    if Thread.isMainThread, trackingQueue != nil {
+      MixpanelLogger.warn(
+        message: "It is NOT recommended to call this method from the main thread as it might block the calling thread until the value can be retrieved. Consider using async getAllVariants() instead."
+      )
+    }
+    #endif
+
+    if let trackingQueue = trackingQueue {
+      return trackingQueue.sync {
+        return _getAllVariantsSyncImpl()
+      }
+    } else {
+      return _getAllVariantsSyncImpl()
+    }
+  }
+
+  private func _getAllVariantsSyncImpl() -> [String: MixpanelFlagVariant] {
     var result: [String: MixpanelFlagVariant] = [:]
     flagsLock.read {
       result = self.flags ?? [:]
@@ -515,7 +581,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   }
 
   func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void) {
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+    getTrackingQueue().async { [weak self] in
       guard let self = self else {
         DispatchQueue.main.async { completion([:]) }
         return
@@ -879,7 +945,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   ///   may not yet observe the newly activated variant. Callers should not rely on immediate
   ///   visibility of first-time event activations in the same synchronous call chain.
   internal func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+    getTrackingQueue().async { [weak self] in
       guard let self = self else { return }
 
       // O(1) check: skip iteration if no pending event matches this event name
@@ -955,12 +1021,14 @@ class FeatureFlagManager: Network, MixpanelFlags {
           // Track the feature flag check event with the new variant
           self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
 
-          // Record to backend (fire-and-forget)
-          self.recordFirstTimeEvent(
-            flagId: pendingEvent.flagId,
-            projectId: pendingEvent.projectId,
-            firstTimeEventHash: pendingEvent.firstTimeEventHash
-          )
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                // Record to backend (fire-and-forget)
+                self?.recordFirstTimeEvent(
+                    flagId: pendingEvent.flagId,
+                    projectId: pendingEvent.projectId,
+                    firstTimeEventHash: pendingEvent.firstTimeEventHash
+                )
+            }
         }
       }
     }

@@ -34,26 +34,44 @@ class Track {
     self.mixpanelPersistence = mixpanelPersistence
   }
 
-  /// Builds event properties for tracking and first-time event checking.
-  /// This is the single source of truth for property building to ensure consistency.
+  /// Builds complete event properties for tracking.
+  /// This is the single source of truth for property building to ensure consistency
+  /// between persistence and first-time event checks.
   ///
   /// - Parameters:
+  ///   - eventName: The event name (after defaulting to "mp_event" if nil)
   ///   - userProperties: User-provided properties
+  ///   - timedEvents: Timed events dictionary for duration calculation
   ///   - superProperties: Super properties from MixpanelInstance
   ///   - mixpanelIdentity: Identity information
-  ///   - epochInterval: Epoch timestamp
-  /// - Returns: Complete event properties dictionary
-  func buildEventProperties(
+  ///   - epochInterval: Epoch timestamp in seconds
+  /// - Returns: Complete event properties dictionary with all standard fields
+  func buildTrackEventProperties(
+    eventName: String,
     userProperties: Properties?,
+    timedEvents: InternalProperties,
     superProperties: InternalProperties,
     mixpanelIdentity: MixpanelIdentity,
     epochInterval: Double
-  ) -> [String: Any] {
-    var p: [String: Any] = [:]
+  ) -> InternalProperties {
+    var p = InternalProperties()
+
+    // Add automatic properties first (lowest priority)
+    AutomaticProperties.automaticPropertiesLock.read {
+      p += AutomaticProperties.properties
+    }
+
+    // Add SDK-specific properties
+    p["token"] = apiToken
 
     // Add timestamp (milliseconds)
     let epochMilliseconds = round(epochInterval * 1000)
     p["time"] = epochMilliseconds
+
+    // Add duration if this is a timed event
+    if let eventStartTime = timedEvents[eventName] as? Double {
+      p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
+    }
 
     // Add identity properties
     p["distinct_id"] = mixpanelIdentity.distinctID
@@ -70,10 +88,10 @@ class Track {
       p["$had_persisted_distinct_id"] = hadPersistedDistinctId
     }
 
-    // Add super properties
+    // Add super properties (can override automatic properties)
     p += superProperties
 
-    // Add user properties (override super properties if keys conflict)
+    // Add user properties (highest priority - can override everything)
     if let userProperties = userProperties {
       p += userProperties
     }
@@ -81,68 +99,36 @@ class Track {
     return p
   }
 
-  func track(
-    event: String?,
-    properties: Properties? = nil,
-    timedEvents: InternalProperties,
-    superProperties: InternalProperties,
-    mixpanelIdentity: MixpanelIdentity,
-    epochInterval: Double
-  ) -> InternalProperties {
-    var ev = "mp_event"
-    if let event = event {
-      ev = event
-    } else {
-      MixpanelLogger.info(
-        message: "mixpanel track called with empty event parameter. using 'mp_event'")
+    func track(
+        event: String,
+        properties: InternalProperties,
+        timedEvents: InternalProperties,
+    ) -> InternalProperties {
+        // Update timed events (remove the event if it was timed)
+        var shadowTimedEvents = timedEvents
+        if timedEvents[event] != nil {
+            shadowTimedEvents.removeValue(forKey: event)
+        }
+
+        // Notify event bridge listeners (non-blocking)
+        if #available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *) {
+            MixpanelEventBridge.shared.notifyListeners(
+                eventName: event,
+                properties: properties
+            )
+        }
+
+        // Note: First-time event checking is now done in MixpanelInstance.track().
+        // This ensures proper ordering when
+        // track() and getVariantSync() are called sequentially.
+
+        var trackEvent: InternalProperties = ["event": event, "properties": properties]
+        metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
+
+        self.mixpanelPersistence.saveEntity(trackEvent, type: .events)
+        MixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents, instanceName: instanceName)
+        return shadowTimedEvents
     }
-    if !(mixpanelInstance?.trackAutomaticEventsEnabled ?? false) && ev.hasPrefix("$ae_") {
-      return timedEvents
-    }
-    assertPropertyTypes(properties)
-
-    // Use shared property builder for consistency
-    var p = buildEventProperties(
-      userProperties: properties,
-      superProperties: superProperties,
-      mixpanelIdentity: mixpanelIdentity,
-      epochInterval: epochInterval
-    )
-
-    // Add SDK-specific properties for persistence
-    AutomaticProperties.automaticPropertiesLock.read {
-      p += AutomaticProperties.properties
-    }
-    p["token"] = apiToken
-
-    // Handle timed events
-    let eventStartTime = timedEvents[ev] as? Double
-    var shadowTimedEvents = timedEvents
-    if let eventStartTime = eventStartTime {
-      shadowTimedEvents.removeValue(forKey: ev)
-      p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
-    }
-
-    // Notify event bridge listeners (non-blocking)
-    if #available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *) {
-      MixpanelEventBridge.shared.notifyListeners(
-        eventName: ev,
-        properties: p
-      )
-    }
-
-    // Note: First-time event checking is now done synchronously in MixpanelInstance.track()
-    // before dispatching to trackingQueue. This ensures proper ordering when track() and
-    // getVariantSync() are called sequentially. The check was removed from here to avoid
-    // duplicate work and matches the Android SDK fix in PR #936.
-
-    var trackEvent: InternalProperties = ["event": ev, "properties": p]
-    metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
-
-    self.mixpanelPersistence.saveEntity(trackEvent, type: .events)
-    MixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents, instanceName: instanceName)
-    return shadowTimedEvents
-  }
 
   func registerSuperProperties(
     _ properties: Properties,

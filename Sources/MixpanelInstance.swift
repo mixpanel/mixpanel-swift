@@ -1202,81 +1202,90 @@ extension MixpanelInstance {
      - parameter event:      event name
      - parameter properties: properties dictionary
      */
-  public func track(event: String?, properties: Properties? = nil) {
-    let epochInterval = Date().timeIntervalSince1970
+    public func track(event: String?, properties: Properties? = nil) {
+        if self.hasOptedOutTracking() {
+            return
+        }
 
-    // Post first-time event check to the flagQueue (asynchronously)
-    // Because getVariant() also uses flagQueue, serial execution guarantees
-    // that if track() is called before getVariant(), the flag will be activated first.
-    // This matches the Android Handler pattern.
-    if let event = event, let flagManager = self.flags as? FeatureFlagManager {
-      // Build properties for first-time event check
-      var superProps = InternalProperties()
-      self.readWriteLock.read {
-        superProps = self.superProperties
-      }
+        // Return early if event is nil (consistent with Track.track() behavior)
+        var eventName: String = "mp_event"
+        if let event = event {
+            eventName = event
+        } else {
+            MixpanelLogger.info(
+                message: "mixpanel track called with empty event parameter. using 'mp_event'")
+        }
 
-      let mixpanelIdentity = MixpanelIdentity(
-        distinctID: self.distinctId,
-        peopleDistinctID: nil,
-        anonymousId: self.anonymousId,
-        userId: self.userId,
-        alias: nil,
-        hadPersistedDistinctId: self.hadPersistedDistinctId
-      )
+        // Check if this is an automatic event that should be ignored
+        if !self.trackAutomaticEventsEnabled && eventName.hasPrefix("$ae_") {
+            return
+        }
 
-      // Build event properties using shared builder
-      let eventProperties = self.trackInstance.buildEventProperties(
-        userProperties: properties,
-        superProperties: superProps,
-        mixpanelIdentity: mixpanelIdentity,
-        epochInterval: epochInterval
-      )
+        // Validate property types early before building
+        if let properties = properties {
+            assertPropertyTypes(properties)
+        }
 
-      // Post to flagQueue - will execute serially with getVariant() calls
-      flagManager.checkFirstTimeEvents(eventName: event, properties: eventProperties)
+        let epochInterval = Date().timeIntervalSince1970
+
+        // CRITICAL: Capture state snapshot atomically on calling thread to ensure consistency
+        // This guarantees that checkFirstTimeEvents and persistence use the SAME properties
+        var shadowTimedEvents = InternalProperties()
+        var shadowSuperProperties = InternalProperties()
+        self.readWriteLock.read {
+            shadowTimedEvents = self.timedEvents
+            shadowSuperProperties = self.superProperties
+        }
+
+        // Capture identity snapshot
+        let mixpanelIdentity = MixpanelIdentity(
+            distinctID: self.distinctId,
+            peopleDistinctID: nil,
+            anonymousId: self.anonymousId,
+            userId: self.userId,
+            alias: nil,
+            hadPersistedDistinctId: self.hadPersistedDistinctId
+        )
+
+        // Build event properties ONCE using the captured snapshot and shared helper function
+        // This ensures first-time event check and persistence use identical properties
+        let eventProperties: InternalProperties = self.trackInstance.buildTrackEventProperties(
+            eventName: eventName,
+            userProperties: properties,
+            timedEvents: shadowTimedEvents,
+            superProperties: shadowSuperProperties,
+            mixpanelIdentity: mixpanelIdentity,
+            epochInterval: epochInterval
+        )
+
+        // Dispatch to trackingQueue for persistence using the SAME captured state
+        trackingQueue.async { [weak self, eventName, eventProperties, shadowTimedEvents] in
+            guard let self = self else {
+                return
+            }
+
+            // Use the captured snapshot to ensure consistency with checkFirstTimeEvents
+            let timedEventsSnapshot: InternalProperties = self.trackInstance.track(
+                event: eventName,
+                properties: eventProperties,
+                timedEvents: shadowTimedEvents)
+
+            self.readWriteLock.write {
+                self.timedEvents = timedEventsSnapshot
+            }
+        }
+        
+        // Post first-time event check to flagQueue with the SAME properties
+        // Serial execution guarantees FIFO ordering with getVariant() calls
+        if let flagManager = self.flags as? FeatureFlagManager {
+            flagManager.checkFirstTimeEvents(eventName: eventName, properties: eventProperties)
+        }
+
+        if MixpanelInstance.isiOSAppExtension() {
+            flush()
+        }
     }
 
-    // Dispatch to trackingQueue for persistence (existing tracking logic)
-    trackingQueue.async { [weak self, event, properties, epochInterval] in
-      guard let self else {
-        return
-      }
-      if self.hasOptedOutTracking() {
-        return
-      }
-      var shadowTimedEvents = InternalProperties()
-      var shadowSuperProperties = InternalProperties()
-
-      self.readWriteLock.read {
-        shadowTimedEvents = self.timedEvents
-        shadowSuperProperties = self.superProperties
-      }
-
-      let mixpanelIdentity = MixpanelIdentity.init(
-        distinctID: self.distinctId,
-        peopleDistinctID: nil,
-        anonymousId: self.anonymousId,
-        userId: self.userId,
-        alias: nil,
-        hadPersistedDistinctId: self.hadPersistedDistinctId)
-      let timedEventsSnapshot = self.trackInstance.track(
-        event: event,
-        properties: properties,
-        timedEvents: shadowTimedEvents,
-        superProperties: shadowSuperProperties,
-        mixpanelIdentity: mixpanelIdentity,
-        epochInterval: epochInterval)
-
-      self.readWriteLock.write {
-        self.timedEvents = timedEventsSnapshot
-      }
-    }
-
-    if MixpanelInstance.isiOSAppExtension() {
-      flush()
-    }
-  }
 
   /**
      Tracks an event with properties and to specific groups.

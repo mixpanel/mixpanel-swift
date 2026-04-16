@@ -15,22 +15,15 @@ let package = Package(
   ],
   dependencies: [
     .package(
-      name: "jsonlogic",
       url: "https://github.com/advantagefse/json-logic-swift",
       from: "1.2.0"
-    ),
-    .package(
-      name: "MixpanelSwiftCommon",
-      url: "https://github.com/mixpanel/mixpanel-swift-common.git",
-      from: "1.0.0"
     )
   ],
   targets: [
     .target(
       name: "Mixpanel",
       dependencies: [
-        "MixpanelSwiftCommon",
-        "jsonlogic",
+        .product(name: "jsonlogic", package: "json-logic-swift")
       ],
       path: "Sources",
       resources: [

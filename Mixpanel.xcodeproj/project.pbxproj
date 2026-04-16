@@ -11,10 +11,6 @@
 		16178FD22F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000003 /* jsonlogic */; };
 		16178FD32F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000004 /* jsonlogic */; };
 		16178FD42F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000005 /* jsonlogic */; };
-		1651FD822F83B6E30065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD812F83B6E30065BB7E /* MixpanelSwiftCommon */; };
-		1651FD852F83B6F10065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD842F83B6F10065BB7E /* MixpanelSwiftCommon */; };
-		1651FD872F83B6F50065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD862F83B6F50065BB7E /* MixpanelSwiftCommon */; };
-		1651FD892F83B6F80065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD882F83B6F80065BB7E /* MixpanelSwiftCommon */; };
 		171E4C122DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C132DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C142DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
@@ -158,7 +154,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				16178FD42F687EE200E022F2 /* jsonlogic in Frameworks */,
-				1651FD892F83B6F80065BB7E /* MixpanelSwiftCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -166,7 +161,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1651FD822F83B6E30065BB7E /* MixpanelSwiftCommon in Frameworks */,
 				16178FD12F687EE200E022F2 /* jsonlogic in Frameworks */,
 				E15FF7C61D02C9E10076CDE3 /* CoreTelephony.framework in Frameworks */,
 			);
@@ -177,7 +171,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				16178FD22F687EE200E022F2 /* jsonlogic in Frameworks */,
-				1651FD852F83B6F10065BB7E /* MixpanelSwiftCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -186,20 +179,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				16178FD32F687EE200E022F2 /* jsonlogic in Frameworks */,
-				1651FD872F83B6F50065BB7E /* MixpanelSwiftCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1651FD832F83B6F10065BB7E /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		17C654792BB1EF6700C8A126 /* Mixpanel */ = {
 			isa = PBXGroup;
 			children = (
@@ -230,7 +215,6 @@
 			isa = PBXGroup;
 			children = (
 				E115947F1CFF1491007F8B4F /* Mixpanel */,
-				1651FD832F83B6F10065BB7E /* Frameworks */,
 				E115947E1CFF1491007F8B4F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -369,7 +353,6 @@
 			name = Mixpanel_watchOS;
 			packageProductDependencies = (
 				17JSONLOGIC00000005 /* jsonlogic */,
-				1651FD882F83B6F80065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel_watchOS;
 			productReference = 86F86E81224404BD00B69832 /* Mixpanel.framework */;
@@ -391,7 +374,6 @@
 			name = Mixpanel;
 			packageProductDependencies = (
 				17JSONLOGIC00000002 /* jsonlogic */,
-				1651FD812F83B6E30065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel;
 			productReference = E115947D1CFF1491007F8B4F /* Mixpanel.framework */;
@@ -413,7 +395,6 @@
 			name = Mixpanel_tvOS;
 			packageProductDependencies = (
 				17JSONLOGIC00000003 /* jsonlogic */,
-				1651FD842F83B6F10065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel_tvOS;
 			productReference = E12782B31D4AB4B30025FB05 /* Mixpanel.framework */;
@@ -435,7 +416,6 @@
 			name = Mixpanel_macOS;
 			packageProductDependencies = (
 				17JSONLOGIC00000004 /* jsonlogic */,
-				1651FD862F83B6F50065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel_OSX;
 			productReference = E1F15FC91E64A10700391AE3 /* Mixpanel.framework */;
@@ -484,7 +464,6 @@
 			mainGroup = E11594731CFF1491007F8B4F;
 			packageReferences = (
 				17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */,
-				1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */,
 			);
 			productRefGroup = E115947E1CFF1491007F8B4F /* Products */;
 			projectDirPath = "";
@@ -1145,14 +1124,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/mixpanel/mixpanel-swift-common";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
 		17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/advantagefse/json-logic-swift";
@@ -1164,26 +1135,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		1651FD812F83B6E30065BB7E /* MixpanelSwiftCommon */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */;
-			productName = MixpanelSwiftCommon;
-		};
-		1651FD842F83B6F10065BB7E /* MixpanelSwiftCommon */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */;
-			productName = MixpanelSwiftCommon;
-		};
-		1651FD862F83B6F50065BB7E /* MixpanelSwiftCommon */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */;
-			productName = MixpanelSwiftCommon;
-		};
-		1651FD882F83B6F80065BB7E /* MixpanelSwiftCommon */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */;
-			productName = MixpanelSwiftCommon;
-		};
 		17JSONLOGIC00000002 /* jsonlogic */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;

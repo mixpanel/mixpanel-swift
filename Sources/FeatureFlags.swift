@@ -175,9 +175,10 @@ public protocol MixpanelFlags {
   /// Otherwise, the provided `fallback` `MixpanelFlagVariant` is returned.
   /// This method will also trigger any necessary tracking logic for the accessed flag.
   ///
-  /// - Important:This method will block the calling thread until the value can be retrieved
+  /// - Important: This method may block the calling thread until the value can be retrieved.
   ///   It is NOT recommended to call this from the main UI thread.
-  ///   If flags are not ready (`areFlagsReady()` is false), it returns the fallback immediately without blocking or fetching.
+  ///   If flags are not ready (`areFlagsReady()` is false), this method returns the `fallback`
+  ///   value, but it may still block while waiting for queued tracking or activation work to complete.
   ///
   /// - Parameters:
   ///   - flagName: The unique identifier for the feature flag.

@@ -297,7 +297,7 @@ public protocol MixpanelFlags {
 
 // --- FeatureFlagManager Class ---
 
-class FeatureFlagManager: Network, MixpanelFlags {
+class FeatureFlagManager: MixpanelFlags {
 
   weak var delegate: MixpanelFlagDelegate? {
     didSet {
@@ -311,6 +311,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     }
   }
 
+    var serverURL: String!
   // Thread safety using ReadWriteLock (consistent with Track, People, MixpanelInstance)
   internal let flagsLock = ReadWriteLock(label: "com.mixpanel.featureflagmanager")
 
@@ -346,30 +347,15 @@ class FeatureFlagManager: Network, MixpanelFlags {
   private var flagsRoute = "/flags/"
 
   // Queue for synchronizing flag operations with tracking
-  private var trackingQueue: DispatchQueue?
+  private var trackingQueue: DispatchQueue
 
   // Initializers
-  required init(serverURL: String) {
-    self.flagContext = [:]
-    super.init(serverURL: serverURL)
-  }
-
-  public init(serverURL: String, delegate: MixpanelFlagDelegate?) {
-    self.delegate = delegate
-    self.flagContext = delegate?.getOptions().featureFlagOptions.context ?? [:]
-    super.init(serverURL: serverURL)
-  }
-
-  convenience init(serverURL: String, trackingQueue: DispatchQueue?) {
-    self.init(serverURL: serverURL)
-    self.trackingQueue = trackingQueue
-  }
-
-  // --- Helper Methods ---
-
-  private func getTrackingQueue() -> DispatchQueue {
-    return trackingQueue ?? DispatchQueue.global(qos: .userInitiated)
-  }
+    internal init(serverURL: String, delegate: MixpanelFlagDelegate? = nil, trackingQueue: DispatchQueue) {
+        self.serverURL = serverURL
+        self.delegate = delegate
+        self.flagContext = delegate?.getOptions().featureFlagOptions.context ?? [:]
+        self.trackingQueue = trackingQueue
+    }
 
   // --- Public Methods ---
 
@@ -379,7 +365,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   func loadFlags(completion: ((Bool) -> Void)?) {
     // Dispatch fetch trigger to allow caller to continue
-    getTrackingQueue().async { [weak self] in
+      trackingQueue.async { [weak self] in
       self?._fetchFlagsIfNeeded(completion: completion)
     }
   }
@@ -388,7 +374,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     flagsLock.write {
       self.flagContext = context
     }
-    getTrackingQueue().async { [weak self] in
+      trackingQueue.async { [weak self] in
       self?._fetchFlagsIfNeeded { _ in
         completion()
       }
@@ -407,20 +393,16 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   func getVariantSync(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
     #if DEBUG
-    if Thread.isMainThread, trackingQueue != nil {
+    if Thread.isMainThread {
       MixpanelLogger.warn(
         message: "It is NOT recommended to call this method from the main thread as it might block the calling thread until the value can be retrieved. Consider using async getVariant() instead."
       )
     }
     #endif
 
-    if let trackingQueue = trackingQueue {
       return trackingQueue.sync {
         return _getVariantSyncImpl(flagName, fallback: fallback)
       }
-    } else {
-      return _getVariantSyncImpl(flagName, fallback: fallback)
-    }
   }
 
   private func _getVariantSyncImpl(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
@@ -473,7 +455,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
     _ flagName: String, fallback: MixpanelFlagVariant,
     completion: @escaping (MixpanelFlagVariant) -> Void
   ) {
-    getTrackingQueue().async { [weak self] in
+      trackingQueue.async { [weak self] in
       guard let self = self else { return }
 
       var flagVariant: MixpanelFlagVariant?
@@ -554,23 +536,19 @@ class FeatureFlagManager: Network, MixpanelFlags {
 
   // --- Bulk Flag Retrieval ---
 
-  func getAllVariantsSync() -> [String: MixpanelFlagVariant] {
-    #if DEBUG
-    if Thread.isMainThread, trackingQueue != nil {
-      MixpanelLogger.warn(
-        message: "It is NOT recommended to call this method from the main thread as it might block the calling thread until the value can be retrieved. Consider using async getAllVariants() instead."
-      )
+    func getAllVariantsSync() -> [String: MixpanelFlagVariant] {
+        #if DEBUG
+        if Thread.isMainThread {
+            MixpanelLogger.warn(
+                message: "It is NOT recommended to call this method from the main thread as it might block the calling thread until the value can be retrieved. Consider using async getAllVariants() instead."
+            )
+        }
+        #endif
+        
+        return trackingQueue.sync {
+            return _getAllVariantsSyncImpl()
+        }
     }
-    #endif
-
-    if let trackingQueue = trackingQueue {
-      return trackingQueue.sync {
-        return _getAllVariantsSyncImpl()
-      }
-    } else {
-      return _getAllVariantsSyncImpl()
-    }
-  }
 
   private func _getAllVariantsSyncImpl() -> [String: MixpanelFlagVariant] {
     var result: [String: MixpanelFlagVariant] = [:]
@@ -581,7 +559,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   }
 
   func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void) {
-    getTrackingQueue().async { [weak self] in
+      trackingQueue.async { [weak self] in
       guard let self = self else {
         DispatchQueue.main.async { completion([:]) }
         return
@@ -945,7 +923,7 @@ class FeatureFlagManager: Network, MixpanelFlags {
   ///   may not yet observe the newly activated variant. Callers should not rely on immediate
   ///   visibility of first-time event activations in the same synchronous call chain.
   internal func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
-    getTrackingQueue().async { [weak self] in
+      trackingQueue.async { [weak self] in
       guard let self = self else { return }
 
       // O(1) check: skip iteration if no pending event matches this event name

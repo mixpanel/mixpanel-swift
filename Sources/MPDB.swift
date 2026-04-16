@@ -55,7 +55,18 @@ class MPDB {
       return
     }
     if let dbPath = pathToDb() {
-      if sqlite3_open_v2(dbPath, &connection, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil)
+      // On iOS (excluding Mac Catalyst and simulator), use SQLITE_OPEN_FILEPROTECTION_COMPLETEUNTILFIRSTUSERAUTHENTICATION
+      // so the database and its WAL/SHM files remain accessible in the background after first
+      // unlock. Without this, WAL file fsync/pwrite can hang indefinitely when the screen is
+      // locked during background execution, causing a watchdog kill.
+      // Mac Catalyst and the simulator use macOS/host file systems with no Data Protection,
+      // so the flag is unnecessary and can cause issues there.
+      #if os(iOS) && !targetEnvironment(macCatalyst) && !targetEnvironment(simulator)
+        let openFlags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FILEPROTECTION_COMPLETEUNTILFIRSTUSERAUTHENTICATION
+      #else
+        let openFlags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
+      #endif
+      if sqlite3_open_v2(dbPath, &connection, openFlags, nil)
         != SQLITE_OK
       {
         logSqlError(message: "Error opening or creating database at path: \(dbPath)")

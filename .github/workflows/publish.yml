@@ -1,0 +1,189 @@
+name: Publish Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 6.3.0 without v prefix)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Dry run (create PR only, skip merge, release and CocoaPods)'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  publish:
+    name: "📦 Publish Release"
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Check if PR already exists
+        id: check_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_EXISTS=$(gh pr list --head release/${{ inputs.version }} --json number --jq 'length')
+          echo "PR_EXISTS=$PR_EXISTS" >> $GITHUB_OUTPUT
+
+      - name: Checkout existing release branch
+        if: ${{ steps.check_pr.outputs.PR_EXISTS != '0' }}
+        run: |
+          git fetch origin release/${{ inputs.version }}
+          git checkout release/${{ inputs.version }}
+
+      - name: Create release branch
+        if: ${{ steps.check_pr.outputs.PR_EXISTS == '0' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b release/${{ inputs.version }}
+
+      - name: Get current version
+        if: ${{ steps.check_pr.outputs.PR_EXISTS == '0' }}
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(grep -E "s.version = '[0-9]+\.[0-9]+\.[0-9]+'" Mixpanel-swift.podspec | sed -E "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/")
+          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Update version in files
+        if: ${{ steps.check_pr.outputs.PR_EXISTS == '0' }}
+        run: |
+          OLD_VERSION="${{ steps.current_version.outputs.CURRENT_VERSION }}"
+          NEW_VERSION="${{ inputs.version }}"
+
+          # Update Mixpanel-swift.podspec
+          sed -i '' "s/s.version = '$OLD_VERSION'/s.version = '$NEW_VERSION'/" Mixpanel-swift.podspec
+
+          # Update Info.plist
+          sed -i '' "s/<string>$OLD_VERSION<\/string>/<string>$NEW_VERSION<\/string>/" Info.plist
+
+          # Update AutomaticProperties.swift
+          sed -i '' "s/return \"$OLD_VERSION\"/return \"$NEW_VERSION\"/" Sources/AutomaticProperties.swift
+
+          # Update generate_docs.sh
+          sed -i '' "s/--module-version $OLD_VERSION/--module-version $NEW_VERSION/" scripts/generate_docs.sh
+
+      - name: Generate documentation
+        if: ${{ steps.check_pr.outputs.PR_EXISTS == '0' }}
+        run: |
+          # Install jazzy
+          gem install jazzy
+
+          # Generate docs
+          ./scripts/generate_docs.sh
+
+      - name: Commit and push changes
+        if: ${{ steps.check_pr.outputs.PR_EXISTS == '0' }}
+        run: |
+          git add Mixpanel-swift.podspec Info.plist Sources/AutomaticProperties.swift scripts/generate_docs.sh docs
+          git commit -m "Version ${{ inputs.version }}
+
+          - Updated version to ${{ inputs.version }}
+          - Updated documentation
+
+          git push origin release/${{ inputs.version }}
+
+      - name: Create pull request
+        if: ${{ steps.check_pr.outputs.PR_EXISTS == '0' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "Release ${{ inputs.version }}" \
+            --body "## Release ${{ inputs.version }}
+
+          This PR prepares the release for version ${{ inputs.version }}.
+
+          ### Changes
+          - Updated version in Mixpanel-swift.podspec
+          - Updated version in Info.plist
+          - Updated version in Sources/AutomaticProperties.swift
+          - Updated version in scripts/generate_docs.sh
+          - Regenerated documentation
+
+          ### Next Steps
+          1. Review the changes
+          2. Approve and merge this PR
+          3. Run this workflow again with \`dry_run: false\` to complete the release
+
+          ---
+          *Created by GitHub Actions workflow*" \
+            --base master \
+            --head release/${{ inputs.version }}
+
+      - name: Wait for PR approval (dry run info)
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "✅ PR created successfully!"
+          echo ""
+          echo "Next steps:"
+          echo "1. Review and approve the PR: https://github.com/${{ github.repository }}/pulls"
+          echo "2. Once approved, run this workflow again with dry_run=false to complete the release"
+
+      - name: Merge pull request
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge release/${{ inputs.version }} --squash --delete-branch
+
+      - name: Pull latest changes
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git checkout master
+          git pull origin master
+
+      - name: Create and push tag
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ inputs.version }}" -m "Release ${{ inputs.version }}"
+          git push origin "${{ inputs.version }}"
+
+      - name: Build Carthage XCFramework
+        if: ${{ !inputs.dry_run }}
+        run: |
+          ./scripts/carthage.sh
+
+      - name: Install CocoaPods
+        if: ${{ !inputs.dry_run }}
+        run: gem install cocoapods
+
+      - name: Validate podspec
+        if: ${{ !inputs.dry_run }}
+        run: pod spec lint Mixpanel-swift.podspec --allow-warnings
+
+      - name: Push to CocoaPods
+        if: ${{ !inputs.dry_run }}
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        run: pod trunk push Mixpanel-swift.podspec --allow-warnings
+
+      - name: Create GitHub Release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ inputs.version }}" \
+            --title "Release ${{ inputs.version }}" \
+            --generate-notes
+
+      - name: Release complete
+        if: ${{ !inputs.dry_run }}
+        run: |
+          echo "🎉 Release ${{ inputs.version }} published successfully!"
+          echo ""
+          echo "The following tasks were completed:"
+          echo "✅ Version bumped to ${{ inputs.version }}"
+          echo "✅ Documentation generated"
+          echo "✅ Git tag ${{ inputs.version }} created"
+          echo "✅ GitHub release created"
+          echo "✅ Carthage XCFramework built"
+          echo "✅ Published to CocoaPods"

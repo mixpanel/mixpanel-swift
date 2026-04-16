@@ -82,11 +82,10 @@ jobs:
         if: ${{ steps.check_pr.outputs.PR_EXISTS == '0' }}
         run: |
           git add Mixpanel-swift.podspec Info.plist Sources/AutomaticProperties.swift scripts/generate_docs.sh docs
-          git commit -m "Version ${{ inputs.version }}
-
-          - Updated version to ${{ inputs.version }}
-          - Updated documentation
-
+          git commit \
+            -m "Version ${{ inputs.version }}" \
+            -m "- Updated version to ${{ inputs.version }}
+          - Updated documentation"
           git push origin release/${{ inputs.version }}
 
       - name: Create pull request

@@ -146,6 +146,10 @@ jobs:
           git tag -a "${{ inputs.version }}" -m "Release ${{ inputs.version }}"
           git push origin "${{ inputs.version }}"
 
+      - name: Install Carthage
+        if: ${{ !inputs.dry_run }}
+        run: brew install carthage
+
       - name: Build Carthage XCFramework
         if: ${{ !inputs.dry_run }}
         run: |

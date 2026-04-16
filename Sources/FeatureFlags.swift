@@ -270,9 +270,9 @@ public protocol MixpanelFlags {
   /// Returns an empty dictionary if flags have not been loaded yet.
   /// This method does not trigger tracking for any flags.
   ///
-  /// - Important:This method will block the calling thread until the value can be retrieved
+  /// - Important: This method will block the calling thread until the value can be retrieved.
   ///   It is NOT recommended to call this from the main UI thread.
-  ///   If flags are not ready (`areFlagsReady()` is false), it returns the fallback immediately without blocking or fetching.
+  ///   If flags are not ready (`areFlagsReady()` is false), it returns an empty dictionary immediately without fetching.
   ///
   /// - Returns: A dictionary mapping flag names to their `MixpanelFlagVariant` values,
   ///            or an empty dictionary if flags are not ready.

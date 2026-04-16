@@ -999,27 +999,29 @@ class FeatureFlagManager: MixpanelFlags {
           // Track the feature flag check event with the new variant
           self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
 
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                // Record to backend (fire-and-forget)
-                self?.recordFirstTimeEvent(
-                    flagId: pendingEvent.flagId,
-                    projectId: pendingEvent.projectId,
-                    firstTimeEventHash: pendingEvent.firstTimeEventHash
-                )
-            }
+           guard let delegate = self.delegate else {
+               MixpanelLogger.error(message: "Delegate missing for recording first-time event")
+               return
+           }
+           
+           let distinctId = delegate.getDistinctId()
+
+           DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+               // Record to backend (fire-and-forget)
+             self?.recordFirstTimeEvent(
+                 flagId: pendingEvent.flagId,
+                 projectId: pendingEvent.projectId,
+                 firstTimeEventHash: pendingEvent.firstTimeEventHash,
+                 distinctId: distinctId
+             )
+          }
         }
       }
     }
   }
 
   /// Records a first-time event activation to the backend
-  internal func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String) {
-    guard let delegate = self.delegate else {
-      MixpanelLogger.error(message: "Delegate missing for recording first-time event")
-      return
-    }
-
-    let distinctId = delegate.getDistinctId()
+  internal func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String) {
     let url = "/flags/\(flagId)/first-time-events"
 
     let queryItems = [

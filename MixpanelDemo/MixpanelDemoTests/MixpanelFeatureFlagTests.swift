@@ -257,7 +257,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
   }
 
   // Override recordFirstTimeEvent to prevent real network calls and track invocations
-  override func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String) {
+  override func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String) {
     recordFirstTimeEventCallCount += 1
     lastRecordedFlagId = flagId
     lastRecordedProjectId = projectId

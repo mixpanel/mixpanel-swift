@@ -208,9 +208,10 @@ public protocol MixpanelFlags {
   /// This is a convenience method that extracts the `value` property from the `MixpanelFlagVariant`
   /// obtained via `getVariantSync`.
   ///
-  /// - Important:This method will block the calling thread until the value can be retrieved
+  /// - Important: This method may block the calling thread until the value can be retrieved.
   ///   It is NOT recommended to call this from the main UI thread.
-  ///   If flags are not ready (`areFlagsReady()` is false), it returns the fallback immediately without blocking or fetching.
+  ///   If flags are not ready (`areFlagsReady()` is false), this method returns the `fallbackValue`,
+  ///   but it may still block while waiting for queued tracking or activation work to complete.
   ///
   /// - Parameters:
   ///   - flagName: The unique identifier for the feature flag.
@@ -239,9 +240,10 @@ public protocol MixpanelFlags {
   /// The exact logic for what constitutes "enabled" (e.g., `true`, non-nil, a specific string)
   /// should be defined by the implementing class.
   ///
-  /// - Important:This method will block the calling thread until the value can be retrieved
+  /// - Important: This method may block the calling thread until the value can be retrieved.
   ///   It is NOT recommended to call this from the main UI thread.
-  ///   If flags are not ready (`areFlagsReady()` is false), it returns the fallback immediately without blocking or fetching.
+  ///   If flags are not ready (`areFlagsReady()` is false), this method returns the `fallbackValue`,
+  ///   but it may still block while waiting for queued tracking or activation work to complete.
   ///
   /// - Parameters:
   ///   - flagName: The unique identifier for the feature flag.
@@ -272,7 +274,9 @@ public protocol MixpanelFlags {
   ///
   /// - Important: This method will block the calling thread until the value can be retrieved.
   ///   It is NOT recommended to call this from the main UI thread.
-  ///   If flags are not ready (`areFlagsReady()` is false), it returns an empty dictionary immediately without fetching.
+  ///   If flags are not ready (`areFlagsReady()` is false), it returns an empty dictionary
+  ///   immediately without fetching, but it may still block while waiting for queued tracking
+  ///   or activation work to complete.
   ///
   /// - Returns: A dictionary mapping flag names to their `MixpanelFlagVariant` values,
   ///            or an empty dictionary if flags are not ready.
@@ -490,8 +494,10 @@ class FeatureFlagManager: MixpanelFlags {
           // This completion runs *after* fetch completes (or fails)
           let result: MixpanelFlagVariant
           if success {
-            // Fetch succeeded, get the flag SYNCHRONOUSLY
-            result = self.getVariantSync(flagName, fallback: fallback)
+            // Fetch succeeded – call the private impl directly to avoid re-entering
+            // trackingQueue.sync (which would block the main thread unnecessarily
+            // and fire a false positive DEBUG warning).
+            result = self._getVariantSyncImpl(flagName, fallback: fallback)
           } else {
             MixpanelLogger.warn(message: "Failed to fetch flags, returning fallback for \(flagName).")
             result = fallback
@@ -576,7 +582,10 @@ class FeatureFlagManager: MixpanelFlags {
         self._fetchFlagsIfNeeded { success in
           let result: [String: MixpanelFlagVariant]
           if success {
-            result = self.getAllVariantsSync()
+            // Fetch succeeded – call the private impl directly to avoid re-entering
+            // trackingQueue.sync (which would block the main thread unnecessarily
+            // and fire a false positive DEBUG warning).
+            result = self._getAllVariantsSyncImpl()
           } else {
             MixpanelLogger.warn(message: "Failed to fetch flags, returning empty dictionary.")
             result = [:]

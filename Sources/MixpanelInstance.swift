@@ -1213,7 +1213,7 @@ extension MixpanelInstance {
             eventName = event
         } else {
             MixpanelLogger.info(
-                message: "mixpanel track called with empty event parameter. using 'mp_event'")
+                message: "mixpanel track called with empty event parameter.")
         }
 
         // Check if this is an automatic event that should be ignored

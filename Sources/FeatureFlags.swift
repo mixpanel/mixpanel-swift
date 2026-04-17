@@ -694,7 +694,7 @@ class FeatureFlagManager: MixpanelFlags {
         self?._completeFetch(success: false)
       },
       success: { [weak self] (flagsResponse, response) in
-        MixpanelLogger.info(message: "Successfully fetched flags.")
+        MixpanelLogger.info(message: "Successfully fetched flags.  \(flagsResponse)")
         guard let self = self else { return }
         let fetchEndTime = Date()
 
@@ -916,111 +916,107 @@ class FeatureFlagManager: MixpanelFlags {
 
   // MARK: - First-Time Event Checking
 
-  /// Checks if a tracked event matches any pending first-time events and activates the corresponding variant.
-  ///
-  /// - Note:
-  ///   This method is **asynchronous** with respect to the caller. It dispatches its work onto
-  ///   the queue and returns immediately, without waiting for first-time event processing to
-  ///   complete. As a result, there is a short window during which a subsequent `getVariant` call
-  ///   may not yet observe the newly activated variant. Callers should not rely on immediate
-  ///   visibility of first-time event activations in the same synchronous call chain.
-  internal func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
-      trackingQueue.async { [weak self] in
-      guard let self = self else { return }
-
-      // O(1) check: skip iteration if no pending event matches this event name
-      var hasPendingEvent = false
-      self.flagsLock.read {
-        hasPendingEvent = self.pendingFirstTimeEventNames.contains(eventName)
-      }
-      guard hasPendingEvent else { return }
-
-      // Snapshot pending events with lock
-      // Note: We don't snapshot activatedFirstTimeEvents because we'll check it
-      // atomically later under write lock to avoid TOCTOU race
-      var pendingEventsCopy: [String: PendingFirstTimeEvent] = [:]
-
-      self.flagsLock.read {
-        pendingEventsCopy = self.pendingFirstTimeEvents
-      }
-
-      // Iterate through all pending first-time events
-      for (eventKey, pendingEvent) in pendingEventsCopy {
-        // Check exact event name match (case-sensitive)
-        if eventName != pendingEvent.eventName {
-          continue
+    /// Checks if a tracked event matches any pending first-time events and activates the corresponding variant.
+    ///
+    ///- Note:
+    ///   This method **must** be called from the `trackingQueue`.
+    ///   Executing this sequentially on the background serial queue ensures that
+    ///   any subsequent `getVariant` calls (which also wait for or read from this state)
+    ///   will receive the newly activated variant, effectively eliminating the race
+    ///   condition between tracking and flag evaluation.
+    internal func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
+        // O(1) check: skip iteration if no pending event matches this event name
+        var hasPendingEvent = false
+        flagsLock.read {
+            hasPendingEvent = self.pendingFirstTimeEventNames.contains(eventName)
         }
-
-        // Evaluate property filters using json-logic-swift library
-        if let filters = pendingEvent.propertyFilters, !filters.isEmpty {
-          // Convert to JSON strings for json-logic-swift library
-          guard let rulesString = pendingEvent.propertyFiltersJSON,
-                let dataJSON = try? JSONSerialization.data(withJSONObject: properties),
-                let dataString = String(data: dataJSON, encoding: .utf8) else {
-            MixpanelLogger.warn(message: "Failed to serialize JsonLogic filters for event '\(eventKey)' matching '\(eventName)'")
-            continue
-          }
-
-          // Evaluate the filter
-          do {
-            let result: Bool = try applyRule(rulesString, to: dataString)
-            if !result {
-              MixpanelLogger.debug(message: "JsonLogic filter evaluated to false for event '\(eventKey)'")
-              continue
+        guard hasPendingEvent else { return }
+        
+        // Snapshot pending events with lock
+        // Note: We don't snapshot activatedFirstTimeEvents because we'll check it
+        // atomically later under write lock to avoid TOCTOU race
+        var pendingEventsCopy: [String: PendingFirstTimeEvent] = [:]
+        
+        flagsLock.read {
+            pendingEventsCopy = self.pendingFirstTimeEvents
+        }
+        
+        // Iterate through all pending first-time events
+        for (eventKey, pendingEvent) in pendingEventsCopy {
+            // Check exact event name match (case-sensitive)
+            if eventName != pendingEvent.eventName {
+                continue
             }
-          } catch {
-            MixpanelLogger.error(message: "JsonLogic evaluation error for event '\(eventKey)': \(error)")
-            continue
-          }
-        }
-
-        // Event matched! Try to activate the variant atomically
-        let flagKey = pendingEvent.flagKey
-        var shouldActivate = false
-
-        // Atomic check-and-set: Ensure only one thread activates this event.
-        // This prevents duplicate recordFirstTimeEvent calls and flag variant changes
-        // when multiple threads concurrently process the same event.
-        self.flagsLock.write {
-          if !self.activatedFirstTimeEvents.contains(eventKey) {
-            // We won the race - activate this event
-            self.activatedFirstTimeEvents.insert(eventKey)
-
-            if self.flags == nil {
-              self.flags = [:]
+            
+            // Evaluate property filters using json-logic-swift library
+            if let filters = pendingEvent.propertyFilters, !filters.isEmpty {
+                // Convert to JSON strings for json-logic-swift library
+                guard let rulesString = pendingEvent.propertyFiltersJSON,
+                      let dataJSON = try? JSONSerialization.data(withJSONObject: properties),
+                      let dataString = String(data: dataJSON, encoding: .utf8) else {
+                    MixpanelLogger.warn(message: "Failed to serialize JsonLogic filters for event '\(eventKey)' matching '\(eventName)'")
+                    continue
+                }
+                
+                // Evaluate the filter
+                do {
+                    let result: Bool = try applyRule(rulesString, to: dataString)
+                    if !result {
+                        MixpanelLogger.debug(message: "JsonLogic filter evaluated to false for event '\(eventKey)'")
+                        continue
+                    }
+                } catch {
+                    MixpanelLogger.error(message: "JsonLogic evaluation error for event '\(eventKey)': \(error)")
+                    continue
+                }
             }
-            self.flags![flagKey] = pendingEvent.pendingVariant
-            shouldActivate = true
-          }
+            
+            // Event matched! Try to activate the variant atomically
+            let flagKey = pendingEvent.flagKey
+            var shouldActivate = false
+            
+            // Atomic check-and-set: Ensure only one thread activates this event.
+            // This prevents duplicate recordFirstTimeEvent calls and flag variant changes
+            // when multiple threads concurrently process the same event.
+            flagsLock.write {
+                if !activatedFirstTimeEvents.contains(eventKey) {
+                    // We won the race - activate this event
+                    activatedFirstTimeEvents.insert(eventKey)
+                    
+                    if flags == nil {
+                        flags = [:]
+                    }
+                    flags![flagKey] = pendingEvent.pendingVariant
+                    shouldActivate = true
+                }
+            }
+            
+            // Only proceed with external calls if we successfully activated
+            if shouldActivate {
+                MixpanelLogger.info(message: "First-time event matched for flag '\(flagKey)': \(eventName)")
+                
+                // Track the feature flag check event with the new variant
+                self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
+                
+                guard let delegate = self.delegate else {
+                    MixpanelLogger.error(message: "Delegate missing for recording first-time event")
+                    return
+                }
+                
+                let distinctId = delegate.getDistinctId()
+                
+                DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                    // Record to backend (fire-and-forget)
+                    self?.recordFirstTimeEvent(
+                        flagId: pendingEvent.flagId,
+                        projectId: pendingEvent.projectId,
+                        firstTimeEventHash: pendingEvent.firstTimeEventHash,
+                        distinctId: distinctId
+                    )
+                }
+            }
         }
-
-        // Only proceed with external calls if we successfully activated
-        if shouldActivate {
-          MixpanelLogger.info(message: "First-time event matched for flag '\(flagKey)': \(eventName)")
-
-          // Track the feature flag check event with the new variant
-          self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
-
-           guard let delegate = self.delegate else {
-               MixpanelLogger.error(message: "Delegate missing for recording first-time event")
-               return
-           }
-           
-           let distinctId = delegate.getDistinctId()
-
-           DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-               // Record to backend (fire-and-forget)
-             self?.recordFirstTimeEvent(
-                 flagId: pendingEvent.flagId,
-                 projectId: pendingEvent.projectId,
-                 firstTimeEventHash: pendingEvent.firstTimeEventHash,
-                 distinctId: distinctId
-             )
-          }
-        }
-      }
     }
-  }
 
   /// Records a first-time event activation to the backend
   internal func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String) {

@@ -67,11 +67,14 @@ Check out the [Carthage docs](https://github.com/Carthage/Carthage#if-youre-buil
 
 ### Dependencies
 
-The Mixpanel Swift SDK includes the following third-party dependencies:
+The Mixpanel Swift SDK includes the following dependencies:
 
-- **json-logic-swift** (v1.2.0+) - Used for evaluating property filters in first-time event targeting for Feature Flags.
+- **[MixpanelSwiftCommon](https://github.com/mixpanel/mixpanel-swift-common)** - Shared common utilities and functionality for Mixpanel Swift SDKs.
+- **[json-logic-swift](https://github.com/advantagefse/json-logic-swift)** (v1.2.0+) - Used for evaluating property filters in first-time event targeting for Feature Flags.
 
-This dependency is automatically managed by your package manager (Swift Package Manager, CocoaPods, or Carthage) and does not require manual installation.
+These dependencies are automatically managed by your package manager (Swift Package Manager or CocoaPods) and do not require manual installation.
+
+**Note for Carthage users:** MixpanelSwiftCommon and other new dependencies do not support Carthage. If you are using Carthage, you can add these dependencies using Swift Package Manager alongside your Carthage setup or migrate mixpanel-swift itself to SPM.
 
 ## 2. Initialize Mixpanel
 Import Mixpanel into AppDelegate.swift, and initialize Mixpanel within application:didFinishLaunchingWithOptions:

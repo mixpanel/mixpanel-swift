@@ -1,0 +1,65 @@
+name: PR Title Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  check-title:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title format
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+
+          # Conventional commit pattern
+          # Supports: feat, fix, chore, release
+          # Optional breaking change indicator: !
+          # Examples:
+          #   feat: Add new feature
+          #   fix: Resolve bug
+          #   feat!: Breaking change
+          #   release: prepare 6.3.0
+
+          PATTERN='^(feat|fix|chore|release)!?: .+$'
+
+          if [[ ! "$PR_TITLE" =~ $PATTERN ]]; then
+            echo "❌ PR title does not follow conventional commit format"
+            echo ""
+            echo "Current title:"
+            echo "  $PR_TITLE"
+            echo ""
+            echo "Required format:"
+            echo "  <type>[!]: <description>"
+            echo ""
+            echo "Valid types:"
+            echo "  feat    - New feature"
+            echo "  fix     - Bug fix"
+            echo "  chore   - Maintenance task"
+            echo "  release - Release preparation"
+            echo ""
+            echo "Breaking changes (optional):"
+            echo "  Add '!' after type for breaking changes"
+            echo "  Example: feat!: Breaking API change"
+            echo ""
+            echo "Valid examples:"
+            echo "  ✅ feat: Add automatic event tracking"
+            echo "  ✅ fix: Resolve SwiftUI accent color override"
+            echo "  ✅ chore: Update dependencies"
+            echo "  ✅ feat!: Breaking change to API"
+            echo "  ✅ release: prepare 6.3.0"
+            echo ""
+            echo "Invalid examples:"
+            echo "  ❌ Added new feature"
+            echo "  ❌ Fix bug"
+            echo "  ❌ Updated docs"
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ PR title follows conventional commit format"
+          echo "Title: $PR_TITLE"

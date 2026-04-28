@@ -1,0 +1,139 @@
+name: Create Release Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to tag (e.g., 6.3.0 without v prefix)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-tag-${{ inputs.version }}
+  cancel-in-progress: false  # Never cancel during tag creation
+
+jobs:
+  create-tag:
+    name: "🏷️ Create Release Tag"
+    runs-on: macos-26
+    environment: release-tagging
+    steps:
+      - name: Enforce master branch requirement
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/master" ]; then
+            echo "ERROR: This workflow can only run from master branch"
+            echo "Current ref: ${{ github.ref }}"
+            echo ""
+            echo "To fix: Navigate to Actions → Create Release Tag"
+            echo "        Click the branch dropdown and select 'master'"
+            echo "        Then run the workflow"
+            exit 1
+          fi
+          echo "✓ Running from master branch"
+
+      - name: Checkout master
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Extract version from files
+        id: extract_versions
+        run: |
+          # Extract from podspec
+          PODSPEC_VERSION=$(grep -E "s.version = '[0-9]+\.[0-9]+\.[0-9]+'" Mixpanel-swift.podspec | sed -E "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/")
+
+          # Extract from AutomaticProperties.swift
+          SWIFT_VERSION=$(grep -E 'return "[0-9]+\.[0-9]+\.[0-9]+"' Sources/AutomaticProperties.swift | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')
+
+          echo "PODSPEC_VERSION=$PODSPEC_VERSION" >> $GITHUB_OUTPUT
+          echo "SWIFT_VERSION=$SWIFT_VERSION" >> $GITHUB_OUTPUT
+
+          echo "Input version: ${{ inputs.version }}"
+          echo "Podspec version: $PODSPEC_VERSION"
+          echo "Swift version: $SWIFT_VERSION"
+
+      - name: Validate version consistency
+        run: |
+          PODSPEC_VERSION="${{ steps.extract_versions.outputs.PODSPEC_VERSION }}"
+          SWIFT_VERSION="${{ steps.extract_versions.outputs.SWIFT_VERSION }}"
+          INPUT_VERSION="${{ inputs.version }}"
+          MISMATCH=0
+
+          if [ "$PODSPEC_VERSION" != "$INPUT_VERSION" ]; then
+            echo "ERROR: Podspec version mismatch"
+            echo "  Expected: $INPUT_VERSION"
+            echo "  Found: $PODSPEC_VERSION"
+            echo "  File: Mixpanel-swift.podspec"
+            MISMATCH=1
+          fi
+
+          if [ "$SWIFT_VERSION" != "$INPUT_VERSION" ]; then
+            echo "ERROR: AutomaticProperties.swift version mismatch"
+            echo "  Expected: $INPUT_VERSION"
+            echo "  Found: $SWIFT_VERSION"
+            echo "  File: Sources/AutomaticProperties.swift"
+            MISMATCH=1
+          fi
+
+          if [ $MISMATCH -eq 1 ]; then
+            echo ""
+            echo "Version files are not consistent with input version."
+            echo "This usually means:"
+            echo "  1. The release PR was not merged yet, or"
+            echo "  2. The release PR merge had conflicts that weren't resolved correctly"
+            echo ""
+            echo "Fix: Run the 'Prepare Release' workflow and merge the PR first."
+            exit 1
+          fi
+
+          echo "✓ All version checks passed"
+
+      - name: Verify tag does not exist
+        run: |
+          if git ls-remote --tags origin | grep -q "refs/tags/${{ inputs.version }}$"; then
+            echo "ERROR: Tag ${{ inputs.version }} already exists on origin"
+            echo ""
+            echo "If you need to re-release, use a patch version increment."
+            echo "Tags are immutable and cannot be deleted or moved."
+            exit 1
+          fi
+          echo "✓ Tag does not exist"
+
+      - name: Validate podspec
+        run: |
+          # Install CocoaPods
+          gem install cocoapods
+
+          # Use lib lint (not spec lint) because tag doesn't exist yet
+          # lib lint validates against local working tree
+          pod lib lint Mixpanel-swift.podspec --allow-warnings
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create annotated tag (no 'v' prefix)
+          git tag -a "${{ inputs.version }}" -m "Release ${{ inputs.version }}"
+
+          # Push tag to origin
+          git push origin "${{ inputs.version }}"
+
+      - name: Tag created successfully
+        run: |
+          echo "✅ Tag ${{ inputs.version }} created successfully!"
+          echo ""
+          echo "Next step: Run the 'Publish Release Artifacts' workflow"
+          echo "  1. Go to: https://github.com/${{ github.repository }}/actions/workflows/release-publish.yml"
+          echo "  2. Click 'Run workflow'"
+          echo "  3. Enter tag: ${{ inputs.version }}"
+          echo "  4. Approve the 'production' environment when prompted"
+          echo ""
+          echo "After publishing completes:"
+          echo "  - CocoaPods will be published"
+          echo "  - GitHub Release will be created as draft"
+          echo "  - Manually publish the draft release at: https://github.com/${{ github.repository }}/releases"

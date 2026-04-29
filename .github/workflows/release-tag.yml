@@ -44,10 +44,28 @@ jobs:
         id: extract_versions
         run: |
           # Extract from podspec
-          PODSPEC_VERSION=$(grep -E "s.version = '[0-9]+\.[0-9]+\.[0-9]+'" Mixpanel-swift.podspec | sed -E "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/")
+          PODSPEC_VERSION_LINE=$(grep -E "s.version = '[0-9]+\.[0-9]+\.[0-9]+'" Mixpanel-swift.podspec || true)
+          if [ -z "$PODSPEC_VERSION_LINE" ]; then
+            echo "ERROR: Could not extract version from Mixpanel-swift.podspec"
+            exit 1
+          fi
+          PODSPEC_VERSION=$(printf '%s\n' "$PODSPEC_VERSION_LINE" | sed -E "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/")
+          if [ -z "$PODSPEC_VERSION" ]; then
+            echo "ERROR: Could not parse version from Mixpanel-swift.podspec"
+            exit 1
+          fi
 
           # Extract from AutomaticProperties.swift
-          SWIFT_VERSION=$(grep -E 'return "[0-9]+\.[0-9]+\.[0-9]+"' Sources/AutomaticProperties.swift | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')
+          SWIFT_VERSION_LINE=$(grep -E 'return "[0-9]+\.[0-9]+\.[0-9]+"' Sources/AutomaticProperties.swift || true)
+          if [ -z "$SWIFT_VERSION_LINE" ]; then
+            echo "ERROR: Could not extract version from Sources/AutomaticProperties.swift"
+            exit 1
+          fi
+          SWIFT_VERSION=$(printf '%s\n' "$SWIFT_VERSION_LINE" | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')
+          if [ -z "$SWIFT_VERSION" ]; then
+            echo "ERROR: Could not parse version from Sources/AutomaticProperties.swift"
+            exit 1
+          fi
 
           echo "PODSPEC_VERSION=$PODSPEC_VERSION" >> $GITHUB_OUTPUT
           echo "SWIFT_VERSION=$SWIFT_VERSION" >> $GITHUB_OUTPUT
@@ -123,9 +141,59 @@ jobs:
           # Push tag to origin
           git push origin "${{ inputs.version }}"
 
-      - name: Tag created successfully
+      - name: Extract changelog for this version
+        id: extract_changelog
+        run: |
+          VERSION="${{ inputs.version }}"
+
+          if [ ! -f "CHANGELOG.md" ]; then
+            echo "⚠️  CHANGELOG.md not found, will use auto-generated notes"
+            echo "CHANGELOG_FOUND=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Extract this version's changelog entry
+          # Starts with "## [VERSION]" and ends before next "## [" or EOF
+          CHANGELOG=$(awk "/^## \[$VERSION\]/,/^## \[/{if(/^## \[/ && !/^## \[$VERSION\]/)exit;print}" CHANGELOG.md)
+
+          if [ -z "$CHANGELOG" ]; then
+            echo "⚠️  Changelog entry for version $VERSION not found in CHANGELOG.md"
+            echo "CHANGELOG_FOUND=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Save to temp file for gh release create
+          echo "$CHANGELOG" > /tmp/release-notes.md
+
+          echo "CHANGELOG_FOUND=true" >> $GITHUB_OUTPUT
+          echo "✓ Extracted changelog entry for $VERSION"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Creating GitHub Release draft..."
+
+          if [ "${{ steps.extract_changelog.outputs.CHANGELOG_FOUND }}" = "true" ]; then
+            # Use curated changelog from CHANGELOG.md
+            gh release create "${{ inputs.version }}" \
+              --title "Release ${{ inputs.version }}" \
+              --notes-file /tmp/release-notes.md \
+              --draft
+            echo "✓ GitHub Release created with changelog from CHANGELOG.md"
+          else
+            # Fallback to auto-generated notes
+            gh release create "${{ inputs.version }}" \
+              --title "Release ${{ inputs.version }}" \
+              --generate-notes \
+              --draft
+            echo "✓ GitHub Release created with auto-generated notes"
+          fi
+
+      - name: Tag and release created successfully
         run: |
           echo "✅ Tag ${{ inputs.version }} created successfully!"
+          echo "✅ GitHub Release created as draft"
           echo ""
           echo "Next step: Run the 'Publish Release Artifacts' workflow"
           echo "  1. Go to: https://github.com/${{ github.repository }}/actions/workflows/release-publish.yml"
@@ -135,5 +203,4 @@ jobs:
           echo ""
           echo "After publishing completes:"
           echo "  - CocoaPods will be published"
-          echo "  - GitHub Release will be created as draft"
           echo "  - Manually publish the draft release at: https://github.com/${{ github.repository }}/releases"

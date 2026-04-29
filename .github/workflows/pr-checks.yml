@@ -1,0 +1,139 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check-title:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title format
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+
+          # Conventional commit pattern
+          # Supports: feat, fix, chore, release
+          # Optional breaking change indicator: !
+          # Examples:
+          #   feat: Add new feature
+          #   fix: Resolve bug
+          #   feat!: Breaking change
+          #   release: prepare 6.3.0
+
+          PATTERN='^(feat|fix|chore|release)!?: .+$'
+
+          if [[ ! "$PR_TITLE" =~ $PATTERN ]]; then
+            echo "❌ PR title does not follow conventional commit format"
+            echo ""
+            echo "Current title:"
+            echo "  $PR_TITLE"
+            echo ""
+            echo "Required format:"
+            echo "  <type>[!]: <description>"
+            echo ""
+            echo "Valid types:"
+            echo "  feat    - New feature"
+            echo "  fix     - Bug fix"
+            echo "  chore   - Maintenance task"
+            echo "  release - Release preparation"
+            echo ""
+            echo "Breaking changes (optional):"
+            echo "  Add '!' after type for breaking changes"
+            echo "  Example: feat!: Breaking API change"
+            echo ""
+            echo "Valid examples:"
+            echo "  ✅ feat: Add automatic event tracking"
+            echo "  ✅ fix: Resolve SwiftUI accent color override"
+            echo "  ✅ chore: Update dependencies"
+            echo "  ✅ feat!: Breaking change to API"
+            echo "  ✅ release: prepare 6.3.0"
+            echo ""
+            echo "Invalid examples:"
+            echo "  ❌ Added new feature"
+            echo "  ❌ Fix bug"
+            echo "  ❌ Updated docs"
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ PR title follows conventional commit format"
+          echo "Title: $PR_TITLE"
+
+  format-check:
+    name: Swift Format Check
+    runs-on: macos-latest
+    continue-on-error: true  # Non-blocking: informational only
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0  # Need full history for diff with base branch
+
+      - name: Install swift-format
+        run: |
+          if ! command -v swift-format >/dev/null 2>&1; then
+            echo "→ Installing swift-format via Homebrew"
+            brew install swift-format
+          else
+            echo "✅ swift-format already installed"
+          fi
+          swift-format --version
+
+      - name: Check Swift formatting
+        run: |
+          echo "→ Checking Swift files changed in this PR"
+          echo ""
+
+          # Verify .swift-format config exists (same as pre-commit hook)
+          if [ ! -f ".swift-format" ]; then
+            echo "❌ .swift-format config file not found at repo root."
+            exit 1
+          fi
+
+          # Get Swift files changed in this PR (same filter as pre-commit: ACMRT)
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/${{ github.base_ref }}...HEAD | grep '\.swift$' || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "ℹ️  No Swift files changed in this PR"
+            exit 0
+          fi
+
+          echo "Files to check:"
+          echo "$CHANGED_FILES" | sed 's/^/  /'
+          echo ""
+
+          # IDENTICAL validation logic from .githooks/pre-commit
+          UNFORMATTED_DISPLAY=""
+          UNFORMATTED_CMD=""
+
+          for file in $CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              # Exact same check as pre-commit hook
+              if ! swift-format format --configuration .swift-format "$file" | diff -q "$file" - >/dev/null 2>&1; then
+                UNFORMATTED_DISPLAY="$UNFORMATTED_DISPLAY
+             $file"
+                UNFORMATTED_CMD="$UNFORMATTED_CMD $file"
+              fi
+            fi
+          done
+
+          if [ -n "$UNFORMATTED_CMD" ]; then
+            echo "❌ These files need formatting:"
+            echo "$UNFORMATTED_DISPLAY"
+            echo ""
+            echo "Run the formatter and re-stage:"
+            echo "  sh ./scripts/format-swift.sh$UNFORMATTED_CMD"
+            echo ""
+            echo "ℹ️  This check is informational only and won't block your PR."
+            echo "   However, formatting issues should be fixed before merging."
+            exit 1
+          fi
+
+          echo "✅ All changed Swift files are formatted correctly"

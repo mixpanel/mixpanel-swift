@@ -1,0 +1,59 @@
+#!/bin/sh
+set -e
+
+echo "🧹 Running Apple swift-format pre-commit hook (staged only)"
+
+# Ensure swift-format exists
+if ! command -v swift-format >/dev/null 2>&1; then
+  echo "❌ swift-format not found."
+  echo "Install with: brew install swift-format"
+  exit 1
+fi
+
+# Ensure config exists
+if [ ! -f ".swift-format" ]; then
+  echo "❌ .swift-format config file not found at repo root."
+  exit 1
+fi
+
+# Get staged Swift files (including renames and type changes)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMRT | grep '\.swift$' || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  echo "ℹ️ No staged Swift files"
+  exit 0
+fi
+
+echo "→ Checking formatting on staged Swift files"
+
+# Two variables: one for display, one for command
+UNFORMATTED_DISPLAY=""
+UNFORMATTED_CMD=""
+
+for file in $STAGED_FILES; do
+  # Create temp file for staged content
+  STAGED_TMP=$(mktemp)
+
+  # Extract staged version of file (not working tree)
+  if git show ":$file" > "$STAGED_TMP" 2>/dev/null; then
+    # Check formatting on staged content
+    if ! swift-format format --configuration .swift-format "$STAGED_TMP" | diff -q "$STAGED_TMP" - >/dev/null 2>&1; then
+      UNFORMATTED_DISPLAY="$UNFORMATTED_DISPLAY
+   $file"
+      UNFORMATTED_CMD="$UNFORMATTED_CMD $file"
+    fi
+    rm -f "$STAGED_TMP"
+  fi
+done
+
+if [ -n "$UNFORMATTED_CMD" ]; then
+  echo ""
+  echo "❌ These files need formatting:"
+  echo "$UNFORMATTED_DISPLAY"
+  echo ""
+  echo "Run the formatter and re-stage:"
+  echo "  sh ./scripts/format-swift.sh$UNFORMATTED_CMD"
+  exit 1
+fi
+
+echo "✅ All staged Swift files are formatted correctly"

@@ -9,7 +9,7 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release-publish-${{ inputs.tag }}
@@ -27,6 +27,57 @@ jobs:
           ref: refs/tags/${{ inputs.tag }}
           fetch-depth: 0
 
+      - name: Extract version from files
+        id: extract_versions
+        run: |
+          # Extract from podspec
+          PODSPEC_VERSION=$(grep -E "s.version = '[0-9]+\.[0-9]+\.[0-9]+'" Mixpanel-swift.podspec | sed -E "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/")
+
+          # Extract from AutomaticProperties.swift
+          SWIFT_VERSION=$(grep -E 'return "[0-9]+\.[0-9]+\.[0-9]+"' Sources/AutomaticProperties.swift | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')
+
+          echo "PODSPEC_VERSION=$PODSPEC_VERSION" >> $GITHUB_OUTPUT
+          echo "SWIFT_VERSION=$SWIFT_VERSION" >> $GITHUB_OUTPUT
+
+          echo "Tag version: ${{ inputs.tag }}"
+          echo "Podspec version: $PODSPEC_VERSION"
+          echo "Swift version: $SWIFT_VERSION"
+
+      - name: Validate version consistency
+        run: |
+          PODSPEC_VERSION="${{ steps.extract_versions.outputs.PODSPEC_VERSION }}"
+          SWIFT_VERSION="${{ steps.extract_versions.outputs.SWIFT_VERSION }}"
+          TAG_VERSION="${{ inputs.tag }}"
+          MISMATCH=0
+
+          if [ "$PODSPEC_VERSION" != "$TAG_VERSION" ]; then
+            echo "ERROR: Podspec version mismatch"
+            echo "  Expected: $TAG_VERSION"
+            echo "  Found: $PODSPEC_VERSION"
+            echo "  File: Mixpanel-swift.podspec"
+            MISMATCH=1
+          fi
+
+          if [ "$SWIFT_VERSION" != "$TAG_VERSION" ]; then
+            echo "ERROR: AutomaticProperties.swift version mismatch"
+            echo "  Expected: $TAG_VERSION"
+            echo "  Found: $SWIFT_VERSION"
+            echo "  File: Sources/AutomaticProperties.swift"
+            MISMATCH=1
+          fi
+
+          if [ $MISMATCH -eq 1 ]; then
+            echo ""
+            echo "Version files in tag $TAG_VERSION are not consistent."
+            echo "This usually means the tag was created incorrectly."
+            echo ""
+            echo "Fix: Delete the tag and re-run the 'Create Release Tag' workflow."
+            echo "  git push --delete origin $TAG_VERSION"
+            exit 1
+          fi
+
+          echo "✓ All version checks passed"
+
       - name: Publish to CocoaPods
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
@@ -43,30 +94,17 @@ jobs:
           echo ""
           echo "✓ Published to CocoaPods"
 
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Creating GitHub Release draft..."
-          gh release create "${{ inputs.tag }}" \
-            --title "Release ${{ inputs.tag }}" \
-            --generate-notes \
-            --draft
-
-          echo "✓ GitHub Release created as draft"
-
-      - name: Release complete
+      - name: Publishing complete
         run: |
           echo ""
-          echo "🎉 Release ${{ inputs.tag }} prepared successfully!"
+          echo "🎉 Release ${{ inputs.tag }} published successfully!"
           echo ""
-          echo "Artifacts published:"
+          echo "Published to:"
           echo "  ✓ CocoaPods: https://cocoapods.org/pods/Mixpanel-swift"
-          echo "  ✓ GitHub Release: Created as DRAFT"
           echo ""
-          echo "⚠️  NEXT STEP: Review and publish the draft release"
+          echo "⚠️  NEXT STEP: Review and publish the draft GitHub Release"
           echo "    https://github.com/${{ github.repository }}/releases/tag/${{ inputs.tag }}"
           echo ""
-          echo "After publishing, users can install via:"
+          echo "After publishing the release, users can install via:"
           echo "  - Swift Package Manager (SPM)"
           echo "  - CocoaPods"

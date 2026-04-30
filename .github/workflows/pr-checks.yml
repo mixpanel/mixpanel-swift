@@ -60,7 +60,7 @@ jobs:
 
   format-check:
     name: Swift Format Check
-    runs-on: macos-latest
+    runs-on: macos-26
     continue-on-error: true  # Non-blocking: informational only
 
     steps:

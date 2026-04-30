@@ -130,6 +130,18 @@ jobs:
           # lib lint validates against local working tree
           pod lib lint Mixpanel-swift.podspec --allow-warnings
 
+      # Validate Carthage compatibility before creating the release tag.
+      # This ensures the XCFramework builds successfully for Carthage users.
+      # Carthage users rely on the framework being buildable from the tagged commit,
+      # so we verify it works before proceeding with tag creation.
+      # The build uses carthage.sh which creates XCFramework for all supported platforms.
+      - name: Install Carthage
+        run: brew install carthage
+
+      - name: Build Carthage XCFramework
+        run: |
+          ./scripts/carthage.sh
+
       - name: Create and push tag
         run: |
           git config user.name "github-actions[bot]"

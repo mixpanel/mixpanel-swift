@@ -353,6 +353,10 @@ class FeatureFlagManager: MixpanelFlags {
   var timeLastFetched: Date?
   var fetchLatencyMs: Int?
 
+  /// Bumped on `reset()` so in-flight fetches dispatched pre-reset don't poison post-reset state.
+  /// Captured at the start of `_performFetchRequest` and re-checked before applying results.
+  private var fetchGeneration: Int = 0
+
   // Configuration
   private var currentOptions: MixpanelOptions? { delegate?.getOptions() }
   private var flagsRoute = "/flags/"
@@ -378,6 +382,39 @@ class FeatureFlagManager: MixpanelFlags {
     // Dispatch fetch trigger to allow caller to continue
       trackingQueue.async { [weak self] in
       self?._fetchFlagsIfNeeded(completion: completion)
+    }
+  }
+
+  /// Clears all in-memory feature flag state: cached flags, tracked-flag set, fetch timing,
+  /// and first-time event state. Intended to be called from `MixpanelInstance.reset()`.
+  ///
+  /// Posts to the tracking queue so the mutation is serialized with reads and fetches. Any
+  /// in-flight fetch dispatched before this call is discarded when it completes (via the
+  /// generation check in `_performFetchRequest`'s success/failure closures). Pending
+  /// fetch-completion handlers are invoked with `false` so callers don't hang.
+  func reset() {
+    trackingQueue.async { [weak self] in
+      guard let self = self else { return }
+
+      var orphanedHandlers: [(Bool) -> Void] = []
+      self.flagsLock.write {
+        self.fetchGeneration &+= 1
+        self.flags = nil
+        self.trackedFeatures.removeAll()
+        self.pendingFirstTimeEvents.removeAll()
+        self.pendingFirstTimeEventNames.removeAll()
+        self.activatedFirstTimeEvents.removeAll()
+        self.fetchStartTime = nil
+        self.timeLastFetched = nil
+        self.fetchLatencyMs = nil
+        orphanedHandlers = self.fetchCompletionHandlers
+        self.fetchCompletionHandlers.removeAll()
+        self.isFetching = false
+      }
+
+      DispatchQueue.main.async {
+        orphanedHandlers.forEach { $0(false) }
+      }
     }
   }
 
@@ -627,10 +664,14 @@ class FeatureFlagManager: MixpanelFlags {
 
   // Performs the actual network request construction and call
   internal func _performFetchRequest() {
-    // Record fetch start time
+    // Record fetch start time and snapshot the current generation. The snapshot is checked
+    // in the success/failure closures so a fetch that was dispatched before reset() does not
+    // overwrite the freshly cleared state.
     let startTime = Date()
+    var generation = 0
     flagsLock.write {
       self.fetchStartTime = startTime
+      generation = self.fetchGeneration
     }
 
     guard let delegate = self.delegate, let options = self.currentOptions else {
@@ -691,11 +732,22 @@ class FeatureFlagManager: MixpanelFlags {
       resource: resource,
       failure: { [weak self] reason, data, response in
         MixpanelLogger.error(message: "Failed to fetch flags. Reason: \(reason)")
-        self?._completeFetch(success: false)
+        guard let self = self else { return }
+        if self.isStaleFetch(generation: generation) {
+          MixpanelLogger.debug(
+            message: "Discarding flag fetch failure from stale generation \(generation).")
+          return
+        }
+        self._completeFetch(success: false)
       },
       success: { [weak self] (flagsResponse, response) in
         MixpanelLogger.info(message: "Successfully fetched flags.  \(flagsResponse)")
         guard let self = self else { return }
+        if self.isStaleFetch(generation: generation) {
+          MixpanelLogger.debug(
+            message: "Discarding flag fetch result from stale generation \(generation).")
+          return
+        }
         let fetchEndTime = Date()
 
         // Merge flags and update state with write lock
@@ -705,6 +757,9 @@ class FeatureFlagManager: MixpanelFlags {
         )
 
         self.flagsLock.write {
+          // Re-check generation under the lock in case reset() raced between the check above
+          // and the write. If stale, drop the result without touching state or completing.
+          guard generation == self.fetchGeneration else { return }
           self.flags = mergedFlags
           self.pendingFirstTimeEvents = mergedPendingEvents
           self.pendingFirstTimeEventNames = mergedPendingEventNames
@@ -722,6 +777,16 @@ class FeatureFlagManager: MixpanelFlags {
         self._completeFetch(success: true)
       }
     )
+  }
+
+  /// Returns true if the captured `generation` no longer matches the current generation,
+  /// meaning the fetch was started before a `reset()` and its result should be discarded.
+  private func isStaleFetch(generation: Int) -> Bool {
+    var current = 0
+    flagsLock.read {
+      current = self.fetchGeneration
+    }
+    return current != generation
   }
 
   // Centralized fetch completion logic

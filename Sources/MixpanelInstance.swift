@@ -1009,6 +1009,17 @@ extension MixpanelInstance {
 
       self.mixpanelPersistence.resetEntities()
       self.archive()
+
+      // reset() does not call identify(), so the loadFlags() call inside identify() never
+      // fires. Clear feature-flag state explicitly and refetch under the new identity if
+      // prefetching is enabled.
+      if let flagManager = self.flags as? FeatureFlagManager {
+        flagManager.reset()
+        if self.options.featureFlagOptions.prefetchFlags {
+          flagManager.loadFlags()
+        }
+      }
+
       if let completion = completion {
         DispatchQueue.main.async(execute: completion)
       }

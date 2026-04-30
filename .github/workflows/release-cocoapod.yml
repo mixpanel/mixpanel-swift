@@ -1,10 +1,10 @@
-name: Publish Release Artifacts
+name: Release CocoaPod
 
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Tag to publish (e.g., 6.3.0 without v prefix)'
+      version:
+        description: 'Version to publish (e.g., 6.3.0 without v prefix)'
         required: true
         type: string
 
@@ -12,19 +12,19 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-publish-${{ inputs.tag }}
+  group: release-cocoapod-${{ inputs.version }}
   cancel-in-progress: false  # NEVER cancel during CocoaPods push
 
 jobs:
-  publish:
-    name: "📦 Publish Release"
+  release-cocoapod:
+    name: "📦 Release CocoaPod"
     runs-on: macos-26
     environment: production
     steps:
-      - name: Checkout tag
+      - name: Checkout version tag
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
-          ref: refs/tags/${{ inputs.tag }}
+          ref: refs/tags/${{ inputs.version }}
           fetch-depth: 0
 
       - name: Extract version from files
@@ -39,7 +39,7 @@ jobs:
           echo "PODSPEC_VERSION=$PODSPEC_VERSION" >> $GITHUB_OUTPUT
           echo "SWIFT_VERSION=$SWIFT_VERSION" >> $GITHUB_OUTPUT
 
-          echo "Tag version: ${{ inputs.tag }}"
+          echo "Input version: ${{ inputs.version }}"
           echo "Podspec version: $PODSPEC_VERSION"
           echo "Swift version: $SWIFT_VERSION"
 
@@ -47,20 +47,20 @@ jobs:
         run: |
           PODSPEC_VERSION="${{ steps.extract_versions.outputs.PODSPEC_VERSION }}"
           SWIFT_VERSION="${{ steps.extract_versions.outputs.SWIFT_VERSION }}"
-          TAG_VERSION="${{ inputs.tag }}"
+          INPUT_VERSION="${{ inputs.version }}"
           MISMATCH=0
 
-          if [ "$PODSPEC_VERSION" != "$TAG_VERSION" ]; then
+          if [ "$PODSPEC_VERSION" != "$INPUT_VERSION" ]; then
             echo "ERROR: Podspec version mismatch"
-            echo "  Expected: $TAG_VERSION"
+            echo "  Expected: $INPUT_VERSION"
             echo "  Found: $PODSPEC_VERSION"
             echo "  File: Mixpanel-swift.podspec"
             MISMATCH=1
           fi
 
-          if [ "$SWIFT_VERSION" != "$TAG_VERSION" ]; then
+          if [ "$SWIFT_VERSION" != "$INPUT_VERSION" ]; then
             echo "ERROR: AutomaticProperties.swift version mismatch"
-            echo "  Expected: $TAG_VERSION"
+            echo "  Expected: $INPUT_VERSION"
             echo "  Found: $SWIFT_VERSION"
             echo "  File: Sources/AutomaticProperties.swift"
             MISMATCH=1
@@ -68,11 +68,11 @@ jobs:
 
           if [ $MISMATCH -eq 1 ]; then
             echo ""
-            echo "Version files in tag $TAG_VERSION are not consistent."
+            echo "Version files in tag $INPUT_VERSION are not consistent."
             echo "This usually means the tag was created incorrectly."
             echo ""
-            echo "Fix: Delete the tag and re-run the 'Create Release Tag' workflow."
-            echo "  git push --delete origin $TAG_VERSION"
+            echo "Fix: Delete the tag and re-run the 'Release SPM' workflow."
+            echo "  git push --delete origin $INPUT_VERSION"
             exit 1
           fi
 
@@ -94,17 +94,17 @@ jobs:
           echo ""
           echo "✓ Published to CocoaPods"
 
-      - name: Publishing complete
+      - name: CocoaPods release complete
         run: |
           echo ""
-          echo "🎉 Release ${{ inputs.tag }} published successfully!"
+          echo "🎉 CocoaPods release ${{ inputs.version }} published successfully!"
           echo ""
           echo "Published to:"
           echo "  ✓ CocoaPods: https://cocoapods.org/pods/Mixpanel-swift"
           echo ""
-          echo "⚠️  NEXT STEP: Review and publish the draft GitHub Release"
-          echo "    https://github.com/${{ github.repository }}/releases/tag/${{ inputs.tag }}"
+          echo "⚠️  FINAL STEP: Review and publish the draft GitHub Release"
+          echo "    https://github.com/${{ github.repository }}/releases/tag/${{ inputs.version }}"
           echo ""
-          echo "After publishing the release, users can install via:"
+          echo "After publishing the GitHub Release, users can install via:"
           echo "  - Swift Package Manager (SPM)"
           echo "  - CocoaPods"

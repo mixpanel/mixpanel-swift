@@ -13,12 +13,12 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: release-pr-${{ inputs.version }}
+  group: prepare-release-${{ inputs.version }}
   cancel-in-progress: true
 
 jobs:
   prepare-release:
-    name: "📝 Prepare Release PR"
+    name: "📝 Prepare Release"
     runs-on: macos-26
     steps:
       - name: Checkout repository
@@ -145,7 +145,7 @@ jobs:
           ### Next Steps
           1. Review the changes (especially the changelog)
           2. Approve and merge this PR
-          3. Run the \`Create Release Tag\` workflow from master branch with version \`${{ inputs.version }}\`
+          3. Run the \`Release SPM\` workflow from master branch with version \`${{ inputs.version }}\`
 
           ---
           *Created by GitHub Actions workflow*" \
@@ -159,6 +159,6 @@ jobs:
           echo "Next steps:"
           echo "1. Review and approve the PR: https://github.com/${{ github.repository }}/pull/$(gh pr list --head release/${{ inputs.version }} --json number --jq '.[0].number')"
           echo "2. Merge the PR to master"
-          echo "3. Run 'Create Release Tag' workflow from master branch"
+          echo "3. Run 'Release SPM' workflow from master branch"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

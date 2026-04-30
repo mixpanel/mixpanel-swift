@@ -1,10 +1,10 @@
-name: Create Release Tag
+name: Release SPM
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to tag (e.g., 6.3.0 without v prefix)'
+        description: 'Version to release (e.g., 6.3.0 without v prefix)'
         required: true
         type: string
 
@@ -12,12 +12,12 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-tag-${{ inputs.version }}
-  cancel-in-progress: false  # Never cancel during tag creation
+  group: release-spm-${{ inputs.version }}
+  cancel-in-progress: false  # Never cancel during release
 
 jobs:
-  create-tag:
-    name: "🏷️ Create Release Tag"
+  release-spm:
+    name: "📦 Release SPM"
     runs-on: macos-26
     environment: release-tagging
     steps:
@@ -27,7 +27,7 @@ jobs:
             echo "ERROR: This workflow can only run from master branch"
             echo "Current ref: ${{ github.ref }}"
             echo ""
-            echo "To fix: Navigate to Actions → Create Release Tag"
+            echo "To fix: Navigate to Actions → Release SPM"
             echo "        Click the branch dropdown and select 'master'"
             echo "        Then run the workflow"
             exit 1
@@ -190,17 +190,18 @@ jobs:
             echo "✓ GitHub Release created with auto-generated notes"
           fi
 
-      - name: Tag and release created successfully
+      - name: SPM release complete
         run: |
           echo "✅ Tag ${{ inputs.version }} created successfully!"
-          echo "✅ GitHub Release created as draft"
+          echo "✅ GitHub Release created as draft (enables SPM distribution)"
           echo ""
-          echo "Next step: Run the 'Publish Release Artifacts' workflow"
-          echo "  1. Go to: https://github.com/${{ github.repository }}/actions/workflows/release-publish.yml"
+          echo "Swift Package Manager users can now use version ${{ inputs.version }}"
+          echo ""
+          echo "Next step: Run the 'Release CocoaPod' workflow"
+          echo "  1. Go to: https://github.com/${{ github.repository }}/actions/workflows/release-cocoapod.yml"
           echo "  2. Click 'Run workflow'"
-          echo "  3. Enter tag: ${{ inputs.version }}"
+          echo "  3. Enter version: ${{ inputs.version }}"
           echo "  4. Approve the 'production' environment when prompted"
           echo ""
-          echo "After publishing completes:"
-          echo "  - CocoaPods will be published"
-          echo "  - Manually publish the draft release at: https://github.com/${{ github.repository }}/releases"
+          echo "After CocoaPod publishing completes:"
+          echo "  - Manually publish the draft GitHub Release at: https://github.com/${{ github.repository }}/releases"

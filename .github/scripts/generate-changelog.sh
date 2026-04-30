@@ -51,22 +51,22 @@ while IFS='|||' read -r SUBJECT COMMIT_HASH; do
   fi
 
   # Parse conventional commit format
-  if [[ "$SUBJECT" =~ ^feat!?: ]]; then
-    MSG="${SUBJECT#feat*: }"
+  if [[ "$SUBJECT" =~ ^feat: ]]; then
+    MSG="${SUBJECT#feat: }"
     if [ -n "$PR_NUM" ]; then
       FEATURES+=("- $MSG ([#$PR_NUM](https://github.com/$REPO/pull/$PR_NUM))")
     else
       FEATURES+=("- $MSG")
     fi
-  elif [[ "$SUBJECT" =~ ^fix!?: ]]; then
-    MSG="${SUBJECT#fix*: }"
+  elif [[ "$SUBJECT" =~ ^fix: ]]; then
+    MSG="${SUBJECT#fix: }"
     if [ -n "$PR_NUM" ]; then
       FIXES+=("- $MSG ([#$PR_NUM](https://github.com/$REPO/pull/$PR_NUM))")
     else
       FIXES+=("- $MSG")
     fi
-  elif [[ "$SUBJECT" =~ ^chore!?: ]]; then
-    MSG="${SUBJECT#chore*: }"
+  elif [[ "$SUBJECT" =~ ^chore: ]]; then
+    MSG="${SUBJECT#chore: }"
     if [ -n "$PR_NUM" ]; then
       CHORES+=("- $MSG ([#$PR_NUM](https://github.com/$REPO/pull/$PR_NUM))")
     else

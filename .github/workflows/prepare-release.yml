@@ -90,7 +90,7 @@ jobs:
           echo "Generating changelog for version $NEW_VERSION..."
 
           # Generate new changelog entry
-          ./.github/scripts/generate-changelog.sh "$NEW_VERSION" "mixpanel/mixpanel-swift" > /tmp/new-changelog.md
+          ./scripts/generate-changelog.sh "$NEW_VERSION" "mixpanel/mixpanel-swift" > /tmp/new-changelog.md
 
           # Prepend to existing CHANGELOG.md or create new one
           if [ -f CHANGELOG.md ]; then

@@ -391,7 +391,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       instanceName: self.name,
       lock: self.readWriteLock,
       metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
-    flags = FeatureFlagManager(serverURL: self.serverURL)
+    flags = FeatureFlagManager(serverURL: self.serverURL, trackingQueue: self.trackingQueue)
     trackInstance.mixpanelInstance = self
     flags.delegate = self
     #if os(iOS) && !targetEnvironment(macCatalyst)

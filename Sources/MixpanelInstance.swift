@@ -1009,6 +1009,9 @@ extension MixpanelInstance {
 
       self.mixpanelPersistence.resetEntities()
       self.archive()
+
+      self.resetFeatureFlags()
+
       if let completion = completion {
         DispatchQueue.main.async(execute: completion)
       }
@@ -1192,6 +1195,40 @@ extension MixpanelInstance {
     }
   }
 
+}
+
+extension MixpanelInstance {
+    func resetFeatureFlags() {
+        // Extract pending completion handlers from the old instance before replacing it.
+        // We'll notify them after creating the new instance.
+        var pendingHandlers: [(Bool) -> Void] = []
+        if let flagManager = self.flags as? FeatureFlagManager {
+            pendingHandlers = flagManager.drainCompletionHandlers()
+        }
+
+        // Reset feature flags by creating a fresh FeatureFlagManager.
+        // Re-initialization automatically clears all state (flags cache, tracked features,
+        // pending events, fetch timing) and eliminates race conditions with in-flight fetches
+        // without needing generation counters.
+        let flagDelegate = self.flags.delegate
+        self.flags = FeatureFlagManager(
+            serverURL: self.serverURL,
+            trackingQueue: self.trackingQueue
+        )
+        self.flags.delegate = flagDelegate
+
+        // Notify pending handlers that their fetch will not complete (due to reset)
+        if !pendingHandlers.isEmpty {
+            DispatchQueue.main.async {
+                pendingHandlers.forEach { $0(false) }
+            }
+        }
+
+        // If prefetchFlags is enabled, load flags under the new identity
+        if self.options.featureFlagOptions.prefetchFlags {
+            self.flags.loadFlags()
+        }
+    }
 }
 
 extension MixpanelInstance {

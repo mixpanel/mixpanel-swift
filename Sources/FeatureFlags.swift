@@ -739,6 +739,24 @@ class FeatureFlagManager: MixpanelFlags {
     }
   }
 
+  /// Extracts and clears all pending fetch completion handlers before instance deallocation.
+  /// Called from MixpanelInstance.resetFeatureFlags() to retrieve handlers that need to be
+  /// notified before the instance is replaced.
+  ///
+  /// - Returns: Array of completion handlers that were pending. The caller is responsible
+  ///   for invoking them with the appropriate result.
+  func drainCompletionHandlers() -> [(Bool) -> Void] {
+    var handlers: [(Bool) -> Void] = []
+
+    flagsLock.write {
+      handlers = self.fetchCompletionHandlers
+      self.fetchCompletionHandlers.removeAll()
+      self.isFetching = false
+    }
+
+    return handlers
+  }
+
   // --- Flag Merging Helper ---
   func mergeFlags(
     responseFlags: [String: MixpanelFlagVariant]?,

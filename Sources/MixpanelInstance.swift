@@ -1198,6 +1198,7 @@ extension MixpanelInstance {
 }
 
 extension MixpanelInstance {
+    // MARK: Feature Flags
     func resetFeatureFlags() {
         // Extract pending completion handlers from the old instance before replacing it.
         // We'll notify them after creating the new instance.

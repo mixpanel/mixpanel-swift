@@ -9,7 +9,7 @@
 //   - CacheFirst serves cached values immediately
 //   - NetworkFirst awaits the initial network response, falls back on failure
 //   - reset() wipes both in-memory state and the on-disk blob
-//   - cacheVariants=true causes successful fetches to write the blob
+//   - successful fetches write the blob (when policy is .cacheFirst or .networkFirst)
 //
 
 import XCTest
@@ -226,7 +226,10 @@ class FeatureFlagCacheTests: XCTestCase {
     XCTAssertEqual(variants["flag_b"]?.value as? String, "hello")
   }
 
-  func testInitIgnoresCacheOnDistinctIdMismatch() throws {
+  /// distinctId mismatch on init is the cross-session form of "distinctId changed":
+  /// it leaves flags empty AND wipes the stale blob from disk, so the prior identity's
+  /// variants don't sit on this device after the user has moved on.
+  func testInitWipesCacheOnDistinctIdMismatch() throws {
     let response = #"{"flags":{"flag_a":{"variant_key":"v1","variant_value":true}}}"#
     MixpanelPersistence.saveFlagsCache(
       FlagsCacheBlob(
@@ -234,6 +237,7 @@ class FeatureFlagCacheTests: XCTestCase {
         distinctId: "different_user",
         response: response),
       instanceName: instanceName)
+    XCTAssertNotNil(MixpanelPersistence.loadFlagsCache(instanceName: instanceName))
 
     let manager = makeManager(
       distinctId: "user_a", context: [:], policy: .cacheFirst(ttl: 86_400))
@@ -241,6 +245,9 @@ class FeatureFlagCacheTests: XCTestCase {
 
     XCTAssertFalse(manager.areFlagsReady(), "distinctId mismatch should leave flags empty")
     XCTAssertTrue(manager.getAllVariantsSync().isEmpty)
+    XCTAssertNil(
+      MixpanelPersistence.loadFlagsCache(instanceName: instanceName),
+      "distinctId mismatch on init should wipe the stale blob")
   }
 
   /// Documents the deliberate decision to key the cache on distinctId only — context changes
@@ -313,7 +320,10 @@ class FeatureFlagCacheTests: XCTestCase {
       "blob should be wiped so the next successful fetch gets a clean slate")
   }
 
-  func testInitDoesNotLoadCacheWhenPolicyIsNetworkOnly() throws {
+  /// `.networkOnly` does two things on init when a stale blob is on disk: (a) doesn't load
+  /// it into memory, and (b) actively wipes it. This way, toggling from a caching policy
+  /// back to `.networkOnly` cleans up the orphaned blob rather than leaving it stranded.
+  func testInitWipesAndDoesNotLoadCacheWhenPolicyIsNetworkOnly() throws {
     let response = #"{"flags":{"flag_a":{"variant_key":"v1","variant_value":true}}}"#
     MixpanelPersistence.saveFlagsCache(
       FlagsCacheBlob(
@@ -321,11 +331,15 @@ class FeatureFlagCacheTests: XCTestCase {
         distinctId: "user_a",
         response: response),
       instanceName: instanceName)
+    XCTAssertNotNil(MixpanelPersistence.loadFlagsCache(instanceName: instanceName))
 
     let manager = makeManager(distinctId: "user_a", context: [:], policy: .networkOnly)
     waitForTrackingQueue(manager: manager)
 
     XCTAssertFalse(manager.areFlagsReady(), ".networkOnly must not load from cache")
+    XCTAssertNil(
+      MixpanelPersistence.loadFlagsCache(instanceName: instanceName),
+      ".networkOnly init should wipe a stale blob from a previous caching-policy session")
   }
 
   /// Regression test for the init-time race that motivated moving FeatureFlagManager
@@ -356,8 +370,7 @@ class FeatureFlagCacheTests: XCTestCase {
         token: "test_token",
         featureFlagOptions: FeatureFlagOptions(
           enabled: true,
-          variantLookupPolicy: .cacheFirst(ttl: 86_400),
-          cacheVariants: true)),
+          variantLookupPolicy: .cacheFirst(ttl: 86_400))),
       distinctId: "wrong_user")
     retainedDelegates.append(delegate)
 
@@ -384,6 +397,133 @@ class FeatureFlagCacheTests: XCTestCase {
       manager.areFlagsReady(),
       "cache load should have used the post-mutation distinctId, not the construction-time one")
     XCTAssertEqual(manager.getAllVariantsSync().count, 1)
+  }
+
+  // MARK: - TTL re-check on get
+  //
+  // The TTL is re-checked on every `getVariant`/`getAllVariants` call (not only at init load
+  // time). Once a `.cache(at:)`-stamped variant ages past TTL while sitting in memory, lookups
+  // return the developer fallback rather than the stale value. The on-disk blob is NOT
+  // deleted — the next successful fetch will overwrite it.
+
+  /// A `.cache(at:)`-stamped variant that's older than the configured TTL is treated as
+  /// not-present by `getVariantSync` — the developer fallback is returned instead.
+  func testGetVariantSyncReturnsFallbackForExpiredCachedVariant() throws {
+    let manager = makeManager(
+      distinctId: "user_a", context: [:], policy: .cacheFirst(ttl: 60))
+    waitForTrackingQueue(manager: manager)
+
+    // Inject an expired cached variant directly into in-memory state. Bypasses the disk
+    // load path so we can test the get-time TTL check in isolation. cachedAt is 1 hour ago,
+    // well past the 60s TTL configured above.
+    let expired = MixpanelFlagVariant(key: "v1", value: "stale_value")
+      .withSource(.cache(at: Date(timeIntervalSinceNow: -3600)))
+    manager.flagsLock.write {
+      manager.flags = ["flag_a": expired]
+    }
+
+    let fallback = MixpanelFlagVariant(key: "fb", value: "fallback_value")
+    let result = manager.getVariantSync("flag_a", fallback: fallback)
+
+    XCTAssertEqual(result.value as? String, "fallback_value")
+    XCTAssertNil(result.source, "fallback variant has nil source")
+  }
+
+  /// A `.cache(at:)`-stamped variant within TTL is served as-is (with `.cache` source preserved).
+  func testGetVariantSyncReturnsFreshCachedVariant() throws {
+    let manager = makeManager(
+      distinctId: "user_a", context: [:], policy: .cacheFirst(ttl: 86_400))
+    waitForTrackingQueue(manager: manager)
+
+    let fresh = MixpanelFlagVariant(key: "v1", value: "fresh_value")
+      .withSource(.cache(at: Date(timeIntervalSinceNow: -60)))
+    manager.flagsLock.write {
+      manager.flags = ["flag_a": fresh]
+    }
+
+    let fallback = MixpanelFlagVariant(key: "fb", value: "fallback_value")
+    let result = manager.getVariantSync("flag_a", fallback: fallback)
+
+    XCTAssertEqual(result.value as? String, "fresh_value")
+    if case .cache = result.source {} else { XCTFail("expected .cache source preserved") }
+  }
+
+  /// `.network`-stamped variants are never expired regardless of how old they are — TTL only
+  /// applies to `.cache(at:)` variants.
+  func testGetVariantSyncReturnsNetworkVariantRegardlessOfAge() throws {
+    let manager = makeManager(
+      distinctId: "user_a", context: [:], policy: .cacheFirst(ttl: 60))
+    waitForTrackingQueue(manager: manager)
+
+    // .network variants don't carry a timestamp, so the TTL check should always return false.
+    let networkVariant = MixpanelFlagVariant(key: "v1", value: "from_network")
+      .withSource(.network)
+    manager.flagsLock.write {
+      manager.flags = ["flag_a": networkVariant]
+    }
+
+    let fallback = MixpanelFlagVariant(key: "fb", value: "fallback_value")
+    let result = manager.getVariantSync("flag_a", fallback: fallback)
+    XCTAssertEqual(result.value as? String, "from_network")
+  }
+
+  /// `getAllVariantsSync` filters out expired cached variants but keeps `.network` variants
+  /// and unexpired `.cache(at:)` variants.
+  func testGetAllVariantsSyncFiltersExpiredCachedVariants() throws {
+    let manager = makeManager(
+      distinctId: "user_a", context: [:], policy: .cacheFirst(ttl: 60))
+    waitForTrackingQueue(manager: manager)
+
+    let expired = MixpanelFlagVariant(key: "v1", value: "stale")
+      .withSource(.cache(at: Date(timeIntervalSinceNow: -3600)))
+    let fresh = MixpanelFlagVariant(key: "v2", value: "ok")
+      .withSource(.cache(at: Date(timeIntervalSinceNow: -10)))
+    let networkSourced = MixpanelFlagVariant(key: "v3", value: "from_network")
+      .withSource(.network)
+
+    manager.flagsLock.write {
+      manager.flags = [
+        "expired_flag": expired,
+        "fresh_flag": fresh,
+        "network_flag": networkSourced,
+      ]
+    }
+
+    let result = manager.getAllVariantsSync()
+    XCTAssertEqual(result.count, 2)
+    XCTAssertNil(result["expired_flag"], "expired flag should be filtered out")
+    XCTAssertNotNil(result["fresh_flag"])
+    XCTAssertNotNil(result["network_flag"])
+  }
+
+  /// The on-disk blob is NOT deleted when an in-memory variant expires at get-time.
+  /// Per the rule: "no harm in keeping. Will likely be overwritten shortly after."
+  func testExpiredVariantOnGetVariantDoesNotWipeDiskCache() throws {
+    let response = #"{"flags":{"flag_a":{"variant_key":"v1","variant_value":"v"}}}"#
+    let blob = FlagsCacheBlob(cachedAt: Date(), distinctId: "user_a", response: response)
+    MixpanelPersistence.saveFlagsCache(blob, instanceName: instanceName)
+
+    let manager = makeManager(
+      distinctId: "user_a", context: [:], policy: .cacheFirst(ttl: 86_400))
+    waitForTrackingQueue(manager: manager)
+    XCTAssertNotNil(MixpanelPersistence.loadFlagsCache(instanceName: instanceName))
+
+    // Force the in-memory variant to be expired without wiping the disk blob.
+    let expired = MixpanelFlagVariant(key: "v1", value: "stale")
+      .withSource(.cache(at: Date(timeIntervalSinceNow: -90_000)))  // > 86_400s TTL
+    manager.flagsLock.write {
+      manager.flags = ["flag_a": expired]
+    }
+
+    let fallback = MixpanelFlagVariant(key: "fb", value: "fb")
+    let result = manager.getVariantSync("flag_a", fallback: fallback)
+    XCTAssertEqual(result.value as? String, "fb")
+
+    // Critical: blob persists. The next successful fetch overwrites it; this lookup didn't
+    // delete it.
+    XCTAssertNotNil(
+      MixpanelPersistence.loadFlagsCache(instanceName: instanceName),
+      "expired-on-get must NOT wipe the on-disk blob")
   }
 
   // MARK: - NetworkFirst gating
@@ -590,8 +730,7 @@ class FeatureFlagCacheTests: XCTestCase {
   private func makeManager(
     distinctId: String,
     context: [String: Any],
-    policy: VariantLookupPolicy,
-    cacheVariants: Bool = true
+    policy: VariantLookupPolicy
   ) -> FeatureFlagManager {
     let delegate = CacheTestMockDelegate(
       options: MixpanelOptions(
@@ -599,8 +738,7 @@ class FeatureFlagCacheTests: XCTestCase {
         featureFlagOptions: FeatureFlagOptions(
           enabled: true,
           context: context,
-          variantLookupPolicy: policy,
-          cacheVariants: cacheVariants)),
+          variantLookupPolicy: policy)),
       distinctId: distinctId)
     retainedDelegates.append(delegate)
     let queue = DispatchQueue(label: "ff.cache.test.\(UUID().uuidString)")
@@ -614,8 +752,7 @@ class FeatureFlagCacheTests: XCTestCase {
   private func makeMockManager(
     distinctId: String,
     context: [String: Any],
-    policy: VariantLookupPolicy,
-    cacheVariants: Bool = true
+    policy: VariantLookupPolicy
   ) -> CacheTestMockManager {
     let delegate = CacheTestMockDelegate(
       options: MixpanelOptions(
@@ -623,8 +760,7 @@ class FeatureFlagCacheTests: XCTestCase {
         featureFlagOptions: FeatureFlagOptions(
           enabled: true,
           context: context,
-          variantLookupPolicy: policy,
-          cacheVariants: cacheVariants)),
+          variantLookupPolicy: policy)),
       distinctId: distinctId)
     retainedDelegates.append(delegate)
     let queue = DispatchQueue(label: "ff.cache.mock.test.\(UUID().uuidString)")

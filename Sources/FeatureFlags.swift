@@ -447,10 +447,10 @@ class FeatureFlagManager: MixpanelFlags {
         self.delegate = delegate
         self.flagContext = delegate?.getOptions().featureFlagOptions.context ?? [:]
 
-        // Load cached variants on the tracking queue so UserDefaults I/O doesn't block the
-        // caller (typically the main thread during MixpanelInstance construction). Only do
-        // this when the configuration actually reads from cache — NetworkOnly + cacheVariants
-        // means writes-only and shouldn't load.
+        // Dispatch the init-time cache work on the tracking queue so UserDefaults I/O doesn't
+        // block the caller (typically the main thread during MixpanelInstance construction).
+        // Caching policies load the cache; `.networkOnly` wipes any stale blob left over from
+        // a previous session that used a caching policy.
         if let options = delegate?.getOptions(), options.featureFlagOptions.enabled {
             switch options.featureFlagOptions.variantLookupPolicy {
             case .cacheFirst, .networkFirst:
@@ -458,7 +458,10 @@ class FeatureFlagManager: MixpanelFlags {
                     self?._loadCachedVariants()
                 }
             case .networkOnly:
-                break
+                trackingQueue.async { [weak self] in
+                    guard let self = self else { return }
+                    MixpanelPersistence.deleteFlagsCache(instanceName: self.instanceName)
+                }
             }
         }
     }
@@ -558,7 +561,10 @@ class FeatureFlagManager: MixpanelFlags {
     flagsLock.write {
       guard let currentFlags = self.flags else { return }
 
-      if let variant = currentFlags[flagName] {
+      // Treat expired cached variants as not-present — return the developer fallback and
+      // skip tracking, since the customer effectively didn't receive a value. The blob
+      // stays on disk; the next successful fetch overwrites it.
+      if let variant = currentFlags[flagName], !self.isVariantExpired(variant) {
         flagVariant = variant
 
         // Perform atomic check-and-set for tracking
@@ -570,7 +576,7 @@ class FeatureFlagManager: MixpanelFlags {
           capturedFetchLatencyMs = self.fetchLatencyMs
         }
       }
-      // If flag wasn't found, flagVariant remains nil
+      // If flag wasn't found OR was expired, flagVariant remains nil
     }
 
     // Now, process the results outside the lock
@@ -608,11 +614,12 @@ class FeatureFlagManager: MixpanelFlags {
       // Read state with lock. Serve immediately when flags are populated AND we're not in
       // the NetworkFirst-init window (waiting for the first network response after a cache
       // hit). For CacheFirst, awaitingInitialNetworkResponse is never set so cached values
-      // are served right away.
+      // are served right away. Expired cached variants are treated as not-present so the
+      // caller falls through to the fetch path below.
       self.flagsLock.read {
         canServeImmediately = (self.flags != nil) && !self.awaitingInitialNetworkResponse
         if canServeImmediately, let currentFlags = self.flags {
-          if let variant = currentFlags[flagName] {
+          if let variant = currentFlags[flagName], !self.isVariantExpired(variant) {
             flagVariant = variant
             needsTrackingCheck = !self.trackedFeatures.contains(flagName)
           }
@@ -692,7 +699,11 @@ class FeatureFlagManager: MixpanelFlags {
   private func _getAllVariantsSyncImpl() -> [String: MixpanelFlagVariant] {
     var result: [String: MixpanelFlagVariant] = [:]
     flagsLock.read {
-      result = self.flags ?? [:]
+      // Filter out expired cached variants — same rule as getVariantSync. Keep `.network`
+      // and unexpired `.cache(at:)` entries.
+      if let currentFlags = self.flags {
+        result = currentFlags.filter { _, variant in !self.isVariantExpired(variant) }
+      }
     }
     return result
   }
@@ -704,14 +715,14 @@ class FeatureFlagManager: MixpanelFlags {
         return
       }
 
-      var currentFlags: [String: MixpanelFlagVariant]?
       var canServeImmediately = false
       self.flagsLock.read {
         canServeImmediately = (self.flags != nil) && !self.awaitingInitialNetworkResponse
-        if canServeImmediately { currentFlags = self.flags }
       }
-      if let currentFlags = currentFlags {
-        DispatchQueue.main.async { completion(currentFlags) }
+      if canServeImmediately {
+        // Use the sync impl so the expired-filter is applied consistently.
+        let result = self._getAllVariantsSyncImpl()
+        DispatchQueue.main.async { completion(result) }
       } else {
         // Either nothing in memory yet, or NetworkFirst awaiting the initial network
         // response. Trigger a fetch and serve from `flags` afterward — on success it has
@@ -956,10 +967,14 @@ class FeatureFlagManager: MixpanelFlags {
     }
 
     // distinctId check — refuse to serve another user's variants under this user's identity.
+    // Wipe the stale blob so it doesn't sit on disk for someone who no longer uses this device.
+    // This is a parallel of the active "distinctId changes" paths (identify/reset/optOut)
+    // applied to the cross-session case where the change happened while the app was killed.
     let delegate = self.delegate
     let currentDistinctId = delegate?.getDistinctId() ?? ""
     if blob.distinctId != currentDistinctId {
-      MixpanelLogger.debug(message: "Cached flags belong to a different distinct_id; ignoring cache.")
+      MixpanelLogger.debug(message: "Cached flags belong to a different distinct_id; clearing.")
+      MixpanelPersistence.deleteFlagsCache(instanceName: self.instanceName)
       return
     }
 
@@ -1036,8 +1051,33 @@ class FeatureFlagManager: MixpanelFlags {
     return self.delegate?.getOptions().featureFlagOptions.variantLookupPolicy ?? .networkOnly
   }
 
+  /// Whether successful fetches should be persisted to disk. Derived from the lookup policy:
+  /// `.cacheFirst` and `.networkFirst` write to disk; `.networkOnly` doesn't.
   private func shouldCacheVariants() -> Bool {
-    return self.delegate?.getOptions().featureFlagOptions.cacheVariants ?? false
+    switch self.currentLookupPolicy() {
+    case .networkOnly:
+      return false
+    case .cacheFirst, .networkFirst:
+      return true
+    }
+  }
+
+  /// Returns true if the variant came from the on-disk cache and has aged past the configured
+  /// TTL. Variants stamped `.network` (or `nil` developer fallbacks) are never expired.
+  ///
+  /// Get-paths use this to skip stale cached values mid-session — once a cached blob's TTL
+  /// elapses while it's loaded in memory, subsequent `getVariant` calls return the developer
+  /// fallback instead of the stale value. The blob itself is intentionally NOT deleted (per
+  /// the "don't clear if TTL has expired on getVariant" rule); the next successful network
+  /// fetch overwrites it.
+  ///
+  /// `.networkOnly` policy returns `nil` from `cacheTtlSeconds()` so this returns false; in
+  /// practice no `.cache(at:)` variants exist under `.networkOnly` anyway.
+  /// TTL `<= 0` disables expiry entirely (matches the init-time semantics).
+  private func isVariantExpired(_ variant: MixpanelFlagVariant) -> Bool {
+    guard case .cache(let cachedAt) = variant.source else { return false }
+    guard let ttl = self.cacheTtlSeconds(), ttl > 0 else { return false }
+    return Date().timeIntervalSince(cachedAt) > ttl
   }
 
   /// Returns true if the captured `generation` no longer matches the current generation,

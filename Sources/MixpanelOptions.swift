@@ -50,39 +50,38 @@ public struct FeatureFlagOptions {
   /// Strategy used to resolve flag variants relative to the on-disk cache and the network.
   /// Defaults to `.networkOnly` — variant lookups always wait for the network call,
   /// matching behavior prior to the introduction of variant persistence.
-  public let variantLookupPolicy: VariantLookupPolicy
-
-  /// Whether successful flag responses are written to the on-disk cache. Defaults to `false`.
   ///
-  /// This is independent of `variantLookupPolicy`. Setting this to `true` while keeping the
-  /// policy as `.networkOnly` lets you populate the cache today so a future migration to
-  /// `.cacheFirst` or `.networkFirst` starts with a warm cache.
-  public let cacheVariants: Bool
+  /// Caching behavior is derived directly from this policy:
+  /// - `.networkOnly` — no caching. The on-disk blob is also wiped at init if present
+  ///   (so toggling from a caching policy back to `.networkOnly` cleans up after itself).
+  /// - `.cacheFirst(ttl:)` / `.networkFirst(ttl:)` — successful fetches write to disk;
+  ///   the cache is read on init.
+  public let variantLookupPolicy: VariantLookupPolicy
 
   public init(
     enabled: Bool = false,
     context: [String: Any] = [:],
     prefetchFlags: Bool = true,
-    variantLookupPolicy: VariantLookupPolicy = .networkOnly,
-    cacheVariants: Bool = false
+    variantLookupPolicy: VariantLookupPolicy = .networkOnly
   ) {
     self.enabled = enabled
     self.context = context
     self.prefetchFlags = prefetchFlags
     self.variantLookupPolicy = variantLookupPolicy
-    self.cacheVariants = cacheVariants
   }
 }
 
 /// Strategy for resolving feature flag variants relative to the on-disk cache and the network.
 ///
 /// - `networkOnly`: Never read or write the on-disk cache. Variant lookups always wait for the
-///   network call. Default; matches behavior prior to variant persistence.
+///   network call. Default; matches behavior prior to variant persistence. If a cached blob
+///   exists from a previous session that used a caching policy, it's wiped on init.
 /// - `cacheFirst(ttl:)`: Serve cached variants immediately when available, refresh from the
-///   network in the background. Cached entries older than `ttl` are discarded. Pass a
-///   non-positive TTL to effectively disable expiry.
+///   network in the background. Cached entries older than `ttl` are ignored on read but NOT
+///   deleted (the next successful fetch overwrites them; a longer TTL on a future launch
+///   could reuse them). Pass a non-positive TTL to effectively disable expiry.
 /// - `networkFirst(ttl:)`: Prefer fresh values from the network, but fall back to cached
-///   variants when the network call fails. Cached entries older than `ttl` are discarded.
+///   variants when the network call fails. Same TTL semantics as `cacheFirst`.
 public enum VariantLookupPolicy {
   case networkOnly
   case cacheFirst(ttl: TimeInterval)

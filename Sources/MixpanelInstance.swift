@@ -1200,17 +1200,19 @@ extension MixpanelInstance {
 extension MixpanelInstance {
     // MARK: Feature Flags
     func resetFeatureFlags() {
-        // Extract pending completion handlers from the old instance before replacing it.
-        // We'll notify them after creating the new instance.
+        // Extract pending completion handlers from the old instance and mark it as discarded
+        // before replacing it. The discarded flag prevents an in-flight fetch's success
+        // closure (which captured a reference to the old manager) from writing the prior
+        // identity's variants into a manager whose callers have moved on.
         var pendingHandlers: [(Bool) -> Void] = []
         if let flagManager = self.flags as? FeatureFlagManager {
             pendingHandlers = flagManager.drainCompletionHandlers()
+            flagManager.markDiscarded()
         }
 
         // Reset feature flags by creating a fresh FeatureFlagManager.
         // Re-initialization automatically clears all state (flags cache, tracked features,
-        // pending events, fetch timing) and eliminates race conditions with in-flight fetches
-        // without needing generation counters.
+        // pending events, fetch timing) and eliminates race conditions with in-flight fetches.
         let flagDelegate = self.flags.delegate
         self.flags = FeatureFlagManager(
             serverURL: self.serverURL,

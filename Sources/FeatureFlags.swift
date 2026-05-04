@@ -331,6 +331,12 @@ class FeatureFlagManager: MixpanelFlags {
   var isFetching: Bool = false
   private var trackedFeatures: Set<String> = Set()
   private var fetchCompletionHandlers: [(Bool) -> Void] = []
+  /// Set to true by `markDiscarded()` when this manager has been replaced by a fresh
+  /// instance (see `MixpanelInstance.resetFeatureFlags()`). In-flight fetch closures check
+  /// this before mutating in-memory state — without the guard, a network response that
+  /// arrives after reset could write the prior identity's variants into a manager whose
+  /// callers have moved on.
+  private var isDiscarded: Bool = false
 
   // First-time event targeting state
   internal var pendingFirstTimeEvents: [String: PendingFirstTimeEvent] = [:]  // Keyed by "flagKey:firstTimeEventHash"
@@ -705,6 +711,11 @@ class FeatureFlagManager: MixpanelFlags {
         )
 
         self.flagsLock.write {
+          // If this manager has been replaced (resetFeatureFlags), drop the result rather
+          // than writing the prior identity's variants into a manager whose callers have
+          // moved on. The disk-cache write that lives below this block (when the variant
+          // persistence feature lands) gets gated by the same check.
+          guard !self.isDiscarded else { return }
           self.flags = mergedFlags
           self.pendingFirstTimeEvents = mergedPendingEvents
           self.pendingFirstTimeEventNames = mergedPendingEventNames
@@ -737,6 +748,16 @@ class FeatureFlagManager: MixpanelFlags {
     DispatchQueue.main.async {
       handlers.forEach { $0(success) }
     }
+  }
+
+  /// Marks this manager as discarded so any in-flight fetch closure that arrives after
+  /// `MixpanelInstance.resetFeatureFlags()` will drop its result rather than mutating
+  /// state that no longer reaches the user. Idempotent.
+  ///
+  /// Call this on the OLD manager instance immediately before replacing it on
+  /// `MixpanelInstance.flags`.
+  func markDiscarded() {
+    flagsLock.write { self.isDiscarded = true }
   }
 
   /// Extracts and clears all pending fetch completion handlers before instance deallocation.

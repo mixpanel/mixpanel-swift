@@ -6,4 +6,5 @@
   },
   "tabWidth": 4,
   "indentConditionalCompilationBlocks": false
+  "indentSwitchCaseLabels": true
 }

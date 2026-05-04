@@ -6,6 +6,8 @@
 //  Copyright © 2025 Mixpanel. All rights reserved.
 //
 
+import Foundation
+
 /// Configuration options for feature flags behavior.
 ///
 /// Use this to control how and when feature flags are loaded by the SDK.
@@ -45,15 +47,46 @@ public struct FeatureFlagOptions {
   /// then manually trigger loading via `flags.loadFlags()`.
   public let prefetchFlags: Bool
 
+  /// Strategy used to resolve flag variants relative to the on-disk cache and the network.
+  /// Defaults to `.networkOnly` — variant lookups always wait for the network call,
+  /// matching behavior prior to the introduction of variant persistence.
+  public let variantLookupPolicy: VariantLookupPolicy
+
+  /// Whether successful flag responses are written to the on-disk cache. Defaults to `false`.
+  ///
+  /// This is independent of `variantLookupPolicy`. Setting this to `true` while keeping the
+  /// policy as `.networkOnly` lets you populate the cache today so a future migration to
+  /// `.cacheFirst` or `.networkFirst` starts with a warm cache.
+  public let cacheVariants: Bool
+
   public init(
     enabled: Bool = false,
     context: [String: Any] = [:],
-    prefetchFlags: Bool = true
+    prefetchFlags: Bool = true,
+    variantLookupPolicy: VariantLookupPolicy = .networkOnly,
+    cacheVariants: Bool = false
   ) {
     self.enabled = enabled
     self.context = context
     self.prefetchFlags = prefetchFlags
+    self.variantLookupPolicy = variantLookupPolicy
+    self.cacheVariants = cacheVariants
   }
+}
+
+/// Strategy for resolving feature flag variants relative to the on-disk cache and the network.
+///
+/// - `networkOnly`: Never read or write the on-disk cache. Variant lookups always wait for the
+///   network call. Default; matches behavior prior to variant persistence.
+/// - `cacheFirst(ttl:)`: Serve cached variants immediately when available, refresh from the
+///   network in the background. Cached entries older than `ttl` are discarded. Pass a
+///   non-positive TTL to effectively disable expiry.
+/// - `networkFirst(ttl:)`: Prefer fresh values from the network, but fall back to cached
+///   variants when the network call fails. Cached entries older than `ttl` are discarded.
+public enum VariantLookupPolicy {
+  case networkOnly
+  case cacheFirst(ttl: TimeInterval)
+  case networkFirst(ttl: TimeInterval)
 }
 
 public class MixpanelOptions {

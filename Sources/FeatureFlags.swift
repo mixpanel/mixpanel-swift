@@ -40,6 +40,21 @@ public struct MixpanelFlagVariant: Decodable {
   public let isExperimentActive: Bool? // Corresponds to 'is_experiment_active' from API
   public let isQATester: Bool? // Corresponds to 'is_qa_tester' from API
 
+  /// Where this variant was sourced from. `nil` on developer-supplied fallback instances;
+  /// `.network` or `.cache(at:)` when the SDK serves a variant. For cached variants, the
+  /// timestamp lives on the `.cache` case so invalid combinations like "network with a
+  /// timestamp" are unrepresentable.
+  public let source: Source?
+
+  /// Identifies where a served variant came from.
+  public enum Source {
+    /// Variant assigned by the most recent successful `/flags/` network call.
+    case network
+    /// Variant loaded from the on-disk cache. `at` is the time the variant set was
+    /// originally written to the cache.
+    case cache(at: Date)
+  }
+
   enum CodingKeys: String, CodingKey {
     case key = "variant_key"
     case value = "variant_value"
@@ -63,6 +78,7 @@ public struct MixpanelFlagVariant: Decodable {
     experimentID = try container.decodeIfPresent(String.self, forKey: .experimentID)
     isExperimentActive = try container.decodeIfPresent(Bool.self, forKey: .isExperimentActive)
     isQATester = try container.decodeIfPresent(Bool.self, forKey: .isQATester)
+    source = nil
   }
 
   // Helper initializer with fallbacks, value defaults to key if nil
@@ -76,6 +92,36 @@ public struct MixpanelFlagVariant: Decodable {
     self.experimentID = experimentID
     self.isExperimentActive = isExperimentActive
     self.isQATester = isQATester
+    self.source = nil
+  }
+
+  /// Internal initializer used when stamping a served variant with its origin.
+  internal init(
+    key: String,
+    value: Any?,
+    experimentID: String?,
+    isExperimentActive: Bool?,
+    isQATester: Bool?,
+    source: Source?
+  ) {
+    self.key = key
+    self.value = value
+    self.experimentID = experimentID
+    self.isExperimentActive = isExperimentActive
+    self.isQATester = isQATester
+    self.source = source
+  }
+
+  /// Returns a copy of this variant stamped with the given source. Other fields are preserved.
+  internal func withSource(_ source: Source) -> MixpanelFlagVariant {
+    return MixpanelFlagVariant(
+      key: self.key,
+      value: self.value,
+      experimentID: self.experimentID,
+      isExperimentActive: self.isExperimentActive,
+      isQATester: self.isQATester,
+      source: source
+    )
   }
 }
 
@@ -162,10 +208,16 @@ public protocol MixpanelFlags {
   /// The completion handler is called with `true` on success and `false` on failure.
   func loadFlags(completion: ((Bool) -> Void)?)
 
-  /// Synchronously checks if the flags  have been successfully loaded
-  /// and are available for querying.
+  /// Synchronously checks if flag variants are in memory and available for synchronous access.
   ///
-  /// - Returns: `true` if the flags are loaded and ready for use, `false` otherwise.
+  /// - Note: When a caching `variantLookupPolicy` is configured (`.cacheFirst` or
+  ///   `.networkFirst`), this can return `true` before the SDK has spoken to the network this
+  ///   session — the returned variants may be stale data from a previous session. Use the
+  ///   `source` field on the served `MixpanelFlagVariant` to distinguish: `.network` for
+  ///   fresh values, `.cache(at:)` for on-disk-cache values (with the cache timestamp).
+  ///
+  /// - Returns: `true` if flag variants are available in memory (from network or cache),
+  ///            `false` otherwise.
   func areFlagsReady() -> Bool
 
   // --- Sync Flag Retrieval ---
@@ -300,9 +352,14 @@ public protocol MixpanelFlags {
 
   /// Replaces the current custom flag evaluation context entirely and triggers a flag re-fetch.
   ///
+  /// In-memory variants and the on-disk cache are intentionally NOT cleared — the cache is
+  /// keyed on distinctId only, so it remains valid for this user across context changes. The
+  /// next successful fetch under the new context will overwrite the cache with fresh values.
+  ///
   /// - Parameters:
   ///   - context: The new context dictionary to use for flag evaluation.
-  ///   - completion: A closure called when the fetch completes (success or failure).
+  ///   - completion: A closure called when the fetch under the new context completes (success
+  ///     or failure). Always invoked exactly once.
   func setContext(_ context: [String: Any], completion: @escaping () -> Void)
 }
 
@@ -331,6 +388,18 @@ class FeatureFlagManager: MixpanelFlags {
   var isFetching: Bool = false
   private var trackedFeatures: Set<String> = Set()
   private var fetchCompletionHandlers: [(Bool) -> Void] = []
+
+  /// True when `flags` was populated from the on-disk cache and we have not yet seen the
+  /// initial network response for the current user/context. Only set for `.networkFirst` —
+  /// `.cacheFirst` serves cached values immediately. Async lookups gate on this to honor the
+  /// NetworkFirst spec ("await on network call, only serve persisted values if it fails")
+  /// while still letting sync lookups + areFlagsReady() see the cached values.
+  internal var awaitingInitialNetworkResponse: Bool = false
+
+  /// Per-instance name used as the UserDefaults key prefix for the on-disk cache. Captured
+  /// from the delegate at init so we can persist/clear without holding a delegate reference
+  /// during async work.
+  private let instanceName: String
 
   // First-time event targeting state
   internal var pendingFirstTimeEvents: [String: PendingFirstTimeEvent] = [:]  // Keyed by "flagKey:firstTimeEventHash"
@@ -361,15 +430,37 @@ class FeatureFlagManager: MixpanelFlags {
   private var currentOptions: MixpanelOptions? { delegate?.getOptions() }
   private var flagsRoute = "/flags/"
 
-  // Queue for synchronizing flag operations with tracking
-  private var trackingQueue: DispatchQueue
+  // Queue for synchronizing flag operations with tracking. `internal` rather than `private`
+  // so tests can post barrier tasks to wait for queued work (cache load on init, etc.).
+  internal var trackingQueue: DispatchQueue
 
   // Initializers
-    internal init(serverURL: String, trackingQueue: DispatchQueue, delegate: MixpanelFlagDelegate? = nil) {
+    internal init(
+      serverURL: String,
+      trackingQueue: DispatchQueue,
+      instanceName: String,
+      delegate: MixpanelFlagDelegate? = nil
+    ) {
         self.serverURL = serverURL
         self.trackingQueue = trackingQueue
+        self.instanceName = instanceName
         self.delegate = delegate
         self.flagContext = delegate?.getOptions().featureFlagOptions.context ?? [:]
+
+        // Load cached variants on the tracking queue so UserDefaults I/O doesn't block the
+        // caller (typically the main thread during MixpanelInstance construction). Only do
+        // this when the configuration actually reads from cache — NetworkOnly + cacheVariants
+        // means writes-only and shouldn't load.
+        if let options = delegate?.getOptions(), options.featureFlagOptions.enabled {
+            switch options.featureFlagOptions.variantLookupPolicy {
+            case .cacheFirst, .networkFirst:
+                trackingQueue.async { [weak self] in
+                    self?._loadCachedVariants()
+                }
+            case .networkOnly:
+                break
+            }
+        }
     }
 
   // --- Public Methods ---
@@ -385,8 +476,11 @@ class FeatureFlagManager: MixpanelFlags {
     }
   }
 
-  /// Clears all in-memory feature flag state: cached flags, tracked-flag set, fetch timing,
-  /// and first-time event state. Intended to be called from `MixpanelInstance.reset()`.
+  /// Clears all in-memory feature flag state (cached flags, tracked-flag set, fetch timing,
+  /// first-time event state) AND wipes the on-disk cache blob. Intended for identity-change
+  /// paths: `MixpanelInstance.reset()`, `identify` when distinctId actually changes, and
+  /// `optOutTracking`. `setContext` deliberately does NOT call this — context changes don't
+  /// invalidate the cache (the blob is keyed on distinctId only).
   ///
   /// Posts to the tracking queue so the mutation is serialized with reads and fetches. Any
   /// in-flight fetch dispatched before this call is discarded when it completes (via the
@@ -407,10 +501,16 @@ class FeatureFlagManager: MixpanelFlags {
         self.fetchStartTime = nil
         self.timeLastFetched = nil
         self.fetchLatencyMs = nil
+        self.awaitingInitialNetworkResponse = false
         orphanedHandlers = self.fetchCompletionHandlers
         self.fetchCompletionHandlers.removeAll()
         self.isFetching = false
       }
+
+      // Wipe the on-disk cache so a freshly-identified user can't be served the prior
+      // user's variants. `MixpanelInstance.reset()` also wipes via deleteMPUserDefaultsData,
+      // so this is defensive (idempotent) but keeps the manager self-contained.
+      MixpanelPersistence.deleteFlagsCache(instanceName: self.instanceName)
 
       DispatchQueue.main.async {
         orphanedHandlers.forEach { $0(false) }
@@ -422,7 +522,7 @@ class FeatureFlagManager: MixpanelFlags {
     flagsLock.write {
       self.flagContext = context
     }
-      trackingQueue.async { [weak self] in
+    trackingQueue.async { [weak self] in
       self?._fetchFlagsIfNeeded { _ in
         completion()
       }
@@ -503,12 +603,15 @@ class FeatureFlagManager: MixpanelFlags {
 
       var flagVariant: MixpanelFlagVariant?
       var needsTrackingCheck = false
-      var flagsAreCurrentlyReady = false
+      var canServeImmediately = false
 
-      // Read state with lock
+      // Read state with lock. Serve immediately when flags are populated AND we're not in
+      // the NetworkFirst-init window (waiting for the first network response after a cache
+      // hit). For CacheFirst, awaitingInitialNetworkResponse is never set so cached values
+      // are served right away.
       self.flagsLock.read {
-        flagsAreCurrentlyReady = (self.flags != nil)
-        if flagsAreCurrentlyReady, let currentFlags = self.flags {
+        canServeImmediately = (self.flags != nil) && !self.awaitingInitialNetworkResponse
+        if canServeImmediately, let currentFlags = self.flags {
           if let variant = currentFlags[flagName] {
             flagVariant = variant
             needsTrackingCheck = !self.trackedFeatures.contains(flagName)
@@ -516,7 +619,7 @@ class FeatureFlagManager: MixpanelFlags {
         }
       }
 
-      if flagsAreCurrentlyReady {
+      if canServeImmediately {
         let result = flagVariant ?? fallback
         if flagVariant != nil, needsTrackingCheck {
           // Perform atomic check-and-track
@@ -525,21 +628,19 @@ class FeatureFlagManager: MixpanelFlags {
         DispatchQueue.main.async { completion(result) }
 
       } else {
-        // --- Flags were NOT ready ---
-        // Trigger fetch; fetch completion will handle calling the original completion handler
-        MixpanelLogger.debug(message: "Flags not ready, attempting fetch for getFeature call...")
-        self._fetchFlagsIfNeeded { success in
-          // This completion runs *after* fetch completes (or fails)
-          let result: MixpanelFlagVariant
-          if success {
-            // Fetch succeeded – call the private impl directly to avoid false positive DEBUG warning
-            result = self._getVariantSyncImpl(flagName, fallback: fallback)
-          } else {
-            MixpanelLogger.warn(message: "Failed to fetch flags, returning fallback for \(flagName).")
-            result = fallback
+        // Flags not yet servable. Either nothing in memory, or NetworkFirst awaiting the
+        // initial network response. Trigger a fetch and serve from `flags` afterward.
+        // On failure, `flags` is left untouched: NetworkFirst with a cache hit still has
+        // cached values (Source.cache); everything else stays nil and we serve the fallback.
+        MixpanelLogger.debug(message: "Flags not yet servable, attempting fetch for getVariant '\(flagName)'...")
+        self._fetchFlagsIfNeeded { _ in
+          // Hop back to the tracking queue so we can read flags + run the tracking check
+          // atomically. Whether the fetch succeeded or not, _getVariantSyncImpl returns the
+          // variant from `flags` if present (cached or network) else the fallback.
+          self.trackingQueue.async {
+            let result = self._getVariantSyncImpl(flagName, fallback: fallback)
+            DispatchQueue.main.async { completion(result) }
           }
-          // Call original completion (on main thread)
-          DispatchQueue.main.async { completion(result) }
         }
       }
     }
@@ -604,22 +705,20 @@ class FeatureFlagManager: MixpanelFlags {
       }
 
       var currentFlags: [String: MixpanelFlagVariant]?
-      self.flagsLock.read { currentFlags = self.flags }
+      var canServeImmediately = false
+      self.flagsLock.read {
+        canServeImmediately = (self.flags != nil) && !self.awaitingInitialNetworkResponse
+        if canServeImmediately { currentFlags = self.flags }
+      }
       if let currentFlags = currentFlags {
         DispatchQueue.main.async { completion(currentFlags) }
       } else {
-        // Flags not ready, trigger fetch
-        MixpanelLogger.debug(message: "Flags not ready, attempting fetch for getAllVariants call...")
-        self._fetchFlagsIfNeeded { success in
-          let result: [String: MixpanelFlagVariant]
-          if success {
-            // Fetch succeeded – call the private impl directly to avoid false positive DEBUG warning
-            result = self._getAllVariantsSyncImpl()
-          } else {
-            MixpanelLogger.warn(message: "Failed to fetch flags, returning empty dictionary.")
-            result = [:]
-          }
-          DispatchQueue.main.async { completion(result) }
+        // Either nothing in memory yet, or NetworkFirst awaiting the initial network
+        // response. Trigger a fetch and serve from `flags` afterward — on success it has
+        // the fresh values, on NetworkFirst failure the cached values stayed in place.
+        MixpanelLogger.debug(message: "Flags not yet servable, attempting fetch for getAllVariants...")
+        self._fetchFlagsIfNeeded { _ in
+          DispatchQueue.main.async { completion(self._getAllVariantsSyncImpl()) }
         }
       }
     }
@@ -716,7 +815,13 @@ class FeatureFlagManager: MixpanelFlags {
       URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion())
     ]
 
+    // Capture the raw response bytes via a reference holder so we can persist the wire
+    // format unchanged. Storing raw JSON (rather than re-encoding the parsed variants)
+    // keeps the parser as the single source of truth and carries `pending_first_time_events`
+    // through to subsequent loads for free.
+    let rawHolder = RawDataHolder()
     let responseParser: (Data) -> FlagsResponse? = { data in
+      rawHolder.data = data
       do { return try JSONDecoder().decode(FlagsResponse.self, from: data) } catch {
         MixpanelLogger.error(message: "Error parsing flags JSON: \(error)")
         return nil
@@ -725,6 +830,11 @@ class FeatureFlagManager: MixpanelFlags {
     let resource = Network.buildResource(
       path: flagsRoute, method: .get, queryItems: queryItems, headers: headers,
       parse: responseParser)
+
+    // Capture the distinctId at dispatch time. Using this (rather than re-reading delegate
+    // state at write time) ensures the persisted blob is keyed to the user we actually
+    // fetched for, even if identify() raced ahead.
+    let distinctIdAtDispatch = distinctId
 
     // Make the API request
     Network.apiRequest(
@@ -737,6 +847,12 @@ class FeatureFlagManager: MixpanelFlags {
           MixpanelLogger.debug(
             message: "Discarding flag fetch failure from stale generation \(generation).")
           return
+        }
+        // Whether or not we have cached values, we've definitively failed to get a network
+        // response. NetworkFirst async lookups can stop awaiting and serve from `flags`
+        // (cached values stay in place since we don't touch them on failure).
+        self.flagsLock.write {
+          self.awaitingInitialNetworkResponse = false
         }
         self._completeFetch(success: false)
       },
@@ -756,13 +872,33 @@ class FeatureFlagManager: MixpanelFlags {
           responsePendingEvents: flagsResponse.pendingFirstTimeEvents
         )
 
+        // Stamp every variant with .network before publishing. mergeFlags may have preserved
+        // some prior-flag entries (activated first-time events) — those came from a prior
+        // network response too, so .network is correct for them as well.
+        let stampedFlags = mergedFlags.mapValues { $0.withSource(.network) }
+
+        // Snapshot the cache-policy decision OUTSIDE the lock to avoid calling into the
+        // delegate (`getOptions()`) while holding the write lock — keeps the lock surface
+        // narrow and avoids potential deadlocks if a future delegate impl ever takes a lock
+        // of its own.
+        let shouldCache = self.shouldCacheVariants()
+
+        // Single critical section: gate the in-memory write AND the on-disk cache write on
+        // the same generation check. Without this, a reset() between the lock release and
+        // the disk write could leak prior-user variants onto disk under the prior-user
+        // distinctId (the next session's distinctId check would catch it, but the disk
+        // write is wasted I/O and confusing in logs).
+        var didApplyResults = false
         self.flagsLock.write {
           // Re-check generation under the lock in case reset() raced between the check above
           // and the write. If stale, drop the result without touching state or completing.
           guard generation == self.fetchGeneration else { return }
-          self.flags = mergedFlags
+          self.flags = stampedFlags
           self.pendingFirstTimeEvents = mergedPendingEvents
           self.pendingFirstTimeEventNames = mergedPendingEventNames
+          // Network response received — async lookups can stop awaiting (NetworkFirst) and
+          // serve from the freshly-populated `flags`.
+          self.awaitingInitialNetworkResponse = false
 
           // Calculate timing metrics
           if let startTime = self.fetchStartTime {
@@ -772,11 +908,136 @@ class FeatureFlagManager: MixpanelFlags {
           self.timeLastFetched = fetchEndTime
 
           MixpanelLogger.debug(message: "Flags updated: \(self.flags ?? [:]), Pending events: \(self.pendingFirstTimeEvents.count)")
+          didApplyResults = true
+        }
+
+        // Persist the raw response so future sessions / failed fetches can fall back. Writes
+        // are independent of the lookup policy — a customer may opt into caching just to warm
+        // up for a future migration to a caching policy. Skipped when `didApplyResults` is
+        // false because that means the generation check failed (reset raced ahead) and we
+        // shouldn't overwrite the cache with prior-user data. UserDefaults I/O is kept
+        // outside the lock since it can block.
+        if didApplyResults,
+           shouldCache,
+           let rawData = rawHolder.data,
+           let rawString = String(data: rawData, encoding: .utf8) {
+          let blob = FlagsCacheBlob(
+            cachedAt: fetchEndTime,
+            distinctId: distinctIdAtDispatch,
+            response: rawString
+          )
+          MixpanelPersistence.saveFlagsCache(blob, instanceName: self.instanceName)
         }
 
         self._completeFetch(success: true)
       }
     )
+  }
+
+  /// Internal reference-type holder so the response-parser closure can hand the raw response
+  /// bytes back to the success closure for caching. Class (not struct) so the captured
+  /// reference shares state across closure invocations.
+  private final class RawDataHolder {
+    var data: Data?
+  }
+
+  // MARK: - Cache Helpers
+
+  /// Loads the on-disk cache, validates distinctId + TTL, parses, stamps every variant with
+  /// `.cache(at:)`, and writes into `flags`. Both `.cacheFirst` and `.networkFirst` populate
+  /// `flags` directly so sync lookups and `areFlagsReady()` reflect the cache. The difference
+  /// between policies is enforced at async-lookup time via `awaitingInitialNetworkResponse`:
+  /// `.networkFirst` sets it true so async lookups await the network call before serving.
+  ///
+  /// Runs on the tracking queue (called from init).
+  internal func _loadCachedVariants() {
+    guard let blob = MixpanelPersistence.loadFlagsCache(instanceName: self.instanceName) else {
+      return
+    }
+
+    // distinctId check — refuse to serve another user's variants under this user's identity.
+    let delegate = self.delegate
+    let currentDistinctId = delegate?.getDistinctId() ?? ""
+    if blob.distinctId != currentDistinctId {
+      MixpanelLogger.debug(message: "Cached flags belong to a different distinct_id; ignoring cache.")
+      return
+    }
+
+    // TTL check — discard expired entries.
+    if let ttl = self.cacheTtlSeconds(), ttl > 0,
+       Date().timeIntervalSince(blob.cachedAt) > ttl {
+      MixpanelLogger.debug(message: "Cached flags expired; ignoring cache.")
+      return
+    }
+
+    // Parse the raw response. The persistence layer self-heals structural failures (bad
+    // JSON envelope) on read, but a structurally-valid blob with an unparseable `response`
+    // string would stick on disk and fail every cold-start. Wipe it here too so the next
+    // successful fetch gets a clean slate.
+    guard let responseData = blob.response.data(using: .utf8),
+          let parsed = try? JSONDecoder().decode(FlagsResponse.self, from: responseData) else {
+      MixpanelLogger.warn(message: "Failed to parse cached flags response; clearing.")
+      MixpanelPersistence.deleteFlagsCache(instanceName: self.instanceName)
+      return
+    }
+
+    let parsedFlags = parsed.flags ?? [:]
+    let stamped = parsedFlags.mapValues { $0.withSource(.cache(at: blob.cachedAt)) }
+
+    // Build pending-event lookups so first-time event matching keeps working from cache.
+    var pendingEvents: [String: PendingFirstTimeEvent] = [:]
+    var pendingEventNames: Set<String> = []
+    if let events = parsed.pendingFirstTimeEvents {
+      for event in events {
+        let key = self.getPendingEventKey(event.flagKey, event.firstTimeEventHash)
+        pendingEvents[key] = event
+        pendingEventNames.insert(event.eventName)
+      }
+    }
+
+    // Snapshot the policy OUTSIDE the lock — `currentLookupPolicy()` calls into the delegate,
+    // and we don't want to hold a delegate call inside our write lock (a future delegate impl
+    // taking its own lock could deadlock). Compute here, branch on it inside the lock.
+    let isNetworkFirst: Bool
+    if case .networkFirst = self.currentLookupPolicy() {
+      isNetworkFirst = true
+    } else {
+      isNetworkFirst = false
+    }
+
+    flagsLock.write {
+      // Defer to network values if a fetch already raced ahead of us between init and now.
+      guard self.flags == nil else { return }
+      self.flags = stamped
+      self.pendingFirstTimeEvents = pendingEvents
+      self.pendingFirstTimeEventNames = pendingEventNames
+      // For .networkFirst, async lookups must wait for the initial network response. The
+      // fetch success/failure path will clear this flag.
+      if isNetworkFirst {
+        self.awaitingInitialNetworkResponse = true
+      }
+      MixpanelLogger.debug(message: "Loaded \(stamped.count) cached variants into memory.")
+    }
+  }
+
+  /// Returns the configured TTL in seconds, or `nil` for `.networkOnly` (no expiry check).
+  /// `.cacheFirst(0)` / `.networkFirst(0)` (or negative) effectively disable expiry — the
+  /// _loadCachedVariants caller treats `<= 0` as "no expiry".
+  private func cacheTtlSeconds() -> TimeInterval? {
+    switch self.currentLookupPolicy() {
+    case .networkOnly:
+      return nil
+    case .cacheFirst(let ttl), .networkFirst(let ttl):
+      return ttl
+    }
+  }
+
+  private func currentLookupPolicy() -> VariantLookupPolicy {
+    return self.delegate?.getOptions().featureFlagOptions.variantLookupPolicy ?? .networkOnly
+  }
+
+  private func shouldCacheVariants() -> Bool {
+    return self.delegate?.getOptions().featureFlagOptions.cacheVariants ?? false
   }
 
   /// Returns true if the captured `generation` no longer matches the current generation,
@@ -1047,11 +1308,14 @@ class FeatureFlagManager: MixpanelFlags {
                 if !activatedFirstTimeEvents.contains(eventKey) {
                     // We won the race - activate this event
                     activatedFirstTimeEvents.insert(eventKey)
-                    
+
                     if flags == nil {
                         flags = [:]
                     }
-                    flags![flagKey] = pendingEvent.pendingVariant
+                    // Stamp NETWORK source — the activated variant came from the prior /flags/
+                    // response. Activations are deliberately not persisted; the cache stays a
+                    // passive snapshot of the wire response so it can be re-loaded verbatim.
+                    flags![flagKey] = pendingEvent.pendingVariant.withSource(.network)
                     shouldActivate = true
                 }
             }

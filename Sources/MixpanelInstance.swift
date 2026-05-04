@@ -391,9 +391,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       instanceName: self.name,
       lock: self.readWriteLock,
       metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
-    flags = FeatureFlagManager(serverURL: self.serverURL, trackingQueue: self.trackingQueue)
     trackInstance.mixpanelInstance = self
-    flags.delegate = self
     #if os(iOS) && !targetEnvironment(macCatalyst)
       // Extract hostname from serverURL and create reachability
       if let url = URL(string: self.serverURL),
@@ -438,6 +436,20 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       setupListeners()
     #endif
     unarchive()
+
+    // Construct FeatureFlagManager AFTER unarchive() so the on-disk cache load (dispatched
+    // async by FeatureFlagManager.init when a caching policy is configured) reads the
+    // correct distinctId via `delegate.getDistinctId()`. Constructing earlier would race the
+    // async cache load against the synchronous distinctId initialization in unarchive() —
+    // a worker thread could pick up the cache-load block and read distinctId == "", computing
+    // the wrong fingerprint and silently ignoring an otherwise-valid cache. Nothing between
+    // here and `flags.loadFlags()` below references `flags`.
+    flags = FeatureFlagManager(
+      serverURL: self.serverURL,
+      trackingQueue: self.trackingQueue,
+      instanceName: self.name,
+      delegate: self
+    )
 
     // check whether we should opt out by default
     // note: we don't override opt out persistence here since opt-out default state is often
@@ -805,6 +817,12 @@ extension MixpanelInstance {
      (recommended), call `identify:` using the current distinct ID:
      `mixpanelInstance.identify(mixpanelInstance.distinctId)`.
   
+     When the distinct ID actually changes, this method also resets feature-flag state
+     (in-memory variants, on-disk cache, and activated first-time-event set) before fetching
+     flags under the new identity. Any `flags.loadFlags(completion:)` callbacks pending from
+     a fetch that was in flight at the moment identify was called will fire with `false`
+     (so callers don't hang) — they will *not* receive the result of the new identity's fetch.
+
      - parameter distinctId: string that uniquely identifies the current user
      - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
      This should only be set to false if you wish to prevent people profile updates for that user.
@@ -847,6 +865,13 @@ extension MixpanelInstance {
           self.alias = nil
           self.distinctId = distinctId
           self.userId = distinctId
+        }
+        // Distinct ID just changed — clear in-memory feature-flag state and the on-disk
+        // cache from the prior identity (and bump the fetch generation so any in-flight
+        // fetch is discarded) before loading flags under the new identity. trackingQueue
+        // FIFO guarantees the reset runs before the loadFlags-driven fetch.
+        if let flagManager = self.flags as? FeatureFlagManager {
+          flagManager.reset()
         }
         self.flags.loadFlags()
         self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
@@ -1703,6 +1728,15 @@ extension MixpanelInstance {
         MixpanelPersistence.saveOptOutStatusFlag(value: self.optOutStatus!, instanceName: self.name)
       }
 
+      // Identity just changed (distinctId was regenerated above). Clear in-memory feature
+      // flag state and the on-disk cache from the prior identity so subsequent lookups
+      // don't serve stale variants. Mirrors `identify()` and `setContext()`. We deliberately
+      // do NOT call `loadFlags()` here — opt-out semantically means "stop tracking", and
+      // re-fetching flags under the new anon identity would defeat that intent. The next
+      // `optInTracking()` will restore the normal fetch flow.
+      if let flagManager = self.flags as? FeatureFlagManager {
+        flagManager.reset()
+      }
     }
   }
 

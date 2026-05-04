@@ -282,6 +282,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       useUniqueDistinctId: options.useUniqueDistinctId,
       superProperties: options.superProperties,
       serverURL: options.serverURL,
+      serverURL: options.serverURL ?? options.proxyServerConfig?.serverUrl,
       proxyServerDelegate: options.proxyServerConfig?.delegate,
       useGzipCompression: options.useGzipCompression,
       options: options)

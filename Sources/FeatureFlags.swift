@@ -346,7 +346,7 @@ class FeatureFlagManager: MixpanelFlags {
   internal var activatedFirstTimeEvents: Set<String> = Set()
 
   // Flag evaluation context (protected by flagsLock)
-  private var flagContext: [String: Any]
+  internal var flagContext: [String: Any]
 
   // Timing tracking properties
   private var fetchStartTime: Date?

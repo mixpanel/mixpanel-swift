@@ -2602,4 +2602,155 @@ class FeatureFlagManagerTests: XCTestCase {
     _ = delegate
   }
 
+  // MARK: - Reset Tests
+
+  private func waitForResetToComplete(_ mockMgr: MockFeatureFlagManager, timeout: TimeInterval = 10.0) {
+    // reset() dispatches its work onto trackingQueue. Wait for `flags` to be cleared
+    // as a proxy for the reset block having executed.
+    let cleared = NSPredicate { _, _ in
+      var done = false
+      mockMgr.flagsLock.read { done = mockMgr.flags == nil }
+      return done
+    }
+    wait(for: [XCTNSPredicateExpectation(predicate: cleared, object: nil)], timeout: timeout)
+  }
+
+  func testReset_ClearsFlagsAndFetchTiming() {
+    setupReadyFlagsAndVerify()
+
+    guard let mockMgr = mockManager else {
+      XCTFail("Manager is not a MockFeatureFlagManager")
+      return
+    }
+
+    // Sanity check pre-reset state
+    mockMgr.flagsLock.read {
+      XCTAssertNotNil(mockMgr.flags, "Flags should be set before reset")
+      XCTAssertNotNil(mockMgr.timeLastFetched, "timeLastFetched should be set before reset")
+      XCTAssertNotNil(mockMgr.fetchLatencyMs, "fetchLatencyMs should be set before reset")
+    }
+
+    mockMgr.reset()
+    waitForResetToComplete(mockMgr)
+
+    XCTAssertFalse(manager.areFlagsReady(), "Flags should not be ready after reset")
+    mockMgr.flagsLock.read {
+      XCTAssertNil(mockMgr.flags, "flags should be cleared")
+      XCTAssertNil(mockMgr.timeLastFetched, "timeLastFetched should be cleared")
+      XCTAssertNil(mockMgr.fetchLatencyMs, "fetchLatencyMs should be cleared")
+      XCTAssertFalse(mockMgr.isFetching, "isFetching should be false after reset")
+    }
+  }
+
+  func testReset_ClearsTrackedFeaturesSoTrackingFiresAgain() {
+    setupReadyFlagsAndVerify()
+
+    guard let mockMgr = mockManager else {
+      XCTFail("Manager is not a MockFeatureFlagManager")
+      return
+    }
+
+    // First read tracks the variant exactly once.
+    expectTracking(expectedCount: 1, description: "Initial tracking") {
+      _ = manager.getVariantSync("feature_string", fallback: defaultFallback)
+    }
+
+    // A second read with the same flag should NOT track again pre-reset.
+    _ = manager.getVariantSync("feature_string", fallback: defaultFallback)
+    waitBriefly()
+    XCTAssertEqual(mockDelegate.trackedEvents.count, 1, "Second read pre-reset should not re-track")
+
+    mockMgr.reset()
+    waitForResetToComplete(mockMgr)
+
+    // Re-populate flags after the reset (mirrors a refetch under a new identity).
+    setupReadyFlags()
+
+    // After reset, reading the same flag should track again because the
+    // trackedFeatures set was cleared.
+    expectTracking(expectedCount: 1, description: "Tracking after reset") {
+      _ = manager.getVariantSync("feature_string", fallback: defaultFallback)
+    }
+  }
+
+  func testReset_ClearsFirstTimeEventState() {
+    guard let mockMgr = mockManager else {
+      XCTFail("Manager is not a MockFeatureFlagManager")
+      return
+    }
+
+    let pendingVariant = MixpanelFlagVariant(key: "activated", value: true)
+    let pendingEvent = createPendingEvent(
+      flagKey: "reset-flag",
+      eventName: "Reset Event",
+      filters: nil,
+      pendingVariant: pendingVariant
+    )
+
+    mockMgr.flagsLock.write {
+      mockMgr.flags = ["reset-flag": createControlVariant()]
+      mockMgr.pendingFirstTimeEvents = ["reset-flag:hash123": pendingEvent]
+      mockMgr.pendingFirstTimeEventNames = [pendingEvent.eventName]
+      mockMgr.activatedFirstTimeEvents.insert("reset-flag:hash123")
+    }
+
+    mockMgr.flagsLock.read {
+      XCTAssertEqual(mockMgr.pendingFirstTimeEvents.count, 1)
+      XCTAssertEqual(mockMgr.pendingFirstTimeEventNames.count, 1)
+      XCTAssertEqual(mockMgr.activatedFirstTimeEvents.count, 1)
+    }
+
+    mockMgr.reset()
+    waitForResetToComplete(mockMgr)
+
+    mockMgr.flagsLock.read {
+      XCTAssertTrue(mockMgr.pendingFirstTimeEvents.isEmpty,
+                    "pendingFirstTimeEvents should be cleared by reset")
+      XCTAssertTrue(mockMgr.pendingFirstTimeEventNames.isEmpty,
+                    "pendingFirstTimeEventNames should be cleared by reset")
+      XCTAssertTrue(mockMgr.activatedFirstTimeEvents.isEmpty,
+                    "activatedFirstTimeEvents should be cleared by reset")
+    }
+  }
+
+  func testReset_PreservesContextSetViaSetContext() {
+    guard let mockMgr = mockManager else {
+      XCTFail("Manager is not a MockFeatureFlagManager")
+      return
+    }
+
+    // Default options carry an empty context.
+    mockMgr.flagsLock.read {
+      XCTAssertTrue(mockMgr.flagContext.isEmpty, "Initial flagContext should be empty")
+    }
+
+    let customContext: [String: Any] = [
+      "user_id": "ctx-user",
+      "group_id": "ctx-group",
+    ]
+
+    let setContextExpectation = XCTestExpectation(description: "setContext completes")
+    mockMgr.setContext(customContext) {
+      setContextExpectation.fulfill()
+    }
+    wait(for: [setContextExpectation], timeout: 5.0)
+
+    mockMgr.flagsLock.read {
+      XCTAssertEqual(mockMgr.flagContext["user_id"] as? String, "ctx-user")
+      XCTAssertEqual(mockMgr.flagContext["group_id"] as? String, "ctx-group")
+    }
+
+    mockMgr.reset()
+    waitForResetToComplete(mockMgr)
+
+    // setContext-supplied context should survive reset() — only identity-tied
+    // state (flags, tracking, first-time events, fetch timing) is cleared.
+    mockMgr.flagsLock.read {
+      XCTAssertEqual(mockMgr.flagContext["user_id"] as? String, "ctx-user",
+                     "setContext value should survive reset()")
+      XCTAssertEqual(mockMgr.flagContext["group_id"] as? String, "ctx-group",
+                     "setContext value should survive reset()")
+    }
+  }
+
 }  // End Test Class

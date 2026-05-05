@@ -5,7 +5,7 @@
 //  Tests for the feature-flag variant persistence layer:
 //   - Persistence round-trip + self-healing on malformed blobs
 //   - distinctId and TTL validation
-//   - Init loads cache and stamps variants with .cache(at:)
+//   - Init loads cache and stamps variants with .cache(cachedAt:)
 //   - CacheFirst serves cached values immediately
 //   - NetworkFirst awaits the initial network response, falls back on failure
 //   - reset() wipes both in-memory state and the on-disk blob
@@ -183,7 +183,7 @@ class FeatureFlagCacheTests: XCTestCase {
     if case .network = stamped.source {} else { XCTFail("expected .network source") }
 
     let cachedAt = Date(timeIntervalSince1970: 1_700_000_000)
-    let cacheStamped = original.withSource(.cache(at: cachedAt))
+    let cacheStamped = original.withSource(.cache(cachedAt: cachedAt))
     if case .cache(let at) = cacheStamped.source {
       XCTAssertEqual(at.timeIntervalSince1970, cachedAt.timeIntervalSince1970, accuracy: 0.001)
     } else {
@@ -426,11 +426,11 @@ class FeatureFlagCacheTests: XCTestCase {
   // MARK: - TTL re-check on get
   //
   // The TTL is re-checked on every `getVariant`/`getAllVariants` call (not only at init load
-  // time). Once a `.cache(at:)`-stamped variant ages past TTL while sitting in memory, lookups
+  // time). Once a `.cache(cachedAt:)`-stamped variant ages past TTL while sitting in memory, lookups
   // return the developer fallback rather than the stale value. The on-disk blob is NOT
   // deleted — the next successful fetch will overwrite it.
 
-  /// A `.cache(at:)`-stamped variant that's older than the configured TTL is treated as
+  /// A `.cache(cachedAt:)`-stamped variant that's older than the configured TTL is treated as
   /// not-present by `getVariantSync` — the developer fallback is returned instead.
   func testGetVariantSyncReturnsFallbackForExpiredCachedVariant() throws {
     let manager = makeManager(
@@ -441,7 +441,7 @@ class FeatureFlagCacheTests: XCTestCase {
     // load path so we can test the get-time TTL check in isolation. cachedAt is 1 hour ago,
     // well past the 60s TTL configured above.
     let expired = MixpanelFlagVariant(key: "v1", value: "stale_value")
-      .withSource(.cache(at: Date(timeIntervalSinceNow: -3600)))
+      .withSource(.cache(cachedAt: Date(timeIntervalSinceNow: -3600)))
     manager.flagsLock.write {
       manager.flags = ["flag_a": expired]
     }
@@ -453,14 +453,14 @@ class FeatureFlagCacheTests: XCTestCase {
     XCTAssertNil(result.source, "fallback variant has nil source")
   }
 
-  /// A `.cache(at:)`-stamped variant within TTL is served as-is (with `.cache` source preserved).
+  /// A `.cache(cachedAt:)`-stamped variant within TTL is served as-is (with `.cache` source preserved).
   func testGetVariantSyncReturnsFreshCachedVariant() throws {
     let manager = makeManager(
       distinctId: "user_a", context: [:], policy: .cacheFirst(ttl: 86_400))
     waitForTrackingQueue(manager: manager)
 
     let fresh = MixpanelFlagVariant(key: "v1", value: "fresh_value")
-      .withSource(.cache(at: Date(timeIntervalSinceNow: -60)))
+      .withSource(.cache(cachedAt: Date(timeIntervalSinceNow: -60)))
     manager.flagsLock.write {
       manager.flags = ["flag_a": fresh]
     }
@@ -473,7 +473,7 @@ class FeatureFlagCacheTests: XCTestCase {
   }
 
   /// `.network`-stamped variants are never expired regardless of how old they are — TTL only
-  /// applies to `.cache(at:)` variants.
+  /// applies to `.cache(cachedAt:)` variants.
   func testGetVariantSyncReturnsNetworkVariantRegardlessOfAge() throws {
     let manager = makeManager(
       distinctId: "user_a", context: [:], policy: .cacheFirst(ttl: 60))
@@ -492,16 +492,16 @@ class FeatureFlagCacheTests: XCTestCase {
   }
 
   /// `getAllVariantsSync` filters out expired cached variants but keeps `.network` variants
-  /// and unexpired `.cache(at:)` variants.
+  /// and unexpired `.cache(cachedAt:)` variants.
   func testGetAllVariantsSyncFiltersExpiredCachedVariants() throws {
     let manager = makeManager(
       distinctId: "user_a", context: [:], policy: .cacheFirst(ttl: 60))
     waitForTrackingQueue(manager: manager)
 
     let expired = MixpanelFlagVariant(key: "v1", value: "stale")
-      .withSource(.cache(at: Date(timeIntervalSinceNow: -3600)))
+      .withSource(.cache(cachedAt: Date(timeIntervalSinceNow: -3600)))
     let fresh = MixpanelFlagVariant(key: "v2", value: "ok")
-      .withSource(.cache(at: Date(timeIntervalSinceNow: -10)))
+      .withSource(.cache(cachedAt: Date(timeIntervalSinceNow: -10)))
     let networkSourced = MixpanelFlagVariant(key: "v3", value: "from_network")
       .withSource(.network)
 
@@ -534,7 +534,7 @@ class FeatureFlagCacheTests: XCTestCase {
 
     // Force the in-memory variant to be expired without wiping the disk blob.
     let expired = MixpanelFlagVariant(key: "v1", value: "stale")
-      .withSource(.cache(at: Date(timeIntervalSinceNow: -90_000)))  // > 86_400s TTL
+      .withSource(.cache(cachedAt: Date(timeIntervalSinceNow: -90_000)))  // > 86_400s TTL
     manager.flagsLock.write {
       manager.flags = ["flag_a": expired]
     }

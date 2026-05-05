@@ -41,8 +41,8 @@ public struct MixpanelFlagVariant: Decodable {
   public let isQATester: Bool? // Corresponds to 'is_qa_tester' from API
 
   /// Where this variant was sourced from. `nil` on developer-supplied fallback instances;
-  /// `.network` or `.cache(at:)` when the SDK serves a variant. For cached variants, the
-  /// timestamp lives on the `.cache` case so invalid combinations like "network with a
+  /// `.network` or `.cache(cachedAt:)` when the SDK serves a variant. For cached variants,
+  /// the timestamp lives on the `.cache` case so invalid combinations like "network with a
   /// timestamp" are unrepresentable.
   public let source: Source?
 
@@ -50,9 +50,9 @@ public struct MixpanelFlagVariant: Decodable {
   public enum Source {
     /// Variant assigned by the most recent successful `/flags/` network call.
     case network
-    /// Variant loaded from the on-disk cache. `at` is the time the variant set was
+    /// Variant loaded from the on-disk cache. `cachedAt` is the time the variant set was
     /// originally written to the cache.
-    case cache(at: Date)
+    case cache(cachedAt: Date)
   }
 
   enum CodingKeys: String, CodingKey {
@@ -214,7 +214,7 @@ public protocol MixpanelFlags {
   ///   `.networkFirst`), this can return `true` before the SDK has spoken to the network this
   ///   session — the returned variants may be stale data from a previous session. Use the
   ///   `source` field on the served `MixpanelFlagVariant` to distinguish: `.network` for
-  ///   fresh values, `.cache(at:)` for on-disk-cache values (with the cache timestamp).
+  ///   fresh values, `.cache(cachedAt:)` for on-disk-cache values (with the cache timestamp).
   ///
   /// - Returns: `true` if flag variants are available in memory (from network or cache),
   ///            `false` otherwise.
@@ -700,7 +700,7 @@ class FeatureFlagManager: MixpanelFlags {
     var result: [String: MixpanelFlagVariant] = [:]
     flagsLock.read {
       // Filter out expired cached variants — same rule as getVariantSync. Keep `.network`
-      // and unexpired `.cache(at:)` entries.
+      // and unexpired `.cache(cachedAt:)` entries.
       if let currentFlags = self.flags {
         result = currentFlags.filter { _, variant in !self.isVariantExpired(variant) }
       }
@@ -955,7 +955,7 @@ class FeatureFlagManager: MixpanelFlags {
   // MARK: - Cache Helpers
 
   /// Loads the on-disk cache, validates distinctId + TTL, parses, stamps every variant with
-  /// `.cache(at:)`, and writes into `flags`. Both `.cacheFirst` and `.networkFirst` populate
+  /// `.cache(cachedAt:)`, and writes into `flags`. Both `.cacheFirst` and `.networkFirst` populate
   /// `flags` directly so sync lookups and `areFlagsReady()` reflect the cache. The difference
   /// between policies is enforced at async-lookup time via `awaitingInitialNetworkResponse`:
   /// `.networkFirst` sets it true so async lookups await the network call before serving.
@@ -997,7 +997,7 @@ class FeatureFlagManager: MixpanelFlags {
     }
 
     let parsedFlags = parsed.flags ?? [:]
-    let stamped = parsedFlags.mapValues { $0.withSource(.cache(at: blob.cachedAt)) }
+    let stamped = parsedFlags.mapValues { $0.withSource(.cache(cachedAt: blob.cachedAt)) }
 
     // Build pending-event lookups so first-time event matching keeps working from cache.
     var pendingEvents: [String: PendingFirstTimeEvent] = [:]
@@ -1072,7 +1072,7 @@ class FeatureFlagManager: MixpanelFlags {
   /// fetch overwrites it.
   ///
   /// `.networkOnly` policy returns `nil` from `cacheTtlSeconds()` so this returns false; in
-  /// practice no `.cache(at:)` variants exist under `.networkOnly` anyway.
+  /// practice no `.cache(cachedAt:)` variants exist under `.networkOnly` anyway.
   /// TTL `<= 0` disables expiry entirely (matches the init-time semantics).
   private func isVariantExpired(_ variant: MixpanelFlagVariant) -> Bool {
     guard case .cache(let cachedAt) = variant.source else { return false }

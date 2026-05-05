@@ -54,7 +54,7 @@ public struct FeatureFlagOptions {
   /// Persistence behavior is derived directly from this policy:
   /// - `.networkOnly` — no persistence. The on-disk blob is also wiped at init if present
   ///   (so toggling from a persisting policy back to `.networkOnly` cleans up after itself).
-  /// - `.persistenceFirst(ttl:)` / `.networkFirst(ttl:)` — successful fetches write to disk;
+  /// - `.persistenceUntilNetworkSuccess(ttl:)` / `.networkFirst(ttl:)` — successful fetches write to disk;
   ///   persisted variants are read on init.
   public let variantLookupPolicy: VariantLookupPolicy
 
@@ -77,27 +77,27 @@ public struct FeatureFlagOptions {
 /// - `networkOnly`: Never read or write persisted variants. Variant lookups always wait for
 ///   the network call. Default; matches behavior prior to variant persistence. If a persisted
 ///   blob exists from a previous session that used a persisting policy, it's wiped on init.
-/// - `persistenceFirst(ttl:)`: Serve persisted variants immediately when available, refresh
+/// - `persistenceUntilNetworkSuccess(ttl:)`: Serve persisted variants immediately when available, refresh
 ///   from the network in the background. Persisted entries older than `ttl` are ignored on
 ///   read but NOT deleted (the next successful fetch overwrites them; a longer TTL on a
 ///   future launch could reuse them). Pass a non-positive TTL to effectively disable expiry.
 /// - `networkFirst(ttl:)`: Prefer fresh values from the network, but fall back to persisted
-///   variants when the network call fails. Same TTL semantics as `persistenceFirst`.
+///   variants when the network call fails. Same TTL semantics as `persistenceUntilNetworkSuccess`.
 ///
-/// Convenience zero-argument forms `persistenceFirst()` / `networkFirst()` use `defaultTTL`
+/// Convenience zero-argument forms `persistenceUntilNetworkSuccess()` / `networkFirst()` use `defaultTTL`
 /// (24 hours) — equivalent to passing `ttl: VariantLookupPolicy.defaultTTL` explicitly.
 public enum VariantLookupPolicy {
   case networkOnly
-  case persistenceFirst(ttl: TimeInterval)
+  case persistenceUntilNetworkSuccess(ttl: TimeInterval)
   case networkFirst(ttl: TimeInterval)
 
   /// Default time-to-live for persisted variants when no TTL is specified: 24 hours.
   public static let defaultTTL: TimeInterval = 24 * 60 * 60
 
   /// Convenience constructor — equivalent to
-  /// `.persistenceFirst(ttl: VariantLookupPolicy.defaultTTL)`.
-  public static func persistenceFirst() -> VariantLookupPolicy {
-    return .persistenceFirst(ttl: defaultTTL)
+  /// `.persistenceUntilNetworkSuccess(ttl: VariantLookupPolicy.defaultTTL)`.
+  public static func persistenceUntilNetworkSuccess() -> VariantLookupPolicy {
+    return .persistenceUntilNetworkSuccess(ttl: defaultTTL)
   }
 
   /// Convenience constructor — equivalent to

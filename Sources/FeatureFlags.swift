@@ -217,7 +217,7 @@ public protocol MixpanelFlags {
 
   /// Synchronously checks if flag variants are in memory and available for synchronous access.
   ///
-  /// - Note: When a persisting `variantLookupPolicy` is configured (`.persistenceFirst` or
+  /// - Note: When a persisting `variantLookupPolicy` is configured (`.persistenceUntilNetworkSuccess` or
   ///   `.networkFirst`), this can return `true` before the SDK has spoken to the network this
   ///   session — the returned variants may be stale data from a previous session. Use the
   ///   `source` field on the served `MixpanelFlagVariant` to distinguish: `.network` for
@@ -400,7 +400,7 @@ class FeatureFlagManager: MixpanelFlags {
 
   /// True when `flags` was populated from the on-disk persistence layer and we have not yet
   /// seen the initial network response for the current user/context. Only set for
-  /// `.networkFirst` — `.persistenceFirst` serves persisted values immediately. Async lookups
+  /// `.networkFirst` — `.persistenceUntilNetworkSuccess` serves persisted values immediately. Async lookups
   /// gate on this to honor the NetworkFirst spec ("await on network call, only serve persisted
   /// values if it fails") while still letting sync lookups + areFlagsReady() see the persisted
   /// values.
@@ -478,7 +478,7 @@ class FeatureFlagManager: MixpanelFlags {
         // any stale blob left over from a previous session that used a persisting policy.
         if let options = delegate?.getOptions(), options.featureFlagOptions.enabled {
             switch options.featureFlagOptions.variantLookupPolicy {
-            case .persistenceFirst, .networkFirst:
+            case .persistenceUntilNetworkSuccess, .networkFirst:
                 trackingQueue.async { [weak self] in
                     self?._loadPersistedVariants()
                 }
@@ -958,7 +958,7 @@ class FeatureFlagManager: MixpanelFlags {
         }
 
         // Persist the raw response so future sessions / failed fetches can fall back. Writes
-        // are gated by the lookup policy via `shouldPersist` (true for `.persistenceFirst`
+        // are gated by the lookup policy via `shouldPersist` (true for `.persistenceUntilNetworkSuccess`
         // and `.networkFirst`, false for `.networkOnly`). Skipped when `didApplyResults` is
         // false because that means the generation check failed (reset raced ahead) and we
         // shouldn't overwrite the persisted blob with prior-user data. UserDefaults I/O is
@@ -991,7 +991,7 @@ class FeatureFlagManager: MixpanelFlags {
 
   /// Loads the on-disk persistence blob, validates distinctId + TTL, parses, stamps every
   /// variant with `.persistence(persistedAt:)`, and writes into `flags`. Both
-  /// `.persistenceFirst` and `.networkFirst` populate `flags` directly so sync lookups and
+  /// `.persistenceUntilNetworkSuccess` and `.networkFirst` populate `flags` directly so sync lookups and
   /// `areFlagsReady()` reflect persisted values. The difference between policies is enforced
   /// at async-lookup time via `awaitingInitialNetworkResponse`: `.networkFirst` sets it true
   /// so async lookups await the network call before serving.
@@ -1074,13 +1074,13 @@ class FeatureFlagManager: MixpanelFlags {
   }
 
   /// Returns the configured TTL in seconds, or `nil` for `.networkOnly` (no expiry check).
-  /// `.persistenceFirst(0)` / `.networkFirst(0)` (or negative) effectively disable expiry —
+  /// `.persistenceUntilNetworkSuccess(0)` / `.networkFirst(0)` (or negative) effectively disable expiry —
   /// the `_loadPersistedVariants` caller treats `<= 0` as "no expiry".
   private func persistenceTtlSeconds() -> TimeInterval? {
     switch self.currentLookupPolicy() {
     case .networkOnly:
       return nil
-    case .persistenceFirst(let ttl), .networkFirst(let ttl):
+    case .persistenceUntilNetworkSuccess(let ttl), .networkFirst(let ttl):
       return ttl
     }
   }
@@ -1090,12 +1090,12 @@ class FeatureFlagManager: MixpanelFlags {
   }
 
   /// Whether successful fetches should be persisted to disk. Derived from the lookup policy:
-  /// `.persistenceFirst` and `.networkFirst` write to disk; `.networkOnly` doesn't.
+  /// `.persistenceUntilNetworkSuccess` and `.networkFirst` write to disk; `.networkOnly` doesn't.
   private func shouldPersistVariants() -> Bool {
     switch self.currentLookupPolicy() {
     case .networkOnly:
       return false
-    case .persistenceFirst, .networkFirst:
+    case .persistenceUntilNetworkSuccess, .networkFirst:
       return true
     }
   }

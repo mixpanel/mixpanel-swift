@@ -82,10 +82,26 @@ public struct FeatureFlagOptions {
 ///   could reuse them). Pass a non-positive TTL to effectively disable expiry.
 /// - `networkFirst(ttl:)`: Prefer fresh values from the network, but fall back to cached
 ///   variants when the network call fails. Same TTL semantics as `cacheFirst`.
+///
+/// Convenience zero-argument forms `cacheFirst()` / `networkFirst()` use `defaultTTL`
+/// (1 hour) — equivalent to passing `ttl: VariantLookupPolicy.defaultTTL` explicitly.
 public enum VariantLookupPolicy {
   case networkOnly
   case cacheFirst(ttl: TimeInterval)
   case networkFirst(ttl: TimeInterval)
+
+  /// Default time-to-live for cached variants when no TTL is specified: 1 hour.
+  public static let defaultTTL: TimeInterval = 60 * 60
+
+  /// Convenience constructor — equivalent to `.cacheFirst(ttl: VariantLookupPolicy.defaultTTL)`.
+  public static func cacheFirst() -> VariantLookupPolicy {
+    return .cacheFirst(ttl: defaultTTL)
+  }
+
+  /// Convenience constructor — equivalent to `.networkFirst(ttl: VariantLookupPolicy.defaultTTL)`.
+  public static func networkFirst() -> VariantLookupPolicy {
+    return .networkFirst(ttl: defaultTTL)
+  }
 }
 
 public class MixpanelOptions {

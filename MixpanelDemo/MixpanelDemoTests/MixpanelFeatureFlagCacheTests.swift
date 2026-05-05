@@ -196,6 +196,30 @@ class FeatureFlagCacheTests: XCTestCase {
     XCTAssertNil(fallback.source)
   }
 
+  // MARK: - Default TTL
+
+  /// `VariantLookupPolicy.defaultTTL` is 1 hour, and the zero-arg static factories
+  /// `cacheFirst()` / `networkFirst()` produce cases keyed to that default. This also
+  /// exercises the case-plus-static-func overload pattern (different parameter lists, so
+  /// `.cacheFirst()` and `.cacheFirst(ttl:)` resolve to different members).
+  func testDefaultTTLConvenienceConstructors() throws {
+    XCTAssertEqual(VariantLookupPolicy.defaultTTL, 60 * 60, "default TTL should be 1 hour")
+
+    let convenientCacheFirst = VariantLookupPolicy.cacheFirst()
+    if case .cacheFirst(let ttl) = convenientCacheFirst {
+      XCTAssertEqual(ttl, VariantLookupPolicy.defaultTTL)
+    } else {
+      XCTFail("convenience cacheFirst() should produce .cacheFirst case")
+    }
+
+    let convenientNetworkFirst = VariantLookupPolicy.networkFirst()
+    if case .networkFirst(let ttl) = convenientNetworkFirst {
+      XCTAssertEqual(ttl, VariantLookupPolicy.defaultTTL)
+    } else {
+      XCTFail("convenience networkFirst() should produce .networkFirst case")
+    }
+  }
+
   // MARK: - Init loads cache and stamps variants
 
   func testInitLoadsCachedVariantsAndStampsCacheSource() throws {

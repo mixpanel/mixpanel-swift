@@ -399,6 +399,21 @@ class FeatureFlagManager: MixpanelFlags {
   /// values.
   internal var awaitingInitialNetworkResponse: Bool = false
 
+  /// `persistedAt` from the persisted blob currently sitting in `flags`. Lifetime matches
+  /// the persistence-derived state (`flags` + `pendingFirstTimeEvents`):
+  ///   - Set in `_loadPersistedVariants` when we read the blob from disk
+  ///   - Cleared in the network-fetch success closure (the in-memory blob is fully
+  ///     `.network`-stamped after a refresh, so the persisted timestamp no longer applies)
+  ///   - Cleared in `reset()` along with the rest of the per-user state
+  ///
+  /// Stored separately from the `.persistence(persistedAt:)` variant case so we can answer
+  /// "is the loaded blob past TTL?" even when `flags` is empty (the previous session may
+  /// have persisted an empty response).
+  ///
+  /// `internal` so tests that inject `.persistence` variants directly can match the
+  /// production invariant.
+  internal var loadedBlobPersistedAt: Date?
+
   /// Per-instance name used as the UserDefaults key prefix for the on-disk persistence layer.
   /// Captured from the delegate at init so we can persist/clear without holding a delegate
   /// reference during async work.
@@ -500,6 +515,7 @@ class FeatureFlagManager: MixpanelFlags {
       self.flagsLock.write {
         self.fetchGeneration &+= 1
         self.flags = nil
+        self.loadedBlobPersistedAt = nil
         self.trackedFeatures.removeAll()
         self.pendingFirstTimeEvents.removeAll()
         self.pendingFirstTimeEventNames.removeAll()
@@ -615,18 +631,20 @@ class FeatureFlagManager: MixpanelFlags {
       var needsTrackingCheck = false
       var canServeImmediately = false
 
-      // Read state with lock. Serve immediately when flags are populated AND we're not in
-      // the NetworkFirst-init window (waiting for the first network response after a
-      // persistence hit). For PersistenceFirst, awaitingInitialNetworkResponse is never set
-      // so persisted values are served right away. Expired persisted variants are treated as
-      // not-present so the caller falls through to the fetch path below.
+      // Read state with lock. Serve immediately when flags are populated, we're not in the
+      // NetworkFirst-init window (waiting for the first network response after a persistence
+      // hit), AND the loaded blob isn't past TTL. The blob-staleness check is what makes the
+      // async path fall through to a fetch when persisted values have aged out mid-session —
+      // the inline TTL check below would otherwise silently serve the developer fallback
+      // without refreshing.
       self.flagsLock.read {
-        canServeImmediately = (self.flags != nil) && !self.awaitingInitialNetworkResponse
-        if canServeImmediately, let currentFlags = self.flags {
-          if let variant = currentFlags[flagName], !self.isVariantExpired(variant) {
-            flagVariant = variant
-            needsTrackingCheck = !self.trackedFeatures.contains(flagName)
-          }
+        guard let currentFlags = self.flags,
+              !self.awaitingInitialNetworkResponse,
+              !self.loadedFlagsAreStale() else { return }
+        canServeImmediately = true
+        if let variant = currentFlags[flagName], !self.isVariantExpired(variant) {
+          flagVariant = variant
+          needsTrackingCheck = !self.trackedFeatures.contains(flagName)
         }
       }
 
@@ -722,16 +740,20 @@ class FeatureFlagManager: MixpanelFlags {
 
       var canServeImmediately = false
       self.flagsLock.read {
-        canServeImmediately = (self.flags != nil) && !self.awaitingInitialNetworkResponse
+        canServeImmediately = (self.flags != nil)
+          && !self.awaitingInitialNetworkResponse
+          && !self.loadedFlagsAreStale()
       }
       if canServeImmediately {
         // Use the sync impl so the expired-filter is applied consistently.
         let result = self._getAllVariantsSyncImpl()
         DispatchQueue.main.async { completion(result) }
       } else {
-        // Either nothing in memory yet, or NetworkFirst awaiting the initial network
-        // response. Trigger a fetch and serve from `flags` afterward — on success it has
-        // the fresh values, on NetworkFirst failure the persisted values stayed in place.
+        // Either nothing in memory yet, NetworkFirst awaiting the initial network response,
+        // or the loaded persisted blob is past TTL. Trigger a fetch and serve from `flags`
+        // afterward — on success it has the fresh values, on NetworkFirst failure the
+        // persisted values stayed in place (still served, _getAllVariantsSyncImpl filters
+        // any expired entries).
         MixpanelLogger.debug(message: "Flags not yet servable, attempting fetch for getAllVariants...")
         self._fetchFlagsIfNeeded { _ in
           DispatchQueue.main.async { completion(self._getAllVariantsSyncImpl()) }
@@ -910,6 +932,7 @@ class FeatureFlagManager: MixpanelFlags {
           // and the write. If stale, drop the result without touching state or completing.
           guard generation == self.fetchGeneration else { return }
           self.flags = stampedFlags
+          self.loadedBlobPersistedAt = nil
           self.pendingFirstTimeEvents = mergedPendingEvents
           self.pendingFirstTimeEventNames = mergedPendingEventNames
           // Network response received — async lookups can stop awaiting (NetworkFirst) and
@@ -1031,6 +1054,7 @@ class FeatureFlagManager: MixpanelFlags {
       // Defer to network values if a fetch already raced ahead of us between init and now.
       guard self.flags == nil else { return }
       self.flags = stamped
+      self.loadedBlobPersistedAt = blob.persistedAt
       self.pendingFirstTimeEvents = pendingEvents
       self.pendingFirstTimeEventNames = pendingEventNames
       // For .networkFirst, async lookups must wait for the initial network response. The
@@ -1069,19 +1093,31 @@ class FeatureFlagManager: MixpanelFlags {
     }
   }
 
-  /// Returns true if the variant came from the on-disk persistence layer and has aged past
-  /// the configured TTL. Variants stamped `.network` (or `nil` developer fallbacks) are never
-  /// expired.
+  /// Returns true if the loaded persisted blob is past TTL. Uses `loadedBlobPersistedAt`
+  /// rather than inspecting variant sources so the check works uniformly whether the blob
+  /// has flags in it or is empty (a previous session may have persisted a no-flags
+  /// response — we still want TTL to govern when to refresh).
   ///
-  /// Get-paths use this to skip stale persisted values mid-session — once a persisted blob's
-  /// TTL elapses while it's loaded in memory, subsequent `getVariant` calls return the
-  /// developer fallback instead of the stale value. The blob itself is intentionally NOT
-  /// deleted (per the "don't clear if TTL has expired on getVariant" rule); the next
-  /// successful network fetch overwrites it.
+  /// Returns false when no persisted blob is in memory, under `.networkOnly`, or with
+  /// TTL `<= 0`.
   ///
-  /// `.networkOnly` policy returns `nil` from `persistenceTtlSeconds()` so this returns false;
-  /// in practice no `.persistence(persistedAt:)` variants exist under `.networkOnly` anyway.
-  /// TTL `<= 0` disables expiry entirely (matches the init-time semantics).
+  /// Caller must hold `flagsLock`.
+  private func loadedFlagsAreStale() -> Bool {
+    guard let persistedAt = self.loadedBlobPersistedAt,
+          let ttl = self.persistenceTtlSeconds(), ttl > 0 else { return false }
+    return Date().timeIntervalSince(persistedAt) > ttl
+  }
+
+  /// Returns true if the variant was loaded from the persistence layer and has aged past
+  /// the configured TTL. `.network` variants (and `nil`-source developer fallbacks) are
+  /// never expired — including activated first-time-event variants, which are deliberately
+  /// stamped `.network` to survive blob expiration.
+  ///
+  /// Get-paths use this to skip stale persisted values mid-session — once a variant's TTL
+  /// elapses while loaded in memory, subsequent `getVariant` calls return the developer
+  /// fallback instead of the stale value. The on-disk blob is intentionally NOT deleted
+  /// (per the "don't clear if TTL has expired on getVariant" rule); the next successful
+  /// network fetch overwrites it.
   private func isVariantExpired(_ variant: MixpanelFlagVariant) -> Bool {
     guard case .persistence(let persistedAt) = variant.source else { return false }
     guard let ttl = self.persistenceTtlSeconds(), ttl > 0 else { return false }

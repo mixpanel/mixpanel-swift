@@ -447,10 +447,12 @@ class FeatureFlagPersistenceTests: XCTestCase {
     // Inject an expired persisted variant directly into in-memory state. Bypasses the disk
     // load path so we can test the get-time TTL check in isolation. persistedAt is 1 hour
     // ago, well past the 60s TTL configured above.
+    let persistedAt = Date(timeIntervalSinceNow: -3600)
     let expired = MixpanelFlagVariant(key: "v1", value: "stale_value")
-      .withSource(.persistence(persistedAt: Date(timeIntervalSinceNow: -3600)))
+      .withSource(.persistence(persistedAt: persistedAt))
     manager.flagsLock.write {
       manager.flags = ["flag_a": expired]
+      manager.loadedBlobPersistedAt = persistedAt
     }
 
     let fallback = MixpanelFlagVariant(key: "fb", value: "fallback_value")
@@ -467,10 +469,12 @@ class FeatureFlagPersistenceTests: XCTestCase {
       distinctId: "user_a", context: [:], policy: .persistenceFirst(ttl: 86_400))
     waitForTrackingQueue(manager: manager)
 
+    let persistedAt = Date(timeIntervalSinceNow: -60)
     let fresh = MixpanelFlagVariant(key: "v1", value: "fresh_value")
-      .withSource(.persistence(persistedAt: Date(timeIntervalSinceNow: -60)))
+      .withSource(.persistence(persistedAt: persistedAt))
     manager.flagsLock.write {
       manager.flags = ["flag_a": fresh]
+      manager.loadedBlobPersistedAt = persistedAt
     }
 
     let fallback = MixpanelFlagVariant(key: "fb", value: "fallback_value")
@@ -501,33 +505,39 @@ class FeatureFlagPersistenceTests: XCTestCase {
     XCTAssertEqual(result.value as? String, "from_network")
   }
 
-  /// `getAllVariantsSync` filters out expired persisted variants but keeps `.network`
-  /// variants and unexpired `.persistence(persistedAt:)` variants.
-  func testGetAllVariantsSyncFiltersExpiredPersistedVariants() throws {
+  /// When the loaded persisted blob is past TTL, `getAllVariantsSync` filters out all
+  /// `.persistence` variants but keeps `.network` variants (e.g., activated first-time
+  /// events that were promoted to network source mid-session). Documents the blob-level
+  /// expiry rule: all `.persistence` variants share `persistedAt`, so they pass-or-fail
+  /// the TTL check together.
+  func testGetAllVariantsSyncFiltersPersistedVariantsWhenBlobIsStale() throws {
     let manager = makeManager(
       distinctId: "user_a", context: [:], policy: .persistenceFirst(ttl: 60))
     waitForTrackingQueue(manager: manager)
 
-    let expired = MixpanelFlagVariant(key: "v1", value: "stale")
-      .withSource(.persistence(persistedAt: Date(timeIntervalSinceNow: -3600)))
-    let fresh = MixpanelFlagVariant(key: "v2", value: "ok")
-      .withSource(.persistence(persistedAt: Date(timeIntervalSinceNow: -10)))
+    let stalePersistedAt = Date(timeIntervalSinceNow: -3600)
+    let stalePersistedA = MixpanelFlagVariant(key: "v1", value: "stale_a")
+      .withSource(.persistence(persistedAt: stalePersistedAt))
+    let stalePersistedB = MixpanelFlagVariant(key: "v2", value: "stale_b")
+      .withSource(.persistence(persistedAt: stalePersistedAt))
     let networkSourced = MixpanelFlagVariant(key: "v3", value: "from_network")
       .withSource(.network)
 
     manager.flagsLock.write {
       manager.flags = [
-        "expired_flag": expired,
-        "fresh_flag": fresh,
+        "stale_flag_a": stalePersistedA,
+        "stale_flag_b": stalePersistedB,
         "network_flag": networkSourced,
       ]
+      manager.loadedBlobPersistedAt = stalePersistedAt
     }
 
     let result = manager.getAllVariantsSync()
-    XCTAssertEqual(result.count, 2)
-    XCTAssertNil(result["expired_flag"], "expired flag should be filtered out")
-    XCTAssertNotNil(result["fresh_flag"])
-    XCTAssertNotNil(result["network_flag"])
+    XCTAssertEqual(result.count, 1)
+    XCTAssertNil(result["stale_flag_a"], "stale persisted variant should be filtered out")
+    XCTAssertNil(result["stale_flag_b"], "stale persisted variant should be filtered out")
+    XCTAssertNotNil(
+      result["network_flag"], ".network variants survive blob expiration (e.g., activated FTEs)")
   }
 
   /// The on-disk blob is NOT deleted when an in-memory variant expires at get-time.
@@ -543,10 +553,12 @@ class FeatureFlagPersistenceTests: XCTestCase {
     XCTAssertNotNil(MixpanelPersistence.loadFlagsPersistence(instanceName: instanceName))
 
     // Force the in-memory variant to be expired without wiping the disk blob.
+    let stalePersistedAt = Date(timeIntervalSinceNow: -90_000)  // > 86_400s TTL
     let expired = MixpanelFlagVariant(key: "v1", value: "stale")
-      .withSource(.persistence(persistedAt: Date(timeIntervalSinceNow: -90_000)))  // > 86_400s TTL
+      .withSource(.persistence(persistedAt: stalePersistedAt))
     manager.flagsLock.write {
       manager.flags = ["flag_a": expired]
+      manager.loadedBlobPersistedAt = stalePersistedAt
     }
 
     let fallback = MixpanelFlagVariant(key: "fb", value: "fb")
@@ -761,6 +773,218 @@ class FeatureFlagPersistenceTests: XCTestCase {
       "setContext must NOT clear in-memory variants")
   }
 
+  // MARK: - Async lookups refresh when loaded blob is stale
+  //
+  // When a persisting policy is in effect and the loaded persisted blob has aged past TTL
+  // mid-session, the async getVariant / getAllVariants paths must fall through to a network
+  // fetch rather than silently serving the developer fallback or an empty dict. The blob
+  // shares a single `persistedAt`, so any one expired entry decides for the whole set.
+
+  /// `getVariant(completion:)` triggers a fetch when the in-memory persisted variant for the
+  /// requested flag has aged past TTL, and serves the post-fetch (network) value rather than
+  /// the developer fallback.
+  func testGetVariantAsyncTriggersFetchWhenLoadedBlobIsStale() throws {
+    let mock = makeMockManager(
+      distinctId: "user_a", context: [:], policy: .persistenceFirst(ttl: 60))
+    waitForTrackingQueue(manager: mock)
+
+    // Inject an expired persisted variant directly. Bypasses the disk-load path so we can
+    // pin the staleness without depending on init timing.
+    let stalePersistedAt = Date(timeIntervalSinceNow: -3600)
+    let expired = MixpanelFlagVariant(key: "v_old", value: "stale_val")
+      .withSource(.persistence(persistedAt: stalePersistedAt))
+    mock.flagsLock.write {
+      mock.flags = ["flag_a": expired]
+      mock.loadedBlobPersistedAt = stalePersistedAt
+    }
+
+    // Mock the refresh response so we can confirm the served value came from the network.
+    mock.simulatedFetchResult = (
+      success: true,
+      flags: ["flag_a": MixpanelFlagVariant(key: "v_fresh", value: "network_val")]
+    )
+    mock.simulatedNetworkDelay = 0
+
+    let asyncDone = expectation(description: "async lookup completes after refresh")
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
+      XCTAssertEqual(
+        variant.value as? String, "network_val",
+        "stale persisted blob should trigger fetch and serve the network value")
+      if case .network = variant.source {} else {
+        XCTFail("post-fetch variant should carry .network source")
+      }
+      asyncDone.fulfill()
+    }
+    wait(for: [asyncDone], timeout: 2.0)
+  }
+
+  /// When the loaded blob is stale and the refresh fails, async getVariant serves the
+  /// developer fallback (the stale persisted value is filtered by `_getVariantSyncImpl`'s
+  /// per-variant TTL check). This documents the post-fix tolerance: we fetch, but we don't
+  /// resurrect stale values just because the network was unavailable.
+  func testGetVariantAsyncReturnsFallbackWhenStaleBlobAndFetchFails() throws {
+    let mock = makeMockManager(
+      distinctId: "user_a", context: [:], policy: .persistenceFirst(ttl: 60))
+    waitForTrackingQueue(manager: mock)
+
+    let stalePersistedAt = Date(timeIntervalSinceNow: -3600)
+    let expired = MixpanelFlagVariant(key: "v_old", value: "stale_val")
+      .withSource(.persistence(persistedAt: stalePersistedAt))
+    mock.flagsLock.write {
+      mock.flags = ["flag_a": expired]
+      mock.loadedBlobPersistedAt = stalePersistedAt
+    }
+
+    mock.simulatedFetchResult = (success: false, flags: nil)
+    mock.simulatedNetworkDelay = 0
+
+    let asyncDone = expectation(description: "async lookup completes after failed refresh")
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback_val")) { variant in
+      XCTAssertEqual(variant.value as? String, "fallback_val")
+      asyncDone.fulfill()
+    }
+    wait(for: [asyncDone], timeout: 2.0)
+  }
+
+  /// `getAllVariants(completion:)` triggers a fetch when the loaded blob is stale rather
+  /// than returning an empty (post-filter) dictionary without attempting refresh.
+  func testGetAllVariantsAsyncTriggersFetchWhenLoadedBlobIsStale() throws {
+    let mock = makeMockManager(
+      distinctId: "user_a", context: [:], policy: .persistenceFirst(ttl: 60))
+    waitForTrackingQueue(manager: mock)
+
+    let stalePersistedAt = Date(timeIntervalSinceNow: -3600)
+    let expiredA = MixpanelFlagVariant(key: "v1", value: "stale_a")
+      .withSource(.persistence(persistedAt: stalePersistedAt))
+    let expiredB = MixpanelFlagVariant(key: "v2", value: "stale_b")
+      .withSource(.persistence(persistedAt: stalePersistedAt))
+    mock.flagsLock.write {
+      mock.flags = ["flag_a": expiredA, "flag_b": expiredB]
+      mock.loadedBlobPersistedAt = stalePersistedAt
+    }
+
+    mock.simulatedFetchResult = (
+      success: true,
+      flags: [
+        "flag_a": MixpanelFlagVariant(key: "v1f", value: "fresh_a"),
+        "flag_b": MixpanelFlagVariant(key: "v2f", value: "fresh_b"),
+      ]
+    )
+    mock.simulatedNetworkDelay = 0
+
+    let asyncDone = expectation(description: "async getAll completes after refresh")
+    mock.getAllVariants { variants in
+      XCTAssertEqual(variants.count, 2)
+      XCTAssertEqual(variants["flag_a"]?.value as? String, "fresh_a")
+      XCTAssertEqual(variants["flag_b"]?.value as? String, "fresh_b")
+      asyncDone.fulfill()
+    }
+    wait(for: [asyncDone], timeout: 2.0)
+  }
+
+  /// An empty persisted blob within TTL is treated as a valid state: serve the developer
+  /// fallback, no network refresh. The customer is opting into "use cached flags," and
+  /// the cache says "no flags configured at the time it was written" — until TTL elapses,
+  /// we trust that.
+  func testGetVariantAsyncServesFallbackOnEmptyFreshBlobWithoutRefresh() throws {
+    let mock = makeMockManager(
+      distinctId: "user_a", context: [:], policy: .persistenceFirst(ttl: 86_400))
+    waitForTrackingQueue(manager: mock)
+
+    let freshPersistedAt = Date(timeIntervalSinceNow: -60)  // well within TTL
+    mock.flagsLock.write {
+      mock.flags = [:]
+      mock.loadedBlobPersistedAt = freshPersistedAt
+    }
+
+    // Configure a recognizable network response. If the staleness check wrongly triggers
+    // a fetch, the served value would be "should_not_be_served".
+    mock.simulatedFetchResult = (
+      success: true,
+      flags: ["flag_a": MixpanelFlagVariant(key: "v1", value: "should_not_be_served")]
+    )
+    mock.simulatedNetworkDelay = 0
+
+    let asyncDone = expectation(description: "async lookup completes without refresh")
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
+      XCTAssertEqual(
+        variant.value as? String, "fallback",
+        "empty fresh blob should serve fallback without auto-refreshing")
+      asyncDone.fulfill()
+    }
+    wait(for: [asyncDone], timeout: 2.0)
+  }
+
+  /// An empty persisted blob PAST TTL still triggers a fetch — the TTL governs when to
+  /// refresh regardless of whether the blob has flags in it. This is exactly why we keep
+  /// `loadedBlobPersistedAt` separate from variant inspection: an empty blob has no
+  /// variants to check, but its persistedAt still tells us when to give up on the cache.
+  func testGetVariantAsyncTriggersFetchWhenEmptyBlobIsStale() throws {
+    let mock = makeMockManager(
+      distinctId: "user_a", context: [:], policy: .persistenceFirst(ttl: 60))
+    waitForTrackingQueue(manager: mock)
+
+    let stalePersistedAt = Date(timeIntervalSinceNow: -3600)  // well past 60s TTL
+    mock.flagsLock.write {
+      mock.flags = [:]
+      mock.loadedBlobPersistedAt = stalePersistedAt
+    }
+
+    mock.simulatedFetchResult = (
+      success: true,
+      flags: ["flag_a": MixpanelFlagVariant(key: "v1", value: "fresh_val")]
+    )
+    mock.simulatedNetworkDelay = 0
+
+    let asyncDone = expectation(description: "async lookup refreshes stale empty blob")
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
+      XCTAssertEqual(
+        variant.value as? String, "fresh_val",
+        "stale empty blob should trigger fetch and serve newly-discovered flag")
+      asyncDone.fulfill()
+    }
+    wait(for: [asyncDone], timeout: 2.0)
+  }
+
+  /// Sanity check the existing serve-immediately path still wins when the loaded blob is
+  /// fresh — the staleness check shouldn't push fresh persisted variants through a needless
+  /// network round-trip.
+  func testGetVariantAsyncServesFreshPersistedImmediatelyWithoutFetch() throws {
+    let mock = makeMockManager(
+      distinctId: "user_a", context: [:], policy: .persistenceFirst(ttl: 86_400))
+    waitForTrackingQueue(manager: mock)
+
+    let freshPersistedAt = Date(timeIntervalSinceNow: -60)
+    let fresh = MixpanelFlagVariant(key: "v1", value: "persisted_val")
+      .withSource(.persistence(persistedAt: freshPersistedAt))
+    mock.flagsLock.write {
+      mock.flags = ["flag_a": fresh]
+      mock.loadedBlobPersistedAt = freshPersistedAt
+    }
+
+    // Configure a slow + clearly-different network response. If the staleness check
+    // wrongly triggers a fetch, the test will catch the wrong value (and the slow delay
+    // would add noticeable latency).
+    mock.simulatedFetchResult = (
+      success: true,
+      flags: ["flag_a": MixpanelFlagVariant(key: "v2", value: "network_val")]
+    )
+    mock.simulatedNetworkDelay = 0.1
+
+    let asyncDone = expectation(description: "async getVariant completes")
+    let start = Date()
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fb")) { variant in
+      let elapsed = Date().timeIntervalSince(start)
+      XCTAssertEqual(variant.value as? String, "persisted_val")
+      if case .persistence = variant.source {} else {
+        XCTFail("fresh persisted variant should be served as-is, not refreshed")
+      }
+      XCTAssertLessThan(elapsed, 0.08, "fresh blob must not wait on the network")
+      asyncDone.fulfill()
+    }
+    wait(for: [asyncDone], timeout: 1.0)
+  }
+
   // MARK: - Tracking properties for persisted variants
 
   /// When a served variant came from the persistence layer, `$experiment_started` carries
@@ -782,7 +1006,10 @@ class FeatureFlagPersistenceTests: XCTestCase {
     // on the blob serializer's millisecond rounding.
     let persistedVariant = MixpanelFlagVariant(key: "v1", value: "persisted_val")
       .withSource(.persistence(persistedAt: persistedAt))
-    manager.flagsLock.write { manager.flags = ["flag_a": persistedVariant] }
+    manager.flagsLock.write {
+      manager.flags = ["flag_a": persistedVariant]
+      manager.loadedBlobPersistedAt = persistedAt
+    }
 
     // Trigger tracking by reading the persisted variant (first read records the tracking
     // event; subsequent reads are deduped via `trackedFeatures`).

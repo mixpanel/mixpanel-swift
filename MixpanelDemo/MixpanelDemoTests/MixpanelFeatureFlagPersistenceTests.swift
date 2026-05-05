@@ -197,9 +197,11 @@ class FeatureFlagPersistenceTests: XCTestCase {
     }
   }
 
-  func testFallbackVariantsHaveNilSource() {
+  func testFallbackVariantsHaveFallbackSource() {
     let fallback = MixpanelFlagVariant(value: "default")
-    XCTAssertNil(fallback.source)
+    if case .fallback = fallback.source {} else {
+      XCTFail("developer-supplied variants should carry .fallback source")
+    }
   }
 
   // MARK: - Default TTL
@@ -459,7 +461,9 @@ class FeatureFlagPersistenceTests: XCTestCase {
     let result = manager.getVariantSync("flag_a", fallback: fallback)
 
     XCTAssertEqual(result.value as? String, "fallback_value")
-    XCTAssertNil(result.source, "fallback variant has nil source")
+    if case .fallback = result.source {} else {
+      XCTFail("served fallback should carry .fallback source")
+    }
   }
 
   /// A `.persistence(persistedAt:)`-stamped variant within TTL is served as-is (with

@@ -40,11 +40,12 @@ public struct MixpanelFlagVariant: Decodable {
   public let isExperimentActive: Bool? // Corresponds to 'is_experiment_active' from API
   public let isQATester: Bool? // Corresponds to 'is_qa_tester' from API
 
-  /// Where this variant was sourced from. `nil` on developer-supplied fallback instances;
-  /// `.network` or `.persistence(persistedAt:)` when the SDK serves a variant. For persisted
-  /// variants, the timestamp lives on the `.persistence` case so invalid combinations like
-  /// "network with a timestamp" are unrepresentable.
-  public let source: Source?
+  /// Where this variant was sourced from. Always non-nil — every `MixpanelFlagVariant`
+  /// carries a definite source. `.fallback` for developer-supplied fallback instances;
+  /// `.network` or `.persistence(persistedAt:)` when the SDK serves a variant. For
+  /// persisted variants, the timestamp lives on the `.persistence` case so invalid
+  /// combinations like "network with a timestamp" are unrepresentable.
+  public let source: Source
 
   /// Identifies where a served variant came from.
   public enum Source {
@@ -53,6 +54,9 @@ public struct MixpanelFlagVariant: Decodable {
     /// Variant loaded from the on-disk persistence layer. `persistedAt` is the time the
     /// variant set was originally written to disk.
     case persistence(persistedAt: Date)
+    /// Developer-supplied fallback returned because the SDK had no value to serve (flag
+    /// not in the loaded set, flags never loaded, fetch failed under NetworkFirst, etc.).
+    case fallback
   }
 
   enum CodingKeys: String, CodingKey {
@@ -78,7 +82,10 @@ public struct MixpanelFlagVariant: Decodable {
     experimentID = try container.decodeIfPresent(String.self, forKey: .experimentID)
     isExperimentActive = try container.decodeIfPresent(Bool.self, forKey: .isExperimentActive)
     isQATester = try container.decodeIfPresent(Bool.self, forKey: .isQATester)
-    source = nil
+    // Decoded variants are immediately re-stamped via `withSource` before being placed in
+    // `flags`, so the customer never observes `.fallback` here. Defaulting to `.fallback`
+    // keeps `source` non-optional without needing a sentinel "unstamped" case.
+    source = .fallback
   }
 
   // Helper initializer with fallbacks, value defaults to key if nil
@@ -92,7 +99,7 @@ public struct MixpanelFlagVariant: Decodable {
     self.experimentID = experimentID
     self.isExperimentActive = isExperimentActive
     self.isQATester = isQATester
-    self.source = nil
+    self.source = .fallback
   }
 
   /// Internal initializer used when stamping a served variant with its origin.
@@ -102,7 +109,7 @@ public struct MixpanelFlagVariant: Decodable {
     experimentID: String?,
     isExperimentActive: Bool?,
     isQATester: Bool?,
-    source: Source?
+    source: Source
   ) {
     self.key = key
     self.value = value

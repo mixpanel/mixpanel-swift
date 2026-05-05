@@ -47,15 +47,15 @@ public struct FeatureFlagOptions {
   /// then manually trigger loading via `flags.loadFlags()`.
   public let prefetchFlags: Bool
 
-  /// Strategy used to resolve flag variants relative to the on-disk cache and the network.
-  /// Defaults to `.networkOnly` — variant lookups always wait for the network call,
-  /// matching behavior prior to the introduction of variant persistence.
+  /// Strategy used to resolve flag variants relative to the on-disk persistence layer and
+  /// the network. Defaults to `.networkOnly` — variant lookups always wait for the network
+  /// call, matching behavior prior to the introduction of variant persistence.
   ///
-  /// Caching behavior is derived directly from this policy:
-  /// - `.networkOnly` — no caching. The on-disk blob is also wiped at init if present
-  ///   (so toggling from a caching policy back to `.networkOnly` cleans up after itself).
-  /// - `.cacheFirst(ttl:)` / `.networkFirst(ttl:)` — successful fetches write to disk;
-  ///   the cache is read on init.
+  /// Persistence behavior is derived directly from this policy:
+  /// - `.networkOnly` — no persistence. The on-disk blob is also wiped at init if present
+  ///   (so toggling from a persisting policy back to `.networkOnly` cleans up after itself).
+  /// - `.persistenceFirst(ttl:)` / `.networkFirst(ttl:)` — successful fetches write to disk;
+  ///   persisted variants are read on init.
   public let variantLookupPolicy: VariantLookupPolicy
 
   public init(
@@ -71,34 +71,37 @@ public struct FeatureFlagOptions {
   }
 }
 
-/// Strategy for resolving feature flag variants relative to the on-disk cache and the network.
+/// Strategy for resolving feature flag variants relative to the on-disk persistence layer
+/// and the network.
 ///
-/// - `networkOnly`: Never read or write the on-disk cache. Variant lookups always wait for the
-///   network call. Default; matches behavior prior to variant persistence. If a cached blob
-///   exists from a previous session that used a caching policy, it's wiped on init.
-/// - `cacheFirst(ttl:)`: Serve cached variants immediately when available, refresh from the
-///   network in the background. Cached entries older than `ttl` are ignored on read but NOT
-///   deleted (the next successful fetch overwrites them; a longer TTL on a future launch
-///   could reuse them). Pass a non-positive TTL to effectively disable expiry.
-/// - `networkFirst(ttl:)`: Prefer fresh values from the network, but fall back to cached
-///   variants when the network call fails. Same TTL semantics as `cacheFirst`.
+/// - `networkOnly`: Never read or write persisted variants. Variant lookups always wait for
+///   the network call. Default; matches behavior prior to variant persistence. If a persisted
+///   blob exists from a previous session that used a persisting policy, it's wiped on init.
+/// - `persistenceFirst(ttl:)`: Serve persisted variants immediately when available, refresh
+///   from the network in the background. Persisted entries older than `ttl` are ignored on
+///   read but NOT deleted (the next successful fetch overwrites them; a longer TTL on a
+///   future launch could reuse them). Pass a non-positive TTL to effectively disable expiry.
+/// - `networkFirst(ttl:)`: Prefer fresh values from the network, but fall back to persisted
+///   variants when the network call fails. Same TTL semantics as `persistenceFirst`.
 ///
-/// Convenience zero-argument forms `cacheFirst()` / `networkFirst()` use `defaultTTL`
-/// (1 hour) — equivalent to passing `ttl: VariantLookupPolicy.defaultTTL` explicitly.
+/// Convenience zero-argument forms `persistenceFirst()` / `networkFirst()` use `defaultTTL`
+/// (24 hours) — equivalent to passing `ttl: VariantLookupPolicy.defaultTTL` explicitly.
 public enum VariantLookupPolicy {
   case networkOnly
-  case cacheFirst(ttl: TimeInterval)
+  case persistenceFirst(ttl: TimeInterval)
   case networkFirst(ttl: TimeInterval)
 
-  /// Default time-to-live for cached variants when no TTL is specified: 1 hour.
-  public static let defaultTTL: TimeInterval = 60 * 60
+  /// Default time-to-live for persisted variants when no TTL is specified: 24 hours.
+  public static let defaultTTL: TimeInterval = 24 * 60 * 60
 
-  /// Convenience constructor — equivalent to `.cacheFirst(ttl: VariantLookupPolicy.defaultTTL)`.
-  public static func cacheFirst() -> VariantLookupPolicy {
-    return .cacheFirst(ttl: defaultTTL)
+  /// Convenience constructor — equivalent to
+  /// `.persistenceFirst(ttl: VariantLookupPolicy.defaultTTL)`.
+  public static func persistenceFirst() -> VariantLookupPolicy {
+    return .persistenceFirst(ttl: defaultTTL)
   }
 
-  /// Convenience constructor — equivalent to `.networkFirst(ttl: VariantLookupPolicy.defaultTTL)`.
+  /// Convenience constructor — equivalent to
+  /// `.networkFirst(ttl: VariantLookupPolicy.defaultTTL)`.
   public static func networkFirst() -> VariantLookupPolicy {
     return .networkFirst(ttl: defaultTTL)
   }

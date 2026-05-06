@@ -400,14 +400,6 @@ class FeatureFlagManager: MixpanelFlags {
   internal var trackedFeatures: Set<String> = Set()
   private var fetchCompletionHandlers: [(Bool) -> Void] = []
 
-  /// True when `flags` was populated from the on-disk persistence layer and we have not yet
-  /// seen the initial network response for the current user/context. Only set for
-  /// `.networkFirst` — `.persistenceUntilNetworkSuccess` serves persisted values immediately. Async lookups
-  /// gate on this to honor the NetworkFirst spec ("await on network call, only serve persisted
-  /// values if it fails") while still letting sync lookups + areFlagsReady() see the persisted
-  /// values.
-  internal var awaitingInitialNetworkResponse: Bool = false
-
   /// `persistedAt` from the persisted blob currently sitting in `flags`. Lifetime matches
   /// the persistence-derived state (`flags` + `pendingFirstTimeEvents`):
   ///   - Set in `_loadPersistedVariants` when we read the blob from disk
@@ -418,6 +410,10 @@ class FeatureFlagManager: MixpanelFlags {
   /// Stored separately from the `.persistence(persistedAt:)` variant case so we can answer
   /// "is the loaded blob past TTL?" even when `flags` is empty (the previous session may
   /// have persisted an empty response).
+  ///
+  /// Also doubles as the "NetworkFirst is still awaiting a successful network response"
+  /// signal — see `isNetworkFirstAwaitingFetch()`. Stays set across failed fetches so each
+  /// subsequent NetworkFirst async lookup re-attempts the network until one succeeds.
   ///
   /// `internal` so tests that inject `.persistence` variants directly can match the
   /// production invariant.
@@ -544,7 +540,6 @@ class FeatureFlagManager: MixpanelFlags {
         self.fetchStartTime = nil
         self.timeLastFetched = nil
         self.fetchLatencyMs = nil
-        self.awaitingInitialNetworkResponse = false
         orphanedHandlers = self.fetchCompletionHandlers
         self.fetchCompletionHandlers.removeAll()
         self.isFetching = false
@@ -653,15 +648,14 @@ class FeatureFlagManager: MixpanelFlags {
       var canServeImmediately = false
       var servingFromPersistedBlob = false
 
-      // Read state with lock. Serve immediately when flags are populated, we're not in the
-      // NetworkFirst-init window (waiting for the first network response after a persistence
-      // hit), AND the loaded blob isn't past TTL. The blob-staleness check is what makes the
-      // async path fall through to a fetch when persisted values have aged out mid-session —
-      // the inline TTL check below would otherwise silently serve the developer fallback
-      // without refreshing.
+      // Read state with lock. Serve immediately when flags are populated, NetworkFirst
+      // isn't still gating on a successful network response, AND the loaded blob isn't past
+      // TTL. The blob-staleness check is what makes the async path fall through to a fetch
+      // when persisted values have aged out mid-session — the inline TTL check below would
+      // otherwise silently serve the developer fallback without refreshing.
       self.flagsLock.read {
         guard let currentFlags = self.flags,
-              !self.awaitingInitialNetworkResponse,
+              !self.isNetworkFirstAwaitingFetch(),
               !self.loadedFlagsAreStale() else { return }
         canServeImmediately = true
         servingFromPersistedBlob = self.loadedBlobPersistedAt != nil
@@ -775,7 +769,7 @@ class FeatureFlagManager: MixpanelFlags {
       var servingFromPersistedBlob = false
       self.flagsLock.read {
         canServeImmediately = (self.flags != nil)
-          && !self.awaitingInitialNetworkResponse
+          && !self.isNetworkFirstAwaitingFetch()
           && !self.loadedFlagsAreStale()
         servingFromPersistedBlob = self.loadedBlobPersistedAt != nil
       }
@@ -927,12 +921,11 @@ class FeatureFlagManager: MixpanelFlags {
             message: "Discarding flag fetch failure from stale generation \(generation).")
           return
         }
-        // Whether or not we have persisted values, we've definitively failed to get a
-        // network response. NetworkFirst async lookups can stop awaiting and serve from
-        // `flags` (persisted values stay in place since we don't touch them on failure).
-        self.flagsLock.write {
-          self.awaitingInitialNetworkResponse = false
-        }
+        // We've definitively failed to get a network response. Persisted values stay in
+        // place since we don't touch them on failure — `loadedBlobPersistedAt` also stays
+        // set, which means the next NetworkFirst async lookup will retry the network (the
+        // gate is "still serving from persistence," not "the very first call"). Per the
+        // spec, NetworkFirst retries until one fetch succeeds.
         self._completeFetch(success: false)
       },
       success: { [weak self] (flagsResponse, response) in
@@ -985,9 +978,9 @@ class FeatureFlagManager: MixpanelFlags {
           // events when the variant didn't actually change across fetches; we accept that
           // for analytics correctness.
           self.trackedFeatures.removeAll()
-          // Network response received — async lookups can stop awaiting (NetworkFirst) and
-          // serve from the freshly-populated `flags`.
-          self.awaitingInitialNetworkResponse = false
+          // Successful fetch overwrites the persisted-blob marker — derived helpers like
+          // `isNetworkFirstAwaitingFetch()` and `loadedFlagsAreStale()` correctly flip to
+          // false on the next read since `loadedBlobPersistedAt` is now nil (cleared above).
 
           // Calculate timing metrics
           if let startTime = self.fetchStartTime {
@@ -1034,10 +1027,11 @@ class FeatureFlagManager: MixpanelFlags {
 
   /// Loads the on-disk persistence blob, validates distinctId + TTL, parses, stamps every
   /// variant with `.persistence(persistedAt:)`, and writes into `flags`. Both
-  /// `.persistenceUntilNetworkSuccess` and `.networkFirst` populate `flags` directly so sync lookups and
-  /// `areFlagsReady()` reflect persisted values. The difference between policies is enforced
-  /// at async-lookup time via `awaitingInitialNetworkResponse`: `.networkFirst` sets it true
-  /// so async lookups await the network call before serving.
+  /// `.persistenceUntilNetworkSuccess` and `.networkFirst` populate `flags` directly so sync
+  /// lookups and `areFlagsReady()` reflect persisted values. The difference between policies
+  /// is enforced at async-lookup time via `isNetworkFirstAwaitingFetch()`: NetworkFirst gates
+  /// async lookups on a successful network response (i.e., until `loadedBlobPersistedAt` is
+  /// cleared by a successful fetch), per the ERD.
   ///
   /// Runs on the tracking queue (called from init).
   internal func _loadPersistedVariants() {
@@ -1092,13 +1086,6 @@ class FeatureFlagManager: MixpanelFlags {
       }
     }
 
-    let isNetworkFirst: Bool
-    if case .networkFirst = self.resolvedLookupPolicy {
-      isNetworkFirst = true
-    } else {
-      isNetworkFirst = false
-    }
-
     flagsLock.write {
       // Defer to network values if a fetch already raced ahead of us between init and now.
       guard self.flags == nil else { return }
@@ -1106,13 +1093,27 @@ class FeatureFlagManager: MixpanelFlags {
       self.loadedBlobPersistedAt = blob.persistedAt
       self.pendingFirstTimeEvents = pendingEvents
       self.pendingFirstTimeEventNames = pendingEventNames
-      // For .networkFirst, async lookups must wait for the initial network response. The
-      // fetch success/failure path will clear this flag.
-      if isNetworkFirst {
-        self.awaitingInitialNetworkResponse = true
-      }
+      // For NetworkFirst, async lookups must wait for a successful network response.
+      // `isNetworkFirstAwaitingFetch()` derives that gate from the policy +
+      // `loadedBlobPersistedAt` — no separate flag to keep in sync.
       MixpanelLogger.debug(message: "Loaded \(stamped.count) persisted variants into memory.")
     }
+  }
+
+  /// Returns `true` when the policy is `.networkFirst` and we're still serving from the
+  /// persisted blob (no successful network fetch has overwritten it yet). Async lookups
+  /// gate on this to honor the NetworkFirst spec ("wait on network call, only serve
+  /// persisted values if it fails") while still letting sync lookups + `areFlagsReady()`
+  /// see the persisted values.
+  ///
+  /// Stays true across failed fetches so each subsequent async lookup re-attempts the
+  /// network until one succeeds, matching the pre-persistence behavior where a `nil`
+  /// `flags` caused getVariant to retry indefinitely.
+  ///
+  /// Caller must hold `flagsLock`.
+  private func isNetworkFirstAwaitingFetch() -> Bool {
+    guard case .networkFirst = self.resolvedLookupPolicy else { return false }
+    return self.loadedBlobPersistedAt != nil
   }
 
   /// Returns the configured TTL in seconds, or `nil` for `.networkOnly` (no expiry check).

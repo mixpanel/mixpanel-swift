@@ -52,8 +52,8 @@ private final class PersistenceTestMockDelegate: MixpanelFlagDelegate {
 
 /// Minimal mock of FeatureFlagManager that intercepts the network call. Deliberately
 /// reproduces the parts of the real fetch path we care about (source stamping,
-/// awaitingInitialNetworkResponse handling, completion fan-out) so async-lookup tests
-/// can verify behavior end-to-end.
+/// `loadedBlobPersistedAt` lifecycle, completion fan-out) so async-lookup tests can
+/// verify behavior end-to-end.
 private final class PersistenceTestMockManager: FeatureFlagManager {
   var simulatedFetchResult: (success: Bool, flags: [String: MixpanelFlagVariant]?)?
   var simulatedNetworkDelay: TimeInterval = 0.1
@@ -66,7 +66,6 @@ private final class PersistenceTestMockManager: FeatureFlagManager {
     let work: () -> Void = { [weak self] in
       guard let self = self else { return }
       guard let result = self.simulatedFetchResult else {
-        self.flagsLock.write { self.awaitingInitialNetworkResponse = false }
         self._completeFetch(success: false)
         return
       }
@@ -74,18 +73,17 @@ private final class PersistenceTestMockManager: FeatureFlagManager {
         let stamped = flags.mapValues { $0.withSource(.network) }
         self.flagsLock.write {
           self.flags = stamped
+          // Mirror production: a successful fetch overwrites the persisted blob (so the
+          // marker clears) and resets the per-flag $experiment_started dedup window.
           self.loadedBlobPersistedAt = nil
-          // Mirror production: clear the per-flag $experiment_started dedup window on every
-          // successful fetch so a flag whose variant changed between fetches re-fires
-          // tracking on the next lookup.
           self.trackedFeatures.removeAll()
-          self.awaitingInitialNetworkResponse = false
           self.timeLastFetched = Date()
         }
         self._completeFetch(success: true)
       } else {
-        // Failure: leave flags in place (NetworkFirst fallback semantics) but clear awaiting.
-        self.flagsLock.write { self.awaitingInitialNetworkResponse = false }
+        // Failure: leave `flags` AND `loadedBlobPersistedAt` in place. NetworkFirst's
+        // `isNetworkFirstAwaitingFetch()` derives from the persisted-blob marker, so the
+        // gate stays true after a failure and the next async lookup retries the network.
         self._completeFetch(success: false)
       }
     }
@@ -674,44 +672,6 @@ class FeatureFlagPersistenceTests: XCTestCase {
 
   // MARK: - NetworkFirst gating
 
-  func testNetworkFirstSetsAwaitingFlagWhenPersistenceLoaded() throws {
-    let response = #"{"flags":{"flag_a":{"variant_key":"v1","variant_value":"persisted_val"}}}"#
-    MixpanelPersistence.saveFlagsPersistence(
-      FlagsPersistenceBlob(
-        persistedAt: Date(),
-        distinctId: "user_a",
-        response: response),
-      instanceName: instanceName)
-
-    let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .networkFirst(ttl: 86_400))
-    waitForTrackingQueue(manager: manager)
-
-    // Sync lookups + areFlagsReady reflect the persistence layer regardless of policy.
-    XCTAssertTrue(manager.areFlagsReady())
-    var awaitingValue = false
-    manager.flagsLock.read { awaitingValue = manager.awaitingInitialNetworkResponse }
-    XCTAssertTrue(awaitingValue, ".networkFirst must await initial network response")
-  }
-
-  func testPersistenceUntilNetworkSuccessDoesNotSetAwaitingFlagWhenPersistenceLoaded() throws {
-    let response = #"{"flags":{"flag_a":{"variant_key":"v1","variant_value":"persisted_val"}}}"#
-    MixpanelPersistence.saveFlagsPersistence(
-      FlagsPersistenceBlob(
-        persistedAt: Date(),
-        distinctId: "user_a",
-        response: response),
-      instanceName: instanceName)
-
-    let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
-    waitForTrackingQueue(manager: manager)
-
-    var awaitingValue = false
-    manager.flagsLock.read { awaitingValue = manager.awaitingInitialNetworkResponse }
-    XCTAssertFalse(awaitingValue, ".persistenceUntilNetworkSuccess must not await initial network response")
-  }
-
   func testNetworkFirstAsyncLookupAwaitsFetchEvenWithPersistence() throws {
     let response = #"{"flags":{"flag_a":{"variant_key":"v1","variant_value":"persisted_val"}}}"#
     MixpanelPersistence.saveFlagsPersistence(
@@ -1181,6 +1141,79 @@ class FeatureFlagPersistenceTests: XCTestCase {
     XCTAssertEqual(props["$variant_source"] as? String, "network")
     XCTAssertNil(props["$persisted_at_in_ms"], "network variants don't carry persistedAt")
     XCTAssertNil(props["$ttl_in_ms"], "network variants don't carry TTL")
+  }
+
+  // MARK: - NetworkFirst retries until a fetch succeeds
+
+  /// Regression test for the bug where NetworkFirst would stop attempting the network after
+  /// the first failure: `awaitingInitialNetworkResponse` was being cleared on fetch failure,
+  /// so subsequent async lookups would silently serve persistence forever even though no
+  /// successful network response had ever come back.
+  ///
+  /// Spec: NetworkFirst lookups await a successful network response. After a failed fetch,
+  /// the next async lookup must retry the network — only a successful fetch satisfies the
+  /// "we got the network value" gate. Verified end-to-end: two failed fetches in a row → two
+  /// fetch attempts (not one).
+  func testNetworkFirstRetriesNetworkAfterFailureUntilSuccess() throws {
+    let response = #"{"flags":{"flag_a":{"variant_key":"v1","variant_value":"persisted_val"}}}"#
+    MixpanelPersistence.saveFlagsPersistence(
+      FlagsPersistenceBlob(
+        persistedAt: Date(),
+        distinctId: "user_a",
+        response: response),
+      instanceName: instanceName)
+
+    let mock = makeMockManager(
+      distinctId: "user_a", context: [:], policy: .networkFirst(ttl: 86_400))
+    waitForTrackingQueue(manager: mock)
+
+    // Round 1: fetch fails. Lookup falls back to persisted value.
+    mock.simulatedFetchResult = (success: false, flags: nil)
+    mock.simulatedNetworkDelay = 0
+    let firstDone = expectation(description: "first lookup")
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
+      XCTAssertEqual(variant.value as? String, "persisted_val",
+                     "first lookup should fall back to persisted value after failed fetch")
+      firstDone.fulfill()
+    }
+    wait(for: [firstDone], timeout: 2.0)
+    XCTAssertEqual(mock.fetchCallCount, 1, "first lookup should trigger one fetch attempt")
+
+    // Round 2: fetch fails again. Pre-fix, the lookup would skip the network entirely
+    // (`awaiting` had been cleared by round 1's failure) and serve persisted directly,
+    // leaving the count at 1. Post-fix, NetworkFirst retries until success.
+    let secondDone = expectation(description: "second lookup")
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
+      XCTAssertEqual(variant.value as? String, "persisted_val")
+      secondDone.fulfill()
+    }
+    wait(for: [secondDone], timeout: 2.0)
+    XCTAssertEqual(
+      mock.fetchCallCount, 2,
+      "NetworkFirst must retry the network on subsequent lookups after a failure")
+
+    // Round 3: fetch succeeds. Network value served, blob marker cleared.
+    mock.simulatedFetchResult = (
+      success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v_fresh", value: "network_val")])
+    let thirdDone = expectation(description: "third lookup")
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
+      XCTAssertEqual(variant.value as? String, "network_val",
+                     "successful fetch should serve the network value")
+      thirdDone.fulfill()
+    }
+    wait(for: [thirdDone], timeout: 2.0)
+    XCTAssertEqual(mock.fetchCallCount, 3, "third lookup triggers the successful fetch")
+
+    // Round 4: subsequent lookup should NOT retry — the gate flipped off after success.
+    let fourthDone = expectation(description: "fourth lookup")
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
+      XCTAssertEqual(variant.value as? String, "network_val")
+      fourthDone.fulfill()
+    }
+    wait(for: [fourthDone], timeout: 2.0)
+    XCTAssertEqual(
+      mock.fetchCallCount, 3,
+      "after a successful fetch, NetworkFirst stops retrying — gate is satisfied")
   }
 
   // MARK: - PersistenceUntilNetworkSuccess background refresh

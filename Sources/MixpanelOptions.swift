@@ -77,15 +77,19 @@ public struct FeatureFlagOptions {
 /// - `networkOnly`: Never read or write persisted variants. Variant lookups always wait for
 ///   the network call. Default; matches behavior prior to variant persistence. If a persisted
 ///   blob exists from a previous session that used a persisting policy, it's wiped on init.
-/// - `persistenceUntilNetworkSuccess(ttl:)`: Serve persisted variants immediately when available, refresh
-///   from the network in the background. Persisted entries older than `ttl` are ignored on
-///   read but NOT deleted (the next successful fetch overwrites them; a longer TTL on a
-///   future launch could reuse them). Pass a non-positive TTL to effectively disable expiry.
+/// - `persistenceUntilNetworkSuccess(ttl:)`: Serve persisted variants immediately when
+///   available, refresh from the network in the background. Persisted entries older than
+///   `ttl` are ignored on read but NOT deleted (the next successful fetch overwrites them).
 /// - `networkFirst(ttl:)`: Prefer fresh values from the network, but fall back to persisted
 ///   variants when the network call fails. Same TTL semantics as `persistenceUntilNetworkSuccess`.
 ///
-/// Convenience zero-argument forms `persistenceUntilNetworkSuccess()` / `networkFirst()` use `defaultTTL`
-/// (24 hours) — equivalent to passing `ttl: VariantLookupPolicy.defaultTTL` explicitly.
+/// **TTL handling** (matches the JS SDK):
+/// - `ttl > 0` — entries expire after the configured number of seconds.
+/// - `ttl == 0` — entries are immediately treated as expired on every check.
+/// - `ttl < 0` — invalid; the SDK logs a warning and falls back to `defaultTTL`.
+///
+/// Convenience zero-argument forms `persistenceUntilNetworkSuccess()` / `networkFirst()` use
+/// `defaultTTL` (24 hours) — equivalent to passing `ttl: VariantLookupPolicy.defaultTTL`.
 public enum VariantLookupPolicy {
   case networkOnly
   case persistenceUntilNetworkSuccess(ttl: TimeInterval)

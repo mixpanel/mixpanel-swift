@@ -228,6 +228,51 @@ class FeatureFlagPersistenceTests: XCTestCase {
     }
   }
 
+  /// Matches the JS SDK's TTL contract: a negative TTL is invalid and silently coerced to
+  /// `defaultTTL`. Verified end-to-end via the staleness behavior — a fresh persisted
+  /// variant must NOT be treated as expired under negative TTL (because we coerce to 24h,
+  /// not "always expired").
+  func testNegativeTTLIsCoercedToDefault() throws {
+    let manager = makeManager(
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: -1))
+    waitForTrackingQueue(manager: manager)
+
+    let recentlyPersistedAt = Date(timeIntervalSinceNow: -60)  // 60s ago, well within 24h
+    let fresh = MixpanelFlagVariant(key: "v1", value: "fresh_value")
+      .withSource(.persistence(persistedAt: recentlyPersistedAt))
+    manager.flagsLock.write {
+      manager.flags = ["flag_a": fresh]
+      manager.loadedBlobPersistedAt = recentlyPersistedAt
+    }
+
+    let result = manager.getVariantSync("flag_a", fallback: MixpanelFlagVariant(value: "fb"))
+    XCTAssertEqual(
+      result.value as? String, "fresh_value",
+      "negative TTL should fall back to defaultTTL, leaving recent variants servable")
+  }
+
+  /// TTL of `0` means "always expired" (matches JS). Even a variant persisted just now is
+  /// past TTL on the next check.
+  func testZeroTTLTreatsAllPersistedVariantsAsExpired() throws {
+    let manager = makeManager(
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 0))
+    waitForTrackingQueue(manager: manager)
+
+    let justNow = Date(timeIntervalSinceNow: -0.001)
+    let variant = MixpanelFlagVariant(key: "v1", value: "stale")
+      .withSource(.persistence(persistedAt: justNow))
+    manager.flagsLock.write {
+      manager.flags = ["flag_a": variant]
+      manager.loadedBlobPersistedAt = justNow
+    }
+
+    let fallback = MixpanelFlagVariant(key: "fb", value: "fallback_val")
+    let result = manager.getVariantSync("flag_a", fallback: fallback)
+    XCTAssertEqual(
+      result.value as? String, "fallback_val",
+      "TTL of 0 should treat any persisted variant as expired")
+  }
+
   // MARK: - Init loads persisted variants and stamps them
 
   func testInitLoadsPersistedVariantsAndStampsPersistenceSource() throws {
@@ -1040,10 +1085,11 @@ class FeatureFlagPersistenceTests: XCTestCase {
     XCTAssertEqual(props["$ttl_in_ms"] as? Int, Int(ttlSeconds * 1000))
   }
 
-  /// `.network`-sourced variants must NOT include any of the persistence-layer tracking
-  /// properties. This protects against accidentally leaking persistence-stamped variants
-  /// through the `.network` path or vice versa.
-  func testTrackingOmitsPersistencePropertiesForNetworkVariant() throws {
+  /// `.network`-sourced variants carry `$variant_source = "network"` (matching the JS SDK)
+  /// but NOT the persistence-layer-only properties (`$persisted_at_in_ms`, `$ttl_in_ms`).
+  /// This protects against accidentally leaking persistence properties through the
+  /// `.network` path.
+  func testTrackingIncludesVariantSourceForNetworkVariant() throws {
     let delegate = PersistenceTestMockDelegate(
       options: MixpanelOptions(
         token: "test_token",
@@ -1081,9 +1127,9 @@ class FeatureFlagPersistenceTests: XCTestCase {
     let experiment = try XCTUnwrap(events.first(where: { $0.event == "$experiment_started" }))
     let props = try XCTUnwrap(experiment.properties)
 
-    XCTAssertNil(props["$variant_source"], "network variants must not carry $variant_source")
-    XCTAssertNil(props["$persisted_at_in_ms"])
-    XCTAssertNil(props["$ttl_in_ms"])
+    XCTAssertEqual(props["$variant_source"] as? String, "network")
+    XCTAssertNil(props["$persisted_at_in_ms"], "network variants don't carry persistedAt")
+    XCTAssertNil(props["$ttl_in_ms"], "network variants don't carry TTL")
   }
 
   // MARK: - Helpers

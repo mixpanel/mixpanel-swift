@@ -1014,8 +1014,9 @@ class FeatureFlagManager: MixpanelFlags {
       return
     }
 
-    // TTL check — discard expired entries.
-    if let ttl = self.persistenceTtlSeconds(), ttl > 0,
+    // TTL check — discard expired entries. TTL of 0 means "always expired"; negative TTLs
+    // are coerced to default by `persistenceTtlSeconds()`.
+    if let ttl = self.persistenceTtlSeconds(),
        Date().timeIntervalSince(blob.persistedAt) > ttl {
       MixpanelLogger.debug(message: "Persisted flags expired; ignoring.")
       return
@@ -1074,13 +1075,18 @@ class FeatureFlagManager: MixpanelFlags {
   }
 
   /// Returns the configured TTL in seconds, or `nil` for `.networkOnly` (no expiry check).
-  /// `.persistenceUntilNetworkSuccess(0)` / `.networkFirst(0)` (or negative) effectively disable expiry —
-  /// the `_loadPersistedVariants` caller treats `<= 0` as "no expiry".
+  /// Negative TTLs are invalid and coerced to `VariantLookupPolicy.defaultTTL` with a warning
+  /// (matches the JS SDK). TTL of `0` is valid and means "always expired."
   private func persistenceTtlSeconds() -> TimeInterval? {
     switch self.currentLookupPolicy() {
     case .networkOnly:
       return nil
     case .persistenceUntilNetworkSuccess(let ttl), .networkFirst(let ttl):
+      if ttl < 0 {
+        MixpanelLogger.warn(
+          message: "Negative TTL (\(ttl)) is invalid; using default \(VariantLookupPolicy.defaultTTL)s")
+        return VariantLookupPolicy.defaultTTL
+      }
       return ttl
     }
   }
@@ -1105,20 +1111,19 @@ class FeatureFlagManager: MixpanelFlags {
   /// has flags in it or is empty (a previous session may have persisted a no-flags
   /// response — we still want TTL to govern when to refresh).
   ///
-  /// Returns false when no persisted blob is in memory, under `.networkOnly`, or with
-  /// TTL `<= 0`.
+  /// Returns false when no persisted blob is in memory or under `.networkOnly`.
   ///
   /// Caller must hold `flagsLock`.
   private func loadedFlagsAreStale() -> Bool {
     guard let persistedAt = self.loadedBlobPersistedAt,
-          let ttl = self.persistenceTtlSeconds(), ttl > 0 else { return false }
+          let ttl = self.persistenceTtlSeconds() else { return false }
     return Date().timeIntervalSince(persistedAt) > ttl
   }
 
   /// Returns true if the variant was loaded from the persistence layer and has aged past
-  /// the configured TTL. `.network` variants (and `nil`-source developer fallbacks) are
-  /// never expired — including activated first-time-event variants, which are deliberately
-  /// stamped `.network` to survive blob expiration.
+  /// the configured TTL. `.network` and `.fallback` variants are never expired — including
+  /// activated first-time-event variants, which are deliberately stamped `.network` to
+  /// survive blob expiration.
   ///
   /// Get-paths use this to skip stale persisted values mid-session — once a variant's TTL
   /// elapses while loaded in memory, subsequent `getVariant` calls return the developer
@@ -1127,7 +1132,7 @@ class FeatureFlagManager: MixpanelFlags {
   /// network fetch overwrites it.
   private func isVariantExpired(_ variant: MixpanelFlagVariant) -> Bool {
     guard case .persistence(let persistedAt) = variant.source else { return false }
-    guard let ttl = self.persistenceTtlSeconds(), ttl > 0 else { return false }
+    guard let ttl = self.persistenceTtlSeconds() else { return false }
     return Date().timeIntervalSince(persistedAt) > ttl
   }
 
@@ -1284,16 +1289,22 @@ class FeatureFlagManager: MixpanelFlags {
       properties["$is_qa_tester"] = isQATester
     }
 
-    // Persistence-source tracking properties. Only stamped when the served variant came from
-    // the on-disk persistence layer; network-sourced and unstamped variants don't get them.
-    // `$persisted_at_in_ms` is the raw epoch millis the blob was written — sent without any
-    // delta calculation so the server can derive whatever it needs.
-    if case .persistence(let persistedAt) = variant.source {
+    // Source tracking properties. `$variant_source` is sent for every served variant
+    // (`.network` or `.persistence`) to match the JS SDK. `$persisted_at_in_ms` and
+    // `$ttl_in_ms` are persistence-only — the timestamp is the raw epoch millis the blob
+    // was written, sent without any delta calculation so the server can derive what it
+    // needs. Tracking only fires for served variants, so `.fallback` won't appear here.
+    switch variant.source {
+    case .network:
+      properties["$variant_source"] = "network"
+    case .persistence(let persistedAt):
       properties["$variant_source"] = "persistence"
       properties["$persisted_at_in_ms"] = Int(persistedAt.timeIntervalSince1970 * 1000)
       if let ttl = self.persistenceTtlSeconds() {
         properties["$ttl_in_ms"] = Int(ttl * 1000)
       }
+    case .fallback:
+      break
     }
 
     // Dispatch delegate call asynchronously to main thread for safety

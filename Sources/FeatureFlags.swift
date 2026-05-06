@@ -651,6 +651,7 @@ class FeatureFlagManager: MixpanelFlags {
       var flagVariant: MixpanelFlagVariant?
       var needsTrackingCheck = false
       var canServeImmediately = false
+      var servingFromPersistedBlob = false
 
       // Read state with lock. Serve immediately when flags are populated, we're not in the
       // NetworkFirst-init window (waiting for the first network response after a persistence
@@ -663,6 +664,7 @@ class FeatureFlagManager: MixpanelFlags {
               !self.awaitingInitialNetworkResponse,
               !self.loadedFlagsAreStale() else { return }
         canServeImmediately = true
+        servingFromPersistedBlob = self.loadedBlobPersistedAt != nil
         if let variant = currentFlags[flagName], !self.isVariantExpired(variant) {
           flagVariant = variant
           needsTrackingCheck = !self.trackedFeatures.contains(flagName)
@@ -670,6 +672,16 @@ class FeatureFlagManager: MixpanelFlags {
       }
 
       if canServeImmediately {
+        // PersistenceUntilNetworkSuccess "serve persisted now, refresh in background":
+        // when the immediate-serve path is satisfied by the persisted blob (not yet
+        // overwritten by a successful fetch), kick off a background fetch with no
+        // completion handler so we don't await it. Idempotent — `_fetchFlagsIfNeeded`
+        // dedupes via `isFetching`. Self-stops once the fetch clears
+        // `loadedBlobPersistedAt`.
+        if servingFromPersistedBlob,
+           case .persistenceUntilNetworkSuccess = self.resolvedLookupPolicy {
+          self._fetchFlagsIfNeeded(completion: nil)
+        }
         let result = flagVariant ?? fallback
         if flagVariant != nil, needsTrackingCheck {
           // Perform atomic check-and-track
@@ -760,12 +772,20 @@ class FeatureFlagManager: MixpanelFlags {
       }
 
       var canServeImmediately = false
+      var servingFromPersistedBlob = false
       self.flagsLock.read {
         canServeImmediately = (self.flags != nil)
           && !self.awaitingInitialNetworkResponse
           && !self.loadedFlagsAreStale()
+        servingFromPersistedBlob = self.loadedBlobPersistedAt != nil
       }
       if canServeImmediately {
+        // PersistenceUntilNetworkSuccess "serve persisted now, refresh in background":
+        // see the matching block in `getVariant` for the full rationale.
+        if servingFromPersistedBlob,
+           case .persistenceUntilNetworkSuccess = self.resolvedLookupPolicy {
+          self._fetchFlagsIfNeeded(completion: nil)
+        }
         // Use the sync impl so the expired-filter is applied consistently.
         let result = self._getAllVariantsSyncImpl()
         DispatchQueue.main.async { completion(result) }

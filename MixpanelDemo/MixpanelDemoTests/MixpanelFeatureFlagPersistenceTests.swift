@@ -57,8 +57,12 @@ private final class PersistenceTestMockDelegate: MixpanelFlagDelegate {
 private final class PersistenceTestMockManager: FeatureFlagManager {
   var simulatedFetchResult: (success: Bool, flags: [String: MixpanelFlagVariant]?)?
   var simulatedNetworkDelay: TimeInterval = 0.1
+  private let fetchCountQueue = DispatchQueue(label: "ff.mock.fetchcount.\(UUID().uuidString)")
+  private var _fetchCallCount = 0
+  var fetchCallCount: Int { fetchCountQueue.sync { _fetchCallCount } }
 
   override func _performFetchRequest() {
+    fetchCountQueue.sync { _fetchCallCount += 1 }
     let work: () -> Void = { [weak self] in
       guard let self = self else { return }
       guard let result = self.simulatedFetchResult else {
@@ -1177,6 +1181,101 @@ class FeatureFlagPersistenceTests: XCTestCase {
     XCTAssertEqual(props["$variant_source"] as? String, "network")
     XCTAssertNil(props["$persisted_at_in_ms"], "network variants don't carry persistedAt")
     XCTAssertNil(props["$ttl_in_ms"], "network variants don't carry TTL")
+  }
+
+  // MARK: - PersistenceUntilNetworkSuccess background refresh
+
+  /// PUN's contract is "serve persisted now, refresh in background." The first lookup that
+  /// finds the immediate-serve path satisfied by a persisted blob (not yet overwritten by a
+  /// successful network fetch) must kick off a background fetch — without blocking the
+  /// lookup itself — so subsequent lookups eventually see fresh values. The fetch self-stops
+  /// because a successful fetch clears `loadedBlobPersistedAt`, taking us off the
+  /// background-refresh trigger.
+  func testPersistenceUntilNetworkSuccessLookupKicksOffBackgroundRefresh() throws {
+    let mock = makeMockManager(
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+    waitForTrackingQueue(manager: mock)
+
+    let freshPersistedAt = Date(timeIntervalSinceNow: -60)
+    let persisted = MixpanelFlagVariant(key: "v_old", value: "persisted_val")
+      .withSource(.persistence(persistedAt: freshPersistedAt))
+    mock.flagsLock.write {
+      mock.flags = ["flag_a": persisted]
+      mock.loadedBlobPersistedAt = freshPersistedAt
+    }
+
+    // Hang the simulated fetch so it counts as kicked-off but doesn't complete and replace
+    // `flags` mid-test. Counter increments synchronously inside `_performFetchRequest`.
+    mock.simulatedFetchResult = (success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v_new", value: "network_val")])
+    mock.simulatedNetworkDelay = 60  // effectively never completes within the test
+
+    XCTAssertEqual(mock.fetchCallCount, 0, "no fetch before lookup")
+
+    let asyncDone = expectation(description: "async lookup completes immediately")
+    let start = Date()
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
+      let elapsed = Date().timeIntervalSince(start)
+      XCTAssertEqual(
+        variant.value as? String, "persisted_val",
+        "lookup must serve the persisted value, not wait on the background fetch")
+      if case .persistence = variant.source {} else {
+        XCTFail("expected .persistence source")
+      }
+      XCTAssertLessThan(elapsed, 0.5, "lookup must not block on the background fetch")
+      asyncDone.fulfill()
+    }
+    wait(for: [asyncDone], timeout: 2.0)
+
+    // Drain the tracking queue to make sure the background _fetchFlagsIfNeeded has been
+    // invoked (it's posted to the same serial queue from inside the lookup block).
+    waitForTrackingQueue(manager: mock)
+    XCTAssertEqual(
+      mock.fetchCallCount, 1,
+      "PUN's first lookup serving persistence should kick off exactly one background fetch")
+  }
+
+  /// After the background fetch completes successfully, `loadedBlobPersistedAt` is cleared
+  /// (in production, by the fetch-success handler) so subsequent lookups stop triggering
+  /// the background-refresh path. Verifies the self-stopping property: PUN doesn't fire a
+  /// fetch on every single lookup forever.
+  func testPersistenceUntilNetworkSuccessBackgroundRefreshSelfStopsAfterSuccess() throws {
+    let mock = makeMockManager(
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+    waitForTrackingQueue(manager: mock)
+
+    let freshPersistedAt = Date(timeIntervalSinceNow: -60)
+    let persisted = MixpanelFlagVariant(key: "v1", value: "persisted_val")
+      .withSource(.persistence(persistedAt: freshPersistedAt))
+    mock.flagsLock.write {
+      mock.flags = ["flag_a": persisted]
+      mock.loadedBlobPersistedAt = freshPersistedAt
+    }
+
+    mock.simulatedFetchResult = (
+      success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v2", value: "network_val")])
+    mock.simulatedNetworkDelay = 0  // complete immediately so flags get replaced post-fetch
+
+    // First lookup: kicks off the background refresh.
+    let firstDone = expectation(description: "first lookup")
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fb")) { _ in firstDone.fulfill() }
+    wait(for: [firstDone], timeout: 2.0)
+    waitForTrackingQueue(manager: mock)
+    XCTAssertEqual(mock.fetchCallCount, 1, "first lookup kicks off the background refresh")
+
+    // Second lookup: now `loadedBlobPersistedAt` should be nil (cleared by the successful
+    // fetch), so this lookup serves the network value without triggering another fetch.
+    let secondDone = expectation(description: "second lookup")
+    mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fb")) { variant in
+      XCTAssertEqual(
+        variant.value as? String, "network_val",
+        "second lookup should serve the freshly-fetched network value")
+      secondDone.fulfill()
+    }
+    wait(for: [secondDone], timeout: 2.0)
+    waitForTrackingQueue(manager: mock)
+    XCTAssertEqual(
+      mock.fetchCallCount, 1,
+      "no additional fetch — successful refresh cleared loadedBlobPersistedAt")
   }
 
   // MARK: - Tracking dedup window resets after every successful fetch

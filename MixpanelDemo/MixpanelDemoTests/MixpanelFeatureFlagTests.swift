@@ -2604,15 +2604,16 @@ class FeatureFlagManagerTests: XCTestCase {
 
   // MARK: - Reset Tests
 
-  private func waitForResetToComplete(_ mockMgr: MockFeatureFlagManager, timeout: TimeInterval = 10.0) {
-    // reset() dispatches its work onto trackingQueue. Wait for `flags` to be cleared
-    // as a proxy for the reset block having executed.
-    let cleared = NSPredicate { _, _ in
-      var done = false
-      mockMgr.flagsLock.read { done = mockMgr.flags == nil }
-      return done
+  /// Calls `reset()` and blocks until its completion fires. We use the completion (rather
+  /// than polling for `flags == nil`) because the polling approach is vacuous in tests where
+  /// `flags` was already nil before the reset — the predicate would match immediately
+  /// without observing the reset block actually running, masking real bugs.
+  private func resetAndWait(_ mockMgr: MockFeatureFlagManager, timeout: TimeInterval = 10.0) {
+    let done = expectation(description: "FeatureFlagManager.reset completes")
+    mockMgr.reset {
+      done.fulfill()
     }
-    wait(for: [XCTNSPredicateExpectation(predicate: cleared, object: nil)], timeout: timeout)
+    wait(for: [done], timeout: timeout)
   }
 
   func testReset_ClearsFlagsAndFetchTiming() {
@@ -2630,8 +2631,7 @@ class FeatureFlagManagerTests: XCTestCase {
       XCTAssertNotNil(mockMgr.fetchLatencyMs, "fetchLatencyMs should be set before reset")
     }
 
-    mockMgr.reset()
-    waitForResetToComplete(mockMgr)
+    resetAndWait(mockMgr)
 
     XCTAssertFalse(manager.areFlagsReady(), "Flags should not be ready after reset")
     mockMgr.flagsLock.read {
@@ -2660,8 +2660,7 @@ class FeatureFlagManagerTests: XCTestCase {
     waitBriefly()
     XCTAssertEqual(mockDelegate.trackedEvents.count, 1, "Second read pre-reset should not re-track")
 
-    mockMgr.reset()
-    waitForResetToComplete(mockMgr)
+    resetAndWait(mockMgr)
 
     // Re-populate flags after the reset (mirrors a refetch under a new identity).
     setupReadyFlags()
@@ -2700,8 +2699,7 @@ class FeatureFlagManagerTests: XCTestCase {
       XCTAssertEqual(mockMgr.activatedFirstTimeEvents.count, 1)
     }
 
-    mockMgr.reset()
-    waitForResetToComplete(mockMgr)
+    resetAndWait(mockMgr)
 
     mockMgr.flagsLock.read {
       XCTAssertTrue(mockMgr.pendingFirstTimeEvents.isEmpty,
@@ -2740,8 +2738,7 @@ class FeatureFlagManagerTests: XCTestCase {
       XCTAssertEqual(mockMgr.flagContext["group_id"] as? String, "ctx-group")
     }
 
-    mockMgr.reset()
-    waitForResetToComplete(mockMgr)
+    resetAndWait(mockMgr)
 
     // setContext-supplied context should survive reset() — only identity-tied
     // state (flags, tracking, first-time events, fetch timing) is cleared.

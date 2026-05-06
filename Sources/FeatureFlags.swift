@@ -392,9 +392,17 @@ class FeatureFlagManager: MixpanelFlags {
   /// in-flight fetch dispatched before this call is discarded when it completes (via the
   /// generation check in `_performFetchRequest`'s success/failure closures). Pending
   /// fetch-completion handlers are invoked with `false` so callers don't hang.
-  func reset() {
+  ///
+  /// `completion` (optional) fires on the tracking queue once the in-memory state has been
+  /// cleared, so callers (notably `MixpanelInstance.reset(completion:)`) can defer their own
+  /// completion until after the wipe — without it, a customer calling a sync flag API from
+  /// the outer reset completion handler could observe pre-reset variants.
+  func reset(completion: (() -> Void)? = nil) {
     trackingQueue.async { [weak self] in
-      guard let self = self else { return }
+      guard let self = self else {
+        completion?()
+        return
+      }
 
       var orphanedHandlers: [(Bool) -> Void] = []
       self.flagsLock.write {
@@ -415,6 +423,8 @@ class FeatureFlagManager: MixpanelFlags {
       DispatchQueue.main.async {
         orphanedHandlers.forEach { $0(false) }
       }
+
+      completion?()
     }
   }
 

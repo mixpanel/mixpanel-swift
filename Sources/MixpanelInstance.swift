@@ -1012,16 +1012,26 @@ extension MixpanelInstance {
 
       // reset() does not call identify(), so the loadFlags() call inside identify() never
       // fires. Clear feature-flag state explicitly and refetch under the new identity if
-      // prefetching is enabled.
-      if let flagManager = self.flags as? FeatureFlagManager {
-        flagManager.reset()
-        if self.options.featureFlagOptions.prefetchFlags {
-          flagManager.loadFlags()
+      // prefetching is enabled. Defer the user-facing completion until the flag-manager
+      // reset has actually drained — otherwise a customer calling a sync flag API from
+      // their completion handler could observe pre-reset variants (the inner reset is
+      // async on the same trackingQueue, so it'd run AFTER the outer block dispatched
+      // completion to main).
+      let flagManager = self.flags as? FeatureFlagManager
+      let fireUserCompletion: () -> Void = {
+        if let completion = completion {
+          DispatchQueue.main.async(execute: completion)
         }
       }
-
-      if let completion = completion {
-        DispatchQueue.main.async(execute: completion)
+      if let flagManager = flagManager {
+        flagManager.reset {
+          if self.options.featureFlagOptions.prefetchFlags {
+            flagManager.loadFlags()
+          }
+          fireUserCompletion()
+        }
+      } else {
+        fireUserCompletion()
       }
     }
   }

@@ -70,6 +70,11 @@ private final class PersistenceTestMockManager: FeatureFlagManager {
         let stamped = flags.mapValues { $0.withSource(.network) }
         self.flagsLock.write {
           self.flags = stamped
+          self.loadedBlobPersistedAt = nil
+          // Mirror production: clear the per-flag $experiment_started dedup window on every
+          // successful fetch so a flag whose variant changed between fetches re-fires
+          // tracking on the next lookup.
+          self.trackedFeatures.removeAll()
           self.awaitingInitialNetworkResponse = false
           self.timeLastFetched = Date()
         }
@@ -1172,6 +1177,88 @@ class FeatureFlagPersistenceTests: XCTestCase {
     XCTAssertEqual(props["$variant_source"] as? String, "network")
     XCTAssertNil(props["$persisted_at_in_ms"], "network variants don't carry persistedAt")
     XCTAssertNil(props["$ttl_in_ms"], "network variants don't carry TTL")
+  }
+
+  // MARK: - Tracking dedup window resets after every successful fetch
+
+  /// Regression test mirroring mixpanel-android's
+  /// `testTracking_getVariantSync_refireAfterSuccessfulRefetch`.
+  ///
+  /// The per-flag `trackedFeatures` set deduplicates `$experiment_started` within a fetch
+  /// round, but must clear on every successful refetch so a second fetch round gets a fresh
+  /// shot at firing tracking — even when the variant value didn't change. Without the clear,
+  /// a flag whose value flipped between fetches (persisted "control" → network "treatment")
+  /// would serve the new value but skip tracking, leaving Mixpanel analytics permanently
+  /// tied to the prior exposure.
+  func testTrackingRefiresAfterSuccessfulRefetch() throws {
+    let delegate = PersistenceTestMockDelegate(
+      options: MixpanelOptions(
+        token: "test_token",
+        featureFlagOptions: FeatureFlagOptions(
+          enabled: true,
+          variantLookupPolicy: .networkOnly)),
+      distinctId: "user_a")
+    retainedDelegates.append(delegate)
+    let queue = DispatchQueue(label: "ff.refire.test.\(UUID().uuidString)")
+    let mock = PersistenceTestMockManager(
+      serverURL: "https://example.test",
+      trackingQueue: queue,
+      instanceName: instanceName,
+      delegate: delegate)
+    waitForTrackingQueue(manager: mock)
+
+    // ── Fetch round 1: server returns flag_X = variant_A. ──
+    mock.simulatedFetchResult = (
+      success: true,
+      flags: ["flag_x": MixpanelFlagVariant(key: "variant_a", value: "value_a")]
+    )
+    mock.simulatedNetworkDelay = 0
+    let firstFetchDone = expectation(description: "first fetch completes")
+    mock.loadFlags(completion: { _ in firstFetchDone.fulfill() })
+    wait(for: [firstFetchDone], timeout: 2.0)
+
+    let fallback = MixpanelFlagVariant(key: "fb", value: "fb_value")
+
+    // First lookup → tracks once.
+    _ = mock.getVariantSync("flag_x", fallback: fallback)
+    waitForMainAndTracking(manager: mock)
+    XCTAssertEqual(
+      delegate.snapshotTrackedEvents().filter { $0.event == "$experiment_started" }.count, 1,
+      "first lookup should fire $experiment_started exactly once")
+
+    // Second lookup in the same fetch round → still 1 (dedup intact).
+    _ = mock.getVariantSync("flag_x", fallback: fallback)
+    waitForMainAndTracking(manager: mock)
+    XCTAssertEqual(
+      delegate.snapshotTrackedEvents().filter { $0.event == "$experiment_started" }.count, 1,
+      "repeat lookup in the same fetch round must not re-fire (dedup window)")
+
+    // ── Fetch round 2: server returns the SAME variant — proves we're testing the
+    //    dedup-clearing behavior, not a value-change-detection behavior. ──
+    mock.simulatedFetchResult = (
+      success: true,
+      flags: ["flag_x": MixpanelFlagVariant(key: "variant_a", value: "value_a")]
+    )
+    let secondFetchDone = expectation(description: "second fetch completes")
+    mock.loadFlags(completion: { _ in secondFetchDone.fulfill() })
+    wait(for: [secondFetchDone], timeout: 2.0)
+
+    // Lookup after refetch → fires again (dedup window reset).
+    _ = mock.getVariantSync("flag_x", fallback: fallback)
+    waitForMainAndTracking(manager: mock)
+    XCTAssertEqual(
+      delegate.snapshotTrackedEvents().filter { $0.event == "$experiment_started" }.count, 2,
+      "successful refetch should clear the dedup window so the next lookup re-fires")
+  }
+
+  /// `waitForTrackingQueue` only drains the tracking queue. Tracking-event recording goes
+  /// through `DispatchQueue.main.async` after the tracking queue, so we need to drain main
+  /// too to observe the recorded events.
+  private func waitForMainAndTracking(manager: FeatureFlagManager) {
+    waitForTrackingQueue(manager: manager)
+    let mainDrained = expectation(description: "main queue drained")
+    DispatchQueue.main.async { mainDrained.fulfill() }
+    wait(for: [mainDrained], timeout: 1.0)
   }
 
   // MARK: - Helpers

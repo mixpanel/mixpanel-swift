@@ -395,7 +395,9 @@ class FeatureFlagManager: MixpanelFlags {
   // Internal State - Protected by flagsLock
   var flags: [String: MixpanelFlagVariant]? = nil
   var isFetching: Bool = false
-  private var trackedFeatures: Set<String> = Set()
+  // `internal` so tests that override `_performFetchRequest` can mirror production's
+  // post-success state mutation (clearing the dedup window after a successful fetch).
+  internal var trackedFeatures: Set<String> = Set()
   private var fetchCompletionHandlers: [(Bool) -> Void] = []
 
   /// True when `flags` was populated from the on-disk persistence layer and we have not yet
@@ -954,6 +956,15 @@ class FeatureFlagManager: MixpanelFlags {
           self.loadedBlobPersistedAt = nil
           self.pendingFirstTimeEvents = mergedPendingEvents
           self.pendingFirstTimeEventNames = mergedPendingEventNames
+          // Reset the per-flag $experiment_started dedup window. Without this, a flag whose
+          // variant value changed between fetches (e.g. persistence-loaded "control" →
+          // network "treatment", or a re-fetch under a new server-side rule) would serve the
+          // new value but silently skip tracking — analytics would still show the prior
+          // exposure. Clearing here means each successful fetch gets a fresh shot at firing
+          // $experiment_started for any accessed flag. Trade-off: occasional duplicate
+          // events when the variant didn't actually change across fetches; we accept that
+          // for analytics correctness.
+          self.trackedFeatures.removeAll()
           // Network response received — async lookups can stop awaiting (NetworkFirst) and
           // serve from the freshly-populated `flags`.
           self.awaitingInitialNetworkResponse = false

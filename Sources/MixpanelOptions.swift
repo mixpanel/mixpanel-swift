@@ -83,10 +83,12 @@ public struct FeatureFlagOptions {
 /// - `networkFirst(ttl:)`: Prefer fresh values from the network, but fall back to persisted
 ///   variants when the network call fails. Same TTL semantics as `persistenceUntilNetworkSuccess`.
 ///
-/// **TTL handling** (matches the JS SDK):
-/// - `ttl > 0` — entries expire after the configured number of seconds.
-/// - `ttl == 0` — entries are immediately treated as expired on every check.
-/// - `ttl < 0` — invalid; the SDK logs a warning and falls back to `defaultTTL`.
+/// **TTL handling** — non-positive TTL on a persisting policy is a misconfiguration. At SDK
+/// init the requested policy is run through `effective(_:)`, which collapses any persisting
+/// policy with `ttl <= 0` to `.networkOnly` (with a warning logged). Persistence-with-no-
+/// useful-TTL would write to disk on every fetch but never serve anything from disk, so the
+/// SDK substitutes the meaningful interpretation. The factories themselves don't sanitize —
+/// they preserve exactly what the developer asked for so callers can introspect.
 ///
 /// Convenience zero-argument forms `persistenceUntilNetworkSuccess()` / `networkFirst()` use
 /// `defaultTTL` (24 hours) — equivalent to passing `ttl: VariantLookupPolicy.defaultTTL`.
@@ -108,6 +110,31 @@ public enum VariantLookupPolicy {
   /// `.networkFirst(ttl: VariantLookupPolicy.defaultTTL)`.
   public static func networkFirst() -> VariantLookupPolicy {
     return .networkFirst(ttl: defaultTTL)
+  }
+
+  /// Resolves the policy the SDK should actually use given what the developer configured.
+  /// Substitutes `.networkOnly` when the requested policy is a persisting one with non-
+  /// positive TTL, since "persist on every fetch but the TTL makes nothing ever serve" does
+  /// no useful work — the developer almost certainly meant "no persistence." Logs a warning
+  /// when the substitution happens.
+  ///
+  /// Called once at FeatureFlagManager init; downstream code can treat the returned policy
+  /// as canonical.
+  internal static func effective(_ requested: VariantLookupPolicy) -> VariantLookupPolicy {
+    let ttl: TimeInterval
+    switch requested {
+    case .networkOnly:
+      return requested
+    case .persistenceUntilNetworkSuccess(let t), .networkFirst(let t):
+      ttl = t
+    }
+    if ttl <= 0 {
+      MixpanelLogger.warn(
+        message:
+          "Non-positive TTL (\(ttl)s) on \(requested); falling back to networkOnly since persistence with no meaningful TTL does no useful work.")
+      return .networkOnly
+    }
+    return requested
   }
 }
 

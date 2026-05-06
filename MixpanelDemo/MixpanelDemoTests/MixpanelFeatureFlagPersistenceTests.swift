@@ -228,49 +228,91 @@ class FeatureFlagPersistenceTests: XCTestCase {
     }
   }
 
-  /// Matches the JS SDK's TTL contract: a negative TTL is invalid and silently coerced to
-  /// `defaultTTL`. Verified end-to-end via the staleness behavior — a fresh persisted
-  /// variant must NOT be treated as expired under negative TTL (because we coerce to 24h,
-  /// not "always expired").
-  func testNegativeTTLIsCoercedToDefault() throws {
-    let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: -1))
-    waitForTrackingQueue(manager: manager)
-
-    let recentlyPersistedAt = Date(timeIntervalSinceNow: -60)  // 60s ago, well within 24h
-    let fresh = MixpanelFlagVariant(key: "v1", value: "fresh_value")
-      .withSource(.persistence(persistedAt: recentlyPersistedAt))
-    manager.flagsLock.write {
-      manager.flags = ["flag_a": fresh]
-      manager.loadedBlobPersistedAt = recentlyPersistedAt
+  /// Factories preserve exactly what was asked — they don't sanitize. The "non-positive TTL
+  /// becomes networkOnly" rule is enforced at SDK init via `VariantLookupPolicy.effective(_:)`,
+  /// not at construction time, so callers can introspect what they configured.
+  func testFactoriesPreserveExactTtl() throws {
+    if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.persistenceUntilNetworkSuccess(ttl: -1) {
+      XCTAssertEqual(t, -1)
+    } else {
+      XCTFail("expected .persistenceUntilNetworkSuccess case")
     }
-
-    let result = manager.getVariantSync("flag_a", fallback: MixpanelFlagVariant(value: "fb"))
-    XCTAssertEqual(
-      result.value as? String, "fresh_value",
-      "negative TTL should fall back to defaultTTL, leaving recent variants servable")
+    if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.persistenceUntilNetworkSuccess(ttl: 0) {
+      XCTAssertEqual(t, 0)
+    } else {
+      XCTFail("expected .persistenceUntilNetworkSuccess case")
+    }
+    if case .networkFirst(let t) = VariantLookupPolicy.networkFirst(ttl: -100) {
+      XCTAssertEqual(t, -100)
+    } else {
+      XCTFail("expected .networkFirst case")
+    }
   }
 
-  /// TTL of `0` means "always expired" (matches JS). Even a variant persisted just now is
-  /// past TTL on the next check.
-  func testZeroTTLTreatsAllPersistedVariantsAsExpired() throws {
+  /// Persisting policies with TTL <= 0 do no useful work (we'd write to disk on every fetch
+  /// but never serve anything from persistence) so the SDK substitutes `.networkOnly` at init.
+  func testEffectivePolicyNonPositiveTtlBecomesNetworkOnly() throws {
+    let resolvedNegativePersistence = VariantLookupPolicy.effective(.persistenceUntilNetworkSuccess(ttl: -1))
+    if case .networkOnly = resolvedNegativePersistence {} else {
+      XCTFail("negative TTL on persistenceUntilNetworkSuccess should resolve to .networkOnly")
+    }
+
+    let resolvedZeroPersistence = VariantLookupPolicy.effective(.persistenceUntilNetworkSuccess(ttl: 0))
+    if case .networkOnly = resolvedZeroPersistence {} else {
+      XCTFail("zero TTL on persistenceUntilNetworkSuccess should resolve to .networkOnly")
+    }
+
+    let resolvedNegativeNetworkFirst = VariantLookupPolicy.effective(.networkFirst(ttl: -100))
+    if case .networkOnly = resolvedNegativeNetworkFirst {} else {
+      XCTFail("negative TTL on networkFirst should resolve to .networkOnly")
+    }
+
+    let resolvedZeroNetworkFirst = VariantLookupPolicy.effective(.networkFirst(ttl: 0))
+    if case .networkOnly = resolvedZeroNetworkFirst {} else {
+      XCTFail("zero TTL on networkFirst should resolve to .networkOnly")
+    }
+  }
+
+  /// Sanity: non-degenerate configurations pass through `effective(_:)` unchanged.
+  func testEffectivePolicyPositiveTtlPreserved() throws {
+    let persistence = VariantLookupPolicy.persistenceUntilNetworkSuccess(ttl: 3600)
+    if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.effective(persistence) {
+      XCTAssertEqual(t, 3600)
+    } else {
+      XCTFail("positive TTL should pass through unchanged")
+    }
+
+    let networkOnly = VariantLookupPolicy.networkOnly
+    if case .networkOnly = VariantLookupPolicy.effective(networkOnly) {} else {
+      XCTFail(".networkOnly should pass through unchanged")
+    }
+  }
+
+  /// End-to-end check: configuring the SDK with a persisting policy + non-positive TTL means
+  /// no persistence happens at runtime — the SDK behaves as if `.networkOnly` was configured.
+  func testNonPositiveTtlPersistingPolicyBehavesAsNetworkOnly() throws {
+    // Pre-stage a persisted blob on disk. Under .networkOnly init, the manager should wipe
+    // it (proves the resolved policy is .networkOnly, not the persisting policy the customer
+    // requested).
+    let response = #"{"flags":{"flag_a":{"variant_key":"v1","variant_value":true}}}"#
+    MixpanelPersistence.saveFlagsPersistence(
+      FlagsPersistenceBlob(
+        persistedAt: Date(),
+        distinctId: "user_a",
+        response: response),
+      instanceName: instanceName)
+    XCTAssertNotNil(MixpanelPersistence.loadFlagsPersistence(instanceName: instanceName))
+
     let manager = makeManager(
       distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 0))
     waitForTrackingQueue(manager: manager)
 
-    let justNow = Date(timeIntervalSinceNow: -0.001)
-    let variant = MixpanelFlagVariant(key: "v1", value: "stale")
-      .withSource(.persistence(persistedAt: justNow))
-    manager.flagsLock.write {
-      manager.flags = ["flag_a": variant]
-      manager.loadedBlobPersistedAt = justNow
-    }
-
-    let fallback = MixpanelFlagVariant(key: "fb", value: "fallback_val")
-    let result = manager.getVariantSync("flag_a", fallback: fallback)
-    XCTAssertEqual(
-      result.value as? String, "fallback_val",
-      "TTL of 0 should treat any persisted variant as expired")
+    XCTAssertFalse(
+      manager.areFlagsReady(),
+      "non-positive TTL should resolve to .networkOnly; nothing loaded from persistence")
+    XCTAssertNil(
+      MixpanelPersistence.loadFlagsPersistence(instanceName: instanceName),
+      "resolved .networkOnly init should wipe the existing blob")
   }
 
   // MARK: - Init loads persisted variants and stamps them

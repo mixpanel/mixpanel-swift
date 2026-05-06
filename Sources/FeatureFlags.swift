@@ -455,6 +455,12 @@ class FeatureFlagManager: MixpanelFlags {
   private var currentOptions: MixpanelOptions? { delegate?.getOptions() }
   private var flagsRoute = "/flags/"
 
+  /// Resolved variant lookup policy snapshot. Computed once at init via
+  /// `VariantLookupPolicy.effective(_:)`, which collapses any persisting policy with
+  /// non-positive TTL down to `.networkOnly` (with a warning logged). Treat this as the
+  /// canonical policy — downstream code should never re-read from `delegate?.getOptions()`.
+  private let resolvedLookupPolicy: VariantLookupPolicy
+
   // Queue for synchronizing flag operations with tracking. `internal` rather than `private`
   // so tests can post barrier tasks to wait for queued work (persistence load on init, etc.).
   internal var trackingQueue: DispatchQueue
@@ -471,13 +477,19 @@ class FeatureFlagManager: MixpanelFlags {
         self.instanceName = instanceName
         self.delegate = delegate
         self.flagContext = delegate?.getOptions().featureFlagOptions.context ?? [:]
+        // Resolve the policy once at init: persisting policies with non-positive TTL collapse
+        // to `.networkOnly` (since "persist on every fetch but TTL makes nothing serve" does
+        // no useful work). Logs a warning when the substitution happens.
+        let requestedPolicy =
+          delegate?.getOptions().featureFlagOptions.variantLookupPolicy ?? .networkOnly
+        self.resolvedLookupPolicy = VariantLookupPolicy.effective(requestedPolicy)
 
         // Dispatch the init-time persistence work on the tracking queue so UserDefaults I/O
         // doesn't block the caller (typically the main thread during MixpanelInstance
         // construction). Persisting policies load the persistence layer; `.networkOnly` wipes
         // any stale blob left over from a previous session that used a persisting policy.
         if let options = delegate?.getOptions(), options.featureFlagOptions.enabled {
-            switch options.featureFlagOptions.variantLookupPolicy {
+            switch self.resolvedLookupPolicy {
             case .persistenceUntilNetworkSuccess, .networkFirst:
                 trackingQueue.async { [weak self] in
                     self?._loadPersistedVariants()
@@ -1014,8 +1026,9 @@ class FeatureFlagManager: MixpanelFlags {
       return
     }
 
-    // TTL check — discard expired entries. TTL of 0 means "always expired"; negative TTLs
-    // are coerced to default by `persistenceTtlSeconds()`.
+    // TTL check — discard expired entries. `persistenceTtlSeconds()` returns nil under
+    // `.networkOnly` (we wouldn't be here in that case) and otherwise a positive TTL
+    // (non-positive values are filtered out at policy resolution).
     if let ttl = self.persistenceTtlSeconds(),
        Date().timeIntervalSince(blob.persistedAt) > ttl {
       MixpanelLogger.debug(message: "Persisted flags expired; ignoring.")
@@ -1048,11 +1061,8 @@ class FeatureFlagManager: MixpanelFlags {
       }
     }
 
-    // Snapshot the policy OUTSIDE the lock — `currentLookupPolicy()` calls into the delegate,
-    // and we don't want to hold a delegate call inside our write lock (a future delegate impl
-    // taking its own lock could deadlock). Compute here, branch on it inside the lock.
     let isNetworkFirst: Bool
-    if case .networkFirst = self.currentLookupPolicy() {
+    if case .networkFirst = self.resolvedLookupPolicy {
       isNetworkFirst = true
     } else {
       isNetworkFirst = false
@@ -1075,30 +1085,22 @@ class FeatureFlagManager: MixpanelFlags {
   }
 
   /// Returns the configured TTL in seconds, or `nil` for `.networkOnly` (no expiry check).
-  /// Negative TTLs are invalid and coerced to `VariantLookupPolicy.defaultTTL` with a warning
-  /// (matches the JS SDK). TTL of `0` is valid and means "always expired."
+  /// Reads from `resolvedLookupPolicy`, so non-positive TTLs have already been collapsed to
+  /// `.networkOnly` at init — anything returned here is `> 0`.
   private func persistenceTtlSeconds() -> TimeInterval? {
-    switch self.currentLookupPolicy() {
+    switch self.resolvedLookupPolicy {
     case .networkOnly:
       return nil
     case .persistenceUntilNetworkSuccess(let ttl), .networkFirst(let ttl):
-      if ttl < 0 {
-        MixpanelLogger.warn(
-          message: "Negative TTL (\(ttl)) is invalid; using default \(VariantLookupPolicy.defaultTTL)s")
-        return VariantLookupPolicy.defaultTTL
-      }
       return ttl
     }
   }
 
-  private func currentLookupPolicy() -> VariantLookupPolicy {
-    return self.delegate?.getOptions().featureFlagOptions.variantLookupPolicy ?? .networkOnly
-  }
-
-  /// Whether successful fetches should be persisted to disk. Derived from the lookup policy:
-  /// `.persistenceUntilNetworkSuccess` and `.networkFirst` write to disk; `.networkOnly` doesn't.
+  /// Whether successful fetches should be persisted to disk. Derived from the resolved
+  /// policy: `.persistenceUntilNetworkSuccess` and `.networkFirst` write to disk;
+  /// `.networkOnly` doesn't.
   private func shouldPersistVariants() -> Bool {
-    switch self.currentLookupPolicy() {
+    switch self.resolvedLookupPolicy {
     case .networkOnly:
       return false
     case .persistenceUntilNetworkSuccess, .networkFirst:

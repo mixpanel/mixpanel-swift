@@ -36,3 +36,4 @@ MixpanelDemo/build/
 
 # Claude.ai instructions
 CLAUDE.md
+.claude/*

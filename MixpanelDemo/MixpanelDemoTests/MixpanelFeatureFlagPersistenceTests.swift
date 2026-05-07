@@ -216,7 +216,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// `VariantLookupPolicy.defaultTTL` is 24 hours, and the zero-arg static factories
   /// `persistenceUntilNetworkSuccess()` / `networkFirst()` produce cases keyed to that default. This also
   /// exercises the case-plus-static-func overload pattern (different parameter lists, so
-  /// `.persistenceUntilNetworkSuccess()` and `.persistenceUntilNetworkSuccess(ttl:)` resolve to different members).
+  /// `.persistenceUntilNetworkSuccess()` and `.persistenceUntilNetworkSuccess(persistenceTtl:)` resolve to different members).
   func testDefaultTTLConvenienceConstructors() throws {
     XCTAssertEqual(VariantLookupPolicy.defaultTTL, 24 * 60 * 60, "default TTL should be 24 hours")
 
@@ -239,17 +239,17 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// becomes networkOnly" rule is enforced at SDK init via `VariantLookupPolicy.effective(_:)`,
   /// not at construction time, so callers can introspect what they configured.
   func testFactoriesPreserveExactTtl() throws {
-    if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.persistenceUntilNetworkSuccess(ttl: -1) {
+    if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.persistenceUntilNetworkSuccess(persistenceTtl: -1) {
       XCTAssertEqual(t, -1)
     } else {
       XCTFail("expected .persistenceUntilNetworkSuccess case")
     }
-    if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.persistenceUntilNetworkSuccess(ttl: 0) {
+    if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.persistenceUntilNetworkSuccess(persistenceTtl: 0) {
       XCTAssertEqual(t, 0)
     } else {
       XCTFail("expected .persistenceUntilNetworkSuccess case")
     }
-    if case .networkFirst(let t) = VariantLookupPolicy.networkFirst(ttl: -100) {
+    if case .networkFirst(let t) = VariantLookupPolicy.networkFirst(persistenceTtl: -100) {
       XCTAssertEqual(t, -100)
     } else {
       XCTFail("expected .networkFirst case")
@@ -259,22 +259,22 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// Persisting policies with TTL <= 0 do no useful work (we'd write to disk on every fetch
   /// but never serve anything from persistence) so the SDK substitutes `.networkOnly` at init.
   func testEffectivePolicyNonPositiveTtlBecomesNetworkOnly() throws {
-    let resolvedNegativePersistence = VariantLookupPolicy.effective(.persistenceUntilNetworkSuccess(ttl: -1))
+    let resolvedNegativePersistence = VariantLookupPolicy.effective(.persistenceUntilNetworkSuccess(persistenceTtl: -1))
     if case .networkOnly = resolvedNegativePersistence {} else {
       XCTFail("negative TTL on persistenceUntilNetworkSuccess should resolve to .networkOnly")
     }
 
-    let resolvedZeroPersistence = VariantLookupPolicy.effective(.persistenceUntilNetworkSuccess(ttl: 0))
+    let resolvedZeroPersistence = VariantLookupPolicy.effective(.persistenceUntilNetworkSuccess(persistenceTtl: 0))
     if case .networkOnly = resolvedZeroPersistence {} else {
       XCTFail("zero TTL on persistenceUntilNetworkSuccess should resolve to .networkOnly")
     }
 
-    let resolvedNegativeNetworkFirst = VariantLookupPolicy.effective(.networkFirst(ttl: -100))
+    let resolvedNegativeNetworkFirst = VariantLookupPolicy.effective(.networkFirst(persistenceTtl: -100))
     if case .networkOnly = resolvedNegativeNetworkFirst {} else {
       XCTFail("negative TTL on networkFirst should resolve to .networkOnly")
     }
 
-    let resolvedZeroNetworkFirst = VariantLookupPolicy.effective(.networkFirst(ttl: 0))
+    let resolvedZeroNetworkFirst = VariantLookupPolicy.effective(.networkFirst(persistenceTtl: 0))
     if case .networkOnly = resolvedZeroNetworkFirst {} else {
       XCTFail("zero TTL on networkFirst should resolve to .networkOnly")
     }
@@ -282,7 +282,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
 
   /// Sanity: non-degenerate configurations pass through `effective(_:)` unchanged.
   func testEffectivePolicyPositiveTtlPreserved() throws {
-    let persistence = VariantLookupPolicy.persistenceUntilNetworkSuccess(ttl: 3600)
+    let persistence = VariantLookupPolicy.persistenceUntilNetworkSuccess(persistenceTtl: 3600)
     if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.effective(persistence) {
       XCTAssertEqual(t, 3600)
     } else {
@@ -311,7 +311,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     XCTAssertNotNil(MixpanelPersistence.loadFlagsPersistence(instanceName: instanceName))
 
     let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 0))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 0))
     waitForTrackingQueue(manager: manager)
 
     XCTAssertFalse(
@@ -335,7 +335,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
       instanceName: instanceName)
 
     let manager = makeManager(
-      distinctId: "user_a", context: context, policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: context, policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
 
     waitForTrackingQueue(manager: manager)
 
@@ -366,7 +366,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     XCTAssertNotNil(MixpanelPersistence.loadFlagsPersistence(instanceName: instanceName))
 
     let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     waitForTrackingQueue(manager: manager)
 
     XCTAssertFalse(manager.areFlagsReady(), "distinctId mismatch should leave flags empty")
@@ -398,7 +398,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     let manager = makeManager(
       distinctId: "user_a",
       context: ["plan": "enterprise"],
-      policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     waitForTrackingQueue(manager: manager)
 
     XCTAssertTrue(
@@ -418,7 +418,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
       instanceName: instanceName)
 
     let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 60))  // 60s TTL
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 60))  // 60s TTL
     waitForTrackingQueue(manager: manager)
 
     XCTAssertFalse(manager.areFlagsReady(), "expired entry should be ignored")
@@ -437,7 +437,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     XCTAssertNotNil(MixpanelPersistence.loadFlagsPersistence(instanceName: instanceName))
 
     let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     waitForTrackingQueue(manager: manager)
 
     XCTAssertFalse(manager.areFlagsReady(), "unparseable response should leave flags empty")
@@ -497,7 +497,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
         token: "test_token",
         featureFlagOptions: FeatureFlagOptions(
           enabled: true,
-          variantLookupPolicy: .persistenceUntilNetworkSuccess(ttl: 86_400))),
+          variantLookupPolicy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))),
       distinctId: "wrong_user")
     retainedDelegates.append(delegate)
 
@@ -537,7 +537,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// treated as not-present by `getVariantSync` — the developer fallback is returned instead.
   func testGetVariantSyncReturnsFallbackForExpiredPersistedVariant() throws {
     let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 60))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 60))
     waitForTrackingQueue(manager: manager)
 
     // Inject an expired persisted variant directly into in-memory state. Bypasses the disk
@@ -564,7 +564,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// `.persistence` source preserved).
   func testGetVariantSyncReturnsFreshPersistedVariant() throws {
     let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     waitForTrackingQueue(manager: manager)
 
     let persistedAt = Date(timeIntervalSinceNow: -60)
@@ -588,7 +588,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// applies to `.persistence(persistedAt:)` variants.
   func testGetVariantSyncReturnsNetworkVariantRegardlessOfAge() throws {
     let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 60))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 60))
     waitForTrackingQueue(manager: manager)
 
     // .network variants don't carry a timestamp, so the TTL check should always return false.
@@ -610,7 +610,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// the TTL check together.
   func testGetAllVariantsSyncFiltersPersistedVariantsWhenBlobIsStale() throws {
     let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 60))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 60))
     waitForTrackingQueue(manager: manager)
 
     let stalePersistedAt = Date(timeIntervalSinceNow: -3600)
@@ -646,7 +646,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     MixpanelPersistence.saveFlagsPersistence(blob, instanceName: instanceName)
 
     let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     waitForTrackingQueue(manager: manager)
     XCTAssertNotNil(MixpanelPersistence.loadFlagsPersistence(instanceName: instanceName))
 
@@ -682,7 +682,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
       instanceName: instanceName)
 
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .networkFirst(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .networkFirst(persistenceTtl: 86_400))
 
     // Configure the mock to "succeed" with new flags, but with a delay that lets us assert
     // the async lookup waited for the network rather than serving persisted values
@@ -721,7 +721,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
       instanceName: instanceName)
 
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .networkFirst(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .networkFirst(persistenceTtl: 86_400))
     mock.simulatedFetchResult = (success: false, flags: nil)
 
     waitForTrackingQueue(manager: mock)
@@ -748,7 +748,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
       instanceName: instanceName)
 
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     // Configure a slow network so we'd notice if the lookup was waiting on it.
     mock.simulatedFetchResult = (
       success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v2", value: "network_val")])
@@ -782,7 +782,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
       instanceName: instanceName)
 
     let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     waitForTrackingQueue(manager: manager)
 
     XCTAssertNotNil(MixpanelPersistence.loadFlagsPersistence(instanceName: instanceName))
@@ -809,7 +809,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
       instanceName: instanceName)
 
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     // Make the post-setContext fetch fail so we can isolate setContext's effect — without
     // a successful overwrite, the blob's survival is solely attributable to setContext
     // NOT wiping it. The same goes for in-memory state.
@@ -845,7 +845,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// the developer fallback.
   func testGetVariantAsyncTriggersFetchWhenLoadedBlobIsStale() throws {
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 60))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 60))
     waitForTrackingQueue(manager: mock)
 
     // Inject an expired persisted variant directly. Bypasses the disk-load path so we can
@@ -884,7 +884,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// resurrect stale values just because the network was unavailable.
   func testGetVariantAsyncReturnsFallbackWhenStaleBlobAndFetchFails() throws {
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 60))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 60))
     waitForTrackingQueue(manager: mock)
 
     let stalePersistedAt = Date(timeIntervalSinceNow: -3600)
@@ -910,7 +910,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// than returning an empty (post-filter) dictionary without attempting refresh.
   func testGetAllVariantsAsyncTriggersFetchWhenLoadedBlobIsStale() throws {
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 60))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 60))
     waitForTrackingQueue(manager: mock)
 
     let stalePersistedAt = Date(timeIntervalSinceNow: -3600)
@@ -948,7 +948,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// we trust that.
   func testGetVariantAsyncServesFallbackOnEmptyFreshBlobWithoutRefresh() throws {
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     waitForTrackingQueue(manager: mock)
 
     let freshPersistedAt = Date(timeIntervalSinceNow: -60)  // well within TTL
@@ -981,7 +981,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// variants to check, but its persistedAt still tells us when to give up on the cache.
   func testGetVariantAsyncTriggersFetchWhenEmptyBlobIsStale() throws {
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 60))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 60))
     waitForTrackingQueue(manager: mock)
 
     let stalePersistedAt = Date(timeIntervalSinceNow: -3600)  // well past 60s TTL
@@ -1011,7 +1011,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// network round-trip.
   func testGetVariantAsyncServesFreshPersistedImmediatelyWithoutFetch() throws {
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     waitForTrackingQueue(manager: mock)
 
     let freshPersistedAt = Date(timeIntervalSinceNow: -60)
@@ -1057,7 +1057,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     let persistedAt = Date(timeIntervalSinceNow: -60)  // 60s ago
     let ttlSeconds: TimeInterval = 86_400  // 24 hours
     let manager = makeManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: ttlSeconds))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: ttlSeconds))
     waitForTrackingQueue(manager: manager)
     let delegate = retainedDelegates.last as! PersistenceTestMockDelegate
 
@@ -1164,7 +1164,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
       instanceName: instanceName)
 
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .networkFirst(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .networkFirst(persistenceTtl: 86_400))
     waitForTrackingQueue(manager: mock)
 
     // Round 1: fetch fails. Lookup falls back to persisted value.
@@ -1226,7 +1226,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// background-refresh trigger.
   func testPersistenceUntilNetworkSuccessLookupKicksOffBackgroundRefresh() throws {
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     waitForTrackingQueue(manager: mock)
 
     let freshPersistedAt = Date(timeIntervalSinceNow: -60)
@@ -1273,7 +1273,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// fetch on every single lookup forever.
   func testPersistenceUntilNetworkSuccessBackgroundRefreshSelfStopsAfterSuccess() throws {
     let mock = makeMockManager(
-      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(ttl: 86_400))
+      distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     waitForTrackingQueue(manager: mock)
 
     let freshPersistedAt = Date(timeIntervalSinceNow: -60)

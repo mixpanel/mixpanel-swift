@@ -54,8 +54,8 @@ public struct FeatureFlagOptions {
   /// Persistence behavior is derived directly from this policy:
   /// - `.networkOnly` — no persistence. The on-disk blob is also wiped at init if present
   ///   (so toggling from a persisting policy back to `.networkOnly` cleans up after itself).
-  /// - `.persistenceUntilNetworkSuccess(ttl:)` / `.networkFirst(ttl:)` — successful fetches write to disk;
-  ///   persisted variants are read on init.
+  /// - `.persistenceUntilNetworkSuccess(persistenceTtl:)` / `.networkFirst(persistenceTtl:)` — successful
+  ///   fetches write to disk; persisted variants are read on init.
   public let variantLookupPolicy: VariantLookupPolicy
 
   public init(
@@ -77,61 +77,65 @@ public struct FeatureFlagOptions {
 /// - `networkOnly`: Never read or write persisted variants. Variant lookups always wait for
 ///   the network call. Default; matches behavior prior to variant persistence. If a persisted
 ///   blob exists from a previous session that used a persisting policy, it's wiped on init.
-/// - `persistenceUntilNetworkSuccess(ttl:)`: Serve persisted variants immediately when
-///   available, refresh from the network in the background. Persisted entries older than
-///   `ttl` are ignored on read but NOT deleted (the next successful fetch overwrites them).
-/// - `networkFirst(ttl:)`: Prefer fresh values from the network, but fall back to persisted
-///   variants when the network call fails. Same TTL semantics as `persistenceUntilNetworkSuccess`.
+/// - `persistenceUntilNetworkSuccess(persistenceTtl:)`: Serve persisted variants immediately
+///   when available, refresh from the network in the background. Persisted entries older
+///   than `persistenceTtl` are ignored on read but NOT deleted (the next successful fetch
+///   overwrites them).
+/// - `networkFirst(persistenceTtl:)`: Prefer fresh values from the network, but fall back to
+///   persisted variants when the network call fails. Same TTL semantics as
+///   `persistenceUntilNetworkSuccess`.
 ///
-/// **TTL handling** — non-positive TTL on a persisting policy is a misconfiguration. At SDK
-/// init the requested policy is run through `effective(_:)`, which collapses any persisting
-/// policy with `ttl <= 0` to `.networkOnly` (with a warning logged). Persistence-with-no-
-/// useful-TTL would write to disk on every fetch but never serve anything from disk, so the
-/// SDK substitutes the meaningful interpretation. The factories themselves don't sanitize —
-/// they preserve exactly what the developer asked for so callers can introspect.
+/// **TTL handling** — non-positive `persistenceTtl` on a persisting policy is a
+/// misconfiguration. At SDK init the requested policy is run through `effective(_:)`, which
+/// collapses any persisting policy with `persistenceTtl <= 0` to `.networkOnly` (with a
+/// warning logged). Persistence-with-no-useful-TTL would write to disk on every fetch but
+/// never serve anything from disk, so the SDK substitutes the meaningful interpretation. The
+/// factories themselves don't sanitize — they preserve exactly what the developer asked for
+/// so callers can introspect.
 ///
 /// Convenience zero-argument forms `persistenceUntilNetworkSuccess()` / `networkFirst()` use
-/// `defaultTTL` (24 hours) — equivalent to passing `ttl: VariantLookupPolicy.defaultTTL`.
+/// `defaultTTL` (24 hours) — equivalent to passing
+/// `persistenceTtl: VariantLookupPolicy.defaultTTL`.
 public enum VariantLookupPolicy {
   case networkOnly
-  case persistenceUntilNetworkSuccess(ttl: TimeInterval)
-  case networkFirst(ttl: TimeInterval)
+  case persistenceUntilNetworkSuccess(persistenceTtl: TimeInterval)
+  case networkFirst(persistenceTtl: TimeInterval)
 
   /// Default time-to-live for persisted variants when no TTL is specified: 24 hours.
   public static let defaultTTL: TimeInterval = 24 * 60 * 60
 
   /// Convenience constructor — equivalent to
-  /// `.persistenceUntilNetworkSuccess(ttl: VariantLookupPolicy.defaultTTL)`.
+  /// `.persistenceUntilNetworkSuccess(persistenceTtl: VariantLookupPolicy.defaultTTL)`.
   public static func persistenceUntilNetworkSuccess() -> VariantLookupPolicy {
-    return .persistenceUntilNetworkSuccess(ttl: defaultTTL)
+    return .persistenceUntilNetworkSuccess(persistenceTtl: defaultTTL)
   }
 
   /// Convenience constructor — equivalent to
-  /// `.networkFirst(ttl: VariantLookupPolicy.defaultTTL)`.
+  /// `.networkFirst(persistenceTtl: VariantLookupPolicy.defaultTTL)`.
   public static func networkFirst() -> VariantLookupPolicy {
-    return .networkFirst(ttl: defaultTTL)
+    return .networkFirst(persistenceTtl: defaultTTL)
   }
 
   /// Resolves the policy the SDK should actually use given what the developer configured.
   /// Substitutes `.networkOnly` when the requested policy is a persisting one with non-
-  /// positive TTL, since "persist on every fetch but the TTL makes nothing ever serve" does
-  /// no useful work — the developer almost certainly meant "no persistence." Logs a warning
-  /// when the substitution happens.
+  /// positive `persistenceTtl`, since "persist on every fetch but the TTL makes nothing ever
+  /// serve" does no useful work — the developer almost certainly meant "no persistence." Logs
+  /// a warning when the substitution happens.
   ///
   /// Called once at FeatureFlagManager init; downstream code can treat the returned policy
   /// as canonical.
   internal static func effective(_ requested: VariantLookupPolicy) -> VariantLookupPolicy {
-    let ttl: TimeInterval
+    let persistenceTtl: TimeInterval
     switch requested {
     case .networkOnly:
       return requested
     case .persistenceUntilNetworkSuccess(let t), .networkFirst(let t):
-      ttl = t
+      persistenceTtl = t
     }
-    if ttl <= 0 {
+    if persistenceTtl <= 0 {
       MixpanelLogger.warn(
         message:
-          "Non-positive TTL (\(ttl)s) on \(requested); falling back to networkOnly since persistence with no meaningful TTL does no useful work.")
+          "Non-positive persistenceTtl (\(persistenceTtl)s) on \(requested); falling back to networkOnly since persistence with no meaningful TTL does no useful work.")
       return .networkOnly
     }
     return requested

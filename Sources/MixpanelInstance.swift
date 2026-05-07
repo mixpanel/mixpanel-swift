@@ -411,7 +411,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
           let wifi =
             flags.contains(SCNetworkReachabilityFlags.reachable)
             && !flags.contains(SCNetworkReachabilityFlags.isWWAN)
-          AutomaticProperties.updateProperties(key: "$wifi", value: wifi)
+          AutomaticProperties.automaticPropertiesLock.write {
+            AutomaticProperties.properties["$wifi"] = wifi
+          }
           MixpanelLogger.info(message: "reachability changed, wifi=\(wifi)")
         }
         if SCNetworkReachabilitySetCallback(reachability, reachabilityCallback, &context) {
@@ -734,28 +736,29 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
 
         trackingQueue.async {
-            AutomaticProperties.updateProperties(key: "$radio", value: radio)
+          AutomaticProperties.automaticPropertiesLock.write { [weak self, radio] in
+            AutomaticProperties.properties["$radio"] = radio
 
             guard self != nil else {
               return
             }
 
-            var carrier = ""
+            AutomaticProperties.properties["$carrier"] = ""
             if #available(iOS 12.0, *) {
               if let carrierName = MixpanelInstance.telephonyInfo
                 .serviceSubscriberCellularProviders?.first?.value.carrierName
               {
-                  carrier = carrierName
+                AutomaticProperties.properties["$carrier"] = carrierName
               }
             } else {
               if let carrierName = MixpanelInstance.telephonyInfo.subscriberCellularProvider?
                 .carrierName
               {
-                  carrier = carrierName
+                AutomaticProperties.properties["$carrier"] = carrierName
               }
             }
-              AutomaticProperties.updateProperties(key: "$carrier", value: carrier)
           }
+        }
       }
     #endif
   #endif  // os(iOS)

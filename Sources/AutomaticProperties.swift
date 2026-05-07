@@ -19,7 +19,7 @@ import Foundation
 class AutomaticProperties {
   static let automaticPropertiesLock = ReadWriteLock(label: "automaticPropertiesLock")
 
-  internal private(set) static var properties: InternalProperties = {
+  static var properties: InternalProperties = {
     var p = InternalProperties()
 
     #if os(iOS) || os(tvOS)
@@ -74,14 +74,6 @@ class AutomaticProperties {
 
     return p
   }()
-    
-    static func updateProperties(key: String, value: Any) {
-        DispatchQueue.main.async {
-            AutomaticProperties.automaticPropertiesLock.write {
-                AutomaticProperties.properties[key] = value
-            }
-        }
-    }
 
   static var peopleProperties: InternalProperties = {
     var p = InternalProperties()

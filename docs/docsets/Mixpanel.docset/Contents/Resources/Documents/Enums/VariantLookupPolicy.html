@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Double Extension Reference</title>
+    <title>VariantLookupPolicy Enumeration Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -13,8 +13,8 @@
     <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
-    <a name="//apple_ref/swift/Extension/Double" class="dashAnchor"></a>
-    <a title="Double Extension Reference"></a>
+    <a name="//apple_ref/swift/Enum/VariantLookupPolicy" class="dashAnchor"></a>
+    <a title="VariantLookupPolicy Enumeration Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">Mixpanel 6.4.0 Docs</a> (68% documented)</p>
@@ -31,9 +31,9 @@
       <p id="breadcrumbs">
         <a href="../index.html">Mixpanel</a>
         <img id="carat" src="../img/carat.png" alt=""/>
-        <a href="../Extensions.html">Extensions</a>
+        <a href="../Enums.html">Enumerations</a>
         <img id="carat" src="../img/carat.png" alt=""/>
-        Swift.Double Extension Reference
+        VariantLookupPolicy Enumeration Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -188,15 +188,42 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>Double</h1>
+            <h1>VariantLookupPolicy</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">Double</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">VariantLookupPolicy</span></code></pre>
 
                 </div>
               </div>
-            
+            <p>Strategy for resolving feature flag variants relative to the on-disk persistence layer
+and the network.</p>
+
+<ul>
+<li><code>networkOnly</code>: Never read or write persisted variants. Variant lookups always wait for
+the network call. Default; matches behavior prior to variant persistence. If a persisted
+blob exists from a previous session that used a persisting policy, it&rsquo;s wiped on init.</li>
+<li><code>persistenceUntilNetworkSuccess(persistenceTtl:)</code>: Serve persisted variants immediately
+when available, refresh from the network in the background. Persisted entries older
+than <code>persistenceTtl</code> are ignored on read but NOT deleted (the next successful fetch
+overwrites them).</li>
+<li><code>networkFirst(persistenceTtl:)</code>: Prefer fresh values from the network, but fall back to
+persisted variants when the network call fails. Same TTL semantics as
+<code>persistenceUntilNetworkSuccess</code>.</li>
+</ul>
+
+<p><strong>TTL handling</strong> — non-positive <code>persistenceTtl</code> on a persisting policy is a
+misconfiguration. At SDK init the requested policy is run through <code>effective(_:)</code>, which
+collapses any persisting policy with <code>persistenceTtl &lt;= 0</code> to <code>.networkOnly</code> (with a
+warning logged). Persistence-with-no-useful-TTL would write to disk on every fetch but
+never serve anything from disk, so the SDK substitutes the meaningful interpretation. The
+factories themselves don&rsquo;t sanitize — they preserve exactly what the developer asked for
+so callers can introspect.</p>
+
+<p>Convenience zero-argument forms <code>persistenceUntilNetworkSuccess()</code> / <code>networkFirst()</code> use
+<code>defaultTTL</code> (24 hours) — equivalent to passing
+<code>persistenceTtl: VariantLookupPolicy.defaultTTL</code>.</p>
+
           </section>
           <section class="section task-group-section">
             <div class="task-group">
@@ -204,37 +231,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:Sd8MixpanelE25isValidNestedTypeAndValueSbyF"></a>
-                    <a name="//apple_ref/swift/Method/isValidNestedTypeAndValue()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:Sd8MixpanelE25isValidNestedTypeAndValueSbyF">isValidNestedTypeAndValue()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Checks if this object has nested object types that Mixpanel supports.
-Will always return true.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">isValidNestedTypeAndValue</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:Sd8MixpanelE6equals3rhsSbAA0A4Type_p_tF"></a>
-                    <a name="//apple_ref/swift/Method/equals(rhs:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:Sd8MixpanelE6equals3rhsSbAA0A4Type_p_tF">equals(rhs:<wbr>)</a>
+                    <a name="/s:8Mixpanel19VariantLookupPolicyO11networkOnlyyA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/networkOnly" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel19VariantLookupPolicyO11networkOnlyyA2CmF">networkOnly</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -249,7 +248,144 @@ Will always return true.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">equals</span><span class="p">(</span><span class="nv">rhs</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">networkOnly</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel19VariantLookupPolicyO30persistenceUntilNetworkSuccessyACSd_tcACmF"></a>
+                    <a name="//apple_ref/swift/Element/persistenceUntilNetworkSuccess(persistenceTtl:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel19VariantLookupPolicyO30persistenceUntilNetworkSuccessyACSd_tcACmF">persistenceUntilNetworkSuccess(persistenceTtl:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">persistenceUntilNetworkSuccess</span><span class="p">(</span><span class="nv">persistenceTtl</span><span class="p">:</span> <span class="kt">TimeInterval</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel19VariantLookupPolicyO12networkFirstyACSd_tcACmF"></a>
+                    <a name="//apple_ref/swift/Element/networkFirst(persistenceTtl:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel19VariantLookupPolicyO12networkFirstyACSd_tcACmF">networkFirst(persistenceTtl:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">networkFirst</span><span class="p">(</span><span class="nv">persistenceTtl</span><span class="p">:</span> <span class="kt">TimeInterval</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel19VariantLookupPolicyO10defaultTTLSdvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/defaultTTL" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel19VariantLookupPolicyO10defaultTTLSdvpZ">defaultTTL</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Default time-to-live for persisted variants when no TTL is specified: 24 hours.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">defaultTTL</span><span class="p">:</span> <span class="kt">TimeInterval</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel19VariantLookupPolicyO30persistenceUntilNetworkSuccessACyFZ"></a>
+                    <a name="//apple_ref/swift/Method/persistenceUntilNetworkSuccess()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel19VariantLookupPolicyO30persistenceUntilNetworkSuccessACyFZ">persistenceUntilNetworkSuccess()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Convenience constructor — equivalent to
+<code>.persistenceUntilNetworkSuccess(persistenceTtl: VariantLookupPolicy.defaultTTL)</code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">persistenceUntilNetworkSuccess</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">VariantLookupPolicy</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel19VariantLookupPolicyO12networkFirstACyFZ"></a>
+                    <a name="//apple_ref/swift/Method/networkFirst()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel19VariantLookupPolicyO12networkFirstACyFZ">networkFirst()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Convenience constructor — equivalent to
+<code>.networkFirst(persistenceTtl: VariantLookupPolicy.defaultTTL)</code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">networkFirst</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">VariantLookupPolicy</span></code></pre>
 
                         </div>
                       </div>

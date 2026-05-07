@@ -17,9 +17,9 @@
     <a title="MixpanelFlags Protocol Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 6.3.0 Docs</a> (68% documented)</p>
+        <p><a href="../index.html">Mixpanel 6.4.0 Docs</a> (68% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
-        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Fketan%2FDocuments%2FMixpanel-GitHub%2Fmixpanel-swift%2Fbuild"><img src="../img/dash.png" alt="Dash"/>Install in Dash</a></p>
+        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Frunner%2Fwork%2Fmixpanel-swift%2Fmixpanel-swift%2Fbuild"><img src="../img/dash.png" alt="Dash"/>Install in Dash</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
             <input type="text" placeholder="Search documentation" data-typeahead>
@@ -70,6 +70,9 @@
               </li>
               <li class="nav-group-task">
                 <a href="../Enums/MixpanelLogLevel.html">MixpanelLogLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VariantLookupPolicy.html">VariantLookupPolicy</a>
               </li>
             </ul>
           </li>
@@ -157,6 +160,9 @@
               </li>
               <li class="nav-group-task">
                 <a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MixpanelFlagVariant/Source.html">– Source</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Structs/MixpanelLogMessage.html">MixpanelLogMessage</a>
@@ -292,8 +298,17 @@ The completion handler is called with <code>true</code> on success and <code>fal
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Synchronously checks if the flags  have been successfully loaded
-and are available for querying.</p>
+                        <p>Synchronously checks if flag variants are in memory and available for synchronous access.</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    <p>When a persisting <code>variantLookupPolicy</code> is configured (<code>.persistenceUntilNetworkSuccess</code> or
+<code>.networkFirst</code>), this can return <code>true</code> before the SDK has spoken to the network this
+session — the returned variants may be stale data from a previous session. Use the
+<code>source</code> field on the served <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code> to distinguish: <code>.network</code> for
+fresh values, <code>.persistence(persistedAt:)</code> for on-disk persisted values (with the
+persistence timestamp).</p>
+
+</div>
 
                       </div>
                       <div class="declaration">
@@ -306,7 +321,8 @@ and are available for querying.</p>
                       </div>
                       <div>
                         <h4>Return Value</h4>
-                        <p><code>true</code> if the flags are loaded and ready for use, <code>false</code> otherwise.</p>
+                        <p><code>true</code> if flag variants are available in memory (from network or persistence),
+       <code>false</code> otherwise.</p>
                       </div>
                     </section>
                   </div>
@@ -879,6 +895,11 @@ The completion handler is typically invoked on the main thread.</p>
                       <div class="abstract">
                         <p>Replaces the current custom flag evaluation context entirely and triggers a flag re-fetch.</p>
 
+<p>In-memory variants and the on-disk persistence layer are intentionally NOT cleared — the
+persistence layer is keyed on distinctId only, so it remains valid for this user across
+context changes. The next successful fetch under the new context will overwrite the
+persistence layer with fresh values.</p>
+
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
@@ -912,7 +933,8 @@ The completion handler is typically invoked on the main thread.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>A closure called when the fetch completes (success or failure).</p>
+                                  <p>A closure called when the fetch under the new context completes (success
+or failure). Always invoked exactly once.</p>
                                 </div>
                               </td>
                             </tr>
@@ -927,7 +949,7 @@ The completion handler is typically invoked on the main thread.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-04-17)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-05-07)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

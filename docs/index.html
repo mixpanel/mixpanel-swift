@@ -16,9 +16,9 @@
     <a title="Mixpanel  Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="index.html">Mixpanel 6.3.0 Docs</a> (68% documented)</p>
+        <p><a href="index.html">Mixpanel 6.4.0 Docs</a> (68% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="img/gh.png" alt="GitHub"/>View on GitHub</a></p>
-        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Fketan%2FDocuments%2FMixpanel-GitHub%2Fmixpanel-swift%2Fbuild"><img src="img/dash.png" alt="Dash"/>Install in Dash</a></p>
+        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Frunner%2Fwork%2Fmixpanel-swift%2Fmixpanel-swift%2Fbuild"><img src="img/dash.png" alt="Dash"/>Install in Dash</a></p>
         <div class="header-right">
           <form role="search" action="search.json">
             <input type="text" placeholder="Search documentation" data-typeahead>
@@ -65,6 +65,9 @@
               </li>
               <li class="nav-group-task">
                 <a href="Enums/MixpanelLogLevel.html">MixpanelLogLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Enums/VariantLookupPolicy.html">VariantLookupPolicy</a>
               </li>
             </ul>
           </li>
@@ -154,6 +157,9 @@
                 <a href="Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a>
               </li>
               <li class="nav-group-task">
+                <a href="Structs/MixpanelFlagVariant/Source.html">– Source</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Structs/MixpanelLogMessage.html">MixpanelLogMessage</a>
               </li>
               <li class="nav-group-task">
@@ -221,6 +227,67 @@ We&rsquo;d also love for you to come and work with us! Check out <strong><a href
 <p>If you are using Objective-C, we recommend using our <strong><a href="https://github.com/mixpanel/mixpanel-iphone">Objective-C Library</a></strong>.</p>
 
 <p>Check out our <a href="https://developer.mixpanel.com/docs/swift">Advanced iOS Swift Guide</a> for additional advanced configurations and use cases, like setting up your project with European Union data storage.</p>
+
+<hr>
+<h1 id='sdk-development' class='heading'>SDK Development</h1>
+
+<p>This section is relevant <strong>only if you are developing or contributing to this SDK repository</strong>.</p>
+<h2 id='swift-formatting-apple-swift-format' class='heading'>Swift Formatting (Apple swift-format)</h2>
+
+<p>This repository uses Apple&rsquo;s swift-format to ensure consistent Swift formatting across all developers.</p>
+
+<p>Formatting rules are defined in the <code>.swift-format</code> file at the repo root.</p>
+<h3 id='prerequisite' class='heading'>Prerequisite</h3>
+
+<p>Install swift-format:</p>
+<pre class="highlight shell"><code>brew <span class="nb">install </span>swift-format
+</code></pre>
+<h3 id='format-swift-code-locally' class='heading'>Format Swift Code Locally</h3>
+
+<p>Format the entire repository:</p>
+<pre class="highlight shell"><code>sh ./scripts/format-swift.sh
+</code></pre>
+
+<p>Format a single file:</p>
+<pre class="highlight shell"><code>sh ./scripts/format-swift.sh Sources/MyFile.swift
+</code></pre>
+
+<p>Format multiple files:</p>
+<pre class="highlight shell"><code>sh ./scripts/format-swift.sh Sources/FileA.swift Sources/FileB.swift
+</code></pre>
+<h2 id='required-git-hook-setup' class='heading'>Required Git Hook Setup</h2>
+
+<p>After pulling the repo, run:</p>
+<pre class="highlight shell"><code>git config core.hooksPath .githooks
+</code></pre>
+
+<p>This enables the pre-commit hook that checks formatting before each commit.</p>
+<h3 id='how-it-works' class='heading'>How it works</h3>
+
+<ol>
+<li>When you commit, the hook checks if staged Swift files are properly formatted</li>
+<li>If formatting issues are found, the commit is blocked</li>
+<li>The hook displays which files need formatting and provides the exact command to fix them</li>
+<li>After running the formatter, stage the files again and recommit</li>
+</ol>
+<h3 id='example' class='heading'>Example</h3>
+<pre class="highlight plaintext"><code>🧹 Running Apple swift-format pre-commit hook (staged only)
+→ Checking formatting on staged Swift files
+
+❌ These files need formatting:
+   Sources/Foo.swift
+   Sources/Bar.swift
+
+Run the formatter and re-stage:
+  sh ./scripts/format-swift.sh Sources/Foo.swift Sources/Bar.swift
+</code></pre>
+
+<p>Then run the suggested command, re-stage, and commit again.</p>
+
+<hr>
+<h1 id='sdk-integration' class='heading'>SDK Integration</h1>
+
+<p>This section is for <strong>app developers integrating the SDK</strong> into their iOS applications.</p>
 <h1 id='quick-start-guide' class='heading'>Quick Start Guide</h1>
 
 <p>Our master branch and our releases are on Swift 5. If you wish to use our Swift 4.2 implementation, please point to the v2.6.1 release. For Swift 4/4.1 implementation, please point to the v2.4.5 release. For Swift 3 implementation, please point to the v2.2.3 release.</p>
@@ -350,7 +417,7 @@ We&rsquo;d also love for you to come and work with us! Check out <strong><a href
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-04-17)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-05-07)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

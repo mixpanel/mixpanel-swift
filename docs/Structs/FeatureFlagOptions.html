@@ -17,9 +17,9 @@
     <a title="FeatureFlagOptions Structure Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 6.3.0 Docs</a> (68% documented)</p>
+        <p><a href="../index.html">Mixpanel 6.4.0 Docs</a> (68% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
-        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Fketan%2FDocuments%2FMixpanel-GitHub%2Fmixpanel-swift%2Fbuild"><img src="../img/dash.png" alt="Dash"/>Install in Dash</a></p>
+        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Frunner%2Fwork%2Fmixpanel-swift%2Fmixpanel-swift%2Fbuild"><img src="../img/dash.png" alt="Dash"/>Install in Dash</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
             <input type="text" placeholder="Search documentation" data-typeahead>
@@ -70,6 +70,9 @@
               </li>
               <li class="nav-group-task">
                 <a href="../Enums/MixpanelLogLevel.html">MixpanelLogLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VariantLookupPolicy.html">VariantLookupPolicy</a>
               </li>
             </ul>
           </li>
@@ -157,6 +160,9 @@
               </li>
               <li class="nav-group-task">
                 <a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MixpanelFlagVariant/Source.html">– Source</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Structs/MixpanelLogMessage.html">MixpanelLogMessage</a>
@@ -306,9 +312,47 @@ then manually trigger loading via <code>flags.loadFlags()</code>.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel18FeatureFlagOptionsV7enabled7context13prefetchFlagsACSb_SDySSypGSbtcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(enabled:context:prefetchFlags:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel18FeatureFlagOptionsV7enabled7context13prefetchFlagsACSb_SDySSypGSbtcfc">init(enabled:<wbr>context:<wbr>prefetchFlags:<wbr>)</a>
+                    <a name="/s:8Mixpanel18FeatureFlagOptionsV19variantLookupPolicyAA07VariantfG0Ovp"></a>
+                    <a name="//apple_ref/swift/Property/variantLookupPolicy" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel18FeatureFlagOptionsV19variantLookupPolicyAA07VariantfG0Ovp">variantLookupPolicy</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Strategy used to resolve flag variants relative to the on-disk persistence layer and
+the network. Defaults to <code>.networkOnly</code> — variant lookups always wait for the network
+call, matching behavior prior to the introduction of variant persistence.</p>
+
+<p>Persistence behavior is derived directly from this policy:</p>
+
+<ul>
+<li><code>.networkOnly</code> — no persistence. The on-disk blob is also wiped at init if present
+(so toggling from a persisting policy back to <code>.networkOnly</code> cleans up after itself).</li>
+<li><code>.persistenceUntilNetworkSuccess(persistenceTtl:)</code> / <code>.networkFirst(persistenceTtl:)</code> — successful
+fetches write to disk; persisted variants are read on init.</li>
+</ul>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">variantLookupPolicy</span><span class="p">:</span> <span class="kt"><a href="../Enums/VariantLookupPolicy.html">VariantLookupPolicy</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel18FeatureFlagOptionsV7enabled7context13prefetchFlags19variantLookupPolicyACSb_SDySSypGSbAA07VariantjK0Otcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(enabled:context:prefetchFlags:variantLookupPolicy:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel18FeatureFlagOptionsV7enabled7context13prefetchFlags19variantLookupPolicyACSb_SDySSypGSbAA07VariantjK0Otcfc">init(enabled:<wbr>context:<wbr>prefetchFlags:<wbr>variantLookupPolicy:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -326,7 +370,8 @@ then manually trigger loading via <code>flags.loadFlags()</code>.</p>
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span>
   <span class="nv">enabled</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
   <span class="nv">context</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[:],</span>
-  <span class="nv">prefetchFlags</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span>
+  <span class="nv">prefetchFlags</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span>
+  <span class="nv">variantLookupPolicy</span><span class="p">:</span> <span class="kt"><a href="../Enums/VariantLookupPolicy.html">VariantLookupPolicy</a></span> <span class="o">=</span> <span class="o">.</span><span class="n">networkOnly</span>
 <span class="p">)</span></code></pre>
 
                         </div>
@@ -339,7 +384,7 @@ then manually trigger loading via <code>flags.loadFlags()</code>.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-04-17)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-05-07)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

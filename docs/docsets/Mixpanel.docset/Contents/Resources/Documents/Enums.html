@@ -17,9 +17,9 @@
     <a title="Enumerations  Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="index.html">Mixpanel 6.3.0 Docs</a> (68% documented)</p>
+        <p><a href="index.html">Mixpanel 6.4.0 Docs</a> (68% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="img/gh.png" alt="GitHub"/>View on GitHub</a></p>
-        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Fketan%2FDocuments%2FMixpanel-GitHub%2Fmixpanel-swift%2Fbuild"><img src="img/dash.png" alt="Dash"/>Install in Dash</a></p>
+        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Frunner%2Fwork%2Fmixpanel-swift%2Fmixpanel-swift%2Fbuild"><img src="img/dash.png" alt="Dash"/>Install in Dash</a></p>
         <div class="header-right">
           <form role="search" action="search.json">
             <input type="text" placeholder="Search documentation" data-typeahead>
@@ -68,6 +68,9 @@
               </li>
               <li class="nav-group-task">
                 <a href="Enums/MixpanelLogLevel.html">MixpanelLogLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Enums/VariantLookupPolicy.html">VariantLookupPolicy</a>
               </li>
             </ul>
           </li>
@@ -157,6 +160,9 @@
                 <a href="Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a>
               </li>
               <li class="nav-group-task">
+                <a href="Structs/MixpanelFlagVariant/Source.html">– Source</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Structs/MixpanelLogMessage.html">MixpanelLogMessage</a>
               </li>
               <li class="nav-group-task">
@@ -244,12 +250,66 @@ showing different logging levels at run time depending on the environment</p>
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel19VariantLookupPolicyO"></a>
+                    <a name="//apple_ref/swift/Enum/VariantLookupPolicy" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel19VariantLookupPolicyO">VariantLookupPolicy</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Strategy for resolving feature flag variants relative to the on-disk persistence layer
+and the network.</p>
+
+<ul>
+<li><code>networkOnly</code>: Never read or write persisted variants. Variant lookups always wait for
+the network call. Default; matches behavior prior to variant persistence. If a persisted
+blob exists from a previous session that used a persisting policy, it&rsquo;s wiped on init.</li>
+<li><code>persistenceUntilNetworkSuccess(persistenceTtl:)</code>: Serve persisted variants immediately
+when available, refresh from the network in the background. Persisted entries older
+than <code>persistenceTtl</code> are ignored on read but NOT deleted (the next successful fetch
+overwrites them).</li>
+<li><code>networkFirst(persistenceTtl:)</code>: Prefer fresh values from the network, but fall back to
+persisted variants when the network call fails. Same TTL semantics as
+<code>persistenceUntilNetworkSuccess</code>.</li>
+</ul>
+
+<p><strong>TTL handling</strong> — non-positive <code>persistenceTtl</code> on a persisting policy is a
+misconfiguration. At SDK init the requested policy is run through <code>effective(_:)</code>, which
+collapses any persisting policy with <code>persistenceTtl &lt;= 0</code> to <code>.networkOnly</code> (with a
+warning logged). Persistence-with-no-useful-TTL would write to disk on every fetch but
+never serve anything from disk, so the SDK substitutes the meaningful interpretation. The
+factories themselves don&rsquo;t sanitize — they preserve exactly what the developer asked for
+so callers can introspect.</p>
+
+<p>Convenience zero-argument forms <code>persistenceUntilNetworkSuccess()</code> / <code>networkFirst()</code> use
+<code>defaultTTL</code> (24 hours) — equivalent to passing
+<code>persistenceTtl: VariantLookupPolicy.defaultTTL</code>.</p>
+
+                        <a href="Enums/VariantLookupPolicy.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">VariantLookupPolicy</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-04-17)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-05-07)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

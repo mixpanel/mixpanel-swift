@@ -1,474 +1,495 @@
 {
   "warnings": [
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 11,
       "symbol": "GzipError",
       "symbol_kind": "source.lang.swift.decl.enum",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 12,
       "symbol": "GzipError.stream",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 13,
       "symbol": "GzipError.data",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 14,
       "symbol": "GzipError.memory",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 15,
       "symbol": "GzipError.buffer",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 16,
       "symbol": "GzipError.version",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Data+Compression.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 17,
       "symbol": "GzipError.unknown(code:)",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 36,
       "symbol": "MixpanelFlagVariant",
       "symbol_kind": "source.lang.swift.decl.struct",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 37,
       "symbol": "MixpanelFlagVariant.key",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 38,
       "symbol": "MixpanelFlagVariant.value",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 39,
       "symbol": "MixpanelFlagVariant.experimentID",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 40,
       "symbol": "MixpanelFlagVariant.isExperimentActive",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
       "line": 41,
       "symbol": "MixpanelFlagVariant.isQATester",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
-      "line": 69,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
+      "line": 92,
       "symbol": "MixpanelFlagVariant.init(key:value:isExperimentActive:isQATester:experimentID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
-      "line": 142,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
+      "line": 195,
       "symbol": "MixpanelFlagDelegate",
       "symbol_kind": "source.lang.swift.decl.protocol",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
-      "line": 143,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
+      "line": 196,
       "symbol": "MixpanelFlagDelegate.getOptions()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
-      "line": 144,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
+      "line": 197,
       "symbol": "MixpanelFlagDelegate.getDistinctId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
-      "line": 145,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
+      "line": 198,
       "symbol": "MixpanelFlagDelegate.getAnonymousId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/FeatureFlags.swift",
-      "line": 146,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/FeatureFlags.swift",
+      "line": 199,
       "symbol": "MixpanelFlagDelegate.track(event:properties:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Mixpanel.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Mixpanel.swift",
       "line": 19,
       "symbol": "Mixpanel.initialize(options:)",
       "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
       "line": 50,
       "symbol": "Properties",
       "symbol_kind": "source.lang.swift.decl.typealias",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
       "line": 59,
       "symbol": "ProxyServerConfig",
       "symbol_kind": "source.lang.swift.decl.struct",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
       "line": 60,
       "symbol": "ProxyServerConfig.init(serverUrl:delegate:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
       "line": 177,
       "symbol": "MixpanelInstance.useGzipCompression",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
       "line": 229,
       "symbol": "MixpanelInstance.minimumSessionDuration",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 471,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 483,
       "symbol": "MixpanelInstance.getOptions()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 475,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 487,
       "symbol": "MixpanelInstance.getDistinctId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 479,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 491,
       "symbol": "MixpanelInstance.getAnonymousId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 1022,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 1068,
       "symbol": "MixpanelInstance.archive()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 1290,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
+      "line": 1336,
       "symbol": "MixpanelInstance.getGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelLogger.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelLogger.swift",
       "line": 56,
       "symbol": "MixpanelLogging.addMessage(message:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelLogger.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelLogger.swift",
       "line": 59,
       "symbol": "MixpanelLogger",
       "symbol_kind": "source.lang.swift.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 48,
-      "symbol": "FeatureFlagOptions.init(enabled:context:prefetchFlags:)",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 61,
+      "symbol": "FeatureFlagOptions.init(enabled:context:prefetchFlags:variantLookupPolicy:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 59,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 100,
+      "symbol": "VariantLookupPolicy.networkOnly",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 101,
+      "symbol": "VariantLookupPolicy.persistenceUntilNetworkSuccess(persistenceTtl:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 102,
+      "symbol": "VariantLookupPolicy.networkFirst(persistenceTtl:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 145,
       "symbol": "MixpanelOptions",
       "symbol_kind": "source.lang.swift.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 60,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 146,
       "symbol": "MixpanelOptions.token",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 61,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 147,
       "symbol": "MixpanelOptions.flushInterval",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 62,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 148,
       "symbol": "MixpanelOptions.instanceName",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 63,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 149,
       "symbol": "MixpanelOptions.trackAutomaticEvents",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 64,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 150,
       "symbol": "MixpanelOptions.optOutTrackingByDefault",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 65,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 151,
       "symbol": "MixpanelOptions.useUniqueDistinctId",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 66,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 152,
       "symbol": "MixpanelOptions.superProperties",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 67,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 153,
       "symbol": "MixpanelOptions.serverURL",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 68,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 154,
       "symbol": "MixpanelOptions.proxyServerConfig",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 69,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 155,
       "symbol": "MixpanelOptions.useGzipCompression",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 71,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 157,
       "symbol": "MixpanelOptions.featureFlagsEnabled",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 74,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 160,
       "symbol": "MixpanelOptions.featureFlagsContext",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 127,
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
+      "line": 213,
       "symbol": "MixpanelOptions.init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:deviceIdProvider:featureFlagOptions:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 20,
       "symbol": "MixpanelType.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 38,
       "symbol": "Optional.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 72,
       "symbol": "String.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 87,
       "symbol": "NSString.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 104,
       "symbol": "NSNumber.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 119,
       "symbol": "Int.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 134,
       "symbol": "UInt.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 150,
       "symbol": "Double.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 166,
       "symbol": "Float.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 180,
       "symbol": "Bool.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 195,
       "symbol": "Date.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 210,
       "symbol": "URL.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 225,
       "symbol": "NSNull.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 246,
       "symbol": "Array.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 283,
       "symbol": "NSArray.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/MixpanelType.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelType.swift",
       "line": 320,
       "symbol": "Dictionary.equals(rhs:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Network.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Network.swift",
       "line": 51,
       "symbol": "ServerProxyResource",
       "symbol_kind": "source.lang.swift.decl.struct",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Network.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Network.swift",
       "line": 52,
       "symbol": "ServerProxyResource.init(queryItems:headers:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Network.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Network.swift",
       "line": 57,
       "symbol": "ServerProxyResource.queryItems",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift/Sources/Network.swift",
+      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Network.swift",
       "line": 58,
       "symbol": "ServerProxyResource.headers",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     }
   ],
-  "source_directory": "/Users/ketan/Documents/Mixpanel-GitHub/mixpanel-swift"
+  "source_directory": "/Users/runner/work/mixpanel-swift/mixpanel-swift"
 }

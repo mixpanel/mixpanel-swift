@@ -41,6 +41,80 @@ If you are using Objective-C, we recommend using our **[Objective-C Library](htt
 
 Check out our [Advanced iOS Swift Guide](https://developer.mixpanel.com/docs/swift) for additional advanced configurations and use cases, like setting up your project with European Union data storage.
 
+---
+
+# SDK Development
+
+This section is relevant **only if you are developing or contributing to this SDK repository**.
+
+## Swift Formatting (Apple swift-format)
+
+This repository uses Apple's swift-format to ensure consistent Swift formatting across all developers.
+
+Formatting rules are defined in the `.swift-format` file at the repo root.
+
+### Prerequisite
+Install swift-format:
+```bash
+brew install swift-format
+```
+
+### Format Swift Code Locally
+
+Format the entire repository:
+```bash
+sh ./scripts/format-swift.sh
+```
+
+Format a single file:
+```bash
+sh ./scripts/format-swift.sh Sources/MyFile.swift
+```
+
+Format multiple files:
+```bash
+sh ./scripts/format-swift.sh Sources/FileA.swift Sources/FileB.swift
+```
+
+## Required Git Hook Setup
+
+After pulling the repo, run:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+This enables the pre-commit hook that checks formatting before each commit.
+
+### How it works
+
+1. When you commit, the hook checks if staged Swift files are properly formatted
+2. If formatting issues are found, the commit is blocked
+3. The hook displays which files need formatting and provides the exact command to fix them
+4. After running the formatter, stage the files again and recommit
+
+### Example
+
+```
+🧹 Running Apple swift-format pre-commit hook (staged only)
+→ Checking formatting on staged Swift files
+
+❌ These files need formatting:
+   Sources/Foo.swift
+   Sources/Bar.swift
+
+Run the formatter and re-stage:
+  sh ./scripts/format-swift.sh Sources/Foo.swift Sources/Bar.swift
+```
+
+Then run the suggested command, re-stage, and commit again.
+
+---
+
+# SDK Integration
+
+This section is for **app developers integrating the SDK** into their iOS applications.
+
 # Quick Start Guide
 Our master branch and our releases are on Swift 5. If you wish to use our Swift 4.2 implementation, please point to the v2.6.1 release. For Swift 4/4.1 implementation, please point to the v2.4.5 release. For Swift 3 implementation, please point to the v2.2.3 release.
 

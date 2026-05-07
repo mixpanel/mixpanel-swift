@@ -40,6 +40,25 @@ public struct MixpanelFlagVariant: Decodable {
   public let isExperimentActive: Bool? // Corresponds to 'is_experiment_active' from API
   public let isQATester: Bool? // Corresponds to 'is_qa_tester' from API
 
+  /// Where this variant was sourced from. Always non-nil — every `MixpanelFlagVariant`
+  /// carries a definite source. `.fallback` for developer-supplied fallback instances;
+  /// `.network` or `.persistence(persistedAt:)` when the SDK serves a variant. For
+  /// persisted variants, the timestamp lives on the `.persistence` case so invalid
+  /// combinations like "network with a timestamp" are unrepresentable.
+  public let source: Source
+
+  /// Identifies where a served variant came from.
+  public enum Source {
+    /// Variant assigned by the most recent successful `/flags/` network call.
+    case network
+    /// Variant loaded from the on-disk persistence layer. `persistedAt` is the time the
+    /// variant set was originally written to disk.
+    case persistence(persistedAt: Date)
+    /// Developer-supplied fallback returned because the SDK had no value to serve (flag
+    /// not in the loaded set, flags never loaded, fetch failed under NetworkFirst, etc.).
+    case fallback
+  }
+
   enum CodingKeys: String, CodingKey {
     case key = "variant_key"
     case value = "variant_value"
@@ -63,6 +82,10 @@ public struct MixpanelFlagVariant: Decodable {
     experimentID = try container.decodeIfPresent(String.self, forKey: .experimentID)
     isExperimentActive = try container.decodeIfPresent(Bool.self, forKey: .isExperimentActive)
     isQATester = try container.decodeIfPresent(Bool.self, forKey: .isQATester)
+    // Decoded variants are immediately re-stamped via `withSource` before being placed in
+    // `flags`, so the customer never observes `.fallback` here. Defaulting to `.fallback`
+    // keeps `source` non-optional without needing a sentinel "unstamped" case.
+    source = .fallback
   }
 
   // Helper initializer with fallbacks, value defaults to key if nil
@@ -76,6 +99,36 @@ public struct MixpanelFlagVariant: Decodable {
     self.experimentID = experimentID
     self.isExperimentActive = isExperimentActive
     self.isQATester = isQATester
+    self.source = .fallback
+  }
+
+  /// Internal initializer used when stamping a served variant with its origin.
+  internal init(
+    key: String,
+    value: Any?,
+    experimentID: String?,
+    isExperimentActive: Bool?,
+    isQATester: Bool?,
+    source: Source
+  ) {
+    self.key = key
+    self.value = value
+    self.experimentID = experimentID
+    self.isExperimentActive = isExperimentActive
+    self.isQATester = isQATester
+    self.source = source
+  }
+
+  /// Returns a copy of this variant stamped with the given source. Other fields are preserved.
+  internal func withSource(_ source: Source) -> MixpanelFlagVariant {
+    return MixpanelFlagVariant(
+      key: self.key,
+      value: self.value,
+      experimentID: self.experimentID,
+      isExperimentActive: self.isExperimentActive,
+      isQATester: self.isQATester,
+      source: source
+    )
   }
 }
 
@@ -162,10 +215,17 @@ public protocol MixpanelFlags {
   /// The completion handler is called with `true` on success and `false` on failure.
   func loadFlags(completion: ((Bool) -> Void)?)
 
-  /// Synchronously checks if the flags  have been successfully loaded
-  /// and are available for querying.
+  /// Synchronously checks if flag variants are in memory and available for synchronous access.
   ///
-  /// - Returns: `true` if the flags are loaded and ready for use, `false` otherwise.
+  /// - Note: When a persisting `variantLookupPolicy` is configured (`.persistenceUntilNetworkSuccess` or
+  ///   `.networkFirst`), this can return `true` before the SDK has spoken to the network this
+  ///   session — the returned variants may be stale data from a previous session. Use the
+  ///   `source` field on the served `MixpanelFlagVariant` to distinguish: `.network` for
+  ///   fresh values, `.persistence(persistedAt:)` for on-disk persisted values (with the
+  ///   persistence timestamp).
+  ///
+  /// - Returns: `true` if flag variants are available in memory (from network or persistence),
+  ///            `false` otherwise.
   func areFlagsReady() -> Bool
 
   // --- Sync Flag Retrieval ---
@@ -300,9 +360,15 @@ public protocol MixpanelFlags {
 
   /// Replaces the current custom flag evaluation context entirely and triggers a flag re-fetch.
   ///
+  /// In-memory variants and the on-disk persistence layer are intentionally NOT cleared — the
+  /// persistence layer is keyed on distinctId only, so it remains valid for this user across
+  /// context changes. The next successful fetch under the new context will overwrite the
+  /// persistence layer with fresh values.
+  ///
   /// - Parameters:
   ///   - context: The new context dictionary to use for flag evaluation.
-  ///   - completion: A closure called when the fetch completes (success or failure).
+  ///   - completion: A closure called when the fetch under the new context completes (success
+  ///     or failure). Always invoked exactly once.
   func setContext(_ context: [String: Any], completion: @escaping () -> Void)
 }
 
@@ -329,8 +395,34 @@ class FeatureFlagManager: MixpanelFlags {
   // Internal State - Protected by flagsLock
   var flags: [String: MixpanelFlagVariant]? = nil
   var isFetching: Bool = false
-  private var trackedFeatures: Set<String> = Set()
+  // `internal` so tests that override `_performFetchRequest` can mirror production's
+  // post-success state mutation (clearing the dedup window after a successful fetch).
+  internal var trackedFeatures: Set<String> = Set()
   private var fetchCompletionHandlers: [(Bool) -> Void] = []
+
+  /// `persistedAt` from the persisted blob currently sitting in `flags`. Lifetime matches
+  /// the persistence-derived state (`flags` + `pendingFirstTimeEvents`):
+  ///   - Set in `_loadPersistedVariants` when we read the blob from disk
+  ///   - Cleared in the network-fetch success closure (the in-memory blob is fully
+  ///     `.network`-stamped after a refresh, so the persisted timestamp no longer applies)
+  ///   - Cleared in `reset()` along with the rest of the per-user state
+  ///
+  /// Stored separately from the `.persistence(persistedAt:)` variant case so we can answer
+  /// "is the loaded blob past TTL?" even when `flags` is empty (the previous session may
+  /// have persisted an empty response).
+  ///
+  /// Also doubles as the "NetworkFirst is still awaiting a successful network response"
+  /// signal — see `isNetworkFirstAwaitingFetch()`. Stays set across failed fetches so each
+  /// subsequent NetworkFirst async lookup re-attempts the network until one succeeds.
+  ///
+  /// `internal` so tests that inject `.persistence` variants directly can match the
+  /// production invariant.
+  internal var loadedBlobPersistedAt: Date?
+
+  /// Per-instance name used as the UserDefaults key prefix for the on-disk persistence layer.
+  /// Captured from the delegate at init so we can persist/clear without holding a delegate
+  /// reference during async work.
+  private let instanceName: String
 
   // First-time event targeting state
   internal var pendingFirstTimeEvents: [String: PendingFirstTimeEvent] = [:]  // Keyed by "flagKey:firstTimeEventHash"
@@ -346,26 +438,67 @@ class FeatureFlagManager: MixpanelFlags {
   internal var activatedFirstTimeEvents: Set<String> = Set()
 
   // Flag evaluation context (protected by flagsLock)
-  private var flagContext: [String: Any]
+  internal var flagContext: [String: Any]
 
   // Timing tracking properties
   private var fetchStartTime: Date?
   var timeLastFetched: Date?
   var fetchLatencyMs: Int?
 
+  /// Bumped on `reset()` so in-flight fetches dispatched pre-reset don't poison post-reset state.
+  /// Captured at the start of `_performFetchRequest` and re-checked before applying results.
+  private var fetchGeneration: Int = 0
+
   // Configuration
   private var currentOptions: MixpanelOptions? { delegate?.getOptions() }
   private var flagsRoute = "/flags/"
 
-  // Queue for synchronizing flag operations with tracking
-  private var trackingQueue: DispatchQueue
+  /// Resolved variant lookup policy snapshot. Computed once at init via
+  /// `VariantLookupPolicy.effective(_:)`, which collapses any persisting policy with
+  /// non-positive TTL down to `.networkOnly` (with a warning logged). Treat this as the
+  /// canonical policy — downstream code should never re-read from `delegate?.getOptions()`.
+  private let resolvedLookupPolicy: VariantLookupPolicy
+
+  // Queue for synchronizing flag operations with tracking. `internal` rather than `private`
+  // so tests can post barrier tasks to wait for queued work (persistence load on init, etc.).
+  internal var trackingQueue: DispatchQueue
 
   // Initializers
-    internal init(serverURL: String, trackingQueue: DispatchQueue, delegate: MixpanelFlagDelegate? = nil) {
+    internal init(
+      serverURL: String,
+      trackingQueue: DispatchQueue,
+      instanceName: String,
+      delegate: MixpanelFlagDelegate? = nil
+    ) {
         self.serverURL = serverURL
         self.trackingQueue = trackingQueue
+        self.instanceName = instanceName
         self.delegate = delegate
         self.flagContext = delegate?.getOptions().featureFlagOptions.context ?? [:]
+        // Resolve the policy once at init: persisting policies with non-positive TTL collapse
+        // to `.networkOnly` (since "persist on every fetch but TTL makes nothing serve" does
+        // no useful work). Logs a warning when the substitution happens.
+        let requestedPolicy =
+          delegate?.getOptions().featureFlagOptions.variantLookupPolicy ?? .networkOnly
+        self.resolvedLookupPolicy = VariantLookupPolicy.effective(requestedPolicy)
+
+        // Dispatch the init-time persistence work on the tracking queue so UserDefaults I/O
+        // doesn't block the caller (typically the main thread during MixpanelInstance
+        // construction). Persisting policies load the persistence layer; `.networkOnly` wipes
+        // any stale blob left over from a previous session that used a persisting policy.
+        if let options = delegate?.getOptions(), options.featureFlagOptions.enabled {
+            switch self.resolvedLookupPolicy {
+            case .persistenceUntilNetworkSuccess, .networkFirst:
+                trackingQueue.async { [weak self] in
+                    self?._loadPersistedVariants()
+                }
+            case .networkOnly:
+                trackingQueue.async { [weak self] in
+                    guard let self = self else { return }
+                    MixpanelPersistence.deleteFlagsPersistence(instanceName: self.instanceName)
+                }
+            }
+        }
     }
 
   // --- Public Methods ---
@@ -381,11 +514,64 @@ class FeatureFlagManager: MixpanelFlags {
     }
   }
 
+  /// Clears all in-memory feature flag state (in-memory variants, tracked-flag set, fetch
+  /// timing, first-time event state) AND wipes the on-disk persistence blob. Intended for
+  /// identity-change paths: `MixpanelInstance.reset()`, `identify` when distinctId actually
+  /// changes, and `optOutTracking`. `setContext` deliberately does NOT call this — context
+  /// changes don't invalidate the persisted blob (it is keyed on distinctId only).
+  ///
+  /// Posts to the tracking queue so the mutation is serialized with reads and fetches. Any
+  /// in-flight fetch dispatched before this call is discarded when it completes (via the
+  /// generation check in `_performFetchRequest`'s success/failure closures). Pending
+  /// fetch-completion handlers are invoked with `false` so callers don't hang.
+  ///
+  /// `completion` (optional) fires on the tracking queue once the in-memory state has been
+  /// cleared, so callers (notably `MixpanelInstance.reset(completion:)`) can defer their own
+  /// completion until after the wipe — without it, a customer calling a sync flag API from
+  /// the outer reset completion handler could observe pre-reset variants.
+  func reset(completion: (() -> Void)? = nil) {
+    trackingQueue.async { [weak self] in
+      guard let self = self else {
+        completion?()
+        return
+      }
+
+      var orphanedHandlers: [(Bool) -> Void] = []
+      self.flagsLock.write {
+        self.fetchGeneration &+= 1
+        self.flags = nil
+        self.loadedBlobPersistedAt = nil
+        self.trackedFeatures.removeAll()
+        self.pendingFirstTimeEvents.removeAll()
+        self.pendingFirstTimeEventNames.removeAll()
+        self.activatedFirstTimeEvents.removeAll()
+        self.fetchStartTime = nil
+        self.timeLastFetched = nil
+        self.fetchLatencyMs = nil
+        orphanedHandlers = self.fetchCompletionHandlers
+        self.fetchCompletionHandlers.removeAll()
+        self.isFetching = false
+      }
+
+      // Wipe the on-disk persistence blob so a freshly-identified user can't be served the
+      // prior user's variants. `MixpanelInstance.reset()` also wipes via
+      // deleteMPUserDefaultsData, so this is defensive (idempotent) but keeps the manager
+      // self-contained.
+      MixpanelPersistence.deleteFlagsPersistence(instanceName: self.instanceName)
+
+      DispatchQueue.main.async {
+        orphanedHandlers.forEach { $0(false) }
+      }
+
+      completion?()
+    }
+  }
+
   func setContext(_ context: [String: Any], completion: @escaping () -> Void) {
     flagsLock.write {
       self.flagContext = context
     }
-      trackingQueue.async { [weak self] in
+    trackingQueue.async { [weak self] in
       self?._fetchFlagsIfNeeded { _ in
         completion()
       }
@@ -421,7 +607,10 @@ class FeatureFlagManager: MixpanelFlags {
     flagsLock.write {
       guard let currentFlags = self.flags else { return }
 
-      if let variant = currentFlags[flagName] {
+      // Treat expired persisted variants as not-present — return the developer fallback and
+      // skip tracking, since the customer effectively didn't receive a value. The blob
+      // stays on disk; the next successful fetch overwrites it.
+      if let variant = currentFlags[flagName], !self.isVariantExpired(variant) {
         flagVariant = variant
 
         // Perform atomic check-and-set for tracking
@@ -433,7 +622,7 @@ class FeatureFlagManager: MixpanelFlags {
           capturedFetchLatencyMs = self.fetchLatencyMs
         }
       }
-      // If flag wasn't found, flagVariant remains nil
+      // If flag wasn't found OR was expired, flagVariant remains nil
     }
 
     // Now, process the results outside the lock
@@ -466,20 +655,37 @@ class FeatureFlagManager: MixpanelFlags {
 
       var flagVariant: MixpanelFlagVariant?
       var needsTrackingCheck = false
-      var flagsAreCurrentlyReady = false
+      var canServeImmediately = false
+      var servingFromPersistedBlob = false
 
-      // Read state with lock
+      // Read state with lock. Serve immediately when flags are populated, NetworkFirst
+      // isn't still gating on a successful network response, AND the loaded blob isn't past
+      // TTL. The blob-staleness check is what makes the async path fall through to a fetch
+      // when persisted values have aged out mid-session — the inline TTL check below would
+      // otherwise silently serve the developer fallback without refreshing.
       self.flagsLock.read {
-        flagsAreCurrentlyReady = (self.flags != nil)
-        if flagsAreCurrentlyReady, let currentFlags = self.flags {
-          if let variant = currentFlags[flagName] {
-            flagVariant = variant
-            needsTrackingCheck = !self.trackedFeatures.contains(flagName)
-          }
+        guard let currentFlags = self.flags,
+              !self.isNetworkFirstAwaitingFetch(),
+              !self.loadedFlagsAreStale() else { return }
+        canServeImmediately = true
+        servingFromPersistedBlob = self.loadedBlobPersistedAt != nil
+        if let variant = currentFlags[flagName], !self.isVariantExpired(variant) {
+          flagVariant = variant
+          needsTrackingCheck = !self.trackedFeatures.contains(flagName)
         }
       }
 
-      if flagsAreCurrentlyReady {
+      if canServeImmediately {
+        // PersistenceUntilNetworkSuccess "serve persisted now, refresh in background":
+        // when the immediate-serve path is satisfied by the persisted blob (not yet
+        // overwritten by a successful fetch), kick off a background fetch with no
+        // completion handler so we don't await it. Idempotent — `_fetchFlagsIfNeeded`
+        // dedupes via `isFetching`. Self-stops once the fetch clears
+        // `loadedBlobPersistedAt`.
+        if servingFromPersistedBlob,
+           case .persistenceUntilNetworkSuccess = self.resolvedLookupPolicy {
+          self._fetchFlagsIfNeeded(completion: nil)
+        }
         let result = flagVariant ?? fallback
         if flagVariant != nil, needsTrackingCheck {
           // Perform atomic check-and-track
@@ -488,21 +694,20 @@ class FeatureFlagManager: MixpanelFlags {
         DispatchQueue.main.async { completion(result) }
 
       } else {
-        // --- Flags were NOT ready ---
-        // Trigger fetch; fetch completion will handle calling the original completion handler
-        MixpanelLogger.debug(message: "Flags not ready, attempting fetch for getFeature call...")
-        self._fetchFlagsIfNeeded { success in
-          // This completion runs *after* fetch completes (or fails)
-          let result: MixpanelFlagVariant
-          if success {
-            // Fetch succeeded – call the private impl directly to avoid false positive DEBUG warning
-            result = self._getVariantSyncImpl(flagName, fallback: fallback)
-          } else {
-            MixpanelLogger.warn(message: "Failed to fetch flags, returning fallback for \(flagName).")
-            result = fallback
+        // Flags not yet servable. Either nothing in memory, or NetworkFirst awaiting the
+        // initial network response. Trigger a fetch and serve from `flags` afterward.
+        // On failure, `flags` is left untouched: NetworkFirst with a persistence hit still
+        // has persisted values (Source.persistence); everything else stays nil and we serve
+        // the fallback.
+        MixpanelLogger.debug(message: "Flags not yet servable, attempting fetch for getVariant '\(flagName)'...")
+        self._fetchFlagsIfNeeded { _ in
+          // Hop back to the tracking queue so we can read flags + run the tracking check
+          // atomically. Whether the fetch succeeded or not, _getVariantSyncImpl returns the
+          // variant from `flags` if present (persisted or network) else the fallback.
+          self.trackingQueue.async {
+            let result = self._getVariantSyncImpl(flagName, fallback: fallback)
+            DispatchQueue.main.async { completion(result) }
           }
-          // Call original completion (on main thread)
-          DispatchQueue.main.async { completion(result) }
         }
       }
     }
@@ -554,7 +759,11 @@ class FeatureFlagManager: MixpanelFlags {
   private func _getAllVariantsSyncImpl() -> [String: MixpanelFlagVariant] {
     var result: [String: MixpanelFlagVariant] = [:]
     flagsLock.read {
-      result = self.flags ?? [:]
+      // Filter out expired persisted variants — same rule as getVariantSync. Keep `.network`
+      // and unexpired `.persistence(persistedAt:)` entries.
+      if let currentFlags = self.flags {
+        result = currentFlags.filter { _, variant in !self.isVariantExpired(variant) }
+      }
     }
     return result
   }
@@ -566,23 +775,33 @@ class FeatureFlagManager: MixpanelFlags {
         return
       }
 
-      var currentFlags: [String: MixpanelFlagVariant]?
-      self.flagsLock.read { currentFlags = self.flags }
-      if let currentFlags = currentFlags {
-        DispatchQueue.main.async { completion(currentFlags) }
+      var canServeImmediately = false
+      var servingFromPersistedBlob = false
+      self.flagsLock.read {
+        canServeImmediately = (self.flags != nil)
+          && !self.isNetworkFirstAwaitingFetch()
+          && !self.loadedFlagsAreStale()
+        servingFromPersistedBlob = self.loadedBlobPersistedAt != nil
+      }
+      if canServeImmediately {
+        // PersistenceUntilNetworkSuccess "serve persisted now, refresh in background":
+        // see the matching block in `getVariant` for the full rationale.
+        if servingFromPersistedBlob,
+           case .persistenceUntilNetworkSuccess = self.resolvedLookupPolicy {
+          self._fetchFlagsIfNeeded(completion: nil)
+        }
+        // Use the sync impl so the expired-filter is applied consistently.
+        let result = self._getAllVariantsSyncImpl()
+        DispatchQueue.main.async { completion(result) }
       } else {
-        // Flags not ready, trigger fetch
-        MixpanelLogger.debug(message: "Flags not ready, attempting fetch for getAllVariants call...")
-        self._fetchFlagsIfNeeded { success in
-          let result: [String: MixpanelFlagVariant]
-          if success {
-            // Fetch succeeded – call the private impl directly to avoid false positive DEBUG warning
-            result = self._getAllVariantsSyncImpl()
-          } else {
-            MixpanelLogger.warn(message: "Failed to fetch flags, returning empty dictionary.")
-            result = [:]
-          }
-          DispatchQueue.main.async { completion(result) }
+        // Either nothing in memory yet, NetworkFirst awaiting the initial network response,
+        // or the loaded persisted blob is past TTL. Trigger a fetch and serve from `flags`
+        // afterward — on success it has the fresh values, on NetworkFirst failure the
+        // persisted values stayed in place (still served, _getAllVariantsSyncImpl filters
+        // any expired entries).
+        MixpanelLogger.debug(message: "Flags not yet servable, attempting fetch for getAllVariants...")
+        self._fetchFlagsIfNeeded { _ in
+          DispatchQueue.main.async { completion(self._getAllVariantsSyncImpl()) }
         }
       }
     }
@@ -627,10 +846,14 @@ class FeatureFlagManager: MixpanelFlags {
 
   // Performs the actual network request construction and call
   internal func _performFetchRequest() {
-    // Record fetch start time
+    // Record fetch start time and snapshot the current generation. The snapshot is checked
+    // in the success/failure closures so a fetch that was dispatched before reset() does not
+    // overwrite the freshly cleared state.
     let startTime = Date()
+    var generation = 0
     flagsLock.write {
       self.fetchStartTime = startTime
+      generation = self.fetchGeneration
     }
 
     guard let delegate = self.delegate, let options = self.currentOptions else {
@@ -675,7 +898,13 @@ class FeatureFlagManager: MixpanelFlags {
       URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion())
     ]
 
+    // Capture the raw response bytes via a reference holder so we can persist the wire
+    // format unchanged. Storing raw JSON (rather than re-encoding the parsed variants)
+    // keeps the parser as the single source of truth and carries `pending_first_time_events`
+    // through to subsequent loads for free.
+    let rawHolder = RawDataHolder()
     let responseParser: (Data) -> FlagsResponse? = { data in
+      rawHolder.data = data
       do { return try JSONDecoder().decode(FlagsResponse.self, from: data) } catch {
         MixpanelLogger.error(message: "Error parsing flags JSON: \(error)")
         return nil
@@ -685,17 +914,38 @@ class FeatureFlagManager: MixpanelFlags {
       path: flagsRoute, method: .get, queryItems: queryItems, headers: headers,
       parse: responseParser)
 
+    // Capture the distinctId at dispatch time. Using this (rather than re-reading delegate
+    // state at write time) ensures the persisted blob is keyed to the user we actually
+    // fetched for, even if identify() raced ahead.
+    let distinctIdAtDispatch = distinctId
+
     // Make the API request
     Network.apiRequest(
       base: serverURL,
       resource: resource,
       failure: { [weak self] reason, data, response in
         MixpanelLogger.error(message: "Failed to fetch flags. Reason: \(reason)")
-        self?._completeFetch(success: false)
+        guard let self = self else { return }
+        if self.isStaleFetch(generation: generation) {
+          MixpanelLogger.debug(
+            message: "Discarding flag fetch failure from stale generation \(generation).")
+          return
+        }
+        // We've definitively failed to get a network response. Persisted values stay in
+        // place since we don't touch them on failure — `loadedBlobPersistedAt` also stays
+        // set, which means the next NetworkFirst async lookup will retry the network (the
+        // gate is "still serving from persistence," not "the very first call"). Per the
+        // spec, NetworkFirst retries until one fetch succeeds.
+        self._completeFetch(success: false)
       },
       success: { [weak self] (flagsResponse, response) in
         MixpanelLogger.info(message: "Successfully fetched flags.  \(flagsResponse)")
         guard let self = self else { return }
+        if self.isStaleFetch(generation: generation) {
+          MixpanelLogger.debug(
+            message: "Discarding flag fetch result from stale generation \(generation).")
+          return
+        }
         let fetchEndTime = Date()
 
         // Merge flags and update state with write lock
@@ -704,10 +954,43 @@ class FeatureFlagManager: MixpanelFlags {
           responsePendingEvents: flagsResponse.pendingFirstTimeEvents
         )
 
+        // Stamp every variant with .network before publishing. mergeFlags may have preserved
+        // some prior-flag entries (activated first-time events) — those came from a prior
+        // network response too, so .network is correct for them as well.
+        let stampedFlags = mergedFlags.mapValues { $0.withSource(.network) }
+
+        // Snapshot the persistence-policy decision OUTSIDE the lock to avoid calling into
+        // the delegate (`getOptions()`) while holding the write lock — keeps the lock
+        // surface narrow and avoids potential deadlocks if a future delegate impl ever takes
+        // a lock of its own.
+        let shouldPersist = self.shouldPersistVariants()
+
+        // Single critical section: gate the in-memory write AND the on-disk persistence
+        // write on the same generation check. Without this, a reset() between the lock
+        // release and the disk write could leak prior-user variants onto disk under the
+        // prior-user distinctId (the next session's distinctId check would catch it, but
+        // the disk write is wasted I/O and confusing in logs).
+        var didApplyResults = false
         self.flagsLock.write {
-          self.flags = mergedFlags
+          // Re-check generation under the lock in case reset() raced between the check above
+          // and the write. If stale, drop the result without touching state or completing.
+          guard generation == self.fetchGeneration else { return }
+          self.flags = stampedFlags
+          self.loadedBlobPersistedAt = nil
           self.pendingFirstTimeEvents = mergedPendingEvents
           self.pendingFirstTimeEventNames = mergedPendingEventNames
+          // Reset the per-flag $experiment_started dedup window. Without this, a flag whose
+          // variant value changed between fetches (e.g. persistence-loaded "control" →
+          // network "treatment", or a re-fetch under a new server-side rule) would serve the
+          // new value but silently skip tracking — analytics would still show the prior
+          // exposure. Clearing here means each successful fetch gets a fresh shot at firing
+          // $experiment_started for any accessed flag. Trade-off: occasional duplicate
+          // events when the variant didn't actually change across fetches; we accept that
+          // for analytics correctness.
+          self.trackedFeatures.removeAll()
+          // Successful fetch overwrites the persisted-blob marker — derived helpers like
+          // `isNetworkFirstAwaitingFetch()` and `loadedFlagsAreStale()` correctly flip to
+          // false on the next read since `loadedBlobPersistedAt` is now nil (cleared above).
 
           // Calculate timing metrics
           if let startTime = self.fetchStartTime {
@@ -717,11 +1000,194 @@ class FeatureFlagManager: MixpanelFlags {
           self.timeLastFetched = fetchEndTime
 
           MixpanelLogger.debug(message: "Flags updated: \(self.flags ?? [:]), Pending events: \(self.pendingFirstTimeEvents.count)")
+          didApplyResults = true
+        }
+
+        // Persist the raw response so future sessions / failed fetches can fall back. Writes
+        // are gated by the lookup policy via `shouldPersist` (true for `.persistenceUntilNetworkSuccess`
+        // and `.networkFirst`, false for `.networkOnly`). Skipped when `didApplyResults` is
+        // false because that means the generation check failed (reset raced ahead) and we
+        // shouldn't overwrite the persisted blob with prior-user data. UserDefaults I/O is
+        // kept outside the lock since it can block.
+        if didApplyResults,
+           shouldPersist,
+           let rawData = rawHolder.data,
+           let rawString = String(data: rawData, encoding: .utf8) {
+          let blob = FlagsPersistenceBlob(
+            persistedAt: fetchEndTime,
+            distinctId: distinctIdAtDispatch,
+            response: rawString
+          )
+          MixpanelPersistence.saveFlagsPersistence(blob, instanceName: self.instanceName)
         }
 
         self._completeFetch(success: true)
       }
     )
+  }
+
+  /// Internal reference-type holder so the response-parser closure can hand the raw response
+  /// bytes back to the success closure for persistence. Class (not struct) so the captured
+  /// reference shares state across closure invocations.
+  private final class RawDataHolder {
+    var data: Data?
+  }
+
+  // MARK: - Persistence Helpers
+
+  /// Loads the on-disk persistence blob, validates distinctId + TTL, parses, stamps every
+  /// variant with `.persistence(persistedAt:)`, and writes into `flags`. Both
+  /// `.persistenceUntilNetworkSuccess` and `.networkFirst` populate `flags` directly so sync
+  /// lookups and `areFlagsReady()` reflect persisted values. The difference between policies
+  /// is enforced at async-lookup time via `isNetworkFirstAwaitingFetch()`: NetworkFirst gates
+  /// async lookups on a successful network response (i.e., until `loadedBlobPersistedAt` is
+  /// cleared by a successful fetch), per the ERD.
+  ///
+  /// Runs on the tracking queue (called from init).
+  internal func _loadPersistedVariants() {
+    guard let blob = MixpanelPersistence.loadFlagsPersistence(instanceName: self.instanceName) else {
+      return
+    }
+
+    // distinctId check — refuse to serve another user's variants under this user's identity.
+    // Wipe the stale blob so it doesn't sit on disk for someone who no longer uses this device.
+    // This is a parallel of the active "distinctId changes" paths (identify/reset/optOut)
+    // applied to the cross-session case where the change happened while the app was killed.
+    let delegate = self.delegate
+    let currentDistinctId = delegate?.getDistinctId() ?? ""
+    if blob.distinctId != currentDistinctId {
+      MixpanelLogger.debug(message: "Persisted flags belong to a different distinct_id; clearing.")
+      MixpanelPersistence.deleteFlagsPersistence(instanceName: self.instanceName)
+      return
+    }
+
+    // TTL check — discard expired entries. `persistenceTtlSeconds()` returns nil under
+    // `.networkOnly` (we wouldn't be here in that case) and otherwise a positive TTL
+    // (non-positive values are filtered out at policy resolution).
+    if let ttl = self.persistenceTtlSeconds(),
+       Date().timeIntervalSince(blob.persistedAt) > ttl {
+      MixpanelLogger.debug(message: "Persisted flags expired; ignoring.")
+      return
+    }
+
+    // Parse the raw response. The persistence layer self-heals structural failures (bad
+    // JSON envelope) on read, but a structurally-valid blob with an unparseable `response`
+    // string would stick on disk and fail every cold-start. Wipe it here too so the next
+    // successful fetch gets a clean slate.
+    guard let responseData = blob.response.data(using: .utf8),
+          let parsed = try? JSONDecoder().decode(FlagsResponse.self, from: responseData) else {
+      MixpanelLogger.warn(message: "Failed to parse persisted flags response; clearing.")
+      MixpanelPersistence.deleteFlagsPersistence(instanceName: self.instanceName)
+      return
+    }
+
+    let parsedFlags = parsed.flags ?? [:]
+    let stamped = parsedFlags.mapValues { $0.withSource(.persistence(persistedAt: blob.persistedAt)) }
+
+    // Build pending-event lookups so first-time event matching keeps working from
+    // persistence.
+    var pendingEvents: [String: PendingFirstTimeEvent] = [:]
+    var pendingEventNames: Set<String> = []
+    if let events = parsed.pendingFirstTimeEvents {
+      for event in events {
+        let key = self.getPendingEventKey(event.flagKey, event.firstTimeEventHash)
+        pendingEvents[key] = event
+        pendingEventNames.insert(event.eventName)
+      }
+    }
+
+    flagsLock.write {
+      // Defer to network values if a fetch already raced ahead of us between init and now.
+      guard self.flags == nil else { return }
+      self.flags = stamped
+      self.loadedBlobPersistedAt = blob.persistedAt
+      self.pendingFirstTimeEvents = pendingEvents
+      self.pendingFirstTimeEventNames = pendingEventNames
+      // For NetworkFirst, async lookups must wait for a successful network response.
+      // `isNetworkFirstAwaitingFetch()` derives that gate from the policy +
+      // `loadedBlobPersistedAt` — no separate flag to keep in sync.
+      MixpanelLogger.debug(message: "Loaded \(stamped.count) persisted variants into memory.")
+    }
+  }
+
+  /// Returns `true` when the policy is `.networkFirst` and we're still serving from the
+  /// persisted blob (no successful network fetch has overwritten it yet). Async lookups
+  /// gate on this to honor the NetworkFirst spec ("wait on network call, only serve
+  /// persisted values if it fails") while still letting sync lookups + `areFlagsReady()`
+  /// see the persisted values.
+  ///
+  /// Stays true across failed fetches so each subsequent async lookup re-attempts the
+  /// network until one succeeds, matching the pre-persistence behavior where a `nil`
+  /// `flags` caused getVariant to retry indefinitely.
+  ///
+  /// Caller must hold `flagsLock`.
+  private func isNetworkFirstAwaitingFetch() -> Bool {
+    guard case .networkFirst = self.resolvedLookupPolicy else { return false }
+    return self.loadedBlobPersistedAt != nil
+  }
+
+  /// Returns the configured TTL in seconds, or `nil` for `.networkOnly` (no expiry check).
+  /// Reads from `resolvedLookupPolicy`, so non-positive TTLs have already been collapsed to
+  /// `.networkOnly` at init — anything returned here is `> 0`.
+  private func persistenceTtlSeconds() -> TimeInterval? {
+    switch self.resolvedLookupPolicy {
+    case .networkOnly:
+      return nil
+    case .persistenceUntilNetworkSuccess(let ttl), .networkFirst(let ttl):
+      return ttl
+    }
+  }
+
+  /// Whether successful fetches should be persisted to disk. Derived from the resolved
+  /// policy: `.persistenceUntilNetworkSuccess` and `.networkFirst` write to disk;
+  /// `.networkOnly` doesn't.
+  private func shouldPersistVariants() -> Bool {
+    switch self.resolvedLookupPolicy {
+    case .networkOnly:
+      return false
+    case .persistenceUntilNetworkSuccess, .networkFirst:
+      return true
+    }
+  }
+
+  /// Returns true if the loaded persisted blob is past TTL. Uses `loadedBlobPersistedAt`
+  /// rather than inspecting variant sources so the check works uniformly whether the blob
+  /// has flags in it or is empty (a previous session may have persisted a no-flags
+  /// response — we still want TTL to govern when to refresh).
+  ///
+  /// Returns false when no persisted blob is in memory or under `.networkOnly`.
+  ///
+  /// Caller must hold `flagsLock`.
+  private func loadedFlagsAreStale() -> Bool {
+    guard let persistedAt = self.loadedBlobPersistedAt,
+          let ttl = self.persistenceTtlSeconds() else { return false }
+    return Date().timeIntervalSince(persistedAt) > ttl
+  }
+
+  /// Returns true if the variant was loaded from the persistence layer and has aged past
+  /// the configured TTL. `.network` and `.fallback` variants are never expired — including
+  /// activated first-time-event variants, which are deliberately stamped `.network` to
+  /// survive blob expiration.
+  ///
+  /// Get-paths use this to skip stale persisted values mid-session — once a variant's TTL
+  /// elapses while loaded in memory, subsequent `getVariant` calls return the developer
+  /// fallback instead of the stale value. The on-disk blob is intentionally NOT deleted
+  /// (per the "don't clear if TTL has expired on getVariant" rule); the next successful
+  /// network fetch overwrites it.
+  private func isVariantExpired(_ variant: MixpanelFlagVariant) -> Bool {
+    guard case .persistence(let persistedAt) = variant.source else { return false }
+    guard let ttl = self.persistenceTtlSeconds() else { return false }
+    return Date().timeIntervalSince(persistedAt) > ttl
+  }
+
+  /// Returns true if the captured `generation` no longer matches the current generation,
+  /// meaning the fetch was started before a `reset()` and its result should be discarded.
+  private func isStaleFetch(generation: Int) -> Bool {
+    var current = 0
+    flagsLock.read {
+      current = self.fetchGeneration
+    }
+    return current != generation
   }
 
   // Centralized fetch completion logic
@@ -867,6 +1333,24 @@ class FeatureFlagManager: MixpanelFlags {
       properties["$is_qa_tester"] = isQATester
     }
 
+    // Source tracking properties. `$variant_source` is sent for every served variant
+    // (`.network` or `.persistence`) to match the JS SDK. `$persisted_at_in_ms` and
+    // `$ttl_in_ms` are persistence-only — the timestamp is the raw epoch millis the blob
+    // was written, sent without any delta calculation so the server can derive what it
+    // needs. Tracking only fires for served variants, so `.fallback` won't appear here.
+    switch variant.source {
+    case .network:
+      properties["$variant_source"] = "network"
+    case .persistence(let persistedAt):
+      properties["$variant_source"] = "persistence"
+      properties["$persisted_at_in_ms"] = Int(persistedAt.timeIntervalSince1970 * 1000)
+      if let ttl = self.persistenceTtlSeconds() {
+        properties["$ttl_in_ms"] = Int(ttl * 1000)
+      }
+    case .fallback:
+      break
+    }
+
     // Dispatch delegate call asynchronously to main thread for safety
     DispatchQueue.main.async {
       delegate.track(event: "$experiment_started", properties: properties)
@@ -982,11 +1466,15 @@ class FeatureFlagManager: MixpanelFlags {
                 if !activatedFirstTimeEvents.contains(eventKey) {
                     // We won the race - activate this event
                     activatedFirstTimeEvents.insert(eventKey)
-                    
+
                     if flags == nil {
                         flags = [:]
                     }
-                    flags![flagKey] = pendingEvent.pendingVariant
+                    // Stamp NETWORK source — the activated variant came from the prior /flags/
+                    // response. Activations are deliberately not written to disk; the
+                    // persistence layer stays a passive snapshot of the wire response so it
+                    // can be re-loaded verbatim.
+                    flags![flagKey] = pendingEvent.pendingVariant.withSource(.network)
                     shouldActivate = true
                 }
             }

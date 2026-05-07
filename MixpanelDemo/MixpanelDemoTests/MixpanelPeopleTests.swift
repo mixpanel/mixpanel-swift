@@ -72,6 +72,7 @@ class MixpanelPeopleTests: MixpanelBaseTests {
   func testDropUnidentifiedPeopleRecords() {
     let testMixpanel = Mixpanel.initialize(
       token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
+    waitForAsyncTasks()
     for i in 0..<505 {
       testMixpanel.people.set(property: "i", to: i)
     }

@@ -17,7 +17,7 @@
     <a title="MixpanelFlags Protocol Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 6.0.0 Docs</a> (68% documented)</p>
+        <p><a href="../index.html">Mixpanel 6.3.0 Docs</a> (68% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Fketan%2FDocuments%2FMixpanel-GitHub%2Fmixpanel-swift%2Fbuild"><img src="../img/dash.png" alt="Dash"/>Install in Dash</a></p>
         <div class="header-right">
@@ -254,6 +254,34 @@ such as tracking. It is declared <code>weak</code> to prevent retain cycles.</p>
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:8Mixpanel0A5FlagsP04loadB010completionyySbcSg_tF"></a>
+                    <a name="//apple_ref/swift/Method/loadFlags(completion:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A5FlagsP04loadB010completionyySbcSg_tF">loadFlags(completion:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Initiates the loading or refreshing of flags with a completion callback.
+The completion handler is called with <code>true</code> on success and <code>false</code> on failure.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">loadFlags</span><span class="p">(</span><span class="nv">completion</span><span class="p">:</span> <span class="p">((</span><span class="kt">Bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:8Mixpanel0A5FlagsP03areB5ReadySbyF"></a>
                     <a name="//apple_ref/swift/Method/areFlagsReady()" class="dashAnchor"></a>
                     <a class="token" href="#/s:8Mixpanel0A5FlagsP03areB5ReadySbyF">areFlagsReady()</a>
@@ -300,6 +328,16 @@ and are available for querying.</p>
 If the feature flag is found and flags are ready, its variant is returned.
 Otherwise, the provided <code>fallback</code> <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code> is returned.
 This method will also trigger any necessary tracking logic for the accessed flag.</p>
+<div class="aside aside-important">
+    <p class="aside-title">Important</p>
+    <p>This method may block the calling thread until the value can be retrieved.
+It is NOT recommended to call this from the main UI thread.
+If flags are not ready (<code><a href="../Protocols/MixpanelFlags.html#/s:8Mixpanel0A5FlagsP03areB5ReadySbyF">areFlagsReady()</a></code> is false), this method returns the <code>fallback</code>
+value, but it may still block while waiting for queued tracking or activation work to complete.
+If called immediately after track(), variants may not be activated yet due to a
+race condition as track is executed asynchronously. Use <code>getVariant</code> instead.</p>
+
+</div>
 
                       </div>
                       <div class="declaration">
@@ -444,6 +482,16 @@ The completion handler is typically invoked on the main thread.</p>
                         <p>Synchronously retrieves the underlying value of a feature flag.
 This is a convenience method that extracts the <code>value</code> property from the <code><a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a></code>
 obtained via <code>getVariantSync</code>.</p>
+<div class="aside aside-important">
+    <p class="aside-title">Important</p>
+    <p>This method may block the calling thread until the value can be retrieved.
+It is NOT recommended to call this from the main UI thread.
+If flags are not ready (<code><a href="../Protocols/MixpanelFlags.html#/s:8Mixpanel0A5FlagsP03areB5ReadySbyF">areFlagsReady()</a></code> is false), this method returns the <code>fallbackValue</code>,
+but it may still block while waiting for queued tracking or activation work to complete.
+If called immediately after track(), variants may not be activated yet due to a
+race condition as track is executed asynchronously. Use <code>getVariantValue</code> instead.</p>
+
+</div>
 
                       </div>
                       <div class="declaration">
@@ -587,6 +635,14 @@ The completion handler is typically invoked on the main thread.</p>
 This typically involves retrieving the flag&rsquo;s value and evaluating it as a boolean.
 The exact logic for what constitutes &ldquo;enabled&rdquo; (e.g., <code>true</code>, non-nil, a specific string)
 should be defined by the implementing class.</p>
+<div class="aside aside-important">
+    <p class="aside-title">Important</p>
+    <p>This method may block the calling thread until the value can be retrieved.
+It is NOT recommended to call this from the main UI thread.
+If flags are not ready (<code><a href="../Protocols/MixpanelFlags.html#/s:8Mixpanel0A5FlagsP03areB5ReadySbyF">areFlagsReady()</a></code> is false), this method returns the <code>fallbackValue</code>,
+but it may still block while waiting for queued tracking or activation work to complete.</p>
+
+</div>
 
                       </div>
                       <div class="declaration">
@@ -728,6 +784,17 @@ The completion handler is typically invoked on the main thread.</p>
                         <p>Synchronously retrieves all currently fetched feature flag variants.
 Returns an empty dictionary if flags have not been loaded yet.
 This method does not trigger tracking for any flags.</p>
+<div class="aside aside-important">
+    <p class="aside-title">Important</p>
+    <p>This method may block the calling thread until the value can be retrieved.
+It is NOT recommended to call this from the main UI thread.
+If flags are not ready (<code><a href="../Protocols/MixpanelFlags.html#/s:8Mixpanel0A5FlagsP03areB5ReadySbyF">areFlagsReady()</a></code> is false), it returns an empty dictionary
+immediately without fetching, but it may still block while waiting for queued tracking
+or activation work to complete.
+If called immediately after track(), variants may not be activated yet due to a
+race condition as track is executed asynchronously. Use <code>getAllVariants</code> instead.</p>
+
+</div>
 
                       </div>
                       <div class="declaration">
@@ -797,12 +864,70 @@ The completion handler is typically invoked on the main thread.</p>
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A5FlagsP10setContext_10completionySDySSypG_yyctF"></a>
+                    <a name="//apple_ref/swift/Method/setContext(_:completion:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A5FlagsP10setContext_10completionySDySSypG_yyctF">setContext(_:<wbr>completion:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Replaces the current custom flag evaluation context entirely and triggers a flag re-fetch.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">setContext</span><span class="p">(</span><span class="n">_</span> <span class="nv">context</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">],</span> <span class="nv">completion</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>context</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The new context dictionary to use for flag evaluation.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>completion</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A closure called when the fetch completes (success or failure).</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-03-17)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-04-17)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

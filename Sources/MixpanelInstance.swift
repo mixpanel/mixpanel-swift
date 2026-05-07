@@ -225,7 +225,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
   /// The minimum session duration (ms) that is tracked in automatic events.
   /// The default value is 10000 (10 seconds).
-  #if os(iOS) || os(tvOS) || os(visionOS)
+  #if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
     open var minimumSessionDuration: UInt64 {
       get {
         return automaticEvents.minimumSessionDuration
@@ -264,7 +264,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   let sessionMetadata: SessionMetadata
   let flushInstance: Flush
   let trackInstance: Track
-  #if os(iOS) || os(tvOS) || os(visionOS)
+  #if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
     let automaticEvents = AutomaticEvents()
   #endif
   private let registerSuperPropertiesNotificationName = Notification.Name(
@@ -391,7 +391,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       instanceName: self.name,
       lock: self.readWriteLock,
       metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
-    flags = FeatureFlagManager(serverURL: self.serverURL)
+    flags = FeatureFlagManager(serverURL: self.serverURL, trackingQueue: self.trackingQueue)
     trackInstance.mixpanelInstance = self
     flags.delegate = self
     #if os(iOS) && !targetEnvironment(macCatalyst)
@@ -450,10 +450,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       registerSuperProperties(superProperties)
     }
 
-    #if os(iOS) || os(tvOS) || os(visionOS)
+    #if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
       if !MixpanelInstance.isiOSAppExtension() && trackAutomaticEvents {
         automaticEvents.delegate = self
-        automaticEvents.initializeEvents(instanceName: self.name)
+        // Defer automatic events initialization to the next run loop iteration
+        // to avoid interfering with SwiftUI's accent color setup when
+        // Mixpanel.initialize() is called from a SwiftUI App's init().
+        // See: https://github.com/mixpanel/mixpanel-swift/issues/522
+        DispatchQueue.main.async { [weak self] in
+          guard let self = self else { return }
+          self.automaticEvents.initializeEvents(instanceName: self.name)
+        }
       }
     #endif
     if self.options.featureFlagOptions.prefetchFlags {

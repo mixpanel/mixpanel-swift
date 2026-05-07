@@ -26,8 +26,11 @@ class AutomaticProperties {
       // Ensure UIScreen is accessed on main thread, regardless of which thread
       // triggers this lazy initializer. Fixes SwiftUI accent color override issue.
       // See: https://github.com/mixpanel/mixpanel-swift/issues/522
-      let screenSize = DispatchQueue.main.sync {
-        UIScreen.main.bounds.size
+      let screenSize: CGSize
+      if Thread.isMainThread {
+        screenSize = UIScreen.main.bounds.size
+      } else {
+        screenSize = DispatchQueue.main.sync { UIScreen.main.bounds.size }
       }
       p["$screen_height"] = Int(screenSize.height)
       p["$screen_width"] = Int(screenSize.width)
@@ -47,8 +50,11 @@ class AutomaticProperties {
       #endif
     #elseif os(macOS)
       // Ensure NSScreen is accessed on main thread
-      let screenSize = DispatchQueue.main.sync {
-        NSScreen.main?.frame.size
+      let screenSize: CGSize?
+      if Thread.isMainThread {
+        screenSize = NSScreen.main?.frame.size
+      } else {
+        screenSize = DispatchQueue.main.sync { NSScreen.main?.frame.size }
       }
       if let screenSize = screenSize {
         p["$screen_height"] = Int(screenSize.height)

@@ -292,7 +292,7 @@ class FeatureFlagManagerTests: XCTestCase {
     mockDelegate = MockFeatureFlagDelegate()
 
     // Use MockFeatureFlagManager to prevent real network calls
-      let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: mockDelegate)
+      let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
     // Configure default simulation - successful fetch with sample flags
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
     mockManager.shouldSimulateNetworkDelay = true
@@ -1317,7 +1317,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testFetchWithNoDelegate() {
     // Create manager with no delegate
-      let noDelegate = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: nil)
+      let noDelegate = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: nil)
 
     // Try to load flags
     noDelegate.loadFlags()
@@ -1520,7 +1520,7 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: testAnonymousId
     )
 
-      let manager = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: mockDelegate)
+      let manager = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
 
     // Verify the delegate methods return expected values
     XCTAssertEqual(mockDelegate.getDistinctId(), testDistinctId)
@@ -1541,7 +1541,7 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: nil
     )
 
-      let manager = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: mockDelegate)
+      let manager = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
 
     // Verify the delegate methods return expected values
     XCTAssertEqual(mockDelegate.getDistinctId(), testDistinctId)
@@ -1922,7 +1922,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testGETRequestFormat() {
     // Use a fresh MockFeatureFlagManager with request validation enabled
-      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: mockDelegate)
+      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
     mockManager.requestValidationEnabled = true
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
@@ -1987,7 +1987,7 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: "custom-device-id"
     )
 
-      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: customDelegate)
+      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: customDelegate)
     mockManager.requestValidationEnabled = true
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
@@ -2030,7 +2030,7 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: nil
     )
 
-      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: nilAnonymousDelegate)
+      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: nilAnonymousDelegate)
     mockManager.requestValidationEnabled = true
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
@@ -2540,7 +2540,7 @@ class FeatureFlagManagerTests: XCTestCase {
         featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: true)
       )
     )
-      let mock = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: delegate)
+      let mock = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: delegate)
     mock.simulatedFetchResult = (success: true, flags: sampleFlags)
 
     // Call loadFlags() (which prefetchFlags: true would trigger during init)
@@ -2566,7 +2566,7 @@ class FeatureFlagManagerTests: XCTestCase {
         featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
       )
     )
-      let mock = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: delegate)
+      let mock = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: delegate)
     mock.simulatedFetchResult = (success: true, flags: sampleFlags)
 
     // Do NOT call loadFlags() - simulating prefetchFlags: false behavior
@@ -2590,7 +2590,7 @@ class FeatureFlagManagerTests: XCTestCase {
       )
     )
 
-      let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: delegate)
+      let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: delegate)
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
     // Manually load flags (simulating what user would do after identify)

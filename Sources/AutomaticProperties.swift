@@ -19,9 +19,6 @@ import Foundation
 class AutomaticProperties {
   static let automaticPropertiesLock = ReadWriteLock(label: "automaticPropertiesLock")
 
-  // Track whether screen size has been captured to ensure idempotency
-  private static var screenSizeCaptured = false
-
   static var properties: InternalProperties = {
     var p = InternalProperties()
 
@@ -129,9 +126,6 @@ class AutomaticProperties {
 
     // Now update properties dictionary under lock (with already-captured values)
     automaticPropertiesLock.write {
-      // Ensure we only capture screen size once (idempotency)
-      guard !screenSizeCaptured else { return }
-
       #if os(iOS) || os(tvOS)
         properties["$screen_height"] = height
         properties["$screen_width"] = width
@@ -141,8 +135,6 @@ class AutomaticProperties {
           properties["$screen_width"] = width
         }
       #endif
-
-      screenSizeCaptured = true
     }
   }
 

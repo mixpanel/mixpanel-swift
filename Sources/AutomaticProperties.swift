@@ -94,41 +94,36 @@ class AutomaticProperties {
   ///
   /// Thread safety:
   /// - Dispatches to main thread asynchronously
-  class func setUIProperties() {
+  static func setUIProperties() {
     #if os(iOS) || os(tvOS) || os(macOS)
-      DispatchQueue.main.async {
-          captureScreenSizeOnMainThread()
-      }
-    #endif
-  }
+    DispatchQueue.main.async {
+        // IMPORTANT: Capture screen size on main thread BEFORE entering write lock.
+        // The write lock executes closures on its internal queue (background thread),
+        // so we must access UIScreen/NSScreen here while still on main thread.
+        #if os(iOS) || os(tvOS)
+          let screenSize = UIScreen.main.bounds.size
+          let height = Int(screenSize.height)
+          let width = Int(screenSize.width)
+        #elseif os(macOS)
+          let screenSize = NSScreen.main?.frame.size
+          let height = screenSize.map { Int($0.height) }
+          let width = screenSize.map { Int($0.width) }
+        #endif
 
-  /// Internal method to capture screen size. Must be called on main thread.
-  private static func captureScreenSizeOnMainThread() {
-    // IMPORTANT: Capture screen size on main thread BEFORE entering write lock.
-    // The write lock executes closures on its internal queue (background thread),
-    // so we must access UIScreen/NSScreen here while still on main thread.
-    #if os(iOS) || os(tvOS)
-      let screenSize = UIScreen.main.bounds.size
-      let height = Int(screenSize.height)
-      let width = Int(screenSize.width)
-    #elseif os(macOS)
-      let screenSize = NSScreen.main?.frame.size
-      let height = screenSize.map { Int($0.height) }
-      let width = screenSize.map { Int($0.width) }
-    #endif
-
-    // Now update properties dictionary under lock (with already-captured values)
-    automaticPropertiesLock.write {
-      #if os(iOS) || os(tvOS)
-        properties["$screen_height"] = height
-        properties["$screen_width"] = width
-      #elseif os(macOS)
-        if let height = height, let width = width {
-          properties["$screen_height"] = height
-          properties["$screen_width"] = width
+        // Now update properties dictionary under lock (with already-captured values)
+        automaticPropertiesLock.write {
+          #if os(iOS) || os(tvOS)
+            properties["$screen_height"] = height
+            properties["$screen_width"] = width
+          #elseif os(macOS)
+            if let height = height, let width = width {
+              properties["$screen_height"] = height
+              properties["$screen_width"] = width
+            }
+          #endif
         }
-      #endif
     }
+    #endif
   }
 
   class func deviceModel() -> String {

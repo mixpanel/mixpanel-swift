@@ -56,6 +56,9 @@ class Track {
     let epochMilliseconds = round(epochInterval * 1000)
     let eventStartTime = timedEvents[ev] as? Double
     var p = InternalProperties()
+    #if os(iOS) || os(tvOS) || os(macOS)
+      AutomaticProperties.ensureScreenSize()
+    #endif
     AutomaticProperties.automaticPropertiesLock.read {
       p += AutomaticProperties.properties
     }

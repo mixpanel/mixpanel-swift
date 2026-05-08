@@ -23,12 +23,6 @@ class AutomaticProperties {
     var p = InternalProperties()
 
     #if os(iOS) || os(tvOS)
-      var screenSize: CGSize? = nil
-      screenSize = UIScreen.main.bounds.size
-      if let screenSize = screenSize {
-        p["$screen_height"] = Int(screenSize.height)
-        p["$screen_width"] = Int(screenSize.width)
-      }
       #if targetEnvironment(macCatalyst)
         p["$os"] = "macOS"
         p["$os_version"] = ProcessInfo.processInfo.operatingSystemVersionString
@@ -44,10 +38,6 @@ class AutomaticProperties {
         }
       #endif
     #elseif os(macOS)
-      if let screenSize = NSScreen.main?.frame.size {
-        p["$screen_height"] = Int(screenSize.height)
-        p["$screen_width"] = Int(screenSize.width)
-      }
       p["$os"] = "macOS"
       p["$os_version"] = ProcessInfo.processInfo.operatingSystemVersionString
     #elseif os(watchOS)
@@ -93,6 +83,38 @@ class AutomaticProperties {
 
     return p
   }()
+
+  #if os(iOS) || os(tvOS) || os(macOS)
+    private static var screenSizeCaptured = false
+
+    static func ensureScreenSize() {
+      guard !screenSizeCaptured else { return }
+      screenSizeCaptured = true
+
+      var height = 0
+      var width = 0
+
+      #if os(iOS) || os(tvOS)
+        DispatchQueue.main.sync {
+          let screenSize = UIScreen.main.bounds.size
+          height = Int(screenSize.height)
+          width = Int(screenSize.width)
+        }
+      #elseif os(macOS)
+        DispatchQueue.main.sync {
+          if let screenSize = NSScreen.main?.frame.size {
+            height = Int(screenSize.height)
+            width = Int(screenSize.width)
+          }
+        }
+      #endif
+
+      automaticPropertiesLock.write {
+        properties["$screen_height"] = height
+        properties["$screen_width"] = width
+      }
+    }
+  #endif
 
   class func deviceModel() -> String {
     var modelCode: String = "Unknown"

@@ -23,12 +23,9 @@ class AutomaticProperties {
     var p = InternalProperties()
 
     #if os(iOS) || os(tvOS)
-      var screenSize: CGSize? = nil
-      screenSize = UIScreen.main.bounds.size
-      if let screenSize = screenSize {
-        p["$screen_height"] = Int(screenSize.height)
-        p["$screen_width"] = Int(screenSize.width)
-      }
+      // Screen size is captured via setUIProperties() called during SDK initialization.
+      // See: https://github.com/mixpanel/mixpanel-swift/issues/522
+
       #if targetEnvironment(macCatalyst)
         p["$os"] = "macOS"
         p["$os_version"] = ProcessInfo.processInfo.operatingSystemVersionString
@@ -44,13 +41,11 @@ class AutomaticProperties {
         }
       #endif
     #elseif os(macOS)
-      if let screenSize = NSScreen.main?.frame.size {
-        p["$screen_height"] = Int(screenSize.height)
-        p["$screen_width"] = Int(screenSize.width)
-      }
+      // Screen size is captured via setUIProperties() called during SDK initialization
       p["$os"] = "macOS"
       p["$os_version"] = ProcessInfo.processInfo.operatingSystemVersionString
     #elseif os(watchOS)
+      // WatchKit APIs are thread-safe, capture screen size immediately
       let watchDevice = WKInterfaceDevice.current()
       p["$os"] = watchDevice.systemName
       p["$os_version"] = watchDevice.systemVersion
@@ -93,6 +88,43 @@ class AutomaticProperties {
 
     return p
   }()
+
+  /// Captures UI-related properties (screen size) that require main thread access.
+  /// Should be called during SDK initialization.
+  ///
+  /// Thread safety:
+  /// - Dispatches to main thread asynchronously
+  static func setUIProperties() {
+    #if os(iOS) || os(tvOS) || os(macOS)
+    DispatchQueue.main.async {
+        // IMPORTANT: Capture screen size on main thread BEFORE entering write lock.
+        // The write lock executes closures on its internal queue (background thread),
+        // so we must access UIScreen/NSScreen here while still on main thread.
+        #if os(iOS) || os(tvOS)
+          let screenSize = UIScreen.main.bounds.size
+          let height = Int(screenSize.height)
+          let width = Int(screenSize.width)
+        #elseif os(macOS)
+          let screenSize = NSScreen.main?.frame.size
+          let height = screenSize.map { Int($0.height) }
+          let width = screenSize.map { Int($0.width) }
+        #endif
+
+        // Now update properties dictionary under lock (with already-captured values)
+        automaticPropertiesLock.write {
+          #if os(iOS) || os(tvOS)
+            properties["$screen_height"] = height
+            properties["$screen_width"] = width
+          #elseif os(macOS)
+            if let height = height, let width = width {
+              properties["$screen_height"] = height
+              properties["$screen_width"] = width
+            }
+          #endif
+        }
+    }
+    #endif
+  }
 
   class func deviceModel() -> String {
     var modelCode: String = "Unknown"

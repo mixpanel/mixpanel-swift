@@ -47,7 +47,45 @@ struct MixpanelUserDefaultsKeys {
   static let userID = "MPUserId"
   static let alias = "MPAlias"
   static let hadPersistedDistinctId = "MPHadPersistedDistinctId"
-  static let flags = "MPFlags"
+  static let flagsPersistence = "MPFlagsPersistence"
+}
+
+/// On-disk persistence blob for the most recent successful `/flags/` response.
+///
+/// Stores the **raw response JSON string** (not parsed variants) so that the network parser
+/// stays the single source of truth. Pending first-time events ride along for free, and
+/// shape changes self-heal — a parse failure on read just clears the blob and the next
+/// successful fetch overwrites with the current shape.
+struct FlagsPersistenceBlob {
+  /// Time the blob was originally written.
+  let persistedAt: Date
+  /// The distinctId the variants in `response` were evaluated under. Validated on read so a
+  /// freshly-identified user can't be served the prior user's variants.
+  let distinctId: String
+  /// Raw JSON string returned by the `/flags/` endpoint. Re-parsed on read.
+  let response: String
+
+  func toDictionary() -> [String: Any] {
+    return [
+      "persistedAt": Int64(persistedAt.timeIntervalSince1970 * 1000),
+      "distinctId": distinctId,
+      "response": response,
+    ]
+  }
+
+  static func from(dictionary: [String: Any]) -> FlagsPersistenceBlob? {
+    guard
+      let persistedAtMillis = dictionary["persistedAt"] as? Int64
+        ?? (dictionary["persistedAt"] as? NSNumber).map({ $0.int64Value }),
+      let distinctId = dictionary["distinctId"] as? String,
+      let response = dictionary["response"] as? String
+    else { return nil }
+    return FlagsPersistenceBlob(
+      persistedAt: Date(timeIntervalSince1970: TimeInterval(persistedAtMillis) / 1000.0),
+      distinctId: distinctId,
+      response: response
+    )
+  }
 }
 
 class MixpanelPersistence {
@@ -211,39 +249,63 @@ class MixpanelPersistence {
     }
   }
 
-  /// -- Feature Flags --
-  /// NOT currently used
+  // -- Feature Flag Variant Persistence --
+  // Wire format: a JSON-serialized dictionary stored under a single per-instance key in the
+  // shared "Mixpanel" UserDefaults suite. See `FlagsPersistenceBlob` for layout.
 
-  static func saveFlags(flags: InternalProperties, instanceName: String) {
+  static func saveFlagsPersistence(_ blob: FlagsPersistenceBlob, instanceName: String) {
     guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
       return
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
     do {
-      let flagsData = try NSKeyedArchiver.archivedData(
-        withRootObject: flags, requiringSecureCoding: false)
-      defaults.set(flagsData, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.flags)")
-      defaults.synchronize()
+      let data = try JSONSerialization.data(withJSONObject: blob.toDictionary(), options: [])
+      defaults.set(data, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.flagsPersistence)")
     } catch {
-      MixpanelLogger.warn(message: "Failed to archive flags")
+      MixpanelLogger.warn(message: "Failed to serialize flags persistence blob: \(error)")
     }
   }
 
-  static func loadFlags(instanceName: String) -> InternalProperties {
+  /// Reads and validates the persisted flags blob.
+  ///
+  /// Returns `nil` when nothing is persisted or the blob is unparseable. **Self-healing:**
+  /// malformed blobs are deleted as a side effect so the next successful fetch overwrites
+  /// with the current shape — no version field needed.
+  ///
+  /// distinctId and TTL validation are intentionally left to the caller (the manager) so
+  /// the persistence layer stays format-only and the manager can apply its own policy.
+  static func loadFlagsPersistence(instanceName: String) -> FlagsPersistenceBlob? {
     guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
-      return InternalProperties()
+      return nil
     }
     let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
-    guard let flags = defaults.data(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.flags)") else {
-      return InternalProperties()
+    let key = "\(prefix)\(MixpanelUserDefaultsKeys.flagsPersistence)"
+    guard let data = defaults.data(forKey: key) else {
+      return nil
     }
     do {
-      return try NSKeyedUnarchiver.unarchivedObject(ofClasses: archivedClasses, from: flags)
-        as? InternalProperties ?? InternalProperties()
+      let parsed = try JSONSerialization.jsonObject(with: data, options: [])
+      guard let dict = parsed as? [String: Any],
+            let blob = FlagsPersistenceBlob.from(dictionary: dict)
+      else {
+        MixpanelLogger.warn(message: "Persisted flags blob has unexpected shape; clearing.")
+        defaults.removeObject(forKey: key)
+        return nil
+      }
+      return blob
     } catch {
-      MixpanelLogger.warn(message: "Failed to unarchive flags")
-      return InternalProperties()
+      MixpanelLogger.warn(message: "Failed to parse persisted flags blob; clearing. \(error)")
+      defaults.removeObject(forKey: key)
+      return nil
     }
+  }
+
+  static func deleteFlagsPersistence(instanceName: String) {
+    guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
+      return
+    }
+    let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
+    defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.flagsPersistence)")
   }
 
   static func saveIdentity(_ mixpanelIdentity: MixpanelIdentity, instanceName: String) {
@@ -302,6 +364,7 @@ class MixpanelPersistence {
     defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)")
     defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.timedEvents)")
     defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.superProperties)")
+    defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.flagsPersistence)")
     defaults.synchronize()
   }
 

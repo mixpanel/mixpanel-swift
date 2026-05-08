@@ -17,9 +17,9 @@
     <a title="MixpanelFlagVariant Structure Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 6.3.0 Docs</a> (68% documented)</p>
+        <p><a href="../index.html">Mixpanel 6.4.0 Docs</a> (68% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
-        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Fketan%2FDocuments%2FMixpanel-GitHub%2Fmixpanel-swift%2Fbuild"><img src="../img/dash.png" alt="Dash"/>Install in Dash</a></p>
+        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Frunner%2Fwork%2Fmixpanel-swift%2Fmixpanel-swift%2Fbuild"><img src="../img/dash.png" alt="Dash"/>Install in Dash</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
             <input type="text" placeholder="Search documentation" data-typeahead>
@@ -70,6 +70,9 @@
               </li>
               <li class="nav-group-task">
                 <a href="../Enums/MixpanelLogLevel.html">MixpanelLogLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VariantLookupPolicy.html">VariantLookupPolicy</a>
               </li>
             </ul>
           </li>
@@ -157,6 +160,9 @@
               </li>
               <li class="nav-group-task">
                 <a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MixpanelFlagVariant/Source.html">– Source</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Structs/MixpanelLogMessage.html">MixpanelLogMessage</a>
@@ -334,6 +340,65 @@
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:8Mixpanel0A11FlagVariantV6sourceAC6SourceOvp"></a>
+                    <a name="//apple_ref/swift/Property/source" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A11FlagVariantV6sourceAC6SourceOvp">source</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Where this variant was sourced from. Always non-nil — every <code>MixpanelFlagVariant</code>
+carries a definite source. <code>.fallback</code> for developer-supplied fallback instances;
+<code>.network</code> or <code>.persistence(persistedAt:)</code> when the SDK serves a variant. For
+persisted variants, the timestamp lives on the <code>.persistence</code> case so invalid
+combinations like &ldquo;network with a timestamp&rdquo; are unrepresentable.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">source</span><span class="p">:</span> <span class="kt"><a href="../Structs/MixpanelFlagVariant/Source.html">Source</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A11FlagVariantV6SourceO"></a>
+                    <a name="//apple_ref/swift/Enum/Source" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A11FlagVariantV6SourceO">Source</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Identifies where a served variant came from.</p>
+
+                        <a href="../Structs/MixpanelFlagVariant/Source.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">Source</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:Se4fromxs7Decoder_p_tKcfc"></a>
                     <a name="//apple_ref/swift/Method/init(from:)" class="dashAnchor"></a>
                     <a class="token" href="#/s:Se4fromxs7Decoder_p_tKcfc">init(from:<wbr>)</a>
@@ -389,7 +454,7 @@
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-04-17)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-05-07)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

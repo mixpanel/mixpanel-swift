@@ -1,0 +1,110 @@
+name: Release CocoaPod
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 6.3.0 without v prefix)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-cocoapod-${{ inputs.version }}
+  cancel-in-progress: false  # NEVER cancel during CocoaPods push
+
+jobs:
+  release-cocoapod:
+    name: "📦 Release CocoaPod"
+    runs-on: macos-26
+    environment: production
+    steps:
+      - name: Checkout version tag
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          ref: refs/tags/${{ inputs.version }}
+          fetch-depth: 0
+
+      - name: Extract version from files
+        id: extract_versions
+        run: |
+          # Extract from podspec
+          PODSPEC_VERSION=$(grep -E "s.version = '[0-9]+\.[0-9]+\.[0-9]+'" Mixpanel-swift.podspec | sed -E "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/")
+
+          # Extract from AutomaticProperties.swift
+          SWIFT_VERSION=$(grep -E 'return "[0-9]+\.[0-9]+\.[0-9]+"' Sources/AutomaticProperties.swift | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')
+
+          echo "PODSPEC_VERSION=$PODSPEC_VERSION" >> $GITHUB_OUTPUT
+          echo "SWIFT_VERSION=$SWIFT_VERSION" >> $GITHUB_OUTPUT
+
+          echo "Input version: ${{ inputs.version }}"
+          echo "Podspec version: $PODSPEC_VERSION"
+          echo "Swift version: $SWIFT_VERSION"
+
+      - name: Validate version consistency
+        run: |
+          PODSPEC_VERSION="${{ steps.extract_versions.outputs.PODSPEC_VERSION }}"
+          SWIFT_VERSION="${{ steps.extract_versions.outputs.SWIFT_VERSION }}"
+          INPUT_VERSION="${{ inputs.version }}"
+          MISMATCH=0
+
+          if [ "$PODSPEC_VERSION" != "$INPUT_VERSION" ]; then
+            echo "ERROR: Podspec version mismatch"
+            echo "  Expected: $INPUT_VERSION"
+            echo "  Found: $PODSPEC_VERSION"
+            echo "  File: Mixpanel-swift.podspec"
+            MISMATCH=1
+          fi
+
+          if [ "$SWIFT_VERSION" != "$INPUT_VERSION" ]; then
+            echo "ERROR: AutomaticProperties.swift version mismatch"
+            echo "  Expected: $INPUT_VERSION"
+            echo "  Found: $SWIFT_VERSION"
+            echo "  File: Sources/AutomaticProperties.swift"
+            MISMATCH=1
+          fi
+
+          if [ $MISMATCH -eq 1 ]; then
+            echo ""
+            echo "Version files in tag $INPUT_VERSION are not consistent."
+            echo "This usually means the tag was created incorrectly."
+            echo ""
+            echo "Fix: Delete the tag and re-run the 'Release SPM' workflow."
+            echo "  git push --delete origin $INPUT_VERSION"
+            exit 1
+          fi
+
+          echo "✓ All version checks passed"
+
+      - name: Publish to CocoaPods
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        run: |
+          # Install CocoaPods
+          gem install cocoapods
+
+          echo "Publishing to CocoaPods..."
+          echo ""
+
+          # trunk push validates server-side, no need for separate spec lint
+          pod trunk push Mixpanel-swift.podspec --allow-warnings
+
+          echo ""
+          echo "✓ Published to CocoaPods"
+
+      - name: CocoaPods release complete
+        run: |
+          echo ""
+          echo "🎉 CocoaPods release ${{ inputs.version }} published successfully!"
+          echo ""
+          echo "Published to:"
+          echo "  ✓ CocoaPods: https://cocoapods.org/pods/Mixpanel-swift"
+          echo ""
+          echo "⚠️  FINAL STEP: Review and publish the draft GitHub Release"
+          echo "    https://github.com/${{ github.repository }}/releases/tag/${{ inputs.version }}"
+          echo ""
+          echo "After publishing the GitHub Release, users can install via:"
+          echo "  - Swift Package Manager (SPM)"
+          echo "  - CocoaPods"

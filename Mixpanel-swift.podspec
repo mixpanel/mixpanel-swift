@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'Mixpanel-swift'
-  s.version = '6.3.0'
+  s.version = '6.4.0'
   s.module_name = 'Mixpanel'
   s.license = 'Apache License, Version 2.0'
   s.summary = 'Mixpanel tracking library for iOS (Swift)'
@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
   s.homepage = 'https://mixpanel.com'
   s.author       = { 'Mixpanel, Inc' => 'support@mixpanel.com' }
   s.source       = { :git => 'https://github.com/mixpanel/mixpanel-swift.git',
-                     :tag => "v#{s.version}" }
+                     :tag => "#{s.version}" }
   s.resource_bundles = {'Mixpanel' => ['Sources/Mixpanel/PrivacyInfo.xcprivacy']}
   s.dependency 'jsonlogic', '~> 1.2.0'
   s.dependency 'MixpanelSwiftCommon', '~> 1.0.0'

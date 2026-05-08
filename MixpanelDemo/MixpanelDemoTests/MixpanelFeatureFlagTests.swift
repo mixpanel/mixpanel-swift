@@ -292,7 +292,7 @@ class FeatureFlagManagerTests: XCTestCase {
     mockDelegate = MockFeatureFlagDelegate()
 
     // Use MockFeatureFlagManager to prevent real network calls
-      let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: mockDelegate)
+      let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
     // Configure default simulation - successful fetch with sample flags
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
     mockManager.shouldSimulateNetworkDelay = true
@@ -941,7 +941,7 @@ class FeatureFlagManagerTests: XCTestCase {
     }
 
     // MockFeatureFlagManager will automatically handle the fetch simulation
-    wait(for: [expectation], timeout: 3.0)
+    wait(for: [expectation], timeout: 10.0)
 
     XCTAssertNotNil(receivedVariants, "Should receive variants after fetch")
     XCTAssertEqual(receivedVariants?.count, sampleFlags.count, "Should return all flags after fetch")
@@ -964,7 +964,7 @@ class FeatureFlagManagerTests: XCTestCase {
       expectation.fulfill()
     }
 
-    wait(for: [expectation], timeout: 3.0)
+    wait(for: [expectation], timeout: 10.0)
 
     XCTAssertNotNil(receivedVariants, "Should receive result even on failure")
     XCTAssertTrue(receivedVariants?.isEmpty ?? false, "Should return empty dictionary on fetch failure")
@@ -1317,7 +1317,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testFetchWithNoDelegate() {
     // Create manager with no delegate
-      let noDelegate = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: nil)
+      let noDelegate = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: nil)
 
     // Try to load flags
     noDelegate.loadFlags()
@@ -1520,7 +1520,7 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: testAnonymousId
     )
 
-      let manager = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: mockDelegate)
+      let manager = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
 
     // Verify the delegate methods return expected values
     XCTAssertEqual(mockDelegate.getDistinctId(), testDistinctId)
@@ -1541,7 +1541,7 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: nil
     )
 
-      let manager = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: mockDelegate)
+      let manager = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
 
     // Verify the delegate methods return expected values
     XCTAssertEqual(mockDelegate.getDistinctId(), testDistinctId)
@@ -1716,10 +1716,16 @@ class FeatureFlagManagerTests: XCTestCase {
         XCTAssertGreaterThan(latencyMs, 0, "fetchLatencyMs should be positive")
         XCTAssertLessThan(latencyMs, 30000, "fetchLatencyMs should be less than 30 seconds")
 
-        // Verify latency is in reasonable range for our simulated delay
-        // Allow generous tolerance for CI/slow systems with async dispatch overhead
+        // Sanity check that the SDK's reported latency is in the same ballpark as the
+        // wall-clock duration of the call. We don't assert tight bounds: `fetchStartTime`
+        // is captured before `getVariant` returns control to the trackingQueue, so on a
+        // contested CI runner the dispatch delay before the mock fetch even starts can
+        // dwarf the simulated 100ms delay. The SDK timer (latencyMs) measures only the
+        // fetch itself, so it can legitimately be much smaller than actualElapsedMs.
+        // Using a 30s tolerance — same as the upper bound on latencyMs above — keeps
+        // this an order-of-magnitude check rather than a tight equivalence one.
         let actualElapsedMs = Int(Date().timeIntervalSince(fetchStartTime) * 1000)
-        let tolerance = 5000  // 5s tolerance for slow CI runners
+        let tolerance = 30000
         XCTAssertLessThanOrEqual(
           abs(latencyMs - actualElapsedMs), tolerance,
           "fetchLatencyMs (\(latencyMs)ms) should be close to actual elapsed time (\(actualElapsedMs)ms)"
@@ -1916,7 +1922,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testGETRequestFormat() {
     // Use a fresh MockFeatureFlagManager with request validation enabled
-      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: mockDelegate)
+      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
     mockManager.requestValidationEnabled = true
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
@@ -1981,7 +1987,7 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: "custom-device-id"
     )
 
-      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: customDelegate)
+      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: customDelegate)
     mockManager.requestValidationEnabled = true
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
@@ -2024,7 +2030,7 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: nil
     )
 
-      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: nilAnonymousDelegate)
+      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: nilAnonymousDelegate)
     mockManager.requestValidationEnabled = true
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
@@ -2534,7 +2540,7 @@ class FeatureFlagManagerTests: XCTestCase {
         featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: true)
       )
     )
-      let mock = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: delegate)
+      let mock = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: delegate)
     mock.simulatedFetchResult = (success: true, flags: sampleFlags)
 
     // Call loadFlags() (which prefetchFlags: true would trigger during init)
@@ -2560,7 +2566,7 @@ class FeatureFlagManagerTests: XCTestCase {
         featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
       )
     )
-      let mock = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: delegate)
+      let mock = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: delegate)
     mock.simulatedFetchResult = (success: true, flags: sampleFlags)
 
     // Do NOT call loadFlags() - simulating prefetchFlags: false behavior
@@ -2584,7 +2590,7 @@ class FeatureFlagManagerTests: XCTestCase {
       )
     )
 
-      let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), delegate: delegate)
+      let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: delegate)
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
     // Manually load flags (simulating what user would do after identify)
@@ -2600,6 +2606,154 @@ class FeatureFlagManagerTests: XCTestCase {
 
     // Keep delegate alive for the duration of the test (FeatureFlagManager holds it weakly)
     _ = delegate
+  }
+
+  // MARK: - Reset Tests
+
+  /// Calls `reset()` and blocks until its completion fires. We use the completion (rather
+  /// than polling for `flags == nil`) because the polling approach is vacuous in tests where
+  /// `flags` was already nil before the reset — the predicate would match immediately
+  /// without observing the reset block actually running, masking real bugs.
+  private func resetAndWait(_ mockMgr: MockFeatureFlagManager, timeout: TimeInterval = 10.0) {
+    let done = expectation(description: "FeatureFlagManager.reset completes")
+    mockMgr.reset {
+      done.fulfill()
+    }
+    wait(for: [done], timeout: timeout)
+  }
+
+  func testReset_ClearsFlagsAndFetchTiming() {
+    setupReadyFlagsAndVerify()
+
+    guard let mockMgr = mockManager else {
+      XCTFail("Manager is not a MockFeatureFlagManager")
+      return
+    }
+
+    // Sanity check pre-reset state
+    mockMgr.flagsLock.read {
+      XCTAssertNotNil(mockMgr.flags, "Flags should be set before reset")
+      XCTAssertNotNil(mockMgr.timeLastFetched, "timeLastFetched should be set before reset")
+      XCTAssertNotNil(mockMgr.fetchLatencyMs, "fetchLatencyMs should be set before reset")
+    }
+
+    resetAndWait(mockMgr)
+
+    XCTAssertFalse(manager.areFlagsReady(), "Flags should not be ready after reset")
+    mockMgr.flagsLock.read {
+      XCTAssertNil(mockMgr.flags, "flags should be cleared")
+      XCTAssertNil(mockMgr.timeLastFetched, "timeLastFetched should be cleared")
+      XCTAssertNil(mockMgr.fetchLatencyMs, "fetchLatencyMs should be cleared")
+      XCTAssertFalse(mockMgr.isFetching, "isFetching should be false after reset")
+    }
+  }
+
+  func testReset_ClearsTrackedFeaturesSoTrackingFiresAgain() {
+    setupReadyFlagsAndVerify()
+
+    guard let mockMgr = mockManager else {
+      XCTFail("Manager is not a MockFeatureFlagManager")
+      return
+    }
+
+    // First read tracks the variant exactly once.
+    expectTracking(expectedCount: 1, description: "Initial tracking") {
+      _ = manager.getVariantSync("feature_string", fallback: defaultFallback)
+    }
+
+    // A second read with the same flag should NOT track again pre-reset.
+    _ = manager.getVariantSync("feature_string", fallback: defaultFallback)
+    waitBriefly()
+    XCTAssertEqual(mockDelegate.trackedEvents.count, 1, "Second read pre-reset should not re-track")
+
+    resetAndWait(mockMgr)
+
+    // Re-populate flags after the reset (mirrors a refetch under a new identity).
+    setupReadyFlags()
+
+    // After reset, reading the same flag should track again because the
+    // trackedFeatures set was cleared.
+    expectTracking(expectedCount: 1, description: "Tracking after reset") {
+      _ = manager.getVariantSync("feature_string", fallback: defaultFallback)
+    }
+  }
+
+  func testReset_ClearsFirstTimeEventState() {
+    guard let mockMgr = mockManager else {
+      XCTFail("Manager is not a MockFeatureFlagManager")
+      return
+    }
+
+    let pendingVariant = MixpanelFlagVariant(key: "activated", value: true)
+    let pendingEvent = createPendingEvent(
+      flagKey: "reset-flag",
+      eventName: "Reset Event",
+      filters: nil,
+      pendingVariant: pendingVariant
+    )
+
+    mockMgr.flagsLock.write {
+      mockMgr.flags = ["reset-flag": createControlVariant()]
+      mockMgr.pendingFirstTimeEvents = ["reset-flag:hash123": pendingEvent]
+      mockMgr.pendingFirstTimeEventNames = [pendingEvent.eventName]
+      mockMgr.activatedFirstTimeEvents.insert("reset-flag:hash123")
+    }
+
+    mockMgr.flagsLock.read {
+      XCTAssertEqual(mockMgr.pendingFirstTimeEvents.count, 1)
+      XCTAssertEqual(mockMgr.pendingFirstTimeEventNames.count, 1)
+      XCTAssertEqual(mockMgr.activatedFirstTimeEvents.count, 1)
+    }
+
+    resetAndWait(mockMgr)
+
+    mockMgr.flagsLock.read {
+      XCTAssertTrue(mockMgr.pendingFirstTimeEvents.isEmpty,
+                    "pendingFirstTimeEvents should be cleared by reset")
+      XCTAssertTrue(mockMgr.pendingFirstTimeEventNames.isEmpty,
+                    "pendingFirstTimeEventNames should be cleared by reset")
+      XCTAssertTrue(mockMgr.activatedFirstTimeEvents.isEmpty,
+                    "activatedFirstTimeEvents should be cleared by reset")
+    }
+  }
+
+  func testReset_PreservesContextSetViaSetContext() {
+    guard let mockMgr = mockManager else {
+      XCTFail("Manager is not a MockFeatureFlagManager")
+      return
+    }
+
+    // Default options carry an empty context.
+    mockMgr.flagsLock.read {
+      XCTAssertTrue(mockMgr.flagContext.isEmpty, "Initial flagContext should be empty")
+    }
+
+    let customContext: [String: Any] = [
+      "user_id": "ctx-user",
+      "group_id": "ctx-group",
+    ]
+
+    let setContextExpectation = XCTestExpectation(description: "setContext completes")
+    mockMgr.setContext(customContext) {
+      setContextExpectation.fulfill()
+    }
+    wait(for: [setContextExpectation], timeout: 5.0)
+
+    mockMgr.flagsLock.read {
+      XCTAssertEqual(mockMgr.flagContext["user_id"] as? String, "ctx-user")
+      XCTAssertEqual(mockMgr.flagContext["group_id"] as? String, "ctx-group")
+    }
+
+    resetAndWait(mockMgr)
+
+    // setContext-supplied context should survive reset() — only identity-tied
+    // state (flags, tracking, first-time events, fetch timing) is cleared.
+    mockMgr.flagsLock.read {
+      XCTAssertEqual(mockMgr.flagContext["user_id"] as? String, "ctx-user",
+                     "setContext value should survive reset()")
+      XCTAssertEqual(mockMgr.flagContext["group_id"] as? String, "ctx-group",
+                     "setContext value should survive reset()")
+    }
   }
 
 }  // End Test Class

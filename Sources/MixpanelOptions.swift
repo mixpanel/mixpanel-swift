@@ -6,6 +6,8 @@
 //  Copyright © 2025 Mixpanel. All rights reserved.
 //
 
+import Foundation
+
 /// Configuration options for feature flags behavior.
 ///
 /// Use this to control how and when feature flags are loaded by the SDK.
@@ -45,14 +47,98 @@ public struct FeatureFlagOptions {
   /// then manually trigger loading via `flags.loadFlags()`.
   public let prefetchFlags: Bool
 
+  /// Strategy used to resolve flag variants relative to the on-disk persistence layer and
+  /// the network. Defaults to `.networkOnly` — variant lookups always wait for the network
+  /// call, matching behavior prior to the introduction of variant persistence.
+  ///
+  /// Persistence behavior is derived directly from this policy:
+  /// - `.networkOnly` — no persistence. The on-disk blob is also wiped at init if present
+  ///   (so toggling from a persisting policy back to `.networkOnly` cleans up after itself).
+  /// - `.persistenceUntilNetworkSuccess(persistenceTtl:)` / `.networkFirst(persistenceTtl:)` — successful
+  ///   fetches write to disk; persisted variants are read on init.
+  public let variantLookupPolicy: VariantLookupPolicy
+
   public init(
     enabled: Bool = false,
     context: [String: Any] = [:],
-    prefetchFlags: Bool = true
+    prefetchFlags: Bool = true,
+    variantLookupPolicy: VariantLookupPolicy = .networkOnly
   ) {
     self.enabled = enabled
     self.context = context
     self.prefetchFlags = prefetchFlags
+    self.variantLookupPolicy = variantLookupPolicy
+  }
+}
+
+/// Strategy for resolving feature flag variants relative to the on-disk persistence layer
+/// and the network.
+///
+/// - `networkOnly`: Never read or write persisted variants. Variant lookups always wait for
+///   the network call. Default; matches behavior prior to variant persistence. If a persisted
+///   blob exists from a previous session that used a persisting policy, it's wiped on init.
+/// - `persistenceUntilNetworkSuccess(persistenceTtl:)`: Serve persisted variants immediately
+///   when available, refresh from the network in the background. Persisted entries older
+///   than `persistenceTtl` are ignored on read but NOT deleted (the next successful fetch
+///   overwrites them).
+/// - `networkFirst(persistenceTtl:)`: Prefer fresh values from the network, but fall back to
+///   persisted variants when the network call fails. Same TTL semantics as
+///   `persistenceUntilNetworkSuccess`.
+///
+/// **TTL handling** — non-positive `persistenceTtl` on a persisting policy is a
+/// misconfiguration. At SDK init the requested policy is run through `effective(_:)`, which
+/// collapses any persisting policy with `persistenceTtl <= 0` to `.networkOnly` (with a
+/// warning logged). Persistence-with-no-useful-TTL would write to disk on every fetch but
+/// never serve anything from disk, so the SDK substitutes the meaningful interpretation. The
+/// factories themselves don't sanitize — they preserve exactly what the developer asked for
+/// so callers can introspect.
+///
+/// Convenience zero-argument forms `persistenceUntilNetworkSuccess()` / `networkFirst()` use
+/// `defaultTTL` (24 hours) — equivalent to passing
+/// `persistenceTtl: VariantLookupPolicy.defaultTTL`.
+public enum VariantLookupPolicy {
+  case networkOnly
+  case persistenceUntilNetworkSuccess(persistenceTtl: TimeInterval)
+  case networkFirst(persistenceTtl: TimeInterval)
+
+  /// Default time-to-live for persisted variants when no TTL is specified: 24 hours.
+  public static let defaultTTL: TimeInterval = 24 * 60 * 60
+
+  /// Convenience constructor — equivalent to
+  /// `.persistenceUntilNetworkSuccess(persistenceTtl: VariantLookupPolicy.defaultTTL)`.
+  public static func persistenceUntilNetworkSuccess() -> VariantLookupPolicy {
+    return .persistenceUntilNetworkSuccess(persistenceTtl: defaultTTL)
+  }
+
+  /// Convenience constructor — equivalent to
+  /// `.networkFirst(persistenceTtl: VariantLookupPolicy.defaultTTL)`.
+  public static func networkFirst() -> VariantLookupPolicy {
+    return .networkFirst(persistenceTtl: defaultTTL)
+  }
+
+  /// Resolves the policy the SDK should actually use given what the developer configured.
+  /// Substitutes `.networkOnly` when the requested policy is a persisting one with non-
+  /// positive `persistenceTtl`, since "persist on every fetch but the TTL makes nothing ever
+  /// serve" does no useful work — the developer almost certainly meant "no persistence." Logs
+  /// a warning when the substitution happens.
+  ///
+  /// Called once at FeatureFlagManager init; downstream code can treat the returned policy
+  /// as canonical.
+  internal static func effective(_ requested: VariantLookupPolicy) -> VariantLookupPolicy {
+    let persistenceTtl: TimeInterval
+    switch requested {
+    case .networkOnly:
+      return requested
+    case .persistenceUntilNetworkSuccess(let t), .networkFirst(let t):
+      persistenceTtl = t
+    }
+    if persistenceTtl <= 0 {
+      MixpanelLogger.warn(
+        message:
+          "Non-positive persistenceTtl (\(persistenceTtl)s) on \(requested); falling back to networkOnly since persistence with no meaningful TTL does no useful work.")
+      return .networkOnly
+    }
+    return requested
   }
 }
 

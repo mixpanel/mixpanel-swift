@@ -23,9 +23,7 @@ class AutomaticProperties {
     var p = InternalProperties()
 
     #if os(iOS) || os(tvOS)
-      // Skip screen size in lazy initializer to avoid
-      // SwiftUI accent color interference (synchronous UIScreen access during App.init)
-      // Screen size will be captured asynchronously below.
+      // Screen size is captured via setUIProperties() called during SDK initialization.
       // See: https://github.com/mixpanel/mixpanel-swift/issues/522
 
       #if targetEnvironment(macCatalyst)
@@ -43,7 +41,7 @@ class AutomaticProperties {
         }
       #endif
     #elseif os(macOS)
-      // Skip screen size in lazy initializer (same reasons as iOS/tvOS)
+      // Screen size is captured via setUIProperties() called during SDK initialization
       p["$os"] = "macOS"
       p["$os_version"] = ProcessInfo.processInfo.operatingSystemVersionString
     #elseif os(watchOS)
@@ -69,14 +67,6 @@ class AutomaticProperties {
     p["$manufacturer"] = "Apple"
     p["$model"] = AutomaticProperties.deviceModel()
 
-    // Schedule async screen size capture for platforms that require main thread access
-    // Using async (not sync) prevents deadlock and allows SwiftUI initialization to complete
-    #if os(iOS) || os(tvOS) || os(macOS)
-      DispatchQueue.main.async {
-        captureScreenSize()
-      }
-    #endif
-      
     return p
   }()
 
@@ -99,18 +89,21 @@ class AutomaticProperties {
     return p
   }()
 
-  /// Captures screen size on main thread and updates properties dictionary.
-  /// This method is called asynchronously after properties initialization to avoid
-  /// interfering with SwiftUI initialization and to prevent deadlock scenarios.
-  private static func captureScreenSize() {
-    // Defensive guard: ensure we're on main thread
-    // This should always be true since we only call via main.async,
-    // but guard defensively and reschedule if needed
-    guard Thread.isMainThread else {
-      DispatchQueue.main.async { captureScreenSize() }
-      return
-    }
+  /// Captures UI-related properties (screen size) that require main thread access.
+  /// Should be called during SDK initialization.
+  ///
+  /// Thread safety:
+  /// - Dispatches to main thread asynchronously
+  class func setUIProperties() {
+    #if os(iOS) || os(tvOS) || os(macOS)
+      DispatchQueue.main.async {
+          captureScreenSizeOnMainThread()
+      }
+    #endif
+  }
 
+  /// Internal method to capture screen size. Must be called on main thread.
+  private static func captureScreenSizeOnMainThread() {
     // IMPORTANT: Capture screen size on main thread BEFORE entering write lock.
     // The write lock executes closures on its internal queue (background thread),
     // so we must access UIScreen/NSScreen here while still on main thread.

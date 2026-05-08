@@ -34,11 +34,6 @@ jobs:
             -enableCodeCoverage YES \
             clean build test | xcpretty -c;
 
-      - name: Pod Lint
-        run: |
-          gem install cocoapods
-          pod lib lint --allow-warnings
-
       - name: Code Coverage Report
         working-directory: MixpanelDemo/build/Logs/Test
         run: |

@@ -23,6 +23,11 @@ class AutomaticProperties {
     var p = InternalProperties()
 
     #if os(iOS) || os(tvOS)
+      // Skip screen size in lazy initializer to avoid
+      // SwiftUI accent color interference (synchronous UIScreen access during App.init)
+      // Screen size will be captured asynchronously below.
+      // See: https://github.com/mixpanel/mixpanel-swift/issues/522
+
       #if targetEnvironment(macCatalyst)
         p["$os"] = "macOS"
         p["$os_version"] = ProcessInfo.processInfo.operatingSystemVersionString
@@ -38,9 +43,11 @@ class AutomaticProperties {
         }
       #endif
     #elseif os(macOS)
+      // Skip screen size in lazy initializer (same reasons as iOS/tvOS)
       p["$os"] = "macOS"
       p["$os_version"] = ProcessInfo.processInfo.operatingSystemVersionString
     #elseif os(watchOS)
+      // WatchKit APIs are thread-safe, capture screen size immediately
       let watchDevice = WKInterfaceDevice.current()
       p["$os"] = watchDevice.systemName
       p["$os_version"] = watchDevice.systemVersion
@@ -62,6 +69,14 @@ class AutomaticProperties {
     p["$manufacturer"] = "Apple"
     p["$model"] = AutomaticProperties.deviceModel()
 
+    // Schedule async screen size capture for platforms that require main thread access
+    // Using async (not sync) prevents deadlock and allows SwiftUI initialization to complete
+    #if os(iOS) || os(tvOS) || os(macOS)
+      DispatchQueue.main.async {
+        captureScreenSize()
+      }
+    #endif
+      
     return p
   }()
 
@@ -84,29 +99,44 @@ class AutomaticProperties {
     return p
   }()
 
-  #if os(iOS) || os(tvOS) || os(macOS)
-    private static var screenSizeCaptured = false
+  /// Captures screen size on main thread and updates properties dictionary.
+  /// This method is called asynchronously after properties initialization to avoid
+  /// interfering with SwiftUI initialization and to prevent deadlock scenarios.
+  private static func captureScreenSize() {
+    // Defensive guard: ensure we're on main thread
+    // This should always be true since we only call via main.async,
+    // but guard defensively and reschedule if needed
+    guard Thread.isMainThread else {
+      DispatchQueue.main.async { captureScreenSize() }
+      return
+    }
 
-    static func ensureScreenSize() {
-      guard !screenSizeCaptured else { return }
-      screenSizeCaptured = true
+    // IMPORTANT: Capture screen size on main thread BEFORE entering write lock.
+    // The write lock executes closures on its internal queue (background thread),
+    // so we must access UIScreen/NSScreen here while still on main thread.
+    #if os(iOS) || os(tvOS)
+      let screenSize = UIScreen.main.bounds.size
+      let height = Int(screenSize.height)
+      let width = Int(screenSize.width)
+    #elseif os(macOS)
+      let screenSize = NSScreen.main?.frame.size
+      let height = screenSize.map { Int($0.height) }
+      let width = screenSize.map { Int($0.width) }
+    #endif
 
+    // Now update properties dictionary under lock (with already-captured values)
+    automaticPropertiesLock.write {
       #if os(iOS) || os(tvOS)
-        let screenSize = UIScreen.main.bounds.size
-        automaticPropertiesLock.write {
-          properties["$screen_height"] = Int(screenSize.height)
-          properties["$screen_width"] = Int(screenSize.width)
-        }
+        properties["$screen_height"] = height
+        properties["$screen_width"] = width
       #elseif os(macOS)
-        if let screenSize = NSScreen.main?.frame.size {
-          automaticPropertiesLock.write {
-            properties["$screen_height"] = Int(screenSize.height)
-            properties["$screen_width"] = Int(screenSize.width)
-          }
+        if let height = height, let width = width {
+          properties["$screen_height"] = height
+          properties["$screen_width"] = width
         }
       #endif
     }
-  #endif
+  }
 
   class func deviceModel() -> String {
     var modelCode: String = "Unknown"

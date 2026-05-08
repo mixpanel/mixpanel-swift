@@ -367,6 +367,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       self.apiToken = apiToken
     }
     trackAutomaticEventsEnabled = trackAutomaticEvents
+    // Capture UI properties (screen size) that require main thread access.
+    // This is called here to ensure $ae_first_open event includes screen size.
+    AutomaticProperties.setUIProperties()
+
     if let serverURL = serverURL {
       self.serverURL = serverURL
     }

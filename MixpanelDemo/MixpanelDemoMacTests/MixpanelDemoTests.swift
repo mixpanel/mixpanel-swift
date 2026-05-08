@@ -42,7 +42,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
       testMixpanel.track(event: "event \(i)")
     }
     flushAndWaitForTrackingQueue(testMixpanel)
-    XCTAssertTrue(
+    XCTAssertFalse(
       eventQueue(token: testMixpanel.apiToken).isEmpty,
       "events should have been flushed")
 

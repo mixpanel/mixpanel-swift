@@ -18,10 +18,10 @@ fi
 LAST_TAG=$(git tag --sort=-version:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || echo "")
 
 if [ -z "$LAST_TAG" ]; then
-  echo "No previous tags found. Generating changelog from all commits."
+  echo "No previous tags found. Generating changelog from all commits." >&2
   COMMIT_RANGE="HEAD"
 else
-  echo "Last tag: $LAST_TAG"
+  echo "Last tag: $LAST_TAG" >&2
   COMMIT_RANGE="$LAST_TAG..HEAD"
 fi
 

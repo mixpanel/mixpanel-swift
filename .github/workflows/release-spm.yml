@@ -165,8 +165,22 @@ jobs:
           fi
 
           # Extract this version's changelog entry
-          # Starts with "## [VERSION]" and ends before next "## [" or EOF
-          CHANGELOG=$(awk "/^## \[$VERSION\]/,/^## \[/{if(/^## \[/ && !/^## \[$VERSION\]/)exit;print}" CHANGELOG.md)
+          # Starts with "## [VERSION](...)" and ends before next "## [" or EOF
+          # The changelog format includes a link after the version number
+          # Uses state-based matching to avoid range pattern issues
+          CHANGELOG=$(awk -v ver="$VERSION" '
+          /^## \[/ {
+            if (match($0, "^## \\[" ver "\\]\\(")) {
+              inSection = 1
+              print
+              next
+            }
+            if (inSection) {
+              exit
+            }
+          }
+          inSection { print }
+          ' CHANGELOG.md)
 
           if [ -z "$CHANGELOG" ]; then
             echo "⚠️  Changelog entry for version $VERSION not found in CHANGELOG.md"

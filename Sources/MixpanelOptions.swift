@@ -143,6 +143,13 @@ public enum VariantLookupPolicy {
 }
 
 public class MixpanelOptions {
+  /// Property keys that ingestion or identity resolution require and that will never be
+  /// stripped by ``excludeProperties``, even if a customer lists them. Single source of truth
+  /// for both the runtime filter (see `Track.applyExcludeProperties`) and the documentation.
+  public static let reservedPropertyKeys: Set<String> = [
+    "token", "time", "distinct_id", "$device_id", "$user_id", "$had_persisted_distinct_id",
+  ]
+
   public let token: String
   public let flushInterval: Double
   public let instanceName: String?
@@ -153,6 +160,20 @@ public class MixpanelOptions {
   public let serverURL: String?
   public let proxyServerConfig: ProxyServerConfig?
   public let useGzipCompression: Bool
+
+  /// Property keys that will be stripped from every event before it is persisted and sent to
+  /// Mixpanel. Defaults to empty (no filtering, zero per-event overhead).
+  ///
+  /// Use this to reduce per-event payload size or to suppress properties the project has no
+  /// interest in. Matching is **exact and case-sensitive**.
+  ///
+  /// Keys in ``MixpanelOptions/reservedPropertyKeys`` are never stripped, even if
+  /// listed — they are required for ingestion and identity resolution.
+  ///
+  /// Applies to **events only**, not to People or Group profile updates. `$mp_metadata` is a
+  /// sibling of `properties` in the event envelope and is structurally outside the filter's
+  /// scope by design.
+  public let excludeProperties: Set<String>
   @available(*, deprecated, message: "Use featureFlagOptions.enabled instead")
   public var featureFlagsEnabled: Bool { return featureFlagOptions.enabled }
 
@@ -224,7 +245,8 @@ public class MixpanelOptions {
     featureFlagsEnabled: Bool = false,
     featureFlagsContext: [String: Any] = [:],
     deviceIdProvider: (() -> String?)? = nil,
-    featureFlagOptions: FeatureFlagOptions? = nil
+    featureFlagOptions: FeatureFlagOptions? = nil,
+    excludeProperties: Set<String> = []
   ) {
     self.token = token
     self.flushInterval = flushInterval
@@ -237,6 +259,7 @@ public class MixpanelOptions {
     self.proxyServerConfig = proxyServerConfig
     self.useGzipCompression = useGzipCompression
     self.deviceIdProvider = deviceIdProvider
+    self.excludeProperties = excludeProperties
 
     // When featureFlagOptions is explicitly provided, it takes precedence
     if let featureFlagOptions = featureFlagOptions {

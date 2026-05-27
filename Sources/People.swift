@@ -26,6 +26,7 @@ open class People {
   weak var delegate: FlushDelegate?
   let metadata: SessionMetadata
   let mixpanelPersistence: MixpanelPersistence
+  let excludeProperties: Set<String>
   weak var mixpanelInstance: MixpanelInstance?
 
   init(
@@ -33,13 +34,15 @@ open class People {
     serialQueue: DispatchQueue,
     lock: ReadWriteLock,
     metadata: SessionMetadata,
-    mixpanelPersistence: MixpanelPersistence
+    mixpanelPersistence: MixpanelPersistence,
+    excludeProperties: Set<String> = []
   ) {
     self.apiToken = apiToken
     self.serialQueue = serialQueue
     self.lock = lock
     self.metadata = metadata
     self.mixpanelPersistence = mixpanelPersistence
+    self.excludeProperties = excludeProperties
   }
 
   func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
@@ -70,6 +73,15 @@ open class People {
           }
         }
         p += properties
+        // Filter only the bag-style operators where the SDK merges peopleProperties
+        // ($set and $set_once on Swift — note: Android only merges into $set, so the
+        // Android port filters $set alone). The operand-style operators ($add,
+        // $append, $union, $unset, $merge, $delete) treat property keys as inputs
+        // rather than a bag to mutate, and filtering inside them would silently
+        // change semantics.
+        if action == "$set" || action == "$set_once" {
+          Track.applyExcludeProperties(&p, exclude: self.excludeProperties)
+        }
         r[action] = p
       }
       self.metadata.toDict(isEvent: false).forEach { (k, v) in r[k] = v }

@@ -161,18 +161,32 @@ public class MixpanelOptions {
   public let proxyServerConfig: ProxyServerConfig?
   public let useGzipCompression: Bool
 
-  /// Property keys that will be stripped from every event before it is persisted and sent to
-  /// Mixpanel. Defaults to empty (no filtering, zero per-event overhead).
+  /// Property keys that will be stripped from outgoing event and People payloads before they
+  /// are persisted and sent to Mixpanel. Defaults to empty (no filtering, zero per-payload
+  /// overhead).
   ///
-  /// Use this to reduce per-event payload size or to suppress properties the project has no
-  /// interest in. Matching is **exact and case-sensitive**.
+  /// Use this to reduce payload size or to suppress properties the project has no interest in.
+  /// Matching is **exact and case-sensitive**.
   ///
-  /// Keys in ``MixpanelOptions/reservedPropertyKeys`` are never stripped, even if
-  /// listed — they are required for ingestion and identity resolution.
+  /// Keys in ``MixpanelOptions/reservedPropertyKeys`` are never stripped, even if listed —
+  /// they are required for ingestion and identity resolution.
   ///
-  /// Applies to **events only**, not to People or Group profile updates. `$mp_metadata` is a
-  /// sibling of `properties` in the event envelope and is structurally outside the filter's
-  /// scope by design.
+  /// **Scope:**
+  /// - **Events** — applied at the persistence chokepoint, covering super properties, caller
+  ///   properties, and SDK auto-properties uniformly.
+  /// - **People `$set` and `$set_once`** — applied after the SDK merges
+  ///   `AutomaticProperties.peopleProperties` (the auto-injected `$ios_*` device keys) so
+  ///   those auto-injected keys are subject to the same exclude set as event auto-properties.
+  ///
+  /// **Not in scope:**
+  /// - Other People operators (`$add`, `$append`, `$union`, `$unset`, `$merge`, `$remove`,
+  ///   `$delete`) are pass-through. Their property keys are operands rather than a bag to
+  ///   mutate, and filtering inside them would silently change semantics (e.g. dropping a
+  ///   name from an `$unset` list).
+  /// - **Group updates** never merge auto-properties, so there is nothing the filter would
+  ///   contribute that the caller couldn't omit themselves.
+  /// - **`$mp_metadata`** is a sibling of `properties` in the event envelope and is
+  ///   structurally outside the filter's scope by design.
   public let excludeProperties: Set<String>
   @available(*, deprecated, message: "Use featureFlagOptions.enabled instead")
   public var featureFlagsEnabled: Bool { return featureFlagOptions.enabled }

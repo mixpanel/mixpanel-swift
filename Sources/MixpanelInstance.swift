@@ -394,7 +394,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       apiToken: self.apiToken,
       instanceName: self.name,
       lock: self.readWriteLock,
-      metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence,
+      metadata: sessionMetadata, 
+      mixpanelPersistence: mixpanelPersistence,
       excludeProperties: self.options.excludeProperties)
     trackInstance.mixpanelInstance = self
     #if os(iOS) && !targetEnvironment(macCatalyst)
@@ -433,7 +434,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       apiToken: self.apiToken,
       serialQueue: trackingQueue,
       lock: self.readWriteLock,
-      metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence)
+      metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence,
+      excludeProperties: self.options.excludeProperties)
     people.mixpanelInstance = self
     people.delegate = self
     flushInstance.flushInterval = flushInterval

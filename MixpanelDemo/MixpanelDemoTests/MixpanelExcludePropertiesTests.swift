@@ -180,4 +180,106 @@ class MixpanelExcludePropertiesTests: MixpanelBaseTests {
 
     removeDBfile(testMixpanel.apiToken)
   }
+
+  // MARK: - People exclude tests
+
+  /// Pick the People record by action key (`$set`, `$set_once`, `$add`, …). After
+  /// `identify` + a People call, the queue contains both the identify-driven merge
+  /// and the test's own action, so action-name matching is the reliable filter.
+  private func findPeopleRecord(
+    in mixpanel: MixpanelInstance, action: String
+  ) -> InternalProperties? {
+    return peopleQueue(token: mixpanel.apiToken).first(where: { $0[action] != nil })
+  }
+
+  func testExcludePropertiesStripsAutoAndCustomFromPeopleSet() {
+    let token = randomId()
+    let options = MixpanelOptions(
+      token: token,
+      flushInterval: 60,
+      excludeProperties: ["$ios_lib_version", "secret_prop"])
+    let testMixpanel = Mixpanel.initialize(options: options)
+    testMixpanel.identify(distinctId: "u1")
+    testMixpanel.people.set(properties: ["secret_prop": "x", "keep_me": "y"])
+    waitForTrackingQueue(testMixpanel)
+
+    let record = peopleQueue(token: testMixpanel.apiToken).first(where: { $0["$set"] != nil })!
+    let bag = record["$set"] as! InternalProperties
+
+    // Excluded auto-prop and custom prop are stripped.
+    XCTAssertNil(bag["$ios_lib_version"])
+    XCTAssertNil(bag["secret_prop"])
+    // Non-excluded custom prop survives.
+    XCTAssertEqual(bag["keep_me"] as? String, "y")
+    // Other auto-props are untouched.
+    XCTAssertNotNil(bag["$ios_device_model"])
+    // Envelope-level routing keys live outside the bag and are unaffected.
+    XCTAssertNotNil(record["$token"])
+    XCTAssertNotNil(record["$distinct_id"])
+
+    removeDBfile(testMixpanel.apiToken)
+  }
+
+  /// Swift-specific deviation from Android: this SDK merges
+  /// `AutomaticProperties.peopleProperties` into both `$set` and `$set_once`, so the
+  /// filter runs on `$set_once` here. Android only merges into `$set` and filters
+  /// accordingly.
+  func testExcludePropertiesAppliesToPeopleSetOnce() {
+    let token = randomId()
+    let options = MixpanelOptions(
+      token: token,
+      flushInterval: 60,
+      excludeProperties: ["$ios_lib_version", "secret_prop"])
+    let testMixpanel = Mixpanel.initialize(options: options)
+    testMixpanel.identify(distinctId: "u1")
+    testMixpanel.people.setOnce(properties: ["secret_prop": "x", "keep_me": "y"])
+    waitForTrackingQueue(testMixpanel)
+
+    let record = findPeopleRecord(in: testMixpanel, action: "$set_once")!
+    let bag = record["$set_once"] as! InternalProperties
+
+    XCTAssertNil(bag["$ios_lib_version"])
+    XCTAssertNil(bag["secret_prop"])
+    XCTAssertEqual(bag["keep_me"] as? String, "y")
+    XCTAssertNotNil(bag["$ios_device_model"])
+
+    removeDBfile(testMixpanel.apiToken)
+  }
+
+  /// Mutating operators (`$add`, `$append`, `$union`, `$unset`) treat the bag as
+  /// operands rather than a property dictionary to mutate; the filter must NOT
+  /// touch them, since stripping a key from e.g. an `$unset` list would silently
+  /// change the operation's meaning.
+  func testExcludePropertiesPassThroughForMutatingPeopleOperators() {
+    let token = randomId()
+    let options = MixpanelOptions(
+      token: token,
+      flushInterval: 60,
+      excludeProperties: ["secret_prop"])
+    let testMixpanel = Mixpanel.initialize(options: options)
+    testMixpanel.identify(distinctId: "u1")
+
+    testMixpanel.people.increment(property: "secret_prop", by: 1)
+    testMixpanel.people.append(properties: ["secret_prop": "v"])
+    testMixpanel.people.union(properties: ["secret_prop": ["v"]])
+    testMixpanel.people.unset(properties: ["secret_prop"])
+    waitForTrackingQueue(testMixpanel)
+
+    XCTAssertEqual(
+      (findPeopleRecord(in: testMixpanel, action: "$add")!["$add"] as! InternalProperties)[
+        "secret_prop"] as? Double, 1, "$add must not be filtered")
+    XCTAssertEqual(
+      (findPeopleRecord(in: testMixpanel, action: "$append")!["$append"] as! InternalProperties)[
+        "secret_prop"] as? String, "v", "$append must not be filtered")
+    XCTAssertNotNil(
+      (findPeopleRecord(in: testMixpanel, action: "$union")!["$union"] as! InternalProperties)[
+        "secret_prop"], "$union must not be filtered")
+    // $unset stores the property names as an array under the action key.
+    let unsetNames = findPeopleRecord(in: testMixpanel, action: "$unset")!["$unset"] as! [String]
+    XCTAssertTrue(
+      unsetNames.contains("secret_prop"),
+      "$unset operand list must not be filtered (would silently change semantics)")
+
+    removeDBfile(testMixpanel.apiToken)
+  }
 }

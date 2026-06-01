@@ -187,6 +187,13 @@ public class MixpanelOptions {
   ///   contribute that the caller couldn't omit themselves.
   /// - **`$mp_metadata`** is a sibling of `properties` in the event envelope and is
   ///   structurally outside the filter's scope by design.
+  ///
+  /// **Recommended: do not strip `mp_lib` or `$lib_version`.** Mixpanel does not need them
+  /// for ingestion or identity resolution, so stripping them is permitted — but they are how
+  /// Mixpanel identifies which SDK (and which version) produced an event. Removing them
+  /// limits reporting accuracy (e.g. per-platform breakdowns) and makes it harder for support
+  /// to debug issues on your project. If either key is included here, the SDK logs a warning
+  /// at instance creation time.
   public let excludeProperties: Set<String>
   @available(*, deprecated, message: "Use featureFlagOptions.enabled instead")
   public var featureFlagsEnabled: Bool { return featureFlagOptions.enabled }

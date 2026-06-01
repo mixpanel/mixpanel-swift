@@ -390,11 +390,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
     flushInstance = Flush(serverURL: self.serverURL, useGzipCompression: useGzipCompression)
     sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
+    MixpanelInstance.warnIfStrippingLibProperties(self.options.excludeProperties)
     trackInstance = Track(
       apiToken: self.apiToken,
       instanceName: self.name,
       lock: self.readWriteLock,
-      metadata: sessionMetadata, 
+      metadata: sessionMetadata,
       mixpanelPersistence: mixpanelPersistence,
       excludeProperties: self.options.excludeProperties)
     trackInstance.mixpanelInstance = self
@@ -578,6 +579,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
   static func isiOSAppExtension() -> Bool {
     return Bundle.main.bundlePath.hasSuffix(".appex")
+  }
+
+  private static func warnIfStrippingLibProperties(_ excludeProperties: Set<String>) {
+    if excludeProperties.contains("mp_lib") || excludeProperties.contains("$lib_version") {
+      MixpanelLogger.warn(
+        message:
+          "MixpanelOptions.excludeProperties is stripping 'mp_lib' and/or '$lib_version'. "
+            + "These are not required for ingestion or identity, but Mixpanel uses them to "
+            + "identify the SDK source and version of each event — stripping them is not "
+            + "recommended.")
+    }
   }
 
   #if !os(OSX) && !os(watchOS)

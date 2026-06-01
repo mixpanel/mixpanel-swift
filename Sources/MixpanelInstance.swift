@@ -586,9 +586,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       MixpanelLogger.warn(
         message:
           "MixpanelOptions.excludeProperties is stripping 'mp_lib' and/or '$lib_version'. "
-            + "These are not required for ingestion or identity, but Mixpanel uses them to "
-            + "identify the SDK source and version of each event — stripping them is not "
-            + "recommended.")
+          + "These are not required for ingestion or identity, but Mixpanel uses them to "
+          + "identify the SDK source and version of each event — stripping them is not "
+          + "recommended.")
     }
   }
 

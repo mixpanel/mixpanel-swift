@@ -164,9 +164,18 @@ jobs:
             exit 0
           fi
 
-          # Extract this version's changelog entry
-          # Starts with "## [VERSION]" and ends before next "## [" or EOF
-          CHANGELOG=$(awk "/^## \[$VERSION\]/,/^## \[/{if(/^## \[/ && !/^## \[$VERSION\]/)exit;print}" CHANGELOG.md)
+          # Extract this version's changelog entry via a sed range.
+          # The address `\@^## \[VERSION\]@,\@^## \[@` selects from the
+          # version header through the next `## [` line; the inner block
+          # deletes both markers and prints the body. sed range patterns
+          # don't test the end pattern against the start line, so the
+          # start doesn't self-terminate. `\@...@` switches the address
+          # delimiter from `/` to `@` for consistency with the rest of
+          # the Mixpanel SDK fleet (where some tags contain `/`). Matches
+          # both `## [VERSION]` and `## [VERSION](link)` headers because
+          # the regex is anchored to the start of the line and the `]`
+          # ends the match before whatever follows.
+          CHANGELOG=$(sed -n '\@^## \['"${VERSION}"'\]@,\@^## \[@{\@^## \['"${VERSION}"'\]@d;\@^## \[@d;p;}' CHANGELOG.md)
 
           if [ -z "$CHANGELOG" ]; then
             echo "⚠️  Changelog entry for version $VERSION not found in CHANGELOG.md"

@@ -1505,4 +1505,51 @@ class MixpanelDemoTests: MixpanelBaseTests {
     XCTAssertTrue(
       testMixpanel.useGzipCompression == false, "the default gzip option disabled failed")
   }
+
+  func testServerURLSynchronizes() {
+    let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
+    let customURL = "https://api-eu.mixpanel.com"
+
+    // Set serverURL on instance
+    testMixpanel.serverURL = customURL
+
+    // Verify it synchronizes with flags.serverURL
+    XCTAssertEqual(
+      testMixpanel.serverURL, customURL,
+      "serverURL should be set on instance")
+  }
+
+  func testProxyServerConfigServerURLWithOptions() {
+    let token = randomId()
+    let proxyURL = "https://proxy.example.com"
+    let proxyConfig = ProxyServerConfig(serverUrl: proxyURL, delegate: nil)!
+
+    // Initialize with MixpanelOptions using only proxyServerConfig
+    let options = MixpanelOptions(token: token, proxyServerConfig: proxyConfig)
+    let testMixpanel = Mixpanel.initialize(options: options)
+
+    // Verify proxyServerConfig.serverUrl is used as serverURL
+    XCTAssertEqual(
+      testMixpanel.serverURL, proxyURL,
+      "serverURL should use proxyServerConfig.serverUrl when options.serverURL is nil")
+  }
+
+  func testServerURLTakesPrecedenceOverProxyServerConfig() {
+    let token = randomId()
+    let explicitURL = "https://api-eu.mixpanel.com"
+    let proxyURL = "https://proxy.example.com"
+    let proxyConfig = ProxyServerConfig(serverUrl: proxyURL, delegate: nil)!
+
+    // Initialize with both serverURL and proxyServerConfig
+    let options = MixpanelOptions(
+      token: token,
+      serverURL: explicitURL,
+      proxyServerConfig: proxyConfig)
+    let testMixpanel = Mixpanel.initialize(options: options)
+
+    // Verify explicit serverURL takes precedence
+    XCTAssertEqual(
+      testMixpanel.serverURL, explicitURL,
+      "explicit serverURL should take precedence over proxyServerConfig.serverUrl")
+  }
 }

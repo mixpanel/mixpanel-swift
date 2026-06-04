@@ -21,17 +21,32 @@ class Track {
   let lock: ReadWriteLock
   let metadata: SessionMetadata
   let mixpanelPersistence: MixpanelPersistence
+  let excludeProperties: Set<String>
   weak var mixpanelInstance: MixpanelInstance?
 
   init(
     apiToken: String, instanceName: String, lock: ReadWriteLock, metadata: SessionMetadata,
-    mixpanelPersistence: MixpanelPersistence
+    mixpanelPersistence: MixpanelPersistence, excludeProperties: Set<String> = []
   ) {
     self.instanceName = instanceName
     self.apiToken = apiToken
     self.lock = lock
     self.metadata = metadata
     self.mixpanelPersistence = mixpanelPersistence
+    self.excludeProperties = excludeProperties
+  }
+
+  /// Removes any key in `exclude` from `properties`, skipping keys in
+  /// ``MixpanelOptions/reservedPropertyKeys`` that ingestion or identity require.
+  /// `internal` so it can be unit-tested directly. No-op on an empty exclude set.
+  static func applyExcludeProperties(
+    _ properties: inout InternalProperties, exclude: Set<String>
+  ) {
+    if exclude.isEmpty { return }
+    for key in exclude {
+      if MixpanelOptions.reservedPropertyKeys.contains(key) { continue }
+      properties.removeValue(forKey: key)
+    }
   }
 
   func track(
@@ -95,6 +110,11 @@ class Track {
        let flagManager = mixpanelInstance.flags as? FeatureFlagManager {
       flagManager.checkFirstTimeEvents(eventName: ev, properties: p)
     }
+
+    // Filter just before persistence so internal observers above (event bridge,
+    // first-time-events check) still see the full property set, matching Android's
+    // network-send chokepoint.
+    Track.applyExcludeProperties(&p, exclude: excludeProperties)
 
     var trackEvent: InternalProperties = ["event": ev, "properties": p]
     metadata.toDict().forEach { (k, v) in trackEvent[k] = v }

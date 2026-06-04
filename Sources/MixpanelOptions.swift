@@ -143,6 +143,13 @@ public enum VariantLookupPolicy {
 }
 
 public class MixpanelOptions {
+  /// Property keys that ingestion or identity resolution require and that will never be
+  /// stripped by ``excludeProperties``, even if a customer lists them. Single source of truth
+  /// for both the runtime filter (see `Track.applyExcludeProperties`) and the documentation.
+  public static let reservedPropertyKeys: Set<String> = [
+    "token", "time", "distinct_id", "$device_id", "$user_id", "$had_persisted_distinct_id",
+  ]
+
   public let token: String
   public let flushInterval: Double
   public let instanceName: String?
@@ -153,6 +160,41 @@ public class MixpanelOptions {
   public let serverURL: String?
   public let proxyServerConfig: ProxyServerConfig?
   public let useGzipCompression: Bool
+
+  /// Property keys that will be stripped from outgoing event and People payloads before they
+  /// are persisted and sent to Mixpanel. Defaults to empty (no filtering, zero per-payload
+  /// overhead).
+  ///
+  /// Use this to reduce payload size or to suppress properties the project has no interest in.
+  /// Matching is **exact and case-sensitive**.
+  ///
+  /// Keys in ``MixpanelOptions/reservedPropertyKeys`` are never stripped, even if listed —
+  /// they are required for ingestion and identity resolution.
+  ///
+  /// **Scope:**
+  /// - **Events** — applied at the persistence chokepoint, covering super properties, caller
+  ///   properties, and SDK auto-properties uniformly.
+  /// - **People `$set` and `$set_once`** — applied after the SDK merges
+  ///   `AutomaticProperties.peopleProperties` (the auto-injected `$ios_*` device keys) so
+  ///   those auto-injected keys are subject to the same exclude set as event auto-properties.
+  ///
+  /// **Not in scope:**
+  /// - Other People operators (`$add`, `$append`, `$union`, `$unset`, `$merge`, `$remove`,
+  ///   `$delete`) are pass-through. Their property keys are operands rather than a bag to
+  ///   mutate, and filtering inside them would silently change semantics (e.g. dropping a
+  ///   name from an `$unset` list).
+  /// - **Group updates** never merge auto-properties, so there is nothing the filter would
+  ///   contribute that the caller couldn't omit themselves.
+  /// - **`$mp_metadata`** is a sibling of `properties` in the event envelope and is
+  ///   structurally outside the filter's scope by design.
+  ///
+  /// **Recommended: do not strip `mp_lib` or `$lib_version`.** Mixpanel does not need them
+  /// for ingestion or identity resolution, so stripping them is permitted — but they are how
+  /// Mixpanel identifies which SDK (and which version) produced an event. Removing them
+  /// limits reporting accuracy (e.g. per-platform breakdowns) and makes it harder for support
+  /// to debug issues on your project. If either key is included here, the SDK logs a warning
+  /// at instance creation time.
+  public let excludeProperties: Set<String>
   @available(*, deprecated, message: "Use featureFlagOptions.enabled instead")
   public var featureFlagsEnabled: Bool { return featureFlagOptions.enabled }
 
@@ -224,7 +266,8 @@ public class MixpanelOptions {
     featureFlagsEnabled: Bool = false,
     featureFlagsContext: [String: Any] = [:],
     deviceIdProvider: (() -> String?)? = nil,
-    featureFlagOptions: FeatureFlagOptions? = nil
+    featureFlagOptions: FeatureFlagOptions? = nil,
+    excludeProperties: Set<String> = []
   ) {
     self.token = token
     self.flushInterval = flushInterval
@@ -237,6 +280,7 @@ public class MixpanelOptions {
     self.proxyServerConfig = proxyServerConfig
     self.useGzipCompression = useGzipCompression
     self.deviceIdProvider = deviceIdProvider
+    self.excludeProperties = excludeProperties
 
     // When featureFlagOptions is explicitly provided, it takes precedence
     if let featureFlagOptions = featureFlagOptions {

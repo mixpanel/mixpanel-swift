@@ -26,6 +26,7 @@ class Flush: AppLifecycle {
   var _flushInterval = 0.0
   var _flushBatchSize = APIConstants.maxBatchSize
   private var _serverURL = BasePath.DefaultMixpanelAPI
+  private var _backupHost: String?
   private let flushRequestReadWriteLock: DispatchQueue
 
   var useGzipCompression: Bool
@@ -42,6 +43,22 @@ class Flush: AppLifecycle {
         execute: {
           _serverURL = newValue
           self.flushRequest.serverURL = newValue
+        })
+    }
+  }
+
+  var backupHost: String? {
+    get {
+      flushRequestReadWriteLock.sync {
+        return _backupHost
+      }
+    }
+    set {
+      flushRequestReadWriteLock.sync(
+        flags: .barrier,
+        execute: {
+          _backupHost = newValue
+          self.flushRequest.backupHost = newValue
         })
     }
   }
@@ -73,10 +90,12 @@ class Flush: AppLifecycle {
     }
   }
 
-  required init(serverURL: String, useGzipCompression: Bool) {
+  required init(serverURL: String, useGzipCompression: Bool, backupHost: String? = nil) {
     self.flushRequest = FlushRequest(serverURL: serverURL)
+    self.flushRequest.backupHost = backupHost
     self.useGzipCompression = useGzipCompression
     _serverURL = serverURL
+    _backupHost = backupHost
     flushRequestReadWriteLock = DispatchQueue(
       label: "com.mixpanel.flush_interval.lock", qos: .utility, attributes: .concurrent,
       autoreleaseFrequency: .workItem)

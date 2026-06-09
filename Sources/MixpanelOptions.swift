@@ -158,6 +158,21 @@ public class MixpanelOptions {
   public let useUniqueDistinctId: Bool
   public let superProperties: Properties?
   public let serverURL: String?
+
+  /// Optional fallback host used only when a request to the primary ``serverURL`` fails to
+  /// connect (or the server returns an error other than a 4xx client error). Defaults to `nil`
+  /// (no fallback).
+  ///
+  /// This is intended for customers in regions where Mixpanel's primary endpoints are blocked:
+  /// configure a proxy and set its host here so that only traffic that actually fails over hits
+  /// the proxy, keeping the integration largely transparent. Mirrors the Android SDK's
+  /// `backupHost`.
+  ///
+  /// Provide a host name (e.g. `"api-backup.mixpanel.com"`). The primary URL's scheme and port
+  /// are preserved when failing over; only the host is swapped. A full URL is also accepted —
+  /// only its host is used.
+  public let backupHost: String?
+
   public let proxyServerConfig: ProxyServerConfig?
   public let useGzipCompression: Bool
 
@@ -261,6 +276,7 @@ public class MixpanelOptions {
     useUniqueDistinctId: Bool = false,
     superProperties: Properties? = nil,
     serverURL: String? = nil,
+    backupHost: String? = nil,
     proxyServerConfig: ProxyServerConfig? = nil,
     useGzipCompression: Bool = true,  // NOTE: This is a new default value!
     featureFlagsEnabled: Bool = false,
@@ -277,6 +293,7 @@ public class MixpanelOptions {
     self.useUniqueDistinctId = useUniqueDistinctId
     self.superProperties = superProperties
     self.serverURL = serverURL
+    self.backupHost = backupHost
     self.proxyServerConfig = proxyServerConfig
     self.useGzipCompression = useGzipCompression
     self.deviceIdProvider = deviceIdProvider

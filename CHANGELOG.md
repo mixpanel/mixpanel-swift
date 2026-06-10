@@ -1,3 +1,21 @@
+Last tag: 6.4.0
+## [6.4.1](https://github.com/mixpanel/mixpanel-swift/tree/6.4.1) (2026-06-10)
+
+### Features
+
+- add MixpanelOptions.excludeProperties to strip event keys (#734) ([#734](https://github.com/mixpanel/mixpanel-swift/pull/734))
+
+### Fixes
+
+- add missing comma in .swift-format config (#736) ([#736](https://github.com/mixpanel/mixpanel-swift/pull/736))
+- global accent color issue (#727) ([#727](https://github.com/mixpanel/mixpanel-swift/pull/727))
+
+### Chores
+
+- align changelog extraction with rest of SDK fleet (#735) ([#735](https://github.com/mixpanel/mixpanel-swift/pull/735))
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.4.0...6.4.1)
+
 # Changelog
 
 Last tag: 6.3.0

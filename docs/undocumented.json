@@ -177,35 +177,35 @@
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 483,
+      "line": 491,
       "symbol": "MixpanelInstance.getOptions()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 487,
+      "line": 495,
       "symbol": "MixpanelInstance.getDistinctId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 491,
+      "line": 499,
       "symbol": "MixpanelInstance.getAnonymousId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 1068,
+      "line": 1087,
       "symbol": "MixpanelInstance.archive()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 1336,
+      "line": 1355,
       "symbol": "MixpanelInstance.getGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
@@ -261,92 +261,92 @@
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 146,
+      "line": 153,
       "symbol": "MixpanelOptions.token",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 147,
+      "line": 154,
       "symbol": "MixpanelOptions.flushInterval",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 148,
+      "line": 155,
       "symbol": "MixpanelOptions.instanceName",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 149,
+      "line": 156,
       "symbol": "MixpanelOptions.trackAutomaticEvents",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 150,
+      "line": 157,
       "symbol": "MixpanelOptions.optOutTrackingByDefault",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 151,
+      "line": 158,
       "symbol": "MixpanelOptions.useUniqueDistinctId",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 152,
+      "line": 159,
       "symbol": "MixpanelOptions.superProperties",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 153,
+      "line": 160,
       "symbol": "MixpanelOptions.serverURL",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 154,
+      "line": 161,
       "symbol": "MixpanelOptions.proxyServerConfig",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 155,
+      "line": 162,
       "symbol": "MixpanelOptions.useGzipCompression",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 157,
+      "line": 199,
       "symbol": "MixpanelOptions.featureFlagsEnabled",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 160,
+      "line": 202,
       "symbol": "MixpanelOptions.featureFlagsContext",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 213,
-      "symbol": "MixpanelOptions.init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:deviceIdProvider:featureFlagOptions:)",
+      "line": 255,
+      "symbol": "MixpanelOptions.init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:deviceIdProvider:featureFlagOptions:excludeProperties:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },

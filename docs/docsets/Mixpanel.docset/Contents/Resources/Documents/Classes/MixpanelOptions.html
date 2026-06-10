@@ -17,7 +17,7 @@
     <a title="MixpanelOptions Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 6.4.0 Docs</a> (68% documented)</p>
+        <p><a href="../index.html">Mixpanel 6.4.1 Docs</a> (69% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Frunner%2Fwork%2Fmixpanel-swift%2Fmixpanel-swift%2Fbuild"><img src="../img/dash.png" alt="Dash"/>Install in Dash</a></p>
         <div class="header-right">
@@ -202,6 +202,35 @@
           <section class="section task-group-section">
             <div class="task-group">
               <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A7OptionsC20reservedPropertyKeysShySSGvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/reservedPropertyKeys" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A7OptionsC20reservedPropertyKeysShySSGvpZ">reservedPropertyKeys</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Property keys that ingestion or identity resolution require and that will never be
+stripped by <code><a href="../Classes/MixpanelOptions.html#/s:8Mixpanel0A7OptionsC17excludePropertiesShySSGvp">excludeProperties</a></code>, even if a customer lists them. Single source of truth
+for both the runtime filter (see <code>Track.applyExcludeProperties</code>) and the documentation.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">reservedPropertyKeys</span><span class="p">:</span> <span class="kt">Set</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
                 <li class="item">
                   <div>
                     <code>
@@ -475,6 +504,71 @@
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:8Mixpanel0A7OptionsC17excludePropertiesShySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/excludeProperties" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A7OptionsC17excludePropertiesShySSGvp">excludeProperties</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Property keys that will be stripped from outgoing event and People payloads before they
+are persisted and sent to Mixpanel. Defaults to empty (no filtering, zero per-payload
+overhead).</p>
+
+<p>Use this to reduce payload size or to suppress properties the project has no interest in.
+Matching is <strong>exact and case-sensitive</strong>.</p>
+
+<p>Keys in <code><a href="../Classes/MixpanelOptions.html#/s:8Mixpanel0A7OptionsC20reservedPropertyKeysShySSGvpZ">reservedPropertyKeys</a></code> are never stripped, even if listed —
+they are required for ingestion and identity resolution.</p>
+
+<p><strong>Scope:</strong></p>
+
+<ul>
+<li><strong>Events</strong> — applied at the persistence chokepoint, covering super properties, caller
+properties, and SDK auto-properties uniformly.</li>
+<li><strong>People <code>$set</code> and <code>$set_once</code></strong> — applied after the SDK merges
+<code>AutomaticProperties.peopleProperties</code> (the auto-injected <code>$ios_*</code> device keys) so
+those auto-injected keys are subject to the same exclude set as event auto-properties.</li>
+</ul>
+
+<p><strong>Not in scope:</strong></p>
+
+<ul>
+<li>Other People operators (<code>$add</code>, <code>$append</code>, <code>$union</code>, <code>$unset</code>, <code>$merge</code>, <code>$remove</code>,
+<code>$delete</code>) are pass-through. Their property keys are operands rather than a bag to
+mutate, and filtering inside them would silently change semantics (e.g. dropping a
+name from an <code>$unset</code> list).</li>
+<li><strong>Group updates</strong> never merge auto-properties, so there is nothing the filter would
+contribute that the caller couldn&rsquo;t omit themselves.</li>
+<li><strong><code>$mp_metadata</code></strong> is a sibling of <code>properties</code> in the event envelope and is
+structurally outside the filter&rsquo;s scope by design.</li>
+</ul>
+
+<p><strong>Recommended: do not strip <code>mp_lib</code> or <code>$lib_version</code>.</strong> Mixpanel does not need them
+for ingestion or identity resolution, so stripping them is permitted — but they are how
+Mixpanel identifies which SDK (and which version) produced an event. Removing them
+limits reporting accuracy (e.g. per-platform breakdowns) and makes it harder for support
+to debug issues on your project. If either key is included here, the SDK logs a warning
+at instance creation time.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">excludeProperties</span><span class="p">:</span> <span class="kt">Set</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:8Mixpanel0A7OptionsC19featureFlagsEnabledSbvp"></a>
                     <a name="//apple_ref/swift/Property/featureFlagsEnabled" class="dashAnchor"></a>
                     <a class="token" href="#/s:8Mixpanel0A7OptionsC19featureFlagsEnabledSbvp">featureFlagsEnabled</a>
@@ -632,9 +726,9 @@ returns a value different from the persisted anonymous ID.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContext06deviceS8Provider011featureFlagB0ACSS_SdSSSgS3bSDySSAA0A4Type_pGSgArA05ProxyyZ0VSgS2bSDySSypGARycSgAA011FeatureFlagB0VSgtcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:deviceIdProvider:featureFlagOptions:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContext06deviceS8Provider011featureFlagB0ACSS_SdSSSgS3bSDySSAA0A4Type_pGSgArA05ProxyyZ0VSgS2bSDySSypGARycSgAA011FeatureFlagB0VSgtcfc">init(token:<wbr>flushInterval:<wbr>instanceName:<wbr>trackAutomaticEvents:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>proxyServerConfig:<wbr>useGzipCompression:<wbr>featureFlagsEnabled:<wbr>featureFlagsContext:<wbr>deviceIdProvider:<wbr>featureFlagOptions:<wbr>)</a>
+                    <a name="/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContext06deviceS8Provider011featureFlagB007excludeU0ACSS_SdSSSgS3bSDySSAA0A4Type_pGSgAsA05ProxyyZ0VSgS2bSDySSypGASycSgAA011FeatureFlagB0VSgShySSGtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:deviceIdProvider:featureFlagOptions:excludeProperties:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContext06deviceS8Provider011featureFlagB007excludeU0ACSS_SdSSSgS3bSDySSAA0A4Type_pGSgAsA05ProxyyZ0VSgS2bSDySSypGASycSgAA011FeatureFlagB0VSgShySSGtcfc">init(token:<wbr>flushInterval:<wbr>instanceName:<wbr>trackAutomaticEvents:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>proxyServerConfig:<wbr>useGzipCompression:<wbr>featureFlagsEnabled:<wbr>featureFlagsContext:<wbr>deviceIdProvider:<wbr>featureFlagOptions:<wbr>excludeProperties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -663,7 +757,8 @@ returns a value different from the persisted anonymous ID.</p>
   <span class="nv">featureFlagsEnabled</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
   <span class="nv">featureFlagsContext</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[:],</span>
   <span class="nv">deviceIdProvider</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">String</span><span class="p">?)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-  <span class="nv">featureFlagOptions</span><span class="p">:</span> <span class="kt"><a href="../Structs/FeatureFlagOptions.html">FeatureFlagOptions</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span>
+  <span class="nv">featureFlagOptions</span><span class="p">:</span> <span class="kt"><a href="../Structs/FeatureFlagOptions.html">FeatureFlagOptions</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+  <span class="nv">excludeProperties</span><span class="p">:</span> <span class="kt">Set</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="p">)</span></code></pre>
 
                         </div>
@@ -676,7 +771,7 @@ returns a value different from the persisted anonymous ID.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-05-07)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-06-10)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

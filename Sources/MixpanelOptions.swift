@@ -127,15 +127,16 @@ public enum VariantLookupPolicy {
   internal static func effective(_ requested: VariantLookupPolicy) -> VariantLookupPolicy {
     let persistenceTtl: TimeInterval
     switch requested {
-    case .networkOnly:
-      return requested
-    case .persistenceUntilNetworkSuccess(let t), .networkFirst(let t):
-      persistenceTtl = t
+      case .networkOnly:
+        return requested
+      case .persistenceUntilNetworkSuccess(let t), .networkFirst(let t):
+        persistenceTtl = t
     }
     if persistenceTtl <= 0 {
       MixpanelLogger.warn(
         message:
-          "Non-positive persistenceTtl (\(persistenceTtl)s) on \(requested); falling back to networkOnly since persistence with no meaningful TTL does no useful work.")
+          "Non-positive persistenceTtl (\(persistenceTtl)s) on \(requested); falling back to networkOnly since persistence with no meaningful TTL does no useful work."
+      )
       return .networkOnly
     }
     return requested
@@ -158,6 +159,7 @@ public class MixpanelOptions {
   public let useUniqueDistinctId: Bool
   public let superProperties: Properties?
   public let serverURL: String?
+
   public let proxyServerConfig: ProxyServerConfig?
   public let useGzipCompression: Bool
 

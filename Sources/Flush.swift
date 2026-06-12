@@ -13,7 +13,7 @@ protocol FlushDelegate: AnyObject {
   func flushSuccess(type: FlushType, ids: [Int32])
 
   #if os(iOS)
-    func updateNetworkActivityIndicator(_ on: Bool)
+  func updateNetworkActivityIndicator(_ on: Bool)
   #endif  // os(iOS)
 }
 
@@ -26,6 +26,7 @@ class Flush: AppLifecycle {
   var _flushInterval = 0.0
   var _flushBatchSize = APIConstants.maxBatchSize
   private var _serverURL = BasePath.DefaultMixpanelAPI
+  private var _backupHost: String?
   private let flushRequestReadWriteLock: DispatchQueue
 
   var useGzipCompression: Bool
@@ -42,6 +43,22 @@ class Flush: AppLifecycle {
         execute: {
           _serverURL = newValue
           self.flushRequest.serverURL = newValue
+        })
+    }
+  }
+
+  var backupHost: String? {
+    get {
+      flushRequestReadWriteLock.sync {
+        return _backupHost
+      }
+    }
+    set {
+      flushRequestReadWriteLock.sync(
+        flags: .barrier,
+        execute: {
+          _backupHost = newValue
+          self.flushRequest.backupHost = newValue
         })
     }
   }
@@ -140,9 +157,9 @@ class Flush: AppLifecycle {
       let requestData = JSONHandler.encodeAPIData(batch)
       if let requestData = requestData {
         #if os(iOS)
-          if !MixpanelInstance.isiOSAppExtension() {
-            delegate?.updateNetworkActivityIndicator(true)
-          }
+        if !MixpanelInstance.isiOSAppExtension() {
+          delegate?.updateNetworkActivityIndicator(true)
+        }
         #endif  // os(iOS)
         let success = flushRequest.sendRequest(
           requestData,
@@ -151,9 +168,9 @@ class Flush: AppLifecycle {
           headers: headers,
           queryItems: queryItems, useGzipCompression: useGzipCompression)
         #if os(iOS)
-          if !MixpanelInstance.isiOSAppExtension() {
-            delegate?.updateNetworkActivityIndicator(false)
-          }
+        if !MixpanelInstance.isiOSAppExtension() {
+          delegate?.updateNetworkActivityIndicator(false)
+        }
         #endif  // os(iOS)
         if success {
           // remove

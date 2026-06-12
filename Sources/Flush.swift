@@ -90,12 +90,10 @@ class Flush: AppLifecycle {
     }
   }
 
-  required init(serverURL: String, useGzipCompression: Bool, backupHost: String? = nil) {
+  required init(serverURL: String, useGzipCompression: Bool) {
     self.flushRequest = FlushRequest(serverURL: serverURL)
-    self.flushRequest.backupHost = backupHost
     self.useGzipCompression = useGzipCompression
     _serverURL = serverURL
-    _backupHost = backupHost
     flushRequestReadWriteLock = DispatchQueue(
       label: "com.mixpanel.flush_interval.lock", qos: .utility, attributes: .concurrent,
       autoreleaseFrequency: .workItem)

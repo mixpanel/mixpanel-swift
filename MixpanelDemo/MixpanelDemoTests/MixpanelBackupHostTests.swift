@@ -77,19 +77,6 @@ class MixpanelBackupHostTests: MixpanelBaseTests {
 
   // MARK: - Plumbing: options -> instance -> flush -> request
 
-  func testBackupHostFromOptionsPropagatesToFlushRequest() {
-    let options = MixpanelOptions(token: randomId(), backupHost: "api-backup.mixpanel.com")
-    let testMixpanel = Mixpanel.initialize(options: options)
-    waitForTrackingQueue(testMixpanel)
-
-    XCTAssertEqual(testMixpanel.backupHost, "api-backup.mixpanel.com")
-    XCTAssertEqual(testMixpanel.flushInstance.backupHost, "api-backup.mixpanel.com")
-    XCTAssertEqual(
-      testMixpanel.flushInstance.flushRequest.backupHost, "api-backup.mixpanel.com")
-
-    removeDBfile(testMixpanel.apiToken)
-  }
-
   func testNoBackupHostByDefault() {
     let options = MixpanelOptions(token: randomId())
     let testMixpanel = Mixpanel.initialize(options: options)

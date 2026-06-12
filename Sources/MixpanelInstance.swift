@@ -176,8 +176,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
   /// Optional fallback host used only when a request to the primary ``serverURL`` fails to
   /// connect (or the server returns an error other than a 4xx client error). Defaults to `nil`
-  /// (no fallback). See ``MixpanelOptions/backupHost`` for details. Mirrors the Android SDK's
-  /// `setBackupHost`.
+  /// (no fallback). Mirrors the Android SDK's `setBackupHost`.
+  ///
+  /// Provide a host name (e.g. `"api-backup.mixpanel.com"`). The primary URL's scheme and port
+  /// are preserved when failing over; only the host is swapped.
   open var backupHost: String? = nil {
     didSet {
       flushInstance.backupHost = backupHost
@@ -384,7 +386,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     if let serverURL = serverURL {
       self.serverURL = serverURL
     }
-    self.backupHost = self.options.backupHost
     self.useGzipCompression = useGzipCompression
     self.proxyServerDelegate = proxyServerDelegate
     let label = "com.mixpanel.\(self.apiToken)"
@@ -400,8 +401,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
     flushInstance = Flush(
-      serverURL: self.serverURL, useGzipCompression: useGzipCompression,
-      backupHost: self.backupHost)
+      serverURL: self.serverURL, useGzipCompression: useGzipCompression)
     sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
     MixpanelInstance.warnIfStrippingLibProperties(self.options.excludeProperties)
     trackInstance = Track(

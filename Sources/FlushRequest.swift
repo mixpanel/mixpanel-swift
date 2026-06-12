@@ -83,10 +83,10 @@ class FlushRequest: Network {
     Network.apiRequest(
       base: base, resource: resource,
       failure: { (reason, _, response) in
-        // On a connection-level failure to the primary host, fall back to the configured backup
-        // host (if any) before giving up. Mirrors the Android SDK's backupHost behavior: the
-        // backup is only attempted when the primary couldn't be reached or returned a server-side
-        // error — never for client errors (4xx), where a different host won't help.
+        // On a failure to the primary host, fall back to the configured backup host (if any)
+        // before giving up. The backup is attempted when the primary couldn't be reached or
+        // returned a non-4xx error — never for client errors (4xx), where a different host
+        // won't help.
         if let backupBase = self.backupBaseURL(forPrimary: base, failureReason: reason) {
           MixpanelLogger.info(
             message:
@@ -153,8 +153,8 @@ class FlushRequest: Network {
   }
 
   /// Whether a primary-host failure should trigger a backup-host retry. We retry on connection
-  /// failures and server-side errors, but not on client errors (4xx) — a different host won't fix
-  /// a malformed request — nor on parse errors, where the primary did respond with a 200.
+  /// failures and non-4xx HTTP errors, but not on client errors (4xx) — a different host won't
+  /// fix a malformed request — nor on parse errors, where the primary did respond with a 200.
   static func shouldFallBackToBackup(_ reason: Reason) -> Bool {
     switch reason {
     case .other, .noData:

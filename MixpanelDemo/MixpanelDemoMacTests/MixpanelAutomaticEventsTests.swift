@@ -16,6 +16,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
   func testSession() {
     let testMixpanel = Mixpanel.initialize(
       token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
+    waitForAsyncTasks()
     testMixpanel.minimumSessionDuration = 0
     testMixpanel.identify(distinctId: "d1")
     waitForTrackingQueue(testMixpanel)
@@ -42,6 +43,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
   func testKeepAutomaticEventsIfNetworkNotAvailable() {
     let testMixpanel = Mixpanel.initialize(
       token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
+    waitForAsyncTasks()
     testMixpanel.minimumSessionDuration = 0
     testMixpanel.automaticEvents.perform(
       #selector(AutomaticEvents.appWillResignActive(_:)),
@@ -72,6 +74,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
   func testFlushAutomaticEventsIfTrackAutomaticEventsEnabledIsTrue() {
     let testMixpanel = Mixpanel.initialize(
       token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
+    waitForAsyncTasks()
     testMixpanel.minimumSessionDuration = 0
     testMixpanel.automaticEvents.perform(
       #selector(AutomaticEvents.appWillResignActive(_:)),
@@ -87,6 +90,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
   }
 
   func testUpdated() {
+    waitForAsyncTasks()
     let defaults = UserDefaults(suiteName: "Mixpanel")
     let infoDict = Bundle.main.infoDictionary
     let appVersionValue = infoDict?["CFBundleShortVersionString"]
@@ -99,6 +103,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
   func testFirstAppShouldOnlyBeTrackedOnce() {
     let testToken = randomId()
     let mp = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true)
+    waitForAsyncTasks()
     mp.minimumSessionDuration = 0
     waitForTrackingQueue(mp)
     XCTAssertEqual(
@@ -106,6 +111,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
     flushAndWaitForTrackingQueue(mp)
 
     let mp2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true)
+    waitForAsyncTasks()
     mp2.minimumSessionDuration = 0
     waitForTrackingQueue(mp2)
     XCTAssertEqual(
@@ -118,9 +124,11 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
     defaults?.removeObject(forKey: "MPFirstOpen")
 
     let mp = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true)
+    waitForAsyncTasks()
     mp.minimumSessionDuration = 0
     waitForTrackingQueue(mp)
     let mp2 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true)
+    waitForAsyncTasks()
     mp2.minimumSessionDuration = 0
     waitForTrackingQueue(mp2)
 

@@ -157,12 +157,12 @@ class FlushRequest: Network {
   /// fix a malformed request — nor on parse errors, where the primary did respond with a 200.
   static func shouldFallBackToBackup(_ reason: Reason) -> Bool {
     switch reason {
-    case .other, .noData:
-      return true
-    case .notOKStatusCode(let statusCode):
-      return !(400..<500).contains(statusCode)
-    case .parseError:
-      return false
+      case .other, .noData:
+        return true
+      case .notOKStatusCode(let statusCode):
+        return !(400..<500).contains(statusCode)
+      case .parseError:
+        return false
     }
   }
 

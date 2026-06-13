@@ -252,6 +252,22 @@ public class MixpanelOptions {
   /// ```
   public let deviceIdProvider: (() -> String?)?
 
+  /// Configuration for automatic event capture (clicks, rage clicks, dead clicks).
+  ///
+  /// Autocapture is **disabled by default**. Provide an `AutocaptureOptions` instance
+  /// to enable automatic capture of user interactions.
+  ///
+  /// **Example — Enable autocapture with defaults:**
+  /// ```swift
+  /// let options = MixpanelOptions(
+  ///     token: "YOUR_TOKEN",
+  ///     autocaptureOptions: AutocaptureOptions()
+  /// )
+  /// ```
+  ///
+  /// **Note:** Autocapture is only available on iOS.
+  public let autocaptureOptions: AutocaptureOptions?
+
   public init(
     token: String,
     flushInterval: Double = 60,
@@ -267,7 +283,8 @@ public class MixpanelOptions {
     featureFlagsContext: [String: Any] = [:],
     deviceIdProvider: (() -> String?)? = nil,
     featureFlagOptions: FeatureFlagOptions? = nil,
-    excludeProperties: Set<String> = []
+    excludeProperties: Set<String> = [],
+    autocaptureOptions: AutocaptureOptions? = nil
   ) {
     self.token = token
     self.flushInterval = flushInterval
@@ -281,6 +298,7 @@ public class MixpanelOptions {
     self.useGzipCompression = useGzipCompression
     self.deviceIdProvider = deviceIdProvider
     self.excludeProperties = excludeProperties
+    self.autocaptureOptions = autocaptureOptions
 
     // When featureFlagOptions is explicitly provided, it takes precedence
     if let featureFlagOptions = featureFlagOptions {

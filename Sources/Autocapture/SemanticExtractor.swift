@@ -110,7 +110,7 @@
     // MARK: - Accessibility Property Discovery
 
     private func findAccessibilityIdentifier(
-      in view: UIView, maxLevels: Int = Self.maxHierarchyDepth
+      in view: UIView, maxLevels: Int = SemanticExtractor.maxHierarchyDepth
     ) -> String? {
       var currentView: UIView? = view
       var level = 0
@@ -128,7 +128,7 @@
       return nil
     }
 
-    private func findAccessibilityLabel(in view: UIView, maxLevels: Int = Self.maxHierarchyDepth)
+    private func findAccessibilityLabel(in view: UIView, maxLevels: Int = SemanticExtractor.maxHierarchyDepth)
       -> String?
     {
       var currentView: UIView? = view
@@ -285,7 +285,7 @@
     // MARK: - View Hierarchy
 
     private func buildViewHierarchy(
-      from view: UIView, maxLevels: Int = Self.maxHierarchyDepth
+      from view: UIView, maxLevels: Int = SemanticExtractor.maxHierarchyDepth
     ) -> String {
       var hierarchy: [String] = []
       var currentView: UIView? = view

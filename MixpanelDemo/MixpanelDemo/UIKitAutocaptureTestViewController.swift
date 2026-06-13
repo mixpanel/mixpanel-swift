@@ -21,7 +21,11 @@ class UIKitAutocaptureTestViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     title = "UIKit Autocapture Test"
-    view.backgroundColor = .systemBackground
+    if #available(iOS 13.0, *) {
+      view.backgroundColor = .systemBackground
+    } else {
+      view.backgroundColor = .white
+    }
     setupScrollView()
     setupTestElements()
   }
@@ -197,7 +201,11 @@ class UIKitAutocaptureTestViewController: UIViewController {
     let instructions = UILabel()
     instructions.numberOfLines = 0
     instructions.font = .systemFont(ofSize: 14)
-    instructions.textColor = .secondaryLabel
+    if #available(iOS 13.0, *) {
+      instructions.textColor = .secondaryLabel
+    } else {
+      instructions.textColor = .gray
+    }
     instructions.text = """
       1. Enable Mixpanel logging to see events
       2. Tap buttons to verify $mp_click events
@@ -241,7 +249,11 @@ class UIKitAutocaptureTestViewController: UIViewController {
     let label = UILabel()
     label.text = text.uppercased()
     label.font = .boldSystemFont(ofSize: 11)
-    label.textColor = .secondaryLabel
+    if #available(iOS 13.0, *) {
+      label.textColor = .secondaryLabel
+    } else {
+      label.textColor = .gray
+    }
     return label
   }
 

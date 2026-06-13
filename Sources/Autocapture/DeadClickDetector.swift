@@ -237,8 +237,17 @@
       var contentHash = 0
 
       // Count visible windows (handles alerts, sheets, etc.)
-      let windowCount =
-        UIApplication.shared.windows.filter { $0.isKeyWindow || !$0.isHidden }.count
+      // Use windowScene.windows for iOS 13+, fallback to just counting this window
+      let windowCount: Int
+      if #available(iOS 13.0, *) {
+        if let scene = window.windowScene {
+          windowCount = scene.windows.filter { $0.isKeyWindow || !$0.isHidden }.count
+        } else {
+          windowCount = 1
+        }
+      } else {
+        windowCount = 1  // Fallback for older iOS
+      }
 
       // Walk view hierarchy
       func processView(_ view: UIView) {

@@ -29,19 +29,19 @@ struct SwiftUIAutocaptureTestView: View {
 
         Button("Rule 1 - accessibilityLabel (primary)") {}
           .accessibilityLabel("swiftui_rule1")
-          .buttonStyle(.bordered)
+          .buttonStyle(TestButtonStyle())
 
         Button("Rule 2 - identifier only (-> hash, needs VoiceOver)") {}
           .accessibilityIdentifier("ident_only")
-          .buttonStyle(.bordered)
+          .buttonStyle(TestButtonStyle())
 
         Button("Label Wins over Identifier") {}
           .accessibilityLabel("label_wins")
           .accessibilityIdentifier("id_loses")
-          .buttonStyle(.bordered)
+          .buttonStyle(TestButtonStyle())
 
         Button("Rule 3 - No ID, No Label (hash)") {}
-          .buttonStyle(.bordered)
+          .buttonStyle(TestButtonStyle())
 
         Image(systemName: "star.fill")
           .resizable()
@@ -56,7 +56,7 @@ struct SwiftUIAutocaptureTestView: View {
 
         Button("Dead Button (empty action) -> $mp_dead_click") {}
           .accessibilityLabel("swiftui_dead_btn")
-          .buttonStyle(.bordered)
+          .buttonStyle(TestButtonStyle())
 
         // MARK: - Rage Click
 
@@ -71,7 +71,7 @@ struct SwiftUIAutocaptureTestView: View {
           tapCount += 1
         }
         .accessibilityLabel("swiftui_rage_click_btn")
-        .buttonStyle(.bordered)
+        .buttonStyle(TestButtonStyle())
 
         // MARK: - Excluded Controls
 
@@ -91,11 +91,11 @@ struct SwiftUIAutocaptureTestView: View {
 
         Button("mp-sensitive (by label)") {}
           .accessibilityLabel("mp-sensitive")
-          .buttonStyle(.bordered)
+          .buttonStyle(TestButtonStyle())
 
         Button("mp-no-track (by identifier)") {}
           .accessibilityIdentifier("mp-no-track")
-          .buttonStyle(.bordered)
+          .buttonStyle(TestButtonStyle())
 
         // MARK: - Instructions
 
@@ -119,6 +119,23 @@ struct SwiftUIAutocaptureTestView: View {
       .padding()
     }
     .navigationTitle("SwiftUI Autocapture Test")
+  }
+}
+
+/// Simple bordered button style compatible with iOS 14+
+@available(iOS 14.0, *)
+private struct TestButtonStyle: ButtonStyle {
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+      .padding(.horizontal, 12)
+      .padding(.vertical, 8)
+      .background(Color.blue.opacity(configuration.isPressed ? 0.2 : 0.1))
+      .foregroundColor(.blue)
+      .cornerRadius(8)
+      .overlay(
+        RoundedRectangle(cornerRadius: 8)
+          .stroke(Color.blue.opacity(0.5), lineWidth: 1)
+      )
   }
 }
 

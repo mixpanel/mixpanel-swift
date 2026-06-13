@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0AA1DE0DA9BEA10750F15ECD /* SwizzledTouchInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04558C747B60EA2884344AC4 /* SwizzledTouchInterceptor.swift */; };
 		16178FD12F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000002 /* jsonlogic */; };
 		16178FD22F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000003 /* jsonlogic */; };
 		16178FD32F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000004 /* jsonlogic */; };
@@ -23,13 +24,20 @@
 		171E4C182DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */; };
 		171E4C192DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */; };
 		171E4C1A2DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */; };
+		1791E3CAF5CEAABAE27B3420 /* ClickEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F6AD00C3E5DEC0700973C08 /* ClickEvent.swift */; };
 		17C6547A2BB1F15C00C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
 		17C6547B2BB1F16000C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
 		17C6547C2BB1F16400C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
 		17C6547D2BB1F16800C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
+		2A5D30DD0C468327425DC577 /* AutocaptureOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38B29F5E5066FADE60A88040 /* AutocaptureOptions.swift */; };
+		2DAF6E6DB83491224C2FAD66 /* SwizzledTouchInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F39A9A035CD63B87C7C4C8E7 /* SwizzledTouchInterceptor.swift */; };
+		48D1B82CD01A008022E3D759 /* AutocaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6AFC14475BD4DC3722712CA /* AutocaptureManager.swift */; };
+		4FB79FD4199BD2C1AEA83B1C /* AutocaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F9956D2BF2A5F6398C0A59 /* AutocaptureManager.swift */; };
 		51DD567C1D306B740045D3DB /* MixpanelLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56791D306B740045D3DB /* MixpanelLogger.swift */; };
 		51DD56831D306B7B0045D3DB /* PrintLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56801D306B7B0045D3DB /* PrintLogging.swift */; };
 		51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51DD56811D306B7B0045D3DB /* FileLogging.swift */; };
+		5C6E56DD87033A7A76E027E7 /* RageClickTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC47FE0246899E1C4E424FA /* RageClickTracker.swift */; };
+		662C13B6649508B946312234 /* DeadClickDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CD6F1660CF2314121E328BE /* DeadClickDetector.swift */; };
 		673ABE3A21360CBE00B1784B /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		67FF65E421878414005161FA /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
 		67FF65E521878416005161FA /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE3921360CBE00B1784B /* Group.swift */; };
@@ -65,7 +73,11 @@
 		95ECF0692C9B851B006364D2 /* Data+Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95ECF0662C9B83D8006364D2 /* Data+Compression.swift */; };
 		95ECF06A2C9B851B006364D2 /* Data+Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95ECF0662C9B83D8006364D2 /* Data+Compression.swift */; };
 		95ECF06B2C9B851C006364D2 /* Data+Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95ECF0662C9B83D8006364D2 /* Data+Compression.swift */; };
+		A18176D6C7255FA1611B3BF1 /* SemanticExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06325D1AC34056FFA59B35DF /* SemanticExtractor.swift */; };
+		A5507733A1B4945D84E53B33 /* SemanticExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74DC0B63B575B53F8DE3BF79 /* SemanticExtractor.swift */; };
+		A9364BC8EBB564C53ADC5156 /* AutocaptureOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60F434067003D809DE25DFE /* AutocaptureOptions.swift */; };
 		BB9614171F3BB87700C3EF3E /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
+		C694CF0F56D88BC591A0054A /* DeadClickDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99155E36042EDC3C22F18B45 /* DeadClickDetector.swift */; };
 		E10D118D1EC0F30900195CCD /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
 		E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115948A1CFF1538007F8B4F /* Mixpanel.swift */; };
 		E115948E1D000709007F8B4F /* MixpanelInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115948D1D000709007F8B4F /* MixpanelInstance.swift */; };
@@ -116,21 +128,36 @@
 		E1F15FE21E64B60D00391AE3 /* Flush.swift in Sources */ = {isa = PBXBuildFile; fileRef = E115949E1D01BE14007F8B4F /* Flush.swift */; };
 		E1F15FE31E64B60D00391AE3 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11594A01D01C597007F8B4F /* Track.swift */; };
 		E1F15FE41E64B60D00391AE3 /* People.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FF7C71D0435670076CDE3 /* People.swift */; };
+		E2281F33D7C441677B124788 /* RageClickTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53AF035597E8943FA5E9E2F0 /* RageClickTracker.swift */; };
+		EA0C3E40CD32AC89419401FF /* ClickEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A88BBA466C3B88E18FCA33 /* ClickEvent.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		04558C747B60EA2884344AC4 /* SwizzledTouchInterceptor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SwizzledTouchInterceptor.swift; sourceTree = "<group>"; };
+		06325D1AC34056FFA59B35DF /* SemanticExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticExtractor.swift; sourceTree = "<group>"; };
 		171E4C112DAF108400B7CB11 /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 		171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelOptions.swift; sourceTree = "<group>"; };
 		1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/Mixpanel/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
+		1CD6F1660CF2314121E328BE /* DeadClickDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DeadClickDetector.swift; path = Sources/Autocapture/DeadClickDetector.swift; sourceTree = "<group>"; };
+		38B29F5E5066FADE60A88040 /* AutocaptureOptions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutocaptureOptions.swift; sourceTree = "<group>"; };
 		51DD56791D306B740045D3DB /* MixpanelLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelLogger.swift; sourceTree = "<group>"; };
 		51DD56801D306B7B0045D3DB /* PrintLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrintLogging.swift; sourceTree = "<group>"; };
 		51DD56811D306B7B0045D3DB /* FileLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileLogging.swift; sourceTree = "<group>"; };
+		53AF035597E8943FA5E9E2F0 /* RageClickTracker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RageClickTracker.swift; sourceTree = "<group>"; };
 		673ABE3921360CBE00B1784B /* Group.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
+		74DC0B63B575B53F8DE3BF79 /* SemanticExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SemanticExtractor.swift; path = Sources/Autocapture/SemanticExtractor.swift; sourceTree = "<group>"; };
+		7F6AD00C3E5DEC0700973C08 /* ClickEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClickEvent.swift; sourceTree = "<group>"; };
 		8625BEBA26D045CE0009BAA9 /* MPDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPDB.swift; sourceTree = "<group>"; };
 		868550AB2699096F001FCDDC /* MixpanelPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelPersistence.swift; sourceTree = "<group>"; };
 		86F86E81224404BD00B69832 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		87A88BBA466C3B88E18FCA33 /* ClickEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ClickEvent.swift; path = Sources/Autocapture/Model/ClickEvent.swift; sourceTree = "<group>"; };
+		8BC47FE0246899E1C4E424FA /* RageClickTracker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RageClickTracker.swift; path = Sources/Autocapture/RageClickTracker.swift; sourceTree = "<group>"; };
 		95ECF0662C9B83D8006364D2 /* Data+Compression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Compression.swift"; sourceTree = "<group>"; };
+		99155E36042EDC3C22F18B45 /* DeadClickDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeadClickDetector.swift; sourceTree = "<group>"; };
+		99F9956D2BF2A5F6398C0A59 /* AutocaptureManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutocaptureManager.swift; sourceTree = "<group>"; };
+		A6AFC14475BD4DC3722712CA /* AutocaptureManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AutocaptureManager.swift; path = Sources/Autocapture/AutocaptureManager.swift; sourceTree = "<group>"; };
 		BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadWriteLock.swift; sourceTree = "<group>"; };
+		D60F434067003D809DE25DFE /* AutocaptureOptions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AutocaptureOptions.swift; path = Sources/Autocapture/AutocaptureOptions.swift; sourceTree = "<group>"; };
 		E115947D1CFF1491007F8B4F /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E11594821CFF1491007F8B4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../Info.plist; sourceTree = "<group>"; };
 		E115948A1CFF1538007F8B4F /* Mixpanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mixpanel.swift; sourceTree = "<group>"; };
@@ -150,6 +177,7 @@
 		E1D335CD1D30578E00E68E12 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		E1D335CF1D3059A800E68E12 /* AutomaticProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutomaticProperties.swift; sourceTree = "<group>"; };
 		E1F15FC91E64A10700391AE3 /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F39A9A035CD63B87C7C4C8E7 /* SwizzledTouchInterceptor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SwizzledTouchInterceptor.swift; path = Sources/Autocapture/SwizzledTouchInterceptor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -208,6 +236,21 @@
 			path = Mixpanel;
 			sourceTree = "<group>";
 		};
+		44C8A3159D6ED585B638A598 /* Autocapture */ = {
+			isa = PBXGroup;
+			children = (
+				CC6DD07E38E5B14C184263E3 /* Model */,
+				99F9956D2BF2A5F6398C0A59 /* AutocaptureManager.swift */,
+				38B29F5E5066FADE60A88040 /* AutocaptureOptions.swift */,
+				99155E36042EDC3C22F18B45 /* DeadClickDetector.swift */,
+				53AF035597E8943FA5E9E2F0 /* RageClickTracker.swift */,
+				06325D1AC34056FFA59B35DF /* SemanticExtractor.swift */,
+				04558C747B60EA2884344AC4 /* SwizzledTouchInterceptor.swift */,
+			);
+			name = Autocapture;
+			path = Autocapture;
+			sourceTree = "<group>";
+		};
 		51DD56771D306B620045D3DB /* Log */ = {
 			isa = PBXGroup;
 			children = (
@@ -224,6 +267,15 @@
 				51DD56811D306B7B0045D3DB /* FileLogging.swift */,
 			);
 			name = Logging;
+			sourceTree = "<group>";
+		};
+		CC6DD07E38E5B14C184263E3 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				7F6AD00C3E5DEC0700973C08 /* ClickEvent.swift */,
+			);
+			name = Model;
+			path = Model;
 			sourceTree = "<group>";
 		};
 		E11594731CFF1491007F8B4F = {
@@ -252,6 +304,7 @@
 				E11594881CFF14D3007F8B4F /* Source */,
 				E11594891CFF14DF007F8B4F /* Supporting Files */,
 				E15FF8021D0461F60076CDE3 /* Frameworks */,
+				44C8A3159D6ED585B638A598 /* Autocapture */,
 			);
 			name = Mixpanel;
 			path = Sources;
@@ -593,6 +646,20 @@
 				51DD56841D306B7B0045D3DB /* FileLogging.swift in Sources */,
 				E1D335CC1D303A0D00E68E12 /* FlushRequest.swift in Sources */,
 				E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */,
+				48D1B82CD01A008022E3D759 /* AutocaptureManager.swift in Sources */,
+				A9364BC8EBB564C53ADC5156 /* AutocaptureOptions.swift in Sources */,
+				662C13B6649508B946312234 /* DeadClickDetector.swift in Sources */,
+				5C6E56DD87033A7A76E027E7 /* RageClickTracker.swift in Sources */,
+				A5507733A1B4945D84E53B33 /* SemanticExtractor.swift in Sources */,
+				2DAF6E6DB83491224C2FAD66 /* SwizzledTouchInterceptor.swift in Sources */,
+				EA0C3E40CD32AC89419401FF /* ClickEvent.swift in Sources */,
+				4FB79FD4199BD2C1AEA83B1C /* AutocaptureManager.swift in Sources */,
+				2A5D30DD0C468327425DC577 /* AutocaptureOptions.swift in Sources */,
+				C694CF0F56D88BC591A0054A /* DeadClickDetector.swift in Sources */,
+				E2281F33D7C441677B124788 /* RageClickTracker.swift in Sources */,
+				A18176D6C7255FA1611B3BF1 /* SemanticExtractor.swift in Sources */,
+				0AA1DE0DA9BEA10750F15ECD /* SwizzledTouchInterceptor.swift in Sources */,
+				1791E3CAF5CEAABAE27B3420 /* ClickEvent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

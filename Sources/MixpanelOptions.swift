@@ -266,48 +266,91 @@ public class MixpanelOptions {
   /// ```
   ///
   /// **Note:** Autocapture is only available on iOS.
-  public let autocaptureOptions: AutocaptureOptions?
+  #if os(iOS)
+    public let autocaptureOptions: AutocaptureOptions?
+  #endif
 
-  public init(
-    token: String,
-    flushInterval: Double = 60,
-    instanceName: String? = nil,
-    trackAutomaticEvents: Bool = false,
-    optOutTrackingByDefault: Bool = false,
-    useUniqueDistinctId: Bool = false,
-    superProperties: Properties? = nil,
-    serverURL: String? = nil,
-    proxyServerConfig: ProxyServerConfig? = nil,
-    useGzipCompression: Bool = true,  // NOTE: This is a new default value!
-    featureFlagsEnabled: Bool = false,
-    featureFlagsContext: [String: Any] = [:],
-    deviceIdProvider: (() -> String?)? = nil,
-    featureFlagOptions: FeatureFlagOptions? = nil,
-    excludeProperties: Set<String> = [],
-    autocaptureOptions: AutocaptureOptions? = nil
-  ) {
-    self.token = token
-    self.flushInterval = flushInterval
-    self.instanceName = instanceName
-    self.trackAutomaticEvents = trackAutomaticEvents
-    self.optOutTrackingByDefault = optOutTrackingByDefault
-    self.useUniqueDistinctId = useUniqueDistinctId
-    self.superProperties = superProperties
-    self.serverURL = serverURL
-    self.proxyServerConfig = proxyServerConfig
-    self.useGzipCompression = useGzipCompression
-    self.deviceIdProvider = deviceIdProvider
-    self.excludeProperties = excludeProperties
-    self.autocaptureOptions = autocaptureOptions
+  #if os(iOS)
+    public init(
+      token: String,
+      flushInterval: Double = 60,
+      instanceName: String? = nil,
+      trackAutomaticEvents: Bool = false,
+      optOutTrackingByDefault: Bool = false,
+      useUniqueDistinctId: Bool = false,
+      superProperties: Properties? = nil,
+      serverURL: String? = nil,
+      proxyServerConfig: ProxyServerConfig? = nil,
+      useGzipCompression: Bool = true,
+      featureFlagsEnabled: Bool = false,
+      featureFlagsContext: [String: Any] = [:],
+      deviceIdProvider: (() -> String?)? = nil,
+      featureFlagOptions: FeatureFlagOptions? = nil,
+      excludeProperties: Set<String> = [],
+      autocaptureOptions: AutocaptureOptions? = nil
+    ) {
+      self.token = token
+      self.flushInterval = flushInterval
+      self.instanceName = instanceName
+      self.trackAutomaticEvents = trackAutomaticEvents
+      self.optOutTrackingByDefault = optOutTrackingByDefault
+      self.useUniqueDistinctId = useUniqueDistinctId
+      self.superProperties = superProperties
+      self.serverURL = serverURL
+      self.proxyServerConfig = proxyServerConfig
+      self.useGzipCompression = useGzipCompression
+      self.deviceIdProvider = deviceIdProvider
+      self.excludeProperties = excludeProperties
+      self.autocaptureOptions = autocaptureOptions
 
-    // When featureFlagOptions is explicitly provided, it takes precedence
-    if let featureFlagOptions = featureFlagOptions {
-      self.featureFlagOptions = featureFlagOptions
-    } else {
-      self.featureFlagOptions = FeatureFlagOptions(
-        enabled: featureFlagsEnabled,
-        context: featureFlagsContext
-      )
+      if let featureFlagOptions = featureFlagOptions {
+        self.featureFlagOptions = featureFlagOptions
+      } else {
+        self.featureFlagOptions = FeatureFlagOptions(
+          enabled: featureFlagsEnabled,
+          context: featureFlagsContext
+        )
+      }
     }
-  }
+  #else
+    public init(
+      token: String,
+      flushInterval: Double = 60,
+      instanceName: String? = nil,
+      trackAutomaticEvents: Bool = false,
+      optOutTrackingByDefault: Bool = false,
+      useUniqueDistinctId: Bool = false,
+      superProperties: Properties? = nil,
+      serverURL: String? = nil,
+      proxyServerConfig: ProxyServerConfig? = nil,
+      useGzipCompression: Bool = true,
+      featureFlagsEnabled: Bool = false,
+      featureFlagsContext: [String: Any] = [:],
+      deviceIdProvider: (() -> String?)? = nil,
+      featureFlagOptions: FeatureFlagOptions? = nil,
+      excludeProperties: Set<String> = []
+    ) {
+      self.token = token
+      self.flushInterval = flushInterval
+      self.instanceName = instanceName
+      self.trackAutomaticEvents = trackAutomaticEvents
+      self.optOutTrackingByDefault = optOutTrackingByDefault
+      self.useUniqueDistinctId = useUniqueDistinctId
+      self.superProperties = superProperties
+      self.serverURL = serverURL
+      self.proxyServerConfig = proxyServerConfig
+      self.useGzipCompression = useGzipCompression
+      self.deviceIdProvider = deviceIdProvider
+      self.excludeProperties = excludeProperties
+
+      if let featureFlagOptions = featureFlagOptions {
+        self.featureFlagOptions = featureFlagOptions
+      } else {
+        self.featureFlagOptions = FeatureFlagOptions(
+          enabled: featureFlagsEnabled,
+          context: featureFlagsContext
+        )
+      }
+    }
+  #endif
 }

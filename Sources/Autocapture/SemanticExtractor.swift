@@ -350,7 +350,38 @@
 
     // MARK: - Interaction Handler Detection
 
+    /// Controls with inherent visual feedback that should be excluded from dead click monitoring.
+    ///
+    /// These controls always produce a UI response when tapped:
+    /// - UISwitch: Toggle animation and state change
+    /// - UISlider: Thumb moves with drag
+    /// - UITextField/UITextView: Keyboard appears, cursor shown
+    /// - UIStepper: Value changes with visual feedback
+    /// - UISegmentedControl: Selection highlight changes
+    /// - UIDatePicker/UIPickerView: Wheel/calendar UI appears
+    private static let controlsWithInherentFeedback: [AnyClass] = [
+      UISwitch.self,
+      UISlider.self,
+      UITextField.self,
+      UITextView.self,
+      UIStepper.self,
+      UISegmentedControl.self,
+      UIDatePicker.self,
+      UIPickerView.self,
+    ]
+
+    /// Check if a view should be considered interactive for dead click detection.
+    ///
+    /// Returns `false` for controls with inherent visual feedback (switches, text fields, etc.)
+    /// since these always produce a response and should not trigger dead click events.
     private func hasInteractionHandlers(view: UIView) -> Bool {
+      // Exclude controls with inherent visual feedback from dead click monitoring
+      for controlType in Self.controlsWithInherentFeedback {
+        if view.isKind(of: controlType) {
+          return false
+        }
+      }
+
       // Check for tap gesture recognizers
       if let gestures = view.gestureRecognizers {
         for gesture in gestures where gesture.isEnabled {

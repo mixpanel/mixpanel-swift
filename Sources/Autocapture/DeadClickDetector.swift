@@ -52,8 +52,17 @@
 
     /// Controls that should be excluded from dead click detection because
     /// they have inherent visual feedback or side effects not detected by UI snapshots.
+    ///
+    /// These controls produce visual feedback that may not be captured by UI snapshot comparison:
+    /// - UISwitch: Toggle animation and state change
+    /// - UISlider: Thumb moves with drag
+    /// - UITextField/UITextView: Keyboard appears, cursor shown
+    /// - UIStepper: Value changes with visual feedback
+    /// - UISegmentedControl: Selection highlight changes
+    /// - UIDatePicker/UIPickerView: Wheel/calendar UI appears
     private static let excludedControlTypes: [AnyClass] = [
       UISwitch.self,
+      UISlider.self,
       UITextField.self,
       UITextView.self,
       UIStepper.self,

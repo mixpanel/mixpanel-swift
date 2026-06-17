@@ -26,6 +26,23 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Extract module config
+        id: config
+        run: |
+          MODULE="analytics"
+          MODULE_CONFIG=$(jq -e '.analytics' .github/modules.json)
+
+          if [ -z "$MODULE_CONFIG" ] || [ "$MODULE_CONFIG" = "null" ]; then
+            echo "ERROR: Module 'analytics' not found in .github/modules.json"
+            exit 1
+          fi
+
+          echo "podspec=$(echo "$MODULE_CONFIG" | jq -r '.podspec')" >> $GITHUB_OUTPUT
+          echo "version_files=$(echo "$MODULE_CONFIG" | jq -c '.version_files // []')" >> $GITHUB_OUTPUT
+          echo "changelog=$(echo "$MODULE_CONFIG" | jq -r '.changelog')" >> $GITHUB_OUTPUT
+
+          echo "✓ Module config loaded for: analytics"
+
       - name: Check if PR already exists
         id: check_pr
         env:
@@ -61,17 +78,20 @@ jobs:
           OLD_VERSION="${{ steps.current_version.outputs.CURRENT_VERSION }}"
           NEW_VERSION="${{ inputs.version }}"
 
-          # Update Mixpanel-swift.podspec
-          sed -i '' "s/s.version = '$OLD_VERSION'/s.version = '$NEW_VERSION'/" Mixpanel-swift.podspec
+          # Update podspec (primary version source)
+          PODSPEC="${{ steps.config.outputs.podspec }}"
+          sed -i '' "s/s.version = '$OLD_VERSION'/s.version = '$NEW_VERSION'/" "$PODSPEC"
+          echo "✓ Updated version in $PODSPEC"
 
-          # Update Info.plist
-          sed -i '' "s/<string>$OLD_VERSION<\/string>/<string>$NEW_VERSION<\/string>/" Info.plist
-
-          # Update AutomaticProperties.swift
-          sed -i '' "s/return \"$OLD_VERSION\"/return \"$NEW_VERSION\"/" Sources/AutomaticProperties.swift
-
-          # Update generate_docs.sh
-          sed -i '' "s/--module-version $OLD_VERSION/--module-version $NEW_VERSION/" scripts/generate_docs.sh
+          # Update each version file from JSON config
+          echo '${{ steps.config.outputs.version_files }}' | jq -r '.[]' | while read -r FILE; do
+            if [ -f "$FILE" ]; then
+              sed -i '' "s/$OLD_VERSION/$NEW_VERSION/g" "$FILE"
+              echo "✓ Updated version in $FILE"
+            else
+              echo "⚠️  Version file not found: $FILE"
+            fi
+          done
 
       - name: Generate documentation
         if: ${{ steps.check_pr.outputs.PR_EXISTS == '0' }}
@@ -93,17 +113,18 @@ jobs:
           ./scripts/generate-changelog.sh "$NEW_VERSION" "mixpanel/mixpanel-swift" > /tmp/new-changelog.md
 
           # Prepend to existing CHANGELOG.md or create new one
-          if [ -f CHANGELOG.md ]; then
+          CHANGELOG_PATH="${{ steps.config.outputs.changelog }}"
+          if [ -f "$CHANGELOG_PATH" ]; then
             # Backup existing changelog
-            cp CHANGELOG.md /tmp/existing-changelog.md
+            cp "$CHANGELOG_PATH" /tmp/existing-changelog.md
             # Prepend new entry
-            cat /tmp/new-changelog.md > CHANGELOG.md
-            cat /tmp/existing-changelog.md >> CHANGELOG.md
+            cat /tmp/new-changelog.md > "$CHANGELOG_PATH"
+            cat /tmp/existing-changelog.md >> "$CHANGELOG_PATH"
           else
             # Create new CHANGELOG.md
-            echo "# Changelog" > CHANGELOG.md
-            echo "" >> CHANGELOG.md
-            cat /tmp/new-changelog.md >> CHANGELOG.md
+            echo "# Changelog" > "$CHANGELOG_PATH"
+            echo "" >> "$CHANGELOG_PATH"
+            cat /tmp/new-changelog.md >> "$CHANGELOG_PATH"
           fi
 
           echo "✓ Changelog generated"
@@ -111,12 +132,18 @@ jobs:
       - name: Commit and push changes
         if: ${{ steps.check_pr.outputs.PR_EXISTS == '0' }}
         run: |
-          git add Mixpanel-swift.podspec Info.plist Sources/AutomaticProperties.swift scripts/generate_docs.sh docs CHANGELOG.md
+          # Add all modified version files
+          git add "${{ steps.config.outputs.podspec }}"
+          echo '${{ steps.config.outputs.version_files }}' | jq -r '.[]' | xargs git add
+          git add "${{ steps.config.outputs.changelog }}"
+          git add docs  # Generated documentation
+
           git commit \
             -m "release: prepare ${{ inputs.version }}" \
             -m "- Updated version to ${{ inputs.version }}
           - Updated documentation
           - Updated changelog"
+
           git push origin release/${{ inputs.version }}
 
       - name: Create pull request

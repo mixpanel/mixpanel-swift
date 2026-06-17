@@ -95,11 +95,16 @@ class FlushRequest: Network {
           Network.apiRequest(
             base: backupBase, resource: resource,
             failure: { (backupReason, _, backupResponse) in
+              MixpanelLogger.warn(
+                message:
+                  "Backup host request to \(resource.path) also failed (\(backupReason))")
               self.handleFlushFailure(
                 path: resource.path, reason: backupReason, response: backupResponse,
                 completion: completion)
             },
             success: { (result, backupResponse) in
+              MixpanelLogger.info(
+                message: "Backup host request to \(resource.path) succeeded")
               self.handleFlushSuccess(
                 base: backupBase, result: result, response: backupResponse, completion: completion)
             })
@@ -139,14 +144,19 @@ class FlushRequest: Network {
   /// the host substitution produced no change.
   private func backupBaseURL(forPrimary base: String, failureReason reason: Reason) -> String? {
     guard let backupHost = backupHost, !backupHost.isEmpty else {
+      MixpanelLogger.debug(message: "No backup host configured, skipping failover")
       return nil
     }
     guard FlushRequest.shouldFallBackToBackup(reason) else {
+      MixpanelLogger.debug(
+        message: "Backup host not used: failure reason \(reason) is not retriable")
       return nil
     }
     guard let backupBase = BasePath.backupBaseURL(base: base, backupHost: backupHost),
       backupBase != base
     else {
+      MixpanelLogger.debug(
+        message: "Backup host not used: resolved backup URL is same as primary")
       return nil
     }
     return backupBase

@@ -15,6 +15,26 @@
 		1651FD852F83B6F10065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD842F83B6F10065BB7E /* MixpanelSwiftCommon */; };
 		1651FD872F83B6F50065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD862F83B6F50065BB7E /* MixpanelSwiftCommon */; };
 		1651FD892F83B6F80065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD882F83B6F80065BB7E /* MixpanelSwiftCommon */; };
+		1653D3FF2FE3904500806CE5 /* SessionRecoveryMetricKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FD2FE3904500806CE5 /* SessionRecoveryMetricKit.swift */; };
+		1653D4002FE3904500806CE5 /* SessionRecoveryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FE2FE3904500806CE5 /* SessionRecoveryRecord.swift */; };
+		1653D4012FE3904500806CE5 /* SessionRecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FC2FE3904500806CE5 /* SessionRecoveryManager.swift */; };
+		1653D4022FE3904500806CE5 /* ANRWatchdog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FB2FE3904500806CE5 /* ANRWatchdog.swift */; };
+		1653D4032FE3904500806CE5 /* SessionRecoveryMetricKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FD2FE3904500806CE5 /* SessionRecoveryMetricKit.swift */; };
+		1653D4042FE3904500806CE5 /* SessionRecoveryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FE2FE3904500806CE5 /* SessionRecoveryRecord.swift */; };
+		1653D4052FE3904500806CE5 /* SessionRecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FC2FE3904500806CE5 /* SessionRecoveryManager.swift */; };
+		1653D4062FE3904500806CE5 /* ANRWatchdog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FB2FE3904500806CE5 /* ANRWatchdog.swift */; };
+		1653D4072FE3904500806CE5 /* SessionRecoveryMetricKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FD2FE3904500806CE5 /* SessionRecoveryMetricKit.swift */; };
+		1653D4082FE3904500806CE5 /* SessionRecoveryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FE2FE3904500806CE5 /* SessionRecoveryRecord.swift */; };
+		1653D4092FE3904500806CE5 /* SessionRecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FC2FE3904500806CE5 /* SessionRecoveryManager.swift */; };
+		1653D40A2FE3904500806CE5 /* ANRWatchdog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FB2FE3904500806CE5 /* ANRWatchdog.swift */; };
+		1653D40B2FE3904500806CE5 /* SessionRecoveryMetricKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FD2FE3904500806CE5 /* SessionRecoveryMetricKit.swift */; };
+		1653D40C2FE3904500806CE5 /* SessionRecoveryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FE2FE3904500806CE5 /* SessionRecoveryRecord.swift */; };
+		1653D40D2FE3904500806CE5 /* SessionRecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FC2FE3904500806CE5 /* SessionRecoveryManager.swift */; };
+		1653D40E2FE3904500806CE5 /* ANRWatchdog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D3FB2FE3904500806CE5 /* ANRWatchdog.swift */; };
+		1653D4102FE3945B00806CE5 /* SessionRecoveryDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D40F2FE3945B00806CE5 /* SessionRecoveryDebug.swift */; };
+		1653D4112FE3945B00806CE5 /* SessionRecoveryDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D40F2FE3945B00806CE5 /* SessionRecoveryDebug.swift */; };
+		1653D4122FE3945B00806CE5 /* SessionRecoveryDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D40F2FE3945B00806CE5 /* SessionRecoveryDebug.swift */; };
+		1653D4132FE3945B00806CE5 /* SessionRecoveryDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1653D40F2FE3945B00806CE5 /* SessionRecoveryDebug.swift */; };
 		171E4C122DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C132DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C142DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
@@ -119,6 +139,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1653D3FB2FE3904500806CE5 /* ANRWatchdog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ANRWatchdog.swift; sourceTree = "<group>"; };
+		1653D3FC2FE3904500806CE5 /* SessionRecoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecoveryManager.swift; sourceTree = "<group>"; };
+		1653D3FD2FE3904500806CE5 /* SessionRecoveryMetricKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecoveryMetricKit.swift; sourceTree = "<group>"; };
+		1653D3FE2FE3904500806CE5 /* SessionRecoveryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecoveryRecord.swift; sourceTree = "<group>"; };
+		1653D40F2FE3945B00806CE5 /* SessionRecoveryDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecoveryDebug.swift; sourceTree = "<group>"; };
 		171E4C112DAF108400B7CB11 /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 		171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelOptions.swift; sourceTree = "<group>"; };
 		1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/Mixpanel/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
@@ -200,6 +225,18 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		1653D3FA2FE38FC400806CE5 /* Crash */ = {
+			isa = PBXGroup;
+			children = (
+				1653D40F2FE3945B00806CE5 /* SessionRecoveryDebug.swift */,
+				1653D3FB2FE3904500806CE5 /* ANRWatchdog.swift */,
+				1653D3FC2FE3904500806CE5 /* SessionRecoveryManager.swift */,
+				1653D3FD2FE3904500806CE5 /* SessionRecoveryMetricKit.swift */,
+				1653D3FE2FE3904500806CE5 /* SessionRecoveryRecord.swift */,
+			);
+			path = Crash;
+			sourceTree = "<group>";
+		};
 		17C654792BB1EF6700C8A126 /* Mixpanel */ = {
 			isa = PBXGroup;
 			children = (
@@ -260,6 +297,7 @@
 		E11594881CFF14D3007F8B4F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1653D3FA2FE38FC400806CE5 /* Crash */,
 				171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */,
 				17C654792BB1EF6700C8A126 /* Mixpanel */,
 				E189D8FB1D5A6943007F3F29 /* Networking */,
@@ -540,6 +578,10 @@
 			files = (
 				86F86EF7224554B900B69832 /* Group.swift in Sources */,
 				86F86ECA22443A4C00B69832 /* SessionMetadata.swift in Sources */,
+				1653D3FF2FE3904500806CE5 /* SessionRecoveryMetricKit.swift in Sources */,
+				1653D4002FE3904500806CE5 /* SessionRecoveryRecord.swift in Sources */,
+				1653D4012FE3904500806CE5 /* SessionRecoveryManager.swift in Sources */,
+				1653D4022FE3904500806CE5 /* ANRWatchdog.swift in Sources */,
 				86F86EC922443A4700B69832 /* Constants.swift in Sources */,
 				86F86EC722443A3C00B69832 /* FileLogging.swift in Sources */,
 				86F86EC622443A3100B69832 /* Error.swift in Sources */,
@@ -547,6 +589,7 @@
 				171E4C172DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */,
 				86F86EC422443A2300B69832 /* ReadWriteLock.swift in Sources */,
 				8625BEBE26D045CE0009BAA9 /* MPDB.swift in Sources */,
+				1653D4132FE3945B00806CE5 /* SessionRecoveryDebug.swift in Sources */,
 				95ECF06B2C9B851C006364D2 /* Data+Compression.swift in Sources */,
 				86F86EC222443A1300B69832 /* Track.swift in Sources */,
 				86F86EC122443A0E00B69832 /* JSONHandler.swift in Sources */,
@@ -571,6 +614,10 @@
 			files = (
 				51DD56831D306B7B0045D3DB /* PrintLogging.swift in Sources */,
 				E115948E1D000709007F8B4F /* MixpanelInstance.swift in Sources */,
+				1653D4032FE3904500806CE5 /* SessionRecoveryMetricKit.swift in Sources */,
+				1653D4042FE3904500806CE5 /* SessionRecoveryRecord.swift in Sources */,
+				1653D4052FE3904500806CE5 /* SessionRecoveryManager.swift in Sources */,
+				1653D4062FE3904500806CE5 /* ANRWatchdog.swift in Sources */,
 				E151FA381E70DFB5002EF53D /* AutomaticEvents.swift in Sources */,
 				E1D335CE1D30578E00E68E12 /* Constants.swift in Sources */,
 				E115949F1D01BE14007F8B4F /* Flush.swift in Sources */,
@@ -578,6 +625,7 @@
 				171E4C182DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */,
 				E15FF7C81D0435670076CDE3 /* People.swift in Sources */,
 				673ABE3A21360CBE00B1784B /* Group.swift in Sources */,
+				1653D4102FE3945B00806CE5 /* SessionRecoveryDebug.swift in Sources */,
 				95ECF0682C9B851A006364D2 /* Data+Compression.swift in Sources */,
 				E11594A11D01C597007F8B4F /* Track.swift in Sources */,
 				E11594991D01689F007F8B4F /* JSONHandler.swift in Sources */,
@@ -602,6 +650,10 @@
 			files = (
 				67FF65E521878416005161FA /* Group.swift in Sources */,
 				E12782BB1D4AB5CB0025FB05 /* PrintLogging.swift in Sources */,
+				1653D4072FE3904500806CE5 /* SessionRecoveryMetricKit.swift in Sources */,
+				1653D4082FE3904500806CE5 /* SessionRecoveryRecord.swift in Sources */,
+				1653D4092FE3904500806CE5 /* SessionRecoveryManager.swift in Sources */,
+				1653D40A2FE3904500806CE5 /* ANRWatchdog.swift in Sources */,
 				E12782BC1D4AB5CB0025FB05 /* FileLogging.swift in Sources */,
 				E12782BD1D4AB5CB0025FB05 /* MixpanelLogger.swift in Sources */,
 				E12782BE1D4AB5CB0025FB05 /* Mixpanel.swift in Sources */,
@@ -609,6 +661,7 @@
 				171E4C192DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */,
 				E12782C11D4AB5CB0025FB05 /* Network.swift in Sources */,
 				8625BEBC26D045CE0009BAA9 /* MPDB.swift in Sources */,
+				1653D4122FE3945B00806CE5 /* SessionRecoveryDebug.swift in Sources */,
 				95ECF0692C9B851B006364D2 /* Data+Compression.swift in Sources */,
 				E12782C21D4AB5CB0025FB05 /* JSONHandler.swift in Sources */,
 				E12782C31D4AB5CB0025FB05 /* Flush.swift in Sources */,
@@ -633,6 +686,10 @@
 			files = (
 				67FF65E421878414005161FA /* Group.swift in Sources */,
 				E1F15FE01E64B60D00391AE3 /* MixpanelInstance.swift in Sources */,
+				1653D40B2FE3904500806CE5 /* SessionRecoveryMetricKit.swift in Sources */,
+				1653D40C2FE3904500806CE5 /* SessionRecoveryRecord.swift in Sources */,
+				1653D40D2FE3904500806CE5 /* SessionRecoveryManager.swift in Sources */,
+				1653D40E2FE3904500806CE5 /* ANRWatchdog.swift in Sources */,
 				E1F15FDF1E64B60D00391AE3 /* Mixpanel.swift in Sources */,
 				E1F15FDC1E64B60A00391AE3 /* AutomaticProperties.swift in Sources */,
 				E1F15FD91E64B60600391AE3 /* MixpanelLogger.swift in Sources */,
@@ -640,6 +697,7 @@
 				171E4C1A2DAF2B3100B7CB11 /* MixpanelOptions.swift in Sources */,
 				E1F15FD71E64B60200391AE3 /* PrintLogging.swift in Sources */,
 				8625BEBD26D045CE0009BAA9 /* MPDB.swift in Sources */,
+				1653D4112FE3945B00806CE5 /* SessionRecoveryDebug.swift in Sources */,
 				95ECF06A2C9B851B006364D2 /* Data+Compression.swift in Sources */,
 				E1F15FE21E64B60D00391AE3 /* Flush.swift in Sources */,
 				E1F15FD51E64B5F800391AE3 /* Network.swift in Sources */,
@@ -888,7 +946,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -940,7 +998,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

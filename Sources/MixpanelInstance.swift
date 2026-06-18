@@ -262,6 +262,19 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var taskId = UIBackgroundTaskIdentifier.invalid
   #endif  // os(OSX)
   let sessionMetadata: SessionMetadata
+  #if os(iOS)
+    lazy var sessionRecoveryManager: SessionRecoveryManager = {
+        let manager = SessionRecoveryManager(instanceName: self.name)
+        manager.mixpanelInstance = self
+        return manager
+    }()
+
+    lazy var anrWatchdog: ANRWatchdog = {
+      let watchdog = ANRWatchdog()
+      watchdog.mixpanelInstance = self
+      return watchdog
+    }()
+  #endif
   let flushInstance: Flush
   let trackInstance: Track
   #if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
@@ -486,6 +499,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     if self.options.featureFlagOptions.prefetchFlags {
       flags.loadFlags()
     }
+
+    #if os(iOS)
+      if #available(iOS 13.0, *) {
+        setupCrashRecovery()
+      }
+    #endif
   }
 
   public func getOptions() -> MixpanelOptions {
@@ -563,6 +582,38 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
   #endif  // os(OSX)
 
+  #if os(iOS)
+    @available(iOS 13.0, *)
+    private func setupCrashRecovery() {
+      // Register MetricKit subscriber (iOS 14+)
+      if #available(iOS 14.0, *) {
+        sessionRecoveryManager.registerMetricKitSubscriber()
+      }
+
+      // Trigger initial crash detection on launch
+      // This will check for any incomplete session from previous launch
+      trackingQueue.async { [weak self] in
+        guard let self = self else { return }
+
+        // The armMarker call in didBecomeActive will detect and process any previous crash
+        // We don't need to do anything special here - the lifecycle hooks handle it
+
+        // Set up periodic heartbeat to update lastAliveTimestamp
+        // This runs every 30 seconds to maintain a recent timestamp
+        Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { [weak self] _ in
+          self?.sessionRecoveryManager.updateLastAliveTimestamp()
+        }
+
+        // Set up periodic cleanup of expired pending records (every 6 hours)
+        Timer.scheduledTimer(withTimeInterval: 6 * 60 * 60, repeats: true) { [weak self] _ in
+          self?.sessionRecoveryManager.cleanupExpiredPendingRecords()
+        }
+      }
+
+      MixpanelLogger.info(message: "Crash recovery system initialized")
+    }
+  #endif
+
   deinit {
     NotificationCenter.default.removeObserver(self)
     #if os(iOS) && !os(watchOS) && !targetEnvironment(macCatalyst)
@@ -607,6 +658,21 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
   @objc private func applicationDidBecomeActive(_ notification: Notification) {
     flushInstance.applicationDidBecomeActive()
+
+    #if os(iOS)
+      if #available(iOS 13.0, *) {
+        // Arm crash detection marker
+        // Note: replayId will be nil here; it will be updated when Session Replay starts recording
+        sessionRecoveryManager.armMarker(
+          sessionId: sessionMetadata.sessionID,
+          replayId: nil,
+          lastFrameTimestamp: nil
+        )
+
+        // Start ANR watchdog
+        anrWatchdog.start(sessionId: sessionMetadata.sessionID, replayId: nil)
+      }
+    #endif
   }
 
   @objc private func applicationWillResignActive(_ notification: Notification) {
@@ -643,6 +709,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       // Ensure that any session replay ID is cleared when the app enters the background
       unregisterSuperProperty("$mp_replay_id")
 
+      #if os(iOS)
+        if #available(iOS 13.0, *) {
+          // Mark session as cleanly completed
+          sessionRecoveryManager.markSessionComplete()
+        }
+      #endif
+
       if flushOnBackground {
         flush(performFullFlush: true, completion: completionHandler)
       }
@@ -653,6 +726,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         return
       }
       sessionMetadata.applicationWillEnterForeground()
+
+      #if os(iOS)
+        if #available(iOS 13.0, *) {
+          // Re-arm crash detection marker for new foreground session
+          sessionRecoveryManager.armMarker(
+            sessionId: sessionMetadata.sessionID,
+            replayId: nil,
+            lastFrameTimestamp: nil
+          )
+        }
+      #endif
 
       if taskId != UIBackgroundTaskIdentifier.invalid {
         sharedApplication.endBackgroundTask(taskId)
@@ -1476,7 +1560,7 @@ extension MixpanelInstance {
 
   /**
      Clears the event timer for the named event.
-  
+
      - parameter event: the name of the event to clear the timer for
      */
   public func clearTimedEvent(event: String) {
@@ -1488,6 +1572,60 @@ extension MixpanelInstance {
       MixpanelPersistence.saveTimedEvents(timedEvents: updatedTimedEvents, instanceName: self.name)
     }
   }
+
+  // MARK: - Session Replay Integration (Crash Detection)
+
+  #if os(iOS)
+    /**
+       Notify crash detection system that Session Replay started recording.
+
+       Called by Session Replay SDK when recording begins. Updates the crash marker
+       with replay session information.
+
+       - parameter replayId: The replay session UUID
+       - parameter replayStartTimestamp: When the replay session started (seconds since epoch)
+       */
+    @available(iOS 13.0, *)
+    public func notifySessionReplayStarted(replayId: String, replayStartTimestamp: TimeInterval) {
+      sessionRecoveryManager.armMarker(
+        sessionId: sessionMetadata.sessionID,
+        replayId: replayId,
+        lastFrameTimestamp: replayStartTimestamp
+      )
+
+      // Update ANR watchdog with replay ID
+      anrWatchdog.currentReplayId = replayId
+
+      MixpanelLogger.debug(
+        message:
+          "Session Replay started: replayId=\(replayId), updating crash detection"
+      )
+    }
+
+    /**
+       Notify crash detection system that a new Session Replay frame was captured.
+
+       Called by Session Replay SDK after each frame capture. Updates the last frame
+       timestamp to maintain a tight crash-time anchor.
+
+       - parameter timestamp: Frame capture timestamp (seconds since epoch)
+       */
+    @available(iOS 13.0, *)
+    public func notifySessionReplayFrameCaptured(timestamp: TimeInterval) {
+      sessionRecoveryManager.updateLastFrameTimestamp(timestamp)
+    }
+
+    /**
+       Notify crash detection system that Session Replay stopped recording.
+
+       Called by Session Replay SDK when recording ends (background, stop, etc.).
+       */
+    @available(iOS 13.0, *)
+    public func notifySessionReplayStopped() {
+      anrWatchdog.currentReplayId = nil
+      MixpanelLogger.debug(message: "Session Replay stopped, cleared replay ID from crash detection")
+    }
+  #endif
 
   /**
      Returns the currently set super properties.

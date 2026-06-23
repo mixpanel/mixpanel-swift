@@ -19,7 +19,7 @@ jobs:
   release-spm:
     name: "📦 Release SPM"
     runs-on: macos-26
-    environment: release-tagging
+    environment: release
     steps:
       - name: Enforce master branch requirement
         run: |
@@ -40,62 +40,92 @@ jobs:
           ref: master
           fetch-depth: 0
 
+      - name: Extract module config
+        id: config
+        run: |
+          MODULE="analytics"
+          MODULE_CONFIG=$(jq -e '.analytics' .github/modules.json)
+
+          if [ -z "$MODULE_CONFIG" ] || [ "$MODULE_CONFIG" = "null" ]; then
+            echo "ERROR: Module 'analytics' not found in .github/modules.json"
+            exit 1
+          fi
+
+          TAG_PREFIX=$(echo "$MODULE_CONFIG" | jq -r '.tag_prefix')
+          FULL_TAG="${TAG_PREFIX}${{ inputs.version }}"
+
+          echo "full_tag=$FULL_TAG" >> $GITHUB_OUTPUT
+          echo "podspec=$(echo "$MODULE_CONFIG" | jq -r '.podspec')" >> $GITHUB_OUTPUT
+          echo "version_files=$(echo "$MODULE_CONFIG" | jq -c '.version_files // []')" >> $GITHUB_OUTPUT
+          echo "changelog=$(echo "$MODULE_CONFIG" | jq -r '.changelog')" >> $GITHUB_OUTPUT
+
+          echo "✓ Full tag: $FULL_TAG"
+
       - name: Extract version from files
         id: extract_versions
         run: |
+          PODSPEC="${{ steps.config.outputs.podspec }}"
+
           # Extract from podspec
-          PODSPEC_VERSION_LINE=$(grep -E "s.version = '[0-9]+\.[0-9]+\.[0-9]+'" Mixpanel-swift.podspec || true)
+          PODSPEC_VERSION_LINE=$(grep -E "s.version = '[0-9]+\.[0-9]+\.[0-9]+'" "$PODSPEC" || true)
           if [ -z "$PODSPEC_VERSION_LINE" ]; then
-            echo "ERROR: Could not extract version from Mixpanel-swift.podspec"
+            echo "ERROR: Could not extract version from $PODSPEC"
             exit 1
           fi
           PODSPEC_VERSION=$(printf '%s\n' "$PODSPEC_VERSION_LINE" | sed -E "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/")
           if [ -z "$PODSPEC_VERSION" ]; then
-            echo "ERROR: Could not parse version from Mixpanel-swift.podspec"
-            exit 1
-          fi
-
-          # Extract from AutomaticProperties.swift
-          SWIFT_VERSION_LINE=$(grep -E 'return "[0-9]+\.[0-9]+\.[0-9]+"' Sources/AutomaticProperties.swift || true)
-          if [ -z "$SWIFT_VERSION_LINE" ]; then
-            echo "ERROR: Could not extract version from Sources/AutomaticProperties.swift"
-            exit 1
-          fi
-          SWIFT_VERSION=$(printf '%s\n' "$SWIFT_VERSION_LINE" | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')
-          if [ -z "$SWIFT_VERSION" ]; then
-            echo "ERROR: Could not parse version from Sources/AutomaticProperties.swift"
+            echo "ERROR: Could not parse version from $PODSPEC"
             exit 1
           fi
 
           echo "PODSPEC_VERSION=$PODSPEC_VERSION" >> $GITHUB_OUTPUT
-          echo "SWIFT_VERSION=$SWIFT_VERSION" >> $GITHUB_OUTPUT
 
           echo "Input version: ${{ inputs.version }}"
           echo "Podspec version: $PODSPEC_VERSION"
-          echo "Swift version: $SWIFT_VERSION"
+
+          # Validate each version file from modules.json
+          echo '${{ steps.config.outputs.version_files }}' | jq -r '.[]' | while read -r FILE; do
+            if [ ! -f "$FILE" ]; then
+              echo "ERROR: Version file not found: $FILE"
+              exit 1
+            fi
+
+            FILE_VERSION=$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+' "$FILE" | head -1)
+
+            if [ -z "$FILE_VERSION" ]; then
+              echo "ERROR: Could not extract version from $FILE"
+              exit 1
+            fi
+
+            echo "✓ $FILE: $FILE_VERSION"
+          done
 
       - name: Validate version consistency
         run: |
           PODSPEC_VERSION="${{ steps.extract_versions.outputs.PODSPEC_VERSION }}"
-          SWIFT_VERSION="${{ steps.extract_versions.outputs.SWIFT_VERSION }}"
           INPUT_VERSION="${{ inputs.version }}"
           MISMATCH=0
 
+          # Check podspec version
           if [ "$PODSPEC_VERSION" != "$INPUT_VERSION" ]; then
             echo "ERROR: Podspec version mismatch"
             echo "  Expected: $INPUT_VERSION"
             echo "  Found: $PODSPEC_VERSION"
-            echo "  File: Mixpanel-swift.podspec"
+            echo "  File: ${{ steps.config.outputs.podspec }}"
             MISMATCH=1
           fi
 
-          if [ "$SWIFT_VERSION" != "$INPUT_VERSION" ]; then
-            echo "ERROR: AutomaticProperties.swift version mismatch"
-            echo "  Expected: $INPUT_VERSION"
-            echo "  Found: $SWIFT_VERSION"
-            echo "  File: Sources/AutomaticProperties.swift"
-            MISMATCH=1
-          fi
+          # Check each version file from modules.json
+          echo '${{ steps.config.outputs.version_files }}' | jq -r '.[]' | while read -r FILE; do
+            FILE_VERSION=$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+' "$FILE" | head -1)
+
+            if [ "$FILE_VERSION" != "$INPUT_VERSION" ]; then
+              echo "ERROR: Version mismatch in $FILE"
+              echo "  Expected: $INPUT_VERSION"
+              echo "  Found: $FILE_VERSION"
+              MISMATCH=1
+            fi
+          done
 
           if [ $MISMATCH -eq 1 ]; then
             echo ""
@@ -112,14 +142,15 @@ jobs:
 
       - name: Verify tag does not exist
         run: |
-          if git ls-remote --tags origin | grep -q "refs/tags/${{ inputs.version }}$"; then
-            echo "ERROR: Tag ${{ inputs.version }} already exists on origin"
+          FULL_TAG="${{ steps.config.outputs.full_tag }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/$FULL_TAG$"; then
+            echo "ERROR: Tag $FULL_TAG already exists on origin"
             echo ""
             echo "If you need to re-release, use a patch version increment."
             echo "Tags are immutable and cannot be deleted or moved."
             exit 1
           fi
-          echo "✓ Tag does not exist"
+          echo "✓ Tag $FULL_TAG does not exist"
 
       - name: Validate podspec
         run: |
@@ -128,7 +159,8 @@ jobs:
 
           # Use lib lint (not spec lint) because tag doesn't exist yet
           # lib lint validates against local working tree
-          pod lib lint Mixpanel-swift.podspec --allow-warnings
+          PODSPEC="${{ steps.config.outputs.podspec }}"
+          pod lib lint "$PODSPEC" --allow-warnings
 
       # Validate Carthage compatibility before creating the release tag.
       # This ensures the XCFramework builds successfully for Carthage users.
@@ -144,67 +176,74 @@ jobs:
 
       - name: Create and push tag
         run: |
+          FULL_TAG="${{ steps.config.outputs.full_tag }}"
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Create annotated tag (no 'v' prefix)
-          git tag -a "${{ inputs.version }}" -m "Release ${{ inputs.version }}"
+          # Create annotated tag
+          git tag -a "$FULL_TAG" -m "Release ${{ inputs.version }}"
 
           # Push tag to origin
-          git push origin "${{ inputs.version }}"
+          git push origin "$FULL_TAG"
+
+          echo "✓ Created and pushed tag: $FULL_TAG"
 
       - name: Extract changelog for this version
         id: extract_changelog
         run: |
-          VERSION="${{ inputs.version }}"
+          FULL_TAG="${{ steps.config.outputs.full_tag }}"
+          CHANGELOG="${{ steps.config.outputs.changelog }}"
 
-          if [ ! -f "CHANGELOG.md" ]; then
-            echo "⚠️  CHANGELOG.md not found, will use auto-generated notes"
+          if [ ! -f "$CHANGELOG" ]; then
+            echo "⚠️  $CHANGELOG not found, will use auto-generated notes"
             echo "CHANGELOG_FOUND=false" >> $GITHUB_OUTPUT
             exit 0
           fi
 
           # Extract this version's changelog entry via a sed range.
-          # The address `\@^## \[VERSION\]@,\@^## \[@` selects from the
+          # The address `\@^## \[FULL_TAG\]@,\@^## \[@` selects from the
           # version header through the next `## [` line; the inner block
           # deletes both markers and prints the body. sed range patterns
           # don't test the end pattern against the start line, so the
           # start doesn't self-terminate. `\@...@` switches the address
           # delimiter from `/` to `@` for consistency with the rest of
           # the Mixpanel SDK fleet (where some tags contain `/`). Matches
-          # both `## [VERSION]` and `## [VERSION](link)` headers because
+          # both `## [FULL_TAG]` and `## [FULL_TAG](link)` headers because
           # the regex is anchored to the start of the line and the `]`
           # ends the match before whatever follows.
-          CHANGELOG=$(sed -n '\@^## \['"${VERSION}"'\]@,\@^## \[@{\@^## \['"${VERSION}"'\]@d;\@^## \[@d;p;}' CHANGELOG.md)
+          CHANGELOG_BODY=$(sed -n '\@^## \['"${FULL_TAG}"'\]@,\@^## \[@{\@^## \['"${FULL_TAG}"'\]@d;\@^## \[@d;p;}' "$CHANGELOG" 2>/dev/null || true)
 
-          if [ -z "$CHANGELOG" ]; then
-            echo "⚠️  Changelog entry for version $VERSION not found in CHANGELOG.md"
+          if [ -z "$CHANGELOG_BODY" ]; then
+            echo "⚠️  Changelog entry for $FULL_TAG not found in $CHANGELOG"
             echo "CHANGELOG_FOUND=false" >> $GITHUB_OUTPUT
             exit 0
           fi
 
           # Save to temp file for gh release create
-          echo "$CHANGELOG" > /tmp/release-notes.md
+          echo "$CHANGELOG_BODY" > /tmp/release-notes.md
 
           echo "CHANGELOG_FOUND=true" >> $GITHUB_OUTPUT
-          echo "✓ Extracted changelog entry for $VERSION"
+          echo "✓ Extracted changelog entry for $FULL_TAG"
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Creating GitHub Release draft..."
+          FULL_TAG="${{ steps.config.outputs.full_tag }}"
+
+          echo "Creating GitHub Release draft for $FULL_TAG..."
 
           if [ "${{ steps.extract_changelog.outputs.CHANGELOG_FOUND }}" = "true" ]; then
             # Use curated changelog from CHANGELOG.md
-            gh release create "${{ inputs.version }}" \
+            gh release create "$FULL_TAG" \
               --title "Release ${{ inputs.version }}" \
               --notes-file /tmp/release-notes.md \
               --draft
             echo "✓ GitHub Release created with changelog from CHANGELOG.md"
           else
             # Fallback to auto-generated notes
-            gh release create "${{ inputs.version }}" \
+            gh release create "$FULL_TAG" \
               --title "Release ${{ inputs.version }}" \
               --generate-notes \
               --draft
@@ -213,7 +252,9 @@ jobs:
 
       - name: SPM release complete
         run: |
-          echo "✅ Tag ${{ inputs.version }} created successfully!"
+          FULL_TAG="${{ steps.config.outputs.full_tag }}"
+
+          echo "✅ Tag $FULL_TAG created successfully!"
           echo "✅ GitHub Release created as draft (enables SPM distribution)"
           echo ""
           echo "Swift Package Manager users can now use version ${{ inputs.version }}"
@@ -222,7 +263,7 @@ jobs:
           echo "  1. Go to: https://github.com/${{ github.repository }}/actions/workflows/release-cocoapod.yml"
           echo "  2. Click 'Run workflow'"
           echo "  3. Enter version: ${{ inputs.version }}"
-          echo "  4. Approve the 'production' environment when prompted"
+          echo "  4. Approve the 'release-cocoapods' environment when prompted"
           echo ""
           echo "After CocoaPod publishing completes:"
           echo "  - Manually publish the draft GitHub Release at: https://github.com/${{ github.repository }}/releases"

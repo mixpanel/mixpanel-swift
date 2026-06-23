@@ -162,11 +162,11 @@
         )
 
         if confidence == .high || confidence == .medium {
-          emitCrashEvent(record, crashInfo: hangInfo, confidence: confidence)
+//          emitCrashEvent(record, crashInfo: hangInfo, confidence: confidence)
 
-          pendingExitsLock.write {
-            pendingUnexpectedExits.removeValue(forKey: record.sessionId)
-          }
+//          pendingExitsLock.write {
+//            pendingUnexpectedExits.removeValue(forKey: record.sessionId)
+//          }
         }
       }
     }

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import MixpanelSwiftCommon
 
 #if !os(OSX)
   import UIKit
@@ -585,6 +586,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   #if os(iOS)
     @available(iOS 13.0, *)
     private func setupCrashRecovery() {
+      // Set up bridge to receive Session Replay notifications
+      MixpanelCommonBridge.receiver = self
+
       // Register MetricKit subscriber (iOS 14+)
       if #available(iOS 14.0, *) {
         sessionRecoveryManager.registerMetricKitSubscriber()
@@ -1573,59 +1577,6 @@ extension MixpanelInstance {
     }
   }
 
-  // MARK: - Session Replay Integration (Crash Detection)
-
-  #if os(iOS)
-    /**
-       Notify crash detection system that Session Replay started recording.
-
-       Called by Session Replay SDK when recording begins. Updates the crash marker
-       with replay session information.
-
-       - parameter replayId: The replay session UUID
-       - parameter replayStartTimestamp: When the replay session started (seconds since epoch)
-       */
-    @available(iOS 13.0, *)
-    public func notifySessionReplayStarted(replayId: String, replayStartTimestamp: TimeInterval) {
-      sessionRecoveryManager.armMarker(
-        sessionId: sessionMetadata.sessionID,
-        replayId: replayId,
-        lastFrameTimestamp: replayStartTimestamp
-      )
-
-      // Update ANR watchdog with replay ID
-      anrWatchdog.currentReplayId = replayId
-
-      MixpanelLogger.debug(
-        message:
-          "Session Replay started: replayId=\(replayId), updating crash detection"
-      )
-    }
-
-    /**
-       Notify crash detection system that a new Session Replay frame was captured.
-
-       Called by Session Replay SDK after each frame capture. Updates the last frame
-       timestamp to maintain a tight crash-time anchor.
-
-       - parameter timestamp: Frame capture timestamp (seconds since epoch)
-       */
-    @available(iOS 13.0, *)
-    public func notifySessionReplayFrameCaptured(timestamp: TimeInterval) {
-      sessionRecoveryManager.updateLastFrameTimestamp(timestamp)
-    }
-
-    /**
-       Notify crash detection system that Session Replay stopped recording.
-
-       Called by Session Replay SDK when recording ends (background, stop, etc.).
-       */
-    @available(iOS 13.0, *)
-    public func notifySessionReplayStopped() {
-      anrWatchdog.currentReplayId = nil
-      MixpanelLogger.debug(message: "Session Replay stopped, cleared replay ID from crash detection")
-    }
-  #endif
 
   /**
      Returns the currently set super properties.
@@ -1959,3 +1910,35 @@ extension MixpanelInstance {
   }
 
 }
+
+// MARK: - Session Replay Integration via Common Bridge
+
+#if os(iOS)
+@available(iOS 13.0, *)
+extension MixpanelInstance: SessionReplayNotificationReceiver {
+    
+    public func sessionReplayDidStart(replayId: String, replayStartTimestamp: TimeInterval) {
+        sessionRecoveryManager.armMarker(
+            sessionId: sessionMetadata.sessionID,
+            replayId: replayId,
+            lastFrameTimestamp: replayStartTimestamp
+        )
+        
+        // Update ANR watchdog with replay ID
+        anrWatchdog.currentReplayId = replayId
+        
+        MixpanelLogger.debug(
+            message: "Session Replay started: replayId=\(replayId), updating crash detection"
+        )
+    }
+    
+    public func sessionReplayDidCaptureFrame(timestamp: TimeInterval) {
+        sessionRecoveryManager.updateLastFrameTimestamp(timestamp)
+    }
+    
+    public func sessionReplayDidStop() {
+        anrWatchdog.currentReplayId = nil
+        MixpanelLogger.debug(message: "Session Replay stopped, cleared replay ID from crash detection")
+    }
+}
+#endif

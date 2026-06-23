@@ -163,7 +163,9 @@ class SessionRecoveryManager: NSObject {
     }
 
     // Emit $unexpected_exit event
-    emitUnexpectedExitEvent(record)
+      if ((record.replayId) != nil) {
+          emitUnexpectedExitEvent(record)
+      }
 
     // Add to pending exits for MetricKit correlation
     pendingExitsLock.write {

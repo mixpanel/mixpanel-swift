@@ -111,7 +111,7 @@
         while self.isRunning && !Thread.current.isCancelled {
           autoreleasepool {
             // Skip ping if paused or debugger attached
-              if self.isPaused {//}|| self.isDebuggerAttached() {
+            if self.isPaused {
               Thread.sleep(forTimeInterval: self.pingInterval)
               return
             }

@@ -1318,6 +1318,54 @@ extension MixpanelInstance {
   }
 
   /**
+     Track a screen view event. This is a convenience method for tracking when users view
+     a screen/page in your application.
+
+     - parameter screenName: The name of the screen/page being viewed
+     - parameter properties: Optional properties to include with this event
+     */
+  public func screenView(screenName: String?, properties: Properties? = nil) {
+    guard let screenName = screenName, !screenName.isEmpty else {
+      MixpanelLogger.error(message: "screenView called with nil or empty screenName. Event not tracked.")
+      return
+    }
+
+    var mergedProperties: Properties = ["current_page_title": screenName]
+
+    if let properties = properties {
+      for (key, value) in properties {
+        mergedProperties[key] = value
+      }
+    }
+
+    track(event: "$mp_page_view", properties: mergedProperties)
+  }
+
+  /**
+     Track a screen leave event. This is a convenience method for tracking when users leave
+     a screen/page in your application.
+
+     - parameter screenName: The name of the screen/page being left
+     - parameter properties: Optional properties to include with this event
+     */
+  public func screenLeave(screenName: String?, properties: Properties? = nil) {
+    guard let screenName = screenName, !screenName.isEmpty else {
+      MixpanelLogger.error(message: "screenLeave called with nil or empty screenName. Event not tracked.")
+      return
+    }
+
+    var mergedProperties: Properties = ["current_page_title": screenName]
+
+    if let properties = properties {
+      for (key, value) in properties {
+        mergedProperties[key] = value
+      }
+    }
+
+    track(event: "$mp_page_leave", properties: mergedProperties)
+  }
+
+  /**
      Tracks an event with properties and to specific groups.
      Properties and groups are optional and can be added only if needed.
   

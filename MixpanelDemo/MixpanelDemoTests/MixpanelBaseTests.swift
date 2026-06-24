@@ -121,6 +121,91 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     waitForTrackingQueue(mixpanel)
   }
 
+  func testScreenView() {
+    let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
+    testMixpanel.screenView(screenName: "HomeScreen", properties: ["extra_prop": "extra_value"])
+
+    waitForTrackingQueue(testMixpanel)
+
+    let events = eventQueue(token: testMixpanel.apiToken)
+    XCTAssertEqual(events.count, 1)
+
+    let event = events.first
+    XCTAssertEqual(event?["event"] as? String, "$mp_page_view")
+
+    let props = event?["properties"] as? InternalProperties
+    XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
+    XCTAssertEqual(props?["extra_prop"] as? String, "extra_value")
+    XCTAssertNotNil(props?["$screen_height"])
+
+    flushAndReset(mixpanel: testMixpanel)
+  }
+
+  func testScreenViewWithoutProperties() {
+    let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
+    testMixpanel.screenView(screenName: "HomeScreen")
+
+    waitForTrackingQueue(testMixpanel)
+
+    let events = eventQueue(token: testMixpanel.apiToken)
+    XCTAssertEqual(events.count, 1)
+
+    let event = events.first
+    XCTAssertEqual(event?["event"] as? String, "$mp_page_view")
+
+    let props = event?["properties"] as? InternalProperties
+    XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
+
+    flushAndReset(mixpanel: testMixpanel)
+  }
+
+  func testScreenViewNilScreenName() {
+    let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
+
+    testMixpanel.screenView(screenName: nil)
+    testMixpanel.screenView(screenName: "")
+
+    waitForTrackingQueue(testMixpanel)
+
+    let events = eventQueue(token: testMixpanel.apiToken)
+    XCTAssertEqual(events.count, 0)
+
+    flushAndReset(mixpanel: testMixpanel)
+  }
+
+  func testScreenLeave() {
+    let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
+    testMixpanel.screenLeave(screenName: "HomeScreen", properties: ["time_spent": 30])
+
+    waitForTrackingQueue(testMixpanel)
+
+    let events = eventQueue(token: testMixpanel.apiToken)
+    XCTAssertEqual(events.count, 1)
+
+    let event = events.first
+    XCTAssertEqual(event?["event"] as? String, "$mp_page_leave")
+
+    let props = event?["properties"] as? InternalProperties
+    XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
+    XCTAssertEqual(props?["time_spent"] as? Int, 30)
+
+    flushAndReset(mixpanel: testMixpanel)
+  }
+
+  func testScreenLeaveNilScreenName() {
+    let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
+
+    testMixpanel.screenLeave(screenName: nil)
+    testMixpanel.screenLeave(screenName: "")
+
+    waitForTrackingQueue(testMixpanel)
+
+    let events = eventQueue(token: testMixpanel.apiToken)
+    XCTAssertEqual(events.count, 0)
+
+    flushAndReset(mixpanel: testMixpanel)
+  }
+
   func assertDefaultPeopleProperties(_ properties: InternalProperties) {
     XCTAssertNotNil(properties["$ios_device_model"], "missing $ios_device_model property")
     XCTAssertNotNil(properties["$ios_lib_version"], "missing $ios_lib_version property")

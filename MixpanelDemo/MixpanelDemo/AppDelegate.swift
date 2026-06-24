@@ -59,11 +59,7 @@ extension UIViewController {
       return ""
     }
 
-    // Remove "ViewController" suffix and format
-    return
-      className
-      .replacingOccurrences(of: "ViewController", with: "")
-      .replacingOccurrences(of: "([a-z])([A-Z])", with: "$1 $2", options: .regularExpression)
+    return className
   }
 }
 

@@ -49,9 +49,9 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
   func dbFilePath(_ token: String? = nil) -> String {
     let manager = FileManager.default
     #if os(iOS)
-      let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
+    let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
     #else
-      let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
+    let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
     #endif  // os(iOS)
     guard let apiToken = token else {
       return ""

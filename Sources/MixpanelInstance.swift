@@ -9,16 +9,16 @@
 import Foundation
 
 #if !os(OSX)
-  import UIKit
+import UIKit
 #else
-  import Cocoa
+import Cocoa
 #endif  // os(OSX)
 #if os(iOS)
-  import SystemConfiguration
+import SystemConfiguration
 #endif
 
 #if os(iOS)
-  import CoreTelephony
+import CoreTelephony
 #endif  // os(iOS)
 
 private let devicePrefix = "$device:"
@@ -209,13 +209,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         MixpanelLogger.disableLevel(.error)
       }
       #if DEBUG
-        var trackProps: Properties = ["MixpanelLogging Enabled": loggingEnabled]
-        if superProperties["mp_lib"] != nil {
-          trackProps["mp_lib"] = self.superProperties["mp_lib"] as! String
-        }
-        if superProperties["$lib_version"] != nil {
-          trackProps["$lib_version"] = self.superProperties["$lib_version"] as! String
-        }
+      var trackProps: Properties = ["MixpanelLogging Enabled": loggingEnabled]
+      if superProperties["mp_lib"] != nil {
+        trackProps["mp_lib"] = self.superProperties["mp_lib"] as! String
+      }
+      if superProperties["$lib_version"] != nil {
+        trackProps["$lib_version"] = self.superProperties["$lib_version"] as! String
+      }
       #endif
     }
   }
@@ -226,25 +226,25 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   /// The minimum session duration (ms) that is tracked in automatic events.
   /// The default value is 10000 (10 seconds).
   #if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
-    open var minimumSessionDuration: UInt64 {
-      get {
-        return automaticEvents.minimumSessionDuration
-      }
-      set {
-        automaticEvents.minimumSessionDuration = newValue
-      }
+  open var minimumSessionDuration: UInt64 {
+    get {
+      return automaticEvents.minimumSessionDuration
     }
+    set {
+      automaticEvents.minimumSessionDuration = newValue
+    }
+  }
 
-    /// The maximum session duration (ms) that is tracked in automatic events.
-    /// The default value is UINT64_MAX (no maximum session duration).
-    open var maximumSessionDuration: UInt64 {
-      get {
-        return automaticEvents.maximumSessionDuration
-      }
-      set {
-        automaticEvents.maximumSessionDuration = newValue
-      }
+  /// The maximum session duration (ms) that is tracked in automatic events.
+  /// The default value is UINT64_MAX (no maximum session duration).
+  open var maximumSessionDuration: UInt64 {
+    get {
+      return automaticEvents.maximumSessionDuration
     }
+    set {
+      automaticEvents.maximumSessionDuration = newValue
+    }
+  }
   #endif
   var superProperties = InternalProperties()
   var trackingQueue: DispatchQueue
@@ -255,17 +255,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
   let readWriteLock: ReadWriteLock
   #if os(iOS) && !targetEnvironment(macCatalyst)
-    var reachability: SCNetworkReachability?
-    static let telephonyInfo = CTTelephonyNetworkInfo()
+  var reachability: SCNetworkReachability?
+  static let telephonyInfo = CTTelephonyNetworkInfo()
   #endif
   #if !os(OSX) && !os(watchOS)
-    var taskId = UIBackgroundTaskIdentifier.invalid
+  var taskId = UIBackgroundTaskIdentifier.invalid
   #endif  // os(OSX)
   let sessionMetadata: SessionMetadata
   let flushInstance: Flush
   let trackInstance: Track
   #if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
-    let automaticEvents = AutomaticEvents()
+  let automaticEvents = AutomaticEvents()
   #endif
   private let registerSuperPropertiesNotificationName = Notification.Name(
     "com.mixpanel.properties.register")
@@ -400,34 +400,35 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       excludeProperties: self.options.excludeProperties)
     trackInstance.mixpanelInstance = self
     #if os(iOS) && !targetEnvironment(macCatalyst)
-      // Extract hostname from serverURL and create reachability
-      if let url = URL(string: self.serverURL),
-         let host = url.host {
-        self.reachability = SCNetworkReachabilityCreateWithName(nil, host)
-      }
-      if let reachability = self.reachability {
-        var context = SCNetworkReachabilityContext(
-          version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
-        func reachabilityCallback(
-          reachability: SCNetworkReachability,
-          flags: SCNetworkReachabilityFlags,
-          unsafePointer: UnsafeMutableRawPointer?
-        ) {
-          let wifi =
-            flags.contains(SCNetworkReachabilityFlags.reachable)
-            && !flags.contains(SCNetworkReachabilityFlags.isWWAN)
-          AutomaticProperties.automaticPropertiesLock.write {
-            AutomaticProperties.properties["$wifi"] = wifi
-          }
-          MixpanelLogger.info(message: "reachability changed, wifi=\(wifi)")
+    // Extract hostname from serverURL and create reachability
+    if let url = URL(string: self.serverURL),
+      let host = url.host
+    {
+      self.reachability = SCNetworkReachabilityCreateWithName(nil, host)
+    }
+    if let reachability = self.reachability {
+      var context = SCNetworkReachabilityContext(
+        version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
+      func reachabilityCallback(
+        reachability: SCNetworkReachability,
+        flags: SCNetworkReachabilityFlags,
+        unsafePointer: UnsafeMutableRawPointer?
+      ) {
+        let wifi =
+          flags.contains(SCNetworkReachabilityFlags.reachable)
+          && !flags.contains(SCNetworkReachabilityFlags.isWWAN)
+        AutomaticProperties.automaticPropertiesLock.write {
+          AutomaticProperties.properties["$wifi"] = wifi
         }
-        if SCNetworkReachabilitySetCallback(reachability, reachabilityCallback, &context) {
-          if !SCNetworkReachabilitySetDispatchQueue(reachability, trackingQueue) {
-            // cleanup callback if setting dispatch queue failed
-            SCNetworkReachabilitySetCallback(reachability, nil, nil)
-          }
+        MixpanelLogger.info(message: "reachability changed, wifi=\(wifi)")
+      }
+      if SCNetworkReachabilitySetCallback(reachability, reachabilityCallback, &context) {
+        if !SCNetworkReachabilitySetDispatchQueue(reachability, trackingQueue) {
+          // cleanup callback if setting dispatch queue failed
+          SCNetworkReachabilitySetCallback(reachability, nil, nil)
         }
       }
+    }
     #endif
     flushInstance.delegate = self
     distinctId = devicePrefix + defaultDeviceId()
@@ -441,7 +442,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     people.delegate = self
     flushInstance.flushInterval = flushInterval
     #if !os(watchOS)
-      setupListeners()
+    setupListeners()
     #endif
     unarchive()
 
@@ -471,17 +472,17 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     }
 
     #if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
-      if !MixpanelInstance.isiOSAppExtension() && trackAutomaticEvents {
-        automaticEvents.delegate = self
-        // Defer automatic events initialization to the next run loop iteration
-        // to avoid interfering with SwiftUI's accent color setup when
-        // Mixpanel.initialize() is called from a SwiftUI App's init().
-        // See: https://github.com/mixpanel/mixpanel-swift/issues/522
-        DispatchQueue.main.async { [weak self] in
-          guard let self = self else { return }
-          self.automaticEvents.initializeEvents(instanceName: self.name)
-        }
+    if !MixpanelInstance.isiOSAppExtension() && trackAutomaticEvents {
+      automaticEvents.delegate = self
+      // Defer automatic events initialization to the next run loop iteration
+      // to avoid interfering with SwiftUI's accent color setup when
+      // Mixpanel.initialize() is called from a SwiftUI App's init().
+      // See: https://github.com/mixpanel/mixpanel-swift/issues/522
+      DispatchQueue.main.async { [weak self] in
+        guard let self = self else { return }
+        self.automaticEvents.initializeEvents(instanceName: self.name)
       }
+    }
     #endif
     if self.options.featureFlagOptions.prefetchFlags {
       flags.loadFlags()
@@ -501,79 +502,79 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   }
 
   #if !os(OSX) && !os(watchOS)
-    private func setupListeners() {
-      let notificationCenter = NotificationCenter.default
-      #if os(iOS) && !targetEnvironment(macCatalyst)
-        setCurrentRadio()
-      // Temporarily remove the ability to monitor the radio change due to a crash issue might relate to the api from Apple
-      // https://openradar.appspot.com/46873673
-      //    notificationCenter.addObserver(self,
-      //                                   selector: #selector(setCurrentRadio),
-      //                                   name: .CTRadioAccessTechnologyDidChange,
-      //                                   object: nil)
-      #endif  // os(iOS)
-      if !MixpanelInstance.isiOSAppExtension() {
-        notificationCenter.addObserver(
-          self,
-          selector: #selector(applicationWillResignActive(_:)),
-          name: UIApplication.willResignActiveNotification,
-          object: nil)
-        notificationCenter.addObserver(
-          self,
-          selector: #selector(applicationDidBecomeActive(_:)),
-          name: UIApplication.didBecomeActiveNotification,
-          object: nil)
-        notificationCenter.addObserver(
-          self,
-          selector: #selector(applicationDidEnterBackground(_:)),
-          name: UIApplication.didEnterBackgroundNotification,
-          object: nil)
-        notificationCenter.addObserver(
-          self,
-          selector: #selector(applicationWillEnterForeground(_:)),
-          name: UIApplication.willEnterForegroundNotification,
-          object: nil)
-        notificationCenter.addObserver(
-          self,
-          selector: #selector(handleSuperPropertiesRegistrationNotification(_:)),
-          name: registerSuperPropertiesNotificationName,
-          object: nil
-        )
-        notificationCenter.addObserver(
-          self,
-          selector: #selector(handleSuperPropertiesRegistrationNotification(_:)),
-          name: unregisterSuperPropertiesNotificationName,
-          object: nil
-        )
-      }
-    }
-  #elseif os(OSX)
-    private func setupListeners() {
-      let notificationCenter = NotificationCenter.default
+  private func setupListeners() {
+    let notificationCenter = NotificationCenter.default
+    #if os(iOS) && !targetEnvironment(macCatalyst)
+    setCurrentRadio()
+    // Temporarily remove the ability to monitor the radio change due to a crash issue might relate to the api from Apple
+    // https://openradar.appspot.com/46873673
+    //    notificationCenter.addObserver(self,
+    //                                   selector: #selector(setCurrentRadio),
+    //                                   name: .CTRadioAccessTechnologyDidChange,
+    //                                   object: nil)
+    #endif  // os(iOS)
+    if !MixpanelInstance.isiOSAppExtension() {
       notificationCenter.addObserver(
         self,
         selector: #selector(applicationWillResignActive(_:)),
-        name: NSApplication.willResignActiveNotification,
+        name: UIApplication.willResignActiveNotification,
         object: nil)
       notificationCenter.addObserver(
         self,
         selector: #selector(applicationDidBecomeActive(_:)),
-        name: NSApplication.didBecomeActiveNotification,
+        name: UIApplication.didBecomeActiveNotification,
         object: nil)
+      notificationCenter.addObserver(
+        self,
+        selector: #selector(applicationDidEnterBackground(_:)),
+        name: UIApplication.didEnterBackgroundNotification,
+        object: nil)
+      notificationCenter.addObserver(
+        self,
+        selector: #selector(applicationWillEnterForeground(_:)),
+        name: UIApplication.willEnterForegroundNotification,
+        object: nil)
+      notificationCenter.addObserver(
+        self,
+        selector: #selector(handleSuperPropertiesRegistrationNotification(_:)),
+        name: registerSuperPropertiesNotificationName,
+        object: nil
+      )
+      notificationCenter.addObserver(
+        self,
+        selector: #selector(handleSuperPropertiesRegistrationNotification(_:)),
+        name: unregisterSuperPropertiesNotificationName,
+        object: nil
+      )
     }
+  }
+  #elseif os(OSX)
+  private func setupListeners() {
+    let notificationCenter = NotificationCenter.default
+    notificationCenter.addObserver(
+      self,
+      selector: #selector(applicationWillResignActive(_:)),
+      name: NSApplication.willResignActiveNotification,
+      object: nil)
+    notificationCenter.addObserver(
+      self,
+      selector: #selector(applicationDidBecomeActive(_:)),
+      name: NSApplication.didBecomeActiveNotification,
+      object: nil)
+  }
   #endif  // os(OSX)
 
   deinit {
     NotificationCenter.default.removeObserver(self)
     #if os(iOS) && !os(watchOS) && !targetEnvironment(macCatalyst)
-      if let reachability = self.reachability {
-        if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
-          MixpanelLogger.error(message: "\(self) error unsetting reachability callback")
-        }
-        if !SCNetworkReachabilitySetDispatchQueue(reachability, nil) {
-          MixpanelLogger.error(message: "\(self) error unsetting reachability dispatch queue")
-        }
+    if let reachability = self.reachability {
+      if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
+        MixpanelLogger.error(message: "\(self) error unsetting reachability callback")
       }
+      if !SCNetworkReachabilitySetDispatchQueue(reachability, nil) {
+        MixpanelLogger.error(message: "\(self) error unsetting reachability dispatch queue")
+      }
+    }
     #endif
   }
 
@@ -593,16 +594,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   }
 
   #if !os(OSX) && !os(watchOS)
-    static func sharedUIApplication() -> UIApplication? {
-      guard
-        let sharedApplication =
-          UIApplication.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue()
-          as? UIApplication
-      else {
-        return nil
-      }
-      return sharedApplication
+  static func sharedUIApplication() -> UIApplication? {
+    guard
+      let sharedApplication =
+        UIApplication.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue()
+        as? UIApplication
+    else {
+      return nil
     }
+    return sharedApplication
+  }
   #endif  // !os(OSX)
 
   @objc private func applicationDidBecomeActive(_ notification: Notification) {
@@ -612,57 +613,57 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   @objc private func applicationWillResignActive(_ notification: Notification) {
     flushInstance.applicationWillResignActive()
     #if os(OSX)
-      if flushOnBackground {
-        flush()
-      }
+    if flushOnBackground {
+      flush()
+    }
 
     #endif
   }
 
   #if !os(OSX) && !os(watchOS)
-    @objc private func applicationDidEnterBackground(_ notification: Notification) {
-      guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
-        return
-      }
+  @objc private func applicationDidEnterBackground(_ notification: Notification) {
+    guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
+      return
+    }
 
-      if hasOptedOutTracking() {
-        return
-      }
+    if hasOptedOutTracking() {
+      return
+    }
 
-      let completionHandler: () -> Void = { [weak self] in
-        guard let self = self else { return }
+    let completionHandler: () -> Void = { [weak self] in
+      guard let self = self else { return }
 
-        if self.taskId != UIBackgroundTaskIdentifier.invalid {
-          sharedApplication.endBackgroundTask(self.taskId)
-          self.taskId = UIBackgroundTaskIdentifier.invalid
-        }
-      }
-
-      taskId = sharedApplication.beginBackgroundTask(expirationHandler: completionHandler)
-
-      // Ensure that any session replay ID is cleared when the app enters the background
-      unregisterSuperProperty("$mp_replay_id")
-
-      if flushOnBackground {
-        flush(performFullFlush: true, completion: completionHandler)
+      if self.taskId != UIBackgroundTaskIdentifier.invalid {
+        sharedApplication.endBackgroundTask(self.taskId)
+        self.taskId = UIBackgroundTaskIdentifier.invalid
       }
     }
 
-    @objc private func applicationWillEnterForeground(_ notification: Notification) {
-      guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
-        return
-      }
-      sessionMetadata.applicationWillEnterForeground()
+    taskId = sharedApplication.beginBackgroundTask(expirationHandler: completionHandler)
 
-      if taskId != UIBackgroundTaskIdentifier.invalid {
-        sharedApplication.endBackgroundTask(taskId)
-        taskId = UIBackgroundTaskIdentifier.invalid
-        #if os(iOS)
-          self.updateNetworkActivityIndicator(false)
-        #endif  // os(iOS)
-      }
+    // Ensure that any session replay ID is cleared when the app enters the background
+    unregisterSuperProperty("$mp_replay_id")
 
+    if flushOnBackground {
+      flush(performFullFlush: true, completion: completionHandler)
     }
+  }
+
+  @objc private func applicationWillEnterForeground(_ notification: Notification) {
+    guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
+      return
+    }
+    sessionMetadata.applicationWillEnterForeground()
+
+    if taskId != UIBackgroundTaskIdentifier.invalid {
+      sharedApplication.endBackgroundTask(taskId)
+      taskId = UIBackgroundTaskIdentifier.invalid
+      #if os(iOS)
+      self.updateNetworkActivityIndicator(false)
+      #endif  // os(iOS)
+    }
+
+  }
   #endif
 
   func addPrefixToDeviceId(deviceId: String?) -> String {
@@ -691,9 +692,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
       distinctId = uniqueIdentifierForDevice()
     } else {
       #if MIXPANEL_UNIQUE_DISTINCT_ID
-        distinctId = uniqueIdentifierForDevice()
+      distinctId = uniqueIdentifierForDevice()
       #else
-        distinctId = nil
+      distinctId = nil
       #endif
     }
     return distinctId ?? UUID().uuidString  // use a random UUID by default
@@ -702,96 +703,96 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
   func uniqueIdentifierForDevice() -> String? {
     var distinctId: String?
     #if os(OSX)
-      distinctId = MixpanelInstance.macOSIdentifier()
+    distinctId = MixpanelInstance.macOSIdentifier()
     #elseif !os(watchOS)
-      if NSClassFromString("UIDevice") != nil {
-        distinctId = UIDevice.current.identifierForVendor?.uuidString
-      } else {
-        distinctId = nil
-      }
-    #else
+    if NSClassFromString("UIDevice") != nil {
+      distinctId = UIDevice.current.identifierForVendor?.uuidString
+    } else {
       distinctId = nil
+    }
+    #else
+    distinctId = nil
     #endif
     return distinctId
   }
 
   #if os(OSX)
-    static func macOSIdentifier() -> String? {
-      let platformExpert: io_service_t = IOServiceGetMatchingService(
-        kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
-      let serialNumberAsCFString =
-        IORegistryEntryCreateCFProperty(
-          platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0)
-      IOObjectRelease(platformExpert)
-      return (serialNumberAsCFString?.takeUnretainedValue() as? String)
-    }
+  static func macOSIdentifier() -> String? {
+    let platformExpert: io_service_t = IOServiceGetMatchingService(
+      kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
+    let serialNumberAsCFString =
+      IORegistryEntryCreateCFProperty(
+        platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0)
+    IOObjectRelease(platformExpert)
+    return (serialNumberAsCFString?.takeUnretainedValue() as? String)
+  }
   #endif  // os(OSX)
 
   #if os(iOS)
-    func updateNetworkActivityIndicator(_ on: Bool) {
-      if showNetworkActivityIndicator {
-        DispatchQueue.main.async { [on] in
-          MixpanelInstance.sharedUIApplication()?.isNetworkActivityIndicatorVisible = on
+  func updateNetworkActivityIndicator(_ on: Bool) {
+    if showNetworkActivityIndicator {
+      DispatchQueue.main.async { [on] in
+        MixpanelInstance.sharedUIApplication()?.isNetworkActivityIndicatorVisible = on
+      }
+    }
+  }
+  #if os(iOS) && !targetEnvironment(macCatalyst)
+  @objc func setCurrentRadio() {
+    var radio = ""
+    let prefix = "CTRadioAccessTechnology"
+    if #available(iOS 12.0, *) {
+      if let radioDict = MixpanelInstance.telephonyInfo.serviceCurrentRadioAccessTechnology {
+        for (_, value) in radioDict where !value.isEmpty && value.hasPrefix(prefix) {
+          // the first should be the prefix, second the target
+          let components = value.components(separatedBy: prefix)
+
+          // Something went wrong and we have more than prefix:target
+          guard components.count == 2 else {
+            continue
+          }
+
+          // Safe to directly access by index since we confirmed count == 2 above
+          let radioValue = components[1]
+
+          // Send to parent
+          radio += radio.isEmpty ? radioValue : ", \(radioValue)"
+        }
+
+        radio = radio.isEmpty ? "None" : radio
+      }
+    } else {
+      radio = MixpanelInstance.telephonyInfo.currentRadioAccessTechnology ?? "None"
+      if radio.hasPrefix(prefix) {
+        radio = (radio as NSString).substring(from: prefix.count)
+      }
+    }
+
+    trackingQueue.async {
+      AutomaticProperties.automaticPropertiesLock.write { [weak self, radio] in
+        AutomaticProperties.properties["$radio"] = radio
+
+        guard self != nil else {
+          return
+        }
+
+        AutomaticProperties.properties["$carrier"] = ""
+        if #available(iOS 12.0, *) {
+          if let carrierName = MixpanelInstance.telephonyInfo
+            .serviceSubscriberCellularProviders?.first?.value.carrierName
+          {
+            AutomaticProperties.properties["$carrier"] = carrierName
+          }
+        } else {
+          if let carrierName = MixpanelInstance.telephonyInfo.subscriberCellularProvider?
+            .carrierName
+          {
+            AutomaticProperties.properties["$carrier"] = carrierName
+          }
         }
       }
     }
-    #if os(iOS) && !targetEnvironment(macCatalyst)
-      @objc func setCurrentRadio() {
-        var radio = ""
-        let prefix = "CTRadioAccessTechnology"
-        if #available(iOS 12.0, *) {
-          if let radioDict = MixpanelInstance.telephonyInfo.serviceCurrentRadioAccessTechnology {
-            for (_, value) in radioDict where !value.isEmpty && value.hasPrefix(prefix) {
-              // the first should be the prefix, second the target
-              let components = value.components(separatedBy: prefix)
-
-              // Something went wrong and we have more than prefix:target
-              guard components.count == 2 else {
-                continue
-              }
-
-              // Safe to directly access by index since we confirmed count == 2 above
-              let radioValue = components[1]
-
-              // Send to parent
-              radio += radio.isEmpty ? radioValue : ", \(radioValue)"
-            }
-
-            radio = radio.isEmpty ? "None" : radio
-          }
-        } else {
-          radio = MixpanelInstance.telephonyInfo.currentRadioAccessTechnology ?? "None"
-          if radio.hasPrefix(prefix) {
-            radio = (radio as NSString).substring(from: prefix.count)
-          }
-        }
-
-        trackingQueue.async {
-          AutomaticProperties.automaticPropertiesLock.write { [weak self, radio] in
-            AutomaticProperties.properties["$radio"] = radio
-
-            guard self != nil else {
-              return
-            }
-
-            AutomaticProperties.properties["$carrier"] = ""
-            if #available(iOS 12.0, *) {
-              if let carrierName = MixpanelInstance.telephonyInfo
-                .serviceSubscriberCellularProviders?.first?.value.carrierName
-              {
-                AutomaticProperties.properties["$carrier"] = carrierName
-              }
-            } else {
-              if let carrierName = MixpanelInstance.telephonyInfo.subscriberCellularProvider?
-                .carrierName
-              {
-                AutomaticProperties.properties["$carrier"] = carrierName
-              }
-            }
-          }
-        }
-      }
-    #endif
+  }
+  #endif
   #endif  // os(iOS)
 
   @objc func handleSuperPropertiesRegistrationNotification(_ notification: Notification) {
@@ -841,14 +842,13 @@ extension MixpanelInstance {
      flags under the new identity. Any `flags.loadFlags(completion:)` callbacks pending from
      a fetch that was in flight at the moment identify was called will fire with `false`
      (so callers don't hang) — they will *not* receive the result of the new identity's fetch.
-
+  
      - parameter distinctId: string that uniquely identifies the current user
      - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
      This should only be set to false if you wish to prevent people profile updates for that user.
      - parameter completion: an optional completion handler for when the identify has completed.
      */
-  public func identify(distinctId: String, usePeople: Bool = true, completion: (() -> Void)? = nil)
-  {
+  public func identify(distinctId: String, usePeople: Bool = true, completion: (() -> Void)? = nil) {
     if hasOptedOutTracking() {
       if let completion = completion {
         DispatchQueue.main.async(execute: completion)
@@ -1227,12 +1227,12 @@ extension MixpanelInstance {
 
   private func persistenceTypeFromFlushType(_ type: FlushType) -> PersistenceType {
     switch type {
-    case .events:
-      return PersistenceType.events
-    case .people:
-      return PersistenceType.people
-    case .groups:
-      return PersistenceType.groups
+      case .events:
+        return PersistenceType.events
+      case .people:
+        return PersistenceType.people
+      case .groups:
+        return PersistenceType.groups
     }
   }
 
@@ -1320,7 +1320,7 @@ extension MixpanelInstance {
   /**
      Track a screen view event. This is a convenience method for tracking when users view
      a screen/page in your application.
-
+  
      - parameter screenName: The name of the screen/page being viewed
      - parameter properties: Optional properties to include with this event
      */
@@ -1332,7 +1332,7 @@ extension MixpanelInstance {
 
     var mergedProperties: Properties = [
       "current_page_title": screenName,
-      "$mp_autocapture": true
+      "$mp_autocapture": true,
     ]
 
     if let properties = properties {
@@ -1347,7 +1347,7 @@ extension MixpanelInstance {
   /**
      Track a screen leave event. This is a convenience method for tracking when users leave
      a screen/page in your application.
-
+  
      - parameter screenName: The name of the screen/page being left
      - parameter properties: Optional properties to include with this event
      */
@@ -1359,7 +1359,7 @@ extension MixpanelInstance {
 
     var mergedProperties: Properties = [
       "current_page_title": screenName,
-      "$mp_autocapture": true
+      "$mp_autocapture": true,
     ]
 
     if let properties = properties {

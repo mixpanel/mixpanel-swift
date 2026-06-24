@@ -138,7 +138,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     XCTAssertEqual(props?["extra_prop"] as? String, "extra_value")
     XCTAssertNotNil(props?["$screen_height"])
 
-    flushAndReset(mixpanel: testMixpanel)
+    removeDBfile(testMixpanel.apiToken)
   }
 
   func testScreenViewWithoutProperties() {
@@ -156,7 +156,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     let props = event?["properties"] as? InternalProperties
     XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
 
-    flushAndReset(mixpanel: testMixpanel)
+    removeDBfile(testMixpanel.apiToken)
   }
 
   func testScreenViewNilScreenName() {
@@ -170,7 +170,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     let events = eventQueue(token: testMixpanel.apiToken)
     XCTAssertEqual(events.count, 0)
 
-    flushAndReset(mixpanel: testMixpanel)
+    removeDBfile(testMixpanel.apiToken)
   }
 
   func testScreenLeave() {
@@ -189,7 +189,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
     XCTAssertEqual(props?["time_spent"] as? Int, 30)
 
-    flushAndReset(mixpanel: testMixpanel)
+    removeDBfile(testMixpanel.apiToken)
   }
 
   func testScreenLeaveNilScreenName() {
@@ -203,7 +203,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     let events = eventQueue(token: testMixpanel.apiToken)
     XCTAssertEqual(events.count, 0)
 
-    flushAndReset(mixpanel: testMixpanel)
+    removeDBfile(testMixpanel.apiToken)
   }
 
   func assertDefaultPeopleProperties(_ properties: InternalProperties) {

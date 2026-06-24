@@ -36,7 +36,7 @@ extension UIViewController {
     // Track screen view
     let screenName = formatScreenName()
     if !screenName.isEmpty {
-      Mixpanel.mainInstance().screenView(screenName: screenName)
+      Mixpanel.mainInstance().trackScreenView(screenName: screenName)
     }
   }
 
@@ -47,7 +47,7 @@ extension UIViewController {
     // Track screen leave
     let screenName = formatScreenName()
     if !screenName.isEmpty {
-      Mixpanel.mainInstance().screenLeave(screenName: screenName)
+      Mixpanel.mainInstance().trackScreenLeave(screenName: screenName)
     }
   }
 

@@ -14,7 +14,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
   func testScreenView() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
     let properties: Properties = ["extra_prop": "extra_value"]
-    testMixpanel.screenView(screenName: "HomeScreen", properties: properties)
+    testMixpanel.trackScreenView(screenName: "HomeScreen", properties: properties)
 
     waitForTrackingQueue(testMixpanel)
 
@@ -34,7 +34,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
 
   func testScreenViewWithoutProperties() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
-    testMixpanel.screenView(screenName: "HomeScreen")
+    testMixpanel.trackScreenView(screenName: "HomeScreen")
 
     waitForTrackingQueue(testMixpanel)
 
@@ -53,8 +53,8 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
   func testScreenViewNilScreenName() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
 
-    testMixpanel.screenView(screenName: nil)
-    testMixpanel.screenView(screenName: "")
+    testMixpanel.trackScreenView(screenName: nil)
+    testMixpanel.trackScreenView(screenName: "")
 
     waitForTrackingQueue(testMixpanel)
 
@@ -67,7 +67,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
   func testScreenLeave() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
     let properties: Properties = ["time_spent": 30]
-    testMixpanel.screenLeave(screenName: "HomeScreen", properties: properties)
+    testMixpanel.trackScreenLeave(screenName: "HomeScreen", properties: properties)
 
     waitForTrackingQueue(testMixpanel)
 
@@ -87,8 +87,8 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
   func testScreenLeaveNilScreenName() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
 
-    testMixpanel.screenLeave(screenName: nil)
-    testMixpanel.screenLeave(screenName: "")
+    testMixpanel.trackScreenLeave(screenName: nil)
+    testMixpanel.trackScreenLeave(screenName: "")
 
     waitForTrackingQueue(testMixpanel)
 

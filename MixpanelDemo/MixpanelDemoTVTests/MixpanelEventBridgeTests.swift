@@ -6,8 +6,8 @@
 //  Copyright © 2026 Mixpanel. All rights reserved.
 //
 
-import XCTest
 import MixpanelSwiftCommon
+import XCTest
 
 @testable import Mixpanel
 

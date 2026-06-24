@@ -50,20 +50,6 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
     removeDBfile(testMixpanel.apiToken)
   }
 
-  func testScreenViewNilScreenName() {
-    let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
-
-    testMixpanel.trackScreenView(screenName: nil)
-    testMixpanel.trackScreenView(screenName: "")
-
-    waitForTrackingQueue(testMixpanel)
-
-    let events = eventQueue(token: testMixpanel.apiToken)
-    XCTAssertEqual(events.count, 0)
-
-    removeDBfile(testMixpanel.apiToken)
-  }
-
   func testScreenLeave() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
     let properties: Properties = ["time_spent": 30]
@@ -80,20 +66,6 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
     let props = event?["properties"] as? InternalProperties
     XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
     XCTAssertEqual(props?["time_spent"] as? Int, 30)
-
-    removeDBfile(testMixpanel.apiToken)
-  }
-
-  func testScreenLeaveNilScreenName() {
-    let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
-
-    testMixpanel.trackScreenLeave(screenName: nil)
-    testMixpanel.trackScreenLeave(screenName: "")
-
-    waitForTrackingQueue(testMixpanel)
-
-    let events = eventQueue(token: testMixpanel.apiToken)
-    XCTAssertEqual(events.count, 0)
 
     removeDBfile(testMixpanel.apiToken)
   }

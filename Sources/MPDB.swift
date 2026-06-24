@@ -29,9 +29,9 @@ class MPDB {
   private func pathToDb() -> String? {
     let manager = FileManager.default
     #if os(iOS)
-      let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
+    let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
     #else
-      let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
+    let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
     #endif  // os(iOS)
 
     guard let urlUnwrapped = url?.appendingPathComponent(apiToken + "_" + DB_FILE_NAME).path else {
@@ -62,9 +62,10 @@ class MPDB {
       // Mac Catalyst and the simulator use macOS/host file systems with no Data Protection,
       // so the flag is unnecessary and can cause issues there.
       #if os(iOS) && !targetEnvironment(macCatalyst) && !targetEnvironment(simulator)
-        let openFlags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FILEPROTECTION_COMPLETEUNTILFIRSTUSERAUTHENTICATION
+      let openFlags =
+        SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FILEPROTECTION_COMPLETEUNTILFIRSTUSERAUTHENTICATION
       #else
-        let openFlags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
+      let openFlags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
       #endif
       if sqlite3_open_v2(dbPath, &connection, openFlags, nil)
         != SQLITE_OK
@@ -199,8 +200,7 @@ class MPDB {
     }
   }
 
-  func deleteRows(_ persistenceType: PersistenceType, ids: [Int32] = [], isDeleteAll: Bool = false)
-  {
+  func deleteRows(_ persistenceType: PersistenceType, ids: [Int32] = [], isDeleteAll: Bool = false) {
     if let db = connection {
       let tableName = tableNameFor(persistenceType)
       let deleteString =

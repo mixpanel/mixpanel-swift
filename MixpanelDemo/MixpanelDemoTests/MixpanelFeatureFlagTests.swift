@@ -69,46 +69,46 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
 func AssertEqual(_ value1: Any?, _ value2: Any?, file: StaticString = #file, line: UInt = #line) {
   // ... (Use the version that fixed the Any?? issues) ...
   switch (value1, value2) {
-  case (nil, nil):
-    break  // Equal
-  case (let v1 as Bool, let v2 as Bool):
-    XCTAssertEqual(v1, v2, file: file, line: line)
-  case (let v1 as String, let v2 as String):
-    XCTAssertEqual(v1, v2, file: file, line: line)
-  case (let v1 as Int, let v2 as Int):
-    XCTAssertEqual(v1, v2, file: file, line: line)
-  case (let v1 as Double, let v2 as Double):
-    // Handle potential precision issues if necessary
-    XCTAssertEqual(v1, v2, accuracy: 0.00001, file: file, line: line)
-  case (let v1 as [Any?], let v2 as [Any?]):
-    XCTAssertEqual(v1.count, v2.count, "Array counts differ", file: file, line: line)
-    for (index, item1) in v1.enumerated() {
-      guard index < v2.count else {
-        XCTFail("Index \(index) out of bounds for second array", file: file, line: line)
-        return
+    case (nil, nil):
+      break  // Equal
+    case (let v1 as Bool, let v2 as Bool):
+      XCTAssertEqual(v1, v2, file: file, line: line)
+    case (let v1 as String, let v2 as String):
+      XCTAssertEqual(v1, v2, file: file, line: line)
+    case (let v1 as Int, let v2 as Int):
+      XCTAssertEqual(v1, v2, file: file, line: line)
+    case (let v1 as Double, let v2 as Double):
+      // Handle potential precision issues if necessary
+      XCTAssertEqual(v1, v2, accuracy: 0.00001, file: file, line: line)
+    case (let v1 as [Any?], let v2 as [Any?]):
+      XCTAssertEqual(v1.count, v2.count, "Array counts differ", file: file, line: line)
+      for (index, item1) in v1.enumerated() {
+        guard index < v2.count else {
+          XCTFail("Index \(index) out of bounds for second array", file: file, line: line)
+          return
+        }
+        AssertEqual(item1, v2[index], file: file, line: line)
       }
-      AssertEqual(item1, v2[index], file: file, line: line)
-    }
-  case (let v1 as [String: Any?], let v2 as [String: Any?]):
-    XCTAssertEqual(
-      v1.count, v2.count, "Dictionary counts differ (\(v1.keys.sorted()) vs \(v2.keys.sorted()))",
-      file: file, line: line)
-    for (key, item1) in v1 {
-      guard v2.keys.contains(key) else {
-        XCTFail("Key '\(key)' missing in second dictionary", file: file, line: line)
-        continue
-      }
-      let item2DoubleOptional = v2[key]
-      AssertEqual(item1, item2DoubleOptional ?? nil, file: file, line: line)
-    }
-  default:
-    if let n1 = value1 as? NSNumber, let n2 = value2 as? NSNumber {
-      XCTAssertEqual(n1, n2, "NSNumber values differ: \(n1) vs \(n2)", file: file, line: line)
-    } else {
-      XCTFail(
-        "Values are not equal or of comparable types: \(String(describing: value1)) vs \(String(describing: value2))",
+    case (let v1 as [String: Any?], let v2 as [String: Any?]):
+      XCTAssertEqual(
+        v1.count, v2.count, "Dictionary counts differ (\(v1.keys.sorted()) vs \(v2.keys.sorted()))",
         file: file, line: line)
-    }
+      for (key, item1) in v1 {
+        guard v2.keys.contains(key) else {
+          XCTFail("Key '\(key)' missing in second dictionary", file: file, line: line)
+          continue
+        }
+        let item2DoubleOptional = v2[key]
+        AssertEqual(item1, item2DoubleOptional ?? nil, file: file, line: line)
+      }
+    default:
+      if let n1 = value1 as? NSNumber, let n2 = value2 as? NSNumber {
+        XCTAssertEqual(n1, n2, "NSNumber values differ: \(n1) vs \(n2)", file: file, line: line)
+      } else {
+        XCTFail(
+          "Values are not equal or of comparable types: \(String(describing: value1)) vs \(String(describing: value2))",
+          file: file, line: line)
+      }
   }
 }
 
@@ -212,7 +212,7 @@ class MockFeatureFlagManager: FeatureFlagManager {
       URLQueryItem(name: "context", value: contextString),
       URLQueryItem(name: "token", value: options.token),
       URLQueryItem(name: "mp_lib", value: "swift"),
-      URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion())
+      URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion()),
     ]
 
     // Capture the constructed request parameters for validation
@@ -263,7 +263,9 @@ class MockFeatureFlagManager: FeatureFlagManager {
     lastRecordedProjectId = projectId
     lastRecordedFirstTimeEventHash = firstTimeEventHash
 
-    print("MockFeatureFlagManager: Intercepted recordFirstTimeEvent call #\(recordFirstTimeEventCallCount) for flag: \(flagId)")
+    print(
+      "MockFeatureFlagManager: Intercepted recordFirstTimeEvent call #\(recordFirstTimeEventCallCount) for flag: \(flagId)"
+    )
     recordFirstTimeEventExpectation?.fulfill()
 
     // DO NOT call super - prevents actual network calls
@@ -292,7 +294,9 @@ class FeatureFlagManagerTests: XCTestCase {
     mockDelegate = MockFeatureFlagDelegate()
 
     // Use MockFeatureFlagManager to prevent real network calls
-      let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
+    let mockManager = MockFeatureFlagManager(
+      serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test",
+      delegate: mockDelegate)
     // Configure default simulation - successful fetch with sample flags
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
     mockManager.shouldSimulateNetworkDelay = true
@@ -437,7 +441,8 @@ class FeatureFlagManagerTests: XCTestCase {
     XCTAssertTrue(properties.keys.contains("fetchLatencyMs"), "Should include fetchLatencyMs", file: file, line: line)
 
     if let expected = expectedLatency,
-       let actual = properties["fetchLatencyMs"] as? Int {
+      let actual = properties["fetchLatencyMs"] as? Int
+    {
       XCTAssertEqual(actual, expected, file: file, line: line)
     }
   }
@@ -466,12 +471,14 @@ class FeatureFlagManagerTests: XCTestCase {
 
     guard let props = tracked.properties else { return }
 
-    verifyTrackingProperties(props, experimentName: experimentName,
-                            variantName: variantName, file: file, line: line)
+    verifyTrackingProperties(
+      props, experimentName: experimentName,
+      variantName: variantName, file: file, line: line)
 
     if checkTimingProperties {
-      verifyTimingProperties(props, expectedLatency: expectedLatency,
-                           file: file, line: line)
+      verifyTimingProperties(
+        props, expectedLatency: expectedLatency,
+        file: file, line: line)
     }
 
     additionalChecks?(props)
@@ -496,9 +503,10 @@ class FeatureFlagManagerTests: XCTestCase {
 
     manager.getVariant(flagName, fallback: fallback ?? defaultFallback) { data in
       if verifyMainThread {
-        XCTAssertTrue(Thread.isMainThread,
-                     "Completion should be on main thread",
-                     file: file, line: line)
+        XCTAssertTrue(
+          Thread.isMainThread,
+          "Completion should be on main thread",
+          file: file, line: line)
       }
       receivedData = data
       expectation.fulfill()
@@ -586,7 +594,8 @@ class FeatureFlagManagerTests: XCTestCase {
     line: UInt = #line
   ) {
     guard let mockMgr = mockManager,
-          let queryItems = mockMgr.lastQueryItems else {
+      let queryItems = mockMgr.lastQueryItems
+    else {
       XCTFail("No query items captured", file: file, line: line)
       return
     }
@@ -594,8 +603,9 @@ class FeatureFlagManagerTests: XCTestCase {
     let queryDict = Dictionary(uniqueKeysWithValues: queryItems.map { ($0.name, $0.value) })
 
     guard let contextString = queryDict["context"],
-          let contextData = contextString?.data(using: .utf8),
-          let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any] else {
+      let contextData = contextString?.data(using: .utf8),
+      let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any]
+    else {
       XCTFail("Failed to parse context", file: file, line: line)
       return
     }
@@ -1047,7 +1057,8 @@ class FeatureFlagManagerTests: XCTestCase {
     expectTracking {
       _ = manager.getVariantSync("feature_string", fallback: defaultFallback)
     }
-    verifyTrackedEvent(experimentName: "feature_string", variantName: "v_str", checkTimingProperties: true, expectedLatency: 150)
+    verifyTrackedEvent(
+      experimentName: "feature_string", variantName: "v_str", checkTimingProperties: true, expectedLatency: 150)
   }
 
   func testTracking_DoesNotTrackForFallback_Sync() {
@@ -1317,7 +1328,9 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testFetchWithNoDelegate() {
     // Create manager with no delegate
-      let noDelegate = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: nil)
+    let noDelegate = FeatureFlagManager(
+      serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test",
+      delegate: nil)
 
     // Try to load flags
     noDelegate.loadFlags()
@@ -1520,7 +1533,9 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: testAnonymousId
     )
 
-      let manager = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
+    let manager = FeatureFlagManager(
+      serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test",
+      delegate: mockDelegate)
 
     // Verify the delegate methods return expected values
     XCTAssertEqual(mockDelegate.getDistinctId(), testDistinctId)
@@ -1541,7 +1556,9 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: nil
     )
 
-      let manager = FeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
+    let manager = FeatureFlagManager(
+      serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test",
+      delegate: mockDelegate)
 
     // Verify the delegate methods return expected values
     XCTAssertEqual(mockDelegate.getDistinctId(), testDistinctId)
@@ -1668,7 +1685,8 @@ class FeatureFlagManagerTests: XCTestCase {
   func testTrackingIncludesOptionalProperties() {
     // Set up flags with experiment properties
     let flagsWithExperiment: [String: MixpanelFlagVariant] = [
-      "experiment_flag": MixpanelFlagVariant(key: "variant_a", value: true, isExperimentActive: true, isQATester: false, experimentID: "exp_123")
+      "experiment_flag": MixpanelFlagVariant(
+        key: "variant_a", value: true, isExperimentActive: true, isQATester: false, experimentID: "exp_123")
     ]
     simulateFetchSuccess(flags: flagsWithExperiment)
 
@@ -1922,7 +1940,9 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testGETRequestFormat() {
     // Use a fresh MockFeatureFlagManager with request validation enabled
-      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: mockDelegate)
+    let mockManager = MockFeatureFlagManager(
+      serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated),
+      instanceName: "test", delegate: mockDelegate)
     mockManager.requestValidationEnabled = true
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
@@ -1935,7 +1955,9 @@ class FeatureFlagManagerTests: XCTestCase {
     wait(for: [expectation], timeout: 10.0)
 
     // Verify no validation errors
-    XCTAssertNil(mockManager.requestValidationError, "Request validation should not have errors: \(mockManager.requestValidationError ?? "")")
+    XCTAssertNil(
+      mockManager.requestValidationError,
+      "Request validation should not have errors: \(mockManager.requestValidationError ?? "")")
 
     // Verify GET method
     XCTAssertEqual(mockManager.lastRequestMethod, .get, "Should use GET method")
@@ -1960,12 +1982,14 @@ class FeatureFlagManagerTests: XCTestCase {
       XCTAssertNotNil(queryDict["context"], "Should include context parameter")
       XCTAssertEqual(queryDict["token"], "test", "Should include token parameter")
       XCTAssertEqual(queryDict["mp_lib"], "swift", "Should include mp_lib parameter")
-      XCTAssertEqual(queryDict["$lib_version"], AutomaticProperties.libVersion(), "Should include $lib_version parameter")
+      XCTAssertEqual(
+        queryDict["$lib_version"], AutomaticProperties.libVersion(), "Should include $lib_version parameter")
 
       // Verify context JSON structure
       if let contextString = queryDict["context"],
         let contextData = contextString?.data(using: .utf8),
-        let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any] {
+        let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any]
+      {
         XCTAssertEqual(context["distinct_id"] as? String, "test_distinct_id", "Context should include distinct_id")
         XCTAssertEqual(context["device_id"] as? String, "test_anonymous_id", "Context should include device_id")
       } else {
@@ -1976,10 +2000,14 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testGETRequestWithCustomContext() {
     // Set up custom context
-    let customOptions = MixpanelOptions(token: "custom-token", featureFlagOptions: FeatureFlagOptions(enabled: true, context: [
-      "user_id": "test-user-123",
-      "group_id": "test-group-456"
-    ]))
+    let customOptions = MixpanelOptions(
+      token: "custom-token",
+      featureFlagOptions: FeatureFlagOptions(
+        enabled: true,
+        context: [
+          "user_id": "test-user-123",
+          "group_id": "test-group-456",
+        ]))
 
     let customDelegate = MockFeatureFlagDelegate(
       options: customOptions,
@@ -1987,7 +2015,9 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: "custom-device-id"
     )
 
-      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: customDelegate)
+    let mockManager = MockFeatureFlagManager(
+      serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated),
+      instanceName: "test", delegate: customDelegate)
     mockManager.requestValidationEnabled = true
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
@@ -2010,7 +2040,8 @@ class FeatureFlagManagerTests: XCTestCase {
       // Verify context includes both standard and custom fields
       if let contextString = queryDict["context"],
         let contextData = contextString?.data(using: .utf8),
-        let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any] {
+        let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any]
+      {
 
         XCTAssertEqual(context["distinct_id"] as? String, "custom-distinct-id", "Context should include distinct_id")
         XCTAssertEqual(context["device_id"] as? String, "custom-device-id", "Context should include device_id")
@@ -2030,7 +2061,9 @@ class FeatureFlagManagerTests: XCTestCase {
       anonymousId: nil
     )
 
-      let mockManager = MockFeatureFlagManager(serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: nilAnonymousDelegate)
+    let mockManager = MockFeatureFlagManager(
+      serverURL: "https://api.mixpanel.com", trackingQueue: DispatchQueue.global(qos: .userInitiated),
+      instanceName: "test", delegate: nilAnonymousDelegate)
     mockManager.requestValidationEnabled = true
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
@@ -2049,15 +2082,17 @@ class FeatureFlagManagerTests: XCTestCase {
     if let queryItems = mockManager.lastQueryItems {
       let queryDict = Dictionary(uniqueKeysWithValues: queryItems.map { ($0.name, $0.value) })
 
-        if let contextString = queryDict["context"],
-          let contextData = contextString?.data(using: .utf8),
-          let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any] {
+      if let contextString = queryDict["context"],
+        let contextData = contextString?.data(using: .utf8),
+        let context = try? JSONSerialization.jsonObject(with: contextData) as? [String: Any]
+      {
 
-          XCTAssertEqual(context["distinct_id"] as? String, "test-distinct-id", "Context should include distinct_id")
-          XCTAssertNil(context["device_id"], "Context should not include device_id when anonymous ID is nil")
+        XCTAssertEqual(context["distinct_id"] as? String, "test-distinct-id", "Context should include distinct_id")
+        XCTAssertNil(context["device_id"], "Context should not include device_id when anonymous ID is nil")
 
-          // Should only contain distinct_id (no additional context configured)
-          XCTAssertEqual(context.keys.count, 1, "Context should only contain distinct_id when no device_id or additional context")
+        // Should only contain distinct_id (no additional context configured)
+        XCTAssertEqual(
+          context.keys.count, 1, "Context should only contain distinct_id when no device_id or additional context")
       } else {
         XCTFail("Context should be valid JSON")
       }
@@ -2070,33 +2105,33 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testParsePendingFirstTimeEvents() {
     let json = """
-    {
-      "flags": {
-        "test-flag": {
-          "variant_key": "control",
-          "variant_value": false
-        }
-      },
-      "pending_first_time_events": [
-        {
-          "flag_key": "test-flag",
-          "flag_id": "flag-123",
-          "project_id": 3,
-          "first_time_event_hash": "abc123",
-          "event_name": "Purchase Complete",
-          "property_filters": {
-            ">": [{"var": "amount"}, 100]
-          },
-          "pending_variant": {
-            "variant_key": "treatment",
-            "variant_value": true,
-            "experiment_id": "exp-456",
-            "is_experiment_active": true
+      {
+        "flags": {
+          "test-flag": {
+            "variant_key": "control",
+            "variant_value": false
           }
-        }
-      ]
-    }
-    """.data(using: .utf8)!
+        },
+        "pending_first_time_events": [
+          {
+            "flag_key": "test-flag",
+            "flag_id": "flag-123",
+            "project_id": 3,
+            "first_time_event_hash": "abc123",
+            "event_name": "Purchase Complete",
+            "property_filters": {
+              ">": [{"var": "amount"}, 100]
+            },
+            "pending_variant": {
+              "variant_key": "treatment",
+              "variant_value": true,
+              "experiment_id": "exp-456",
+              "is_experiment_active": true
+            }
+          }
+        ]
+      }
+      """.data(using: .utf8)!
 
     do {
       let response = try JSONDecoder().decode(FlagsResponse.self, from: json)
@@ -2120,11 +2155,11 @@ class FeatureFlagManagerTests: XCTestCase {
 
   func testParseEmptyPendingFirstTimeEvents() {
     let json = """
-    {
-      "flags": {},
-      "pending_first_time_events": []
-    }
-    """.data(using: .utf8)!
+      {
+        "flags": {},
+        "pending_first_time_events": []
+      }
+      """.data(using: .utf8)!
 
     do {
       let response = try JSONDecoder().decode(FlagsResponse.self, from: json)
@@ -2233,7 +2268,8 @@ class FeatureFlagManagerTests: XCTestCase {
         XCTAssertTrue(mockManager.activatedFirstTimeEvents.contains("once-only:hash999"))
 
         // Verify recordFirstTimeEvent was called exactly once
-        XCTAssertEqual(mockManager.recordFirstTimeEventCallCount, 1,
+        XCTAssertEqual(
+          mockManager.recordFirstTimeEventCallCount, 1,
           "recordFirstTimeEvent should be called exactly once, not \(mockManager.recordFirstTimeEventCallCount) times")
 
         // Verify the correct parameters were recorded
@@ -2366,7 +2402,7 @@ class FeatureFlagManagerTests: XCTestCase {
         mockMgr.flags = ["multi-event-flag": controlVariant]
         mockMgr.pendingFirstTimeEvents = [
           "multi-event-flag:hash1": event1,
-          "multi-event-flag:hash2": event2
+          "multi-event-flag:hash2": event2,
         ]
         mockMgr.pendingFirstTimeEventNames = [event1.eventName, event2.eventName]
       }
@@ -2451,7 +2487,8 @@ class FeatureFlagManagerTests: XCTestCase {
       }
 
       // Verify recordFirstTimeEvent was called (even though it failed)
-      XCTAssertGreaterThan(mockMgr.recordFirstTimeEventCallCount, 0,
+      XCTAssertGreaterThan(
+        mockMgr.recordFirstTimeEventCallCount, 0,
         "recordFirstTimeEvent should be called even when network fails")
     }
   }
@@ -2477,8 +2514,8 @@ class FeatureFlagManagerTests: XCTestCase {
         "variant_value": pendingVariant.value as Any,
         "experiment_id": pendingVariant.experimentID as Any,
         "is_experiment_active": pendingVariant.isExperimentActive as Any,
-        "is_qa_tester": pendingVariant.isQATester as Any
-      ]
+        "is_qa_tester": pendingVariant.isQATester as Any,
+      ],
     ]
 
     let data = try! JSONSerialization.data(withJSONObject: json)
@@ -2540,7 +2577,9 @@ class FeatureFlagManagerTests: XCTestCase {
         featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: true)
       )
     )
-      let mock = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: delegate)
+    let mock = MockFeatureFlagManager(
+      serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test",
+      delegate: delegate)
     mock.simulatedFetchResult = (success: true, flags: sampleFlags)
 
     // Call loadFlags() (which prefetchFlags: true would trigger during init)
@@ -2566,7 +2605,9 @@ class FeatureFlagManagerTests: XCTestCase {
         featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
       )
     )
-      let mock = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: delegate)
+    let mock = MockFeatureFlagManager(
+      serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test",
+      delegate: delegate)
     mock.simulatedFetchResult = (success: true, flags: sampleFlags)
 
     // Do NOT call loadFlags() - simulating prefetchFlags: false behavior
@@ -2590,7 +2631,9 @@ class FeatureFlagManagerTests: XCTestCase {
       )
     )
 
-      let mockManager = MockFeatureFlagManager(serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test", delegate: delegate)
+    let mockManager = MockFeatureFlagManager(
+      serverURL: "https://test.com", trackingQueue: DispatchQueue.global(qos: .userInitiated), instanceName: "test",
+      delegate: delegate)
     mockManager.simulatedFetchResult = (success: true, flags: sampleFlags)
 
     // Manually load flags (simulating what user would do after identify)
@@ -2708,12 +2751,15 @@ class FeatureFlagManagerTests: XCTestCase {
     resetAndWait(mockMgr)
 
     mockMgr.flagsLock.read {
-      XCTAssertTrue(mockMgr.pendingFirstTimeEvents.isEmpty,
-                    "pendingFirstTimeEvents should be cleared by reset")
-      XCTAssertTrue(mockMgr.pendingFirstTimeEventNames.isEmpty,
-                    "pendingFirstTimeEventNames should be cleared by reset")
-      XCTAssertTrue(mockMgr.activatedFirstTimeEvents.isEmpty,
-                    "activatedFirstTimeEvents should be cleared by reset")
+      XCTAssertTrue(
+        mockMgr.pendingFirstTimeEvents.isEmpty,
+        "pendingFirstTimeEvents should be cleared by reset")
+      XCTAssertTrue(
+        mockMgr.pendingFirstTimeEventNames.isEmpty,
+        "pendingFirstTimeEventNames should be cleared by reset")
+      XCTAssertTrue(
+        mockMgr.activatedFirstTimeEvents.isEmpty,
+        "activatedFirstTimeEvents should be cleared by reset")
     }
   }
 
@@ -2749,10 +2795,12 @@ class FeatureFlagManagerTests: XCTestCase {
     // setContext-supplied context should survive reset() — only identity-tied
     // state (flags, tracking, first-time events, fetch timing) is cleared.
     mockMgr.flagsLock.read {
-      XCTAssertEqual(mockMgr.flagContext["user_id"] as? String, "ctx-user",
-                     "setContext value should survive reset()")
-      XCTAssertEqual(mockMgr.flagContext["group_id"] as? String, "ctx-group",
-                     "setContext value should survive reset()")
+      XCTAssertEqual(
+        mockMgr.flagContext["user_id"] as? String, "ctx-user",
+        "setContext value should survive reset()")
+      XCTAssertEqual(
+        mockMgr.flagContext["group_id"] as? String, "ctx-group",
+        "setContext value should survive reset()")
     }
   }
 

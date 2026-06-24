@@ -43,40 +43,40 @@ class GDPRViewController: UIViewController, UITableViewDelegate, UITableViewData
     var descStr = ""
 
     switch indexPath.item {
-    case 0:
-      Mixpanel.mainInstance().optOutTracking()
-      descStr = "Opted out"
-    case 1:
-      descStr = "Opt-out flag is \(Mixpanel.mainInstance().hasOptedOutTracking())"
-    case 2:
-      Mixpanel.mainInstance().optInTracking()
-      descStr = "Opted In"
-    case 3:
-      Mixpanel.mainInstance().optInTracking(distinctId: "aDistinctIdForOptIn")
-      descStr = "Opt In with distinctId 'aDistinctIdForOptIn'"
-    case 4:
-      let p: Properties = [
-        "a": 1,
-        "b": 2.3,
-        "c": ["4", 5] as [Any],
-        "d": URL(string: "https://mixpanel.com")!,
-        "e": NSNull(),
-        "f": Date(),
-      ]
-      Mixpanel.mainInstance().optInTracking(distinctId: "aDistinctIdForOptIn", properties: p)
-      descStr = "Opt In with distinctId 'aDistinctIdForOptIn' and \(p)"
-    case 5:
-      Mixpanel.initialize(
-        token: "testtoken", trackAutomaticEvents: true, optOutTrackingByDefault: true)
-      descStr =
-        "Init Mixpanel with default opt-out(sample only), to make it work, place it in your startup stage of your app"
-    case 6:
-      Mixpanel.initialize(
-        token: "testtoken", trackAutomaticEvents: true, optOutTrackingByDefault: false)
-      descStr =
-        "Init Mixpanel with default opt-in(sample only), to make it work, place it in your startup stage of your app"
-    default:
-      break
+      case 0:
+        Mixpanel.mainInstance().optOutTracking()
+        descStr = "Opted out"
+      case 1:
+        descStr = "Opt-out flag is \(Mixpanel.mainInstance().hasOptedOutTracking())"
+      case 2:
+        Mixpanel.mainInstance().optInTracking()
+        descStr = "Opted In"
+      case 3:
+        Mixpanel.mainInstance().optInTracking(distinctId: "aDistinctIdForOptIn")
+        descStr = "Opt In with distinctId 'aDistinctIdForOptIn'"
+      case 4:
+        let p: Properties = [
+          "a": 1,
+          "b": 2.3,
+          "c": ["4", 5] as [Any],
+          "d": URL(string: "https://mixpanel.com")!,
+          "e": NSNull(),
+          "f": Date(),
+        ]
+        Mixpanel.mainInstance().optInTracking(distinctId: "aDistinctIdForOptIn", properties: p)
+        descStr = "Opt In with distinctId 'aDistinctIdForOptIn' and \(p)"
+      case 5:
+        Mixpanel.initialize(
+          token: "testtoken", trackAutomaticEvents: true, optOutTrackingByDefault: true)
+        descStr =
+          "Init Mixpanel with default opt-out(sample only), to make it work, place it in your startup stage of your app"
+      case 6:
+        Mixpanel.initialize(
+          token: "testtoken", trackAutomaticEvents: true, optOutTrackingByDefault: false)
+        descStr =
+          "Init Mixpanel with default opt-in(sample only), to make it work, place it in your startup stage of your app"
+      default:
+        break
     }
 
     let vc =

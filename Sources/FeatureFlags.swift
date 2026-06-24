@@ -36,9 +36,9 @@ struct AnyCodable: Decodable {
 public struct MixpanelFlagVariant: Decodable {
   public let key: String  // Corresponds to 'variant_key' from API
   public let value: Any?  // Corresponds to 'variant_value' from API
-  public let experimentID: String? // Corresponds to 'experiment_id' from API
-  public let isExperimentActive: Bool? // Corresponds to 'is_experiment_active' from API
-  public let isQATester: Bool? // Corresponds to 'is_qa_tester' from API
+  public let experimentID: String?  // Corresponds to 'experiment_id' from API
+  public let isExperimentActive: Bool?  // Corresponds to 'is_experiment_active' from API
+  public let isQATester: Bool?  // Corresponds to 'is_qa_tester' from API
 
   /// Where this variant was sourced from. Always non-nil — every `MixpanelFlagVariant`
   /// carries a definite source. `.fallback` for developer-supplied fallback instances;
@@ -89,7 +89,10 @@ public struct MixpanelFlagVariant: Decodable {
   }
 
   // Helper initializer with fallbacks, value defaults to key if nil
-  public init(key: String = "", value: Any? = nil, isExperimentActive: Bool? = nil, isQATester: Bool? = nil, experimentID: String? = nil) {
+  public init(
+    key: String = "", value: Any? = nil, isExperimentActive: Bool? = nil, isQATester: Bool? = nil,
+    experimentID: String? = nil
+  ) {
     self.key = key
     if let value = value {
       self.value = value
@@ -136,48 +139,48 @@ public struct MixpanelFlagVariant: Decodable {
 
 /// Represents a pending first-time event definition from the flags endpoint
 struct PendingFirstTimeEvent: Decodable {
-    let flagKey: String
-    let flagId: String
-    let projectId: Int
-    let firstTimeEventHash: String
-    let eventName: String
-    let propertyFilters: [String: Any]?
-    let propertyFiltersJSON: String?
-    let pendingVariant: MixpanelFlagVariant
+  let flagKey: String
+  let flagId: String
+  let projectId: Int
+  let firstTimeEventHash: String
+  let eventName: String
+  let propertyFilters: [String: Any]?
+  let propertyFiltersJSON: String?
+  let pendingVariant: MixpanelFlagVariant
 
-    enum CodingKeys: String, CodingKey {
-        case flagKey = "flag_key"
-        case flagId = "flag_id"
-        case projectId = "project_id"
-        case firstTimeEventHash = "first_time_event_hash"
-        case eventName = "event_name"
-        case propertyFilters = "property_filters"
-        case pendingVariant = "pending_variant"
+  enum CodingKeys: String, CodingKey {
+    case flagKey = "flag_key"
+    case flagId = "flag_id"
+    case projectId = "project_id"
+    case firstTimeEventHash = "first_time_event_hash"
+    case eventName = "event_name"
+    case propertyFilters = "property_filters"
+    case pendingVariant = "pending_variant"
+  }
+
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    flagKey = try container.decode(String.self, forKey: .flagKey)
+    flagId = try container.decode(String.self, forKey: .flagId)
+    projectId = try container.decode(Int.self, forKey: .projectId)
+    firstTimeEventHash = try container.decode(String.self, forKey: .firstTimeEventHash)
+    eventName = try container.decode(String.self, forKey: .eventName)
+    pendingVariant = try container.decode(MixpanelFlagVariant.self, forKey: .pendingVariant)
+
+    // Decode propertyFilters using AnyCodable
+    if let filtersContainer = try? container.decode([String: AnyCodable].self, forKey: .propertyFilters) {
+      let filters = filtersContainer.mapValues { $0.value as Any }
+      propertyFilters = filters
+      if let jsonData = try? JSONSerialization.data(withJSONObject: filters) {
+        propertyFiltersJSON = String(data: jsonData, encoding: .utf8)
+      } else {
+        propertyFiltersJSON = nil
+      }
+    } else {
+      propertyFilters = nil
+      propertyFiltersJSON = nil
     }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        flagKey = try container.decode(String.self, forKey: .flagKey)
-        flagId = try container.decode(String.self, forKey: .flagId)
-        projectId = try container.decode(Int.self, forKey: .projectId)
-        firstTimeEventHash = try container.decode(String.self, forKey: .firstTimeEventHash)
-        eventName = try container.decode(String.self, forKey: .eventName)
-        pendingVariant = try container.decode(MixpanelFlagVariant.self, forKey: .pendingVariant)
-
-        // Decode propertyFilters using AnyCodable
-        if let filtersContainer = try? container.decode([String: AnyCodable].self, forKey: .propertyFilters) {
-            let filters = filtersContainer.mapValues { $0.value as Any }
-            propertyFilters = filters
-            if let jsonData = try? JSONSerialization.data(withJSONObject: filters) {
-                propertyFiltersJSON = String(data: jsonData, encoding: .utf8)
-            } else {
-                propertyFiltersJSON = nil
-            }
-        } else {
-            propertyFilters = nil
-            propertyFiltersJSON = nil
-        }
-    }
+  }
 }
 
 // Response structure for the /flags endpoint
@@ -388,7 +391,7 @@ class FeatureFlagManager: MixpanelFlags {
     }
   }
 
-    var serverURL: String!
+  var serverURL: String!
   // Thread safety using ReadWriteLock (consistent with Track, People, MixpanelInstance)
   internal let flagsLock = ReadWriteLock(label: "com.mixpanel.featureflagmanager")
 
@@ -464,42 +467,42 @@ class FeatureFlagManager: MixpanelFlags {
   internal var trackingQueue: DispatchQueue
 
   // Initializers
-    internal init(
-      serverURL: String,
-      trackingQueue: DispatchQueue,
-      instanceName: String,
-      delegate: MixpanelFlagDelegate? = nil
-    ) {
-        self.serverURL = serverURL
-        self.trackingQueue = trackingQueue
-        self.instanceName = instanceName
-        self.delegate = delegate
-        self.flagContext = delegate?.getOptions().featureFlagOptions.context ?? [:]
-        // Resolve the policy once at init: persisting policies with non-positive TTL collapse
-        // to `.networkOnly` (since "persist on every fetch but TTL makes nothing serve" does
-        // no useful work). Logs a warning when the substitution happens.
-        let requestedPolicy =
-          delegate?.getOptions().featureFlagOptions.variantLookupPolicy ?? .networkOnly
-        self.resolvedLookupPolicy = VariantLookupPolicy.effective(requestedPolicy)
+  internal init(
+    serverURL: String,
+    trackingQueue: DispatchQueue,
+    instanceName: String,
+    delegate: MixpanelFlagDelegate? = nil
+  ) {
+    self.serverURL = serverURL
+    self.trackingQueue = trackingQueue
+    self.instanceName = instanceName
+    self.delegate = delegate
+    self.flagContext = delegate?.getOptions().featureFlagOptions.context ?? [:]
+    // Resolve the policy once at init: persisting policies with non-positive TTL collapse
+    // to `.networkOnly` (since "persist on every fetch but TTL makes nothing serve" does
+    // no useful work). Logs a warning when the substitution happens.
+    let requestedPolicy =
+      delegate?.getOptions().featureFlagOptions.variantLookupPolicy ?? .networkOnly
+    self.resolvedLookupPolicy = VariantLookupPolicy.effective(requestedPolicy)
 
-        // Dispatch the init-time persistence work on the tracking queue so UserDefaults I/O
-        // doesn't block the caller (typically the main thread during MixpanelInstance
-        // construction). Persisting policies load the persistence layer; `.networkOnly` wipes
-        // any stale blob left over from a previous session that used a persisting policy.
-        if let options = delegate?.getOptions(), options.featureFlagOptions.enabled {
-            switch self.resolvedLookupPolicy {
-            case .persistenceUntilNetworkSuccess, .networkFirst:
-                trackingQueue.async { [weak self] in
-                    self?._loadPersistedVariants()
-                }
-            case .networkOnly:
-                trackingQueue.async { [weak self] in
-                    guard let self = self else { return }
-                    MixpanelPersistence.deleteFlagsPersistence(instanceName: self.instanceName)
-                }
-            }
-        }
+    // Dispatch the init-time persistence work on the tracking queue so UserDefaults I/O
+    // doesn't block the caller (typically the main thread during MixpanelInstance
+    // construction). Persisting policies load the persistence layer; `.networkOnly` wipes
+    // any stale blob left over from a previous session that used a persisting policy.
+    if let options = delegate?.getOptions(), options.featureFlagOptions.enabled {
+      switch self.resolvedLookupPolicy {
+        case .persistenceUntilNetworkSuccess, .networkFirst:
+          trackingQueue.async { [weak self] in
+            self?._loadPersistedVariants()
+          }
+        case .networkOnly:
+          trackingQueue.async { [weak self] in
+            guard let self = self else { return }
+            MixpanelPersistence.deleteFlagsPersistence(instanceName: self.instanceName)
+          }
+      }
     }
+  }
 
   // --- Public Methods ---
 
@@ -509,7 +512,7 @@ class FeatureFlagManager: MixpanelFlags {
 
   func loadFlags(completion: ((Bool) -> Void)?) {
     // Dispatch fetch trigger to allow caller to continue
-      trackingQueue.async { [weak self] in
+    trackingQueue.async { [weak self] in
       self?._fetchFlagsIfNeeded(completion: completion)
     }
   }
@@ -591,10 +594,11 @@ class FeatureFlagManager: MixpanelFlags {
   func getVariantSync(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
     if Thread.isMainThread {
       MixpanelLogger.warn(
-        message: "It is NOT recommended to call this method from the main thread as it might block the calling thread until the value can be retrieved. Consider using async getVariant() instead."
+        message:
+          "It is NOT recommended to call this method from the main thread as it might block the calling thread until the value can be retrieved. Consider using async getVariant() instead."
       )
     }
-      return _getVariantSyncImpl(flagName, fallback: fallback)
+    return _getVariantSyncImpl(flagName, fallback: fallback)
   }
 
   private func _getVariantSyncImpl(_ flagName: String, fallback: MixpanelFlagVariant) -> MixpanelFlagVariant {
@@ -650,7 +654,7 @@ class FeatureFlagManager: MixpanelFlags {
     _ flagName: String, fallback: MixpanelFlagVariant,
     completion: @escaping (MixpanelFlagVariant) -> Void
   ) {
-      trackingQueue.async { [weak self] in
+    trackingQueue.async { [weak self] in
       guard let self = self else { return }
 
       var flagVariant: MixpanelFlagVariant?
@@ -665,8 +669,9 @@ class FeatureFlagManager: MixpanelFlags {
       // otherwise silently serve the developer fallback without refreshing.
       self.flagsLock.read {
         guard let currentFlags = self.flags,
-              !self.isNetworkFirstAwaitingFetch(),
-              !self.loadedFlagsAreStale() else { return }
+          !self.isNetworkFirstAwaitingFetch(),
+          !self.loadedFlagsAreStale()
+        else { return }
         canServeImmediately = true
         servingFromPersistedBlob = self.loadedBlobPersistedAt != nil
         if let variant = currentFlags[flagName], !self.isVariantExpired(variant) {
@@ -683,7 +688,8 @@ class FeatureFlagManager: MixpanelFlags {
         // dedupes via `isFetching`. Self-stops once the fetch clears
         // `loadedBlobPersistedAt`.
         if servingFromPersistedBlob,
-           case .persistenceUntilNetworkSuccess = self.resolvedLookupPolicy {
+          case .persistenceUntilNetworkSuccess = self.resolvedLookupPolicy
+        {
           self._fetchFlagsIfNeeded(completion: nil)
         }
         let result = flagVariant ?? fallback
@@ -747,14 +753,15 @@ class FeatureFlagManager: MixpanelFlags {
 
   // --- Bulk Flag Retrieval ---
 
-    func getAllVariantsSync() -> [String: MixpanelFlagVariant] {
-        if Thread.isMainThread {
-            MixpanelLogger.warn(
-                message: "It is NOT recommended to call this method from the main thread as it might block the calling thread until the value can be retrieved. Consider using async getAllVariants() instead."
-            )
-        }
-        return _getAllVariantsSyncImpl()
+  func getAllVariantsSync() -> [String: MixpanelFlagVariant] {
+    if Thread.isMainThread {
+      MixpanelLogger.warn(
+        message:
+          "It is NOT recommended to call this method from the main thread as it might block the calling thread until the value can be retrieved. Consider using async getAllVariants() instead."
+      )
     }
+    return _getAllVariantsSyncImpl()
+  }
 
   private func _getAllVariantsSyncImpl() -> [String: MixpanelFlagVariant] {
     var result: [String: MixpanelFlagVariant] = [:]
@@ -769,7 +776,7 @@ class FeatureFlagManager: MixpanelFlags {
   }
 
   func getAllVariants(completion: @escaping ([String: MixpanelFlagVariant]) -> Void) {
-      trackingQueue.async { [weak self] in
+    trackingQueue.async { [weak self] in
       guard let self = self else {
         DispatchQueue.main.async { completion([:]) }
         return
@@ -778,7 +785,8 @@ class FeatureFlagManager: MixpanelFlags {
       var canServeImmediately = false
       var servingFromPersistedBlob = false
       self.flagsLock.read {
-        canServeImmediately = (self.flags != nil)
+        canServeImmediately =
+          (self.flags != nil)
           && !self.isNetworkFirstAwaitingFetch()
           && !self.loadedFlagsAreStale()
         servingFromPersistedBlob = self.loadedBlobPersistedAt != nil
@@ -787,7 +795,8 @@ class FeatureFlagManager: MixpanelFlags {
         // PersistenceUntilNetworkSuccess "serve persisted now, refresh in background":
         // see the matching block in `getVariant` for the full rationale.
         if servingFromPersistedBlob,
-           case .persistenceUntilNetworkSuccess = self.resolvedLookupPolicy {
+          case .persistenceUntilNetworkSuccess = self.resolvedLookupPolicy
+        {
           self._fetchFlagsIfNeeded(completion: nil)
         }
         // Use the sync impl so the expired-filter is applied consistently.
@@ -895,7 +904,7 @@ class FeatureFlagManager: MixpanelFlags {
       URLQueryItem(name: "context", value: contextString),
       URLQueryItem(name: "token", value: options.token),
       URLQueryItem(name: "mp_lib", value: "swift"),
-      URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion())
+      URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion()),
     ]
 
     // Capture the raw response bytes via a reference holder so we can persist the wire
@@ -999,7 +1008,8 @@ class FeatureFlagManager: MixpanelFlags {
           }
           self.timeLastFetched = fetchEndTime
 
-          MixpanelLogger.debug(message: "Flags updated: \(self.flags ?? [:]), Pending events: \(self.pendingFirstTimeEvents.count)")
+          MixpanelLogger.debug(
+            message: "Flags updated: \(self.flags ?? [:]), Pending events: \(self.pendingFirstTimeEvents.count)")
           didApplyResults = true
         }
 
@@ -1010,9 +1020,10 @@ class FeatureFlagManager: MixpanelFlags {
         // shouldn't overwrite the persisted blob with prior-user data. UserDefaults I/O is
         // kept outside the lock since it can block.
         if didApplyResults,
-           shouldPersist,
-           let rawData = rawHolder.data,
-           let rawString = String(data: rawData, encoding: .utf8) {
+          shouldPersist,
+          let rawData = rawHolder.data,
+          let rawString = String(data: rawData, encoding: .utf8)
+        {
           let blob = FlagsPersistenceBlob(
             persistedAt: fetchEndTime,
             distinctId: distinctIdAtDispatch,
@@ -1065,7 +1076,8 @@ class FeatureFlagManager: MixpanelFlags {
     // `.networkOnly` (we wouldn't be here in that case) and otherwise a positive TTL
     // (non-positive values are filtered out at policy resolution).
     if let ttl = self.persistenceTtlSeconds(),
-       Date().timeIntervalSince(blob.persistedAt) > ttl {
+      Date().timeIntervalSince(blob.persistedAt) > ttl
+    {
       MixpanelLogger.debug(message: "Persisted flags expired; ignoring.")
       return
     }
@@ -1075,7 +1087,8 @@ class FeatureFlagManager: MixpanelFlags {
     // string would stick on disk and fail every cold-start. Wipe it here too so the next
     // successful fetch gets a clean slate.
     guard let responseData = blob.response.data(using: .utf8),
-          let parsed = try? JSONDecoder().decode(FlagsResponse.self, from: responseData) else {
+      let parsed = try? JSONDecoder().decode(FlagsResponse.self, from: responseData)
+    else {
       MixpanelLogger.warn(message: "Failed to parse persisted flags response; clearing.")
       MixpanelPersistence.deleteFlagsPersistence(instanceName: self.instanceName)
       return
@@ -1131,10 +1144,10 @@ class FeatureFlagManager: MixpanelFlags {
   /// `.networkOnly` at init — anything returned here is `> 0`.
   private func persistenceTtlSeconds() -> TimeInterval? {
     switch self.resolvedLookupPolicy {
-    case .networkOnly:
-      return nil
-    case .persistenceUntilNetworkSuccess(let ttl), .networkFirst(let ttl):
-      return ttl
+      case .networkOnly:
+        return nil
+      case .persistenceUntilNetworkSuccess(let ttl), .networkFirst(let ttl):
+        return ttl
     }
   }
 
@@ -1143,10 +1156,10 @@ class FeatureFlagManager: MixpanelFlags {
   /// `.networkOnly` doesn't.
   private func shouldPersistVariants() -> Bool {
     switch self.resolvedLookupPolicy {
-    case .networkOnly:
-      return false
-    case .persistenceUntilNetworkSuccess, .networkFirst:
-      return true
+      case .networkOnly:
+        return false
+      case .persistenceUntilNetworkSuccess, .networkFirst:
+        return true
     }
   }
 
@@ -1160,7 +1173,8 @@ class FeatureFlagManager: MixpanelFlags {
   /// Caller must hold `flagsLock`.
   private func loadedFlagsAreStale() -> Bool {
     guard let persistedAt = self.loadedBlobPersistedAt,
-          let ttl = self.persistenceTtlSeconds() else { return false }
+      let ttl = self.persistenceTtlSeconds()
+    else { return false }
     return Date().timeIntervalSince(persistedAt) > ttl
   }
 
@@ -1209,7 +1223,9 @@ class FeatureFlagManager: MixpanelFlags {
   func mergeFlags(
     responseFlags: [String: MixpanelFlagVariant]?,
     responsePendingEvents: [PendingFirstTimeEvent]?
-  ) -> (flags: [String: MixpanelFlagVariant], pendingEvents: [String: PendingFirstTimeEvent], pendingEventNames: Set<String>) {
+  ) -> (
+    flags: [String: MixpanelFlagVariant], pendingEvents: [String: PendingFirstTimeEvent], pendingEventNames: Set<String>
+  ) {
     var newFlags: [String: MixpanelFlagVariant] = [:]
     var newPendingEvents: [String: PendingFirstTimeEvent] = [:]
     var newPendingEventNames: Set<String> = Set()
@@ -1339,16 +1355,16 @@ class FeatureFlagManager: MixpanelFlags {
     // was written, sent without any delta calculation so the server can derive what it
     // needs. Tracking only fires for served variants, so `.fallback` won't appear here.
     switch variant.source {
-    case .network:
-      properties["$variant_source"] = "network"
-    case .persistence(let persistedAt):
-      properties["$variant_source"] = "persistence"
-      properties["$persisted_at_in_ms"] = Int(persistedAt.timeIntervalSince1970 * 1000)
-      if let ttl = self.persistenceTtlSeconds() {
-        properties["$ttl_in_ms"] = Int(ttl * 1000)
-      }
-    case .fallback:
-      break
+      case .network:
+        properties["$variant_source"] = "network"
+      case .persistence(let persistedAt):
+        properties["$variant_source"] = "persistence"
+        properties["$persisted_at_in_ms"] = Int(persistedAt.timeIntervalSince1970 * 1000)
+        if let ttl = self.persistenceTtlSeconds() {
+          properties["$ttl_in_ms"] = Int(ttl * 1000)
+        }
+      case .fallback:
+        break
     }
 
     // Dispatch delegate call asynchronously to main thread for safety
@@ -1400,111 +1416,113 @@ class FeatureFlagManager: MixpanelFlags {
 
   // MARK: - First-Time Event Checking
 
-    /// Checks if a tracked event matches any pending first-time events and activates the corresponding variant.
-    ///
-    ///- Note:
-    ///   This method **must** be called from the `trackingQueue`.
-    ///   Executing this sequentially on the background serial queue ensures that
-    ///   any subsequent `getVariant` calls (which also wait for or read from this state)
-    ///   will receive the newly activated variant, effectively eliminating the race
-    ///   condition between tracking and flag evaluation.
-    internal func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
-        // O(1) check: skip iteration if no pending event matches this event name
-        var hasPendingEvent = false
-        flagsLock.read {
-            hasPendingEvent = self.pendingFirstTimeEventNames.contains(eventName)
-        }
-        guard hasPendingEvent else { return }
-        
-        // Snapshot pending events with lock
-        // Note: We don't snapshot activatedFirstTimeEvents because we'll check it
-        // atomically later under write lock to avoid TOCTOU race
-        var pendingEventsCopy: [String: PendingFirstTimeEvent] = [:]
-        
-        flagsLock.read {
-            pendingEventsCopy = self.pendingFirstTimeEvents
-        }
-        
-        // Iterate through all pending first-time events
-        for (eventKey, pendingEvent) in pendingEventsCopy {
-            // Check exact event name match (case-sensitive)
-            if eventName != pendingEvent.eventName {
-                continue
-            }
-            
-            // Evaluate property filters using json-logic-swift library
-            if let filters = pendingEvent.propertyFilters, !filters.isEmpty {
-                // Convert to JSON strings for json-logic-swift library
-                guard let rulesString = pendingEvent.propertyFiltersJSON,
-                      let dataJSON = try? JSONSerialization.data(withJSONObject: properties),
-                      let dataString = String(data: dataJSON, encoding: .utf8) else {
-                    MixpanelLogger.warn(message: "Failed to serialize JsonLogic filters for event '\(eventKey)' matching '\(eventName)'")
-                    continue
-                }
-                
-                // Evaluate the filter
-                do {
-                    let result: Bool = try applyRule(rulesString, to: dataString)
-                    if !result {
-                        MixpanelLogger.debug(message: "JsonLogic filter evaluated to false for event '\(eventKey)'")
-                        continue
-                    }
-                } catch {
-                    MixpanelLogger.error(message: "JsonLogic evaluation error for event '\(eventKey)': \(error)")
-                    continue
-                }
-            }
-            
-            // Event matched! Try to activate the variant atomically
-            let flagKey = pendingEvent.flagKey
-            var shouldActivate = false
-            
-            // Atomic check-and-set: Ensure only one thread activates this event.
-            // This prevents duplicate recordFirstTimeEvent calls and flag variant changes
-            // when multiple threads concurrently process the same event.
-            flagsLock.write {
-                if !activatedFirstTimeEvents.contains(eventKey) {
-                    // We won the race - activate this event
-                    activatedFirstTimeEvents.insert(eventKey)
-
-                    if flags == nil {
-                        flags = [:]
-                    }
-                    // Stamp NETWORK source — the activated variant came from the prior /flags/
-                    // response. Activations are deliberately not written to disk; the
-                    // persistence layer stays a passive snapshot of the wire response so it
-                    // can be re-loaded verbatim.
-                    flags![flagKey] = pendingEvent.pendingVariant.withSource(.network)
-                    shouldActivate = true
-                }
-            }
-            
-            // Only proceed with external calls if we successfully activated
-            if shouldActivate {
-                MixpanelLogger.info(message: "First-time event matched for flag '\(flagKey)': \(eventName)")
-                
-                // Track the feature flag check event with the new variant
-                self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
-                
-                guard let delegate = self.delegate else {
-                    MixpanelLogger.error(message: "Delegate missing for recording first-time event")
-                    return
-                }
-                
-                let distinctId = delegate.getDistinctId()
-                
-                DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                    // Record to backend (fire-and-forget)
-                    self?.recordFirstTimeEvent(
-                        flagId: pendingEvent.flagId,
-                        projectId: pendingEvent.projectId,
-                        firstTimeEventHash: pendingEvent.firstTimeEventHash,
-                        distinctId: distinctId
-                    )
-                }
-            }
-        }
+  /// Checks if a tracked event matches any pending first-time events and activates the corresponding variant.
+  ///
+  ///- Note:
+  ///   This method **must** be called from the `trackingQueue`.
+  ///   Executing this sequentially on the background serial queue ensures that
+  ///   any subsequent `getVariant` calls (which also wait for or read from this state)
+  ///   will receive the newly activated variant, effectively eliminating the race
+  ///   condition between tracking and flag evaluation.
+  internal func checkFirstTimeEvents(eventName: String, properties: [String: Any]) {
+    // O(1) check: skip iteration if no pending event matches this event name
+    var hasPendingEvent = false
+    flagsLock.read {
+      hasPendingEvent = self.pendingFirstTimeEventNames.contains(eventName)
     }
+    guard hasPendingEvent else { return }
+
+    // Snapshot pending events with lock
+    // Note: We don't snapshot activatedFirstTimeEvents because we'll check it
+    // atomically later under write lock to avoid TOCTOU race
+    var pendingEventsCopy: [String: PendingFirstTimeEvent] = [:]
+
+    flagsLock.read {
+      pendingEventsCopy = self.pendingFirstTimeEvents
+    }
+
+    // Iterate through all pending first-time events
+    for (eventKey, pendingEvent) in pendingEventsCopy {
+      // Check exact event name match (case-sensitive)
+      if eventName != pendingEvent.eventName {
+        continue
+      }
+
+      // Evaluate property filters using json-logic-swift library
+      if let filters = pendingEvent.propertyFilters, !filters.isEmpty {
+        // Convert to JSON strings for json-logic-swift library
+        guard let rulesString = pendingEvent.propertyFiltersJSON,
+          let dataJSON = try? JSONSerialization.data(withJSONObject: properties),
+          let dataString = String(data: dataJSON, encoding: .utf8)
+        else {
+          MixpanelLogger.warn(
+            message: "Failed to serialize JsonLogic filters for event '\(eventKey)' matching '\(eventName)'")
+          continue
+        }
+
+        // Evaluate the filter
+        do {
+          let result: Bool = try applyRule(rulesString, to: dataString)
+          if !result {
+            MixpanelLogger.debug(message: "JsonLogic filter evaluated to false for event '\(eventKey)'")
+            continue
+          }
+        } catch {
+          MixpanelLogger.error(message: "JsonLogic evaluation error for event '\(eventKey)': \(error)")
+          continue
+        }
+      }
+
+      // Event matched! Try to activate the variant atomically
+      let flagKey = pendingEvent.flagKey
+      var shouldActivate = false
+
+      // Atomic check-and-set: Ensure only one thread activates this event.
+      // This prevents duplicate recordFirstTimeEvent calls and flag variant changes
+      // when multiple threads concurrently process the same event.
+      flagsLock.write {
+        if !activatedFirstTimeEvents.contains(eventKey) {
+          // We won the race - activate this event
+          activatedFirstTimeEvents.insert(eventKey)
+
+          if flags == nil {
+            flags = [:]
+          }
+          // Stamp NETWORK source — the activated variant came from the prior /flags/
+          // response. Activations are deliberately not written to disk; the
+          // persistence layer stays a passive snapshot of the wire response so it
+          // can be re-loaded verbatim.
+          flags![flagKey] = pendingEvent.pendingVariant.withSource(.network)
+          shouldActivate = true
+        }
+      }
+
+      // Only proceed with external calls if we successfully activated
+      if shouldActivate {
+        MixpanelLogger.info(message: "First-time event matched for flag '\(flagKey)': \(eventName)")
+
+        // Track the feature flag check event with the new variant
+        self._trackFlagIfNeeded(flagName: flagKey, variant: pendingEvent.pendingVariant)
+
+        guard let delegate = self.delegate else {
+          MixpanelLogger.error(message: "Delegate missing for recording first-time event")
+          return
+        }
+
+        let distinctId = delegate.getDistinctId()
+
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+          // Record to backend (fire-and-forget)
+          self?.recordFirstTimeEvent(
+            flagId: pendingEvent.flagId,
+            projectId: pendingEvent.projectId,
+            firstTimeEventHash: pendingEvent.firstTimeEventHash,
+            distinctId: distinctId
+          )
+        }
+      }
+    }
+  }
 
   /// Records a first-time event activation to the backend
   internal func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String) {
@@ -1512,17 +1530,18 @@ class FeatureFlagManager: MixpanelFlags {
 
     let queryItems = [
       URLQueryItem(name: "mp_lib", value: "swift"),
-      URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion())
+      URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion()),
     ]
 
     let payload: [String: Any] = [
       "distinct_id": distinctId,
       "project_id": projectId,
-      "first_time_event_hash": firstTimeEventHash
+      "first_time_event_hash": firstTimeEventHash,
     ]
 
     guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
-          let options = currentOptions else {
+      let options = currentOptions
+    else {
       MixpanelLogger.error(message: "Failed to prepare first-time event recording request")
       return
     }
@@ -1563,71 +1582,75 @@ class FeatureFlagManager: MixpanelFlags {
 
 #if DEBUG
 extension PendingFirstTimeEvent {
-    init(flagKey: String, flagId: String, projectId: Int,
-         firstTimeEventHash: String, eventName: String,
-         propertyFilters: [String: Any]?, pendingVariant: MixpanelFlagVariant) {
-        self.flagKey = flagKey
-        self.flagId = flagId
-        self.projectId = projectId
-        self.firstTimeEventHash = firstTimeEventHash
-        self.eventName = eventName
-        self.propertyFilters = propertyFilters
-        if let filters = propertyFilters, let jsonData = try? JSONSerialization.data(withJSONObject: filters) {
-            self.propertyFiltersJSON = String(data: jsonData, encoding: .utf8)
-        } else {
-            self.propertyFiltersJSON = nil
-        }
-        self.pendingVariant = pendingVariant
+  init(
+    flagKey: String, flagId: String, projectId: Int,
+    firstTimeEventHash: String, eventName: String,
+    propertyFilters: [String: Any]?, pendingVariant: MixpanelFlagVariant
+  ) {
+    self.flagKey = flagKey
+    self.flagId = flagId
+    self.projectId = projectId
+    self.firstTimeEventHash = firstTimeEventHash
+    self.eventName = eventName
+    self.propertyFilters = propertyFilters
+    if let filters = propertyFilters, let jsonData = try? JSONSerialization.data(withJSONObject: filters) {
+      self.propertyFiltersJSON = String(data: jsonData, encoding: .utf8)
+    } else {
+      self.propertyFiltersJSON = nil
     }
+    self.pendingVariant = pendingVariant
+  }
 }
 
 extension FeatureFlagManager {
-    internal func injectMockFirstTimeEvents(_ mockEvents: [PendingFirstTimeEvent],
-                                           _ mockFlags: [String: MixpanelFlagVariant]) {
-        flagsLock.write {
-            self.activatedFirstTimeEvents.removeAll()
-            self.flags = mockFlags
-            self.pendingFirstTimeEvents.removeAll()
-            self.pendingFirstTimeEventNames.removeAll()
-            for event in mockEvents {
-                let key = getPendingEventKey(event.flagKey, event.firstTimeEventHash)
-                self.pendingFirstTimeEvents[key] = event
-                self.pendingFirstTimeEventNames.insert(event.eventName)
-            }
-        }
+  internal func injectMockFirstTimeEvents(
+    _ mockEvents: [PendingFirstTimeEvent],
+    _ mockFlags: [String: MixpanelFlagVariant]
+  ) {
+    flagsLock.write {
+      self.activatedFirstTimeEvents.removeAll()
+      self.flags = mockFlags
+      self.pendingFirstTimeEvents.removeAll()
+      self.pendingFirstTimeEventNames.removeAll()
+      for event in mockEvents {
+        let key = getPendingEventKey(event.flagKey, event.firstTimeEventHash)
+        self.pendingFirstTimeEvents[key] = event
+        self.pendingFirstTimeEventNames.insert(event.eventName)
+      }
     }
+  }
 
-    internal func resetFirstTimeEventsForDemo() {
-        flagsLock.write {
-            self.activatedFirstTimeEvents.removeAll()
-            for (_, event) in self.pendingFirstTimeEvents {
-                self.flags?[event.flagKey] = event.pendingVariant
-            }
-        }
+  internal func resetFirstTimeEventsForDemo() {
+    flagsLock.write {
+      self.activatedFirstTimeEvents.removeAll()
+      for (_, event) in self.pendingFirstTimeEvents {
+        self.flags?[event.flagKey] = event.pendingVariant
+      }
     }
+  }
 
-    internal func getPendingEventsForDebug() -> [(eventKey: String, event: PendingFirstTimeEvent)] {
-        var result: [(eventKey: String, event: PendingFirstTimeEvent)] = []
-        flagsLock.read {
-            result = self.pendingFirstTimeEvents.map { (eventKey: $0.key, event: $0.value) }
-        }
-        return result.sorted { $0.eventKey < $1.eventKey }
+  internal func getPendingEventsForDebug() -> [(eventKey: String, event: PendingFirstTimeEvent)] {
+    var result: [(eventKey: String, event: PendingFirstTimeEvent)] = []
+    flagsLock.read {
+      result = self.pendingFirstTimeEvents.map { (eventKey: $0.key, event: $0.value) }
     }
+    return result.sorted { $0.eventKey < $1.eventKey }
+  }
 
-    internal func getActivatedEventsForDebug() -> [String] {
-        var result: [String] = []
-        flagsLock.read {
-            result = Array(self.activatedFirstTimeEvents)
-        }
-        return result.sorted()
+  internal func getActivatedEventsForDebug() -> [String] {
+    var result: [String] = []
+    flagsLock.read {
+      result = Array(self.activatedFirstTimeEvents)
     }
+    return result.sorted()
+  }
 
-    internal func getFlagsForDebug() -> [String: MixpanelFlagVariant] {
-        var result: [String: MixpanelFlagVariant] = [:]
-        flagsLock.read {
-            result = self.flags ?? [:]
-        }
-        return result
+  internal func getFlagsForDebug() -> [String: MixpanelFlagVariant] {
+    var result: [String: MixpanelFlagVariant] = [:]
+    flagsLock.read {
+      result = self.flags ?? [:]
     }
+    return result
+  }
 }
 #endif

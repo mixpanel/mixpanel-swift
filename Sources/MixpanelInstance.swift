@@ -1324,12 +1324,7 @@ extension MixpanelInstance {
      - parameter screenName: The name of the screen/page being viewed
      - parameter properties: Optional properties to include with this event
      */
-  public func trackScreenView(screenName: String?, properties: Properties? = nil) {
-    guard let screenName = screenName, !screenName.isEmpty else {
-      MixpanelLogger.error(message: "trackScreenView called with nil or empty screenName. Event not tracked.")
-      return
-    }
-
+  public func trackScreenView(screenName: String, properties: Properties? = nil) {
     var mergedProperties: Properties = [
       "current_page_title": screenName,
       "$mp_autocapture": true,
@@ -1351,12 +1346,7 @@ extension MixpanelInstance {
      - parameter screenName: The name of the screen/page being left
      - parameter properties: Optional properties to include with this event
      */
-  public func trackScreenLeave(screenName: String?, properties: Properties? = nil) {
-    guard let screenName = screenName, !screenName.isEmpty else {
-      MixpanelLogger.error(message: "trackScreenLeave called with nil or empty screenName. Event not tracked.")
-      return
-    }
-
+  public func trackScreenLeave(screenName: String, properties: Properties? = nil) {
     var mergedProperties: Properties = [
       "current_page_title": screenName,
       "$mp_autocapture": true,

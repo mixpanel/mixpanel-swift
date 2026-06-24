@@ -286,7 +286,7 @@ class MixpanelPersistence {
     do {
       let parsed = try JSONSerialization.jsonObject(with: data, options: [])
       guard let dict = parsed as? [String: Any],
-            let blob = FlagsPersistenceBlob.from(dictionary: dict)
+        let blob = FlagsPersistenceBlob.from(dictionary: dict)
       else {
         MixpanelLogger.warn(message: "Persisted flags blob has unexpected shape; clearing.")
         defaults.removeObject(forKey: key)
@@ -416,9 +416,9 @@ class MixpanelPersistence {
     let manager = FileManager.default
 
     #if os(iOS)
-      let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
+    let url = manager.urls(for: .libraryDirectory, in: .userDomainMask).last
     #else
-      let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
+    let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
     #endif  // os(iOS)
     guard let urlUnwrapped = url?.appendingPathComponent(filename).path else {
       return nil

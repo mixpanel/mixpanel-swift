@@ -1330,7 +1330,10 @@ extension MixpanelInstance {
       return
     }
 
-    var mergedProperties: Properties = ["current_page_title": screenName]
+    var mergedProperties: Properties = [
+      "current_page_title": screenName,
+      "$mp_autocapture": true
+    ]
 
     if let properties = properties {
       for (key, value) in properties {
@@ -1354,7 +1357,10 @@ extension MixpanelInstance {
       return
     }
 
-    var mergedProperties: Properties = ["current_page_title": screenName]
+    var mergedProperties: Properties = [
+      "current_page_title": screenName,
+      "$mp_autocapture": true
+    ]
 
     if let properties = properties {
       for (key, value) in properties {

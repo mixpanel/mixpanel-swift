@@ -19,10 +19,10 @@ Pod::Spec.new do |s|
   }
   s.default_subspec = 'Complete'
   base_source_files = ['Sources/Network.swift', 'Sources/FlushRequest.swift', 'Sources/PrintLogging.swift', 'Sources/FileLogging.swift',
-    'Sources/MixpanelLogger.swift', 'Sources/JSONHandler.swift', 'Sources/Error.swift', 'Sources/AutomaticProperties.swift',
+    'Sources/MixpanelLogger.swift', 'Sources/JSONHandler.swift', 'Sources/JSONExceptionHandler.h', 'Sources/JSONExceptionHandler.m', 'Sources/Error.swift', 'Sources/AutomaticProperties.swift',
     'Sources/Constants.swift', 'Sources/MixpanelType.swift', 'Sources/Mixpanel.swift', 'Sources/MixpanelInstance.swift',
     'Sources/Flush.swift', 'Sources/Track.swift', 'Sources/People.swift', 'Sources/AutomaticEvents.swift',
-    'Sources/Group.swift', 'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift', 'Sources/MPDB.swift', 'Sources/MixpanelPersistence.swift', 
+    'Sources/Group.swift', 'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift', 'Sources/MPDB.swift', 'Sources/MixpanelPersistence.swift',
     'Sources/Data+Compression.swift', 'Sources/MixpanelOptions.swift', 'Sources/FeatureFlags.swift']
   s.tvos.deployment_target = '12.0'
   s.tvos.frameworks = 'UIKit', 'Foundation'

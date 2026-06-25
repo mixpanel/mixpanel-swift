@@ -25,11 +25,19 @@ class JSONHandler {
 
   class func deserializeData(_ data: Data) -> MPObjectToParse? {
     var object: MPObjectToParse?
-    do {
-      object = try JSONSerialization.jsonObject(with: data, options: [])
-    } catch {
-      MixpanelLogger.warn(message: "exception decoding object data")
+    var error: NSError?
+
+    // Use ObjC wrapper to catch NSExceptions that would otherwise crash the app
+    object = JSONExceptionHandler.safeJSONObject(with: data, error: &error)
+
+    if let error = error {
+      // Log the specific error for debugging
+      MixpanelLogger.warn(message: "Failed to decode JSON data: \(error.localizedDescription)")
+    } else if object == nil {
+      // Unexpected nil without error
+      MixpanelLogger.warn(message: "JSON deserialization returned nil without error")
     }
+
     return object
   }
 

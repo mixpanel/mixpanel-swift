@@ -1,0 +1,4 @@
+module MixpanelObjC {
+    header "../JSONExceptionHandler.h"
+    export *
+}

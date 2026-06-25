@@ -2,9 +2,9 @@
   "version": 1,
   "lineLength": 120,
   "indentation": {
-    "spaces": 2
+    "spaces": 4
   },
-  "tabWidth": 2,
+  "tabWidth": 4,
   "indentConditionalCompilationBlocks": false,
   "indentSwitchCaseLabels": true,
   "trailingCommas": "neverUsed"

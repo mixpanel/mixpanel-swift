@@ -52,6 +52,13 @@ struct BasePath {
       return nil
     }
     components.host = resolvedHost
+    // Only the scheme, host, and port of `base` are reused for the backup. The path/query/fragment
+    // belong to the primary proxy (e.g. "/support-test-ingestion-proxy") and are meaningless on a
+    // different host, so they must be dropped — otherwise they'd be carried over and the request
+    // path (e.g. "/track/") would be appended after them.
+    components.path = ""
+    components.query = nil
+    components.fragment = nil
     return components.string
   }
 }

@@ -75,7 +75,8 @@
 		E17AA05E1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17AA05D1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift */; };
 		E1C61EBA1D22F6470056C56C /* MixpanelPeopleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */; };
 		174563BA2DD74E9ABE905B9A /* MixpanelScreenTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3018131FE6FE484786E6788E /* MixpanelScreenTrackingTests.swift */; };
-		A88996800DA044B4B1886E99 /* MixpanelScreenTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3018131FE6FE484786E6788E /* MixpanelScreenTrackingTests.swift */; };
+		A88996800DA044B4B1886E99 /* MixpanelScreenTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C8D4E5F3A1B2C7D8E9F0A1B /* MixpanelScreenTrackingTests.swift */; };
+		7F3A4B5C6D7E8F9A0B1C2D3E /* MixpanelScreenTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D5E6F7A8B9C0D1E2F3A4B5C /* MixpanelScreenTrackingTests.swift */; };
 		E1C61EBE1D22F9F60056C56C /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C61EBD1D22F9F60056C56C /* TestConstants.swift */; };
 		E1C8F50C1EC244E90089C537 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1C8F50B1EC244E90089C537 /* StoreKit.framework */; };
 /* End PBXBuildFile section */
@@ -268,6 +269,8 @@
 		7DA802B4623D45938280B06A /* MixpanelEventBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelEventBridgeTests.swift; sourceTree = "<group>"; };
 		8C72DDD552B64791AD52E1DC /* MixpanelEventBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelEventBridgeTests.swift; sourceTree = "<group>"; };
 		B34EFF52AF7D4D6BACA89305 /* MixpanelEventBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelEventBridgeTests.swift; sourceTree = "<group>"; };
+		9C8D4E5F3A1B2C7D8E9F0A1B /* MixpanelScreenTrackingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelScreenTrackingTests.swift; sourceTree = "<group>"; };
+		2D5E6F7A8B9C0D1E2F3A4B5C /* MixpanelScreenTrackingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelScreenTrackingTests.swift; sourceTree = "<group>"; };
 		51DD56891D3077390045D3DB /* LoggerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoggerTests.swift; sourceTree = "<group>"; };
 		60CB587023D77F9200F1632B /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		671EECAE21432E5F006DD9FA /* GroupsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroupsViewController.swift; sourceTree = "<group>"; };
@@ -460,7 +463,7 @@
 				8654F2F72671636A00ACEED5 /* MixpanelDemoMacTests-Bridging-Header.h */,
 				B0454269B91B8DAD46D580E9 /* MixpanelAutomaticEventsTests.swift */,
 				8C72DDD552B64791AD52E1DC /* MixpanelEventBridgeTests.swift */,
-				3018131FE6FE484786E6788E /* MixpanelScreenTrackingTests.swift */,
+				9C8D4E5F3A1B2C7D8E9F0A1B /* MixpanelScreenTrackingTests.swift */,
 			);
 			path = MixpanelDemoMacTests;
 			sourceTree = "<group>";
@@ -524,7 +527,7 @@
 			children = (
 				86F86F1522460B3200B69832 /* MixpanelDemoTVTests.swift */,
 				B34EFF52AF7D4D6BACA89305 /* MixpanelEventBridgeTests.swift */,
-				3018131FE6FE484786E6788E /* MixpanelScreenTrackingTests.swift */,
+				2D5E6F7A8B9C0D1E2F3A4B5C /* MixpanelScreenTrackingTests.swift */,
 				86F86F1722460B3200B69832 /* Info.plist */,
 			);
 			path = MixpanelDemoTVTests;
@@ -1114,6 +1117,7 @@
 			files = (
 				86F86F1622460B3200B69832 /* MixpanelDemoTVTests.swift in Sources */,
 				EC34FF3FE7F841898A805160 /* MixpanelEventBridgeTests.swift in Sources */,
+				7F3A4B5C6D7E8F9A0B1C2D3E /* MixpanelScreenTrackingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1157,7 +1161,7 @@
 				1A1B2C3D4E5F60718293A5B0 /* MixpanelExcludePropertiesTests.swift in Sources */,
 				174205522F15A7210031EEDC /* MixpanelDeviceIdProviderTests.swift in Sources */,
 				B1AB7B0E940444B7A9B0876A /* MixpanelEventBridgeTests.swift in Sources */,
-				A88996800DA044B4B1886E99 /* MixpanelScreenTrackingTests.swift in Sources */,
+				174563BA2DD74E9ABE905B9A /* MixpanelScreenTrackingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

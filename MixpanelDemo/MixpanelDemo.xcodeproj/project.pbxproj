@@ -460,6 +460,7 @@
 				8654F2F72671636A00ACEED5 /* MixpanelDemoMacTests-Bridging-Header.h */,
 				B0454269B91B8DAD46D580E9 /* MixpanelAutomaticEventsTests.swift */,
 				8C72DDD552B64791AD52E1DC /* MixpanelEventBridgeTests.swift */,
+				3018131FE6FE484786E6788E /* MixpanelScreenTrackingTests.swift */,
 			);
 			path = MixpanelDemoMacTests;
 			sourceTree = "<group>";
@@ -523,6 +524,7 @@
 			children = (
 				86F86F1522460B3200B69832 /* MixpanelDemoTVTests.swift */,
 				B34EFF52AF7D4D6BACA89305 /* MixpanelEventBridgeTests.swift */,
+				3018131FE6FE484786E6788E /* MixpanelScreenTrackingTests.swift */,
 				86F86F1722460B3200B69832 /* Info.plist */,
 			);
 			path = MixpanelDemoTVTests;
@@ -625,6 +627,7 @@
 				862773E2206B3B1D00CBE79E /* MixpanelOptOutTests.swift */,
 				E17AA05D1EC6234E0066EFE8 /* MixpanelAutomaticEventsTests.swift */,
 				7DA802B4623D45938280B06A /* MixpanelEventBridgeTests.swift */,
+				3018131FE6FE484786E6788E /* MixpanelScreenTrackingTests.swift */,
 				E1C61EBD1D22F9F60056C56C /* TestConstants.swift */,
 				51DD56891D3077390045D3DB /* LoggerTests.swift */,
 				E12BD03A1D8A14D6008989C9 /* Supporting Files */,

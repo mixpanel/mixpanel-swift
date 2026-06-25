@@ -9,7 +9,7 @@
 import Foundation
 
 #if !os(OSX)
-import UIKit
+  import UIKit
 #endif  // !os(OSX)
 
 struct QueueConstants {
@@ -33,9 +33,9 @@ struct GzipSettings {
 }
 
 #if !os(OSX) && !os(watchOS) && !os(visionOS)
-extension UIDevice {
-  var iPhoneX: Bool {
-    return UIScreen.main.nativeBounds.height == 2436
+  extension UIDevice {
+    var iPhoneX: Bool {
+      return UIScreen.main.nativeBounds.height == 2436
+    }
   }
-}
 #endif  // !os(OSX)

@@ -191,14 +191,14 @@ class MixpanelDemoTests: MixpanelBaseTests {
       let distinctId: String = "d1"
       // try this for ODIN and nil
       #if MIXPANEL_UNIQUE_DISTINCT_ID
-      XCTAssertEqual(
-        testMixpanel.distinctId,
-        devicePrefix + testMixpanel.defaultDeviceId(),
-        "mixpanel identify failed to set default distinct id")
-      XCTAssertEqual(
-        testMixpanel.anonymousId,
-        testMixpanel.defaultDeviceId(),
-        "mixpanel failed to set default anonymous id")
+        XCTAssertEqual(
+          testMixpanel.distinctId,
+          devicePrefix + testMixpanel.defaultDeviceId(),
+          "mixpanel identify failed to set default distinct id")
+        XCTAssertEqual(
+          testMixpanel.anonymousId,
+          testMixpanel.defaultDeviceId(),
+          "mixpanel failed to set default anonymous id")
       #endif
       XCTAssertNil(
         testMixpanel.people.distinctId,
@@ -213,10 +213,10 @@ class MixpanelDemoTests: MixpanelBaseTests {
         eventsQueue.count == 1,
         "events should be sent right away with default distinct id")
       #if MIXPANEL_UNIQUE_DISTINCT_ID
-      XCTAssertEqual(
-        (eventsQueue.last?["properties"] as? InternalProperties)?["distinct_id"] as? String,
-        devicePrefix + mixpanel.defaultDeviceId(),
-        "events should use default distinct id if none set")
+        XCTAssertEqual(
+          (eventsQueue.last?["properties"] as? InternalProperties)?["distinct_id"] as? String,
+          devicePrefix + mixpanel.defaultDeviceId(),
+          "events should use default distinct id if none set")
       #endif
       XCTAssertEqual(
         (eventsQueue.last?["properties"] as? InternalProperties)?["$lib_version"] as? String,
@@ -332,8 +332,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
       XCTAssertNotEqual(
         prevDistinctId, originalDistinctId, "After reset, UUID will be used - never the same")
       #if MIXPANEL_UNIQUE_DISTINCT_ID
-      XCTAssertEqual(
-        prevDistinctId, originalDistinctId, "After reset, IFV will be used - always the same")
+        XCTAssertEqual(
+          prevDistinctId, originalDistinctId, "After reset, IFV will be used - always the same")
       #endif
       testMixpanel.reset()
       waitForTrackingQueue(testMixpanel)
@@ -632,10 +632,10 @@ class MixpanelDemoTests: MixpanelBaseTests {
     testMixpanel.reset()
     waitForTrackingQueue(testMixpanel)
     #if MIXPANEL_UNIQUE_DISTINCT_ID
-    XCTAssertEqual(
-      testMixpanel.distinctId,
-      devicePrefix + testMixpanel.defaultDeviceId(),
-      "distinct id failed to reset")
+      XCTAssertEqual(
+        testMixpanel.distinctId,
+        devicePrefix + testMixpanel.defaultDeviceId(),
+        "distinct id failed to reset")
     #endif
     XCTAssertNil(testMixpanel.people.distinctId, "people distinct id failed to reset")
     XCTAssertTrue(
@@ -646,9 +646,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
     let testMixpanel2 = Mixpanel.initialize(token: randomId(), flushInterval: 60)
     waitForTrackingQueue(testMixpanel2)
     #if MIXPANEL_UNIQUE_DISTINCT_ID
-    XCTAssertEqual(
-      testMixpanel2.distinctId, devicePrefix + testMixpanel2.defaultDeviceId(),
-      "distinct id failed to reset after archive")
+      XCTAssertEqual(
+        testMixpanel2.distinctId, devicePrefix + testMixpanel2.defaultDeviceId(),
+        "distinct id failed to reset after archive")
     #endif
     XCTAssertNil(
       testMixpanel2.people.distinctId,
@@ -706,9 +706,9 @@ class MixpanelDemoTests: MixpanelBaseTests {
     let testMixpanel = Mixpanel.initialize(token: testToken, flushInterval: 60)
     testMixpanel.serverURL = kFakeServerUrl
     #if MIXPANEL_UNIQUE_DISTINCT_ID
-    XCTAssertEqual(
-      testMixpanel.distinctId, devicePrefix + testMixpanel.defaultDeviceId(),
-      "default distinct id archive failed")
+      XCTAssertEqual(
+        testMixpanel.distinctId, devicePrefix + testMixpanel.defaultDeviceId(),
+        "default distinct id archive failed")
     #endif
     XCTAssertTrue(
       testMixpanel.currentSuperProperties().isEmpty,

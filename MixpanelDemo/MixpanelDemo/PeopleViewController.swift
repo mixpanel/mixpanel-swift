@@ -49,67 +49,67 @@ class PeopleViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var descStr = ""
 
     switch indexPath.item {
-      case 0:
-        let p: Properties = [
-          "a": 1,
-          "b": 2.3,
-          "c": ["4", 5] as [Any],
-          "d": URL(string: "https://mixpanel.com")!,
-          "e": NSNull(),
-          "f": Date(),
-        ]
-        Mixpanel.mainInstance().people.set(properties: p)
-        descStr = "Properties: \(p)"
-      case 1:
-        Mixpanel.mainInstance().people.set(property: "g", to: "yo")
-        descStr = "Property key: g, value: yo"
-      case 2:
-        let p = ["h": "just once"]
-        Mixpanel.mainInstance().people.setOnce(properties: p)
-        descStr = "Properties: \(p)"
-      case 3:
-        let p = ["b", "h"]
-        Mixpanel.mainInstance().people.unset(properties: p)
-        descStr = "Unset Properties: \(p)"
-      case 4:
-        let p = ["a": 1.2, "b": 3]
-        Mixpanel.mainInstance().people.increment(properties: p)
-        descStr = "Properties: \(p)"
-      case 5:
-        Mixpanel.mainInstance().people.increment(property: "b", by: 2.3)
-        descStr = "Property key: b, value increment: 2.3"
-      case 6:
-        let p = ["c": "hello", "d": "goodbye"]
-        Mixpanel.mainInstance().people.append(properties: p)
-        descStr = "Properties: \(p)"
-      case 7:
-        let p = ["c": ["goodbye", "hi"], "d": ["hello"]]
-        Mixpanel.mainInstance().people.union(properties: p)
-        descStr = "Properties: \(p)"
-      case 8:
-        Mixpanel.mainInstance().people.trackCharge(amount: 20.5)
-        descStr = "Amount: 20.5"
-      case 9:
-        let p = ["sandwich": 1]
-        Mixpanel.mainInstance().people.trackCharge(amount: 12.8, properties: p)
-        descStr = "Amount: 12.8, Properties: \(p)"
-      case 10:
-        Mixpanel.mainInstance().people.clearCharges()
-        descStr = "Cleared Charges"
-      case 11:
-        Mixpanel.mainInstance().people.deleteUser()
-        descStr = "Deleted User"
-      case 12:
-        // Mixpanel People requires that you explicitly set a distinct ID for the current user. In this case,
-        // we're using the automatically generated distinct ID from event tracking, based on the device's MAC address.
-        // It is strongly recommended that you use the same distinct IDs for Mixpanel Engagement and Mixpanel People.
-        // Note that the call to Mixpanel People identify: can come after properties have been set. We queue them until
-        // identify: is called and flush them at that time. That way, you can set properties before a user is logged in
-        // and identify them once you know their user ID.
-        Mixpanel.mainInstance().identify(distinctId: "testDistinctId111")
-        descStr = "Identified User"
-      default:
-        break
+    case 0:
+      let p: Properties = [
+        "a": 1,
+        "b": 2.3,
+        "c": ["4", 5] as [Any],
+        "d": URL(string: "https://mixpanel.com")!,
+        "e": NSNull(),
+        "f": Date(),
+      ]
+      Mixpanel.mainInstance().people.set(properties: p)
+      descStr = "Properties: \(p)"
+    case 1:
+      Mixpanel.mainInstance().people.set(property: "g", to: "yo")
+      descStr = "Property key: g, value: yo"
+    case 2:
+      let p = ["h": "just once"]
+      Mixpanel.mainInstance().people.setOnce(properties: p)
+      descStr = "Properties: \(p)"
+    case 3:
+      let p = ["b", "h"]
+      Mixpanel.mainInstance().people.unset(properties: p)
+      descStr = "Unset Properties: \(p)"
+    case 4:
+      let p = ["a": 1.2, "b": 3]
+      Mixpanel.mainInstance().people.increment(properties: p)
+      descStr = "Properties: \(p)"
+    case 5:
+      Mixpanel.mainInstance().people.increment(property: "b", by: 2.3)
+      descStr = "Property key: b, value increment: 2.3"
+    case 6:
+      let p = ["c": "hello", "d": "goodbye"]
+      Mixpanel.mainInstance().people.append(properties: p)
+      descStr = "Properties: \(p)"
+    case 7:
+      let p = ["c": ["goodbye", "hi"], "d": ["hello"]]
+      Mixpanel.mainInstance().people.union(properties: p)
+      descStr = "Properties: \(p)"
+    case 8:
+      Mixpanel.mainInstance().people.trackCharge(amount: 20.5)
+      descStr = "Amount: 20.5"
+    case 9:
+      let p = ["sandwich": 1]
+      Mixpanel.mainInstance().people.trackCharge(amount: 12.8, properties: p)
+      descStr = "Amount: 12.8, Properties: \(p)"
+    case 10:
+      Mixpanel.mainInstance().people.clearCharges()
+      descStr = "Cleared Charges"
+    case 11:
+      Mixpanel.mainInstance().people.deleteUser()
+      descStr = "Deleted User"
+    case 12:
+      // Mixpanel People requires that you explicitly set a distinct ID for the current user. In this case,
+      // we're using the automatically generated distinct ID from event tracking, based on the device's MAC address.
+      // It is strongly recommended that you use the same distinct IDs for Mixpanel Engagement and Mixpanel People.
+      // Note that the call to Mixpanel People identify: can come after properties have been set. We queue them until
+      // identify: is called and flush them at that time. That way, you can set properties before a user is logged in
+      // and identify them once you know their user ID.
+      Mixpanel.mainInstance().identify(distinctId: "testDistinctId111")
+      descStr = "Identified User"
+    default:
+      break
     }
 
     let vc =

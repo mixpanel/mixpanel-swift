@@ -27,11 +27,11 @@ extension Optional: MixpanelType {
   public func isValidNestedTypeAndValue() -> Bool {
     guard let val = self else { return true }  // nil is valid
     switch val {
-      case let v as MixpanelType:
-        return v.isValidNestedTypeAndValue()
-      default:
-        // non-nil but cannot be unwrapped to MixpanelType
-        return false
+    case let v as MixpanelType:
+      return v.isValidNestedTypeAndValue()
+    default:
+      // non-nil but cannot be unwrapped to MixpanelType
+      return false
     }
   }
 

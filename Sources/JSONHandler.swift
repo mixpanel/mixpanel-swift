@@ -61,59 +61,59 @@ class JSONHandler {
 
   private class func makeObjectSerializable(_ obj: MPObjectToParse) -> MPObjectToParse {
     switch obj {
-      case let obj as NSNumber:
-        if isBoolNumber(obj) {
-          return obj.boolValue
-        } else if isInvalidNumber(obj) {
-          return String(describing: obj)
-        } else {
-          return obj
-        }
-
-      case let obj as Double where obj.isFinite && !obj.isNaN:
+    case let obj as NSNumber:
+      if isBoolNumber(obj) {
+        return obj.boolValue
+      } else if isInvalidNumber(obj) {
+        return String(describing: obj)
+      } else {
         return obj
+      }
 
-      case let obj as Float where obj.isFinite && !obj.isNaN:
-        return obj
+    case let obj as Double where obj.isFinite && !obj.isNaN:
+      return obj
 
-      case is String, is Int, is UInt, is UInt64, is Bool:
-        return obj
+    case let obj as Float where obj.isFinite && !obj.isNaN:
+      return obj
 
-      case let obj as [Any?]:
-        // nil values in Array properties are dropped
-        let nonNilEls: [Any] = obj.compactMap({ $0 })
-        return nonNilEls.map { makeObjectSerializable($0) }
+    case is String, is Int, is UInt, is UInt64, is Bool:
+      return obj
 
-      case let obj as [Any]:
-        return obj.map { makeObjectSerializable($0) }
+    case let obj as [Any?]:
+      // nil values in Array properties are dropped
+      let nonNilEls: [Any] = obj.compactMap({ $0 })
+      return nonNilEls.map { makeObjectSerializable($0) }
 
-      case let obj as InternalProperties:
-        var serializedDict = InternalProperties()
-        _ = obj.map { e in
-          serializedDict[e.key] =
-            makeObjectSerializable(e.value)
-        }
-        return serializedDict
+    case let obj as [Any]:
+      return obj.map { makeObjectSerializable($0) }
 
-      case let obj as Date:
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        return dateFormatter.string(from: obj)
+    case let obj as InternalProperties:
+      var serializedDict = InternalProperties()
+      _ = obj.map { e in
+        serializedDict[e.key] =
+          makeObjectSerializable(e.value)
+      }
+      return serializedDict
 
-      case let obj as URL:
-        return obj.absoluteString
+    case let obj as Date:
+      let dateFormatter = DateFormatter()
+      dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+      dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+      dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+      return dateFormatter.string(from: obj)
 
-      default:
-        let objString = String(describing: obj)
-        if objString == "nil" {
-          // all nil properties outside of Arrays are converted to NSNull()
-          return NSNull()
-        } else {
-          MixpanelLogger.info(message: "enforcing string on object")
-          return objString
-        }
+    case let obj as URL:
+      return obj.absoluteString
+
+    default:
+      let objString = String(describing: obj)
+      if objString == "nil" {
+        // all nil properties outside of Arrays are converted to NSNull()
+        return NSNull()
+      } else {
+        MixpanelLogger.info(message: "enforcing string on object")
+        return objString
+      }
     }
   }
 

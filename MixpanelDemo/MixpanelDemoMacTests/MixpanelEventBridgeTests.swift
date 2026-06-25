@@ -6,8 +6,8 @@
 //  Copyright © 2026 Mixpanel. All rights reserved.
 //
 
-import MixpanelSwiftCommon
 import XCTest
+import MixpanelSwiftCommon
 
 @testable import Mixpanel
 
@@ -36,7 +36,7 @@ class MixpanelEventBridgeTests: MixpanelBaseTests {
 
     wait(for: [expectation], timeout: 2.0)
     task.cancel()
-    removeDBfile(apiToken: testMixpanel.apiToken)
+      removeDBfile(apiToken: testMixpanel.apiToken)
   }
 
   // MARK: - Event Bridge Receives Properties
@@ -63,14 +63,14 @@ class MixpanelEventBridgeTests: MixpanelBaseTests {
 
     wait(for: [expectation], timeout: 2.0)
     task.cancel()
-    removeDBfile(apiToken: testMixpanel.apiToken)
+      removeDBfile(apiToken: testMixpanel.apiToken)
   }
 
   // MARK: - Event Bridge Not Notified When Opted Out
 
   func testEventBridgeNotNotifiedWhenOptedOut() {
     let testMixpanel = Mixpanel.initialize(
-      token: randomId(), optOutTrackingByDefault: true, trackAutomaticEvents: false)
+        token: randomId(), optOutTrackingByDefault: true, trackAutomaticEvents: false)
     let eventName = "BridgeOptOutTest_\(randomId())"
     let noEventExpectation = XCTestExpectation(
       description: "Event bridge should not be notified when tracking is opted out")
@@ -90,7 +90,7 @@ class MixpanelEventBridgeTests: MixpanelBaseTests {
 
     wait(for: [noEventExpectation], timeout: 1.0)
     task.cancel()
-    removeDBfile(apiToken: testMixpanel.apiToken)
+      removeDBfile(apiToken: testMixpanel.apiToken)
   }
 
 }

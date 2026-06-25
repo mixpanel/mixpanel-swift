@@ -206,8 +206,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
 
   func testFallbackVariantsHaveFallbackSource() {
     let fallback = MixpanelFlagVariant(value: "default")
-    if case .fallback = fallback.source {
-    } else {
+    if case .fallback = fallback.source {} else {
       XCTFail("developer-supplied variants should carry .fallback source")
     }
   }
@@ -240,16 +239,12 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// becomes networkOnly" rule is enforced at SDK init via `VariantLookupPolicy.effective(_:)`,
   /// not at construction time, so callers can introspect what they configured.
   func testFactoriesPreserveExactTtl() throws {
-    if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.persistenceUntilNetworkSuccess(
-      persistenceTtl: -1)
-    {
+    if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.persistenceUntilNetworkSuccess(persistenceTtl: -1) {
       XCTAssertEqual(t, -1)
     } else {
       XCTFail("expected .persistenceUntilNetworkSuccess case")
     }
-    if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.persistenceUntilNetworkSuccess(
-      persistenceTtl: 0)
-    {
+    if case .persistenceUntilNetworkSuccess(let t) = VariantLookupPolicy.persistenceUntilNetworkSuccess(persistenceTtl: 0) {
       XCTAssertEqual(t, 0)
     } else {
       XCTFail("expected .persistenceUntilNetworkSuccess case")
@@ -265,26 +260,22 @@ class FeatureFlagPersistenceTests: XCTestCase {
   /// but never serve anything from persistence) so the SDK substitutes `.networkOnly` at init.
   func testEffectivePolicyNonPositiveTtlBecomesNetworkOnly() throws {
     let resolvedNegativePersistence = VariantLookupPolicy.effective(.persistenceUntilNetworkSuccess(persistenceTtl: -1))
-    if case .networkOnly = resolvedNegativePersistence {
-    } else {
+    if case .networkOnly = resolvedNegativePersistence {} else {
       XCTFail("negative TTL on persistenceUntilNetworkSuccess should resolve to .networkOnly")
     }
 
     let resolvedZeroPersistence = VariantLookupPolicy.effective(.persistenceUntilNetworkSuccess(persistenceTtl: 0))
-    if case .networkOnly = resolvedZeroPersistence {
-    } else {
+    if case .networkOnly = resolvedZeroPersistence {} else {
       XCTFail("zero TTL on persistenceUntilNetworkSuccess should resolve to .networkOnly")
     }
 
     let resolvedNegativeNetworkFirst = VariantLookupPolicy.effective(.networkFirst(persistenceTtl: -100))
-    if case .networkOnly = resolvedNegativeNetworkFirst {
-    } else {
+    if case .networkOnly = resolvedNegativeNetworkFirst {} else {
       XCTFail("negative TTL on networkFirst should resolve to .networkOnly")
     }
 
     let resolvedZeroNetworkFirst = VariantLookupPolicy.effective(.networkFirst(persistenceTtl: 0))
-    if case .networkOnly = resolvedZeroNetworkFirst {
-    } else {
+    if case .networkOnly = resolvedZeroNetworkFirst {} else {
       XCTFail("zero TTL on networkFirst should resolve to .networkOnly")
     }
   }
@@ -299,8 +290,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     }
 
     let networkOnly = VariantLookupPolicy.networkOnly
-    if case .networkOnly = VariantLookupPolicy.effective(networkOnly) {
-    } else {
+    if case .networkOnly = VariantLookupPolicy.effective(networkOnly) {} else {
       XCTFail(".networkOnly should pass through unchanged")
     }
   }
@@ -338,8 +328,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     // `Date()` (rather than a fixed-far-past timestamp) so the 86_400s TTL check passes.
     let persistedAt = Date()
     let context = ["plan": "enterprise"]
-    let response =
-      #"{"flags":{"flag_a":{"variant_key":"v1","variant_value":42},"flag_b":{"variant_key":"v2","variant_value":"hello"}}}"#
+    let response = #"{"flags":{"flag_a":{"variant_key":"v1","variant_value":42},"flag_b":{"variant_key":"v2","variant_value":"hello"}}}"#
 
     MixpanelPersistence.saveFlagsPersistence(
       FlagsPersistenceBlob(persistedAt: persistedAt, distinctId: "user_a", response: response),
@@ -419,7 +408,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
   }
 
   func testInitIgnoresPersistenceWhenExpired() throws {
-    let oldDate = Date(timeIntervalSinceNow: -86_400 * 7)  // 7 days ago
+    let oldDate = Date(timeIntervalSinceNow: -86_400 * 7) // 7 days ago
     let response = #"{"flags":{"flag_a":{"variant_key":"v1","variant_value":true}}}"#
     MixpanelPersistence.saveFlagsPersistence(
       FlagsPersistenceBlob(
@@ -566,8 +555,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     let result = manager.getVariantSync("flag_a", fallback: fallback)
 
     XCTAssertEqual(result.value as? String, "fallback_value")
-    if case .fallback = result.source {
-    } else {
+    if case .fallback = result.source {} else {
       XCTFail("served fallback should carry .fallback source")
     }
   }
@@ -591,8 +579,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     let result = manager.getVariantSync("flag_a", fallback: fallback)
 
     XCTAssertEqual(result.value as? String, "fresh_value")
-    if case .persistence = result.source {
-    } else {
+    if case .persistence = result.source {} else {
       XCTFail("expected .persistence source preserved")
     }
   }
@@ -715,8 +702,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
       // The variant served must be the network value, not the persisted one.
       XCTAssertEqual(variant.value as? String, "network_val")
-      if case .network = variant.source {
-      } else {
+      if case .network = variant.source {} else {
         XCTFail("variant served by NetworkFirst should be from .network after fetch")
       }
       asyncDone.fulfill()
@@ -744,8 +730,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
       // Fetch failed → persisted values stay → async lookup serves the persisted variant.
       XCTAssertEqual(variant.value as? String, "persisted_val")
-      if case .persistence = variant.source {
-      } else {
+      if case .persistence = variant.source {} else {
         XCTFail("variant served on NetworkFirst failure should keep .persistence source")
       }
       asyncDone.fulfill()
@@ -766,8 +751,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
       distinctId: "user_a", context: [:], policy: .persistenceUntilNetworkSuccess(persistenceTtl: 86_400))
     // Configure a slow network so we'd notice if the lookup was waiting on it.
     mock.simulatedFetchResult = (
-      success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v2", value: "network_val")]
-    )
+      success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v2", value: "network_val")])
     mock.simulatedNetworkDelay = 0.1
 
     waitForTrackingQueue(manager: mock)
@@ -886,8 +870,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
       XCTAssertEqual(
         variant.value as? String, "network_val",
         "stale persisted blob should trigger fetch and serve the network value")
-      if case .network = variant.source {
-      } else {
+      if case .network = variant.source {} else {
         XCTFail("post-fetch variant should carry .network source")
       }
       asyncDone.fulfill()
@@ -1053,8 +1036,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fb")) { variant in
       let elapsed = Date().timeIntervalSince(start)
       XCTAssertEqual(variant.value as? String, "persisted_val")
-      if case .persistence = variant.source {
-      } else {
+      if case .persistence = variant.source {} else {
         XCTFail("fresh persisted variant should be served as-is, not refreshed")
       }
       XCTAssertLessThan(elapsed, 0.08, "fresh blob must not wait on the network")
@@ -1190,9 +1172,8 @@ class FeatureFlagPersistenceTests: XCTestCase {
     mock.simulatedNetworkDelay = 0
     let firstDone = expectation(description: "first lookup")
     mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
-      XCTAssertEqual(
-        variant.value as? String, "persisted_val",
-        "first lookup should fall back to persisted value after failed fetch")
+      XCTAssertEqual(variant.value as? String, "persisted_val",
+                     "first lookup should fall back to persisted value after failed fetch")
       firstDone.fulfill()
     }
     wait(for: [firstDone], timeout: 2.0)
@@ -1213,13 +1194,11 @@ class FeatureFlagPersistenceTests: XCTestCase {
 
     // Round 3: fetch succeeds. Network value served, blob marker cleared.
     mock.simulatedFetchResult = (
-      success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v_fresh", value: "network_val")]
-    )
+      success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v_fresh", value: "network_val")])
     let thirdDone = expectation(description: "third lookup")
     mock.getVariant("flag_a", fallback: MixpanelFlagVariant(value: "fallback")) { variant in
-      XCTAssertEqual(
-        variant.value as? String, "network_val",
-        "successful fetch should serve the network value")
+      XCTAssertEqual(variant.value as? String, "network_val",
+                     "successful fetch should serve the network value")
       thirdDone.fulfill()
     }
     wait(for: [thirdDone], timeout: 2.0)
@@ -1260,9 +1239,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
 
     // Hang the simulated fetch so it counts as kicked-off but doesn't complete and replace
     // `flags` mid-test. Counter increments synchronously inside `_performFetchRequest`.
-    mock.simulatedFetchResult = (
-      success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v_new", value: "network_val")]
-    )
+    mock.simulatedFetchResult = (success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v_new", value: "network_val")])
     mock.simulatedNetworkDelay = 60  // effectively never completes within the test
 
     XCTAssertEqual(mock.fetchCallCount, 0, "no fetch before lookup")
@@ -1274,8 +1251,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
       XCTAssertEqual(
         variant.value as? String, "persisted_val",
         "lookup must serve the persisted value, not wait on the background fetch")
-      if case .persistence = variant.source {
-      } else {
+      if case .persistence = variant.source {} else {
         XCTFail("expected .persistence source")
       }
       XCTAssertLessThan(elapsed, 0.5, "lookup must not block on the background fetch")
@@ -1309,8 +1285,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     }
 
     mock.simulatedFetchResult = (
-      success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v2", value: "network_val")]
-    )
+      success: true, flags: ["flag_a": MixpanelFlagVariant(key: "v2", value: "network_val")])
     mock.simulatedNetworkDelay = 0  // complete immediately so flags get replaced post-fetch
 
     // First lookup: kicks off the background refresh.

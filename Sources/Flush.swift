@@ -13,7 +13,7 @@ protocol FlushDelegate: AnyObject {
   func flushSuccess(type: FlushType, ids: [Int32])
 
   #if os(iOS)
-  func updateNetworkActivityIndicator(_ on: Bool)
+    func updateNetworkActivityIndicator(_ on: Bool)
   #endif  // os(iOS)
 }
 
@@ -140,9 +140,9 @@ class Flush: AppLifecycle {
       let requestData = JSONHandler.encodeAPIData(batch)
       if let requestData = requestData {
         #if os(iOS)
-        if !MixpanelInstance.isiOSAppExtension() {
-          delegate?.updateNetworkActivityIndicator(true)
-        }
+          if !MixpanelInstance.isiOSAppExtension() {
+            delegate?.updateNetworkActivityIndicator(true)
+          }
         #endif  // os(iOS)
         let success = flushRequest.sendRequest(
           requestData,
@@ -151,9 +151,9 @@ class Flush: AppLifecycle {
           headers: headers,
           queryItems: queryItems, useGzipCompression: useGzipCompression)
         #if os(iOS)
-        if !MixpanelInstance.isiOSAppExtension() {
-          delegate?.updateNetworkActivityIndicator(false)
-        }
+          if !MixpanelInstance.isiOSAppExtension() {
+            delegate?.updateNetworkActivityIndicator(false)
+          }
         #endif  // os(iOS)
         if success {
           // remove

@@ -21,7 +21,7 @@ let package = Package(
     .package(
       url: "https://github.com/mixpanel/mixpanel-swift-common.git",
       from: "1.0.0"
-    ),
+    )
   ],
   targets: [
     .target(

@@ -18,18 +18,18 @@ public enum GzipError: Swift.Error {
 
   init(code: Int32) {
     switch code {
-      case Z_STREAM_ERROR:
-        self = .stream
-      case Z_DATA_ERROR:
-        self = .data
-      case Z_MEM_ERROR:
-        self = .memory
-      case Z_BUF_ERROR:
-        self = .buffer
-      case Z_VERSION_ERROR:
-        self = .version
-      default:
-        self = .unknown(code: Int(code))
+    case Z_STREAM_ERROR:
+      self = .stream
+    case Z_DATA_ERROR:
+      self = .data
+    case Z_MEM_ERROR:
+      self = .memory
+    case Z_BUF_ERROR:
+      self = .buffer
+    case Z_VERSION_ERROR:
+      self = .version
+    default:
+      self = .unknown(code: Int(code))
     }
   }
 }

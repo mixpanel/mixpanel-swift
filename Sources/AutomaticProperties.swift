@@ -9,11 +9,11 @@
 import Foundation
 
 #if os(iOS) || os(tvOS) || os(visionOS)
-import UIKit
+  import UIKit
 #elseif os(macOS)
-import Cocoa
+  import Cocoa
 #elseif canImport(WatchKit)
-import WatchKit
+  import WatchKit
 #endif
 
 class AutomaticProperties {
@@ -23,39 +23,39 @@ class AutomaticProperties {
     var p = InternalProperties()
 
     #if os(iOS) || os(tvOS)
-    // Screen size is captured via setUIProperties() called during SDK initialization.
-    // See: https://github.com/mixpanel/mixpanel-swift/issues/522
+      // Screen size is captured via setUIProperties() called during SDK initialization.
+      // See: https://github.com/mixpanel/mixpanel-swift/issues/522
 
-    #if targetEnvironment(macCatalyst)
-    p["$os"] = "macOS"
-    p["$os_version"] = ProcessInfo.processInfo.operatingSystemVersionString
-    #else
-    if AutomaticProperties.isiOSAppOnMac() {
-      // iOS App Running on Apple Silicon Mac
-      p["$os"] = "macOS"
-      // unfortunately, there is no API that reports the correct macOS version
-      // for "Designed for iPad" apps running on macOS, so we omit it here rather than mis-report
-    } else {
-      p["$os"] = UIDevice.current.systemName
-      p["$os_version"] = UIDevice.current.systemVersion
-    }
-    #endif
+      #if targetEnvironment(macCatalyst)
+        p["$os"] = "macOS"
+        p["$os_version"] = ProcessInfo.processInfo.operatingSystemVersionString
+      #else
+        if AutomaticProperties.isiOSAppOnMac() {
+          // iOS App Running on Apple Silicon Mac
+          p["$os"] = "macOS"
+          // unfortunately, there is no API that reports the correct macOS version
+          // for "Designed for iPad" apps running on macOS, so we omit it here rather than mis-report
+        } else {
+          p["$os"] = UIDevice.current.systemName
+          p["$os_version"] = UIDevice.current.systemVersion
+        }
+      #endif
     #elseif os(macOS)
-    // Screen size is captured via setUIProperties() called during SDK initialization
-    p["$os"] = "macOS"
-    p["$os_version"] = ProcessInfo.processInfo.operatingSystemVersionString
+      // Screen size is captured via setUIProperties() called during SDK initialization
+      p["$os"] = "macOS"
+      p["$os_version"] = ProcessInfo.processInfo.operatingSystemVersionString
     #elseif os(watchOS)
-    // WatchKit APIs are thread-safe, capture screen size immediately
-    let watchDevice = WKInterfaceDevice.current()
-    p["$os"] = watchDevice.systemName
-    p["$os_version"] = watchDevice.systemVersion
-    p["$watch_model"] = AutomaticProperties.watchModel()
-    let screenSize = watchDevice.screenBounds.size
-    p["$screen_width"] = Int(screenSize.width)
-    p["$screen_height"] = Int(screenSize.height)
+      // WatchKit APIs are thread-safe, capture screen size immediately
+      let watchDevice = WKInterfaceDevice.current()
+      p["$os"] = watchDevice.systemName
+      p["$os_version"] = watchDevice.systemVersion
+      p["$watch_model"] = AutomaticProperties.watchModel()
+      let screenSize = watchDevice.screenBounds.size
+      p["$screen_width"] = Int(screenSize.width)
+      p["$screen_height"] = Int(screenSize.height)
     #elseif os(visionOS)
-    p["$os"] = "visionOS"
-    p["$os_version"] = UIDevice.current.systemVersion
+      p["$os"] = "visionOS"
+      p["$os_version"] = UIDevice.current.systemVersion
     #endif
 
     let infoDict = Bundle.main.infoDictionary ?? [:]
@@ -79,9 +79,9 @@ class AutomaticProperties {
     }
     p["$ios_device_model"] = AutomaticProperties.deviceModel()
     #if !os(OSX) && !os(watchOS) && !os(visionOS)
-    p["$ios_version"] = UIDevice.current.systemVersion
+      p["$ios_version"] = UIDevice.current.systemVersion
     #else
-    p["$ios_version"] = ProcessInfo.processInfo.operatingSystemVersionString
+      p["$ios_version"] = ProcessInfo.processInfo.operatingSystemVersionString
     #endif
     p["$ios_lib_version"] = AutomaticProperties.libVersion()
     p["$swift_lib_version"] = AutomaticProperties.libVersion()
@@ -97,31 +97,31 @@ class AutomaticProperties {
   static func setUIProperties() {
     #if os(iOS) || os(tvOS) || os(macOS)
     DispatchQueue.main.async {
-      // IMPORTANT: Capture screen size on main thread BEFORE entering write lock.
-      // The write lock executes closures on its internal queue (background thread),
-      // so we must access UIScreen/NSScreen here while still on main thread.
-      #if os(iOS) || os(tvOS)
-      let screenSize = UIScreen.main.bounds.size
-      let height = Int(screenSize.height)
-      let width = Int(screenSize.width)
-      #elseif os(macOS)
-      let screenSize = NSScreen.main?.frame.size
-      let height = screenSize.map { Int($0.height) }
-      let width = screenSize.map { Int($0.width) }
-      #endif
-
-      // Now update properties dictionary under lock (with already-captured values)
-      automaticPropertiesLock.write {
+        // IMPORTANT: Capture screen size on main thread BEFORE entering write lock.
+        // The write lock executes closures on its internal queue (background thread),
+        // so we must access UIScreen/NSScreen here while still on main thread.
         #if os(iOS) || os(tvOS)
-        properties["$screen_height"] = height
-        properties["$screen_width"] = width
+          let screenSize = UIScreen.main.bounds.size
+          let height = Int(screenSize.height)
+          let width = Int(screenSize.width)
         #elseif os(macOS)
-        if let height = height, let width = width {
-          properties["$screen_height"] = height
-          properties["$screen_width"] = width
-        }
+          let screenSize = NSScreen.main?.frame.size
+          let height = screenSize.map { Int($0.height) }
+          let width = screenSize.map { Int($0.width) }
         #endif
-      }
+
+        // Now update properties dictionary under lock (with already-captured values)
+        automaticPropertiesLock.write {
+          #if os(iOS) || os(tvOS)
+            properties["$screen_height"] = height
+            properties["$screen_width"] = width
+          #elseif os(macOS)
+            if let height = height, let width = width {
+              properties["$screen_height"] = height
+              properties["$screen_width"] = width
+            }
+          #endif
+        }
     }
     #endif
   }
@@ -149,14 +149,14 @@ class AutomaticProperties {
   }
 
   #if os(watchOS)
-  class func watchModel() -> String {
-    let watchSize38mm = Int(136)
-    let watchSize40mm = Int(162)
-    let watchSize42mm = Int(156)
-    let watchSize44mm = Int(184)
+    class func watchModel() -> String {
+      let watchSize38mm = Int(136)
+      let watchSize40mm = Int(162)
+      let watchSize42mm = Int(156)
+      let watchSize44mm = Int(184)
 
-    let screenWidth = Int(WKInterfaceDevice.current().screenBounds.size.width)
-    switch screenWidth {
+      let screenWidth = Int(WKInterfaceDevice.current().screenBounds.size.width)
+      switch screenWidth {
       case watchSize38mm:
         return "Apple Watch 38mm"
       case watchSize40mm:
@@ -167,8 +167,8 @@ class AutomaticProperties {
         return "Apple Watch 44mm"
       default:
         return "Apple Watch"
+      }
     }
-  }
   #endif
 
   class func isiOSAppOnMac() -> Bool {

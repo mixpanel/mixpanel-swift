@@ -47,58 +47,58 @@ class TrackingViewController: UIViewController, UITableViewDelegate, UITableView
     var descStr = ""
 
     switch indexPath.item {
-      case 0:
-        let ev = "Track Event!"
+    case 0:
+      let ev = "Track Event!"
+      Mixpanel.mainInstance().track(event: ev)
+      descStr = "Event: \"\(ev)\""
+    case 1:
+      let ev = "Track Event With Properties!"
+      let p = ["Cool Property": "Property Value"]
+      Mixpanel.mainInstance().track(event: ev, properties: p)
+      descStr = "Event: \"\(ev)\"\n Properties: \(p)"
+    case 2:
+      let ev = "Timed Event"
+      Mixpanel.mainInstance().time(event: ev)
+      DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
         Mixpanel.mainInstance().track(event: ev)
-        descStr = "Event: \"\(ev)\""
-      case 1:
-        let ev = "Track Event With Properties!"
-        let p = ["Cool Property": "Property Value"]
-        Mixpanel.mainInstance().track(event: ev, properties: p)
-        descStr = "Event: \"\(ev)\"\n Properties: \(p)"
-      case 2:
-        let ev = "Timed Event"
-        Mixpanel.mainInstance().time(event: ev)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-          Mixpanel.mainInstance().track(event: ev)
-        }
-        descStr = "Timed Event: \"\(ev)\""
-      case 3:
-        Mixpanel.mainInstance().clearTimedEvents()
-        descStr = "Timed Events Cleared"
-      case 4:
-        descStr = "Super Properties:\n"
-        descStr += "\(Mixpanel.mainInstance().currentSuperProperties())"
-      case 5:
-        Mixpanel.mainInstance().clearSuperProperties()
-        descStr = "Cleared Super Properties"
-      case 6:
-        let p: Properties = [
-          "Super Property 1": 1,
-          "Super Property 2": "p2",
-          "Super Property 3": Date(),
-          "Super Property 4": ["a": "b"],
-          "Super Property 5": [3, "a", Date()] as [Any],
-          "Super Property 6":
-            URL(string: "https://mixpanel.com")!,
-          "Super Property 7": NSNull(),
-        ]
-        Mixpanel.mainInstance().registerSuperProperties(p)
-        descStr = "Properties: \(p)"
-      case 7:
-        let p = ["Super Property 1": 2.3]
-        Mixpanel.mainInstance().registerSuperPropertiesOnce(p)
-        descStr = "Properties: \(p)"
-      case 8:
-        let p = ["Super Property 1": 1.2]
-        Mixpanel.mainInstance().registerSuperPropertiesOnce(p, defaultValue: 2.3)
-        descStr = "Properties: \(p) with Default Value: 2.3"
-      case 9:
-        let p = "Super Property 2"
-        Mixpanel.mainInstance().unregisterSuperProperty(p)
-        descStr = "Properties: \(p)"
-      default:
-        break
+      }
+      descStr = "Timed Event: \"\(ev)\""
+    case 3:
+      Mixpanel.mainInstance().clearTimedEvents()
+      descStr = "Timed Events Cleared"
+    case 4:
+      descStr = "Super Properties:\n"
+      descStr += "\(Mixpanel.mainInstance().currentSuperProperties())"
+    case 5:
+      Mixpanel.mainInstance().clearSuperProperties()
+      descStr = "Cleared Super Properties"
+    case 6:
+      let p: Properties = [
+        "Super Property 1": 1,
+        "Super Property 2": "p2",
+        "Super Property 3": Date(),
+        "Super Property 4": ["a": "b"],
+        "Super Property 5": [3, "a", Date()] as [Any],
+        "Super Property 6":
+          URL(string: "https://mixpanel.com")!,
+        "Super Property 7": NSNull(),
+      ]
+      Mixpanel.mainInstance().registerSuperProperties(p)
+      descStr = "Properties: \(p)"
+    case 7:
+      let p = ["Super Property 1": 2.3]
+      Mixpanel.mainInstance().registerSuperPropertiesOnce(p)
+      descStr = "Properties: \(p)"
+    case 8:
+      let p = ["Super Property 1": 1.2]
+      Mixpanel.mainInstance().registerSuperPropertiesOnce(p, defaultValue: 2.3)
+      descStr = "Properties: \(p) with Default Value: 2.3"
+    case 9:
+      let p = "Super Property 2"
+      Mixpanel.mainInstance().unregisterSuperProperty(p)
+      descStr = "Properties: \(p)"
+    default:
+      break
     }
 
     let vc =

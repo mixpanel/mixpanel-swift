@@ -106,6 +106,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Accessor to the Mixpanel Autocapture API object.
     open var autocapture: Autocapture!
 
+    #if os(iOS)
+    /// Autocapture manager for click, rage click, and dead click detection.
+    var autocaptureManager: AutocaptureManager?
+    #endif
+
     /// Accessor the Mixpanel Feature Flags API object.
     open var flags: MixpanelFlags!
 
@@ -451,6 +456,24 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif
         unarchive()
 
+        // Initialize autocapture if enabled (iOS only)
+        #if os(iOS)
+        if let autocaptureOpts = self.options.autocaptureOptions, autocaptureOpts.isEnabled {
+            if !MixpanelInstance.isiOSAppExtension() {
+                autocaptureManager = AutocaptureManager(
+                    options: autocaptureOpts,
+                    trackEvent: { [weak self] name, props in
+                        self?.track(event: name, properties: props)
+                    }
+                )
+                autocaptureManager?.start()
+                MixpanelLogger.info(message: "AutocaptureManager started")
+            } else {
+                MixpanelLogger.info(message: "Autocapture disabled in app extension")
+            }
+        }
+        #endif
+
         // Construct FeatureFlagManager AFTER unarchive() so the on-disk cache load (dispatched
         // async by FeatureFlagManager.init when a caching policy is configured) reads the
         // correct distinctId via `delegate.getDistinctId()`. Constructing earlier would race the
@@ -571,6 +594,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     deinit {
         NotificationCenter.default.removeObserver(self)
+        #if os(iOS)
+        autocaptureManager?.stop()
+        #endif
         #if os(iOS) && !os(watchOS) && !targetEnvironment(macCatalyst)
         if let reachability = self.reachability {
             if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
@@ -1261,6 +1287,23 @@ extension MixpanelInstance {
                 type: self.persistenceTypeFromFlushType(type), ids: ids)
         }
     }
+
+  // MARK: - Autocapture
+
+  #if os(iOS)
+    /**
+      Signals to the SDK that a UI change occurred.
+
+      Call this when a UI change happens that the dead click detector cannot observe,
+      such as navigation in React Native or other framework-driven UI changes.
+      This cancels any pending dead click detection to prevent false positives.
+
+      This method is safe to call even if autocapture is not enabled; it will simply do nothing.
+     */
+    public func signalUIChange() {
+      autocaptureManager?.signalUIChange()
+    }
+  #endif
 
 }
 

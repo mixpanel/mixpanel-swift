@@ -398,6 +398,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testTrackWithDefaultProperties() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        waitForAsyncTasks()
         testMixpanel.track(event: "Something Happened")
         waitForTrackingQueue(testMixpanel)
         let e: InternalProperties = eventQueue(token: testMixpanel.apiToken).last!
@@ -488,6 +489,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testTrackWithGroups() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        waitForAsyncTasks()
         let groupKey = "test_key"
         let groupID = "test_id"
         testMixpanel.trackWithGroups(

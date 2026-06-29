@@ -104,7 +104,8 @@
 
       // Fallback: ClassName_view_<hash>
       let className = String(describing: type(of: view))
-      return "\(className)_view_\(abs(view.hash))"
+      let safeHash = view.hash == Int.min ? Int.max : abs(view.hash)
+      return "\(className)_view_\(safeHash)"
     }
 
     // MARK: - Accessibility Property Discovery
@@ -311,31 +312,31 @@
 
     /// Check if view or any ancestor is marked as sensitive.
     ///
-    /// A view is sensitive if its accessibilityIdentifier or accessibilityLabel
-    /// contains "mp-sensitive" or "mp-no-track".
+    /// A view is sensitive if its accessibilityIdentifier contains "mp-sensitive" or "mp-no-track".
+    /// We only check accessibilityIdentifier (not accessibilityLabel) because React Native
+    /// aggregates all child labels into parent views, which would cause false positives.
+    ///
+    /// Additionally, we limit the hierarchy walk to a reasonable depth to avoid checking
+    /// container views that have aggregated content.
     private func isSensitive(view: UIView) -> Bool {
       var currentView: UIView? = view
+      var level = 0
+      let maxLevels = 5  // Don't walk too far up - container views often have aggregated labels
 
-      while let v = currentView {
-        // Check accessibilityIdentifier
+      while let v = currentView, level < maxLevels {
+        // Only check accessibilityIdentifier - this is explicitly set per-view and not aggregated
+        // by React Native or UIKit container views
         if let identifier = v.accessibilityIdentifier {
           for marker in Self.sensitiveMarkers {
             if identifier.contains(marker) {
-              return true
-            }
-          }
-        }
-
-        // Check accessibilityLabel
-        if let label = v.accessibilityLabel {
-          for marker in Self.sensitiveMarkers {
-            if label.contains(marker) {
+              MixpanelLogger.debug(message: "SemanticExtractor: found sensitive marker '\(marker)' in identifier")
               return true
             }
           }
         }
 
         currentView = v.superview
+        level += 1
       }
 
       return false
@@ -370,18 +371,57 @@
       UIPickerView.self,
     ]
 
+    /// SwiftUI class name patterns for controls with inherent visual feedback.
+    private static let swiftUIExcludedPatterns = [
+      "Toggle",       // SwiftUI Toggle (switch)
+      "Slider",       // SwiftUI Slider
+      "Stepper",      // SwiftUI Stepper
+      "TextField",    // SwiftUI TextField
+      "TextEditor",   // SwiftUI TextEditor (multiline text)
+      "SecureField",  // SwiftUI SecureField (password)
+      "Picker",       // SwiftUI Picker
+      "DatePicker",   // SwiftUI DatePicker
+    ]
+
     /// Check if a view should be considered interactive for dead click detection.
     ///
     /// Returns `false` for controls with inherent visual feedback (switches, text fields, etc.)
     /// since these always produce a response and should not trigger dead click events.
+    ///
+    /// This method walks up the view hierarchy to catch cases where the touch hits
+    /// a subview of an excluded control.
     private func hasInteractionHandlers(view: UIView) -> Bool {
-      // Exclude controls with inherent visual feedback from dead click monitoring
-      for controlType in Self.controlsWithInherentFeedback {
-        if view.isKind(of: controlType) {
+      // Walk up the hierarchy to check for excluded controls
+      var currentView: UIView? = view
+      var depth = 0
+      let maxDepth = 10
+
+      while let v = currentView, depth < maxDepth {
+        // Check UIKit control types
+        for controlType in Self.controlsWithInherentFeedback {
+          if v.isKind(of: controlType) {
+            return false
+          }
+        }
+
+        // Check SwiftUI patterns by class name
+        let className = String(describing: type(of: v))
+        for pattern in Self.swiftUIExcludedPatterns {
+          if className.contains(pattern) {
+            return false
+          }
+        }
+
+        // Also check accessibility traits for adjustable (sliders, steppers)
+        if v.accessibilityTraits.contains(.adjustable) {
           return false
         }
+
+        currentView = v.superview
+        depth += 1
       }
 
+      // Now check for actual interaction handlers
       // Check for tap gesture recognizers
       if let gestures = view.gestureRecognizers {
         for gesture in gestures where gesture.isEnabled {

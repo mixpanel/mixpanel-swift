@@ -119,6 +119,7 @@ class Track {
     var trackEvent: InternalProperties = ["event": ev, "properties": p]
     metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
 
+    MixpanelLogger.debug(message: "Tracking event: \(ev), properties: \(p)")
     self.mixpanelPersistence.saveEntity(trackEvent, type: .events)
     MixpanelPersistence.saveTimedEvents(timedEvents: shadowTimedEvents, instanceName: instanceName)
     return shadowTimedEvents

@@ -17,6 +17,7 @@ import Foundation
 enum AutocaptureDefaults {
   static let maxTextLength = 100
   static let maxHierarchyDepth = 5
+  static let maxRecursionDepth = 20
 }
 
 // MARK: - Click Options

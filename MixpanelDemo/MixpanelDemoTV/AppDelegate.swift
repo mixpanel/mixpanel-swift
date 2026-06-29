@@ -23,8 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
         let mixpanelOptions = MixpanelOptions(
-            token: "MIXPANEL_TOKEN",
-            trackAutomaticEvents: true,
+            token: "MIXPANEL_TOKEN"
         )
         Mixpanel.initialize(options: mixpanelOptions)
         Mixpanel.mainInstance().loggingEnabled = true

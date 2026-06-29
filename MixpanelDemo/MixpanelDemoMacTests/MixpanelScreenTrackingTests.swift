@@ -92,6 +92,22 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         removeDBfile(apiToken: testMixpanel.apiToken)
     }
 
+    func testEmptyScreenNameIsIgnored() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
+
+        testMixpanel.autocapture.trackScreenView(screenName: "")
+        testMixpanel.autocapture.trackScreenView(screenName: "   ")
+        testMixpanel.autocapture.trackScreenLeave(screenName: "")
+        testMixpanel.autocapture.trackScreenLeave(screenName: "   ")
+
+        waitForTrackingQueue(testMixpanel)
+
+        let events = eventQueue(token: testMixpanel.apiToken)
+        XCTAssertEqual(events.count, 0)
+
+        removeDBfile(apiToken: testMixpanel.apiToken)
+    }
+
     func testSdkPropertiesCannotBeOverridden() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
         let properties: Properties = [

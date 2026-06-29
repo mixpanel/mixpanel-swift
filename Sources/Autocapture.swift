@@ -30,16 +30,17 @@ open class Autocapture {
             return
         }
 
-        var mergedProperties: Properties = [
-            "current_page_title": screenName,
-            "$mp_autocapture": true,
-        ]
+        var mergedProperties: Properties = [:]
 
         if let properties = properties {
             for (key, value) in properties {
                 mergedProperties[key] = value
             }
         }
+
+        // SDK properties set after caller properties to prevent overrides
+        mergedProperties["current_page_title"] = screenName
+        mergedProperties["$mp_autocapture"] = true
 
         mixpanelInstance.track(event: "$mp_page_view", properties: mergedProperties)
     }
@@ -59,16 +60,17 @@ open class Autocapture {
             return
         }
 
-        var mergedProperties: Properties = [
-            "current_page_title": screenName,
-            "$mp_autocapture": true,
-        ]
+        var mergedProperties: Properties = [:]
 
         if let properties = properties {
             for (key, value) in properties {
                 mergedProperties[key] = value
             }
         }
+
+        // SDK properties set after caller properties to prevent overrides
+        mergedProperties["current_page_title"] = screenName
+        mergedProperties["$mp_autocapture"] = true
 
         mixpanelInstance.track(event: "$mp_page_leave", properties: mergedProperties)
     }

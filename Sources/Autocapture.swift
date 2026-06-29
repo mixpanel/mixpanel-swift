@@ -18,7 +18,7 @@ open class Autocapture {
     /**
        Track a screen view event. This is a convenience method for tracking when users view
        a screen/page in your application.
-
+    
        - parameter screenName: The name of the screen/page being viewed
        - parameter properties: Optional properties to include with this event
        */
@@ -42,7 +42,7 @@ open class Autocapture {
     /**
        Track a screen leave event. This is a convenience method for tracking when users leave
        a screen/page in your application.
-
+    
        - parameter screenName: The name of the screen/page being left
        - parameter properties: Optional properties to include with this event
        */

@@ -22,7 +22,8 @@ extension UIViewController {
 
         // Swizzle viewWillDisappear to track screen leaves
         let originalViewWillDisappear = class_getInstanceMethod(UIViewController.self, #selector(viewWillDisappear(_:)))
-        let swizzledViewWillDisappear = class_getInstanceMethod(UIViewController.self, #selector(mp_viewWillDisappear(_:)))
+        let swizzledViewWillDisappear = class_getInstanceMethod(
+            UIViewController.self, #selector(mp_viewWillDisappear(_:)))
 
         if let original = originalViewWillDisappear, let swizzled = swizzledViewWillDisappear {
             method_exchangeImplementations(original, swizzled)

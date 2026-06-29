@@ -28,17 +28,17 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         super.tearDown()
     }
 
-    func removeDBfile(apiToken: String) {
+    func removeDBfile(_ token: String? = nil) {
         do {
             let fileManager = FileManager.default
 
             // Check if file exists
-            if fileManager.fileExists(atPath: dbFilePath(apiToken)) {
+            if fileManager.fileExists(atPath: dbFilePath(token)) {
                 // Delete file
-                try fileManager.removeItem(atPath: dbFilePath(apiToken))
+                try fileManager.removeItem(atPath: dbFilePath(token))
             } else {
                 print(
-                    "Unable to delete the test db file at \(dbFilePath(apiToken)), the file does not exist")
+                    "Unable to delete the test db file at \(dbFilePath(token)), the file does not exist")
             }
         } catch let error as NSError {
             print("An error took place: \(error)")
@@ -48,7 +48,7 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     func removeDBfile(_ mixpanel: MixpanelInstance) {
         waitForTrackingQueue(mixpanel)
         mixpanel.mixpanelPersistence.closeDB()
-        removeDBfile(apiToken: mixpanel.apiToken)
+        removeDBfile(mixpanel.apiToken)
     }
 
     func dbFilePath(_ token: String? = nil) -> String {

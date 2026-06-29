@@ -145,7 +145,7 @@ class MixpanelExcludePropertiesTests: MixpanelBaseTests {
         // survives at the envelope (the filter's scope ends at `properties`).
         XCTAssertNotNil(event["$mp_metadata"])
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testExcludePropertiesCannotStripReservedKeysEndToEnd() {
@@ -164,12 +164,12 @@ class MixpanelExcludePropertiesTests: MixpanelBaseTests {
         XCTAssertNotNil(props["distinct_id"], "reserved key distinct_id was stripped")
         XCTAssertNotNil(props["token"], "reserved key token was stripped")
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testDefaultOptionsStripNothing() {
-        let testMixpanel = Mixpanel.initialize(
-            token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
+        let options = MixpanelOptions(token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
+        let testMixpanel = Mixpanel.initialize(options: options)
         testMixpanel.track(event: "test_event", properties: ["custom_prop": "v"])
         waitForTrackingQueue(testMixpanel)
 
@@ -178,7 +178,7 @@ class MixpanelExcludePropertiesTests: MixpanelBaseTests {
         XCTAssertEqual(props["custom_prop"] as? String, "v")
         XCTAssertNotNil(props["$lib_version"])
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     // MARK: - People exclude tests
@@ -217,7 +217,7 @@ class MixpanelExcludePropertiesTests: MixpanelBaseTests {
         XCTAssertNotNil(record["$token"])
         XCTAssertNotNil(record["$distinct_id"])
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     /// Swift-specific deviation from Android: this SDK merges
@@ -243,7 +243,7 @@ class MixpanelExcludePropertiesTests: MixpanelBaseTests {
         XCTAssertEqual(bag["keep_me"] as? String, "y")
         XCTAssertNotNil(bag["$ios_device_model"])
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     /// Mutating operators (`$add`, `$append`, `$union`, `$unset`) treat the bag as
@@ -280,6 +280,6 @@ class MixpanelExcludePropertiesTests: MixpanelBaseTests {
             unsetNames.contains("secret_prop"),
             "$unset operand list must not be filtered (would silently change semantics)")
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 }

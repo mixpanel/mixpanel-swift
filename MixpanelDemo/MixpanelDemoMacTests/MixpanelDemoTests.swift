@@ -1041,7 +1041,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let halfRows = numRows / 2
         let eventName = "Test Event"
         func _inner() {
-            removeDBfile(apiToken: testToken)
+            removeDBfile(testToken)
             let mpdb = MPDB.init(token: testToken)
             mpdb.open()
             for pType in PersistenceType.allCases {
@@ -1080,7 +1080,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                 mpdb.close()
             }
         }
-        removeDBfile(apiToken: testToken)
+        removeDBfile(testToken)
     }
 
 }

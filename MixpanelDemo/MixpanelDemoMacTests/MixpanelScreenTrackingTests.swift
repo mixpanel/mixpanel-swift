@@ -30,7 +30,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         XCTAssertEqual(props?["extra_prop"] as? String, "extra_value")
         XCTAssertNotNil(props?["$screen_height"])
 
-        removeDBfile(testMixpanel.apiToken)
+        removeDBfile(apiToken: testMixpanel.apiToken)
     }
 
     func testScreenViewWithoutProperties() {
@@ -49,7 +49,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
         XCTAssertEqual(props?["$mp_autocapture"] as? Bool, true)
 
-        removeDBfile(testMixpanel.apiToken)
+        removeDBfile(apiToken: testMixpanel.apiToken)
     }
 
     func testScreenLeave() {
@@ -70,7 +70,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         XCTAssertEqual(props?["$mp_autocapture"] as? Bool, true)
         XCTAssertEqual(props?["time_spent"] as? Int, 30)
 
-        removeDBfile(testMixpanel.apiToken)
+        removeDBfile(apiToken: testMixpanel.apiToken)
     }
 
     func testScreenLeaveWithoutProperties() {
@@ -89,7 +89,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
         XCTAssertEqual(props?["$mp_autocapture"] as? Bool, true)
 
-        removeDBfile(testMixpanel.apiToken)
+        removeDBfile(apiToken: testMixpanel.apiToken)
     }
 
     func testSdkPropertiesCannotBeOverridden() {
@@ -109,6 +109,6 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
         XCTAssertEqual(props?["$mp_autocapture"] as? Bool, true)
 
-        removeDBfile(testMixpanel.apiToken)
+        removeDBfile(apiToken: testMixpanel.apiToken)
     }
 }

@@ -57,3 +57,36 @@ if [ -n "$UNFORMATTED_CMD" ]; then
 fi
 
 echo "✅ All staged Swift files are formatted correctly"
+
+# Check for trailing commas before closing paren (not caught by swift-format)
+echo ""
+echo "→ Checking for trailing commas in function calls"
+
+TRAILING_COMMA_FILES=""
+
+for file in $STAGED_FILES; do
+  STAGED_TMP=$(mktemp)
+  if git show ":$file" > "$STAGED_TMP" 2>/dev/null; then
+    MATCHES=$(awk '
+      /,[ \t]*$/ { found=1; lineno=NR; line=$0; next }
+      found && /^[ \t]*[)\>]/ { print lineno ": " line; found=0; next }
+      { found=0 }
+    ' "$STAGED_TMP")
+    if [ -n "$MATCHES" ]; then
+      echo ""
+      echo "  $file"
+      echo "$MATCHES" | sed 's/^/    /'
+      TRAILING_COMMA_FILES="$TRAILING_COMMA_FILES $file"
+    fi
+    rm -f "$STAGED_TMP"
+  fi
+done
+
+if [ -n "$TRAILING_COMMA_FILES" ]; then
+  echo ""
+  echo "❌ Found trailing commas in function calls (invalid in Swift < 6.1)"
+  echo "   Remove the trailing comma from the last argument."
+  exit 1
+fi
+
+echo "✅ No trailing commas found in function calls"

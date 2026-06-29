@@ -1,0 +1,14 @@
+{
+  "analytics": {
+    "tag_prefix": "",
+    "podspec": "Mixpanel-swift.podspec",
+    "version_files": [
+      "Info.plist",
+      "Sources/AutomaticProperties.swift",
+      "scripts/generate_docs.sh"
+    ],
+    "changelog": "CHANGELOG.md",
+    "readme": "README.md",
+    "package_name": "mixpanel-swift"
+  }
+}

@@ -130,3 +130,45 @@ jobs:
           fi
 
           echo "✅ All changed Swift files are formatted correctly"
+
+      - name: Check for trailing commas in function calls
+        if: always()
+        run: |
+          echo "→ Checking for trailing commas in function calls (invalid in Swift < 6.1)"
+          echo ""
+
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/${{ github.base_ref }}...HEAD | grep '\.swift$' || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "ℹ️  No Swift files changed in this PR"
+            exit 0
+          fi
+
+          TRAILING_COMMA_FILES=""
+
+          for file in $CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              MATCHES=$(awk '
+                /,[ \t]*$/ { found=1; lineno=NR; line=$0; next }
+                found && /^[ \t]*[)\>]/ { print lineno ": " line; found=0; next }
+                { found=0 }
+              ' "$file")
+              if [ -n "$MATCHES" ]; then
+                echo "  $file"
+                echo "$MATCHES" | sed 's/^/    /'
+                echo ""
+                TRAILING_COMMA_FILES="$TRAILING_COMMA_FILES $file"
+              fi
+            fi
+          done
+
+          if [ -n "$TRAILING_COMMA_FILES" ]; then
+            echo "❌ Found trailing commas in function calls (invalid in Swift < 6.1)"
+            echo "   Remove the trailing comma from the last argument."
+            echo ""
+            echo "ℹ️  This check is informational only and won't block your PR."
+            echo "   However, these should be fixed before merging."
+            exit 1
+          fi
+
+          echo "✅ No trailing commas found in function calls"

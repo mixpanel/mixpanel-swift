@@ -43,7 +43,6 @@
 
     private struct PendingCheck {
       let event: ClickEvent
-      let view: UIView
       let baselineSnapshot: UISnapshot?
       let startTime: Date
     }
@@ -78,18 +77,58 @@
       self.baselineDelayMs = options.baselineDelayMs
     }
 
+    /// SwiftUI class name patterns for controls with inherent visual feedback.
+    /// These are checked when walking up the view hierarchy for SwiftUI views.
+    private static let swiftUIExcludedPatterns = [
+      "Toggle",       // SwiftUI Toggle (switch)
+      "Slider",       // SwiftUI Slider
+      "Stepper",      // SwiftUI Stepper
+      "TextField",    // SwiftUI TextField
+      "TextEditor",   // SwiftUI TextEditor (multiline text)
+      "SecureField",  // SwiftUI SecureField (password)
+      "Picker",       // SwiftUI Picker
+      "DatePicker",   // SwiftUI DatePicker
+    ]
+
     // MARK: - Public API
 
     /// Check if a view should be excluded from dead click monitoring.
     ///
     /// Returns true for controls that have inherent feedback (keyboard, state changes)
     /// that may not be detected by UI snapshot comparison.
+    ///
+    /// This method walks up the view hierarchy to catch cases where the touch hits
+    /// a subview of an excluded control (e.g., the thumb of a UISwitch).
     func shouldExclude(view: UIView) -> Bool {
-      for controlType in Self.excludedControlTypes {
-        if view.isKind(of: controlType) {
+      var currentView: UIView? = view
+      var depth = 0
+      let maxDepth = 10
+
+      while let v = currentView, depth < maxDepth {
+        // Check UIKit control types
+        for controlType in Self.excludedControlTypes {
+          if v.isKind(of: controlType) {
+            return true
+          }
+        }
+
+        // Check SwiftUI patterns by class name
+        let className = String(describing: type(of: v))
+        for pattern in Self.swiftUIExcludedPatterns {
+          if className.contains(pattern) {
+            return true
+          }
+        }
+
+        // Also check accessibility traits for adjustable (sliders, steppers)
+        if v.accessibilityTraits.contains(.adjustable) {
           return true
         }
+
+        currentView = v.superview
+        depth += 1
       }
+
       return false
     }
 
@@ -165,7 +204,6 @@
       currentWindow = window
       pendingCheck = PendingCheck(
         event: event,
-        view: view,
         baselineSnapshot: nil,
         startTime: Date()
       )
@@ -199,7 +237,6 @@
       let baseline = captureSnapshot(window: window)
       check = PendingCheck(
         event: check.event,
-        view: check.view,
         baselineSnapshot: baseline,
         startTime: check.startTime
       )
@@ -259,8 +296,8 @@
       }
 
       // Walk view hierarchy
-      func processView(_ view: UIView) {
-        guard !view.isHidden, view.alpha > 0 else { return }
+      func processView(_ view: UIView, depth: Int = 0) {
+        guard !view.isHidden, view.alpha > 0, depth < AutocaptureDefaults.maxRecursionDepth else { return }
 
         viewCount += 1
 
@@ -287,7 +324,7 @@
         contentHash ^= hasher.finalize()
 
         for subview in view.subviews {
-          processView(subview)
+          processView(subview, depth: depth + 1)
         }
       }
 

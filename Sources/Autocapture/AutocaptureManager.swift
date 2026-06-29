@@ -33,8 +33,14 @@
 
     // MARK: - Event Callback
 
-    /// Callback to track events via MixpanelInstance
-    private let trackEvent: (String, Properties) -> Void
+    /// Callback to track events via MixpanelInstance.
+    /// This is `var` to allow test injection of event capture.
+    /// Thread-safe: reads and writes are synchronized via `lock`.
+    private var _trackEvent: (String, Properties) -> Void
+    var trackEvent: (String, Properties) -> Void {
+      get { lock.lock(); defer { lock.unlock() }; return _trackEvent }
+      set { lock.lock(); defer { lock.unlock() }; _trackEvent = newValue }
+    }
 
     // MARK: - State
 
@@ -53,7 +59,7 @@
       trackEvent: @escaping (String, Properties) -> Void
     ) {
       self.options = options
-      self.trackEvent = trackEvent
+      self._trackEvent = trackEvent
 
       // Initialize components
       self.semanticExtractor = SemanticExtractor()
@@ -96,7 +102,7 @@
       isStarted = true
 
       // Install touch interceptor
-      SwizzledTouchInterceptor.shared.install(manager: self)
+      TouchInterceptor.shared.install(manager: self)
 
       MixpanelLogger.info(message: "AutocaptureManager: started")
     }
@@ -111,7 +117,7 @@
       isStarted = false
 
       // Uninstall touch interceptor
-      SwizzledTouchInterceptor.shared.uninstall()
+      TouchInterceptor.shared.uninstall()
 
       // Reset components
       rageClickTracker?.reset()
@@ -120,11 +126,22 @@
       MixpanelLogger.info(message: "AutocaptureManager: stopped")
     }
 
+    /// Signals that a UI change occurred.
+    ///
+    /// Call this when a UI change happens that the dead click detector cannot observe,
+    /// such as navigation in React Native or other framework-driven UI changes.
+    /// This cancels any pending dead click detection to prevent false positives.
+    func signalUIChange() {
+      deadClickDetector?.cancelPendingCheck()
+      rageClickTracker?.reset()
+      MixpanelLogger.debug(message: "AutocaptureManager: UI change signaled, cancelled pending detections")
+    }
+
     // MARK: - Touch Handling
 
     /// Handle a touch event from the interceptor.
     ///
-    /// Called by SwizzledTouchInterceptor when a touch ends.
+    /// Called by TouchInterceptor when a touch ends.
     func handleTouch(at point: CGPoint, view: UIView?, window: UIWindow?) {
       do {
         try processTouch(at: point, view: view, window: window)
@@ -135,7 +152,9 @@
     }
 
     private func processTouch(at point: CGPoint, view: UIView?, window: UIWindow?) throws {
-      guard let view = view else { return }
+      guard let view = view else {
+        return
+      }
 
       // Extract semantic information (returns nil if sensitive)
       guard var clickEvent = semanticExtractor.extractSemantics(from: view, at: point) else {

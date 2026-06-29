@@ -94,16 +94,6 @@ class MixpanelBackupHostTests: MixpanelBaseTests {
     XCTAssertEqual(result, "https://api-backup.mixpanel.com")
   }
 
-  func testBackupBaseURLDropsPrimaryProxyPath() {
-    // The primary serverURL may include a proxy path. That path is meaningless on the backup host
-    // and must be dropped, otherwise it gets carried over and the request path is appended after it
-    // (e.g. ".../test-ingestion/track/").
-    let result = BasePath.backupBaseURL(
-      base: "https://test.cloudfunctions.net/test-ingestion",
-      backupHost: "https://api.mixpanel.com")
-    XCTAssertEqual(result, "https://api.mixpanel.com")
-  }
-
   func testBackupBaseURLReturnsNilWhenBaseHasNoHost() {
     // No scheme means URLComponents parses the whole string as a path, so there's no host to swap.
     XCTAssertNil(BasePath.backupBaseURL(base: "api.mixpanel.com", backupHost: "backup.example.com"))

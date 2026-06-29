@@ -1,0 +1,27 @@
+name: tvOS CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5  # v2
+    - name: Run Test
+      working-directory: MixpanelDemo
+      run: |
+        set -o pipefail
+        xcodebuild -scheme MixpanelDemoTV -derivedDataPath Build/ -configuration Debug \
+          -destination 'platform=tvOS Simulator,name=Apple TV' \
+          ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES -enableCodeCoverage YES \
+          clean build test | xcpretty -c
+    - name: Code Coverage Report
+      working-directory: MixpanelDemo/build/Logs/Test
+      run: |
+        xcrun xccov view --report --files-for-target Mixpanel.framework  *.xcresult
+        xcrun xccov view --report --only-targets *.xcresult

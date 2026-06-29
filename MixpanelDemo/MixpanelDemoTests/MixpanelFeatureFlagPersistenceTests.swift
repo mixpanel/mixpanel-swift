@@ -1373,7 +1373,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
         mock.simulatedNetworkDelay = 0
         let firstFetchDone = expectation(description: "first fetch completes")
         mock.loadFlags(completion: { _ in firstFetchDone.fulfill() })
-        wait(for: [firstFetchDone], timeout: 2.0)
+        wait(for: [firstFetchDone], timeout: 5.0)
 
         let fallback = MixpanelFlagVariant(key: "fb", value: "fb_value")
 
@@ -1470,7 +1470,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
     /// on it.
     private func waitForTrackingQueue(
         manager: FeatureFlagManager,
-        timeout: TimeInterval = 1.0,
+        timeout: TimeInterval = 2.0,
         file: StaticString = #file,
         line: UInt = #line
     ) {

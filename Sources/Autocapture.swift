@@ -24,7 +24,7 @@ open class Autocapture {
        */
     open func trackScreenView(screenName: String, properties: Properties? = nil) {
         guard let mixpanelInstance = mixpanelInstance else { return }
-        guard !screenName.trimmingCharacters(in: .whitespaces).isEmpty else {
+        guard !screenName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             MixpanelLogger.warn(
                 message: "trackScreenView called with empty screenName, ignoring event")
             return
@@ -54,7 +54,7 @@ open class Autocapture {
        */
     open func trackScreenLeave(screenName: String, properties: Properties? = nil) {
         guard let mixpanelInstance = mixpanelInstance else { return }
-        guard !screenName.trimmingCharacters(in: .whitespaces).isEmpty else {
+        guard !screenName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             MixpanelLogger.warn(
                 message: "trackScreenLeave called with empty screenName, ignoring event")
             return

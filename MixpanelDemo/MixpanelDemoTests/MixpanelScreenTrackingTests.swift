@@ -14,7 +14,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
   func testScreenView() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
     let properties: Properties = ["extra_prop": "extra_value"]
-    testMixpanel.trackScreenView(screenName: "HomeScreen", properties: properties)
+    testMixpanel.autocapture.trackScreenView(screenName: "HomeScreen", properties: properties)
 
     waitForTrackingQueue(testMixpanel)
 
@@ -34,7 +34,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
 
   func testScreenViewWithoutProperties() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
-    testMixpanel.trackScreenView(screenName: "HomeScreen")
+    testMixpanel.autocapture.trackScreenView(screenName: "HomeScreen")
 
     waitForTrackingQueue(testMixpanel)
 
@@ -53,7 +53,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
   func testScreenLeave() {
     let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
     let properties: Properties = ["time_spent": 30]
-    testMixpanel.trackScreenLeave(screenName: "HomeScreen", properties: properties)
+    testMixpanel.autocapture.trackScreenLeave(screenName: "HomeScreen", properties: properties)
 
     waitForTrackingQueue(testMixpanel)
 

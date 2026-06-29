@@ -103,6 +103,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Accessor to the Mixpanel People API object.
     open var people: People!
 
+    /// Accessor to the Mixpanel Autocapture API object.
+    open var autocapture: Autocapture!
+
     /// Accessor the Mixpanel Feature Flags API object.
     open var flags: MixpanelFlags!
 
@@ -440,6 +443,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             excludeProperties: self.options.excludeProperties)
         people.mixpanelInstance = self
         people.delegate = self
+        autocapture = Autocapture()
+        autocapture.mixpanelInstance = self
         flushInstance.flushInterval = flushInterval
         #if !os(watchOS)
         setupListeners()
@@ -1315,50 +1320,6 @@ extension MixpanelInstance {
         if MixpanelInstance.isiOSAppExtension() {
             flush()
         }
-    }
-
-    /**
-       Track a screen view event. This is a convenience method for tracking when users view
-       a screen/page in your application.
-    
-       - parameter screenName: The name of the screen/page being viewed
-       - parameter properties: Optional properties to include with this event
-       */
-    public func trackScreenView(screenName: String, properties: Properties? = nil) {
-        var mergedProperties: Properties = [
-            "current_page_title": screenName,
-            "$mp_autocapture": true,
-        ]
-
-        if let properties = properties {
-            for (key, value) in properties {
-                mergedProperties[key] = value
-            }
-        }
-
-        track(event: "$mp_page_view", properties: mergedProperties)
-    }
-
-    /**
-       Track a screen leave event. This is a convenience method for tracking when users leave
-       a screen/page in your application.
-    
-       - parameter screenName: The name of the screen/page being left
-       - parameter properties: Optional properties to include with this event
-       */
-    public func trackScreenLeave(screenName: String, properties: Properties? = nil) {
-        var mergedProperties: Properties = [
-            "current_page_title": screenName,
-            "$mp_autocapture": true,
-        ]
-
-        if let properties = properties {
-            for (key, value) in properties {
-                mergedProperties[key] = value
-            }
-        }
-
-        track(event: "$mp_page_leave", properties: mergedProperties)
     }
 
     /**

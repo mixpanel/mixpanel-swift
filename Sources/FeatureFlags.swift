@@ -54,9 +54,34 @@ public struct MixpanelFlagVariant: Decodable {
         /// Variant loaded from the on-disk persistence layer. `persistedAt` is the time the
         /// variant set was originally written to disk.
         case persistence(persistedAt: Date)
-        /// Developer-supplied fallback returned because the SDK had no value to serve (flag
-        /// not in the loaded set, flags never loaded, fetch failed under NetworkFirst, etc.).
-        case fallback
+        /// Developer-supplied fallback returned because the SDK had no value to serve.
+        ///
+        /// `reason` explains *why* — flag missing from the cache/response, or flags not yet
+        /// ready. Previously a Fallback meant only "not a real variant," which collapsed
+        /// several distinct outcomes into one (SDK-79). Callers — especially the OpenFeature
+        /// wrapper — can dispatch on the reason to surface the correct user-facing error code.
+        ///
+        /// `.unspecified` is the default for developer-constructed fallbacks; the SDK
+        /// stamps a more specific reason before returning so callers should rarely
+        /// observe it on a returned variant.
+        case fallback(reason: FallbackReason = .unspecified)
+    }
+
+    /// Why the SDK returned the developer fallback.
+    ///
+    /// Network/cache SDKs (like the iOS/macOS Mixpanel SDK) cannot distinguish
+    /// "flag does not exist" from "user is not in any rollout" without server-side
+    /// cooperation — both surface as `.flagNotFound` for now. Future server changes
+    /// can add a more specific reason without breaking callers that already switch
+    /// on this enum.
+    public enum FallbackReason {
+        /// Developer-constructed default. The SDK stamps a more specific reason
+        /// before returning, so callers should rarely observe this value.
+        case unspecified
+        /// Flag key was not present in the cache or network response.
+        case flagNotFound
+        /// Flags were not ready when the sync lookup happened.
+        case notReady
     }
 
     enum CodingKeys: String, CodingKey {
@@ -85,7 +110,7 @@ public struct MixpanelFlagVariant: Decodable {
         // Decoded variants are immediately re-stamped via `withSource` before being placed in
         // `flags`, so the customer never observes `.fallback` here. Defaulting to `.fallback`
         // keeps `source` non-optional without needing a sentinel "unstamped" case.
-        source = .fallback
+        source = .fallback()
     }
 
     // Helper initializer with fallbacks, value defaults to key if nil
@@ -102,16 +127,18 @@ public struct MixpanelFlagVariant: Decodable {
         self.experimentID = experimentID
         self.isExperimentActive = isExperimentActive
         self.isQATester = isQATester
-        self.source = .fallback
+        self.source = .fallback()
     }
 
-    /// Internal initializer used when stamping a served variant with its origin.
-    internal init(
+    /// Initializer that stamps a served (or fallback) variant with its origin.
+    /// Used both internally (by `withSource` when re-tagging a decoded variant)
+    /// and by tests/callers constructing variants with explicit source metadata.
+    public init(
         key: String,
         value: Any?,
-        experimentID: String?,
-        isExperimentActive: Bool?,
-        isQATester: Bool?,
+        experimentID: String? = nil,
+        isExperimentActive: Bool? = nil,
+        isQATester: Bool? = nil,
         source: Source
     ) {
         self.key = key
@@ -123,7 +150,11 @@ public struct MixpanelFlagVariant: Decodable {
     }
 
     /// Returns a copy of this variant stamped with the given source. Other fields are preserved.
-    internal func withSource(_ source: Source) -> MixpanelFlagVariant {
+    ///
+    /// Public so callers (and tests) can re-tag variants with explicit source
+    /// metadata — the SDK uses this internally to stamp the reason a developer-supplied
+    /// fallback was returned.
+    public func withSource(_ source: Source) -> MixpanelFlagVariant {
         return MixpanelFlagVariant(
             key: self.key,
             value: self.value,
@@ -644,7 +675,12 @@ class FeatureFlagManager: MixpanelFlags {
             return foundVariant
         } else {
             MixpanelLogger.info(message: "Flag '\(flagName)' not found or flags not ready. Returning fallback.")
-            return fallback
+            // Stamp the fallback with a reason so callers (e.g., the OpenFeature
+            // wrapper) can tell why we fell back — distinguish "flag missing /
+            // user not in cohort" from "flags never loaded" (SDK-79).
+            let reason: MixpanelFlagVariant.FallbackReason =
+                areFlagsReady() ? .flagNotFound : .notReady
+            return fallback.withSource(.fallback(reason: reason))
         }
     }
 
@@ -692,7 +728,12 @@ class FeatureFlagManager: MixpanelFlags {
                 {
                     self._fetchFlagsIfNeeded(completion: nil)
                 }
-                let result = flagVariant ?? fallback
+                // Flags are loaded (not network-first-awaiting, not stale), but this key
+                // isn't in `currentFlags` (or its persisted variant was expired). Stamp
+                // the fallback as `.flagNotFound` so the OpenFeature wrapper can map to
+                // `FLAG_NOT_FOUND` instead of letting a bare `.fallback(.unspecified)`
+                // through — same treatment the sync impl applies in _getVariantSyncImpl.
+                let result = flagVariant ?? fallback.withSource(.fallback(reason: .flagNotFound))
                 if flagVariant != nil, needsTrackingCheck {
                     // Perform atomic check-and-track
                     self._trackFlagIfNeeded(flagName: flagName, variant: result)
@@ -1366,7 +1407,7 @@ class FeatureFlagManager: MixpanelFlags {
                 if let ttl = self.persistenceTtlSeconds() {
                     properties["$ttl_in_ms"] = Int(ttl * 1000)
                 }
-            case .fallback:
+            case .fallback(_):
                 break
         }
 

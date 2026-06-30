@@ -206,7 +206,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
 
     func testFallbackVariantsHaveFallbackSource() {
         let fallback = MixpanelFlagVariant(value: "default")
-        if case .fallback = fallback.source {
+        if case .fallback(_) = fallback.source {
         } else {
             XCTFail("developer-supplied variants should carry .fallback source")
         }
@@ -567,7 +567,7 @@ class FeatureFlagPersistenceTests: XCTestCase {
         let result = manager.getVariantSync("flag_a", fallback: fallback)
 
         XCTAssertEqual(result.value as? String, "fallback_value")
-        if case .fallback = result.source {
+        if case .fallback(_) = result.source {
         } else {
             XCTFail("served fallback should carry .fallback source")
         }

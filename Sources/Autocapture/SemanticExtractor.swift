@@ -19,7 +19,7 @@
     private static let maxHierarchyDepth = AutocaptureDefaults.maxHierarchyDepth
 
     /// Markers for sensitive elements that should be excluded from all capture
-    private static let sensitiveMarkers = ["mp-sensitive", "mp-no-track"]
+    private static let sensitiveMarkers = ["mp-no-track"]
 
     /// Regex patterns for redacting sensitive content
     private static let creditCardPattern = try? NSRegularExpression(
@@ -312,7 +312,7 @@
 
     /// Check if view or any ancestor is marked as sensitive.
     ///
-    /// A view is sensitive if its accessibilityIdentifier contains "mp-sensitive" or "mp-no-track".
+    /// A view is sensitive if its accessibilityIdentifier contains "mp-no-track".
     /// We only check accessibilityIdentifier (not accessibilityLabel) because React Native
     /// aggregates all child labels into parent views, which would cause false positives.
     ///

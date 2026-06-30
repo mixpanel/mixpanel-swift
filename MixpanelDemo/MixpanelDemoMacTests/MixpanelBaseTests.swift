@@ -10,6 +10,7 @@ import SQLite3
 import XCTest
 
 @testable import Mixpanel
+
 #if os(tvOS)
 @testable import MixpanelDemoTV
 #elseif os(macOS)

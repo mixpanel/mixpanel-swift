@@ -144,6 +144,10 @@ public struct AutocaptureOptions {
   /// Configuration for dead click detection.
   public let deadClickOptions: DeadClickOptions
 
+  /// Whether to capture visible text content of tapped elements as `$el_text`.
+  /// Disabled by default to protect user privacy.
+  public let captureTextContent: Bool
+
   /// Returns `true` if any autocapture feature is enabled.
   public var isEnabled: Bool {
     return clickOptions.enabled || rageClickOptions.enabled || deadClickOptions.enabled
@@ -152,10 +156,12 @@ public struct AutocaptureOptions {
   public init(
     clickOptions: ClickOptions = ClickOptions(),
     rageClickOptions: RageClickOptions = RageClickOptions(),
-    deadClickOptions: DeadClickOptions = DeadClickOptions()
+    deadClickOptions: DeadClickOptions = DeadClickOptions(),
+    captureTextContent: Bool = false
   ) {
     self.clickOptions = clickOptions
     self.rageClickOptions = rageClickOptions
     self.deadClickOptions = deadClickOptions
+    self.captureTextContent = captureTextContent
   }
 }

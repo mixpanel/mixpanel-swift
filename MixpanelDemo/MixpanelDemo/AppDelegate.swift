@@ -9,6 +9,61 @@
 import Mixpanel
 import UIKit
 
+// MARK: - Automatic Screen Tracking Extension
+extension UIViewController {
+    static func setupAutomaticScreenTracking() {
+        // Swizzle viewDidAppear to track screen views
+        let originalViewDidAppear = class_getInstanceMethod(UIViewController.self, #selector(viewDidAppear(_:)))
+        let swizzledViewDidAppear = class_getInstanceMethod(UIViewController.self, #selector(mp_viewDidAppear(_:)))
+
+        if let original = originalViewDidAppear, let swizzled = swizzledViewDidAppear {
+            method_exchangeImplementations(original, swizzled)
+        }
+
+        // Swizzle viewWillDisappear to track screen leaves
+        let originalViewWillDisappear = class_getInstanceMethod(UIViewController.self, #selector(viewWillDisappear(_:)))
+        let swizzledViewWillDisappear = class_getInstanceMethod(
+            UIViewController.self, #selector(mp_viewWillDisappear(_:)))
+
+        if let original = originalViewWillDisappear, let swizzled = swizzledViewWillDisappear {
+            method_exchangeImplementations(original, swizzled)
+        }
+    }
+
+    @objc private func mp_viewDidAppear(_ animated: Bool) {
+        // Call original implementation
+        mp_viewDidAppear(animated)
+
+        // Track screen view
+        let screenName = formatScreenName()
+        if !screenName.isEmpty {
+            Mixpanel.mainInstance().autocapture.trackScreenView(screenName: screenName)
+        }
+    }
+
+    @objc private func mp_viewWillDisappear(_ animated: Bool) {
+        // Call original implementation
+        mp_viewWillDisappear(animated)
+
+        // Track screen leave
+        let screenName = formatScreenName()
+        if !screenName.isEmpty {
+            Mixpanel.mainInstance().autocapture.trackScreenLeave(screenName: screenName)
+        }
+    }
+
+    private func formatScreenName() -> String {
+        let className = String(describing: type(of: self))
+
+        // Skip UIKit internal view controllers
+        if className.hasPrefix("UI") || className.hasPrefix("_") {
+            return ""
+        }
+
+        return className
+    }
+}
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -88,11 +143,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         )
         Mixpanel.initialize(options: mixpanelOptions)
         Mixpanel.mainInstance().loggingEnabled = true
+        UIViewController.setupAutomaticScreenTracking()
 
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("📊 Mixpanel initialized")
         print("   anonymousId: \(Mixpanel.mainInstance().anonymousId ?? "nil")")
         print("   distinctId:  \(Mixpanel.mainInstance().distinctId)")
+        print("   📱 Automatic screen tracking: ENABLED")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
         return true

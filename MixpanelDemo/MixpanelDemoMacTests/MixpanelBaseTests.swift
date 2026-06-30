@@ -10,7 +10,11 @@ import SQLite3
 import XCTest
 
 @testable import Mixpanel
+#if os(tvOS)
+@testable import MixpanelDemoTV
+#elseif os(macOS)
 @testable import MixpanelDemoMac
+#endif
 
 class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     var mixpanelWillFlush: Bool!

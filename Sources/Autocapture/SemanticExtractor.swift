@@ -38,7 +38,7 @@
     /// Extract semantic information from a view at the given point.
     ///
     /// Returns `nil` if the view is marked as sensitive.
-    func extractSemantics(from view: UIView, at point: CGPoint) -> ClickEvent? {
+    func extractSemantics(from view: UIView, at point: CGPoint, captureTextContent: Bool) -> ClickEvent? {
       // Check if view or ancestor is marked as sensitive
       if isSensitive(view: view) {
         MixpanelLogger.debug(message: "SemanticExtractor: skipping sensitive element")
@@ -49,7 +49,7 @@
       let elementId = generateElementId(for: view, isSwiftUI: isSwiftUIView(view))
       let ariaLabel = findAccessibilityLabel(in: view)
       let role = determineRole(for: view)
-      let text = extractText(from: view)
+      let text = captureTextContent ? extractText(from: view) : nil
       let elements = buildViewHierarchy(from: view)
       let isInteractive = hasInteractionHandlers(view: view)
 

@@ -157,7 +157,7 @@
       }
 
       // Extract semantic information (returns nil if sensitive)
-      guard var clickEvent = semanticExtractor.extractSemantics(from: view, at: point) else {
+      guard var clickEvent = semanticExtractor.extractSemantics(from: view, at: point, captureTextContent: options.captureTextContent) else {
         MixpanelLogger.debug(message: "AutocaptureManager: skipped sensitive element")
         return
       }

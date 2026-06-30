@@ -55,6 +55,12 @@ That's it! No additional setup required. Autocapture automatically intercepts al
 | `timeoutMs` | `500` | Response wait time in milliseconds |
 | `baselineDelayMs` | `150` | Delay before capturing baseline snapshot |
 
+### AutocaptureOptions
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `captureTextContent` | `false` | Capture text content of tapped elements as `$el_text`. Disabled by default to protect user privacy. |
+
 ### Custom Configuration Example
 
 ```swift
@@ -67,7 +73,8 @@ let autocaptureOpts = AutocaptureOptions(
     ),
     deadClickOptions: DeadClickOptions(
         enabled: false            // Disable dead click detection
-    )
+    ),
+    captureTextContent: true      // Enable $el_text capture
 )
 
 let options = MixpanelOptions(
@@ -86,7 +93,7 @@ All autocapture events include these properties:
 | `$y` | Touch Y coordinate (screen points) |
 | `$el_id` | Element identifier (see resolution rules below) |
 | `$el_tag_name` | Class name of the view (e.g., `UIButton`) |
-| `$el_text` | Visible text content (max 100 chars) |
+| `$el_text` | Visible text content (max 100 chars, **opt-in** — requires `captureTextContent: true`) |
 | `$attr-aria-label` | Accessibility label |
 | `$attr-role` | Element role (Button, Switch, etc.) |
 | `$elements` | View hierarchy string (max 5 levels) |
@@ -258,7 +265,7 @@ AutocaptureManager: emitted $mp_dead_click for broken_link
 - Touch coordinates
 - View class names and hierarchy
 - Accessibility labels and identifiers
-- Visible text content (redacted for sensitive patterns)
+- Visible text content — **only when `captureTextContent: true` is set** (redacted for sensitive patterns)
 
 ### What is NOT Captured
 

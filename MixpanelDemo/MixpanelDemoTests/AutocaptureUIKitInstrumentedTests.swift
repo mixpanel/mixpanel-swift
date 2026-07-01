@@ -22,10 +22,8 @@ import XCTest
   /// 2. Element ID resolution rules (accessibilityIdentifier > accessibilityLabel > hash)
   /// 3. Rage click detection
   /// 4. Dead click detection
-  /// 5. Privacy filtering
-  /// 6. Multiple clicks generate multiple events
-  /// 7. Text content capture
-  /// 8. Standard Mixpanel properties
+  /// 5. Multiple clicks generate multiple events
+  /// 6. Standard Mixpanel properties
   class AutocaptureUIKitInstrumentedTests: MixpanelBaseTests {
 
     // MARK: - Properties
@@ -220,24 +218,7 @@ import XCTest
       }
     }
 
-    // MARK: - Test 6: Privacy Filter Blocks Events
-
-    func testPrivacyFilterBlocksEvents() {
-      // Given: A button marked as sensitive (accessibilityIdentifier contains "mp-sensitive")
-      let button = testViewController.sensitiveButton
-
-      // When: Simulate tap
-      simulateTap(on: button)
-
-      // Wait a bit for any events
-      Thread.sleep(forTimeInterval: 0.5)
-
-      // Then: Should NOT capture any event for this element
-      let events = capturedEvents.filter { $0.name == "$mp_click" }
-      XCTAssertTrue(events.isEmpty, "Sensitive elements should not emit any events")
-    }
-
-    // MARK: - Test 7: Multiple Clicks Generate Multiple Events
+    // MARK: - Test 6: Multiple Clicks Generate Multiple Events
 
     func testMultipleClicksGenerateMultipleEvents() {
       // Given: Three different buttons
@@ -260,26 +241,7 @@ import XCTest
       XCTAssertEqual(clickEvents.count, 3, "Should capture exactly 3 click events")
     }
 
-    // MARK: - Test 8: Click Event Captures $el_text
-
-    func testClickEventCapturesElText() {
-      // Given: A button with visible text
-      let button = testViewController.rule1Button
-
-      // When: Simulate tap
-      simulateTap(on: button)
-
-      // Then: Should capture button text in $el_text
-      let event = waitForEvent(named: "$mp_click", timeout: 5)
-      XCTAssertNotNil(event, "Should capture $mp_click event")
-
-      if let props = event?.properties {
-        let text = props["$el_text"] as? String
-        XCTAssertEqual(text, "Rule 1 Button", "Should capture button title text")
-      }
-    }
-
-    // MARK: - Test 9: Standard Properties Included
+    // MARK: - Test 7: Standard Properties Included
 
     func testClickEventHasTokenProperty() {
       // Given: A button
@@ -448,19 +410,6 @@ import XCTest
       return button
     }()
 
-    /// Sensitive button that should be excluded from tracking
-    let sensitiveButton: UIButton = {
-      let button = UIButton(type: .system)
-      button.setTitle("Sensitive", for: .normal)
-      button.accessibilityIdentifier = "mp-sensitive"
-      button.backgroundColor = .black
-      button.setTitleColor(.white, for: .normal)
-      button.layer.cornerRadius = 8
-      button.translatesAutoresizingMaskIntoConstraints = false
-      button.addTarget(nil, action: #selector(buttonTapped), for: .touchUpInside)
-      return button
-    }()
-
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
@@ -477,7 +426,6 @@ import XCTest
         bothButton,
         rageButton,
         deadButton,
-        sensitiveButton,
       ])
       stackView.axis = .vertical
       stackView.spacing = 16

@@ -31,9 +31,6 @@
     /// Class name of the tapped view (e.g., "UIButton", "Button")
     let tagName: String
 
-    /// Visible text content of the element, truncated to 100 chars
-    let text: String?
-
     /// Accessibility label (maps to $attr-aria-label)
     let ariaLabel: String?
 
@@ -67,10 +64,6 @@
         "$el_tag_name": tagName,
         "$elements": elements,
       ]
-
-      if let text = text {
-        props["$el_text"] = text
-      }
 
       if let ariaLabel = ariaLabel {
         props["$attr-aria-label"] = ariaLabel

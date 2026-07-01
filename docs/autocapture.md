@@ -12,7 +12,7 @@ Autocapture captures three types of events:
 | Rage Click | `$mp_rage_click` | Fired when a user taps rapidly (4+ times) in the same area |
 | Dead Click | `$mp_dead_click` | Fired when a tap produces no visible UI response |
 
-**Privacy:** Autocapture is designed with privacy in mind. No personally identifiable information (PII) is captured by default. Secure text fields are never captured, and sensitive content patterns (credit cards, SSNs) are automatically redacted.
+**Privacy:** Autocapture is designed with privacy in mind. No personally identifiable information (PII) is captured by default.
 
 ## Quick Start
 
@@ -55,12 +55,6 @@ That's it! No additional setup required. Autocapture automatically intercepts al
 | `timeoutMs` | `500` | Response wait time in milliseconds |
 | `baselineDelayMs` | `150` | Delay before capturing baseline snapshot |
 
-### AutocaptureOptions
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `captureTextContent` | `false` | Capture text content of tapped elements as `$el_text`. Disabled by default to protect user privacy. |
-
 ### Custom Configuration Example
 
 ```swift
@@ -73,8 +67,7 @@ let autocaptureOpts = AutocaptureOptions(
     ),
     deadClickOptions: DeadClickOptions(
         enabled: false            // Disable dead click detection
-    ),
-    captureTextContent: true      // Enable $el_text capture
+    )
 )
 
 let options = MixpanelOptions(
@@ -93,7 +86,6 @@ All autocapture events include these properties:
 | `$y` | Touch Y coordinate (screen points) |
 | `$el_id` | Element identifier (see resolution rules below) |
 | `$el_tag_name` | Class name of the view (e.g., `UIButton`) |
-| `$el_text` | Visible text content (max 100 chars, **opt-in** — requires `captureTextContent: true`) |
 | `$attr-aria-label` | Accessibility label |
 | `$attr-role` | Element role (Button, Switch, etc.) |
 | `$elements` | View hierarchy string (max 5 levels) |
@@ -139,36 +131,6 @@ Button("Checkout") { /* ... */ }
 ```
 
 **Why the difference?** SwiftUI's accessibility tree is lazily materialized only when VoiceOver or Accessibility Inspector is running. Without these tools, `accessibilityIdentifier` returns nil.
-
-## Disabling for Specific Elements
-
-Mark elements with `mp-no-track` to exclude them from **all** autocapture events:
-
-### Using accessibilityIdentifier
-
-```swift
-// UIKit
-sensitiveView.accessibilityIdentifier = "mp-no-track"
-
-// SwiftUI
-SecretView()
-    .accessibilityIdentifier("mp-no-track")
-```
-
-### Using accessibilityLabel
-
-```swift
-// UIKit
-sensitiveView.accessibilityLabel = "mp-no-track"
-
-// SwiftUI
-SecretView()
-    .accessibilityLabel("mp-no-track")
-```
-
-The check uses `contains()`, so identifiers like `payment-form-mp-no-track` also work.
-
-**Note:** When a view is marked with `mp-no-track`, it is completely excluded - no `$mp_click`, `$mp_rage_click`, or `$mp_dead_click` events are emitted. Child views inherit this exclusion.
 
 ## Dead Click Detection
 
@@ -256,7 +218,6 @@ AutocaptureManager: emitted $mp_dead_click for broken_link
 
 **False positive dead clicks:**
 - Element may have a handler that doesn't produce visible UI change
-- Consider excluding specific elements with `mp-no-track`
 
 ## Privacy Considerations
 
@@ -265,15 +226,12 @@ AutocaptureManager: emitted $mp_dead_click for broken_link
 - Touch coordinates
 - View class names and hierarchy
 - Accessibility labels and identifiers
-- Visible text content — **only when `captureTextContent: true` is set** (redacted for sensitive patterns)
 
 ### What is NOT Captured
 
-- Secure text field content (`isSecureTextEntry = true`)
-- Password fields (`textContentType` of `.password`, `.newPassword`, `.oneTimeCode`)
-- Credit card numbers (regex redacted)
-- Social Security Numbers (regex redacted)
-- Content from elements marked `mp-no-track`
+- Visible text content (see note below)
+
+Autocapture does not capture visible text content (`$el_text`) from tapped elements. Tracking text can be invasive and raise privacy concerns. Additionally, the complexity of nested view hierarchies can cause text extraction to capture content from unintended views — for example, tapping a container view might extract text from a deeply nested label that isn't semantically related to the tap. The remaining captured properties (`$el_id`, `$el_tag_name`, `$attr-aria-label`, `$attr-role`, `$elements`) are purely structural UI metadata.
 
 ### AppTrackingTransparency
 

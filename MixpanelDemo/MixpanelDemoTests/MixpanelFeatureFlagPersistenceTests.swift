@@ -212,6 +212,66 @@ class FeatureFlagPersistenceTests: XCTestCase {
         }
     }
 
+    // MARK: - FallbackReason distinctions (SDK-79)
+
+    /// `getVariantSync` before any load has happened must stamp `.notReady`, not
+    /// `.flagNotFound` — the two are distinct signals for the OpenFeature wrapper.
+    func testGetVariantSyncReturnsNotReadyWhenFlagsNeverLoaded() throws {
+        let mock = makeMockManager(distinctId: "user_a", context: [:], policy: .networkOnly)
+        waitForTrackingQueue(manager: mock)
+        // `flags` is nil at this point — no load has been attempted synchronously.
+        XCTAssertFalse(mock.areFlagsReady(), "precondition: flags must not be ready")
+
+        let result = mock.getVariantSync("any-flag", fallback: MixpanelFlagVariant(value: "fb"))
+        guard case .fallback(let reason) = result.source else {
+            XCTFail("expected .fallback source, got \(result.source)")
+            return
+        }
+        XCTAssertEqual(reason, .notReady, "sync lookup before load must be .notReady, not .flagNotFound")
+    }
+
+    /// `getVariantSync` after flags have loaded but the requested key isn't present must
+    /// stamp `.flagNotFound`, distinguishing "flag doesn't exist" from "flags never loaded".
+    func testGetVariantSyncReturnsFlagNotFoundWhenKeyMissing() throws {
+        let mock = makeMockManager(distinctId: "user_a", context: [:], policy: .networkOnly)
+        waitForTrackingQueue(manager: mock)
+        // Populate `flags` as an empty (but non-nil) map to simulate "loaded, no matching key".
+        mock.flagsLock.write { mock.flags = [:] }
+        XCTAssertTrue(mock.areFlagsReady(), "precondition: flags must be ready (empty is still ready)")
+
+        let result = mock.getVariantSync("missing-flag", fallback: MixpanelFlagVariant(value: "fb"))
+        guard case .fallback(let reason) = result.source else {
+            XCTFail("expected .fallback source, got \(result.source)")
+            return
+        }
+        XCTAssertEqual(reason, .flagNotFound, "loaded-but-missing key must be .flagNotFound")
+    }
+
+    /// Async `getVariant` after a failed network fetch with no cached/persisted data must
+    /// stamp `.backendError` — distinguishes "fetch failed" from "flags never loaded"
+    /// so the OpenFeature wrapper can map to GENERAL_ERROR instead of PROVIDER_NOT_READY.
+    func testGetVariantAsyncReturnsBackendErrorWhenFetchFailsWithoutCache() throws {
+        let mock = makeMockManager(distinctId: "user_a", context: [:], policy: .networkOnly)
+        waitForTrackingQueue(manager: mock)
+        mock.simulatedFetchResult = (success: false, flags: nil)
+        mock.simulatedNetworkDelay = 0
+        XCTAssertFalse(mock.areFlagsReady(), "precondition: no cache")
+
+        let done = expectation(description: "async lookup completes after failed fetch")
+        var observed: MixpanelFlagVariant?
+        mock.getVariant("any-flag", fallback: MixpanelFlagVariant(value: "fb")) { variant in
+            observed = variant
+            done.fulfill()
+        }
+        wait(for: [done], timeout: 2.0)
+
+        guard let result = observed, case .fallback(let reason) = result.source else {
+            XCTFail("expected .fallback source, got \(String(describing: observed?.source))")
+            return
+        }
+        XCTAssertEqual(reason, .backendError, "fetch-failed with no cache must be .backendError, not .notReady")
+    }
+
     // MARK: - Default TTL
 
     /// `VariantLookupPolicy.defaultTTL` is 24 hours, and the zero-arg static factories

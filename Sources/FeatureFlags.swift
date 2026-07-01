@@ -70,11 +70,15 @@ public struct MixpanelFlagVariant: Decodable {
     /// cooperation — both surface as `.flagNotFound` for now. Future server changes
     /// can add a more specific reason without breaking callers that already switch
     /// on this enum.
-    public enum FallbackReason {
+    public enum FallbackReason: Equatable, Hashable, Sendable {
         /// Flag key was not present in the cache or network response.
         case flagNotFound
         /// Flags were not ready when the sync lookup happened.
         case notReady
+        /// Network fetch failed and no cached/persisted variant was available.
+        /// Only surfaced on the async `getVariant` path — `getVariantSync` cannot
+        /// distinguish "network error" from "flags never loaded."
+        case backendError
     }
 
     enum CodingKeys: String, CodingKey {
@@ -740,11 +744,20 @@ class FeatureFlagManager: MixpanelFlags {
                 // the fallback.
                 MixpanelLogger.debug(
                     message: "Flags not yet servable, attempting fetch for getVariant '\(flagName)'...")
-                self._fetchFlagsIfNeeded { _ in
+                self._fetchFlagsIfNeeded { fetchOk in
                     // Hop back to the tracking queue so we can read flags + run the tracking check
                     // atomically. Whether the fetch succeeded or not, _getVariantSyncImpl returns the
                     // variant from `flags` if present (persisted or network) else the fallback.
                     self.trackingQueue.async {
+                        if !fetchOk, !self.areFlagsReady() {
+                            // Fetch failed and we have no cached/persisted flags to fall back on —
+                            // distinguish this from "flags never loaded" (.notReady) so callers
+                            // (e.g., the OpenFeature wrapper) can surface a backend/general error
+                            // rather than a not-ready state.
+                            let result = fallback.withSource(.fallback(reason: .backendError))
+                            DispatchQueue.main.async { completion(result) }
+                            return
+                        }
                         let result = self._getVariantSyncImpl(flagName, fallback: fallback)
                         DispatchQueue.main.async { completion(result) }
                     }

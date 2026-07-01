@@ -238,20 +238,7 @@ import XCTest
       }
     }
 
-    // MARK: - Test 6: Privacy Filter Blocks Events
-
-    func testSwiftUIPrivacyFilterBlocksEvents() {
-      // Set the sensitive marker on button 6
-      setSwiftUIButtonAccessibility(index: 6, identifier: "mp-sensitive", label: nil)
-      simulateTapOnSwiftUIButton(index: 6)
-
-      Thread.sleep(forTimeInterval: 0.5)
-
-      let events = capturedEvents.filter { $0.name == "$mp_click" }
-      XCTAssertTrue(events.isEmpty, "Sensitive elements should not emit any events")
-    }
-
-    // MARK: - Test 7: Multiple Clicks Generate Multiple Events
+    // MARK: - Test 6: Multiple Clicks Generate Multiple Events
 
     func testSwiftUIMultipleClicksGenerateMultipleEvents() {
       simulateTapOnSwiftUIButton(index: 0, setAccessibility: "SwiftUI Rule 1")
@@ -267,22 +254,7 @@ import XCTest
       XCTAssertEqual(clickEvents.count, 3, "Should capture exactly 3 click events")
     }
 
-    // MARK: - Test 8: Click Event Captures $el_text
-
-    func testSwiftUIClickEventCapturesElText() {
-      simulateTapOnSwiftUIButton(index: 0, setAccessibility: "SwiftUI Rule 1")
-
-      let event = waitForEvent(named: "$mp_click", timeout: 5)
-      XCTAssertNotNil(event, "Should capture $mp_click event")
-
-      // Note: SwiftUI rendered views may not expose text at the UIKit layer
-      // So we just verify the event was captured
-      if let props = event?.properties {
-        XCTAssertNotNil(props["$el_id"], "Should have element ID")
-      }
-    }
-
-    // MARK: - Test 9: Standard Properties Included
+    // MARK: - Test 7: Standard Properties Included
 
     func testSwiftUIClickEventHasTokenProperty() {
       simulateTapOnSwiftUIButton(index: 0, setAccessibility: "SwiftUI Rule 1")
@@ -622,7 +594,6 @@ import XCTest
         "Both Label SwiftUI",    // 3
         "Rage Zone SwiftUI",     // 4
         "Dead Button SwiftUI",   // 5
-        "mp-sensitive"           // 6 (uses identifier)
       ]
       return buttonOrder.firstIndex(of: label)
     }
@@ -788,16 +759,6 @@ import XCTest
           .accessibilityLabel("Dead Button SwiftUI")
           .padding()
           .background(Color.gray)
-          .foregroundColor(.white)
-          .cornerRadius(8)
-
-          // Sensitive button (should be filtered)
-          Button("Sensitive") {
-            tapCount += 1
-          }
-          .accessibilityIdentifier("mp-sensitive")
-          .padding()
-          .background(Color.black)
           .foregroundColor(.white)
           .cornerRadius(8)
         }

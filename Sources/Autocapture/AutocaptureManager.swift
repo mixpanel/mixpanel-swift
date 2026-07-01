@@ -156,11 +156,8 @@
         return
       }
 
-      // Extract semantic information (returns nil if sensitive)
-      guard var clickEvent = semanticExtractor.extractSemantics(from: view, at: point, captureTextContent: options.captureTextContent) else {
-        MixpanelLogger.debug(message: "AutocaptureManager: skipped sensitive element")
-        return
-      }
+      // Extract semantic information
+      var clickEvent = semanticExtractor.extractSemantics(from: view, at: point)
 
       // Check for rage click
       var rageClickResult: RageClickResult?
@@ -174,7 +171,6 @@
             y: clickEvent.y,
             elementId: clickEvent.elementId,
             tagName: clickEvent.tagName,
-            text: clickEvent.text,
             ariaLabel: clickEvent.ariaLabel,
             role: clickEvent.role,
             elements: clickEvent.elements,

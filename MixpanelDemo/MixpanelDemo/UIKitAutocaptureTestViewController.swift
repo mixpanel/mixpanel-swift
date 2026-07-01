@@ -177,23 +177,6 @@ class UIKitAutocaptureTestViewController: UIViewController {
     stepper.accessibilityIdentifier = "test_stepper"
     stackView.addArrangedSubview(stepper)
 
-    // MARK: - Privacy Section
-
-    stackView.addArrangedSubview(sectionLabel("Privacy - zero events captured"))
-
-    // mp-sensitive by identifier
-    addButton(
-      to: stackView,
-      title: "mp-sensitive (by identifier)",
-      identifier: "mp-sensitive",
-      hasAction: true
-    )
-
-    // mp-no-track by label
-    let noTrackBtn = makeButton("mp-no-track (by label)", hasAction: true)
-    noTrackBtn.accessibilityLabel = "mp-no-track"
-    stackView.addArrangedSubview(noTrackBtn)
-
     // MARK: - Instructions
 
     stackView.addArrangedSubview(sectionLabel("Instructions"))
@@ -211,7 +194,6 @@ class UIKitAutocaptureTestViewController: UIViewController {
       2. Tap buttons to verify $mp_click events
       3. Tap 4+ times rapidly on Rage Zone for $mp_rage_click
       4. Tap Dead Button and wait 500ms for $mp_dead_click
-      5. Privacy buttons should emit NO events
       """
     stackView.addArrangedSubview(instructions)
   }

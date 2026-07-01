@@ -302,7 +302,6 @@ import XCTest
       XCTAssertEqual(props["$y"] as? CGFloat, 200)
       XCTAssertEqual(props["$el_id"] as? String, "test_button")
       XCTAssertEqual(props["$el_tag_name"] as? String, "UIButton")
-      XCTAssertEqual(props["$el_text"] as? String, "Click Me")
       XCTAssertEqual(props["$attr-aria-label"] as? String, "Test Button")
       XCTAssertEqual(props["$attr-role"] as? String, "Button")
       XCTAssertEqual(props["$elements"] as? String, "UIButton > UIView")
@@ -325,7 +324,6 @@ import XCTest
 
       let props = event.toProperties()
 
-      XCTAssertNil(props["$el_text"])
       XCTAssertNil(props["$attr-aria-label"])
       XCTAssertNil(props["$attr-role"])
     }

@@ -85,18 +85,6 @@ struct SwiftUIAutocaptureTestView: View {
         SecureField("Password - text NOT captured", text: $password)
           .textFieldStyle(.roundedBorder)
 
-        // MARK: - Privacy
-
-        SectionHeader("Privacy - zero events captured")
-
-        Button("mp-sensitive (by label)") {}
-          .accessibilityLabel("mp-sensitive")
-          .buttonStyle(TestButtonStyle())
-
-        Button("mp-no-track (by identifier)") {}
-          .accessibilityIdentifier("mp-no-track")
-          .buttonStyle(TestButtonStyle())
-
         // MARK: - Instructions
 
         SectionHeader("Instructions")
@@ -107,7 +95,6 @@ struct SwiftUIAutocaptureTestView: View {
           2. Tap buttons to verify $mp_click events
           3. Tap 4+ times rapidly on Rage Zone for $mp_rage_click
           4. Tap Dead Button and wait 500ms for $mp_dead_click
-          5. Privacy buttons should emit NO events
 
           Note: SwiftUI uses accessibilityLabel as primary $el_id
           (accessibilityIdentifier requires VoiceOver to be active)

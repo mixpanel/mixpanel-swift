@@ -11,45 +11,20 @@
 
   /// Extracts semantic information from UIKit and SwiftUI views for autocapture events.
   ///
-  /// Handles element identification, text extraction, role detection, and privacy filtering.
+  /// Handles element identification, role detection, and privacy filtering.
   final class SemanticExtractor {
     // MARK: - Constants
 
-    private static let maxTextLength = AutocaptureDefaults.maxTextLength
     private static let maxHierarchyDepth = AutocaptureDefaults.maxHierarchyDepth
-
-    /// Markers for sensitive elements that should be excluded from all capture
-    private static let sensitiveMarkers = ["mp-no-track"]
-
-    /// Regex patterns for redacting sensitive content
-    private static let creditCardPattern = try? NSRegularExpression(
-      pattern:
-        "\\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\\b",
-      options: []
-    )
-
-    private static let ssnPattern = try? NSRegularExpression(
-      pattern: "\\b[0-9]{3}-[0-9]{2}-[0-9]{4}\\b",
-      options: []
-    )
 
     // MARK: - Public API
 
     /// Extract semantic information from a view at the given point.
-    ///
-    /// Returns `nil` if the view is marked as sensitive.
-    func extractSemantics(from view: UIView, at point: CGPoint, captureTextContent: Bool) -> ClickEvent? {
-      // Check if view or ancestor is marked as sensitive
-      if isSensitive(view: view) {
-        MixpanelLogger.debug(message: "SemanticExtractor: skipping sensitive element")
-        return nil
-      }
-
+    func extractSemantics(from view: UIView, at point: CGPoint) -> ClickEvent {
       let className = String(describing: type(of: view))
       let elementId = generateElementId(for: view, isSwiftUI: isSwiftUIView(view))
       let ariaLabel = findAccessibilityLabel(in: view)
       let role = determineRole(for: view)
-      let text = captureTextContent ? extractText(from: view) : nil
       let elements = buildViewHierarchy(from: view)
       let isInteractive = hasInteractionHandlers(view: view)
 
@@ -58,7 +33,6 @@
         y: point.y,
         elementId: elementId,
         tagName: className,
-        text: text,
         ariaLabel: ariaLabel,
         role: role,
         elements: elements,
@@ -195,94 +169,6 @@
       return nil
     }
 
-    // MARK: - Text Extraction
-
-    private func extractText(from view: UIView) -> String? {
-      // Check if this is a secure text field - never capture text
-      if let textField = view as? UITextField {
-        if textField.isSecureTextEntry {
-          return nil
-        }
-        if let contentType = textField.textContentType {
-          let sensitiveTypes: [UITextContentType] = [.password, .newPassword, .oneTimeCode]
-          if sensitiveTypes.contains(contentType) {
-            return nil
-          }
-        }
-      }
-
-      var text: String?
-
-      // Try to extract text from the view
-      if let label = view as? UILabel {
-        text = label.text
-      } else if let button = view as? UIButton {
-        text = button.currentTitle
-      } else if let textField = view as? UITextField {
-        text = textField.text
-      } else if let textView = view as? UITextView {
-        // Skip if secure
-        text = textView.isSecureTextEntry ? nil : textView.text
-      } else if let segmentedControl = view as? UISegmentedControl {
-        let index = segmentedControl.selectedSegmentIndex
-        if index != UISegmentedControl.noSegment {
-          text = segmentedControl.titleForSegment(at: index)
-        }
-      }
-
-      // If no text found directly, try to find text in subviews (for container views)
-      if text == nil {
-        text = findTextInSubviews(view)
-      }
-
-      // Truncate, filter sensitive content, and return
-      return text.flatMap { sanitizeText($0) }
-    }
-
-    private func findTextInSubviews(_ view: UIView, depth: Int = 0) -> String? {
-      guard depth < 3 else { return nil }
-
-      for subview in view.subviews {
-        if let label = subview as? UILabel, let text = label.text, !text.isEmpty {
-          return text
-        }
-        if let found = findTextInSubviews(subview, depth: depth + 1) {
-          return found
-        }
-      }
-
-      return nil
-    }
-
-    private func sanitizeText(_ text: String) -> String? {
-      guard !text.isEmpty else { return nil }
-
-      // Truncate to max length
-      var sanitized = String(text.prefix(Self.maxTextLength))
-
-      // Redact credit card numbers
-      if let regex = Self.creditCardPattern {
-        sanitized = regex.stringByReplacingMatches(
-          in: sanitized,
-          options: [],
-          range: NSRange(sanitized.startIndex..., in: sanitized),
-          withTemplate: "[REDACTED]"
-        )
-      }
-
-      // Redact SSN patterns
-      if let regex = Self.ssnPattern {
-        sanitized = regex.stringByReplacingMatches(
-          in: sanitized,
-          options: [],
-          range: NSRange(sanitized.startIndex..., in: sanitized),
-          withTemplate: "[REDACTED]"
-        )
-      }
-
-      return sanitized
-    }
-
     // MARK: - View Hierarchy
 
     private func buildViewHierarchy(
@@ -306,40 +192,6 @@
       }
 
       return hierarchy.reversed().joined(separator: " > ")
-    }
-
-    // MARK: - Privacy / Sensitive Detection
-
-    /// Check if view or any ancestor is marked as sensitive.
-    ///
-    /// A view is sensitive if its accessibilityIdentifier contains "mp-no-track".
-    /// We only check accessibilityIdentifier (not accessibilityLabel) because React Native
-    /// aggregates all child labels into parent views, which would cause false positives.
-    ///
-    /// Additionally, we limit the hierarchy walk to a reasonable depth to avoid checking
-    /// container views that have aggregated content.
-    private func isSensitive(view: UIView) -> Bool {
-      var currentView: UIView? = view
-      var level = 0
-      let maxLevels = 5  // Don't walk too far up - container views often have aggregated labels
-
-      while let v = currentView, level < maxLevels {
-        // Only check accessibilityIdentifier - this is explicitly set per-view and not aggregated
-        // by React Native or UIKit container views
-        if let identifier = v.accessibilityIdentifier {
-          for marker in Self.sensitiveMarkers {
-            if identifier.contains(marker) {
-              MixpanelLogger.debug(message: "SemanticExtractor: found sensitive marker '\(marker)' in identifier")
-              return true
-            }
-          }
-        }
-
-        currentView = v.superview
-        level += 1
-      }
-
-      return false
     }
 
     // MARK: - SwiftUI Detection

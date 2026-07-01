@@ -15,7 +15,6 @@ import Foundation
 
 /// Internal configuration constants not exposed in public API
 enum AutocaptureDefaults {
-  static let maxTextLength = 100
   static let maxHierarchyDepth = 5
   static let maxRecursionDepth = 20
 }
@@ -144,10 +143,6 @@ public struct AutocaptureOptions {
   /// Configuration for dead click detection.
   public let deadClickOptions: DeadClickOptions
 
-  /// Whether to capture visible text content of tapped elements as `$el_text`.
-  /// Disabled by default to protect user privacy.
-  public let captureTextContent: Bool
-
   /// Returns `true` if any autocapture feature is enabled.
   public var isEnabled: Bool {
     return clickOptions.enabled || rageClickOptions.enabled || deadClickOptions.enabled
@@ -156,12 +151,10 @@ public struct AutocaptureOptions {
   public init(
     clickOptions: ClickOptions = ClickOptions(),
     rageClickOptions: RageClickOptions = RageClickOptions(),
-    deadClickOptions: DeadClickOptions = DeadClickOptions(),
-    captureTextContent: Bool = false
+    deadClickOptions: DeadClickOptions = DeadClickOptions()
   ) {
     self.clickOptions = clickOptions
     self.rageClickOptions = rageClickOptions
     self.deadClickOptions = deadClickOptions
-    self.captureTextContent = captureTextContent
   }
 }

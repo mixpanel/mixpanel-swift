@@ -6,112 +6,112 @@
 //  Copyright © 2026 Mixpanel. All rights reserved.
 //
 
-import XCTest
 import MixpanelSwiftCommon
+import XCTest
 
 @testable import Mixpanel
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 class MixpanelEventBridgeTests: XCTestCase {
 
-  private func randomId() -> String {
-    return String(format: "%08x%08x", arc4random(), arc4random())
-  }
-
-  private func waitForTrackingQueue(_ mixpanel: MixpanelInstance) {
-    mixpanel.trackingQueue.sync {
-      mixpanel.networkQueue.sync { return }
+    private func randomId() -> String {
+        return String(format: "%08x%08x", arc4random(), arc4random())
     }
-    mixpanel.trackingQueue.sync {
-      mixpanel.networkQueue.sync { return }
-    }
-  }
 
-  private func removeDBfile(_ apiToken: String) {
-    let manager = FileManager.default
-    let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
-    guard let path = url?.appendingPathComponent("\(apiToken)_MPDB.sqlite").path else { return }
-    guard manager.fileExists(atPath: path) else { return }
-    try? manager.removeItem(atPath: path)
-  }
-
-  // MARK: - Event Bridge Notified on Track
-
-  func testEventBridgeNotifiedOnTrack() {
-    let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
-    let eventName = "BridgeTestEvent_\(randomId())"
-    let expectation = XCTestExpectation(description: "Event bridge is notified when event is tracked")
-
-    let stream = MixpanelEventBridge.shared.eventStream()
-    let task = Task {
-      for await event in stream {
-        if event.eventName == eventName {
-          expectation.fulfill()
-          break
+    private func waitForTrackingQueue(_ mixpanel: MixpanelInstance) {
+        mixpanel.trackingQueue.sync {
+            mixpanel.networkQueue.sync { return }
         }
-      }
-    }
-
-    testMixpanel.track(event: eventName)
-    waitForTrackingQueue(testMixpanel)
-
-    wait(for: [expectation], timeout: 2.0)
-    task.cancel()
-    removeDBfile(testMixpanel.apiToken)
-  }
-
-  // MARK: - Event Bridge Receives Properties
-
-  func testEventBridgeReceivesEventProperties() {
-    let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
-    let eventName = "BridgePropsTest_\(randomId())"
-    let expectation = XCTestExpectation(
-      description: "Event bridge receives event with correct properties")
-
-    let stream = MixpanelEventBridge.shared.eventStream()
-    let task = Task {
-      for await event in stream {
-        if event.eventName == eventName {
-          XCTAssertEqual(event.properties["testKey"] as? String, "testValue")
-          expectation.fulfill()
-          break
+        mixpanel.trackingQueue.sync {
+            mixpanel.networkQueue.sync { return }
         }
-      }
     }
 
-    testMixpanel.track(event: eventName, properties: ["testKey": "testValue"])
-    waitForTrackingQueue(testMixpanel)
+    private func removeDBfile(_ apiToken: String) {
+        let manager = FileManager.default
+        let url = manager.urls(for: .cachesDirectory, in: .userDomainMask).last
+        guard let path = url?.appendingPathComponent("\(apiToken)_MPDB.sqlite").path else { return }
+        guard manager.fileExists(atPath: path) else { return }
+        try? manager.removeItem(atPath: path)
+    }
 
-    wait(for: [expectation], timeout: 2.0)
-    task.cancel()
-    removeDBfile(testMixpanel.apiToken)
-  }
+    // MARK: - Event Bridge Notified on Track
 
-  // MARK: - Event Bridge Not Notified When Opted Out
+    func testEventBridgeNotifiedOnTrack() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
+        let eventName = "BridgeTestEvent_\(randomId())"
+        let expectation = XCTestExpectation(description: "Event bridge is notified when event is tracked")
 
-  func testEventBridgeNotNotifiedWhenOptedOut() {
-    let testMixpanel = Mixpanel.initialize(
-      token: randomId(), trackAutomaticEvents: false, optOutTrackingByDefault: true)
-    let eventName = "BridgeOptOutTest_\(randomId())"
-    let noEventExpectation = XCTestExpectation(
-      description: "Event bridge should not be notified when tracking is opted out")
-    noEventExpectation.isInverted = true
-
-    let stream = MixpanelEventBridge.shared.eventStream()
-    let task = Task {
-      for await event in stream {
-        if event.eventName == eventName {
-          noEventExpectation.fulfill()
+        let stream = MixpanelEventBridge.shared.eventStream()
+        let task = Task {
+            for await event in stream {
+                if event.eventName == eventName {
+                    expectation.fulfill()
+                    break
+                }
+            }
         }
-      }
+
+        testMixpanel.track(event: eventName)
+        waitForTrackingQueue(testMixpanel)
+
+        wait(for: [expectation], timeout: 2.0)
+        task.cancel()
+        removeDBfile(testMixpanel.apiToken)
     }
 
-    testMixpanel.track(event: eventName)
-    waitForTrackingQueue(testMixpanel)
+    // MARK: - Event Bridge Receives Properties
 
-    wait(for: [noEventExpectation], timeout: 1.0)
-    task.cancel()
-    removeDBfile(testMixpanel.apiToken)
-  }
+    func testEventBridgeReceivesEventProperties() {
+        let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
+        let eventName = "BridgePropsTest_\(randomId())"
+        let expectation = XCTestExpectation(
+            description: "Event bridge receives event with correct properties")
+
+        let stream = MixpanelEventBridge.shared.eventStream()
+        let task = Task {
+            for await event in stream {
+                if event.eventName == eventName {
+                    XCTAssertEqual(event.properties["testKey"] as? String, "testValue")
+                    expectation.fulfill()
+                    break
+                }
+            }
+        }
+
+        testMixpanel.track(event: eventName, properties: ["testKey": "testValue"])
+        waitForTrackingQueue(testMixpanel)
+
+        wait(for: [expectation], timeout: 2.0)
+        task.cancel()
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    // MARK: - Event Bridge Not Notified When Opted Out
+
+    func testEventBridgeNotNotifiedWhenOptedOut() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, optOutTrackingByDefault: true)
+        let eventName = "BridgeOptOutTest_\(randomId())"
+        let noEventExpectation = XCTestExpectation(
+            description: "Event bridge should not be notified when tracking is opted out")
+        noEventExpectation.isInverted = true
+
+        let stream = MixpanelEventBridge.shared.eventStream()
+        let task = Task {
+            for await event in stream {
+                if event.eventName == eventName {
+                    noEventExpectation.fulfill()
+                }
+            }
+        }
+
+        testMixpanel.track(event: eventName)
+        waitForTrackingQueue(testMixpanel)
+
+        wait(for: [noEventExpectation], timeout: 1.0)
+        task.cancel()
+        removeDBfile(testMixpanel.apiToken)
+    }
 
 }

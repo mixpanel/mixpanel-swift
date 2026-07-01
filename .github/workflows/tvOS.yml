@@ -1,4 +1,4 @@
-name: macOS CI
+name: tvOS CI
 
 on:
   push:
@@ -16,8 +16,8 @@ jobs:
       working-directory: MixpanelDemo
       run: |
         set -o pipefail
-        xcodebuild -scheme MixpanelDemoMac -derivedDataPath Build/ -configuration Debug \
-          -destination 'platform=macOS,arch=arm64' \
+        xcodebuild -scheme MixpanelDemoTV -derivedDataPath Build/ -configuration Debug \
+          -destination 'platform=tvOS Simulator,name=Apple TV' \
           ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES -enableCodeCoverage YES \
           clean build test | xcpretty -c
     - name: Code Coverage Report

@@ -60,11 +60,7 @@ public struct MixpanelFlagVariant: Decodable {
         /// ready. Previously a Fallback meant only "not a real variant," which collapsed
         /// several distinct outcomes into one (SDK-79). Callers — especially the OpenFeature
         /// wrapper — can dispatch on the reason to surface the correct user-facing error code.
-        ///
-        /// `.unspecified` is the default for developer-constructed fallbacks; the SDK
-        /// stamps a more specific reason before returning so callers should rarely
-        /// observe it on a returned variant.
-        case fallback(reason: FallbackReason = .unspecified)
+        case fallback(reason: FallbackReason)
     }
 
     /// Why the SDK returned the developer fallback.
@@ -75,9 +71,6 @@ public struct MixpanelFlagVariant: Decodable {
     /// can add a more specific reason without breaking callers that already switch
     /// on this enum.
     public enum FallbackReason {
-        /// Developer-constructed default. The SDK stamps a more specific reason
-        /// before returning, so callers should rarely observe this value.
-        case unspecified
         /// Flag key was not present in the cache or network response.
         case flagNotFound
         /// Flags were not ready when the sync lookup happened.
@@ -110,7 +103,7 @@ public struct MixpanelFlagVariant: Decodable {
         // Decoded variants are immediately re-stamped via `withSource` before being placed in
         // `flags`, so the customer never observes `.fallback` here. Defaulting to `.fallback`
         // keeps `source` non-optional without needing a sentinel "unstamped" case.
-        source = .fallback()
+        source = .fallback(reason: .flagNotFound)
     }
 
     // Helper initializer with fallbacks, value defaults to key if nil
@@ -127,7 +120,7 @@ public struct MixpanelFlagVariant: Decodable {
         self.experimentID = experimentID
         self.isExperimentActive = isExperimentActive
         self.isQATester = isQATester
-        self.source = .fallback()
+        self.source = .fallback(reason: .flagNotFound)
     }
 
     /// Initializer that stamps a served (or fallback) variant with its origin.
@@ -730,9 +723,8 @@ class FeatureFlagManager: MixpanelFlags {
                 }
                 // Flags are loaded (not network-first-awaiting, not stale), but this key
                 // isn't in `currentFlags` (or its persisted variant was expired). Stamp
-                // the fallback as `.flagNotFound` so the OpenFeature wrapper can map to
-                // `FLAG_NOT_FOUND` instead of letting a bare `.fallback(.unspecified)`
-                // through — same treatment the sync impl applies in _getVariantSyncImpl.
+                // the fallback as `.flagNotFound` — same treatment the sync impl applies
+                // in _getVariantSyncImpl.
                 let result = flagVariant ?? fallback.withSource(.fallback(reason: .flagNotFound))
                 if flagVariant != nil, needsTrackingCheck {
                     // Perform atomic check-and-track

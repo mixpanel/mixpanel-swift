@@ -146,17 +146,21 @@ Dead click detection monitors interactive elements for UI response:
 
 ### Excluded Controls
 
-These controls are excluded from dead click detection because they have inherent feedback not detected by UI snapshots:
+These controls are excluded from dead click detection because they always produce a visual response when tapped (inherent feedback). They still emit `$mp_click` events.
 
+**UIKit:**
+- `UITextField` / `UITextView` - Keyboard appears
 - `UISwitch` - Toggles own state
-- `UITextField` - Keyboard appears
-- `UITextView` - Keyboard appears
-- `UIStepper` - Increments value
-- `UISegmentedControl` - Changes selection
-- `UIDatePicker` - Shows picker
-- `UIPickerView` - Shows picker
+- `UISlider` - Thumb moves
+- `UIStepper` - Value changes
+- `UISegmentedControl` - Selection changes
+- `UIDatePicker` / `UIPickerView` - Picker UI appears
 
-These controls still emit `$mp_click` events.
+**SwiftUI:**
+- `TextField` / `TextEditor` / `SecureField` - Keyboard appears
+- `Toggle` - Toggles own state
+- `Slider` / `Stepper` - Value changes
+- `Picker` / `DatePicker` - Picker UI appears
 
 ### What Counts as UI Change
 
@@ -164,7 +168,7 @@ These controls still emit `$mp_click` events.
 - Content change (text, button titles, etc.)
 - Window count change (alerts, sheets, modals)
 
-**Note:** Keyboard appearance does not count as a UI change for the tapped element.
+**Note:** Text input controls (`UITextField`, `UITextView`, `TextField`, etc.) are fully excluded from dead click monitoring, so the keyboard appearing after a tap does not produce a false `$mp_dead_click`.
 
 ## Platform Support
 

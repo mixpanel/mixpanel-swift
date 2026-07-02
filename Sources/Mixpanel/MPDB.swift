@@ -260,6 +260,8 @@ class MPDB {
         -> [InternalProperties]
     {
         var rows: [InternalProperties] = []
+        var corruptRowIds: [Int32] = []  // Track corrupt rows for self-healing deletion
+        
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
             let selectString = """
@@ -268,30 +270,56 @@ class MPDB {
                 """
             var selectStatement: OpaquePointer?
             var rowsRead: Int = 0
+            var rowsSuccessful: Int = 0
+            
             if sqlite3_prepare_v2(db, selectString, -1, &selectStatement, nil) == SQLITE_OK {
                 while sqlite3_step(selectStatement) == SQLITE_ROW {
                     if let blob = sqlite3_column_blob(selectStatement, 1) {
                         let blobLength = sqlite3_column_bytes(selectStatement, 1)
                         let data = Data(bytes: blob, count: Int(blobLength))
                         let id = sqlite3_column_int(selectStatement, 0)
-
+                        rowsRead += 1
+                        
                         if let jsonObject = JSONHandler.deserializeData(data) as? InternalProperties {
                             var entity = jsonObject
                             entity["id"] = id
                             rows.append(entity)
+                            rowsSuccessful += 1
+                        } else {
+                            // Deserialization failed - mark row for deletion (self-healing)
+                            corruptRowIds.append(id)
+                            MixpanelLogger.warn(
+                                message: "Corrupt data in \(tableName) row \(id), marking for deletion. Size: \(blobLength) bytes"
+                            )
                         }
-                        rowsRead += 1
                     } else {
-                        logSqlError(message: "No blob found in data column for row in \(tableName)")
+                        // No blob found - database integrity issue
+                        let id = sqlite3_column_int(selectStatement, 0)
+                        corruptRowIds.append(id)
+                        logSqlError(message: "No blob found in data column for row \(id) in \(tableName)")
                     }
                 }
-                if rowsRead > 0 {
-                    MixpanelLogger.info(message: "Successfully read \(rowsRead) from table \(tableName)")
+                
+                if rowsSuccessful > 0 {
+                    MixpanelLogger.info(
+                        message: "Successfully read \(rowsSuccessful) rows from table \(tableName)"
+                    )
+                }
+                
+                if !corruptRowIds.isEmpty {
+                    MixpanelLogger.warn(
+                        message: "Found \(corruptRowIds.count) corrupt rows out of \(rowsRead) total in \(tableName), deleting..."
+                    )
                 }
             } else {
                 logSqlError(message: "SELECT statement for table \(tableName) could not be prepared")
             }
             sqlite3_finalize(selectStatement)
+            
+            // Self-healing: Delete corrupt rows immediately to prevent crash loops
+            if !corruptRowIds.isEmpty {
+                deleteRows(persistenceType, ids: corruptRowIds)
+            }
         } else {
             reconnect()
         }

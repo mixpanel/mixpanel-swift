@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if SWIFT_PACKAGE
+import MixpanelObjC
+#endif
 
 class JSONHandler {
 
@@ -24,15 +27,18 @@ class JSONHandler {
     }
 
     class func deserializeData(_ data: Data) -> MPObjectToParse? {
-        var object: MPObjectToParse?
-        do {
-            object = try JSONSerialization.jsonObject(with: data, options: [])
-        } catch {
-            MixpanelLogger.warn(message: "exception decoding object data")
+        var error: NSError?
+
+        // Use ObjC function that catches NSException
+        let object = JSONExceptionHandler_safeDeserialize(data, &error)
+
+        if let error = error {
+            MixpanelLogger.warn(message: "Failed to decode JSON: \(error.localizedDescription)")
         }
+
         return object
     }
-
+    
     class func serializeJSONObject(_ obj: MPObjectToParse) -> Data? {
         let serializableJSONObject: MPObjectToParse
         if let jsonObject = makeObjectSerializable(obj) as? [Any] {

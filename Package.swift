@@ -24,13 +24,23 @@ let package = Package(
         ),
     ],
     targets: [
+        // Objective-C target for exception handling
+        .target(
+            name: "MixpanelObjC",
+            dependencies: [],
+            path: "Sources/MixpanelObjC",
+            publicHeadersPath: "include"
+        ),
+
+        // Swift target
         .target(
             name: "Mixpanel",
             dependencies: [
+                "MixpanelObjC",
                 .product(name: "MixpanelSwiftCommon", package: "mixpanel-swift-common"),
                 .product(name: "jsonlogic", package: "json-logic-swift"),
             ],
-            path: "Sources",
+            path: "Sources/Mixpanel",
             resources: [
                 .copy("Mixpanel/PrivacyInfo.xcprivacy")
             ]

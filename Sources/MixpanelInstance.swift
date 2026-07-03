@@ -103,7 +103,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Accessor to the Mixpanel People API object.
     open var people: People!
 
-
     /// Accessor to the Mixpanel Autocapture API object.
     open var autocapture: Autocapture!
 

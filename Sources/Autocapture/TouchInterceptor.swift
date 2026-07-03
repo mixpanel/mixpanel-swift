@@ -183,10 +183,23 @@
   // MARK: - Custom Gesture Recognizer
 
   /// A gesture recognizer that observes touches without claiming them.
+  /// Filters scrolls/swipes by checking touch displacement and duration.
   private class TouchObservingGestureRecognizer: UIGestureRecognizer {
 
+    /// Maximum displacement (in points) for a touch to be considered a tap.
+    /// Matches iOS recommended minimum tap target size guideline.
+    private static let maxTapDisplacement: CGFloat = 10.0
+
+    /// Maximum duration (in seconds) for a touch to be considered a tap.
+    private static let maxTapDuration: TimeInterval = 0.5
+
+    private var downLocation: CGPoint?
+    private var downTime: Date?
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
-      // Don't change state - we're just observing
+      guard touches.count == 1, let touch = touches.first else { return }
+      downLocation = touch.location(in: self.view)
+      downTime = Date()
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
@@ -194,14 +207,33 @@
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
+      defer {
+        downLocation = nil
+        downTime = nil
+        // Transition to failed state to let the gesture system continue
+        // We're observing only, not claiming the touch
+        state = .failed
+      }
+
       // Only process single-finger taps to avoid duplicate events from multi-touch
       guard touches.count == 1, let touch = touches.first else {
-        state = .failed
         return
       }
 
       guard let window = self.view as? UIWindow else {
-        state = .failed
+        return
+      }
+
+      // Filter scrolls/swipes: check displacement from touch-down position
+      guard let startLocation = downLocation else { return }
+      let endLocation = touch.location(in: self.view)
+      let dx = endLocation.x - startLocation.x
+      let dy = endLocation.y - startLocation.y
+      let displacement = hypot(dx, dy)
+      guard displacement <= Self.maxTapDisplacement else { return }
+
+      // Filter long presses: check duration
+      guard let startTime = downTime, Date().timeIntervalSince(startTime) < Self.maxTapDuration else {
         return
       }
 
@@ -209,19 +241,18 @@
       let view = touch.view
 
       TouchInterceptor.shared.processTouchEnded(at: location, view: view, window: window)
-
-      // Transition to failed state to let the gesture system continue
-      // We're observing only, not claiming the touch
-      state = .failed
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
+      downLocation = nil
+      downTime = nil
       state = .cancelled
     }
 
     override func reset() {
       super.reset()
-      // Reset state for next touch sequence
+      downLocation = nil
+      downTime = nil
       state = .possible
     }
 

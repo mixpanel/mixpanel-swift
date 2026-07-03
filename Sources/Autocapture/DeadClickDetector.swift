@@ -141,6 +141,29 @@
       return false
     }
 
+    /// Check if a view is inside a SwiftUI hosting context.
+    ///
+    /// SwiftUI manages interactions entirely in its own layer — UIKit APIs cannot
+    /// detect gesture recognizers, UIControl targets, or accessibility traits on
+    /// SwiftUI rendering views. This method identifies SwiftUI context so dead click
+    /// monitoring can skip the UIKit-based handler check.
+    private func isInSwiftUIContext(view: UIView) -> Bool {
+      var current: UIView? = view
+      var depth = 0
+      let maxDepth = 10
+
+      while let v = current, depth < maxDepth {
+        let className = String(describing: type(of: v))
+        if className.contains("Hosting") || className.contains("SwiftUI") {
+          return true
+        }
+        current = v.superview
+        depth += 1
+      }
+
+      return false
+    }
+
     /// Start monitoring for dead click after a tap.
     ///
     /// - Parameters:
@@ -155,11 +178,18 @@
         return
       }
 
-      // Only monitor elements with interaction handlers
-      guard hasInteractionHandlers(view: view) else {
-        MixpanelLogger.debug(
-          message: "DeadClickDetector: no handlers on \(event.elementId)")
-        return
+      // Only monitor elements with interaction handlers.
+      // SwiftUI manages interactions entirely in its own layer — UIKit APIs cannot
+      // detect gesture recognizers, UIControl targets, or accessibility traits on
+      // SwiftUI rendering views (_UIGraphicsView, CGDrawingView, etc.).
+      // For SwiftUI views, skip the handler check and rely on snapshot comparison
+      // to correctly distinguish interactive taps from dead clicks.
+      if !isInSwiftUIContext(view: view) {
+        guard hasInteractionHandlers(view: view) else {
+          MixpanelLogger.debug(
+            message: "DeadClickDetector: no handlers on \(event.elementId)")
+          return
+        }
       }
 
       // Capture baseline synchronously at click time — before the click handler
@@ -270,8 +300,12 @@
         }
       }
 
-      if let rootView = window.rootViewController?.view {
-        processView(rootView)
+      // Walk the window's entire view hierarchy — not just rootViewController.view.
+      // Presented view controllers (alerts, action sheets, popovers) are added as
+      // direct subviews of the window via _UITransitionView, not as children of the
+      // root view controller's view. Walking from the window catches all of them.
+      for subview in window.subviews {
+        processView(subview)
       }
 
       return UISnapshot(

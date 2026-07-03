@@ -244,7 +244,9 @@
       }
 
       let location = touch.location(in: window)
-      let view = touch.view
+      // touch.view can be nil for SwiftUI-managed views (sheets, popovers).
+      // Fall back to hit-testing the window to find the view at the touch point.
+      let view = touch.view ?? window.hitTest(location, with: nil)
 
       TouchInterceptor.shared.processTouchEnded(at: location, view: view, window: window)
     }

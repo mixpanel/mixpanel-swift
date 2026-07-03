@@ -153,6 +153,7 @@
 
     private func processTouch(at point: CGPoint, view: UIView?, window: UIWindow?) throws {
       guard let view = view else {
+        MixpanelLogger.debug(message: "AutocaptureManager: no view for touch at \(point)")
         return
       }
 

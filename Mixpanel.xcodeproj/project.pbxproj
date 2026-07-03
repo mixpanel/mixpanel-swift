@@ -15,17 +15,13 @@
 		1651FD852F83B6F10065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD842F83B6F10065BB7E /* MixpanelSwiftCommon */; };
 		1651FD872F83B6F50065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD862F83B6F50065BB7E /* MixpanelSwiftCommon */; };
 		1651FD892F83B6F80065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD882F83B6F80065BB7E /* MixpanelSwiftCommon */; };
-		1668B3DA2FF5265300AF2B30 /* Mixpanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1668B3D92FF5265300AF2B30 /* Mixpanel.h */; };
 		1668B3DB2FF5265300AF2B30 /* JSONExceptionHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1668B3D72FF5265300AF2B30 /* JSONExceptionHandler.h */; };
 		1668B3DC2FF5265300AF2B30 /* JSONExceptionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 1668B3D82FF5265300AF2B30 /* JSONExceptionHandler.m */; };
-		1668B3DD2FF5265300AF2B30 /* Mixpanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1668B3D92FF5265300AF2B30 /* Mixpanel.h */; };
 		1668B3DE2FF5265300AF2B30 /* JSONExceptionHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1668B3D72FF5265300AF2B30 /* JSONExceptionHandler.h */; };
 		1668B3DF2FF5265300AF2B30 /* JSONExceptionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 1668B3D82FF5265300AF2B30 /* JSONExceptionHandler.m */; };
 		1668B3E02FF5265300AF2B30 /* JSONExceptionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 1668B3D82FF5265300AF2B30 /* JSONExceptionHandler.m */; };
-		1668B3E12FF5265300AF2B30 /* Mixpanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1668B3D92FF5265300AF2B30 /* Mixpanel.h */; };
 		1668B3E22FF5265300AF2B30 /* JSONExceptionHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1668B3D72FF5265300AF2B30 /* JSONExceptionHandler.h */; };
 		1668B3E32FF5265300AF2B30 /* JSONExceptionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 1668B3D82FF5265300AF2B30 /* JSONExceptionHandler.m */; };
-		1668B3E42FF5265300AF2B30 /* Mixpanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1668B3D92FF5265300AF2B30 /* Mixpanel.h */; };
 		1668B3E52FF5265300AF2B30 /* JSONExceptionHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1668B3D72FF5265300AF2B30 /* JSONExceptionHandler.h */; };
 		171E4C122DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C132DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
@@ -137,7 +133,7 @@
 /* Begin PBXFileReference section */
 		1668B3D72FF5265300AF2B30 /* JSONExceptionHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JSONExceptionHandler.h; path = Sources/MixpanelObjC/include/JSONExceptionHandler.h; sourceTree = SOURCE_ROOT; };
 		1668B3D82FF5265300AF2B30 /* JSONExceptionHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = JSONExceptionHandler.m; path = Sources/MixpanelObjC/JSONExceptionHandler.m; sourceTree = SOURCE_ROOT; };
-		1668B3D92FF5265300AF2B30 /* Mixpanel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Mixpanel.h; sourceTree = "<group>"; };
+		1668B3E62FF669CD00AF2B30 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		171E4C112DAF108400B7CB11 /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 		171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelOptions.swift; sourceTree = "<group>"; };
 		1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/Mixpanel/Mixpanel/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
@@ -152,7 +148,6 @@
 		AC10CA0001000001 /* Autocapture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Autocapture.swift; sourceTree = "<group>"; };
 		BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadWriteLock.swift; sourceTree = "<group>"; };
 		E115947D1CFF1491007F8B4F /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E11594821CFF1491007F8B4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../Info.plist; sourceTree = "<group>"; };
 		E115948A1CFF1538007F8B4F /* Mixpanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mixpanel.swift; sourceTree = "<group>"; };
 		E115948D1D000709007F8B4F /* MixpanelInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelInstance.swift; sourceTree = "<group>"; };
 		E11594961D006022007F8B4F /* Network.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
@@ -282,7 +277,6 @@
 			children = (
 				1668B3D72FF5265300AF2B30 /* JSONExceptionHandler.h */,
 				1668B3D82FF5265300AF2B30 /* JSONExceptionHandler.m */,
-				1668B3D92FF5265300AF2B30 /* Mixpanel.h */,
 				171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */,
 				17C654792BB1EF6700C8A126 /* Mixpanel */,
 				E189D8FB1D5A6943007F3F29 /* Networking */,
@@ -303,7 +297,7 @@
 		E11594891CFF14DF007F8B4F /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				E11594821CFF1491007F8B4F /* Info.plist */,
+				1668B3E62FF669CD00AF2B30 /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -350,7 +344,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1668B3E12FF5265300AF2B30 /* Mixpanel.h in Headers */,
 				1668B3E22FF5265300AF2B30 /* JSONExceptionHandler.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -359,7 +352,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1668B3DD2FF5265300AF2B30 /* Mixpanel.h in Headers */,
 				1668B3DE2FF5265300AF2B30 /* JSONExceptionHandler.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -368,7 +360,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1668B3E42FF5265300AF2B30 /* Mixpanel.h in Headers */,
 				1668B3E52FF5265300AF2B30 /* JSONExceptionHandler.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -377,7 +368,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1668B3DA2FF5265300AF2B30 /* Mixpanel.h in Headers */,
 				1668B3DB2FF5265300AF2B30 /* JSONExceptionHandler.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -737,11 +727,11 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OBJC_BRIDGING_HEADER = "Sources/Mixpanel-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Sources/Mixpanel-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Sources/MixpanelObjC/include";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Sources/MixpanelObjC/include";
 				WATCHOS_DEPLOYMENT_TARGET = 4.0;
 			};
 			name = Debug;
@@ -780,11 +770,11 @@
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "Sources/Mixpanel-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Sources/Mixpanel-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Sources/MixpanelObjC/include";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Sources/MixpanelObjC/include";
 				WATCHOS_DEPLOYMENT_TARGET = 4.0;
 			};
 			name = Release;
@@ -840,6 +830,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -896,6 +887,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -949,11 +941,11 @@
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "${inherited} DEBUG";
 				SWIFT_INCLUDE_PATHS = "${SRCROOT}";
-				SWIFT_OBJC_BRIDGING_HEADER = "Sources/Mixpanel-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Sources/Mixpanel-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Sources/MixpanelObjC/include";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Sources/MixpanelObjC/include";
 				WATCHOS_DEPLOYMENT_TARGET = 3.0;
 			};
 			name = Debug;
@@ -1002,11 +994,11 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "${inherited}";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_INCLUDE_PATHS = "${SRCROOT}";
-				SWIFT_OBJC_BRIDGING_HEADER = "Sources/Mixpanel-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Sources/Mixpanel-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Sources/MixpanelObjC/include";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Sources/MixpanelObjC/include";
 				WATCHOS_DEPLOYMENT_TARGET = 3.0;
 			};
 			name = Release;
@@ -1036,13 +1028,13 @@
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OBJC_BRIDGING_HEADER = "Sources/Mixpanel-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Sources/Mixpanel-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 12.0;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Sources/MixpanelObjC/include";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Sources/MixpanelObjC/include";
 			};
 			name = Debug;
 		};
@@ -1072,13 +1064,13 @@
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "Sources/Mixpanel-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Sources/Mixpanel-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 12.0;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Sources/MixpanelObjC/include";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Sources/MixpanelObjC/include";
 			};
 			name = Release;
 		};
@@ -1111,11 +1103,11 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OBJC_BRIDGING_HEADER = "Sources/Mixpanel-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Sources/Mixpanel-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Sources/MixpanelObjC/include";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Sources/MixpanelObjC/include";
 			};
 			name = Debug;
 		};
@@ -1149,11 +1141,11 @@
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "Sources/Mixpanel-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Sources/Mixpanel-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Sources/MixpanelObjC/include";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Sources/MixpanelObjC/include";
 			};
 			name = Release;
 		};

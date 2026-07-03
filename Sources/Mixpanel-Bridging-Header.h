@@ -3,4 +3,4 @@
 //  Mixpanel
 //
 
-#import "JSONExceptionHandler.h"
+#import "MixpanelObjC/include/JSONExceptionHandler.h"

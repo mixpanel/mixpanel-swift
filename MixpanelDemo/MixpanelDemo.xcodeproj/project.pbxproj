@@ -20,6 +20,7 @@
 		671EECAF21432E5F006DD9FA /* GroupsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 671EECAE21432E5F006DD9FA /* GroupsViewController.swift */; };
 		673ABE4321405A0500B1784B /* MixpanelGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE4221405A0500B1784B /* MixpanelGroupTests.swift */; };
 		7E01564E4913076E148AE9E1 /* AutocaptureSwiftUIInstrumentedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73B0A4D17C3AB8AF617801F4 /* AutocaptureSwiftUIInstrumentedTests.swift */; };
+		8A2F3B5C1D9E7A4B0C6F8D2E /* AutocaptureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4D6E8F2A1B3C5D7E0F9A4B /* AutocaptureTests.swift */; };
 		860BE3132072B85D00C12F18 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 860BE30F2072B83E00C12F18 /* CoreTelephony.framework */; };
 		860BE3712076FBCC00C12F18 /* GDPRViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 860BE3702076FBCC00C12F18 /* GDPRViewController.swift */; };
 		862773E3206B3B1D00CBE79E /* MixpanelOptOutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862773E2206B3B1D00CBE79E /* MixpanelOptOutTests.swift */; };
@@ -282,6 +283,7 @@
 		671EECAE21432E5F006DD9FA /* GroupsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroupsViewController.swift; sourceTree = "<group>"; };
 		673ABE4221405A0500B1784B /* MixpanelGroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelGroupTests.swift; sourceTree = "<group>"; };
 		73B0A4D17C3AB8AF617801F4 /* AutocaptureSwiftUIInstrumentedTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutocaptureSwiftUIInstrumentedTests.swift; sourceTree = "<group>"; };
+		9C4D6E8F2A1B3C5D7E0F9A4B /* AutocaptureTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutocaptureTests.swift; sourceTree = "<group>"; };
 		7DA802B4623D45938280B06A /* MixpanelEventBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelEventBridgeTests.swift; sourceTree = "<group>"; };
 		860BE30F2072B83E00C12F18 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		860BE3702076FBCC00C12F18 /* GDPRViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GDPRViewController.swift; sourceTree = "<group>"; };
@@ -647,6 +649,7 @@
 				E1C61EBD1D22F9F60056C56C /* TestConstants.swift */,
 				51DD56891D3077390045D3DB /* LoggerTests.swift */,
 				E12BD03A1D8A14D6008989C9 /* Supporting Files */,
+				9C4D6E8F2A1B3C5D7E0F9A4B /* AutocaptureTests.swift */,
 				41EE1ACA2C88917BC782B4D6 /* AutocaptureUIKitInstrumentedTests.swift */,
 				73B0A4D17C3AB8AF617801F4 /* AutocaptureSwiftUIInstrumentedTests.swift */,
 			);
@@ -1178,6 +1181,7 @@
 				1A1B2C3D4E5F60718293A5B0 /* MixpanelExcludePropertiesTests.swift in Sources */,
 				174205522F15A7210031EEDC /* MixpanelDeviceIdProviderTests.swift in Sources */,
 				B1AB7B0E940444B7A9B0876A /* MixpanelEventBridgeTests.swift in Sources */,
+				8A2F3B5C1D9E7A4B0C6F8D2E /* AutocaptureTests.swift in Sources */,
 				A4E1266DF2B6E40D2408CB44 /* AutocaptureUIKitInstrumentedTests.swift in Sources */,
 				7E01564E4913076E148AE9E1 /* AutocaptureSwiftUIInstrumentedTests.swift in Sources */,
 				174563BA2DD74E9ABE905B9A /* MixpanelScreenTrackingTests.swift in Sources */,

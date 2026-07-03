@@ -159,7 +159,6 @@ public class MixpanelOptions {
     public let useUniqueDistinctId: Bool
     public let superProperties: Properties?
     public let serverURL: String?
-
     public let proxyServerConfig: ProxyServerConfig?
     public let useGzipCompression: Bool
 

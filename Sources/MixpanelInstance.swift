@@ -103,6 +103,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Accessor to the Mixpanel People API object.
     open var people: People!
 
+
+    /// Accessor to the Mixpanel Autocapture API object.
+    open var autocapture: Autocapture!
+
     /// Accessor the Mixpanel Feature Flags API object.
     open var flags: MixpanelFlags!
 
@@ -400,8 +404,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         self.useUniqueDistinctId = useUniqueDistinctId
 
         readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
-        flushInstance = Flush(
-            serverURL: self.serverURL, useGzipCompression: useGzipCompression)
+        flushInstance = Flush(serverURL: self.serverURL, useGzipCompression: useGzipCompression)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         MixpanelInstance.warnIfStrippingLibProperties(self.options.excludeProperties)
         trackInstance = Track(
@@ -453,6 +456,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             excludeProperties: self.options.excludeProperties)
         people.mixpanelInstance = self
         people.delegate = self
+        autocapture = Autocapture()
+        autocapture.mixpanelInstance = self
         flushInstance.flushInterval = flushInterval
         #if !os(watchOS)
         setupListeners()

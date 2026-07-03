@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Generate changelog from conventional commits since last tag
-# Groups commits by type: Features, Fixes, Chores, etc.
+# Groups commits by type: Features, Fixes, Chores
 # Auto-linkifies PR references
 
 VERSION="$1"
@@ -14,35 +14,62 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
-# Find the last tag (without 'v' prefix)
-LAST_TAG=$(git tag --sort=-version:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || echo "")
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+MODULES_JSON="$SCRIPT_DIR/../.github/modules.json"
 
-if [ -z "$LAST_TAG" ]; then
+# Extract tag prefix from modules.json
+if [ ! -f "$MODULES_JSON" ]; then
+  echo "ERROR: modules.json not found at $MODULES_JSON"
+  exit 1
+fi
+
+TAG_PREFIX=$(jq -e -r '.analytics.tag_prefix' "$MODULES_JSON" 2>/dev/null || echo "INVALID")
+if [ "$TAG_PREFIX" = "INVALID" ] || [ "$TAG_PREFIX" = "null" ]; then
+  echo "ERROR: Could not read tag_prefix from modules.json"
+  exit 1
+fi
+
+# Build tag glob pattern
+if [ "$TAG_PREFIX" = "" ]; then
+  TAG_GLOB="[0-9]*"
+else
+  TAG_GLOB="${TAG_PREFIX}*"
+fi
+
+# Find previous tag using pattern
+PREVIOUS_TAG=$(git tag --sort=-version:refname --list "$TAG_GLOB" | head -1 || true)
+
+if [ -z "$PREVIOUS_TAG" ]; then
   echo "No previous tags found. Generating changelog from all commits."
   COMMIT_RANGE="HEAD"
 else
-  echo "Last tag: $LAST_TAG"
-  COMMIT_RANGE="$LAST_TAG..HEAD"
+  echo "Last tag: $PREVIOUS_TAG"
+  COMMIT_RANGE="${PREVIOUS_TAG}..HEAD"
 fi
 
 # Get current date
 CURRENT_DATE=$(date +%Y-%m-%d)
 
+# Build version tag
+VERSION_TAG="${TAG_PREFIX}${VERSION}"
+
 # Get commits in range
-COMMITS=$(git log "$COMMIT_RANGE" --pretty=format:"%s|||%H" --no-merges)
+COMMITS=$(git log "$COMMIT_RANGE" --pretty=format:"%s" --no-merges)
 
 # Initialize arrays for different types
-declare -a FEATURES
-declare -a FIXES
-declare -a CHORES
+declare -a FEATURES=()
+declare -a FIXES=()
 
 # Parse commits and categorize by conventional commit type
-while IFS='|||' read -r SUBJECT COMMIT_HASH; do
+while IFS= read -r SUBJECT; do
   # Skip empty lines
   [ -z "$SUBJECT" ] && continue
 
   # Skip release commits
   [[ "$SUBJECT" =~ ^release: ]] && continue
+
+  # Skip chore commits
+  [[ "$SUBJECT" =~ ^chore: ]] && continue
 
   # Extract PR number if present (#123)
   PR_NUM=""
@@ -65,18 +92,11 @@ while IFS='|||' read -r SUBJECT COMMIT_HASH; do
     else
       FIXES+=("- $MSG")
     fi
-  elif [[ "$SUBJECT" =~ ^chore: ]]; then
-    MSG="${SUBJECT#chore: }"
-    if [ -n "$PR_NUM" ]; then
-      CHORES+=("- $MSG ([#$PR_NUM](https://github.com/$REPO/pull/$PR_NUM))")
-    else
-      CHORES+=("- $MSG")
-    fi
   fi
 done <<< "$COMMITS"
 
 # Generate changelog markdown
-echo "## [$VERSION](https://github.com/$REPO/tree/$VERSION) ($CURRENT_DATE)"
+echo "## [${VERSION_TAG}](https://github.com/${REPO}/tree/${VERSION_TAG}) (${CURRENT_DATE})"
 echo ""
 
 # Features
@@ -99,20 +119,10 @@ if [ ${#FIXES[@]} -gt 0 ]; then
   echo ""
 fi
 
-# Chores
-if [ ${#CHORES[@]} -gt 0 ]; then
-  echo "### Chores"
-  echo ""
-  for chore in "${CHORES[@]}"; do
-    echo "$chore"
-  done
-  echo ""
-fi
-
 # Full changelog link
-if [ -n "$LAST_TAG" ]; then
-  echo "[Full Changelog](https://github.com/$REPO/compare/$LAST_TAG...$VERSION)"
+if [ -n "$PREVIOUS_TAG" ]; then
+  echo "[Full Changelog](https://github.com/${REPO}/compare/${PREVIOUS_TAG}...${VERSION_TAG})"
 else
-  echo "[Full Changelog](https://github.com/$REPO/commits/$VERSION)"
+  echo "[Full Changelog](https://github.com/${REPO}/commits/${VERSION_TAG})"
 fi
 echo ""

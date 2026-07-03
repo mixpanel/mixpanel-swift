@@ -74,7 +74,7 @@ import XCTest
       let autocaptureOptions = AutocaptureOptions(
         clickOptions: ClickOptions(enabled: true),
         rageClickOptions: RageClickOptions(enabled: true, clickThreshold: 4, timeWindowMs: 1000),
-        deadClickOptions: DeadClickOptions(enabled: true, timeoutMs: 500, baselineDelayMs: 100)
+        deadClickOptions: DeadClickOptions(enabled: true, timeoutMs: 500)
       )
 
       let options = MixpanelOptions(
@@ -210,7 +210,6 @@ import XCTest
       if let props = rageEvent?.properties {
         // SwiftUI rendered views use UIKit resolution rules (identifier first)
         XCTAssertEqual(props["$el_id"] as? String, "swiftui_rage")
-        XCTAssertNotNil(props["$tap_count"])
       }
     }
 

@@ -62,7 +62,7 @@ import XCTest
       let autocaptureOptions = AutocaptureOptions(
         clickOptions: ClickOptions(enabled: true),
         rageClickOptions: RageClickOptions(enabled: true, clickThreshold: 4, timeWindowMs: 1000),
-        deadClickOptions: DeadClickOptions(enabled: true, timeoutMs: 500, baselineDelayMs: 100)
+        deadClickOptions: DeadClickOptions(enabled: true, timeoutMs: 500)
       )
 
       let options = MixpanelOptions(
@@ -192,7 +192,6 @@ import XCTest
 
       if let props = rageEvent?.properties {
         XCTAssertEqual(props["$el_id"] as? String, "rage_btn")
-        XCTAssertNotNil(props["$tap_count"], "Should include tap count")
       }
     }
 

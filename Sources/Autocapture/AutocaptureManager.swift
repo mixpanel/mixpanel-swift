@@ -157,29 +157,10 @@
       }
 
       // Extract semantic information
-      var clickEvent = semanticExtractor.extractSemantics(from: view, at: point)
+      let clickEvent = semanticExtractor.extractSemantics(from: view, at: point)
 
       // Check for rage click
-      var rageClickResult: RageClickResult?
-      if let tracker = rageClickTracker {
-        rageClickResult = tracker.trackClick(x: point.x, y: point.y)
-
-        // Update event with rage click info
-        if rageClickResult?.isRageClick == true {
-          clickEvent = ClickEvent(
-            x: clickEvent.x,
-            y: clickEvent.y,
-            elementId: clickEvent.elementId,
-            tagName: clickEvent.tagName,
-            ariaLabel: clickEvent.ariaLabel,
-            role: clickEvent.role,
-            elements: clickEvent.elements,
-            isRageClick: true,
-            tapCount: rageClickResult?.tapCount ?? 1,
-            isInteractive: clickEvent.isInteractive
-          )
-        }
-      }
+      let rageClickResult = rageClickTracker?.trackClick(x: point.x, y: point.y)
 
       // Emit click event
       if options.clickOptions.enabled {
@@ -207,12 +188,11 @@
     }
 
     private func emitRageClickEvent(_ event: ClickEvent) {
-      var properties = event.toProperties()
-      properties["$tap_count"] = event.tapCount
+      let properties = event.toProperties()
       trackEvent(EventName.rageClick, properties)
       MixpanelLogger.debug(
         message:
-          "AutocaptureManager: emitted \(EventName.rageClick) for \(event.elementId) (count: \(event.tapCount))"
+          "AutocaptureManager: emitted \(EventName.rageClick) for \(event.elementId)"
       )
     }
 

@@ -53,18 +53,15 @@ import XCTest
       let options = DeadClickOptions()
       XCTAssertTrue(options.enabled)
       XCTAssertEqual(options.timeoutMs, 500)
-      XCTAssertEqual(options.baselineDelayMs, 150)
     }
 
     func testDeadClickOptionsCustomValues() {
       let options = DeadClickOptions(
         enabled: false,
-        timeoutMs: 700,
-        baselineDelayMs: 200
+        timeoutMs: 700
       )
       XCTAssertFalse(options.enabled)
       XCTAssertEqual(options.timeoutMs, 700)
-      XCTAssertEqual(options.baselineDelayMs, 200)
     }
 
     // MARK: - AutocaptureOptions Tests
@@ -287,13 +284,9 @@ import XCTest
         y: 200,
         elementId: "test_button",
         tagName: "UIButton",
-        text: "Click Me",
         ariaLabel: "Test Button",
         role: "Button",
-        elements: "UIButton > UIView",
-        isRageClick: false,
-        tapCount: 1,
-        isInteractive: true
+        elements: "UIButton > UIView"
       )
 
       let props = event.toProperties()
@@ -313,13 +306,9 @@ import XCTest
         y: 200,
         elementId: "test_button",
         tagName: "UIButton",
-        text: nil,
         ariaLabel: nil,
         role: nil,
-        elements: "UIButton",
-        isRageClick: false,
-        tapCount: 1,
-        isInteractive: true
+        elements: "UIButton"
       )
 
       let props = event.toProperties()

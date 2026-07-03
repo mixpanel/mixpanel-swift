@@ -12,7 +12,7 @@
   /// Detects clicks on interactive elements that produce no visible UI response.
   ///
   /// Dead clicks indicate broken or unresponsive UI elements. Detection works by:
-  /// 1. Capturing a baseline UI snapshot shortly after the click (150ms default)
+  /// 1. Capturing a baseline UI snapshot synchronously at click time
   /// 2. Waiting for the timeout period (500ms default)
   /// 3. Comparing the final state to the baseline
   /// 4. If no change detected, emitting a dead click event
@@ -20,7 +20,6 @@
     // MARK: - Configuration
 
     private let timeoutMs: Int
-    private let baselineDelayMs: Int
 
     // MARK: - Callback
 
@@ -43,52 +42,15 @@
 
     private struct PendingCheck {
       let event: ClickEvent
-      let baselineSnapshot: UISnapshot?
+      let baselineSnapshot: UISnapshot
       let startTime: Date
     }
-
-    // MARK: - Excluded Controls
-
-    /// Controls that should be excluded from dead click detection because
-    /// they have inherent visual feedback or side effects not detected by UI snapshots.
-    ///
-    /// These controls produce visual feedback that may not be captured by UI snapshot comparison:
-    /// - UISwitch: Toggle animation and state change
-    /// - UISlider: Thumb moves with drag
-    /// - UITextField/UITextView: Keyboard appears, cursor shown
-    /// - UIStepper: Value changes with visual feedback
-    /// - UISegmentedControl: Selection highlight changes
-    /// - UIDatePicker/UIPickerView: Wheel/calendar UI appears
-    private static let excludedControlTypes: [AnyClass] = [
-      UISwitch.self,
-      UISlider.self,
-      UITextField.self,
-      UITextView.self,
-      UIStepper.self,
-      UISegmentedControl.self,
-      UIDatePicker.self,
-      UIPickerView.self,
-    ]
 
     // MARK: - Initialization
 
     init(options: DeadClickOptions) {
       self.timeoutMs = options.timeoutMs
-      self.baselineDelayMs = options.baselineDelayMs
     }
-
-    /// SwiftUI class name patterns for controls with inherent visual feedback.
-    /// These are checked when walking up the view hierarchy for SwiftUI views.
-    private static let swiftUIExcludedPatterns = [
-      "Toggle",       // SwiftUI Toggle (switch)
-      "Slider",       // SwiftUI Slider
-      "Stepper",      // SwiftUI Stepper
-      "TextField",    // SwiftUI TextField
-      "TextEditor",   // SwiftUI TextEditor (multiline text)
-      "SecureField",  // SwiftUI SecureField (password)
-      "Picker",       // SwiftUI Picker
-      "DatePicker",   // SwiftUI DatePicker
-    ]
 
     // MARK: - Public API
 
@@ -106,7 +68,7 @@
 
       while let v = currentView, depth < maxDepth {
         // Check UIKit control types
-        for controlType in Self.excludedControlTypes {
+        for controlType in AutocaptureDefaults.excludedControlTypes {
           if v.isKind(of: controlType) {
             return true
           }
@@ -114,7 +76,7 @@
 
         // Check SwiftUI patterns by class name
         let className = String(describing: type(of: v))
-        for pattern in Self.swiftUIExcludedPatterns {
+        for pattern in AutocaptureDefaults.swiftUIExcludedPatterns {
           if className.contains(pattern) {
             return true
           }
@@ -200,19 +162,25 @@
         return
       }
 
+      // Capture baseline synchronously at click time — before the click handler
+      // has a chance to update the UI. This prevents fast UI responses (e.g.,
+      // showing a UIAlertController) from being absorbed into the baseline,
+      // which would cause false positive dead clicks.
+      let baseline = captureSnapshot(window: window)
+
       lock.lock()
       currentWindow = window
       pendingCheck = PendingCheck(
         event: event,
-        baselineSnapshot: nil,
+        baselineSnapshot: baseline,
         startTime: Date()
       )
       lock.unlock()
 
-      // Schedule baseline capture
-      DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(baselineDelayMs)) {
+      // Schedule final check at full timeout
+      DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeoutMs)) {
         [weak self] in
-        self?.captureBaseline()
+        self?.performFinalCheck()
       }
     }
 
@@ -227,36 +195,9 @@
 
     // MARK: - Private
 
-    private func captureBaseline() {
-      lock.lock()
-      guard var check = pendingCheck, let window = currentWindow else {
-        lock.unlock()
-        return
-      }
-
-      let baseline = captureSnapshot(window: window)
-      check = PendingCheck(
-        event: check.event,
-        baselineSnapshot: baseline,
-        startTime: check.startTime
-      )
-      pendingCheck = check
-      lock.unlock()
-
-      // Schedule final check
-      let remainingDelay = timeoutMs - baselineDelayMs
-      DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(remainingDelay)) {
-        [weak self] in
-        self?.performFinalCheck()
-      }
-    }
-
     private func performFinalCheck() {
       lock.lock()
-      guard let check = pendingCheck,
-        let baseline = check.baselineSnapshot,
-        let window = currentWindow
-      else {
+      guard let check = pendingCheck, let window = currentWindow else {
         pendingCheck = nil
         lock.unlock()
         return
@@ -265,6 +206,7 @@
       lock.unlock()
 
       let current = captureSnapshot(window: window)
+      let baseline = check.baselineSnapshot
 
       // Compare snapshots
       let hasChanges = hasUIChanges(baseline: baseline, current: current)

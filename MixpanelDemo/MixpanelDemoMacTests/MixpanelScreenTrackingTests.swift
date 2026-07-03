@@ -30,7 +30,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         XCTAssertEqual(props?["extra_prop"] as? String, "extra_value")
         XCTAssertNotNil(props?["$screen_height"])
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testScreenViewWithoutProperties() {
@@ -49,7 +49,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
         XCTAssertEqual(props?["$mp_autocapture"] as? Bool, true)
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testScreenLeave() {
@@ -70,7 +70,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         XCTAssertEqual(props?["$mp_autocapture"] as? Bool, true)
         XCTAssertEqual(props?["time_spent"] as? Int, 30)
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testScreenLeaveWithoutProperties() {
@@ -89,7 +89,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
         XCTAssertEqual(props?["$mp_autocapture"] as? Bool, true)
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testEmptyScreenNameIsIgnored() {
@@ -105,7 +105,7 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         let events = eventQueue(token: testMixpanel.apiToken)
         XCTAssertEqual(events.count, 0)
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     func testSdkPropertiesCannotBeOverridden() {
@@ -125,6 +125,6 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
         XCTAssertEqual(props?["$mp_autocapture"] as? Bool, true)
 
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 }

@@ -20,12 +20,20 @@
     // MARK: - Public API
 
     /// Extract semantic information from a view at the given point.
+    ///
+    /// If the touched view is not interactive (e.g., a UILabel inside a UIButton),
+    /// walks up to find the nearest interactive ancestor and extracts from that instead.
     func extractSemantics(from view: UIView, at point: CGPoint) -> ClickEvent {
-      let className = String(describing: type(of: view))
-      let elementId = generateElementId(for: view, isSwiftUI: isSwiftUIView(view))
-      let ariaLabel = findAccessibilityLabel(in: view)
-      let role = determineRole(for: view)
-      let elements = buildViewHierarchy(from: view)
+      // UIKit hit-testing returns the deepest view. For UIButton > UILabel,
+      // we get the UILabel — wrong role, wrong el_id, not interactive.
+      // Walk up to the nearest clickable ancestor when the leaf isn't interactive.
+      let targetView = isInteractive(view) ? view : (findInteractiveAncestor(of: view) ?? view)
+
+      let className = String(describing: type(of: targetView))
+      let elementId = generateElementId(for: targetView, isSwiftUI: isSwiftUIView(targetView))
+      let ariaLabel = findAccessibilityLabel(in: targetView)
+      let role = determineRole(for: targetView)
+      let elements = buildViewHierarchy(from: targetView)
 
       return ClickEvent(
         x: point.x,
@@ -195,6 +203,38 @@
     private func isSwiftUIView(_ view: UIView) -> Bool {
       let className = String(describing: type(of: view))
       return className.contains("Hosting") || className.contains("SwiftUI")
+    }
+
+    // MARK: - Interactive View Resolution
+
+    /// Check if a view is interactive (has tap handlers or is a UIControl with targets).
+    private func isInteractive(_ view: UIView) -> Bool {
+      if let control = view as? UIControl, !control.allTargets.isEmpty {
+        return true
+      }
+      if let gestures = view.gestureRecognizers {
+        for gesture in gestures where gesture.isEnabled {
+          if gesture is UITapGestureRecognizer {
+            return true
+          }
+        }
+      }
+      return false
+    }
+
+    /// Walk up the view hierarchy to find the nearest interactive ancestor.
+    /// Returns nil if no interactive ancestor is found within maxDepth levels.
+    private func findInteractiveAncestor(of view: UIView, maxDepth: Int = 5) -> UIView? {
+      var current = view.superview
+      var depth = 0
+      while let v = current, depth < maxDepth {
+        if isInteractive(v) {
+          return v
+        }
+        current = v.superview
+        depth += 1
+      }
+      return nil
     }
 
   }

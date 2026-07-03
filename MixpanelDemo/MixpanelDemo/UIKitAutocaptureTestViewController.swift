@@ -13,7 +13,7 @@ import UIKit
 ///
 /// Tests all three event types ($mp_click, $mp_rage_click, $mp_dead_click)
 /// and verifies $el_id resolution rules for UIKit views.
-class UIKitAutocaptureTestViewController: UIViewController {
+class UIKitAutocaptureTestViewController: UIViewController, UIPopoverPresentationControllerDelegate {
 
   private let scrollView = UIScrollView()
   private let stackView = UIStackView()
@@ -177,6 +177,34 @@ class UIKitAutocaptureTestViewController: UIViewController {
     stepper.accessibilityIdentifier = "test_stepper"
     stackView.addArrangedSubview(stepper)
 
+    // MARK: - Multi-Window / Overlay Section
+
+    stackView.addArrangedSubview(sectionLabel("Multi-Window / Overlay"))
+
+    // Show Alert
+    let alertBtn = makeButton("Show UIAlertController (Alert)", hasAction: false)
+    alertBtn.accessibilityIdentifier = "uikit_alert_trigger"
+    alertBtn.addTarget(self, action: #selector(showAlert), for: .touchUpInside)
+    stackView.addArrangedSubview(alertBtn)
+
+    // Show Action Sheet
+    let actionSheetBtn = makeButton("Show UIAlertController (Action Sheet)", hasAction: false)
+    actionSheetBtn.accessibilityIdentifier = "uikit_actionsheet_trigger"
+    actionSheetBtn.addTarget(self, action: #selector(showActionSheet(_:)), for: .touchUpInside)
+    stackView.addArrangedSubview(actionSheetBtn)
+
+    // Show Popover
+    let popoverBtn = makeButton("Show Popover", hasAction: false)
+    popoverBtn.accessibilityIdentifier = "uikit_popover_trigger"
+    popoverBtn.addTarget(self, action: #selector(showPopover(_:)), for: .touchUpInside)
+    stackView.addArrangedSubview(popoverBtn)
+
+    // Show Share Sheet
+    let shareBtn = makeButton("Show Share Sheet", hasAction: false)
+    shareBtn.accessibilityIdentifier = "uikit_share_trigger"
+    shareBtn.addTarget(self, action: #selector(showShareSheet(_:)), for: .touchUpInside)
+    stackView.addArrangedSubview(shareBtn)
+
     // MARK: - Instructions
 
     stackView.addArrangedSubview(sectionLabel("Instructions"))
@@ -240,6 +268,77 @@ class UIKitAutocaptureTestViewController: UIViewController {
   }
 
   @objc private func noop() {}
+
+  func adaptivePresentationStyle(
+    for controller: UIPresentationController
+  ) -> UIModalPresentationStyle {
+    return .none
+  }
+
+  @objc private func showAlert() {
+    let alert = UIAlertController(
+      title: "Test Alert",
+      message: "Tap buttons inside this alert",
+      preferredStyle: .alert
+    )
+    alert.addAction(UIAlertAction(title: "Confirm", style: .default))
+    alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+    present(alert, animated: true)
+  }
+
+  @objc private func showActionSheet(_ sender: UIButton) {
+    let sheet = UIAlertController(
+      title: "Test Action Sheet",
+      message: "Choose an option",
+      preferredStyle: .actionSheet
+    )
+    sheet.addAction(UIAlertAction(title: "Option 1", style: .default))
+    sheet.addAction(UIAlertAction(title: "Option 2", style: .default))
+    sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+    if let popover = sheet.popoverPresentationController {
+      popover.sourceView = sender
+      popover.sourceRect = sender.bounds
+    }
+    present(sheet, animated: true)
+  }
+
+  @objc private func showPopover(_ sender: UIButton) {
+    let contentVC = UIViewController()
+    if #available(iOS 13.0, *) {
+      contentVC.view.backgroundColor = .systemBackground
+    } else {
+      contentVC.view.backgroundColor = .white
+    }
+    contentVC.preferredContentSize = CGSize(width: 250, height: 150)
+
+    let dismissBtn = UIButton(type: .system)
+    dismissBtn.setTitle("Dismiss Popover", for: .normal)
+    dismissBtn.translatesAutoresizingMaskIntoConstraints = false
+    contentVC.view.addSubview(dismissBtn)
+    NSLayoutConstraint.activate([
+      dismissBtn.centerXAnchor.constraint(equalTo: contentVC.view.centerXAnchor),
+      dismissBtn.centerYAnchor.constraint(equalTo: contentVC.view.centerYAnchor),
+    ])
+
+    contentVC.modalPresentationStyle = .popover
+    if let popover = contentVC.popoverPresentationController {
+      popover.sourceView = sender
+      popover.sourceRect = sender.bounds
+      popover.permittedArrowDirections = .any
+      popover.delegate = self
+    }
+    present(contentVC, animated: true)
+  }
+
+  @objc private func showShareSheet(_ sender: UIButton) {
+    let items: [Any] = ["Sample text for sharing", URL(string: "https://mixpanel.com")!]
+    let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
+    if let popover = activityVC.popoverPresentationController {
+      popover.sourceView = sender
+      popover.sourceRect = sender.bounds
+    }
+    present(activityVC, animated: true)
+  }
 
   @objc private func buttonTapped(_ sender: UIButton) {
     // Visual feedback

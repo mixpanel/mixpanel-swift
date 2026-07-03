@@ -30,13 +30,6 @@
 
     private override init() {
       super.init()
-      // Observe for new windows
-      NotificationCenter.default.addObserver(
-        self,
-        selector: #selector(windowDidBecomeVisible(_:)),
-        name: UIWindow.didBecomeVisibleNotification,
-        object: nil
-      )
     }
 
     deinit {
@@ -74,7 +67,6 @@
       }
 
       self.manager = manager
-      isInstalled = true
 
       // Add gesture recognizer to all existing windows
       // Use selector-based approach to avoid app extension issues
@@ -101,6 +93,17 @@
         }
       }
 
+      // Set installed flag only after successful window instrumentation
+      isInstalled = true
+
+      // Re-register notification observer (removed during uninstall)
+      NotificationCenter.default.addObserver(
+        self,
+        selector: #selector(windowDidBecomeVisible(_:)),
+        name: UIWindow.didBecomeVisibleNotification,
+        object: nil
+      )
+
       MixpanelLogger.info(message: "TouchInterceptor: installed successfully, observing \(observedWindows.count) windows")
     }
 
@@ -109,6 +112,9 @@
       lock.lock()
       defer { lock.unlock() }
       manager = nil
+      // Stop observing new windows
+      NotificationCenter.default.removeObserver(
+        self, name: UIWindow.didBecomeVisibleNotification, object: nil)
       for window in observedWindows.allObjects {
         window.gestureRecognizers?.removeAll { $0 is TouchObservingGestureRecognizer }
       }
@@ -120,7 +126,7 @@
     // MARK: - Window Observation
 
     @objc private func windowDidBecomeVisible(_ notification: Notification) {
-      guard let window = notification.object as? UIWindow else { return }
+      guard isInstalled, let window = notification.object as? UIWindow else { return }
       MixpanelLogger.debug(message: "TouchInterceptor: window became visible")
       DispatchQueue.main.async { [weak self] in
         self?.addGestureRecognizer(to: window)

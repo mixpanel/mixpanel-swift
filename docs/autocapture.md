@@ -28,7 +28,7 @@ let options = MixpanelOptions(
 let mixpanel = Mixpanel.initialize(options: options)
 ```
 
-That's it! No additional setup required. Autocapture automatically intercepts all touch events via method swizzling.
+That's it! No additional setup required. Autocapture automatically intercepts all touch events via a non-claiming gesture recognizer.
 
 ## Configuration Options
 
@@ -53,7 +53,6 @@ That's it! No additional setup required. Autocapture automatically intercepts al
 |--------|---------|-------------|
 | `enabled` | `true` | Track dead click events |
 | `timeoutMs` | `500` | Response wait time in milliseconds |
-| `baselineDelayMs` | `150` | Delay before capturing baseline snapshot |
 
 ### Custom Configuration Example
 
@@ -89,12 +88,6 @@ All autocapture events include these properties:
 | `$attr-aria-label` | Accessibility label |
 | `$attr-role` | Element role (Button, Switch, etc.) |
 | `$elements` | View hierarchy string (max 5 levels) |
-
-### Rage Click Additional Properties
-
-| Property | Description |
-|----------|-------------|
-| `$tap_count` | Number of taps in the rage click sequence |
 
 ## Element Identification (`$el_id`)
 
@@ -139,9 +132,9 @@ Dead click detection monitors interactive elements for UI response:
 ### How It Works
 
 1. User taps an element with interaction handlers
-2. Wait 150ms for animations to settle (baseline delay)
-3. Capture a snapshot of the UI state
-4. Wait until 500ms total (timeout)
+2. Capture a snapshot of the UI state immediately (synchronous baseline)
+3. Wait 500ms (timeout)
+4. Capture a final snapshot and compare with baseline
 5. If UI hasn't changed, emit `$mp_dead_click`
 
 ### Excluded Controls
@@ -248,7 +241,7 @@ Autocapture does **not** require ATT permission. It is first-party analytics wit
 
 ### Touch Interception
 
-Autocapture uses method swizzling on `UIApplication.sendEvent(_:)` to intercept all touch events. This approach:
+Autocapture uses a non-claiming gesture recognizer added to all windows to observe touch events. This approach:
 
 - Requires zero customer setup
 - Captures all windows (main, alerts, sheets, modals)

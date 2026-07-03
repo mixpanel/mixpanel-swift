@@ -18,6 +18,10 @@ struct SwiftUIAutocaptureTestView: View {
   @State private var text = ""
   @State private var password = ""
   @State private var tapCount = 0
+  @State private var showAlert = false
+  @State private var showSheet = false
+  @State private var showConfirmationDialog = false
+  @State private var showPopover = false
 
   var body: some View {
     ScrollView {
@@ -85,6 +89,34 @@ struct SwiftUIAutocaptureTestView: View {
         SecureField("Password - text NOT captured", text: $password)
           .textFieldStyle(.roundedBorder)
 
+        // MARK: - Multi-Window / Overlay
+
+        SectionHeader("Multi-Window / Overlay")
+
+        Button("Show Alert") {
+          showAlert = true
+        }
+        .accessibilityLabel("swiftui_alert_trigger")
+        .buttonStyle(TestButtonStyle())
+
+        Button("Show Sheet") {
+          showSheet = true
+        }
+        .accessibilityLabel("swiftui_sheet_trigger")
+        .buttonStyle(TestButtonStyle())
+
+        Button("Show Confirmation Dialog") {
+          showConfirmationDialog = true
+        }
+        .accessibilityLabel("swiftui_confirmation_trigger")
+        .buttonStyle(TestButtonStyle())
+
+        Button("Show Popover") {
+          showPopover = true
+        }
+        .accessibilityLabel("swiftui_popover_trigger")
+        .buttonStyle(TestButtonStyle())
+
         // MARK: - Instructions
 
         SectionHeader("Instructions")
@@ -106,6 +138,103 @@ struct SwiftUIAutocaptureTestView: View {
       .padding()
     }
     .navigationTitle("SwiftUI Autocapture Test")
+    .modifier(AlertModifier(isPresented: $showAlert))
+    .sheet(isPresented: $showSheet) {
+      NavigationView {
+        VStack(spacing: 12) {
+          Button("Sheet Action 1") {}
+            .accessibilityLabel("swiftui_sheet_action_1")
+            .buttonStyle(TestButtonStyle())
+
+          Button("Sheet Action 2") {}
+            .accessibilityLabel("swiftui_sheet_action_2")
+            .buttonStyle(TestButtonStyle())
+
+          Button("Sheet Action 3") {}
+            .accessibilityLabel("swiftui_sheet_action_3")
+            .buttonStyle(TestButtonStyle())
+
+          Button("Close") {
+            showSheet = false
+          }
+          .buttonStyle(TestButtonStyle())
+        }
+        .padding()
+        .navigationTitle("Test Sheet")
+      }
+    }
+    .modifier(ConfirmationDialogModifier(isPresented: $showConfirmationDialog))
+    .popover(isPresented: $showPopover) {
+      VStack(spacing: 12) {
+        Text("Popover Content")
+        Button("Close") {
+          showPopover = false
+        }
+      }
+      .padding()
+    }
+  }
+}
+
+/// ViewModifier that presents an alert using the iOS 15+ API when available,
+/// falling back to the iOS 14 Alert struct.
+@available(iOS 14.0, *)
+private struct AlertModifier: ViewModifier {
+  @Binding var isPresented: Bool
+
+  func body(content: Content) -> some View {
+    if #available(iOS 15.0, *) {
+      content
+        .alert("Test Alert", isPresented: $isPresented) {
+          Button("Confirm") {}
+            .accessibilityLabel("swiftui_alert_confirm")
+          Button("Cancel", role: .cancel) {}
+        }
+    } else {
+      content
+        .alert(isPresented: $isPresented) {
+          Alert(
+            title: Text("Test Alert"),
+            primaryButton: .default(Text("Confirm")),
+            secondaryButton: .cancel()
+          )
+        }
+    }
+  }
+}
+
+/// ViewModifier that presents a confirmationDialog on iOS 15+,
+/// falling back to an actionSheet on iOS 14.
+@available(iOS 14.0, *)
+private struct ConfirmationDialogModifier: ViewModifier {
+  @Binding var isPresented: Bool
+
+  func body(content: Content) -> some View {
+    if #available(iOS 15.0, *) {
+      content
+        .confirmationDialog("Choose Option", isPresented: $isPresented) {
+          Button("Option 1") {}
+            .accessibilityLabel("swiftui_dialog_option_1")
+          Button("Option 2") {}
+            .accessibilityLabel("swiftui_dialog_option_2")
+          Button("Option 3") {}
+            .accessibilityLabel("swiftui_dialog_option_3")
+          Button("Cancel", role: .cancel) {}
+        }
+    } else {
+      content
+        .actionSheet(isPresented: $isPresented) {
+          ActionSheet(
+            title: Text("Choose Option"),
+            buttons: [
+              .default(Text("Option 1")),
+              .default(Text("Option 2")),
+              .default(Text("Option 3")),
+              .cancel()
+            ]
+          )
+        }
+    }
   }
 }
 

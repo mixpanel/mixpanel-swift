@@ -17,6 +17,36 @@ import Foundation
 enum AutocaptureDefaults {
   static let maxHierarchyDepth = 5
   static let maxRecursionDepth = 20
+
+  #if os(iOS)
+    /// UIKit controls with inherent visual feedback that should be excluded from
+    /// dead click detection. These controls always produce a visible UI response
+    /// (toggle animation, keyboard, wheel picker, etc.) that may not be captured
+    /// by snapshot comparison.
+    static let excludedControlTypes: [AnyClass] = [
+      UISwitch.self,
+      UISlider.self,
+      UITextField.self,
+      UITextView.self,
+      UIStepper.self,
+      UISegmentedControl.self,
+      UIDatePicker.self,
+      UIPickerView.self,
+    ]
+
+    /// SwiftUI class name patterns for controls with inherent visual feedback.
+    /// Checked by substring match on the view's class name when walking the hierarchy.
+    static let swiftUIExcludedPatterns = [
+      "Toggle",       // SwiftUI Toggle (switch)
+      "Slider",       // SwiftUI Slider
+      "Stepper",      // SwiftUI Stepper
+      "TextField",    // SwiftUI TextField
+      "TextEditor",   // SwiftUI TextEditor (multiline text)
+      "SecureField",  // SwiftUI SecureField (password)
+      "Picker",       // SwiftUI Picker
+      "DatePicker",   // SwiftUI DatePicker
+    ]
+  #endif
 }
 
 // MARK: - Click Options
@@ -83,19 +113,12 @@ public struct DeadClickOptions {
   /// Defaults to `500` (0.5 seconds).
   public let timeoutMs: Int
 
-  /// Delay in milliseconds before capturing the baseline UI state.
-  /// This allows animations to settle before capturing the snapshot.
-  /// Defaults to `150` (0.15 seconds).
-  public let baselineDelayMs: Int
-
   public init(
     enabled: Bool = true,
-    timeoutMs: Int = 500,
-    baselineDelayMs: Int = 150
+    timeoutMs: Int = 500
   ) {
     self.enabled = enabled
     self.timeoutMs = timeoutMs
-    self.baselineDelayMs = baselineDelayMs
   }
 }
 

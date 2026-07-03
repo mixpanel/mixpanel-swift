@@ -145,8 +145,10 @@
 
     // MARK: - Gesture Handling
 
+    /// Required by UIGestureRecognizer(target:action:) — never called because
+    /// TouchObservingGestureRecognizer handles touches via touchesBegan/touchesEnded
+    /// overrides and always transitions to .failed state.
     @objc private func handleTouchGesture(_ gesture: TouchObservingGestureRecognizer) {
-      // This won't be called - the recognizer handles touches internally
     }
 
     /// Called by the gesture recognizer when a touch ends

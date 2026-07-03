@@ -40,19 +40,6 @@
     /// View hierarchy string (max 5 levels, ">" separated)
     let elements: String
 
-    // MARK: - Event Type
-
-    /// Whether this click is part of a rage click sequence
-    let isRageClick: Bool
-
-    /// Number of taps in the rage click sequence (if applicable)
-    let tapCount: Int
-
-    // MARK: - State
-
-    /// Whether the element has interaction handlers attached
-    let isInteractive: Bool
-
     // MARK: - Conversion to Properties
 
     /// Convert to Mixpanel properties dictionary for tracking

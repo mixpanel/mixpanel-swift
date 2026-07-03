@@ -26,7 +26,6 @@
       let ariaLabel = findAccessibilityLabel(in: view)
       let role = determineRole(for: view)
       let elements = buildViewHierarchy(from: view)
-      let isInteractive = hasInteractionHandlers(view: view)
 
       return ClickEvent(
         x: point.x,
@@ -35,10 +34,7 @@
         tagName: className,
         ariaLabel: ariaLabel,
         role: role,
-        elements: elements,
-        isRageClick: false,
-        tapCount: 1,
-        isInteractive: isInteractive
+        elements: elements
       )
     }
 
@@ -201,94 +197,5 @@
       return className.contains("Hosting") || className.contains("SwiftUI")
     }
 
-    // MARK: - Interaction Handler Detection
-
-    /// Controls with inherent visual feedback that should be excluded from dead click monitoring.
-    ///
-    /// These controls always produce a UI response when tapped:
-    /// - UISwitch: Toggle animation and state change
-    /// - UISlider: Thumb moves with drag
-    /// - UITextField/UITextView: Keyboard appears, cursor shown
-    /// - UIStepper: Value changes with visual feedback
-    /// - UISegmentedControl: Selection highlight changes
-    /// - UIDatePicker/UIPickerView: Wheel/calendar UI appears
-    private static let controlsWithInherentFeedback: [AnyClass] = [
-      UISwitch.self,
-      UISlider.self,
-      UITextField.self,
-      UITextView.self,
-      UIStepper.self,
-      UISegmentedControl.self,
-      UIDatePicker.self,
-      UIPickerView.self,
-    ]
-
-    /// SwiftUI class name patterns for controls with inherent visual feedback.
-    private static let swiftUIExcludedPatterns = [
-      "Toggle",       // SwiftUI Toggle (switch)
-      "Slider",       // SwiftUI Slider
-      "Stepper",      // SwiftUI Stepper
-      "TextField",    // SwiftUI TextField
-      "TextEditor",   // SwiftUI TextEditor (multiline text)
-      "SecureField",  // SwiftUI SecureField (password)
-      "Picker",       // SwiftUI Picker
-      "DatePicker",   // SwiftUI DatePicker
-    ]
-
-    /// Check if a view should be considered interactive for dead click detection.
-    ///
-    /// Returns `false` for controls with inherent visual feedback (switches, text fields, etc.)
-    /// since these always produce a response and should not trigger dead click events.
-    ///
-    /// This method walks up the view hierarchy to catch cases where the touch hits
-    /// a subview of an excluded control.
-    private func hasInteractionHandlers(view: UIView) -> Bool {
-      // Walk up the hierarchy to check for excluded controls
-      var currentView: UIView? = view
-      var depth = 0
-      let maxDepth = 10
-
-      while let v = currentView, depth < maxDepth {
-        // Check UIKit control types
-        for controlType in Self.controlsWithInherentFeedback {
-          if v.isKind(of: controlType) {
-            return false
-          }
-        }
-
-        // Check SwiftUI patterns by class name
-        let className = String(describing: type(of: v))
-        for pattern in Self.swiftUIExcludedPatterns {
-          if className.contains(pattern) {
-            return false
-          }
-        }
-
-        // Also check accessibility traits for adjustable (sliders, steppers)
-        if v.accessibilityTraits.contains(.adjustable) {
-          return false
-        }
-
-        currentView = v.superview
-        depth += 1
-      }
-
-      // Now check for actual interaction handlers
-      // Check for tap gesture recognizers
-      if let gestures = view.gestureRecognizers {
-        for gesture in gestures where gesture.isEnabled {
-          if gesture is UITapGestureRecognizer {
-            return true
-          }
-        }
-      }
-
-      // Check if UIControl has targets
-      if let control = view as? UIControl, !control.allTargets.isEmpty {
-        return true
-      }
-
-      return false
-    }
   }
 #endif

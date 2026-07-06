@@ -177,6 +177,84 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
     }
 
+    /// Optional fallback host used only when a request to the primary ``serverURL`` fails to
+    /// connect (or the server returns an error other than a 4xx client error). Defaults to `nil`
+    /// (no fallback). Mirrors the Android SDK's `setBackupHost`.
+    ///
+    /// **How It Works:**
+    /// When the primary request fails, the SDK automatically retries the **same request** against
+    /// the backup host, preserving:
+    /// - The original request path (e.g., `/track/`, `/engage/`)
+    /// - All HTTP headers (including authentication headers from proxy configuration)
+    /// - All query parameters
+    /// - The request body
+    /// - The primary URL's scheme (http/https) and port
+    ///
+    /// Only the **hostname** is replaced. The backup host receives an identical request to what
+    /// the primary host would have received.
+    ///
+    /// **Authentication & Proxy Behavior:**
+    /// - **Standard Mixpanel API**: If `serverURL` is `https://api.mixpanel.com`, both primary
+    ///   and backup requests use Mixpanel's standard authentication (token in the request body).
+    /// - **Proxy Server**: If `serverURL` points to your proxy (configured via `proxyServerConfig`),
+    ///   both primary and backup requests include your proxy's custom authentication headers
+    ///   (provided by `MixpanelProxyServerDelegate.mixpanelResourceForProxyServer`).
+    ///
+    /// The backup host must support the same API contract and authentication scheme as your
+    /// primary `serverURL`.
+    ///
+    /// **When Backup is Used:**
+    /// - Network failures (connection timeout, DNS resolution failure, etc.)
+    /// - Non-4xx HTTP errors
+    ///
+    /// **When Backup is NOT Used:**
+    /// - Client errors (4xx status codes) — these indicate a problem with the request itself,
+    ///   so retrying against a different host won't help
+    /// - Successful responses (200 OK)
+    /// - Parse errors (response received but couldn't be parsed)
+    ///
+    /// **Example 1 — Standard Mixpanel with Backup:**
+    /// ```swift
+    /// let mixpanel = Mixpanel.initialize(token: "YOUR_TOKEN")
+    /// mixpanel.backupHost = "api-backup.mixpanel.com"
+    /// // Primary: https://api.mixpanel.com/track/
+    /// // Backup:  https://api-backup.yourcompany.com/track/
+    /// // Both use token-based auth from the request body
+    /// ```
+    ///
+    /// **Example 2 — Proxy Server with Backup:**
+    /// ```swift
+    /// class MyProxyDelegate: MixpanelProxyServerDelegate {
+    ///     func mixpanelResourceForProxyServer(_ name: String) -> ServerProxyResource? {
+    ///         return ServerProxyResource(headers: ["Authorization": "Bearer YOUR_TOKEN"])
+    ///     }
+    /// }
+    ///
+    /// let proxyConfig = ProxyServerConfig(
+    ///     serverUrl: "https://proxy.yourcompany.com",
+    ///     delegate: MyProxyDelegate()
+    /// )
+    /// let options = MixpanelOptions(
+    ///     token: "YOUR_TOKEN",
+    ///     proxyServerConfig: proxyConfig
+    /// )
+    /// let mixpanel = Mixpanel.initialize(options: options)
+    /// mixpanel.backupHost = "proxy-backup.yourcompany.com"
+    /// // Primary: https://proxy.yourcompany.com/track/
+    /// //          Headers: Authorization: Bearer YOUR_TOKEN
+    /// // Backup:  https://proxy-backup.yourcompany.com/track/
+    /// //          Headers: Authorization: Bearer YOUR_TOKEN (same auth headers)
+    /// ```
+    ///
+    /// - Note: Provide just the hostname (e.g., `"api-backup.mixpanel.com"`). If you provide
+    ///   a full URL (e.g., `"https://api-backup.mixpanel.com"`), only the hostname portion
+    ///   will be extracted and used.
+    open var backupHost: String? = nil {
+        didSet {
+            flushInstance.backupHost = backupHost
+        }
+    }
+
     open var useGzipCompression: Bool = false {
         didSet {
             flushInstance.useGzipCompression = useGzipCompression

@@ -25,6 +25,41 @@ struct BasePath {
             of: "+", with: "%2B")
         return components.url
     }
+
+    /// Builds a base URL that targets `backupHost` while preserving the scheme and port of `base`.
+    ///
+    /// `backupHost` is treated as a host name (e.g. "api-backup.mixpanel.com"), mirroring the
+    /// Android SDK's `backupHost`. As a convenience, a full URL (e.g.
+    /// "https://api-backup.mixpanel.com") is also accepted — only its host is used; the scheme and
+    /// port always come from `base`.
+    ///
+    /// Returns nil when `base` has no host or the substitution can't produce a valid URL, in which
+    /// case the caller should skip the backup attempt.
+    static func backupBaseURL(base: String, backupHost: String) -> String? {
+        guard var components = URLComponents(string: base), components.host != nil else {
+            return nil
+        }
+        let resolvedHost: String
+        if backupHost.contains("://"),
+            let parsed = URLComponents(string: backupHost),
+            let parsedHost = parsed.host
+        {
+            resolvedHost = parsedHost
+        } else {
+            resolvedHost = backupHost
+        }
+        guard !resolvedHost.isEmpty else {
+            return nil
+        }
+        // guard against using base host same as backup host
+        guard let baseComponents = URLComponents(string: base), let baseHost = baseComponents.host,
+            baseHost != resolvedHost
+        else {
+            return nil
+        }
+        components.host = resolvedHost
+        return components.string
+    }
 }
 
 enum RequestMethod: String {
@@ -61,6 +96,10 @@ public struct ServerProxyResource {
 class Network {
 
     var serverURL: String
+
+    /// Optional fallback host (e.g. "api-backup.mixpanel.com"). When set, a request that fails to
+    /// reach the primary `serverURL` is retried against this host before being reported as failed.
+    var backupHost: String?
 
     required init(serverURL: String) {
         self.serverURL = serverURL

@@ -17,7 +17,7 @@
     <a title="MixpanelInstance Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 6.4.1 Docs</a> (69% documented)</p>
+        <p><a href="../index.html">Mixpanel 6.5.0 Docs</a> (70% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Frunner%2Fwork%2Fmixpanel-swift%2Fmixpanel-swift%2Fbuild"><img src="../img/dash.png" alt="Dash"/>Install in Dash</a></p>
         <div class="header-right">
@@ -42,6 +42,9 @@
           <li class="nav-group-name">
             <a href="../Classes.html">Classes</a>
             <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/Autocapture.html">Autocapture</a>
+              </li>
               <li class="nav-group-task">
                 <a href="../Classes/Group.html">Group</a>
               </li>
@@ -165,6 +168,9 @@
                 <a href="../Structs/MixpanelFlagVariant/Source.html">– Source</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Structs/MixpanelFlagVariant/FallbackReason.html">– FallbackReason</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Structs/MixpanelLogMessage.html">MixpanelLogMessage</a>
               </li>
               <li class="nav-group-task">
@@ -193,7 +199,7 @@
                 <div class="language">
                   
                   <pre class="highlight swift"><code><span class="kd">open</span> <span class="kd">class</span> <span class="kt">MixpanelInstance</span><span class="p">:</span> <span class="kt">CustomDebugStringConvertible</span><span class="p">,</span> <span class="kt">FlushDelegate</span><span class="p">,</span> <span class="kt">AEDelegate</span><span class="p">,</span>
-  <span class="kt"><a href="../Protocols/MixpanelFlagDelegate.html">MixpanelFlagDelegate</a></span></code></pre>
+    <span class="kt"><a href="../Protocols/MixpanelFlagDelegate.html">MixpanelFlagDelegate</a></span></code></pre>
 
                 </div>
               </div>
@@ -423,6 +429,33 @@ already exists in persistence</p>
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:8Mixpanel0A8InstanceC11autocaptureAA11AutocaptureCSgvp"></a>
+                    <a name="//apple_ref/swift/Property/autocapture" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC11autocaptureAA11AutocaptureCSgvp">autocapture</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Accessor to the Mixpanel Autocapture API object.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="k">var</span> <span class="nv">autocapture</span><span class="p">:</span> <span class="kt"><a href="../Classes/Autocapture.html">Autocapture</a></span><span class="o">!</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:8Mixpanel0A8InstanceC5flagsAA0A5Flags_pSgvp"></a>
                     <a name="//apple_ref/swift/Property/flags" class="dashAnchor"></a>
                     <a class="token" href="#/s:8Mixpanel0A8InstanceC5flagsAA0A5Flags_pSgvp">flags</a>
@@ -640,6 +673,117 @@ Useful if you need to proxy Mixpanel requests. Defaults to
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">open</span> <span class="k">var</span> <span class="nv">serverURL</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel0A8InstanceC10backupHostSSSgvp"></a>
+                    <a name="//apple_ref/swift/Property/backupHost" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A8InstanceC10backupHostSSSgvp">backupHost</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Optional fallback host used only when a request to the primary <code><a href="../Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC9serverURLSSvp">serverURL</a></code> fails to
+connect (or the server returns an error other than a 4xx client error). Defaults to <code>nil</code>
+(no fallback). Mirrors the Android SDK&rsquo;s <code>setBackupHost</code>.</p>
+
+<p><strong>How It Works:</strong>
+When the primary request fails, the SDK automatically retries the <strong>same request</strong> against
+the backup host, preserving:</p>
+
+<ul>
+<li>The original request path (e.g., <code>/track/</code>, <code>/engage/</code>)</li>
+<li>All HTTP headers (including authentication headers from proxy configuration)</li>
+<li>All query parameters</li>
+<li>The request body</li>
+<li>The primary URL&rsquo;s scheme (http/https) and port</li>
+</ul>
+
+<p>Only the <strong>hostname</strong> is replaced. The backup host receives an identical request to what
+the primary host would have received.</p>
+
+<p><strong>Authentication &amp; Proxy Behavior:</strong></p>
+
+<ul>
+<li><strong>Standard Mixpanel API</strong>: If <code><a href="../Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC9serverURLSSvp">serverURL</a></code> is <code>https://api.mixpanel.com</code>, both primary
+and backup requests use Mixpanel&rsquo;s standard authentication (token in the request body).</li>
+<li><strong>Proxy Server</strong>: If <code><a href="../Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC9serverURLSSvp">serverURL</a></code> points to your proxy (configured via <code>proxyServerConfig</code>),
+both primary and backup requests include your proxy&rsquo;s custom authentication headers
+(provided by <code>MixpanelProxyServerDelegate.mixpanelResourceForProxyServer</code>).</li>
+</ul>
+
+<p>The backup host must support the same API contract and authentication scheme as your
+primary <code><a href="../Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC9serverURLSSvp">serverURL</a></code>.</p>
+
+<p><strong>When Backup is Used:</strong></p>
+
+<ul>
+<li>Network failures (connection timeout, DNS resolution failure, etc.)</li>
+<li>Non-4xx HTTP errors</li>
+</ul>
+
+<p><strong>When Backup is NOT Used:</strong></p>
+
+<ul>
+<li>Client errors (4xx status codes) — these indicate a problem with the request itself,
+so retrying against a different host won&rsquo;t help</li>
+<li>Successful responses (200 OK)</li>
+<li>Parse errors (response received but couldn&rsquo;t be parsed)</li>
+</ul>
+
+<p><strong>Example 1 — Standard Mixpanel with Backup:</strong></p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">mixpanel</span> <span class="o">=</span> <span class="kt">Mixpanel</span><span class="o">.</span><span class="nf">initialize</span><span class="p">(</span><span class="nv">token</span><span class="p">:</span> <span class="s">"YOUR_TOKEN"</span><span class="p">)</span>
+<span class="n">mixpanel</span><span class="o">.</span><span class="n">backupHost</span> <span class="o">=</span> <span class="s">"api-backup.mixpanel.com"</span>
+<span class="c1">// Primary: https://api.mixpanel.com/track/</span>
+<span class="c1">// Backup:  https://api-backup.yourcompany.com/track/</span>
+<span class="c1">// Both use token-based auth from the request body</span>
+</code></pre>
+
+<p><strong>Example 2 — Proxy Server with Backup:</strong></p>
+<pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MyProxyDelegate</span><span class="p">:</span> <span class="kt">MixpanelProxyServerDelegate</span> <span class="p">{</span>
+    <span class="kd">func</span> <span class="nf">mixpanelResourceForProxyServer</span><span class="p">(</span><span class="n">_</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">ServerProxyResource</span><span class="p">?</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kt">ServerProxyResource</span><span class="p">(</span><span class="nv">headers</span><span class="p">:</span> <span class="p">[</span><span class="s">"Authorization"</span><span class="p">:</span> <span class="s">"Bearer YOUR_TOKEN"</span><span class="p">])</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="nv">proxyConfig</span> <span class="o">=</span> <span class="kt">ProxyServerConfig</span><span class="p">(</span>
+    <span class="nv">serverUrl</span><span class="p">:</span> <span class="s">"https://proxy.yourcompany.com"</span><span class="p">,</span>
+    <span class="nv">delegate</span><span class="p">:</span> <span class="kt">MyProxyDelegate</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="k">let</span> <span class="nv">options</span> <span class="o">=</span> <span class="kt">MixpanelOptions</span><span class="p">(</span>
+    <span class="nv">token</span><span class="p">:</span> <span class="s">"YOUR_TOKEN"</span><span class="p">,</span>
+    <span class="nv">proxyServerConfig</span><span class="p">:</span> <span class="n">proxyConfig</span>
+<span class="p">)</span>
+<span class="k">let</span> <span class="nv">mixpanel</span> <span class="o">=</span> <span class="kt">Mixpanel</span><span class="o">.</span><span class="nf">initialize</span><span class="p">(</span><span class="nv">options</span><span class="p">:</span> <span class="n">options</span><span class="p">)</span>
+<span class="n">mixpanel</span><span class="o">.</span><span class="n">backupHost</span> <span class="o">=</span> <span class="s">"proxy-backup.yourcompany.com"</span>
+<span class="c1">// Primary: https://proxy.yourcompany.com/track/</span>
+<span class="c1">//          Headers: Authorization: Bearer YOUR_TOKEN</span>
+<span class="c1">// Backup:  https://proxy-backup.yourcompany.com/track/</span>
+<span class="c1">//          Headers: Authorization: Bearer YOUR_TOKEN (same auth headers)</span>
+</code></pre>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    Provide just the hostname (e.g., <code>&quot;api-backup.mixpanel.com&quot;</code>). If you provide
+a full URL (e.g., <code>&quot;https://api-backup.mixpanel.com&quot;</code>), only the hostname portion
+will be extracted and used.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="k">var</span> <span class="nv">backupHost</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -1063,8 +1207,8 @@ but can be used to merge two IDs in scenarios where identify() would fail</p>
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">createAlias</span><span class="p">(</span>
-  <span class="n">_</span> <span class="nv">alias</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">usePeople</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span> <span class="nv">andIdentify</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span>
-  <span class="nv">completion</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="n">_</span> <span class="nv">alias</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">distinctId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">usePeople</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span> <span class="nv">andIdentify</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="nv">completion</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span>
 <span class="p">)</span></code></pre>
 
                         </div>
@@ -1802,8 +1946,8 @@ MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">registerSuperPropertiesOnce</span><span class="p">(</span>
-  <span class="n">_</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">,</span>
-  <span class="n">defaultValue</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="n">_</span> <span class="nv">properties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">,</span>
+    <span class="n">defaultValue</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MixpanelType.html">MixpanelType</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span>
 <span class="p">)</span></code></pre>
 
                         </div>
@@ -2258,7 +2402,7 @@ that is sent to Mixpanel</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-06-10)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-07-06)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

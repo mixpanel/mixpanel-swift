@@ -17,7 +17,7 @@
     <a title="Mixpanel Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 6.4.1 Docs</a> (69% documented)</p>
+        <p><a href="../index.html">Mixpanel 6.5.0 Docs</a> (70% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Frunner%2Fwork%2Fmixpanel-swift%2Fmixpanel-swift%2Fbuild"><img src="../img/dash.png" alt="Dash"/>Install in Dash</a></p>
         <div class="header-right">
@@ -42,6 +42,9 @@
           <li class="nav-group-name">
             <a href="../Classes.html">Classes</a>
             <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/Autocapture.html">Autocapture</a>
+              </li>
               <li class="nav-group-task">
                 <a href="../Classes/Group.html">Group</a>
               </li>
@@ -165,6 +168,9 @@
                 <a href="../Structs/MixpanelFlagVariant/Source.html">– Source</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Structs/MixpanelFlagVariant/FallbackReason.html">– FallbackReason</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Structs/MixpanelLogMessage.html">MixpanelLogMessage</a>
               </li>
               <li class="nav-group-task">
@@ -262,15 +268,15 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@discardableResult</span>
 <span class="kd">open</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">initialize</span><span class="p">(</span>
-  <span class="n">token</span> <span class="nv">apiToken</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
-  <span class="nv">trackAutomaticEvents</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">,</span>
-  <span class="nv">flushInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
-  <span class="nv">instanceName</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-  <span class="nv">optOutTrackingByDefault</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
-  <span class="nv">useUniqueDistinctId</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
-  <span class="nv">superProperties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-  <span class="nv">serverURL</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-  <span class="nv">useGzipCompression</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span>
+    <span class="n">token</span> <span class="nv">apiToken</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+    <span class="nv">trackAutomaticEvents</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">,</span>
+    <span class="nv">flushInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+    <span class="nv">instanceName</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+    <span class="nv">optOutTrackingByDefault</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="nv">useUniqueDistinctId</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="nv">superProperties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+    <span class="nv">serverURL</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+    <span class="nv">useGzipCompression</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span></code></pre>
 
                         </div>
@@ -431,15 +437,15 @@ the instances with an instanceName. Then they can be reached by calling getInsta
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@discardableResult</span>
 <span class="kd">open</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">initialize</span><span class="p">(</span>
-  <span class="n">token</span> <span class="nv">apiToken</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
-  <span class="nv">trackAutomaticEvents</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">,</span>
-  <span class="nv">flushInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
-  <span class="nv">instanceName</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-  <span class="nv">optOutTrackingByDefault</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
-  <span class="nv">useUniqueDistinctId</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
-  <span class="nv">superProperties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-  <span class="nv">proxyServerConfig</span><span class="p">:</span> <span class="kt"><a href="../Structs/ProxyServerConfig.html">ProxyServerConfig</a></span><span class="p">,</span>
-  <span class="nv">useGzipCompression</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span>
+    <span class="n">token</span> <span class="nv">apiToken</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+    <span class="nv">trackAutomaticEvents</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">,</span>
+    <span class="nv">flushInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+    <span class="nv">instanceName</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+    <span class="nv">optOutTrackingByDefault</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="nv">useUniqueDistinctId</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="nv">superProperties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+    <span class="nv">proxyServerConfig</span><span class="p">:</span> <span class="kt"><a href="../Structs/ProxyServerConfig.html">ProxyServerConfig</a></span><span class="p">,</span>
+    <span class="nv">useGzipCompression</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MixpanelInstance.html">MixpanelInstance</a></span></code></pre>
 
                         </div>
@@ -837,7 +843,7 @@ the instances with an instanceName. Then they can be reached by calling getInsta
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-06-10)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-07-06)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

@@ -205,7 +205,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     ///
     /// **When Backup is Used:**
     /// - Network failures (connection timeout, DNS resolution failure, etc.)
-    /// - Server errors (5xx status codes)
+    /// - Non-4xx HTTP errors
     ///
     /// **When Backup is NOT Used:**
     /// - Client errors (4xx status codes) — these indicate a problem with the request itself,

@@ -51,6 +51,10 @@ struct BasePath {
         guard !resolvedHost.isEmpty else {
             return nil
         }
+        // guard against using base host same as backup host
+        guard let baseComponents = URLComponents(string: base), let baseHost = baseComponents.host, baseHost != resolvedHost else {
+            return nil
+        }
         components.host = resolvedHost
         return components.string
     }

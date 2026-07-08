@@ -13,9 +13,6 @@
   struct RageClickResult {
     /// Whether this click triggered a rage click event
     let isRageClick: Bool
-
-    /// Total number of clicks in the current sequence
-    let tapCount: Int
   }
 
   /// Tracks rapid repeated clicks to detect user frustration (rage clicks).
@@ -91,9 +88,6 @@
       // Add current click to history
       recentClicks.append(ClickRecord(x: x, y: y, timestamp: now))
 
-      // Total count includes current click
-      let totalCount = nearbyCount + 1
-
       // Rage click triggers when we have threshold-1 previous clicks nearby
       // (so the current click is the Nth click)
       let isRageClick = nearbyCount >= (clickThreshold - 1)
@@ -103,7 +97,7 @@
         cleanOldClicks(currentTime: now)
       }
 
-      return RageClickResult(isRageClick: isRageClick, tapCount: totalCount)
+      return RageClickResult(isRageClick: isRageClick)
     }
 
     /// Reset tracking state (e.g., on scene change or app background).

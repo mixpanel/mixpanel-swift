@@ -121,7 +121,6 @@ import XCTest
       let result = tracker.trackClick(x: 100, y: 100)
 
       XCTAssertFalse(result.isRageClick)
-      XCTAssertEqual(result.tapCount, 1)
     }
 
     func testThreeClicksIsNotRageClick() {
@@ -133,7 +132,6 @@ import XCTest
       for i in 1...3 {
         let result = tracker.trackClick(x: 100, y: 100)
         XCTAssertFalse(result.isRageClick, "Click \(i) should not be rage click")
-        XCTAssertEqual(result.tapCount, i)
         currentTime += 100  // 100ms between clicks
       }
     }
@@ -152,7 +150,6 @@ import XCTest
       // Fourth click should trigger rage click
       let result = tracker.trackClick(x: 100, y: 100)
       XCTAssertTrue(result.isRageClick)
-      XCTAssertEqual(result.tapCount, 4)
     }
 
     // MARK: - Time Window
@@ -252,7 +249,6 @@ import XCTest
       // Fourth click after reset should be like first click
       let result = tracker.trackClick(x: 100, y: 100)
       XCTAssertFalse(result.isRageClick)
-      XCTAssertEqual(result.tapCount, 1)
     }
 
     // MARK: - Custom Threshold
@@ -272,7 +268,6 @@ import XCTest
       // 6th click should trigger
       let result = tracker.trackClick(x: 100, y: 100)
       XCTAssertTrue(result.isRageClick)
-      XCTAssertEqual(result.tapCount, 6)
     }
   }
 

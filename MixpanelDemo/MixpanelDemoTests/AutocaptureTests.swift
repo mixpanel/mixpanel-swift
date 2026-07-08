@@ -286,8 +286,8 @@ import XCTest
 
       let props = event.toProperties()
 
-      XCTAssertEqual(props["$x"] as? Double, 100)
-      XCTAssertEqual(props["$y"] as? Double, 200)
+      XCTAssertEqual(props["$x"] as? Int, 100)
+      XCTAssertEqual(props["$y"] as? Int, 200)
       XCTAssertEqual(props["$el_id"] as? String, "test_button")
       XCTAssertEqual(props["$el_tag_name"] as? String, "UIButton")
       XCTAssertEqual(props["$attr-aria-label"] as? String, "Test Button")

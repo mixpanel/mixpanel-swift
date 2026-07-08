@@ -99,20 +99,9 @@
     /// Only views with actual handlers should be monitored for dead clicks,
     /// as tapping a non-interactive view is expected to do nothing.
     func hasInteractionHandlers(view: UIView) -> Bool {
-      // Check for tap gesture recognizers on the view itself
-      if let gestures = view.gestureRecognizers {
-        for gesture in gestures where gesture.isEnabled {
-          if gesture is UITapGestureRecognizer {
-            return true
-          }
-        }
-      }
-
-      // Check if UIControl has targets (buttons, etc.)
-      if let control = view as? UIControl {
-        if !control.allTargets.isEmpty {
-          return true
-        }
+      // Check the view itself
+      if AutocaptureDefaults.isInteractive(view) {
+        return true
       }
 
       // Check ancestors for gesture recognizers that might handle this tap
@@ -121,19 +110,9 @@
       let maxDepth = 5
 
       while let current = ancestor, depth < maxDepth {
-        if let gestures = current.gestureRecognizers {
-          for gesture in gestures where gesture.isEnabled {
-            if gesture is UITapGestureRecognizer {
-              return true
-            }
-          }
-        }
-
-        // Check if ancestor is a UIControl with targets
-        if let control = current as? UIControl, !control.allTargets.isEmpty {
+        if AutocaptureDefaults.isInteractive(current) {
           return true
         }
-
         ancestor = current.superview
         depth += 1
       }
@@ -153,8 +132,7 @@
       let maxDepth = 10
 
       while let v = current, depth < maxDepth {
-        let className = String(describing: type(of: v))
-        if className.contains("Hosting") || className.contains("SwiftUI") {
+        if AutocaptureDefaults.isSwiftUIView(v) {
           return true
         }
         current = v.superview
@@ -252,7 +230,7 @@
 
     private func captureSnapshot(window: UIWindow) -> UISnapshot {
       var viewCount = 0
-      var contentHash = 0
+      var contentHash = 17
 
       // Count visible windows (handles alerts, sheets, etc.)
       // Use windowScene.windows for iOS 13+, fallback to just counting this window
@@ -273,27 +251,31 @@
 
         viewCount += 1
 
-        // Hash content for change detection
-        var hasher = Hasher()
-        hasher.combine(String(describing: type(of: view)))
+        // Position and size
+        let frame = view.frame
+        contentHash = 31 &* contentHash &+ Int(frame.origin.x)
+        contentHash = 31 &* contentHash &+ Int(frame.origin.y)
+        contentHash = 31 &* contentHash &+ Int(frame.size.width)
+        contentHash = 31 &* contentHash &+ Int(frame.size.height)
 
+        // Class name
+        contentHash = 31 &* contentHash &+ String(describing: type(of: view)).hashValue
+
+        // Text content
         if let label = view as? UILabel {
-          hasher.combine(label.text)
+          contentHash = 31 &* contentHash &+ (label.text?.hashValue ?? 0)
         }
         if let button = view as? UIButton {
-          hasher.combine(button.currentTitle)
+          contentHash = 31 &* contentHash &+ (button.currentTitle?.hashValue ?? 0)
         }
+
+        // Control state
         if let switchView = view as? UISwitch {
-          hasher.combine(switchView.isOn)
+          contentHash = 31 &* contentHash &+ switchView.isOn.hashValue
         }
         if let control = view as? UIControl {
-          hasher.combine(control.isEnabled)
+          contentHash = 31 &* contentHash &+ control.isEnabled.hashValue
         }
-
-        hasher.combine(view.isHidden)
-        hasher.combine(view.alpha > 0)
-
-        contentHash ^= hasher.finalize()
 
         for subview in view.subviews {
           processView(subview, depth: depth + 1)

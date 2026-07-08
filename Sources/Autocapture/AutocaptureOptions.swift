@@ -46,6 +46,27 @@ enum AutocaptureDefaults {
       "Picker",       // SwiftUI Picker
       "DatePicker",   // SwiftUI DatePicker
     ]
+
+    /// Check if a single view is a SwiftUI view (class name contains "Hosting" or "SwiftUI").
+    static func isSwiftUIView(_ view: UIView) -> Bool {
+      let className = String(describing: type(of: view))
+      return className.contains("Hosting") || className.contains("SwiftUI")
+    }
+
+    /// Check if a view is interactive (UIControl with targets or has enabled tap gesture recognizer).
+    static func isInteractive(_ view: UIView) -> Bool {
+      if let control = view as? UIControl, !control.allTargets.isEmpty {
+        return true
+      }
+      if let gestures = view.gestureRecognizers {
+        for gesture in gestures where gesture.isEnabled {
+          if gesture is UITapGestureRecognizer {
+            return true
+          }
+        }
+      }
+      return false
+    }
   #endif
 }
 

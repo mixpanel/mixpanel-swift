@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Source Enumeration Reference</title>
+    <title>FallbackReason Enumeration Reference</title>
     <link rel="stylesheet" type="text/css" href="../../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../../css/highlight.css" />
     <meta charset='utf-8'>
@@ -13,8 +13,8 @@
     <script src="../../js/jazzy.search.js" defer></script>
   </head>
   <body>
-    <a name="//apple_ref/swift/Enum/Source" class="dashAnchor"></a>
-    <a title="Source Enumeration Reference"></a>
+    <a name="//apple_ref/swift/Enum/FallbackReason" class="dashAnchor"></a>
+    <a title="FallbackReason Enumeration Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../../index.html">Mixpanel 6.5.0 Docs</a> (70% documented)</p>
@@ -35,7 +35,7 @@
         <img id="carat" src="../../img/carat.png" alt=""/>
         <a href="../../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a>
         <img id="carat" src="../../img/carat.png" alt=""/>
-        Source Enumeration Reference
+        FallbackReason Enumeration Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -196,15 +196,21 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>Source</h1>
+            <h1>FallbackReason</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">Source</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">FallbackReason</span> <span class="p">:</span> <span class="kt">Equatable</span><span class="p">,</span> <span class="kt">Hashable</span><span class="p">,</span> <span class="kt">Sendable</span></code></pre>
 
                 </div>
               </div>
-            <p>Identifies where a served variant came from.</p>
+            <p>Why the SDK returned the developer fallback.</p>
+
+<p>Network/cache SDKs (like the iOS/macOS Mixpanel SDK) cannot distinguish
+&ldquo;flag does not exist&rdquo; from &ldquo;user is not in any rollout&rdquo; without server-side
+cooperation — both surface as <code>.flagNotFound</code> for now. Future server changes
+can add a more specific reason without breaking callers that already switch
+on this enum.</p>
 
           </section>
           <section class="section task-group-section">
@@ -213,9 +219,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A11FlagVariantV6SourceO7networkyA2EmF"></a>
-                    <a name="//apple_ref/swift/Element/network" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A11FlagVariantV6SourceO7networkyA2EmF">network</a>
+                    <a name="/s:8Mixpanel0A11FlagVariantV14FallbackReasonO12flagNotFoundyA2EmF"></a>
+                    <a name="//apple_ref/swift/Element/flagNotFound" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A11FlagVariantV14FallbackReasonO12flagNotFoundyA2EmF">flagNotFound</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -223,14 +229,14 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Variant assigned by the most recent successful <code>/flags/</code> network call.</p>
+                        <p>Flag key was not present in the cache or network response.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">network</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">flagNotFound</span></code></pre>
 
                         </div>
                       </div>
@@ -240,9 +246,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A11FlagVariantV6SourceO11persistenceyAE10Foundation4DateV_tcAEmF"></a>
-                    <a name="//apple_ref/swift/Element/persistence(persistedAt:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A11FlagVariantV6SourceO11persistenceyAE10Foundation4DateV_tcAEmF">persistence(persistedAt:<wbr>)</a>
+                    <a name="/s:8Mixpanel0A11FlagVariantV14FallbackReasonO8notReadyyA2EmF"></a>
+                    <a name="//apple_ref/swift/Element/notReady" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A11FlagVariantV14FallbackReasonO8notReadyyA2EmF">notReady</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -250,15 +256,14 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Variant loaded from the on-disk persistence layer. <code>persistedAt</code> is the time the
-variant set was originally written to disk.</p>
+                        <p>Flags were not ready when the sync lookup happened.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">persistence</span><span class="p">(</span><span class="nv">persistedAt</span><span class="p">:</span> <span class="kt">Date</span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">notReady</span></code></pre>
 
                         </div>
                       </div>
@@ -268,9 +273,9 @@ variant set was originally written to disk.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A11FlagVariantV6SourceO8fallbackyAeC14FallbackReasonO_tcAEmF"></a>
-                    <a name="//apple_ref/swift/Element/fallback(reason:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A11FlagVariantV6SourceO8fallbackyAeC14FallbackReasonO_tcAEmF">fallback(reason:<wbr>)</a>
+                    <a name="/s:8Mixpanel0A11FlagVariantV14FallbackReasonO12backendErroryA2EmF"></a>
+                    <a name="//apple_ref/swift/Element/backendError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A11FlagVariantV14FallbackReasonO12backendErroryA2EmF">backendError</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -278,19 +283,16 @@ variant set was originally written to disk.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Developer-supplied fallback returned because the SDK had no value to serve.</p>
-
-<p><code>reason</code> explains <em>why</em> — flag missing from the cache/response, or flags not yet
-ready. Previously a Fallback meant only &ldquo;not a real variant,&rdquo; which collapsed
-several distinct outcomes into one (SDK-79). Callers — especially the OpenFeature
-wrapper — can dispatch on the reason to surface the correct user-facing error code.</p>
+                        <p>Network fetch failed and no cached/persisted variant was available.
+Only surfaced on the async <code>getVariant</code> path — <code>getVariantSync</code> cannot
+distinguish &ldquo;network error&rdquo; from &ldquo;flags never loaded.&rdquo;</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">fallback</span><span class="p">(</span><span class="nv">reason</span><span class="p">:</span> <span class="kt"><a href="../../Structs/MixpanelFlagVariant/FallbackReason.html">FallbackReason</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">backendError</span></code></pre>
 
                         </div>
                       </div>

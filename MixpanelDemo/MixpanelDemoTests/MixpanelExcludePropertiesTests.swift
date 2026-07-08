@@ -168,8 +168,8 @@ class MixpanelExcludePropertiesTests: MixpanelBaseTests {
     }
 
     func testDefaultOptionsStripNothing() {
-        let testMixpanel = Mixpanel.initialize(
-            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        let options = MixpanelOptions(token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
+        let testMixpanel = Mixpanel.initialize(options: options)
         testMixpanel.track(event: "test_event", properties: ["custom_prop": "v"])
         waitForTrackingQueue(testMixpanel)
 

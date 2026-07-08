@@ -36,7 +36,7 @@ class MixpanelEventBridgeTests: MixpanelBaseTests {
 
         wait(for: [expectation], timeout: 2.0)
         task.cancel()
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     // MARK: - Event Bridge Receives Properties
@@ -63,7 +63,7 @@ class MixpanelEventBridgeTests: MixpanelBaseTests {
 
         wait(for: [expectation], timeout: 2.0)
         task.cancel()
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
     // MARK: - Event Bridge Not Notified When Opted Out
@@ -90,7 +90,7 @@ class MixpanelEventBridgeTests: MixpanelBaseTests {
 
         wait(for: [noEventExpectation], timeout: 1.0)
         task.cancel()
-        removeDBfile(apiToken: testMixpanel.apiToken)
+        removeDBfile(testMixpanel.apiToken)
     }
 
 }

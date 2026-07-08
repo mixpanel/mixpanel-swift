@@ -398,6 +398,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testTrackWithDefaultProperties() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        waitForAsyncTasks()
         testMixpanel.track(event: "Something Happened")
         waitForTrackingQueue(testMixpanel)
         let e: InternalProperties = eventQueue(token: testMixpanel.apiToken).last!
@@ -488,6 +489,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
 
     func testTrackWithGroups() {
         let testMixpanel = Mixpanel.initialize(token: randomId(), flushInterval: 60)
+        waitForAsyncTasks()
         let groupKey = "test_key"
         let groupID = "test_id"
         testMixpanel.trackWithGroups(
@@ -1039,7 +1041,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let halfRows = numRows / 2
         let eventName = "Test Event"
         func _inner() {
-            removeDBfile(apiToken: testToken)
+            removeDBfile(testToken)
             let mpdb = MPDB.init(token: testToken)
             mpdb.open()
             for pType in PersistenceType.allCases {
@@ -1078,7 +1080,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
                 mpdb.close()
             }
         }
-        removeDBfile(apiToken: testToken)
+        removeDBfile(testToken)
     }
 
 }

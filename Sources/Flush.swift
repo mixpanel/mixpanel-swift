@@ -26,6 +26,7 @@ class Flush: AppLifecycle {
     var _flushInterval = 0.0
     var _flushBatchSize = APIConstants.maxBatchSize
     private var _serverURL = BasePath.DefaultMixpanelAPI
+    private var _backupHost: String?
     private let flushRequestReadWriteLock: DispatchQueue
 
     var useGzipCompression: Bool
@@ -42,6 +43,22 @@ class Flush: AppLifecycle {
                 execute: {
                     _serverURL = newValue
                     self.flushRequest.serverURL = newValue
+                })
+        }
+    }
+
+    var backupHost: String? {
+        get {
+            flushRequestReadWriteLock.sync {
+                return _backupHost
+            }
+        }
+        set {
+            flushRequestReadWriteLock.sync(
+                flags: .barrier,
+                execute: {
+                    _backupHost = newValue
+                    self.flushRequest.backupHost = newValue
                 })
         }
     }

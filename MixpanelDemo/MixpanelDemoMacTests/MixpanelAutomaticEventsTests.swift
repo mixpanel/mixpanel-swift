@@ -17,6 +17,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
         testMixpanel.minimumSessionDuration = 0
+        waitForAsyncTasks()
         testMixpanel.identify(distinctId: "d1")
         waitForTrackingQueue(testMixpanel)
         testMixpanel.automaticEvents.perform(
@@ -43,6 +44,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
         testMixpanel.minimumSessionDuration = 0
+        waitForAsyncTasks()
         testMixpanel.automaticEvents.perform(
             #selector(AutomaticEvents.appWillResignActive(_:)),
             with: Notification(name: Notification.Name(rawValue: "test")))
@@ -73,6 +75,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), flushInterval: 60, trackAutomaticEvents: true)
         testMixpanel.minimumSessionDuration = 0
+        waitForAsyncTasks()
         testMixpanel.automaticEvents.perform(
             #selector(AutomaticEvents.appWillResignActive(_:)),
             with: Notification(name: Notification.Name(rawValue: "test")))
@@ -100,6 +103,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
         let testToken = randomId()
         let mp = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true)
         mp.minimumSessionDuration = 0
+        waitForAsyncTasks()
         waitForTrackingQueue(mp)
         XCTAssertEqual(
             eventQueue(token: mp.apiToken).count, 1, "First app open should be tracked")
@@ -107,6 +111,7 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
 
         let mp2 = Mixpanel.initialize(token: testToken, trackAutomaticEvents: true)
         mp2.minimumSessionDuration = 0
+        waitForAsyncTasks()
         waitForTrackingQueue(mp2)
         XCTAssertEqual(
             eventQueue(token: mp2.apiToken).count, 0, "First app open should not be tracked again")
@@ -119,9 +124,11 @@ class MixpanelAutomaticEventsTests: MixpanelBaseTests {
 
         let mp = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true)
         mp.minimumSessionDuration = 0
+        waitForAsyncTasks()
         waitForTrackingQueue(mp)
         let mp2 = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: true)
         mp2.minimumSessionDuration = 0
+        waitForAsyncTasks()
         waitForTrackingQueue(mp2)
 
         XCTAssertEqual(eventQueue(token: mp.apiToken).count, 1, "there should be only 1 event")

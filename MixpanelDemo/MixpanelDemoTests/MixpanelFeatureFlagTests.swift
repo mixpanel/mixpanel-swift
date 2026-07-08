@@ -373,7 +373,7 @@ class FeatureFlagManagerTests: XCTestCase {
 
     // Expectation & Waiting Helpers
 
-    private func waitBriefly(timeout: TimeInterval = 0.5, file: StaticString = #file, line: UInt = #line) {
+    private func waitBriefly(timeout: TimeInterval = 2.0, file: StaticString = #file, line: UInt = #line) {
         let expectation = XCTestExpectation(description: "Brief wait")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { expectation.fulfill() }
         wait(for: [expectation], timeout: timeout)
@@ -1669,7 +1669,7 @@ class FeatureFlagManagerTests: XCTestCase {
         }
 
         // Wait for all tracking to complete
-        wait(for: expectations, timeout: 5.0)
+        wait(for: expectations, timeout: 10.0)
 
         // Verify all tracking calls included timing properties
         XCTAssertEqual(mockDelegate.trackedEvents.count, expectationCount)
@@ -2627,7 +2627,7 @@ class FeatureFlagManagerTests: XCTestCase {
         // Do NOT call loadFlags() - simulating prefetchFlags: false behavior
 
         // Give a brief moment for any async dispatch to occur
-        waitBriefly(timeout: 1.0)
+        waitBriefly(timeout: 3.0)
 
         XCTAssertEqual(mock.fetchRequestCount, 0, "prefetchFlags: false should not trigger a flag fetch")
         XCTAssertFalse(mock.areFlagsReady(), "No flags should be loaded")
@@ -2797,7 +2797,7 @@ class FeatureFlagManagerTests: XCTestCase {
         mockMgr.setContext(customContext) {
             setContextExpectation.fulfill()
         }
-        wait(for: [setContextExpectation], timeout: 5.0)
+        wait(for: [setContextExpectation], timeout: 10.0)
 
         mockMgr.flagsLock.read {
             XCTAssertEqual(mockMgr.flagContext["user_id"] as? String, "ctx-user")

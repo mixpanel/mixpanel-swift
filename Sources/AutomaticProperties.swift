@@ -180,7 +180,7 @@ class AutomaticProperties {
     }
 
     class func libVersion() -> String {
-        return "6.4.1"
+        return "6.5.0"
     }
 
 }

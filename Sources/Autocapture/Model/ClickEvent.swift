@@ -45,8 +45,8 @@
     /// Convert to Mixpanel properties dictionary for tracking
     func toProperties() -> Properties {
       var props: Properties = [
-        "$x": Double(x),
-        "$y": Double(y),
+        "$x": Int(x),
+        "$y": Int(y),
         "$el_id": elementId,
         "$el_tag_name": tagName,
         "$elements": elements,

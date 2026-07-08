@@ -80,10 +80,10 @@
         }
       }
 
-      // Fallback: ClassName_view_<hash>
+      // Fallback: ClassName_view_<hex hash>
       let className = String(describing: type(of: view))
       let safeHash = view.hash == Int.min ? Int.max : abs(view.hash)
-      return "\(className)_view_\(safeHash)"
+      return "\(className)_view_\(String(safeHash, radix: 16))"
     }
 
     // MARK: - Accessibility Property Discovery
@@ -201,25 +201,14 @@
     // MARK: - SwiftUI Detection
 
     private func isSwiftUIView(_ view: UIView) -> Bool {
-      let className = String(describing: type(of: view))
-      return className.contains("Hosting") || className.contains("SwiftUI")
+      return AutocaptureDefaults.isSwiftUIView(view)
     }
 
     // MARK: - Interactive View Resolution
 
     /// Check if a view is interactive (has tap handlers or is a UIControl with targets).
     private func isInteractive(_ view: UIView) -> Bool {
-      if let control = view as? UIControl, !control.allTargets.isEmpty {
-        return true
-      }
-      if let gestures = view.gestureRecognizers {
-        for gesture in gestures where gesture.isEnabled {
-          if gesture is UITapGestureRecognizer {
-            return true
-          }
-        }
-      }
-      return false
+      return AutocaptureDefaults.isInteractive(view)
     }
 
     /// Walk up the view hierarchy to find the nearest interactive ancestor.

@@ -540,9 +540,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             if !MixpanelInstance.isiOSAppExtension() {
                 autocaptureManager = AutocaptureManager(
                     options: autocaptureOpts,
-                    trackEvent: { [weak self] name, props in
-                        self?.track(event: name, properties: props)
-                    }
+                    autocapture: autocapture
                 )
                 autocaptureManager?.start()
                 MixpanelLogger.info(message: "AutocaptureManager started")

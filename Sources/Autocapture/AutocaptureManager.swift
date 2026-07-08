@@ -13,14 +13,6 @@
   ///
   /// Manages lifecycle, coordinates components, and dispatches events to Mixpanel.
   final class AutocaptureManager {
-    // MARK: - Event Names
-
-    private enum EventName {
-      static let click = "$mp_click"
-      static let rageClick = "$mp_rage_click"
-      static let deadClick = "$mp_dead_click"
-    }
-
     // MARK: - Configuration
 
     private let options: AutocaptureOptions
@@ -31,16 +23,11 @@
     private let rageClickTracker: RageClickTracker?
     private let deadClickDetector: DeadClickDetector?
 
-    // MARK: - Event Callback
+    // MARK: - Autocapture Reference
 
-    /// Callback to track events via MixpanelInstance.
-    /// This is `var` to allow test injection of event capture.
-    /// Thread-safe: reads and writes are synchronized via `lock`.
-    private var _trackEvent: (String, Properties) -> Void
-    var trackEvent: (String, Properties) -> Void {
-      get { lock.lock(); defer { lock.unlock() }; return _trackEvent }
-      set { lock.lock(); defer { lock.unlock() }; _trackEvent = newValue }
-    }
+    /// Reference to the Autocapture instance for event tracking.
+    /// Weak to avoid retain cycles with MixpanelInstance.
+    private weak var autocapture: Autocapture?
 
     // MARK: - State
 
@@ -53,13 +40,13 @@
     ///
     /// - Parameters:
     ///   - options: Autocapture configuration options
-    ///   - trackEvent: Callback to send events to Mixpanel
+    ///   - autocapture: The Autocapture instance for event tracking
     init(
       options: AutocaptureOptions,
-      trackEvent: @escaping (String, Properties) -> Void
+      autocapture: Autocapture
     ) {
       self.options = options
-      self._trackEvent = trackEvent
+      self.autocapture = autocapture
 
       // Initialize components
       self.semanticExtractor = SemanticExtractor()
@@ -75,7 +62,9 @@
       if options.deadClickOptions.enabled {
         self.deadClickDetector = DeadClickDetector(options: options.deadClickOptions)
         self.deadClickDetector?.onDeadClick = { [weak self] event in
-          self?.emitDeadClickEvent(event)
+          self?.autocapture?.trackDeadClick(event)
+          MixpanelLogger.debug(
+            message: "AutocaptureManager: emitted $mp_dead_click for \(event.elementId)")
         }
       } else {
         self.deadClickDetector = nil
@@ -165,12 +154,16 @@
 
       // Emit click event
       if options.clickOptions.enabled {
-        emitClickEvent(clickEvent)
+        autocapture?.trackClick(clickEvent)
+        MixpanelLogger.debug(
+          message: "AutocaptureManager: emitted $mp_click for \(clickEvent.elementId)")
       }
 
       // Emit rage click event (independent of regular click)
       if options.rageClickOptions.enabled, rageClickResult?.isRageClick == true {
-        emitRageClickEvent(clickEvent)
+        autocapture?.trackRageClick(clickEvent)
+        MixpanelLogger.debug(
+          message: "AutocaptureManager: emitted $mp_rage_click for \(clickEvent.elementId)")
       }
 
       // Start dead click monitoring
@@ -179,29 +172,5 @@
       }
     }
 
-    // MARK: - Event Emission
-
-    private func emitClickEvent(_ event: ClickEvent) {
-      let properties = event.toProperties()
-      trackEvent(EventName.click, properties)
-      MixpanelLogger.debug(
-        message: "AutocaptureManager: emitted \(EventName.click) for \(event.elementId)")
-    }
-
-    private func emitRageClickEvent(_ event: ClickEvent) {
-      let properties = event.toProperties()
-      trackEvent(EventName.rageClick, properties)
-      MixpanelLogger.debug(
-        message:
-          "AutocaptureManager: emitted \(EventName.rageClick) for \(event.elementId)"
-      )
-    }
-
-    private func emitDeadClickEvent(_ event: ClickEvent) {
-      let properties = event.toProperties()
-      trackEvent(EventName.deadClick, properties)
-      MixpanelLogger.debug(
-        message: "AutocaptureManager: emitted \(EventName.deadClick) for \(event.elementId)")
-    }
   }
 #endif

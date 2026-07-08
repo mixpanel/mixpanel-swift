@@ -30,14 +30,12 @@ import XCTest
 
     private var testWindow: UIWindow!
     private var testViewController: UIKitAutocaptureTestViewController!
-    private var capturedEvents: [(name: String, properties: Properties)] = []
     private var mixpanel: MixpanelInstance!
 
     // MARK: - Setup / Teardown
 
     override func setUp() {
       super.setUp()
-      capturedEvents = []
 
       // Create test window and view controller on main thread
       let setupExpectation = expectation(description: "Setup complete")
@@ -77,19 +75,6 @@ import XCTest
 
       mixpanel = Mixpanel.initialize(options: options)
 
-      // Hook into autocapture events for testing
-      if let manager = mixpanel.autocaptureManager {
-        // Store original callback
-        let originalTrackEvent = manager.trackEvent
-
-        // Replace with our capturing version
-        manager.trackEvent = { [weak self] name, props in
-          self?.capturedEvents.append((name: name, properties: props))
-          // Also call original so tracking queue is updated
-          originalTrackEvent(name, props)
-        }
-      }
-
       // Wait for autocapture to start
       waitForAsyncTasks()
     }
@@ -109,8 +94,6 @@ import XCTest
       if let token = mixpanel?.apiToken {
         removeDBfile(token)
       }
-      capturedEvents = []
-
       super.tearDown()
     }
 
@@ -236,7 +219,9 @@ import XCTest
 
       // Then: Should capture 3 separate $mp_click events
       Thread.sleep(forTimeInterval: 0.5)  // Wait for all events
-      let clickEvents = capturedEvents.filter { $0.name == "$mp_click" }
+      waitForTrackingQueue(mixpanel)
+      let events = eventQueue(token: mixpanel.apiToken)
+      let clickEvents = events.filter { ($0["event"] as? String) == "$mp_click" }
       XCTAssertEqual(clickEvents.count, 3, "Should capture exactly 3 click events")
     }
 
@@ -299,14 +284,19 @@ import XCTest
 
     /// Wait for an autocapture event with the given name
     private func waitForEvent(named eventName: String, timeout: TimeInterval) -> (
-      name: String, properties: Properties
+      name: String, properties: [String: Any]
     )? {
       let startTime = Date()
 
       while Date().timeIntervalSince(startTime) < timeout {
-        // Check for event in captured events
-        if let event = capturedEvents.first(where: { $0.name == eventName }) {
-          return event
+        // Wait for tracking queue to flush to persistence
+        waitForTrackingQueue(mixpanel)
+
+        // Read events from persistence queue
+        let events = eventQueue(token: mixpanel.apiToken)
+        if let match = events.first(where: { ($0["event"] as? String) == eventName }),
+           let props = match["properties"] as? [String: Any] {
+          return (name: eventName, properties: props)
         }
 
         // Run loop to allow async operations

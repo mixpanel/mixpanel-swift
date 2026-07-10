@@ -10,14 +10,12 @@
   import ObjectiveC
   import UIKit
 
-  /// Intercepts touch events using a global gesture recognizer approach.
+  /// Intercepts touch events using a gesture recognizer approach.
   ///
-  /// This captures touches on ALL windows by adding a gesture recognizer that
-  /// observes but never claims touch events.
+  /// Each AutocaptureManager owns its own TouchInterceptor instance.
+  /// The interceptor adds non-exclusive gesture recognizers to windows
+  /// that observe but never claim touch events.
   final class TouchInterceptor: NSObject, UIGestureRecognizerDelegate {
-    // MARK: - Singleton
-
-    static let shared = TouchInterceptor()
 
     // MARK: - State
 
@@ -28,7 +26,7 @@
 
     // MARK: - Initialization
 
-    private override init() {
+    override init() {
       super.init()
     }
 
@@ -115,8 +113,14 @@
       // Stop observing new windows
       NotificationCenter.default.removeObserver(
         self, name: UIWindow.didBecomeVisibleNotification, object: nil)
+      // Remove only gesture recognizers owned by this instance
       for window in observedWindows.allObjects {
-        window.gestureRecognizers?.removeAll { $0 is TouchObservingGestureRecognizer }
+        window.gestureRecognizers?.removeAll { recognizer in
+          guard let touchRecognizer = recognizer as? TouchObservingGestureRecognizer else {
+            return false
+          }
+          return touchRecognizer.owner === self
+        }
       }
       observedWindows.removeAllObjects()
       isInstalled = false
@@ -137,7 +141,8 @@
       guard !observedWindows.contains(window) else { return }
 
       // Add only our custom observing recognizer (not duplicate tap recognizer)
-      let observingRecognizer = TouchObservingGestureRecognizer(target: self, action: #selector(handleTouchGesture(_:)))
+      let observingRecognizer = TouchObservingGestureRecognizer(
+        target: self, action: #selector(handleTouchGesture(_:)), owner: self)
       observingRecognizer.delegate = self
       observingRecognizer.cancelsTouchesInView = false
       observingRecognizer.delaysTouchesEnded = false
@@ -199,8 +204,17 @@
     /// Maximum duration (in seconds) for a touch to be considered a tap.
     private static let maxTapDuration: TimeInterval = 0.5
 
+    /// The TouchInterceptor instance that owns this gesture recognizer.
+    /// Used during uninstall to remove only recognizers belonging to a specific interceptor.
+    weak var owner: TouchInterceptor?
+
     private var downLocation: CGPoint?
     private var downTime: Date?
+
+    init(target: Any?, action: Selector?, owner: TouchInterceptor) {
+      self.owner = owner
+      super.init(target: target, action: action)
+    }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
       guard touches.count == 1, let touch = touches.first else { return }
@@ -248,7 +262,7 @@
       // Fall back to hit-testing the window to find the view at the touch point.
       let view = touch.view ?? window.hitTest(location, with: nil)
 
-      TouchInterceptor.shared.processTouchEnded(at: location, view: view, window: window)
+      owner?.processTouchEnded(at: location, view: view, window: window)
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {

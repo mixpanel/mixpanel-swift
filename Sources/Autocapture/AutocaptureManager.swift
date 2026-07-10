@@ -22,6 +22,7 @@
     private let semanticExtractor: SemanticExtractor
     private let rageClickTracker: RageClickTracker?
     private let deadClickDetector: DeadClickDetector?
+    private let touchInterceptor = TouchInterceptor()
 
     // MARK: - Autocapture Reference
 
@@ -91,7 +92,7 @@
       isStarted = true
 
       // Install touch interceptor
-      TouchInterceptor.shared.install(manager: self)
+      touchInterceptor.install(manager: self)
 
       MixpanelLogger.info(message: "AutocaptureManager: started")
     }
@@ -106,7 +107,7 @@
       isStarted = false
 
       // Uninstall touch interceptor
-      TouchInterceptor.shared.uninstall()
+      touchInterceptor.uninstall()
 
       // Reset components
       rageClickTracker?.reset()

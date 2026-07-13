@@ -53,17 +53,28 @@ enum AutocaptureDefaults {
       return className.contains("Hosting") || className.contains("SwiftUI")
     }
 
-    /// Check if a view is interactive (UIControl with targets or has enabled tap gesture recognizer).
+    /// Check if a view is interactive (UIControl with targets, has enabled tap gesture recognizer,
+    /// or is a SwiftUI view with button accessibility trait).
     static func isInteractive(_ view: UIView) -> Bool {
+      // UIKit: UIControl with action targets
       if let control = view as? UIControl, !control.allTargets.isEmpty {
         return true
       }
+      // UIKit: explicit tap gesture recognizer
       if let gestures = view.gestureRecognizers {
         for gesture in gestures where gesture.isEnabled {
           if gesture is UITapGestureRecognizer {
             return true
           }
         }
+      }
+      // Button accessibility trait indicates a clickable element.
+      // SwiftUI renders buttons as internal views (e.g., _UIGraphicsView) without
+      // UIKit gesture recognizers. The .button trait is set on the hit-test view
+      // regardless of framework and reliably signals interactivity.
+      // No framework gate needed — plain labels have .staticText, not .button.
+      if view.accessibilityTraits.contains(.button) {
+        return true
       }
       return false
     }

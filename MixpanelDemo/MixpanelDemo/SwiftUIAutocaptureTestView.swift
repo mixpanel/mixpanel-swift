@@ -117,6 +117,16 @@ struct SwiftUIAutocaptureTestView: View {
         .accessibilityLabel("swiftui_popover_trigger")
         .buttonStyle(TestButtonStyle())
 
+        // MARK: - Mixed Framework Dead Click Tests
+
+        SectionHeader("Mixed Framework Dead Click Tests")
+
+        Text("None of these should trigger $mp_dead_click")
+          .font(.caption)
+          .foregroundColor(.secondary)
+
+        MixedFrameworkTestSection()
+
         // MARK: - Instructions
 
         SectionHeader("Instructions")
@@ -172,6 +182,127 @@ struct SwiftUIAutocaptureTestView: View {
         }
       }
       .padding()
+    }
+  }
+}
+
+// MARK: - Mixed Framework Components
+
+/// Test section embedding UIKit views inside SwiftUI via UIViewRepresentable.
+/// Tests all 4 cross-framework button→text combinations for dead click detection.
+@available(iOS 14.0, *)
+private struct MixedFrameworkTestSection: View {
+  @State private var swiftUICounter = 0
+  @State private var uikitCounter = 0
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      // UIKit elements (Cases 1 & 2) with orange background
+      UIKitButtonsView(
+        uikitCounter: $uikitCounter,
+        swiftUICounter: $swiftUICounter
+      )
+      .frame(height: 150)
+      .background(Color.orange.opacity(0.1))
+      .cornerRadius(8)
+
+      // Case 3: SwiftUI Button -> UIKit Text
+      Button("3. SwiftUI Btn -> UIKit Text") {
+        uikitCounter += 1
+      }
+      .accessibilityLabel("swiftui_btn_uikit_text")
+      .buttonStyle(TestButtonStyle())
+
+      // Case 4: SwiftUI Button -> SwiftUI Text
+      Button("4. SwiftUI Btn -> SwiftUI Text") {
+        swiftUICounter += 1
+      }
+      .accessibilityLabel("swiftui_btn_swiftui_text")
+      .buttonStyle(TestButtonStyle())
+
+      // SwiftUI text counter (updated by cases 2 & 4)
+      Text("SwiftUI counter: \(swiftUICounter)")
+        .accessibilityLabel("swiftui_text_counter")
+    }
+  }
+}
+
+/// UIViewRepresentable that hosts UIKit buttons for mixed-framework testing.
+/// Case 1: UIKit Button -> UIKit text update
+/// Case 2: UIKit Button -> SwiftUI text update (via binding)
+@available(iOS 14.0, *)
+private struct UIKitButtonsView: UIViewRepresentable {
+  @Binding var uikitCounter: Int
+  @Binding var swiftUICounter: Int
+
+  func makeCoordinator() -> Coordinator {
+    Coordinator(self)
+  }
+
+  func makeUIView(context: Context) -> UIView {
+    let container = UIView()
+
+    let stack = UIStackView()
+    stack.axis = .vertical
+    stack.spacing = 8
+    stack.translatesAutoresizingMaskIntoConstraints = false
+    container.addSubview(stack)
+    NSLayoutConstraint.activate([
+      stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
+      stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
+      stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
+    ])
+
+    // Case 1: UIKit Button -> UIKit Text
+    let btn1 = UIButton(type: .system)
+    btn1.setTitle("1. UIKit Btn -> UIKit Text", for: .normal)
+    btn1.accessibilityLabel = "uikit_btn_uikit_text"
+    btn1.layer.borderWidth = 1
+    btn1.layer.cornerRadius = 8
+    btn1.layer.borderColor = UIColor.systemBlue.cgColor
+    btn1.heightAnchor.constraint(equalToConstant: 44).isActive = true
+    btn1.addTarget(context.coordinator, action: #selector(Coordinator.uikitBtnUikitText), for: .touchUpInside)
+    stack.addArrangedSubview(btn1)
+
+    // UIKit counter label
+    let counterLabel = UILabel()
+    counterLabel.text = "UIKit counter: 0"
+    counterLabel.accessibilityLabel = "uikit_text_counter"
+    context.coordinator.counterLabel = counterLabel
+    stack.addArrangedSubview(counterLabel)
+
+    // Case 2: UIKit Button -> SwiftUI Text
+    let btn2 = UIButton(type: .system)
+    btn2.setTitle("2. UIKit Btn -> SwiftUI Text", for: .normal)
+    btn2.accessibilityLabel = "uikit_btn_swiftui_text"
+    btn2.layer.borderWidth = 1
+    btn2.layer.cornerRadius = 8
+    btn2.layer.borderColor = UIColor.systemBlue.cgColor
+    btn2.heightAnchor.constraint(equalToConstant: 44).isActive = true
+    btn2.addTarget(context.coordinator, action: #selector(Coordinator.uikitBtnSwiftUIText), for: .touchUpInside)
+    stack.addArrangedSubview(btn2)
+
+    return container
+  }
+
+  func updateUIView(_ uiView: UIView, context: Context) {
+    context.coordinator.counterLabel?.text = "UIKit counter: \(uikitCounter)"
+  }
+
+  class Coordinator: NSObject {
+    var parent: UIKitButtonsView
+    weak var counterLabel: UILabel?
+
+    init(_ parent: UIKitButtonsView) {
+      self.parent = parent
+    }
+
+    @objc func uikitBtnUikitText() {
+      parent.uikitCounter += 1
+    }
+
+    @objc func uikitBtnSwiftUIText() {
+      parent.swiftUICounter += 1
     }
   }
 }

@@ -7,6 +7,7 @@
 //
 
 import Mixpanel
+import SwiftUI
 import UIKit
 
 /// Test screen for validating UIKit autocapture functionality.
@@ -17,6 +18,11 @@ class UIKitAutocaptureTestViewController: UIViewController, UIPopoverPresentatio
 
   private let scrollView = UIScrollView()
   private let stackView = UIStackView()
+
+  // Mixed framework test state
+  private var uikitCounter = 0
+  private var uikitCounterLabel: UILabel?
+  private var swiftUICounterModel: AnyObject?  // MixedFrameworkCounterModel (iOS 13+)
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -205,6 +211,10 @@ class UIKitAutocaptureTestViewController: UIViewController, UIPopoverPresentatio
     shareBtn.addTarget(self, action: #selector(showShareSheet(_:)), for: .touchUpInside)
     stackView.addArrangedSubview(shareBtn)
 
+    // MARK: - Mixed Framework Dead Click Tests
+
+    setupMixedFrameworkTests()
+
     // MARK: - Instructions
 
     stackView.addArrangedSubview(sectionLabel("Instructions"))
@@ -346,6 +356,142 @@ class UIKitAutocaptureTestViewController: UIViewController, UIPopoverPresentatio
     sender.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.3)
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
       sender.backgroundColor = originalColor
+    }
+  }
+
+  // MARK: - Mixed Framework Dead Click Tests
+
+  private func setupMixedFrameworkTests() {
+    stackView.addArrangedSubview(sectionLabel("Mixed Framework Dead Click Tests"))
+
+    let subtitle = UILabel()
+    subtitle.text = "None of these should trigger $mp_dead_click"
+    subtitle.font = .systemFont(ofSize: 12)
+    if #available(iOS 13.0, *) {
+      subtitle.textColor = .secondaryLabel
+    } else {
+      subtitle.textColor = .gray
+    }
+    stackView.addArrangedSubview(subtitle)
+
+    // UIKit counter label (updated by cases 1 & 3)
+    let counterLabel = UILabel()
+    counterLabel.text = "UIKit counter: 0"
+    counterLabel.accessibilityIdentifier = "uikit_text_counter_in_uikit"
+    self.uikitCounterLabel = counterLabel
+
+    // Case 1: UIKit Button -> UIKit Text
+    let btn1 = makeButton("1. UIKit Btn -> UIKit Text", hasAction: false)
+    btn1.accessibilityIdentifier = "uikit_btn_uikit_text_in_uikit"
+    btn1.addTarget(self, action: #selector(mixedUikitBtnUikitText), for: .touchUpInside)
+    stackView.addArrangedSubview(btn1)
+
+    stackView.addArrangedSubview(counterLabel)
+
+    // Case 2: UIKit Button -> SwiftUI Text
+    let btn2 = makeButton("2. UIKit Btn -> SwiftUI Text", hasAction: false)
+    btn2.accessibilityIdentifier = "uikit_btn_swiftui_text_in_uikit"
+    btn2.addTarget(self, action: #selector(mixedUikitBtnSwiftUIText), for: .touchUpInside)
+    stackView.addArrangedSubview(btn2)
+
+    // SwiftUI content embedded via UIHostingController (Cases 3 & 4 + SwiftUI counter)
+    if #available(iOS 14.0, *) {
+      let model = MixedFrameworkCounterModel()
+      self.swiftUICounterModel = model
+
+      let swiftUIContent = MixedFrameworkSwiftUIContent(model: model) { [weak self] in
+        self?.uikitCounter += 1
+        self?.uikitCounterLabel?.text = "UIKit counter: \(self?.uikitCounter ?? 0)"
+      }
+
+      let hostingController = UIHostingController(rootView: swiftUIContent)
+      addChild(hostingController)
+      hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+      hostingController.view.backgroundColor = .clear
+
+      // Wrap in a container with green background to visually distinguish SwiftUI content
+      let container = UIView()
+      container.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.08)
+      container.layer.cornerRadius = 8
+      container.translatesAutoresizingMaskIntoConstraints = false
+      container.addSubview(hostingController.view)
+
+      NSLayoutConstraint.activate([
+        hostingController.view.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
+        hostingController.view.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
+        hostingController.view.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
+        hostingController.view.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
+      ])
+
+      stackView.addArrangedSubview(container)
+      hostingController.didMove(toParent: self)
+    }
+  }
+
+  @objc private func mixedUikitBtnUikitText() {
+    uikitCounter += 1
+    uikitCounterLabel?.text = "UIKit counter: \(uikitCounter)"
+  }
+
+  @objc private func mixedUikitBtnSwiftUIText() {
+    if #available(iOS 13.0, *),
+       let model = swiftUICounterModel as? MixedFrameworkCounterModel {
+      model.counter += 1
+    }
+  }
+}
+
+// MARK: - Mixed Framework Support
+
+/// Observable model shared between UIKit and SwiftUI for cross-framework state updates.
+@available(iOS 13.0, *)
+class MixedFrameworkCounterModel: ObservableObject {
+  @Published var counter = 0
+}
+
+/// SwiftUI content embedded in UIKit screen for mixed-framework dead click testing.
+/// Case 3: SwiftUI Button -> UIKit Text (via closure)
+/// Case 4: SwiftUI Button -> SwiftUI Text (via ObservableObject)
+@available(iOS 14.0, *)
+private struct MixedFrameworkSwiftUIContent: View {
+  @ObservedObject var model: MixedFrameworkCounterModel
+  let onUikitTextUpdate: () -> Void
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      // Case 3: SwiftUI Button -> UIKit Text
+      Button("3. SwiftUI Btn -> UIKit Text") {
+        onUikitTextUpdate()
+      }
+      .accessibilityLabel("swiftui_btn_uikit_text_in_uikit")
+      .frame(maxWidth: .infinity, alignment: .center)
+      .padding(.horizontal, 12)
+      .padding(.vertical, 8)
+      .background(Color.blue.opacity(0.1))
+      .cornerRadius(8)
+      .overlay(
+        RoundedRectangle(cornerRadius: 8)
+          .stroke(Color.blue.opacity(0.5), lineWidth: 1)
+      )
+
+      // Case 4: SwiftUI Button -> SwiftUI Text
+      Button("4. SwiftUI Btn -> SwiftUI Text") {
+        model.counter += 1
+      }
+      .accessibilityLabel("swiftui_btn_swiftui_text_in_uikit")
+      .frame(maxWidth: .infinity, alignment: .center)
+      .padding(.horizontal, 12)
+      .padding(.vertical, 8)
+      .background(Color.blue.opacity(0.1))
+      .cornerRadius(8)
+      .overlay(
+        RoundedRectangle(cornerRadius: 8)
+          .stroke(Color.blue.opacity(0.5), lineWidth: 1)
+      )
+
+      // SwiftUI text counter (updated by cases 2 & 4)
+      Text("SwiftUI counter: \(model.counter)")
+        .accessibilityLabel("swiftui_text_counter_in_uikit")
     }
   }
 }

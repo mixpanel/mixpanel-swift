@@ -107,6 +107,19 @@
 
     /// Uninstall the touch interceptor.
     func uninstall() {
+      // Ensure uninstall happens on main thread — gesture recognizer removal
+      // is a UIKit mutation. deinit can run on any thread.
+      if !Thread.isMainThread {
+        DispatchQueue.main.async { [weak self] in
+          self?.performUninstall()
+        }
+        return
+      }
+
+      performUninstall()
+    }
+
+    private func performUninstall() {
       lock.lock()
       defer { lock.unlock() }
       manager = nil

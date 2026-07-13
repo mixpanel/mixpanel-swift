@@ -534,22 +534,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif
         unarchive()
 
-        // Initialize autocapture if enabled (iOS only)
-        #if os(iOS)
-        if let autocaptureOpts = self.options.autocaptureOptions, autocaptureOpts.isEnabled {
-            if !MixpanelInstance.isiOSAppExtension() {
-                autocaptureManager = AutocaptureManager(
-                    options: autocaptureOpts,
-                    autocapture: autocapture
-                )
-                autocaptureManager?.start()
-                MixpanelLogger.info(message: "AutocaptureManager started")
-            } else {
-                MixpanelLogger.info(message: "Autocapture disabled in app extension")
-            }
-        }
-        #endif
-
         // Construct FeatureFlagManager AFTER unarchive() so the on-disk cache load (dispatched
         // async by FeatureFlagManager.init when a caching policy is configured) reads the
         // correct distinctId via `delegate.getDistinctId()`. Constructing earlier would race the
@@ -570,6 +554,27 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if optOutTrackingByDefault && (hasOptedOutTracking() || optOutStatus == nil) {
             optOutTracking()
         }
+
+        // Initialize autocapture if enabled (iOS only)
+        // Done after opt-out check so autocapture is not started when tracking is opted out.
+        // Note: optOutTracking() runs async on trackingQueue, so hasOptedOutTracking() may
+        // not reflect the default yet. Check optOutTrackingByDefault directly as well.
+        #if os(iOS)
+        if let autocaptureOpts = self.options.autocaptureOptions, autocaptureOpts.isEnabled {
+            if optOutTrackingByDefault || hasOptedOutTracking() {
+                MixpanelLogger.info(message: "Autocapture disabled: tracking is opted out")
+            } else if MixpanelInstance.isiOSAppExtension() {
+                MixpanelLogger.info(message: "Autocapture disabled in app extension")
+            } else {
+                autocaptureManager = AutocaptureManager(
+                    options: autocaptureOpts,
+                    autocapture: autocapture
+                )
+                autocaptureManager?.start()
+                MixpanelLogger.info(message: "AutocaptureManager started")
+            }
+        }
+        #endif
 
         if let superProperties = superProperties {
             registerSuperProperties(superProperties)
@@ -1890,6 +1895,10 @@ extension MixpanelInstance {
             if let flagManager = self.flags as? FeatureFlagManager {
                 flagManager.reset()
             }
+
+            #if os(iOS)
+            self.autocaptureManager?.stop()
+            #endif
         }
     }
 
@@ -1918,6 +1927,26 @@ extension MixpanelInstance {
                 self.identify(distinctId: distinctId)
             }
             self.track(event: "$opt_in", properties: properties)
+
+            #if os(iOS)
+            // Restart autocapture if it was configured but stopped due to opt-out
+            if self.autocaptureManager == nil,
+               let autocaptureOpts = self.options.autocaptureOptions,
+               autocaptureOpts.isEnabled,
+               !MixpanelInstance.isiOSAppExtension() {
+                let manager = AutocaptureManager(
+                    options: autocaptureOpts,
+                    autocapture: self.autocapture
+                )
+                self.autocaptureManager = manager
+                DispatchQueue.main.async {
+                    manager.start()
+                }
+                MixpanelLogger.info(message: "AutocaptureManager started after opt-in")
+            } else {
+                self.autocaptureManager?.start()
+            }
+            #endif
         }
 
     }

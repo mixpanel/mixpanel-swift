@@ -33,7 +33,7 @@
 
       let className = String(describing: type(of: targetView))
       let elementId = generateElementId(for: targetView, isSwiftUI: isSwiftUIView(targetView))
-      let ariaLabel = findAccessibilityLabel(in: targetView)
+      let accessibleLabel = findAccessibilityLabel(in: targetView)
       let role = determineRole(for: targetView)
       let elements = buildViewHierarchy(from: targetView)
 
@@ -42,7 +42,7 @@
         y: point.y,
         elementId: elementId,
         tagName: className,
-        ariaLabel: ariaLabel,
+        accessibleLabel: accessibleLabel,
         role: role,
         elements: elements,
         isInteractive: viewIsInteractive

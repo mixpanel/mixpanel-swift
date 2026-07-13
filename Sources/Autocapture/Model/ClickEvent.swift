@@ -39,7 +39,7 @@
     public let tagName: String
 
     /// Accessibility label (maps to $attr-aria-label)
-    public let ariaLabel: String?
+    public let accessibleLabel: String?
 
     /// Element role based on accessibility traits or control type (maps to $attr-role)
     public let role: String?
@@ -59,19 +59,19 @@
     ///   - y: Touch location Y coordinate
     ///   - elementId: Primary element identifier
     ///   - tagName: Class name of the tapped view (defaults to empty string)
-    ///   - ariaLabel: Accessibility label (defaults to nil)
+    ///   - accessibleLabel: Accessibility label (defaults to nil)
     ///   - role: Semantic role of the element (defaults to nil)
     ///   - elements: View hierarchy string (defaults to empty string)
     ///   - isInteractive: Whether the element is interactive (defaults to true)
     public init(x: CGFloat, y: CGFloat, elementId: String,
-                tagName: String = "", ariaLabel: String? = nil,
+                tagName: String = "", accessibleLabel: String? = nil,
                 role: String? = nil, elements: String = "",
                 isInteractive: Bool = true) {
       self.x = x
       self.y = y
       self.elementId = elementId
       self.tagName = tagName
-      self.ariaLabel = ariaLabel
+      self.accessibleLabel = accessibleLabel
       self.role = role
       self.elements = elements
       self.isInteractive = isInteractive
@@ -95,8 +95,8 @@
         props["$elements"] = elements
       }
 
-      if let ariaLabel = ariaLabel {
-        props["$attr-aria-label"] = ariaLabel
+      if let accessibleLabel = accessibleLabel {
+        props["$attr-aria-label"] = accessibleLabel
       }
 
       if let role = role {

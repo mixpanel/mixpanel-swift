@@ -27,7 +27,9 @@
       // UIKit hit-testing returns the deepest view. For UIButton > UILabel,
       // we get the UILabel — wrong role, wrong el_id, not interactive.
       // Walk up to the nearest clickable ancestor when the leaf isn't interactive.
-      let targetView = isInteractive(view) ? view : (findInteractiveAncestor(of: view) ?? view)
+      let interactiveAncestor = isInteractive(view) ? view : findInteractiveAncestor(of: view)
+      let targetView = interactiveAncestor ?? view
+      let viewIsInteractive = interactiveAncestor != nil
 
       let className = String(describing: type(of: targetView))
       let elementId = generateElementId(for: targetView, isSwiftUI: isSwiftUIView(targetView))
@@ -42,7 +44,8 @@
         tagName: className,
         ariaLabel: ariaLabel,
         role: role,
-        elements: elements
+        elements: elements,
+        isInteractive: viewIsInteractive
       )
     }
 

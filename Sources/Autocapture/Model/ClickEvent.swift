@@ -47,6 +47,11 @@
     /// View hierarchy string (max 5 levels, ">" separated)
     public let elements: String
 
+    /// Whether the clicked element is interactive (has tap handlers or is a clickable control).
+    /// Non-interactive elements (plain labels, images without gestures) are excluded from
+    /// dead click detection since tapping them is expected to do nothing.
+    let isInteractive: Bool
+
     /// Creates a new ClickEvent.
     ///
     /// - Parameters:
@@ -57,9 +62,11 @@
     ///   - ariaLabel: Accessibility label (defaults to nil)
     ///   - role: Semantic role of the element (defaults to nil)
     ///   - elements: View hierarchy string (defaults to empty string)
+    ///   - isInteractive: Whether the element is interactive (defaults to true)
     public init(x: CGFloat, y: CGFloat, elementId: String,
                 tagName: String = "", ariaLabel: String? = nil,
-                role: String? = nil, elements: String = "") {
+                role: String? = nil, elements: String = "",
+                isInteractive: Bool = true) {
       self.x = x
       self.y = y
       self.elementId = elementId
@@ -67,6 +74,7 @@
       self.ariaLabel = ariaLabel
       self.role = role
       self.elements = elements
+      self.isInteractive = isInteractive
     }
 
     // MARK: - Conversion to Properties

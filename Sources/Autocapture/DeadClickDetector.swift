@@ -94,54 +94,6 @@
       return false
     }
 
-    /// Check if a view has tap/interaction handlers attached.
-    ///
-    /// Only views with actual handlers should be monitored for dead clicks,
-    /// as tapping a non-interactive view is expected to do nothing.
-    func hasInteractionHandlers(view: UIView) -> Bool {
-      // Check the view itself
-      if AutocaptureDefaults.isInteractive(view) {
-        return true
-      }
-
-      // Check ancestors for gesture recognizers that might handle this tap
-      var ancestor = view.superview
-      var depth = 0
-      let maxDepth = 5
-
-      while let current = ancestor, depth < maxDepth {
-        if AutocaptureDefaults.isInteractive(current) {
-          return true
-        }
-        ancestor = current.superview
-        depth += 1
-      }
-
-      return false
-    }
-
-    /// Check if a view is inside a SwiftUI hosting context.
-    ///
-    /// SwiftUI manages interactions entirely in its own layer — UIKit APIs cannot
-    /// detect gesture recognizers, UIControl targets, or accessibility traits on
-    /// SwiftUI rendering views. This method identifies SwiftUI context so dead click
-    /// monitoring can skip the UIKit-based handler check.
-    private func isInSwiftUIContext(view: UIView) -> Bool {
-      var current: UIView? = view
-      var depth = 0
-      let maxDepth = 10
-
-      while let v = current, depth < maxDepth {
-        if AutocaptureDefaults.isSwiftUIView(v) {
-          return true
-        }
-        current = v.superview
-        depth += 1
-      }
-
-      return false
-    }
-
     /// Start monitoring for dead click after a tap.
     ///
     /// - Parameters:
@@ -149,25 +101,19 @@
     ///   - view: The view that was tapped
     ///   - window: The window containing the view
     func startMonitoring(event: ClickEvent, view: UIView, in window: UIWindow) {
-      // Skip excluded elements
+      // Only monitor interactive elements — tapping a non-interactive view
+      // (plain label, image without gesture) is expected to do nothing.
+      guard event.isInteractive else {
+        MixpanelLogger.debug(
+          message: "DeadClickDetector: non-interactive element \(event.elementId)")
+        return
+      }
+
+      // Skip excluded elements (controls with inherent feedback like toggles, text fields)
       guard !shouldExclude(view: view) else {
         MixpanelLogger.debug(
           message: "DeadClickDetector: excluded element \(event.elementId)")
         return
-      }
-
-      // Only monitor elements with interaction handlers.
-      // SwiftUI manages interactions entirely in its own layer — UIKit APIs cannot
-      // detect gesture recognizers, UIControl targets, or accessibility traits on
-      // SwiftUI rendering views (_UIGraphicsView, CGDrawingView, etc.).
-      // For SwiftUI views, skip the handler check and rely on snapshot comparison
-      // to correctly distinguish interactive taps from dead clicks.
-      if !isInSwiftUIContext(view: view) {
-        guard hasInteractionHandlers(view: view) else {
-          MixpanelLogger.debug(
-            message: "DeadClickDetector: no handlers on \(event.elementId)")
-          return
-        }
       }
 
       // Capture baseline synchronously at click time — before the click handler

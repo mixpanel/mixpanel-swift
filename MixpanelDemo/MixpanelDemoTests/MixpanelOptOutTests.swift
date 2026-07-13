@@ -310,6 +310,128 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
+    // MARK: - Autocapture Opt-Out Tests
+
+    func testAutocaptureNotStartedWhenOptedOutByDefault() {
+        let token = randomId()
+        let options = MixpanelOptions(
+            token: token,
+            flushInterval: 60,
+            instanceName: token,
+            trackAutomaticEvents: false,
+            optOutTrackingByDefault: true,
+            serverURL: kFakeServerUrl,
+            autocaptureOptions: AutocaptureOptions()
+        )
+        let testMixpanel = Mixpanel.initialize(options: options)
+        waitForTrackingQueue(testMixpanel)
+        waitForAsyncTasks()
+
+        XCTAssertTrue(testMixpanel.hasOptedOutTracking())
+        XCTAssertNil(
+            testMixpanel.autocaptureManager,
+            "AutocaptureManager should not be created when opted out by default")
+
+        removeDBfile(token)
+    }
+
+    func testAutocaptureStopsOnOptOut() {
+        let token = randomId()
+        let options = MixpanelOptions(
+            token: token,
+            flushInterval: 60,
+            instanceName: token,
+            trackAutomaticEvents: false,
+            optOutTrackingByDefault: false,
+            serverURL: kFakeServerUrl,
+            autocaptureOptions: AutocaptureOptions()
+        )
+        let testMixpanel = Mixpanel.initialize(options: options)
+        waitForTrackingQueue(testMixpanel)
+        waitForAsyncTasks()
+
+        XCTAssertNotNil(testMixpanel.autocaptureManager,
+                        "AutocaptureManager should be created when not opted out")
+        XCTAssertTrue(testMixpanel.autocaptureManager!.isStarted,
+                      "AutocaptureManager should be started")
+
+        testMixpanel.optOutTracking()
+        waitForTrackingQueue(testMixpanel)
+        waitForAsyncTasks()
+
+        XCTAssertFalse(testMixpanel.autocaptureManager!.isStarted,
+                       "AutocaptureManager should be stopped after opt-out")
+
+        removeDBfile(token)
+    }
+
+    func testAutocaptureRestartsOnOptIn() {
+        let token = randomId()
+        let options = MixpanelOptions(
+            token: token,
+            flushInterval: 60,
+            instanceName: token,
+            trackAutomaticEvents: false,
+            optOutTrackingByDefault: false,
+            serverURL: kFakeServerUrl,
+            autocaptureOptions: AutocaptureOptions()
+        )
+        let testMixpanel = Mixpanel.initialize(options: options)
+        waitForTrackingQueue(testMixpanel)
+        waitForAsyncTasks()
+
+        // Opt out — autocapture stops
+        testMixpanel.optOutTracking()
+        waitForTrackingQueue(testMixpanel)
+        waitForAsyncTasks()
+        XCTAssertFalse(testMixpanel.autocaptureManager!.isStarted,
+                       "AutocaptureManager should be stopped after opt-out")
+
+        // Opt in — autocapture restarts
+        testMixpanel.optInTracking()
+        waitForTrackingQueue(testMixpanel)
+        waitForAsyncTasks()
+        XCTAssertNotNil(testMixpanel.autocaptureManager,
+                        "AutocaptureManager should exist after opt-in")
+        XCTAssertTrue(testMixpanel.autocaptureManager!.isStarted,
+                      "AutocaptureManager should be started after opt-in")
+
+        removeDBfile(token)
+    }
+
+    func testAutocaptureStartsOnOptInAfterOptOutByDefault() {
+        let token = randomId()
+        let options = MixpanelOptions(
+            token: token,
+            flushInterval: 60,
+            instanceName: token,
+            trackAutomaticEvents: false,
+            optOutTrackingByDefault: true,
+            serverURL: kFakeServerUrl,
+            autocaptureOptions: AutocaptureOptions()
+        )
+        let testMixpanel = Mixpanel.initialize(options: options)
+        waitForTrackingQueue(testMixpanel)
+        waitForAsyncTasks()
+
+        XCTAssertNil(testMixpanel.autocaptureManager,
+                     "AutocaptureManager should not be created when opted out by default")
+
+        // Opt in — autocapture should be created and started
+        testMixpanel.optInTracking()
+        waitForTrackingQueue(testMixpanel)
+        waitForAsyncTasks()
+
+        XCTAssertNotNil(testMixpanel.autocaptureManager,
+                        "AutocaptureManager should be created after opt-in")
+        XCTAssertTrue(testMixpanel.autocaptureManager!.isStarted,
+                      "AutocaptureManager should be started after opt-in")
+
+        removeDBfile(token)
+    }
+
+    // MARK: - Existing Tests
+
     func testOptOutWillSkipFlushEvent() {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), trackAutomaticEvents: true, optOutTrackingByDefault: true)

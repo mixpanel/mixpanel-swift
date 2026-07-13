@@ -32,7 +32,7 @@
 
     // MARK: - State
 
-    private var isStarted = false
+    private(set) var isStarted = false
     private let lock = NSLock()
 
     // MARK: - Initialization

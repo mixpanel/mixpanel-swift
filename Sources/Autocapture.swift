@@ -27,38 +27,18 @@ open class Autocapture {
        - parameter properties: Optional properties to include with this event
        */
     open func trackScreenView(screenName: String, properties: Properties? = nil) {
-        guard !screenName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            MixpanelLogger.warn(
-                message: "trackScreenView called with empty screenName, ignoring event")
-            return
-        }
-
-        var mergedProperties: Properties = properties ?? [:]
-        // SDK properties set after caller properties to prevent overrides
-        mergedProperties["current_page_title"] = screenName
-
-        trackAutocaptureEvent("$mp_page_view", properties: mergedProperties)
+        trackScreenEvent("$mp_page_view", screenName: screenName, properties: properties)
     }
 
     /**
        Track a screen leave event. This is a convenience method for tracking when users leave
        a screen/page in your application.
-    
+
        - parameter screenName: The name of the screen/page being left
        - parameter properties: Optional properties to include with this event
        */
     open func trackScreenLeave(screenName: String, properties: Properties? = nil) {
-        guard !screenName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            MixpanelLogger.warn(
-                message: "trackScreenLeave called with empty screenName, ignoring event")
-            return
-        }
-
-        var mergedProperties: Properties = properties ?? [:]
-        // SDK properties set after caller properties to prevent overrides
-        mergedProperties["current_page_title"] = screenName
-
-        trackAutocaptureEvent("$mp_page_leave", properties: mergedProperties)
+        trackScreenEvent("$mp_page_leave", screenName: screenName, properties: properties)
     }
 
     // MARK: - Click Tracking
@@ -112,6 +92,21 @@ open class Autocapture {
     #endif
 
     // MARK: - Private Helpers
+
+    private func trackScreenEvent(_ eventName: String, screenName: String,
+                                  properties: Properties? = nil) {
+        guard !screenName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            MixpanelLogger.warn(
+                message: "\(eventName) called with empty screenName, ignoring event")
+            return
+        }
+
+        var mergedProperties: Properties = properties ?? [:]
+        // SDK properties set after caller properties to prevent overrides
+        mergedProperties["current_page_title"] = screenName
+
+        trackAutocaptureEvent(eventName, properties: mergedProperties)
+    }
 
     /// Adds the $mp_autocapture flag and tracks the event.
     /// All autocapture events (screen view, screen leave, click, rage click, dead click)

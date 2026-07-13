@@ -279,7 +279,7 @@ import XCTest
         y: 200,
         elementId: "test_button",
         tagName: "UIButton",
-        ariaLabel: "Test Button",
+        accessibleLabel: "Test Button",
         role: "Button",
         elements: "UIButton > UIView"
       )
@@ -301,7 +301,7 @@ import XCTest
         y: 200,
         elementId: "test_button",
         tagName: "UIButton",
-        ariaLabel: nil,
+        accessibleLabel: nil,
         role: nil,
         elements: "UIButton"
       )

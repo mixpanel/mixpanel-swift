@@ -95,20 +95,10 @@
       return nil
     }
 
-    private func findAccessibilityLabel(in view: UIView, maxLevels: Int = SemanticExtractor.maxHierarchyDepth)
-      -> String?
-    {
-      var currentView: UIView? = view
-      var level = 0
-
-      while let v = currentView, level < maxLevels {
-        if let label = v.accessibilityLabel, !label.isEmpty {
-          return label
-        }
-        currentView = v.superview
-        level += 1
+    private func findAccessibilityLabel(in view: UIView) -> String? {
+      if let label = view.accessibilityLabel, !label.isEmpty {
+        return label
       }
-
       return nil
     }
 

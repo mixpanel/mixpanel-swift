@@ -128,43 +128,50 @@ class Flush: AppLifecycle {
     ) {
         var mutableQueue = queue
         while !mutableQueue.isEmpty {
-            let batchSize = min(mutableQueue.count, flushBatchSize)
-            let range = 0..<batchSize
-            let batch = Array(mutableQueue[range])
-            let ids: [Int32] = batch.map { entity in
-                (entity["id"] as? Int32) ?? 0
+            var shouldBreak = false
+            autoreleasepool {
+                let batchSize = min(mutableQueue.count, flushBatchSize)
+                let range = 0..<batchSize
+                var batch = Array(mutableQueue[range])
+                let ids: [Int32] = batch.map { entity in
+                    (entity["id"] as? Int32) ?? 0
+                }
+                MixpanelLogger.debug(message: "Sending batch of data")
+                MixpanelLogger.debug(message: batch as Any)
+                let requestData = JSONHandler.encodeAPIData(batch)
+
+                batch = []
+
+                if let requestData = requestData {
+                    #if os(iOS)
+                    if !MixpanelInstance.isiOSAppExtension() {
+                        delegate?.updateNetworkActivityIndicator(true)
+                    }
+                    #endif  // os(iOS)
+                    let success = flushRequest.sendRequest(
+                        requestData,
+                        type: type,
+                        useIP: useIPAddressForGeoLocation,
+                        headers: headers,
+                        queryItems: queryItems, useGzipCompression: useGzipCompression)
+                    #if os(iOS)
+                    if !MixpanelInstance.isiOSAppExtension() {
+                        delegate?.updateNetworkActivityIndicator(false)
+                    }
+                    #endif  // os(iOS)
+                    if success {
+                        delegate?.flushSuccess(type: type, ids: ids)
+                        mutableQueue = self.removeProcessedBatch(
+                            batchSize: batchSize,
+                            queue: mutableQueue,
+                            type: type)
+                    } else {
+                        shouldBreak = true
+                    }
+                }
             }
-            // Log data payload sent
-            MixpanelLogger.debug(message: "Sending batch of data")
-            MixpanelLogger.debug(message: batch as Any)
-            let requestData = JSONHandler.encodeAPIData(batch)
-            if let requestData = requestData {
-                #if os(iOS)
-                if !MixpanelInstance.isiOSAppExtension() {
-                    delegate?.updateNetworkActivityIndicator(true)
-                }
-                #endif  // os(iOS)
-                let success = flushRequest.sendRequest(
-                    requestData,
-                    type: type,
-                    useIP: useIPAddressForGeoLocation,
-                    headers: headers,
-                    queryItems: queryItems, useGzipCompression: useGzipCompression)
-                #if os(iOS)
-                if !MixpanelInstance.isiOSAppExtension() {
-                    delegate?.updateNetworkActivityIndicator(false)
-                }
-                #endif  // os(iOS)
-                if success {
-                    // remove
-                    delegate?.flushSuccess(type: type, ids: ids)
-                    mutableQueue = self.removeProcessedBatch(
-                        batchSize: batchSize,
-                        queue: mutableQueue,
-                        type: type)
-                } else {
-                    break
-                }
+            if shouldBreak {
+                break
             }
         }
     }

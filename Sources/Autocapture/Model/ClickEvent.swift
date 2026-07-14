@@ -34,8 +34,8 @@
     /// A stable identifier for the tapped element, used to group clicks in analytics.
     ///
     /// Recommended sources (in order of preference):
+    /// - `accessibilityLabel` — human-readable, consistent across UIKit and SwiftUI
     /// - `accessibilityIdentifier` — stable and not user-visible
-    /// - `accessibilityLabel` — if no identifier is set
     /// - A custom string like `"buy_button"` or `"settings_cell_notifications"`
     ///
     /// Avoid dynamic values (e.g., cell index, timestamp) — they prevent meaningful grouping.

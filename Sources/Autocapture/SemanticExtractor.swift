@@ -32,7 +32,7 @@
       let viewIsInteractive = interactiveAncestor != nil
 
       let className = String(describing: type(of: targetView))
-      let elementId = generateElementId(for: targetView, isSwiftUI: isSwiftUIView(targetView))
+      let elementId = generateElementId(for: targetView)
       let accessibleLabel = findAccessibilityLabel(in: targetView)
       let role = determineRole(for: targetView)
       let elements = buildViewHierarchy(from: targetView)
@@ -53,34 +53,18 @@
 
     /// Generate element ID following platform-specific resolution rules:
     ///
-    /// **UIKit:**
-    /// 1. `accessibilityIdentifier` (if non-empty)
-    /// 2. `accessibilityLabel` (if non-empty)
+    /// Resolution order (same for UIKit and SwiftUI):
+    /// 1. `accessibilityLabel` (if non-empty)
+    /// 2. `accessibilityIdentifier` (if non-empty)
     /// 3. `ClassName_view_<hash>`
-    ///
-    /// **SwiftUI:**
-    /// 1. `accessibilityLabel` (primary - always available)
-    /// 2. `accessibilityIdentifier` (only when VoiceOver active)
-    /// 3. `ClassName_view_<hash>`
-    private func generateElementId(for view: UIView, isSwiftUI: Bool) -> String {
-      if isSwiftUI {
-        // SwiftUI: accessibilityLabel is primary
-        if let label = findAccessibilityLabel(in: view), !label.isEmpty {
-          return label
-        }
-        // SwiftUI: accessibilityIdentifier only works with VoiceOver, check anyway
-        if let identifier = findAccessibilityIdentifier(in: view), !identifier.isEmpty {
-          return identifier
-        }
-      } else {
-        // UIKit: accessibilityIdentifier is primary
-        if let identifier = findAccessibilityIdentifier(in: view), !identifier.isEmpty {
-          return identifier
-        }
-        // UIKit: accessibilityLabel as fallback
-        if let label = findAccessibilityLabel(in: view), !label.isEmpty {
-          return label
-        }
+    private func generateElementId(for view: UIView) -> String {
+      // accessibilityLabel is primary for both UIKit and SwiftUI
+      if let label = findAccessibilityLabel(in: view), !label.isEmpty {
+        return label
+      }
+      // accessibilityIdentifier as fallback
+      if let identifier = findAccessibilityIdentifier(in: view), !identifier.isEmpty {
+        return identifier
       }
 
       // Fallback: ClassName_view_<hex hash>
@@ -199,12 +183,6 @@
       }
 
       return hierarchy.reversed().joined(separator: " > ")
-    }
-
-    // MARK: - SwiftUI Detection
-
-    private func isSwiftUIView(_ view: UIView) -> Bool {
-      return AutocaptureDefaults.isSwiftUIView(view)
     }
 
     // MARK: - Interactive View Resolution

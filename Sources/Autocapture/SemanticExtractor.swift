@@ -56,7 +56,7 @@
     /// Resolution order (same for UIKit and SwiftUI):
     /// 1. `accessibilityLabel` (if non-empty)
     /// 2. `accessibilityIdentifier` (if non-empty)
-    /// 3. `ClassName_view_<hash>`
+    /// 3. `ClassName_<hash>`
     private func generateElementId(for view: UIView) -> String {
       // accessibilityLabel is primary for both UIKit and SwiftUI
       if let label = findAccessibilityLabel(in: view), !label.isEmpty {
@@ -67,10 +67,10 @@
         return identifier
       }
 
-      // Fallback: ClassName_view_<hex hash>
+      // Fallback: ClassName_<hex hash>
       let className = String(describing: type(of: view))
       let safeHash = view.hash == Int.min ? Int.max : abs(view.hash)
-      return "\(className)_view_\(String(safeHash, radix: 16))"
+      return "\(className)_\(String(safeHash, radix: 16))"
     }
 
     // MARK: - Accessibility Property Discovery

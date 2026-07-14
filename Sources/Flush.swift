@@ -10,7 +10,7 @@ import Foundation
 
 protocol FlushDelegate: AnyObject {
     func flush(performFullFlush: Bool, completion: (() -> Void)?)
-    func flushSuccess(type: FlushType, ids: [Int32])
+    func removeProcessedEntities(type: FlushType, ids: [Int32])
 
     #if os(iOS)
     func updateNetworkActivityIndicator(_ on: Bool)
@@ -142,32 +142,40 @@ class Flush: AppLifecycle {
 
                 batch = []
 
-                if let requestData = requestData {
-                    #if os(iOS)
-                    if !MixpanelInstance.isiOSAppExtension() {
-                        delegate?.updateNetworkActivityIndicator(true)
-                    }
-                    #endif  // os(iOS)
-                    let success = flushRequest.sendRequest(
-                        requestData,
-                        type: type,
-                        useIP: useIPAddressForGeoLocation,
-                        headers: headers,
-                        queryItems: queryItems, useGzipCompression: useGzipCompression)
-                    #if os(iOS)
-                    if !MixpanelInstance.isiOSAppExtension() {
-                        delegate?.updateNetworkActivityIndicator(false)
-                    }
-                    #endif  // os(iOS)
-                    if success {
-                        delegate?.flushSuccess(type: type, ids: ids)
-                        mutableQueue = self.removeProcessedBatch(
-                            batchSize: batchSize,
-                            queue: mutableQueue,
-                            type: type)
-                    } else {
-                        shouldBreak = true
-                    }
+                guard let requestData = requestData else {
+                    MixpanelLogger.warn(message: "Failed to serialize batch, dropping \(ids.count) events")
+                    delegate?.removeProcessedEntities(type: type, ids: ids)
+                    mutableQueue = self.removeProcessedBatch(
+                        batchSize: batchSize,
+                        queue: mutableQueue,
+                        type: type)
+                    return
+                }
+
+                #if os(iOS)
+                if !MixpanelInstance.isiOSAppExtension() {
+                    delegate?.updateNetworkActivityIndicator(true)
+                }
+                #endif  // os(iOS)
+                let success = flushRequest.sendRequest(
+                    requestData,
+                    type: type,
+                    useIP: useIPAddressForGeoLocation,
+                    headers: headers,
+                    queryItems: queryItems, useGzipCompression: useGzipCompression)
+                #if os(iOS)
+                if !MixpanelInstance.isiOSAppExtension() {
+                    delegate?.updateNetworkActivityIndicator(false)
+                }
+                #endif  // os(iOS)
+                if success {
+                    delegate?.removeProcessedEntities(type: type, ids: ids)
+                    mutableQueue = self.removeProcessedBatch(
+                        batchSize: batchSize,
+                        queue: mutableQueue,
+                        type: type)
+                } else {
+                    shouldBreak = true
                 }
             }
             if shouldBreak {

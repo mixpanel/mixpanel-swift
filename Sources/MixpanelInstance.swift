@@ -1252,7 +1252,7 @@ extension MixpanelInstance {
         self.flushInstance.flushQueue(queue, type: type, headers: headers, queryItems: queryItems)
     }
 
-    func flushSuccess(type: FlushType, ids: [Int32]) {
+    func removeProcessedEntities(type: FlushType, ids: [Int32]) {
         trackingQueue.async { [weak self] in
             guard let self = self else {
                 return

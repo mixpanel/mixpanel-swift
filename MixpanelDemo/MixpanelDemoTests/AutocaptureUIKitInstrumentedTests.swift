@@ -145,14 +145,14 @@ import XCTest
       // When: Simulate tap
       simulateTap(on: button)
 
-      // Then: Element ID should use hash format: ClassName_view_<hash>
+      // Then: Element ID should use hash format: ClassName_<hash>
       let event = waitForEvent(named: "$mp_click", timeout: 5)
       XCTAssertNotNil(event, "Should capture $mp_click event")
 
       if let props = event?.properties {
         let elId = props["$el_id"] as? String ?? ""
         XCTAssertTrue(
-          elId.hasPrefix("UIButton_view_"),
+          elId.hasPrefix("UIButton_"),
           "Expected hash fallback format, got: \(elId)")
       }
     }

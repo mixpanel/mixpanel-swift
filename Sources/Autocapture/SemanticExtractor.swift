@@ -35,13 +35,14 @@
       let elementId = generateElementId(for: targetView)
       let accessibleLabel = findAccessibilityLabel(in: targetView)
       let role = determineRole(for: targetView)
+      let tagName = resolveTagName(className: className, role: role, view: targetView)
       let elements = buildViewHierarchy(from: targetView)
 
       return ClickEvent(
         x: point.x,
         y: point.y,
         elementId: elementId,
-        tagName: className,
+        tagName: tagName,
         accessibleLabel: accessibleLabel,
         role: role,
         elements: elements,
@@ -158,6 +159,18 @@
       if traits.contains(.tabBar) { return "TabBar" }
 
       return nil
+    }
+
+    // MARK: - Tag Name Resolution
+
+    /// For UIKit views, uses the raw class name (e.g., "UIButton", "UITableViewCell").
+    /// For SwiftUI views, the raw class name is an internal UIKit name (e.g., "_UIGraphicsView")
+    /// which is meaningless — use the role instead, falling back to "View".
+    private func resolveTagName(className: String, role: String?, view: UIView) -> String {
+      if AutocaptureDefaults.isSwiftUIView(view) {
+        return role ?? "View"
+      }
+      return className
     }
 
     // MARK: - View Hierarchy

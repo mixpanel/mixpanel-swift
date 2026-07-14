@@ -9,42 +9,64 @@
 #if os(iOS)
   import UIKit
 
-  /// Model representing a click event with all captured properties.
+  /// Represents a captured click event with element metadata.
   ///
-  /// Use this to track click events with full element metadata.
-  /// Property names match the JS SDK schema for cross-platform consistency.
-  ///
-  /// **Example:**
-  /// ```swift
-  /// let click = ClickEvent(x: 100, y: 200, elementId: "buy_button")
-  /// mixpanel.autocapture.trackClick(click)
-  /// ```
+  /// Contains all semantic information about the clicked element and its context.
+  /// Create a `ClickEvent` and pass it to `mixpanel.autocapture.trackClick(_:)` to
+  /// track click events with full element metadata.
   public struct ClickEvent {
     // MARK: - Position
 
-    /// Touch location X coordinate (screen coordinates)
+    /// Touch X coordinate in the window's coordinate space (points).
+    ///
+    /// The SDK captures this as `touch.location(in: window).x`.
+    /// When tracking manually, use `touch.location(in: view.window).x`.
     public let x: CGFloat
 
-    /// Touch location Y coordinate (screen coordinates)
+    /// Touch Y coordinate in the window's coordinate space (points).
+    ///
+    /// The SDK captures this as `touch.location(in: window).y`.
+    /// When tracking manually, use `touch.location(in: view.window).y`.
     public let y: CGFloat
 
     // MARK: - Element Identification
 
-    /// Primary element identifier following resolution rules:
-    /// - UIKit: accessibilityIdentifier -> accessibilityLabel -> ClassName_view_<hash>
-    /// - SwiftUI: accessibilityLabel -> ClassName_view_<hash>
+    /// A stable identifier for the tapped element, used to group clicks in analytics.
+    ///
+    /// Recommended sources (in order of preference):
+    /// - `accessibilityIdentifier` — stable and not user-visible
+    /// - `accessibilityLabel` — if no identifier is set
+    /// - A custom string like `"buy_button"` or `"settings_cell_notifications"`
+    ///
+    /// Avoid dynamic values (e.g., cell index, timestamp) — they prevent meaningful grouping.
     public let elementId: String
 
-    /// Class name of the tapped view (e.g., "UIButton", "Button")
+    /// The class name or component type of the tapped element.
+    ///
+    /// Examples: `"UIButton"`, `"UITableViewCell"`, `"Button"` (SwiftUI).
+    /// Use `String(describing: type(of: view))` to get the class name.
+    /// Defaults to empty string if not provided.
     public let tagName: String
 
-    /// Accessibility label (maps to $attr-aria-label)
+    /// The human-readable accessibility label of the element.
+    ///
+    /// This is the text read aloud by VoiceOver — typically the view's `accessibilityLabel`.
+    /// Examples: `"Add to cart"`, `"Play video"`, `"Close"`.
+    /// Set to `nil` if the element has no accessibility label.
     public let accessibleLabel: String?
 
-    /// Element role based on accessibility traits or control type (maps to $attr-role)
+    /// The semantic role describing what the element does.
+    ///
+    /// Common values: `"button"`, `"link"`, `"switch"`, `"checkbox"`, `"slider"`,
+    /// `"tab"`, `"textfield"`, `"image"`.
+    /// Set to `nil` if the element has no specific role.
     public let role: String?
 
-    /// View hierarchy string (max 5 levels, ">" separated)
+    /// View hierarchy path from the tapped element up to 5 ancestor levels, `">"` separated.
+    ///
+    /// Example: `"UIButton > UIStackView > UITableViewCell > UITableView > UIView"`.
+    /// Useful for identifying where in the view tree the click occurred.
+    /// Defaults to empty string if not provided.
     public let elements: String
 
     /// Whether the clicked element is interactive (has tap handlers or is a clickable control).
@@ -54,14 +76,36 @@
 
     /// Creates a new ClickEvent.
     ///
+    /// Only `x`, `y`, and `elementId` are required. All other parameters have sensible defaults.
+    ///
+    /// **Minimal usage:**
+    /// ```swift
+    /// let click = ClickEvent(x: 150, y: 300, elementId: "buy_button")
+    /// mixpanel.autocapture.trackClick(click)
+    /// ```
+    ///
+    /// **Full usage:**
+    /// ```swift
+    /// let click = ClickEvent(
+    ///     x: touch.location(in: view.window).x,
+    ///     y: touch.location(in: view.window).y,
+    ///     elementId: button.accessibilityIdentifier ?? "buy_button",
+    ///     tagName: String(describing: type(of: button)),
+    ///     accessibleLabel: button.accessibilityLabel,
+    ///     role: "button",
+    ///     elements: "UIButton > UIStackView > UIView"
+    /// )
+    /// mixpanel.autocapture.trackClick(click)
+    /// ```
+    ///
     /// - Parameters:
-    ///   - x: Touch location X coordinate
-    ///   - y: Touch location Y coordinate
-    ///   - elementId: Primary element identifier
-    ///   - tagName: Class name of the tapped view (defaults to empty string)
-    ///   - accessibleLabel: Accessibility label (defaults to nil)
-    ///   - role: Semantic role of the element (defaults to nil)
-    ///   - elements: View hierarchy string (defaults to empty string)
+    ///   - x: Touch X coordinate in window points
+    ///   - y: Touch Y coordinate in window points
+    ///   - elementId: Stable identifier for the tapped element
+    ///   - tagName: Class name of the tapped element (defaults to empty string)
+    ///   - accessibleLabel: The element's accessibility label (defaults to nil)
+    ///   - role: Semantic role like `"button"`, `"switch"`, `"link"` (defaults to nil)
+    ///   - elements: View hierarchy path, `">"` separated (defaults to empty string)
     ///   - isInteractive: Whether the element is interactive (defaults to true)
     public init(x: CGFloat, y: CGFloat, elementId: String,
                 tagName: String = "", accessibleLabel: String? = nil,

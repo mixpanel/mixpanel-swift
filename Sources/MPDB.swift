@@ -270,19 +270,21 @@ class MPDB {
             var rowsRead: Int = 0
             if sqlite3_prepare_v2(db, selectString, -1, &selectStatement, nil) == SQLITE_OK {
                 while sqlite3_step(selectStatement) == SQLITE_ROW {
-                    if let blob = sqlite3_column_blob(selectStatement, 1) {
-                        let blobLength = sqlite3_column_bytes(selectStatement, 1)
-                        let data = Data(bytes: blob, count: Int(blobLength))
-                        let id = sqlite3_column_int(selectStatement, 0)
+                    autoreleasepool {
+                        if let blob = sqlite3_column_blob(selectStatement, 1) {
+                            let blobLength = sqlite3_column_bytes(selectStatement, 1)
+                            let data = Data(bytes: blob, count: Int(blobLength))
+                            let id = sqlite3_column_int(selectStatement, 0)
 
-                        if let jsonObject = JSONHandler.deserializeData(data) as? InternalProperties {
-                            var entity = jsonObject
-                            entity["id"] = id
-                            rows.append(entity)
+                            if let jsonObject = JSONHandler.deserializeData(data) as? InternalProperties {
+                                var entity = jsonObject
+                                entity["id"] = id
+                                rows.append(entity)
+                            }
+                            rowsRead += 1
+                        } else {
+                            logSqlError(message: "No blob found in data column for row in \(tableName)")
                         }
-                        rowsRead += 1
-                    } else {
-                        logSqlError(message: "No blob found in data column for row in \(tableName)")
                     }
                 }
                 if rowsRead > 0 {

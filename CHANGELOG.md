@@ -1,3 +1,12 @@
+Last tag: 6.5.0
+## [6.5.1](https://github.com/mixpanel/mixpanel-swift/tree/6.5.1) (2026-07-15)
+
+### Fixes
+
+- Reduce flush and DB memory spikes (#751) ([#751](https://github.com/mixpanel/mixpanel-swift/pull/751))
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.5.0...6.5.1)
+
 Last tag: 6.4.1
 ## [6.5.0](https://github.com/mixpanel/mixpanel-swift/tree/6.5.0) (2026-07-06)
 

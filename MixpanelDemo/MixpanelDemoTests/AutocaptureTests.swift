@@ -299,17 +299,15 @@ import XCTest
       let event = ClickEvent(
         x: 100,
         y: 200,
-        elementId: "test_button",
-        tagName: "UIButton",
-        accessibleLabel: nil,
-        role: nil,
-        elements: "UIButton"
+        elementId: "test_button"
       )
 
       let props = event.toProperties()
 
+      XCTAssertNil(props["$el_tag_name"])
       XCTAssertNil(props["$attr-aria-label"])
       XCTAssertNil(props["$attr-role"])
+      XCTAssertNil(props["$elements"])
     }
   }
 #endif

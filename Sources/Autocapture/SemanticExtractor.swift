@@ -11,7 +11,7 @@
 
   /// Extracts semantic information from UIKit and SwiftUI views for autocapture events.
   ///
-  /// Handles element identification, role detection, and privacy filtering.
+  /// Handles element identification and role detection.
   final class SemanticExtractor {
     // MARK: - Constants
 

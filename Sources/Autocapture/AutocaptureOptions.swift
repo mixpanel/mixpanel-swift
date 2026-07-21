@@ -32,6 +32,7 @@ enum AutocaptureDefaults {
       UISegmentedControl.self,
       UIDatePicker.self,
       UIPickerView.self,
+      UIPageControl.self,
     ]
 
     /// SwiftUI class name patterns for controls with inherent visual feedback.
@@ -83,7 +84,11 @@ enum AutocaptureDefaults {
 
 // MARK: - Click Options
 
-/// Configuration options for basic click event capture.
+/// Configuration options for click event capture.
+///
+/// When enabled, a `$mp_click` event is tracked for every tap on any element.
+/// Each event includes the touch coordinates, element identifier, class name,
+/// accessibility label, semantic role, and view hierarchy path.
 public struct ClickOptions {
   /// Whether click capture is enabled. Defaults to `true` when autocapture is enabled.
   public let enabled: Bool

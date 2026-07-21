@@ -206,7 +206,6 @@ AutocaptureManager: emitted $mp_dead_click for broken_link
 
 **Events not appearing:**
 - Verify `autocaptureOptions` is passed to `MixpanelOptions`
-- Check that the view is not marked as sensitive
 - Ensure the app is not in an app extension (autocapture is disabled in extensions)
 
 **SwiftUI elements showing hash IDs:**

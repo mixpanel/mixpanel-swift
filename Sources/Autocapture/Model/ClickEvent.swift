@@ -45,8 +45,8 @@
     ///
     /// Examples: `"UIButton"`, `"UITableViewCell"`, `"Button"` (SwiftUI).
     /// Use `String(describing: type(of: view))` to get the class name.
-    /// Defaults to empty string if not provided.
-    public let tagName: String
+    /// Set to `nil` if not available.
+    public let tagName: String?
 
     /// The human-readable accessibility label of the element.
     ///
@@ -66,8 +66,8 @@
     ///
     /// Example: `"UIButton > UIStackView > UITableViewCell > UITableView > UIView"`.
     /// Useful for identifying where in the view tree the click occurred.
-    /// Defaults to empty string if not provided.
-    public let elements: String
+    /// Set to `nil` if not available.
+    public let elements: String?
 
     /// Whether the clicked element is interactive (has tap handlers or is a clickable control).
     /// Non-interactive elements (plain labels, images without gestures) are excluded from
@@ -102,14 +102,14 @@
     ///   - x: Touch X coordinate in window points
     ///   - y: Touch Y coordinate in window points
     ///   - elementId: Stable identifier for the tapped element
-    ///   - tagName: Class name of the tapped element (defaults to empty string)
+    ///   - tagName: Class name of the tapped element (defaults to nil)
     ///   - accessibleLabel: The element's accessibility label (defaults to nil)
     ///   - role: Semantic role like `"button"`, `"switch"`, `"link"` (defaults to nil)
-    ///   - elements: View hierarchy path, `">"` separated (defaults to empty string)
+    ///   - elements: View hierarchy path, `">"` separated (defaults to nil)
     ///   - isInteractive: Whether the element is interactive (defaults to true)
     public init(x: CGFloat, y: CGFloat, elementId: String,
-                tagName: String = "", accessibleLabel: String? = nil,
-                role: String? = nil, elements: String = "",
+                tagName: String? = nil, accessibleLabel: String? = nil,
+                role: String? = nil, elements: String? = nil,
                 isInteractive: Bool = true) {
       self.x = x
       self.y = y
@@ -131,11 +131,11 @@
         "$el_id": elementId,
       ]
 
-      if !tagName.isEmpty {
+      if let tagName = tagName {
         props["$el_tag_name"] = tagName
       }
 
-      if !elements.isEmpty {
+      if let elements = elements {
         props["$elements"] = elements
       }
 

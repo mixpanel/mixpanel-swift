@@ -30,6 +30,7 @@
 
     private var pendingCheck: PendingCheck?
     private weak var currentWindow: UIWindow?
+    private var checkTask: Any?  // Task<Void, Never> on iOS 13+
     private let lock = NSLock()
 
     // MARK: - Types
@@ -116,6 +117,9 @@
         return
       }
 
+      // Cancel any in-flight detection before starting a new one
+      cancelPendingCheck()
+
       // Capture baseline synchronously at click time — before the click handler
       // has a chance to update the UI. This prevents fast UI responses (e.g.,
       // showing a UIAlertController) from being absorbed into the baseline,
@@ -131,10 +135,21 @@
       )
       lock.unlock()
 
-      // Schedule final check at full timeout
-      DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeWindowMs)) {
-        [weak self] in
-        self?.performFinalCheck()
+      // Schedule final check as a cancellable task
+      let timeWindow = timeWindowMs
+      if #available(iOS 13.0, *) {
+        checkTask = Task { [weak self] in
+          try? await Task.sleep(nanoseconds: UInt64(timeWindow) * 1_000_000)
+          guard !Task.isCancelled else { return }
+          await MainActor.run {
+            self?.performFinalCheck()
+          }
+        }
+      } else {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeWindow)) {
+          [weak self] in
+          self?.performFinalCheck()
+        }
       }
     }
 
@@ -142,6 +157,10 @@
     ///
     /// Call this when the user navigates away or the app backgrounds.
     func cancelPendingCheck() {
+      if #available(iOS 13.0, *) {
+        (checkTask as? Task<Void, Never>)?.cancel()
+      }
+      checkTask = nil
       lock.lock()
       pendingCheck = nil
       lock.unlock()

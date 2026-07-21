@@ -140,7 +140,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let autocaptureOptions = AutocaptureOptions()
 
         let mixpanelOptions = MixpanelOptions(
-            token: "3124becc8e700e259476cca2f895e5f5",
+            token: "YOUR_MIXPANEL_TOKEN",
             trackAutomaticEvents: true,
             deviceIdProvider: deviceIdProvider,
             autocaptureOptions: autocaptureOptions

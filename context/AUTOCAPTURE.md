@@ -52,7 +52,7 @@ That's it! No additional setup required. Autocapture automatically intercepts al
 | Option | Default | Description |
 |--------|---------|-------------|
 | `enabled` | `true` | Track dead click events |
-| `timeoutMs` | `500` | Response wait time in milliseconds |
+| `timeWindowMs` | `500` | Response wait time in milliseconds |
 
 ### Custom Configuration Example
 
@@ -97,7 +97,7 @@ The `$el_id` property uses different resolution rules for UIKit and SwiftUI:
 
 1. `accessibilityIdentifier` (if non-empty)
 2. `accessibilityLabel` (if non-empty)
-3. `ClassName_view_<hash>` (fallback)
+3. `ClassName_<hash>` (fallback)
 
 ```swift
 // Recommended: Set accessibilityIdentifier for reliable tracking
@@ -111,7 +111,7 @@ button.accessibilityLabel = "Checkout"
 
 1. `accessibilityLabel` (primary - always available)
 2. `accessibilityIdentifier` (only available when VoiceOver is active)
-3. `ClassName_view_<hash>` (fallback)
+3. `ClassName_<hash>` (fallback)
 
 ```swift
 // Recommended: Use accessibilityLabel (always works)
@@ -133,7 +133,7 @@ Dead click detection monitors interactive elements for UI response:
 
 1. User taps an element with interaction handlers
 2. Capture a snapshot of the UI state immediately (synchronous baseline)
-3. Wait 500ms (timeout)
+3. Wait 500ms (time window)
 4. Capture a final snapshot and compare with baseline
 5. If UI hasn't changed, emit `$mp_dead_click`
 

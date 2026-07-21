@@ -13,13 +13,13 @@
   ///
   /// Dead clicks indicate broken or unresponsive UI elements. Detection works by:
   /// 1. Capturing a baseline UI snapshot synchronously at click time
-  /// 2. Waiting for the timeout period (500ms default)
+  /// 2. Waiting for the time window (500ms default)
   /// 3. Comparing the final state to the baseline
   /// 4. If no change detected, emitting a dead click event
   final class DeadClickDetector {
     // MARK: - Configuration
 
-    private let timeoutMs: Int
+    private let timeWindowMs: Int
 
     // MARK: - Callback
 
@@ -49,7 +49,7 @@
     // MARK: - Initialization
 
     init(options: DeadClickOptions) {
-      self.timeoutMs = options.timeoutMs
+      self.timeWindowMs = options.timeWindowMs
     }
 
     // MARK: - Public API
@@ -132,7 +132,7 @@
       lock.unlock()
 
       // Schedule final check at full timeout
-      DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeoutMs)) {
+      DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeWindowMs)) {
         [weak self] in
         self?.performFinalCheck()
       }

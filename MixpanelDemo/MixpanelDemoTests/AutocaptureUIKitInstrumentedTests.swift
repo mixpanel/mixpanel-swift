@@ -60,7 +60,7 @@ import XCTest
       let autocaptureOptions = AutocaptureOptions(
         clickOptions: ClickOptions(enabled: true),
         rageClickOptions: RageClickOptions(enabled: true, clickThreshold: 4, timeWindowMs: 1000),
-        deadClickOptions: DeadClickOptions(enabled: true, timeoutMs: 500)
+        deadClickOptions: DeadClickOptions(enabled: true, timeWindowMs: 500)
       )
 
       let options = MixpanelOptions(

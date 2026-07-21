@@ -161,7 +161,7 @@
       }
 
       // Emit rage click event (independent of regular click)
-      if options.rageClickOptions.enabled, rageClickResult?.isRageClick == true {
+      if rageClickResult?.isRageClick == true {
         autocapture?.trackRageClick(clickEvent)
         MixpanelLogger.debug(
           message: "AutocaptureManager: emitted $mp_rage_click for \(clickEvent.elementId)")

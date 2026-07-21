@@ -140,17 +140,17 @@ public struct DeadClickOptions {
   /// Whether dead click detection is enabled. Defaults to `true`.
   public let enabled: Bool
 
-  /// Timeout in milliseconds to wait for UI response after a click.
+  /// Time window in milliseconds to wait for UI response after a click.
   /// If no UI change is detected within this window, a dead click is recorded.
   /// Defaults to `500` (0.5 seconds).
-  public let timeoutMs: Int
+  public let timeWindowMs: Int
 
   public init(
     enabled: Bool = true,
-    timeoutMs: Int = 500
+    timeWindowMs: Int = 500
   ) {
     self.enabled = enabled
-    self.timeoutMs = timeoutMs
+    self.timeWindowMs = timeWindowMs
   }
 }
 

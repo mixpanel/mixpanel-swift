@@ -52,16 +52,16 @@ import XCTest
     func testDeadClickOptionsDefaults() {
       let options = DeadClickOptions()
       XCTAssertTrue(options.enabled)
-      XCTAssertEqual(options.timeoutMs, 500)
+      XCTAssertEqual(options.timeWindowMs, 500)
     }
 
     func testDeadClickOptionsCustomValues() {
       let options = DeadClickOptions(
         enabled: false,
-        timeoutMs: 700
+        timeWindowMs: 700
       )
       XCTAssertFalse(options.enabled)
-      XCTAssertEqual(options.timeoutMs, 700)
+      XCTAssertEqual(options.timeWindowMs, 700)
     }
 
     // MARK: - AutocaptureOptions Tests

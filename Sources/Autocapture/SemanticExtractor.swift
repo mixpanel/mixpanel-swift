@@ -197,7 +197,7 @@
 
     /// Walk up the view hierarchy to find the nearest interactive ancestor.
     /// Returns nil if no interactive ancestor is found within maxDepth levels.
-    private func findInteractiveAncestor(of view: UIView, maxDepth: Int = 5) -> UIView? {
+    private func findInteractiveAncestor(of view: UIView, maxDepth: Int = AutocaptureDefaults.maxHierarchyDepth) -> UIView? {
       var current = view.superview
       var depth = 0
       while let v = current, depth < maxDepth {

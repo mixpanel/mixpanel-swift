@@ -288,7 +288,6 @@
       super.reset()
       downLocation = nil
       downTime = nil
-      state = .possible
     }
 
     override func canPrevent(_ preventedGestureRecognizer: UIGestureRecognizer) -> Bool {

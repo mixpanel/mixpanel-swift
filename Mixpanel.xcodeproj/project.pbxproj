@@ -309,7 +309,6 @@
 				E11594881CFF14D3007F8B4F /* Source */,
 				E11594891CFF14DF007F8B4F /* Supporting Files */,
 				E15FF8021D0461F60076CDE3 /* Frameworks */,
-				44C8A3159D6ED585B638A598 /* Autocapture */,
 			);
 			name = Mixpanel;
 			path = Sources;
@@ -323,6 +322,7 @@
 				E189D8FB1D5A6943007F3F29 /* Networking */,
 				51DD56771D306B620045D3DB /* Log */,
 				E189D8FA1D5A692A007F3F29 /* Utilities */,
+				44C8A3159D6ED585B638A598 /* Autocapture */,
 				E115948A1CFF1538007F8B4F /* Mixpanel.swift */,
 				E115948D1D000709007F8B4F /* MixpanelInstance.swift */,
 				171E4C112DAF108400B7CB11 /* FeatureFlags.swift */,

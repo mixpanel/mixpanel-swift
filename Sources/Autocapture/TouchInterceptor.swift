@@ -207,7 +207,7 @@
   // MARK: - Custom Gesture Recognizer
 
   /// A gesture recognizer that observes touches without claiming them.
-  /// Filters scrolls/swipes by checking touch displacement and duration.
+  /// Filters scrolls/swipes by tracking max displacement across all moves and duration.
   private class TouchObservingGestureRecognizer: UIGestureRecognizer {
 
     /// Maximum displacement (in points) for a touch to be considered a tap.
@@ -223,6 +223,7 @@
 
     private var downLocation: CGPoint?
     private var downTime: Date?
+    private var exceededSlop = false
 
     init(target: Any?, action: Selector?, owner: TouchInterceptor) {
       self.owner = owner
@@ -233,10 +234,17 @@
       guard touches.count == 1, let touch = touches.first else { return }
       downLocation = touch.location(in: self.view)
       downTime = Date()
+      exceededSlop = false
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
-      // Don't change state - we're just observing
+      guard !exceededSlop, let touch = touches.first, let startLocation = downLocation else { return }
+      let currentLocation = touch.location(in: self.view)
+      let dx = currentLocation.x - startLocation.x
+      let dy = currentLocation.y - startLocation.y
+      if hypot(dx, dy) > Self.maxTapDisplacement {
+        exceededSlop = true
+      }
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
@@ -257,13 +265,8 @@
         return
       }
 
-      // Filter scrolls/swipes: check displacement from touch-down position
-      guard let startLocation = downLocation else { return }
-      let endLocation = touch.location(in: self.view)
-      let dx = endLocation.x - startLocation.x
-      let dy = endLocation.y - startLocation.y
-      let displacement = hypot(dx, dy)
-      guard displacement <= Self.maxTapDisplacement else { return }
+      // Filter scrolls/swipes: reject if any intermediate move exceeded slop
+      guard !exceededSlop, downLocation != nil else { return }
 
       // Filter long presses: check duration
       guard let startTime = downTime, Date().timeIntervalSince(startTime) < Self.maxTapDuration else {
@@ -281,6 +284,7 @@
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
       downLocation = nil
       downTime = nil
+      exceededSlop = false
       state = .cancelled
     }
 
@@ -288,6 +292,7 @@
       super.reset()
       downLocation = nil
       downTime = nil
+      exceededSlop = false
     }
 
     override func canPrevent(_ preventedGestureRecognizer: UIGestureRecognizer) -> Bool {

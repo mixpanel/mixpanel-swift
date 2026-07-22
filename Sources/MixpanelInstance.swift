@@ -106,6 +106,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Accessor to the Mixpanel Autocapture API object.
     open var autocapture: Autocapture!
 
+    #if os(iOS)
+    /// Autocapture manager for click, rage click, and dead click detection.
+    var autocaptureManager: AutocaptureManager?
+    #endif
+
     /// Accessor the Mixpanel Feature Flags API object.
     open var flags: MixpanelFlags!
 
@@ -550,6 +555,27 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             optOutTracking()
         }
 
+        // Initialize autocapture if enabled (iOS only)
+        // Done after opt-out check so autocapture is not started when tracking is opted out.
+        // Note: optOutTracking() runs async on trackingQueue, so hasOptedOutTracking() may
+        // not reflect the default yet. Check optOutTrackingByDefault directly as well.
+        #if os(iOS)
+        if let autocaptureOpts = self.options.autocaptureOptions, autocaptureOpts.isEnabled {
+            if optOutTrackingByDefault || hasOptedOutTracking() {
+                MixpanelLogger.info(message: "Autocapture disabled: tracking is opted out")
+            } else if MixpanelInstance.isiOSAppExtension() {
+                MixpanelLogger.info(message: "Autocapture disabled in app extension")
+            } else {
+                autocaptureManager = AutocaptureManager(
+                    options: autocaptureOpts,
+                    autocapture: autocapture
+                )
+                autocaptureManager?.start()
+                MixpanelLogger.info(message: "AutocaptureManager started")
+            }
+        }
+        #endif
+
         if let superProperties = superProperties {
             registerSuperProperties(superProperties)
         }
@@ -649,6 +675,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     deinit {
         NotificationCenter.default.removeObserver(self)
+        #if os(iOS)
+        autocaptureManager?.stop()
+        #endif
         #if os(iOS) && !os(watchOS) && !targetEnvironment(macCatalyst)
         if let reachability = self.reachability {
             if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
@@ -1340,6 +1369,23 @@ extension MixpanelInstance {
         }
     }
 
+  // MARK: - Autocapture
+
+  #if os(iOS)
+    /**
+      Signals to the SDK that a UI change occurred.
+
+      Call this when a UI change happens that the dead click detector cannot observe,
+      such as navigation in React Native or other framework-driven UI changes.
+      This cancels any pending dead click detection to prevent false positives.
+
+      This method is safe to call even if autocapture is not enabled; it will simply do nothing.
+     */
+    public func signalUIChange() {
+      autocaptureManager?.signalUIChange()
+    }
+  #endif
+
 }
 
 extension MixpanelInstance {
@@ -1849,6 +1895,10 @@ extension MixpanelInstance {
             if let flagManager = self.flags as? FeatureFlagManager {
                 flagManager.reset()
             }
+
+            #if os(iOS)
+            self.autocaptureManager?.stop()
+            #endif
         }
     }
 
@@ -1877,6 +1927,26 @@ extension MixpanelInstance {
                 self.identify(distinctId: distinctId)
             }
             self.track(event: "$opt_in", properties: properties)
+
+            #if os(iOS)
+            // Restart autocapture if it was configured but stopped due to opt-out
+            if self.autocaptureManager == nil,
+               let autocaptureOpts = self.options.autocaptureOptions,
+               autocaptureOpts.isEnabled,
+               !MixpanelInstance.isiOSAppExtension() {
+                let manager = AutocaptureManager(
+                    options: autocaptureOpts,
+                    autocapture: self.autocapture
+                )
+                self.autocaptureManager = manager
+                DispatchQueue.main.async {
+                    manager.start()
+                }
+                MixpanelLogger.info(message: "AutocaptureManager started after opt-in")
+            } else {
+                self.autocaptureManager?.start()
+            }
+            #endif
         }
 
     }

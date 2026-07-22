@@ -136,10 +136,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+        // Enable autocapture for testing
+        let autocaptureOptions = AutocaptureOptions()
+
         let mixpanelOptions = MixpanelOptions(
-            token: "MIXPANEL_TOKEN",
+            token: "YOUR_MIXPANEL_TOKEN",
             trackAutomaticEvents: true,
-            deviceIdProvider: deviceIdProvider
+            deviceIdProvider: deviceIdProvider,
+            autocaptureOptions: autocaptureOptions
         )
         Mixpanel.initialize(options: mixpanelOptions)
         Mixpanel.mainInstance().loggingEnabled = true

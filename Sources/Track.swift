@@ -117,6 +117,7 @@ class Track {
         // network-send chokepoint.
         Track.applyExcludeProperties(&p, exclude: excludeProperties)
 
+        MixpanelLogger.debug(message: "Tracking event: \(ev), properties: \(p)")
         var trackEvent: InternalProperties = ["event": ev, "properties": p]
         metadata.toDict().forEach { (k, v) in trackEvent[k] = v }
 

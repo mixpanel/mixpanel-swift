@@ -1,0 +1,313 @@
+//
+//  TouchInterceptor.swift
+//  Mixpanel
+//
+//  Created by Mixpanel on 2026-06-13.
+//  Copyright (c) Mixpanel. All rights reserved.
+//
+
+#if os(iOS)
+  import ObjectiveC
+  import UIKit
+
+  /// Intercepts touch events using a gesture recognizer approach.
+  ///
+  /// Each AutocaptureManager owns its own TouchInterceptor instance.
+  /// The interceptor adds non-exclusive gesture recognizers to windows
+  /// that observe but never claim touch events.
+  final class TouchInterceptor: NSObject, UIGestureRecognizerDelegate {
+
+    // MARK: - State
+
+    private var isInstalled = false
+    private weak var manager: AutocaptureManager?
+    private let lock = NSLock()
+    private var observedWindows = NSHashTable<UIWindow>.weakObjects()
+
+    // MARK: - Initialization
+
+    override init() {
+      super.init()
+    }
+
+    deinit {
+      NotificationCenter.default.removeObserver(self)
+    }
+
+    // MARK: - Public API
+
+    /// Install the touch interceptor.
+    ///
+    /// - Parameter manager: The AutocaptureManager to delegate touch events to
+    func install(manager: AutocaptureManager) {
+      MixpanelLogger.debug(message: "TouchInterceptor: install() called, isInstalled=\(isInstalled)")
+
+      // Ensure installation happens on main thread
+      if !Thread.isMainThread {
+        MixpanelLogger.debug(message: "TouchInterceptor: dispatching to main thread")
+        DispatchQueue.main.async { [weak self] in
+          self?.performInstall(manager: manager)
+        }
+        return
+      }
+
+      performInstall(manager: manager)
+    }
+
+    private func performInstall(manager: AutocaptureManager) {
+      lock.lock()
+      defer { lock.unlock() }
+
+      guard !isInstalled else {
+        self.manager = manager
+        MixpanelLogger.debug(message: "TouchInterceptor: already installed, updated manager reference")
+        return
+      }
+
+      self.manager = manager
+
+      // Add gesture recognizer to all existing windows
+      // Use selector-based approach to avoid app extension issues
+      let sharedSelector = NSSelectorFromString("sharedApplication")
+      guard UIApplication.responds(to: sharedSelector),
+            let application = UIApplication.perform(sharedSelector)?.takeUnretainedValue() as? UIApplication
+      else {
+        MixpanelLogger.info(message: "TouchInterceptor: not running in app context, skipping window observation")
+        return
+      }
+
+      for window in application.windows {
+        addGestureRecognizer(to: window)
+      }
+
+      // Also check connected scenes for windows (iOS 13+)
+      if #available(iOS 13.0, *) {
+        for scene in application.connectedScenes {
+          if let windowScene = scene as? UIWindowScene {
+            for window in windowScene.windows {
+              addGestureRecognizer(to: window)
+            }
+          }
+        }
+      }
+
+      // Set installed flag only after successful window instrumentation
+      isInstalled = true
+
+      // Re-register notification observer (removed during uninstall)
+      NotificationCenter.default.addObserver(
+        self,
+        selector: #selector(windowDidBecomeVisible(_:)),
+        name: UIWindow.didBecomeVisibleNotification,
+        object: nil
+      )
+
+      MixpanelLogger.info(message: "TouchInterceptor: installed successfully, observing \(observedWindows.count) windows")
+    }
+
+    /// Uninstall the touch interceptor.
+    func uninstall() {
+      // Ensure uninstall happens on main thread — gesture recognizer removal
+      // is a UIKit mutation. deinit can run on any thread.
+      if !Thread.isMainThread {
+        DispatchQueue.main.async { [weak self] in
+          self?.performUninstall()
+        }
+        return
+      }
+
+      performUninstall()
+    }
+
+    private func performUninstall() {
+      lock.lock()
+      defer { lock.unlock() }
+      manager = nil
+      // Stop observing new windows
+      NotificationCenter.default.removeObserver(
+        self, name: UIWindow.didBecomeVisibleNotification, object: nil)
+      // Remove only gesture recognizers owned by this instance
+      for window in observedWindows.allObjects {
+        window.gestureRecognizers?.removeAll { recognizer in
+          guard let touchRecognizer = recognizer as? TouchObservingGestureRecognizer else {
+            return false
+          }
+          return touchRecognizer.owner === self
+        }
+      }
+      observedWindows.removeAllObjects()
+      isInstalled = false
+      MixpanelLogger.info(message: "TouchInterceptor: uninstalled")
+    }
+
+    // MARK: - Window Observation
+
+    @objc private func windowDidBecomeVisible(_ notification: Notification) {
+      guard isInstalled, let window = notification.object as? UIWindow else { return }
+      MixpanelLogger.debug(message: "TouchInterceptor: window became visible")
+      DispatchQueue.main.async { [weak self] in
+        self?.addGestureRecognizer(to: window)
+      }
+    }
+
+    private func addGestureRecognizer(to window: UIWindow) {
+      guard !observedWindows.contains(window) else { return }
+
+      // Add only our custom observing recognizer (not duplicate tap recognizer)
+      let observingRecognizer = TouchObservingGestureRecognizer(
+        target: self, action: #selector(handleTouchGesture(_:)), owner: self)
+      observingRecognizer.delegate = self
+      observingRecognizer.cancelsTouchesInView = false
+      observingRecognizer.delaysTouchesEnded = false
+      observingRecognizer.delaysTouchesBegan = false
+
+      window.addGestureRecognizer(observingRecognizer)
+      observedWindows.add(window)
+
+      MixpanelLogger.debug(message: "TouchInterceptor: added gesture recognizer to window")
+    }
+
+    // MARK: - Gesture Handling
+
+    /// Required by UIGestureRecognizer(target:action:) — never called because
+    /// TouchObservingGestureRecognizer handles touches via touchesBegan/touchesEnded
+    /// overrides and always transitions to .failed state.
+    @objc private func handleTouchGesture(_ gesture: TouchObservingGestureRecognizer) {
+    }
+
+    /// Called by the gesture recognizer when a touch ends
+    func processTouchEnded(at location: CGPoint, view: UIView?, window: UIWindow) {
+      MixpanelLogger.debug(message: "TouchInterceptor: touch ended at \(location)")
+
+      guard let manager = manager else {
+        MixpanelLogger.debug(message: "TouchInterceptor: manager is nil")
+        return
+      }
+
+      manager.handleTouch(at: location, view: view, window: window)
+    }
+
+    // MARK: - UIGestureRecognizerDelegate
+
+    func gestureRecognizer(
+      _ gestureRecognizer: UIGestureRecognizer,
+      shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+      return true  // Allow all other gesture recognizers to work
+    }
+
+    func gestureRecognizer(
+      _ gestureRecognizer: UIGestureRecognizer,
+      shouldReceive touch: UITouch
+    ) -> Bool {
+      return true  // Receive all touches
+    }
+  }
+
+  // MARK: - Custom Gesture Recognizer
+
+  /// A gesture recognizer that observes touches without claiming them.
+  /// Filters scrolls/swipes by tracking max displacement across all moves and duration.
+  class TouchObservingGestureRecognizer: UIGestureRecognizer {
+
+    /// Maximum displacement (in points) for a touch to be considered a tap.
+    /// Matches iOS recommended minimum tap target size guideline.
+    private static let maxTapDisplacement: CGFloat = 10.0
+    private static let maxTapDisplacementSq: CGFloat = maxTapDisplacement * maxTapDisplacement
+
+    /// Maximum duration (in seconds) for a touch to be considered a tap.
+    private static let maxTapDuration: TimeInterval = 0.5
+
+    /// The TouchInterceptor instance that owns this gesture recognizer.
+    /// Used during uninstall to remove only recognizers belonging to a specific interceptor.
+    weak var owner: TouchInterceptor?
+
+    private var downX: CGFloat = 0
+    private var downY: CGFloat = 0
+    private var downTime: TimeInterval = 0
+    private var exceededSlop = false
+
+    init(target: Any?, action: Selector?, owner: TouchInterceptor) {
+      self.owner = owner
+      super.init(target: target, action: action)
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+      guard touches.count == 1, let touch = touches.first else { return }
+      let location = touch.location(in: self.view)
+      downX = location.x
+      downY = location.y
+      downTime = CACurrentMediaTime()
+      exceededSlop = false
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
+      guard !exceededSlop, downTime > 0, let touch = touches.first else { return }
+      let location = touch.location(in: self.view)
+      let dx = location.x - downX
+      let dy = location.y - downY
+      if (dx * dx + dy * dy) > Self.maxTapDisplacementSq {
+        exceededSlop = true
+      }
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
+      defer {
+        downTime = 0
+        state = .failed
+      }
+
+      // Only process single-finger taps to avoid duplicate events from multi-touch
+      guard touches.count == 1, let touch = touches.first else {
+        return
+      }
+
+      guard let window = self.view as? UIWindow else {
+        return
+      }
+
+      // Filter scrolls/swipes: reject if any intermediate move exceeded slop
+      guard !exceededSlop, downTime > 0 else { return }
+
+      // Filter long presses: check duration
+      guard (CACurrentMediaTime() - downTime) < Self.maxTapDuration else {
+        return
+      }
+
+      let location = touch.location(in: window)
+      // touch.view can be nil for SwiftUI-managed views (sheets, popovers).
+      // Fall back to hit-testing the window to find the view at the touch point.
+      let view = touch.view ?? window.hitTest(location, with: nil)
+
+      owner?.processTouchEnded(at: location, view: view, window: window)
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
+      downTime = 0
+      exceededSlop = false
+      state = .cancelled
+    }
+
+    override func reset() {
+      super.reset()
+      downTime = 0
+      exceededSlop = false
+    }
+
+    override func canPrevent(_ preventedGestureRecognizer: UIGestureRecognizer) -> Bool {
+      return false  // Never prevent other gesture recognizers
+    }
+
+    override func canBePrevented(by preventingGestureRecognizer: UIGestureRecognizer) -> Bool {
+      return false  // Cannot be prevented by other gesture recognizers
+    }
+
+    override func shouldRequireFailure(of otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+      return false  // Don't require others to fail
+    }
+
+    override func shouldBeRequiredToFail(by otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+      return false  // Don't need to fail for others
+    }
+  }
+#endif

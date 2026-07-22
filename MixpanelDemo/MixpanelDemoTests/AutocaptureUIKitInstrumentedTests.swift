@@ -253,6 +253,79 @@ import XCTest
       }
     }
 
+    // MARK: - Test 8: Swipe-back-to-same-position does NOT fire click
+
+    /// Regression test: a swipe that returns to the starting position must NOT register as a tap.
+    ///
+    /// Before the fix, displacement was only checked at `touchesEnded` by comparing final vs initial
+    /// position. A quick swipe down-and-back-up would falsely pass the check. Now, `touchesMoved`
+    /// tracks max displacement and rejects the gesture if any move exceeds the slop threshold.
+    func testSwipeBackToSamePositionDoesNotFireClick() {
+      // Test the production TouchObservingGestureRecognizer's slop logic directly.
+      // Create the real GR wired to a TouchInterceptor → autocaptureManager,
+      // so a detected tap would produce a real $mp_click event in the queue.
+      let gestureExpectation = expectation(description: "Gesture test complete")
+
+      DispatchQueue.main.async { [weak self] in
+        guard let self = self, let window = self.testWindow,
+              let manager = self.mixpanel.autocaptureManager else {
+          gestureExpectation.fulfill()
+          return
+        }
+
+        // Create a real TouchInterceptor and wire it to the autocapture manager.
+        // install() sets the manager reference (may not find the test window
+        // via UIApplication.shared.windows, which is fine — we add the GR manually).
+        let interceptor = TouchInterceptor()
+        interceptor.install(manager: manager)
+
+        // Create the production GR with the interceptor as owner.
+        // target/action unused — the GR calls owner.processTouchEnded() directly.
+        let gr = TouchObservingGestureRecognizer(
+          target: nil, action: nil, owner: interceptor)
+        gr.cancelsTouchesInView = false
+        gr.delaysTouchesEnded = false
+        gr.delaysTouchesBegan = false
+        window.addGestureRecognizer(gr)
+
+        let button = self.testViewController.rule1Button
+        let center = button.superview?.convert(button.center, to: window) ?? button.center
+
+        // Simulate: touchesBegan at center
+        let touchDown = MockUITouch(location: center, view: window)
+        gr.touchesBegan(Set([touchDown]), with: UIEvent())
+
+        // Simulate: touchesMoved 200pt down (well beyond 10pt slop)
+        let farPoint = CGPoint(x: center.x, y: center.y + 200)
+        let touchMoveFar = MockUITouch(location: farPoint, view: window)
+        gr.touchesMoved(Set([touchMoveFar]), with: UIEvent())
+
+        // Simulate: touchesMoved back to original position
+        let touchMoveBack = MockUITouch(location: center, view: window)
+        gr.touchesMoved(Set([touchMoveBack]), with: UIEvent())
+
+        // Simulate: touchesEnded at original position
+        let touchUp = MockUITouch(location: center, view: window)
+        gr.touchesEnded(Set([touchUp]), with: UIEvent())
+
+        // Clean up
+        window.removeGestureRecognizer(gr)
+
+        gestureExpectation.fulfill()
+      }
+
+      wait(for: [gestureExpectation], timeout: 5)
+
+      // Verify no $mp_click event was captured — the swipe exceeded slop
+      Thread.sleep(forTimeInterval: 1.0)
+      waitForTrackingQueue(mixpanel)
+      let events = eventQueue(token: mixpanel.apiToken)
+      let clickEvents = events.filter { ($0["event"] as? String) == "$mp_click" }
+      XCTAssertEqual(
+        clickEvents.count, 0,
+        "Swipe-back-to-same-position should NOT fire $mp_click event")
+    }
+
     // MARK: - Helper Methods
 
     /// Simulate a tap on a view by injecting touch events
@@ -437,6 +510,29 @@ import XCTest
 
     @objc private func buttonTapped() {
       // Empty handler - just to make button interactive
+    }
+  }
+
+  // MARK: - Test helpers for gesture recognizer testing
+
+  /// Minimal UITouch subclass that returns a fixed location.
+  /// Used to exercise TouchObservingGestureRecognizer's slop logic in tests.
+  private class MockUITouch: UITouch {
+    private let mockLocation: CGPoint
+    private let mockView: UIView?
+
+    init(location: CGPoint, view: UIView?) {
+      self.mockLocation = location
+      self.mockView = view
+      super.init()
+    }
+
+    override func location(in view: UIView?) -> CGPoint {
+      return mockLocation
+    }
+
+    override var view: UIView? {
+      return mockView
     }
   }
 

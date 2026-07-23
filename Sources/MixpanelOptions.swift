@@ -301,6 +301,8 @@ public class MixpanelOptions {
         self.excludeProperties = excludeProperties
         #if os(iOS)
         self.autocaptureOptions = autocaptureOptions
+        #else
+        self.autocaptureOptions = nil
         #endif
 
         // When featureFlagOptions is explicitly provided, it takes precedence

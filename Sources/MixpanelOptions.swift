@@ -302,7 +302,7 @@ public class MixpanelOptions {
         #if os(iOS)
         self.autocaptureOptions = autocaptureOptions
         #endif
-        
+
         // When featureFlagOptions is explicitly provided, it takes precedence
         if let featureFlagOptions = featureFlagOptions {
             self.featureFlagOptions = featureFlagOptions

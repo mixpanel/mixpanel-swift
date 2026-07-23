@@ -81,9 +81,9 @@ import XCTest
         instanceName: token,
         trackAutomaticEvents: false,
         optOutTrackingByDefault: false,
-        serverURL: kFakeServerUrl,
-        autocaptureOptions: autocaptureOptions
+        serverURL: kFakeServerUrl
       )
+      options.autocaptureOptions = autocaptureOptions
 
       mixpanel = Mixpanel.initialize(options: options)
 

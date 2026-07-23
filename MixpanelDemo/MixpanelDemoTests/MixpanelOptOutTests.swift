@@ -320,9 +320,9 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             instanceName: token,
             trackAutomaticEvents: false,
             optOutTrackingByDefault: true,
-            serverURL: kFakeServerUrl,
-            autocaptureOptions: AutocaptureOptions()
+            serverURL: kFakeServerUrl
         )
+        options.autocaptureOptions = AutocaptureOptions()
         let testMixpanel = Mixpanel.initialize(options: options)
         waitForTrackingQueue(testMixpanel)
         waitForAsyncTasks()
@@ -343,9 +343,9 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             instanceName: token,
             trackAutomaticEvents: false,
             optOutTrackingByDefault: false,
-            serverURL: kFakeServerUrl,
-            autocaptureOptions: AutocaptureOptions()
+            serverURL: kFakeServerUrl
         )
+        options.autocaptureOptions = AutocaptureOptions()
         let testMixpanel = Mixpanel.initialize(options: options)
         waitForTrackingQueue(testMixpanel)
         waitForAsyncTasks()
@@ -373,9 +373,9 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             instanceName: token,
             trackAutomaticEvents: false,
             optOutTrackingByDefault: false,
-            serverURL: kFakeServerUrl,
-            autocaptureOptions: AutocaptureOptions()
+            serverURL: kFakeServerUrl
         )
+        options.autocaptureOptions = AutocaptureOptions()
         let testMixpanel = Mixpanel.initialize(options: options)
         waitForTrackingQueue(testMixpanel)
         waitForAsyncTasks()
@@ -407,9 +407,9 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             instanceName: token,
             trackAutomaticEvents: false,
             optOutTrackingByDefault: true,
-            serverURL: kFakeServerUrl,
-            autocaptureOptions: AutocaptureOptions()
+            serverURL: kFakeServerUrl
         )
+        options.autocaptureOptions = AutocaptureOptions()
         let testMixpanel = Mixpanel.initialize(options: options)
         waitForTrackingQueue(testMixpanel)
         waitForAsyncTasks()

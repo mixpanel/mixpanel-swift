@@ -14,25 +14,23 @@ import Foundation
 ///
 /// **Example — Default behavior (prefetches flags during initialization):**
 /// ```swift
-/// let options = MixpanelOptions(
-///     token: "YOUR_TOKEN",
-///     featureFlagOptions: FeatureFlagOptions(enabled: true)
-/// )
+/// let options = MixpanelOptions(token: "YOUR_TOKEN")
+/// options.featureFlagOptions = FeatureFlagOptions(enabled: true)
+/// let mixpanel = Mixpanel.initialize(options: options)
 /// ```
 ///
 /// **Example — Deferred loading (for use with identify):**
 /// ```swift
-/// let options = MixpanelOptions(
-///     token: "YOUR_TOKEN",
-///     featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false)
-/// )
-/// let mp = Mixpanel.initialize(options: options)
+/// let options = MixpanelOptions(token: "YOUR_TOKEN")
+/// options.featureFlagOptions = FeatureFlagOptions(enabled: true, prefetchFlags: false)
+/// let mixpanel = Mixpanel.initialize(options: options)
+///
 /// // identify() triggers loadFlags() internally when the distinctId changes
-/// mp.identify(distinctId: "user123")
+/// mixpanel.identify(distinctId: "user123")
 /// ```
 ///
 /// If `identify` may be called with the same persisted distinctId (no change),
-/// call `mp.flags.loadFlags()` explicitly to ensure flags are fetched.
+/// call `mixpanel.flags.loadFlags()` explicitly to ensure flags are fetched.
 public struct FeatureFlagOptions {
     /// Whether feature flags are enabled. Defaults to `false`.
     public let enabled: Bool
@@ -143,6 +141,30 @@ public enum VariantLookupPolicy {
     }
 }
 
+/// Configuration options for Mixpanel SDK initialization.
+///
+/// All properties (except `token`) are mutable, enabling flexible configuration:
+/// ```swift
+/// let options = MixpanelOptions(token: "YOUR_TOKEN")
+/// options.flushInterval = 30
+/// options.trackAutomaticEvents = true
+///
+/// // Replace entire configuration structs
+/// options.featureFlagOptions = FeatureFlagOptions(enabled: true, prefetchFlags: false)
+///
+/// let mixpanel = Mixpanel.initialize(options: options)
+/// ```
+///
+/// **Note**: While you can replace entire struct objects (featureFlagOptions,
+/// proxyServerConfig, autocaptureOptions), you cannot modify individual properties
+/// within those structs as they remain immutable.
+///
+/// **Thread Safety**: This class is NOT thread-safe. Complete configuration on a
+/// single thread before passing to `Mixpanel.initialize()`. Changes made after
+/// initialization will NOT affect existing `MixpanelInstance` objects.
+///
+/// **Token Immutability**: The `token` property cannot be modified after
+/// object creation as it identifies the Mixpanel project.
 public class MixpanelOptions {
     /// Property keys that ingestion or identity resolution require and that will never be
     /// stripped by ``excludeProperties``, even if a customer lists them. Single source of truth
@@ -151,16 +173,78 @@ public class MixpanelOptions {
         "token", "time", "distinct_id", "$device_id", "$user_id", "$had_persisted_distinct_id",
     ]
 
+    /// Your Mixpanel project token.
+    /// This is the unique identifier for your Mixpanel project and cannot be changed after initialization.
     public let token: String
-    public let flushInterval: Double
-    public let instanceName: String?
-    public let trackAutomaticEvents: Bool
-    public let optOutTrackingByDefault: Bool
-    public let useUniqueDistinctId: Bool
-    public let superProperties: Properties?
-    public let serverURL: String?
-    public let proxyServerConfig: ProxyServerConfig?
-    public let useGzipCompression: Bool
+
+    /// Interval in seconds between automatic data flushes to Mixpanel servers.
+    /// Set to a higher value to reduce network requests, or lower for more real-time tracking.
+    /// Set to `0` or less to disable automatic flushing (you must call `flush()` manually).
+    /// Defaults to `60` seconds.
+    public var flushInterval: Double = 60
+
+    /// Unique name for this Mixpanel instance.
+    /// Use this when you need to track to multiple Mixpanel projects from the same app.
+    /// If not provided, defaults to the project token.
+    public var instanceName: String? = nil
+
+    /// Whether to automatically track events like `$app_open` and first app opens.
+    /// When enabled, the SDK tracks session start events automatically.
+    /// Defaults to `false`.
+    ///
+    /// **Legacy feature:** Not recommended for new implementations.
+    public var trackAutomaticEvents: Bool = false
+
+    /// Whether users should be opted out of tracking by default.
+    /// When `true`, no data is sent until the user explicitly opts in via `optInTracking()`.
+    /// Defaults to `false`.
+    public var optOutTrackingByDefault: Bool = false
+
+    /// Whether to use IDFV (Identifier for Vendor) as the default distinct ID.
+    /// When `false`, a random UUID is generated instead.
+    ///
+    /// **IDFV behavior:** Remains stable across app reinstalls as long as at least one app
+    /// from the same vendor stays installed. Resets to a new value if the user uninstalls all
+    /// apps from your vendor and later reinstalls.
+    ///
+    /// Defaults to `false` (uses random UUID).
+    public var useUniqueDistinctId: Bool = false
+
+    /// Properties to include with every event tracked by this instance.
+    /// These are merged with event-specific properties, with event properties taking precedence.
+    /// Useful for setting common properties like user type, subscription details, etc.
+    /// Defaults to `nil`.
+    public var superProperties: Properties? = nil
+
+    /// Custom server URL for data ingestion.
+    ///
+    /// Use this for data residency requirements:
+    /// - EU: `https://api-eu.mixpanel.com`
+    /// - India: `https://api-in.mixpanel.com`
+    ///
+    /// Defaults to `nil` (uses US servers: `https://api.mixpanel.com`).
+    public var serverURL: String? = nil
+
+    /// Configuration for proxying Mixpanel requests through your own server.
+    /// Allows you to route analytics data through your infrastructure before reaching Mixpanel.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// let proxyConfig = ProxyServerConfig(
+    ///     serverUrl: "https://proxy.yourcompany.com",
+    ///     delegate: MyProxyDelegate()
+    /// )
+    /// let options = MixpanelOptions(token: "YOUR_TOKEN")
+    /// options.proxyServerConfig = proxyConfig
+    /// ```
+    ///
+    /// Defaults to `nil`
+    public var proxyServerConfig: ProxyServerConfig? = nil
+
+    /// Whether to compress network request payloads using gzip.
+    /// Compression reduces bandwidth usage but adds minimal CPU overhead.
+    /// Defaults to `true`.
+    public var useGzipCompression: Bool = true
 
     /// Property keys that will be stripped from outgoing event and People payloads before they
     /// are persisted and sent to Mixpanel. Defaults to empty (no filtering, zero per-payload
@@ -195,7 +279,8 @@ public class MixpanelOptions {
     /// limits reporting accuracy (e.g. per-platform breakdowns) and makes it harder for support
     /// to debug issues on your project. If either key is included here, the SDK logs a warning
     /// at instance creation time.
-    public let excludeProperties: Set<String>
+    public var excludeProperties: Set<String> = []
+    
     @available(*, deprecated, message: "Use featureFlagOptions.enabled instead")
     public var featureFlagsEnabled: Bool { return featureFlagOptions.enabled }
 
@@ -206,7 +291,7 @@ public class MixpanelOptions {
     ///
     /// When provided to the initializer, this takes precedence over the
     /// `featureFlagsEnabled` and `featureFlagsContext` parameters.
-    public let featureFlagOptions: FeatureFlagOptions
+    public var featureFlagOptions: FeatureFlagOptions = FeatureFlagOptions()
 
     /// A closure that provides a custom device ID.
     ///
@@ -236,22 +321,20 @@ public class MixpanelOptions {
     /// // Cache the device ID at app launch (before Mixpanel init)
     /// let cachedDeviceId = MyKeychainHelper.getOrCreatePersistentId()
     ///
-    /// let options = MixpanelOptions(
-    ///     token: "YOUR_TOKEN",
-    ///     deviceIdProvider: { cachedDeviceId }  // Return cached value
-    /// )
+    /// let options = MixpanelOptions(token: "YOUR_TOKEN")
+    /// options.deviceIdProvider = { cachedDeviceId }  // Return cached value
+    /// let mixpanel = Mixpanel.initialize(options: options)
     /// ```
     ///
     /// **Example - Ephemeral Device ID (resets each time):**
     /// ```swift
-    /// let options = MixpanelOptions(
-    ///     token: "YOUR_TOKEN",
-    ///     deviceIdProvider: {
-    ///         return UUID().uuidString
-    ///     }
-    /// )
+    /// let options = MixpanelOptions(token: "YOUR_TOKEN")
+    /// options.deviceIdProvider = {
+    ///     return UUID().uuidString
+    /// }
+    /// let mixpanel = Mixpanel.initialize(options: options)
     /// ```
-    public let deviceIdProvider: (() -> String?)?
+    public var deviceIdProvider: (() -> String?)? = nil
 
     /// Configuration for automatic event capture (clicks, rage clicks, dead clicks).
     ///
@@ -268,11 +351,37 @@ public class MixpanelOptions {
     ///
     /// **Note:** Autocapture is only available on iOS.
     #if os(iOS)
-    public let autocaptureOptions: AutocaptureOptions?
+    public var autocaptureOptions: AutocaptureOptions? = nil
     #endif
 
-    #if os(iOS)
-    public init(
+    /// Initializer requiring only a token.
+    /// All other properties use their default values and can be configured after initialization.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// let options = MixpanelOptions(token: "YOUR_TOKEN")
+    /// options.flushInterval = 30
+    /// options.trackAutomaticEvents = true
+    /// let mixpanel = Mixpanel.initialize(options: options)
+    /// ```
+    ///
+    /// - parameter token: Your Mixpanel project token
+    public init(token: String) {
+        self.token = token
+    }
+
+    /// Backward compatible convenience initializer with fixed set of configuration parameters.
+    ///
+    /// **Recommended:** Use `init(token:)` instead and set properties after initialization
+    /// for a cleaner, more flexible API:
+    /// ```swift
+    /// let options = MixpanelOptions(token: "YOUR_TOKEN")
+    /// options.flushInterval = 30
+    /// options.serverURL = "https://api-eu.mixpanel.com"
+    /// ```
+    ///
+    /// This initializer is maintained for backward compatibility but may be deprecated in a future release.
+    public convenience init(
         token: String,
         flushInterval: Double = 60,
         instanceName: String? = nil,
@@ -288,51 +397,8 @@ public class MixpanelOptions {
         deviceIdProvider: (() -> String?)? = nil,
         featureFlagOptions: FeatureFlagOptions? = nil,
         excludeProperties: Set<String> = [],
-        autocaptureOptions: AutocaptureOptions? = nil
     ) {
-        self.token = token
-        self.flushInterval = flushInterval
-        self.instanceName = instanceName
-        self.trackAutomaticEvents = trackAutomaticEvents
-        self.optOutTrackingByDefault = optOutTrackingByDefault
-        self.useUniqueDistinctId = useUniqueDistinctId
-        self.superProperties = superProperties
-        self.serverURL = serverURL
-        self.proxyServerConfig = proxyServerConfig
-        self.useGzipCompression = useGzipCompression
-        self.deviceIdProvider = deviceIdProvider
-        self.excludeProperties = excludeProperties
-        self.autocaptureOptions = autocaptureOptions
-
-        // When featureFlagOptions is explicitly provided, it takes precedence
-        if let featureFlagOptions = featureFlagOptions {
-            self.featureFlagOptions = featureFlagOptions
-        } else {
-            self.featureFlagOptions = FeatureFlagOptions(
-                enabled: featureFlagsEnabled,
-                context: featureFlagsContext
-            )
-        }
-    }
-    #else
-    public init(
-        token: String,
-        flushInterval: Double = 60,
-        instanceName: String? = nil,
-        trackAutomaticEvents: Bool = false,
-        optOutTrackingByDefault: Bool = false,
-        useUniqueDistinctId: Bool = false,
-        superProperties: Properties? = nil,
-        serverURL: String? = nil,
-        proxyServerConfig: ProxyServerConfig? = nil,
-        useGzipCompression: Bool = true,
-        featureFlagsEnabled: Bool = false,
-        featureFlagsContext: [String: Any] = [:],
-        deviceIdProvider: (() -> String?)? = nil,
-        featureFlagOptions: FeatureFlagOptions? = nil,
-        excludeProperties: Set<String> = []
-    ) {
-        self.token = token
+        self.init(token: token)
         self.flushInterval = flushInterval
         self.instanceName = instanceName
         self.trackAutomaticEvents = trackAutomaticEvents
@@ -355,5 +421,39 @@ public class MixpanelOptions {
             )
         }
     }
-    #endif
+}
+
+// MARK: - Internal Copy Support
+
+extension MixpanelOptions {
+    /// Creates a deep copy of this MixpanelOptions instance.
+    ///
+    /// The SDK uses this internally to create an immutable snapshot of the configuration
+    /// at initialization time. This ensures that changes to the original options object
+    /// after `Mixpanel.initialize()` do not affect the running SDK instance.
+    ///
+    /// All properties are copied:
+    /// - Value types (String, Bool, Double, etc.) are copied by value
+    /// - Struct types (FeatureFlagOptions, AutocaptureOptions, etc.) are copied by value
+    /// - Closure references (deviceIdProvider) are preserved
+    /// - Weak references (proxyServerConfig.delegate) point to the same delegate instance
+    internal func copy() -> MixpanelOptions {
+        let copy = MixpanelOptions(token: self.token)
+        copy.flushInterval = self.flushInterval
+        copy.instanceName = self.instanceName
+        copy.trackAutomaticEvents = self.trackAutomaticEvents
+        copy.optOutTrackingByDefault = self.optOutTrackingByDefault
+        copy.useUniqueDistinctId = self.useUniqueDistinctId
+        copy.superProperties = self.superProperties
+        copy.serverURL = self.serverURL
+        copy.proxyServerConfig = self.proxyServerConfig
+        copy.useGzipCompression = self.useGzipCompression
+        copy.featureFlagOptions = self.featureFlagOptions
+        copy.deviceIdProvider = self.deviceIdProvider
+        copy.excludeProperties = self.excludeProperties
+        #if os(iOS)
+        copy.autocaptureOptions = self.autocaptureOptions
+        #endif
+        return copy
+    }
 }

@@ -434,9 +434,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         useGzipCompression: Bool = false,
         options: MixpanelOptions? = nil
     ) {
-        // Store the config if provided, otherwise create one with the current values
+        // Store a deep copy of the config if provided (to ensure immutability after init),
+        // otherwise create a new config with the current values
         self.options =
-            options
+            options?.copy()
             ?? MixpanelOptions(
                 token: apiToken ?? "",
                 flushInterval: flushInterval,

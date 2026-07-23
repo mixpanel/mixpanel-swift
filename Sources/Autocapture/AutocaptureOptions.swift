@@ -168,10 +168,9 @@ public struct DeadClickOptions {
 ///
 /// **Example - Enable with defaults:**
 /// ```swift
-/// let options = MixpanelOptions(
-///     token: "YOUR_TOKEN",
-///     autocaptureOptions: AutocaptureOptions()
-/// )
+/// let options = MixpanelOptions(token: "YOUR_TOKEN")
+/// options.autocaptureOptions = AutocaptureOptions()
+/// let mixpanel = Mixpanel.initialize(options: options)
 /// ```
 ///
 /// **Example - Custom configuration:**
@@ -188,10 +187,9 @@ public struct DeadClickOptions {
 ///     )
 /// )
 ///
-/// let options = MixpanelOptions(
-///     token: "YOUR_TOKEN",
-///     autocaptureOptions: autocaptureOpts
-/// )
+/// let options = MixpanelOptions(token: "YOUR_TOKEN")
+/// options.autocaptureOptions = autocaptureOpts
+/// let mixpanel = Mixpanel.initialize(options: options)
 /// ```
 public struct AutocaptureOptions {
   /// Configuration for basic click capture.

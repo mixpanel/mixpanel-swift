@@ -249,11 +249,13 @@
 
     /// Walk up the view hierarchy to find the nearest interactive ancestor.
     /// Returns nil if no interactive ancestor is found within maxDepth levels.
+    /// Excludes UIWindow — its gesture recognizers are infrastructure (e.g., TouchInterceptor),
+    /// not user-facing controls.
     private func findInteractiveAncestor(of view: UIView, maxDepth: Int = AutocaptureDefaults.maxAncestorSearchDepth) -> UIView? {
       var current = view.superview
       var depth = 0
       while let v = current, depth < maxDepth {
-        if isInteractive(v) {
+        if !(v is UIWindow) && isInteractive(v) {
           return v
         }
         current = v.superview

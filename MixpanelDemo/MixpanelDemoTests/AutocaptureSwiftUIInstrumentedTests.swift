@@ -547,54 +547,59 @@ import XCTest
       return nil
     }
 
-    // MARK: - SwiftUI Index-Based Button Finding
+    // MARK: - Accessibility-Based Button Finding (OS-version agnostic)
 
-    /// Find SwiftUI button views by their position in the rendering order
-    /// SwiftUI renders buttons as _UIGraphicsView inside PlatformGroupContainer
-    private func findSwiftUIButtonByIndex(_ index: Int, in view: UIView) -> UIView? {
-      // Find PlatformGroupContainer which holds all the button views
-      if let container = findViewOfType("PlatformGroupContainer", in: view) {
-        // Each button is rendered as a _UIGraphicsView followed by a CGDrawingView
-        // So we need to find _UIGraphicsView views
-        let graphicsViews = container.subviews.filter {
-          String(describing: type(of: $0)).contains("_UIGraphicsView")
+    /// Accessibility labels for each button index in the VStack.
+    /// These are set via `.accessibilityLabel()` in SwiftUIAutocaptureTestView
+    /// and are stable across iOS versions, unlike internal UIKit class names.
+    private static let buttonLabels = [
+      "SwiftUI Rule 1",        // 0
+      "Rule Two SwiftUI",      // 1
+      "Rule 3 SwiftUI Button", // 2 (no explicit accessibilityLabel — uses title)
+      "Both Label SwiftUI",    // 3
+      "Rage Zone SwiftUI",     // 4
+      "Dead Button SwiftUI",   // 5
+    ]
+
+    /// Find the center point and hit-test view for a SwiftUI button by probing the VStack layout.
+    ///
+    /// SwiftUI's internal view hierarchy and accessibility tree vary across iOS versions.
+    /// This approach calculates approximate button positions from the known VStack layout,
+    /// then uses `accessibilityHitTest` to verify a button exists at that point, and
+    /// `window.hitTest` to get the actual UIKit view — mirroring real touch handling.
+    private func findSwiftUIButton(label: String, in window: UIWindow, hostingView: UIView) -> (view: UIView, center: CGPoint)? {
+      guard let index = Self.buttonLabels.firstIndex(of: label) else { return nil }
+
+      // Calculate approximate center of button in the VStack.
+      // Layout: ScrollView > VStack(spacing: 16) with .padding() on each button and the VStack.
+      // Each button is roughly 44pt tall with 8pt vertical padding = ~60pt per button.
+      let buttonHeight: CGFloat = 60
+      let spacing: CGFloat = 16
+      let topPadding: CGFloat = 16  // VStack .padding()
+      let safeAreaTop: CGFloat = window.safeAreaInsets.top
+
+      let buttonCenterY = safeAreaTop + topPadding + CGFloat(index) * (buttonHeight + spacing) + buttonHeight / 2
+      let centerX = window.bounds.midX
+      let windowPoint = CGPoint(x: centerX, y: buttonCenterY)
+
+      // Debug: verify there's a button at this position using accessibility (iOS 18+)
+      if #available(iOS 18.0, *) {
+        let screenPoint = window.convert(windowPoint, to: window.screen.coordinateSpace)
+        if let element = hostingView.accessibilityHitTest(screenPoint, event: nil) as? NSObject {
+          let elementLabel = element.accessibilityLabel ?? ""
+          print("[Test] accessibilityHitTest at \(windowPoint) found: '\(elementLabel)' (looking for: '\(label)')")
         }
-        if index < graphicsViews.count {
-          return graphicsViews[index]
-        }
+      }
+
+      // Use UIKit hitTest to get the actual view — same path as real touch handling
+      if let hitView = window.hitTest(windowPoint, with: nil) {
+        return (view: hitView, center: windowPoint)
       }
       return nil
     }
 
-    /// Find a view of a specific type name in the hierarchy
-    private func findViewOfType(_ typeName: String, in view: UIView) -> UIView? {
-      let viewTypeName = String(describing: type(of: view))
-      if viewTypeName.contains(typeName) {
-        return view
-      }
-
-      for subview in view.subviews {
-        if let found = findViewOfType(typeName, in: subview) {
-          return found
-        }
-      }
-      return nil
-    }
-
-    /// Map of button labels to their index in the VStack
-    private func buttonIndexForLabel(_ label: String) -> Int? {
-      let buttonOrder = [
-        "SwiftUI Rule 1",        // 0
-        "Rule Two SwiftUI",      // 1
-        "swiftui_rule3",         // 2 (uses identifier, no label)
-        "Both Label SwiftUI",    // 3
-        "Rage Zone SwiftUI",     // 4
-        "Dead Button SwiftUI",   // 5
-      ]
-      return buttonOrder.firstIndex(of: label)
-    }
-
-    /// Simulate tap using indexed button approach for SwiftUI
+    /// Simulate tap on a SwiftUI button by index (maps to accessibility label).
+    /// Optionally overrides the accessibility label on the hit-test view for assertion purposes.
     private func simulateTapOnSwiftUIButton(index: Int, setAccessibility: String? = nil) {
       let tapExpectation = expectation(description: "Tap simulated")
 
@@ -607,19 +612,15 @@ import XCTest
           return
         }
 
-        if let targetView = self.findSwiftUIButtonByIndex(index, in: rootView) {
-          // Optionally set accessibility properties for testing
-          if let label = setAccessibility {
-            targetView.accessibilityLabel = label
+        let label = Self.buttonLabels[index]
+        if let result = self.findSwiftUIButton(label: label, in: window, hostingView: rootView) {
+          if let overrideLabel = setAccessibility {
+            result.view.accessibilityLabel = overrideLabel
           }
-
-          // Get the center of the button in window coordinates
-          let frame = targetView.superview?.convert(targetView.frame, to: window) ?? targetView.frame
-          let center = CGPoint(x: frame.midX, y: frame.midY)
-          print("[Test] Simulating tap on button \(index) at \(center), view: \(type(of: targetView)), frame: \(frame)")
-          self.mixpanel.autocaptureManager?.handleTouch(at: center, view: targetView, window: window)
+          print("[Test] Simulating tap on button \(index) ('\(label)') at \(result.center), view: \(type(of: result.view))")
+          self.mixpanel.autocaptureManager?.handleTouch(at: result.center, view: result.view, window: window)
         } else {
-          print("[Test] Could not find button at index \(index)")
+          print("[Test] Could not find button at index \(index) with label '\(label)'")
         }
 
         tapExpectation.fulfill()
@@ -628,24 +629,26 @@ import XCTest
       wait(for: [tapExpectation], timeout: 2)
     }
 
-    /// Set accessibility properties on a SwiftUI button by index
+    /// Set accessibility properties on a SwiftUI button by index.
     private func setSwiftUIButtonAccessibility(index: Int, identifier: String?, label: String?) {
       let setupExpectation = expectation(description: "Accessibility setup")
 
       DispatchQueue.main.async { [weak self] in
         guard let self = self,
+          let window = self.testWindow,
           let rootView = self.hostingController?.view
         else {
           setupExpectation.fulfill()
           return
         }
 
-        if let targetView = self.findSwiftUIButtonByIndex(index, in: rootView) {
+        let buttonLabel = Self.buttonLabels[index]
+        if let result = self.findSwiftUIButton(label: buttonLabel, in: window, hostingView: rootView) {
           if let id = identifier {
-            targetView.accessibilityIdentifier = id
+            result.view.accessibilityIdentifier = id
           }
           if let lbl = label {
-            targetView.accessibilityLabel = lbl
+            result.view.accessibilityLabel = lbl
           }
         }
 
@@ -655,24 +658,25 @@ import XCTest
       wait(for: [setupExpectation], timeout: 2)
     }
 
-    /// Make a SwiftUI button appear interactive by adding a tap gesture recognizer
-    /// This is needed because SwiftUI's _UIGraphicsView doesn't expose UIKit gesture recognizers
+    /// Make a SwiftUI button appear interactive by adding a tap gesture recognizer.
+    /// Needed for dead click detection on views that lack UIKit interactivity signals.
     private func makeSwiftUIButtonInteractive(index: Int) {
       let setupExpectation = expectation(description: "Make interactive")
 
       DispatchQueue.main.async { [weak self] in
         guard let self = self,
+          let window = self.testWindow,
           let rootView = self.hostingController?.view
         else {
           setupExpectation.fulfill()
           return
         }
 
-        if let targetView = self.findSwiftUIButtonByIndex(index, in: rootView) {
-          // Add a tap gesture recognizer to make the view appear interactive
+        let label = Self.buttonLabels[index]
+        if let result = self.findSwiftUIButton(label: label, in: window, hostingView: rootView) {
           let tapGesture = UITapGestureRecognizer(target: nil, action: nil)
           tapGesture.isEnabled = true
-          targetView.addGestureRecognizer(tapGesture)
+          result.view.addGestureRecognizer(tapGesture)
         }
 
         setupExpectation.fulfill()

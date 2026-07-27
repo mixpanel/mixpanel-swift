@@ -16,6 +16,7 @@ import Foundation
 /// Internal configuration constants not exposed in public API
 enum AutocaptureDefaults {
   static let maxHierarchyDepth = 5
+  static let maxAncestorSearchDepth = 20
   static let maxRecursionDepth = 20
 
   #if os(iOS)

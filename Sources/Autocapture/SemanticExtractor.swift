@@ -29,7 +29,15 @@
       // Walk up to the nearest clickable ancestor when the leaf isn't interactive.
       let interactiveAncestor = isInteractive(view) ? view : findInteractiveAncestor(of: view)
       let targetView = interactiveAncestor ?? view
-      let viewIsInteractive = interactiveAncestor != nil
+      var viewIsInteractive = interactiveAncestor != nil
+
+      // SwiftUI buttons are rendered as internal UIKit views (e.g., PlatformGroupContainer)
+      // that lack UIKit interactivity signals (UIControl targets, gesture recognizers).
+      // The .button accessibility trait exists only in SwiftUI's accessibility element tree,
+      // not on the UIKit views. Query the accessibility tree at the touch point.
+      if !viewIsInteractive {
+        viewIsInteractive = isSwiftUIButtonAtPoint(point, view: view)
+      }
 
       let className = String(describing: type(of: targetView))
       let elementId = generateElementId(for: targetView)
@@ -195,9 +203,53 @@
       return AutocaptureDefaults.isInteractive(view)
     }
 
+    // MARK: - SwiftUI Interactivity Detection
+
+    /// Check if a SwiftUI button exists at the given point using the accessibility element tree.
+    ///
+    /// SwiftUI renders buttons as internal UIKit views (e.g., PlatformGroupContainer) that lack
+    /// standard UIKit interactivity signals. The `.button` accessibility trait exists only in
+    /// SwiftUI's accessibility element tree, not on the UIKit views themselves.
+    private func isSwiftUIButtonAtPoint(_ windowPoint: CGPoint, view: UIView) -> Bool {
+      // Only needed on iOS 18+ where SwiftUI renders buttons as PlatformGroupContainer
+      // without .button trait on the UIKit view. On older iOS, SwiftUI views like
+      // _UIGraphicsView carry the .button trait directly.
+      guard #available(iOS 18.0, *) else { return false }
+
+      // Find the nearest SwiftUI hosting ancestor — bails out early for pure UIKit views.
+      guard let hostingView = findHostingAncestor(of: view) else { return false }
+      guard let window = view.window else { return false }
+
+      // accessibilityHitTest expects screen coordinates
+      let screenPoint = window.convert(windowPoint, to: window.screen.coordinateSpace)
+
+      // Query the hosting view's accessibility tree rather than the entire window,
+      // limiting the search scope to just the SwiftUI content.
+      guard let element = hostingView.accessibilityHitTest(screenPoint, event: nil) as? NSObject else {
+        return false
+      }
+
+      return element.accessibilityTraits.contains(UIAccessibilityTraits.button)
+    }
+
+    /// Find the nearest SwiftUI hosting view ancestor.
+    /// Returns nil if the view is not inside a SwiftUI hierarchy.
+    private func findHostingAncestor(of view: UIView) -> UIView? {
+      var current: UIView? = view
+      var depth = 0
+      while let v = current, depth < AutocaptureDefaults.maxAncestorSearchDepth {
+        if AutocaptureDefaults.isSwiftUIView(v) {
+          return v
+        }
+        current = v.superview
+        depth += 1
+      }
+      return nil
+    }
+
     /// Walk up the view hierarchy to find the nearest interactive ancestor.
     /// Returns nil if no interactive ancestor is found within maxDepth levels.
-    private func findInteractiveAncestor(of view: UIView, maxDepth: Int = AutocaptureDefaults.maxHierarchyDepth) -> UIView? {
+    private func findInteractiveAncestor(of view: UIView, maxDepth: Int = AutocaptureDefaults.maxAncestorSearchDepth) -> UIView? {
       var current = view.superview
       var depth = 0
       while let v = current, depth < maxDepth {

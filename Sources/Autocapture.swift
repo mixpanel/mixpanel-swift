@@ -19,7 +19,8 @@ open class Autocapture {
        Track a screen view event. This is a convenience method for tracking when users view
        a screen/page in your application.
     
-       - parameter screenName: The name of the screen/page being viewed
+       - parameter screenName: The name of the screen/page being viewed. Must be non-empty;
+         if an empty or whitespace-only string is passed, the event is silently dropped.
        - parameter properties: Optional properties to include with this event
        */
     open func trackScreenView(screenName: String, properties: Properties? = nil) {
@@ -49,7 +50,8 @@ open class Autocapture {
        Track a screen leave event. This is a convenience method for tracking when users leave
        a screen/page in your application.
     
-       - parameter screenName: The name of the screen/page being left
+       - parameter screenName: The name of the screen/page being left. Must be non-empty;
+         if an empty or whitespace-only string is passed, the event is silently dropped.
        - parameter properties: Optional properties to include with this event
        */
     open func trackScreenLeave(screenName: String, properties: Properties? = nil) {

@@ -15,14 +15,12 @@ open class Autocapture {
 
     weak var mixpanelInstance: MixpanelInstance?
 
-    /**
-       Track a screen view event. This is a convenience method for tracking when users view
-       a screen/page in your application.
-    
-       - parameter screenName: The name of the screen/page being viewed. Must be non-empty;
-         if an empty or whitespace-only string is passed, the event is silently dropped.
-       - parameter properties: Optional properties to include with this event
-       */
+    /// Track a screen view event. This is a convenience method for tracking when users view
+    /// a screen/page in your application.
+    ///
+    /// - parameter screenName: The name of the screen/page being viewed. Must be non-empty;
+    ///   if an empty or whitespace-only string is passed, the event is silently dropped.
+    /// - parameter properties: Optional properties to include with this event
     open func trackScreenView(screenName: String, properties: Properties? = nil) {
         guard let mixpanelInstance = mixpanelInstance else { return }
         guard !screenName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -46,14 +44,12 @@ open class Autocapture {
         mixpanelInstance.track(event: "$mp_page_view", properties: mergedProperties)
     }
 
-    /**
-       Track a screen leave event. This is a convenience method for tracking when users leave
-       a screen/page in your application.
-    
-       - parameter screenName: The name of the screen/page being left. Must be non-empty;
-         if an empty or whitespace-only string is passed, the event is silently dropped.
-       - parameter properties: Optional properties to include with this event
-       */
+    /// Track a screen leave event. This is a convenience method for tracking when users leave
+    /// a screen/page in your application.
+    ///
+    /// - parameter screenName: The name of the screen/page being left. Must be non-empty;
+    ///   if an empty or whitespace-only string is passed, the event is silently dropped.
+    /// - parameter properties: Optional properties to include with this event
     open func trackScreenLeave(screenName: String, properties: Properties? = nil) {
         guard let mixpanelInstance = mixpanelInstance else { return }
         guard !screenName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {

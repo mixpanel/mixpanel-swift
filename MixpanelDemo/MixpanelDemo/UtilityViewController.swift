@@ -22,8 +22,6 @@ class UtilityViewController: UIViewController, UITableViewDelegate, UITableViewD
         "Archive",
         "Flush",
         "In-App Purchase",
-        "UIKit Autocapture Test",
-        "SwiftUI Autocapture Test",
     ]
 
     override func viewDidLoad() {
@@ -76,20 +74,6 @@ class UtilityViewController: UIViewController, UITableViewDelegate, UITableViewD
                 descStr = "Flushed Data"
             case 4:
                 IAPFlow()
-            case 5:
-                // UIKit Autocapture Test
-                let vc = UIKitAutocaptureTestViewController()
-                navigationController?.pushViewController(vc, animated: true)
-                return
-            case 6:
-                // SwiftUI Autocapture Test
-                if #available(iOS 14.0, *) {
-                    let vc = SwiftUIAutocaptureTestHostingController()
-                    navigationController?.pushViewController(vc, animated: true)
-                } else {
-                    descStr = "SwiftUI Autocapture Test requires iOS 14+"
-                }
-                return
             default:
                 break
         }

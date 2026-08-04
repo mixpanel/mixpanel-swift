@@ -7,14 +7,14 @@
 //
 
 #if os(iOS)
-  import UIKit
+import UIKit
 
-  /// Represents a captured click event with element metadata.
-  ///
-  /// Contains all semantic information about the clicked element and its context.
-  /// Create a `ClickEvent` and pass it to `mixpanel.autocapture.trackClick(_:)` to
-  /// track click events with full element metadata.
-  public struct ClickEvent {
+/// Represents a captured click event with element metadata.
+///
+/// Contains all semantic information about the clicked element and its context.
+/// Create a `ClickEvent` and pass it to `mixpanel.autocapture.trackClick(_:)` to
+/// track click events with full element metadata.
+public struct ClickEvent {
     // MARK: - Position
 
     /// Touch X coordinate in the window's coordinate space (points).
@@ -107,47 +107,49 @@
     ///   - role: Semantic role like `"button"`, `"switch"`, `"link"` (defaults to nil)
     ///   - elements: View hierarchy path, `">"` separated (defaults to nil)
     ///   - isInteractive: Whether the element is interactive (defaults to true)
-    public init(x: CGFloat, y: CGFloat, elementId: String,
-                tagName: String? = nil, accessibleLabel: String? = nil,
-                role: String? = nil, elements: String? = nil,
-                isInteractive: Bool = true) {
-      self.x = x
-      self.y = y
-      self.elementId = elementId
-      self.tagName = tagName
-      self.accessibleLabel = accessibleLabel
-      self.role = role
-      self.elements = elements
-      self.isInteractive = isInteractive
+    public init(
+        x: CGFloat, y: CGFloat, elementId: String,
+        tagName: String? = nil, accessibleLabel: String? = nil,
+        role: String? = nil, elements: String? = nil,
+        isInteractive: Bool = true
+    ) {
+        self.x = x
+        self.y = y
+        self.elementId = elementId
+        self.tagName = tagName
+        self.accessibleLabel = accessibleLabel
+        self.role = role
+        self.elements = elements
+        self.isInteractive = isInteractive
     }
 
     // MARK: - Conversion to Properties
 
     /// Convert to Mixpanel properties dictionary for tracking
     func toProperties() -> Properties {
-      var props: Properties = [
-        "$x": Int(x),
-        "$y": Int(y),
-        "$el_id": elementId,
-      ]
+        var props: Properties = [
+            "$x": Int(x),
+            "$y": Int(y),
+            "$el_id": elementId,
+        ]
 
-      if let tagName = tagName {
-        props["$el_tag_name"] = tagName
-      }
+        if let tagName = tagName {
+            props["$el_tag_name"] = tagName
+        }
 
-      if let elements = elements {
-        props["$elements"] = elements
-      }
+        if let elements = elements {
+            props["$elements"] = elements
+        }
 
-      if let accessibleLabel = accessibleLabel {
-        props["$attr-aria-label"] = accessibleLabel
-      }
+        if let accessibleLabel = accessibleLabel {
+            props["$attr-aria-label"] = accessibleLabel
+        }
 
-      if let role = role {
-        props["$attr-role"] = role
-      }
+        if let role = role {
+            props["$attr-role"] = role
+        }
 
-      return props
+        return props
     }
-  }
+}
 #endif

@@ -353,10 +353,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
     let automaticEvents = AutomaticEvents()
     #endif
-    #if os(iOS)
-    /// Manager for automatic click, rage click, and dead click capture
-    var autocaptureManager: AutocaptureManager?
-    #endif
     private let registerSuperPropertiesNotificationName = Notification.Name(
         "com.mixpanel.properties.register")
     private let unregisterSuperPropertiesNotificationName = Notification.Name(
@@ -601,23 +597,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             flags.loadFlags()
         }
 
-        // Initialize autocapture if enabled (iOS only)
-        #if os(iOS)
-        if let autocaptureOpts = self.options.autocaptureOptions, autocaptureOpts.isEnabled {
-            if !MixpanelInstance.isiOSAppExtension() {
-                autocaptureManager = AutocaptureManager(
-                    options: autocaptureOpts,
-                    trackEvent: { [weak self] name, props in
-                        self?.track(event: name, properties: props)
-                    }
-                )
-                autocaptureManager?.start()
-            } else {
-                MixpanelLogger.info(
-                    message: "Autocapture disabled in app extension")
-            }
-        }
-        #endif
     }
 
     public func getOptions() -> MixpanelOptions {

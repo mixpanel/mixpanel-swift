@@ -91,6 +91,15 @@ All autocapture events include these properties:
 
 ## Element Identification (`$el_id`)
 
+### Walk-Up to Clickable Parent
+
+When a non-interactive leaf view (e.g., `UILabel` inside a `UIButton`) is tapped, the SDK walks up the view hierarchy to the nearest interactive ancestor and uses its identity for `$el_id`. This is always-on behavior — not configurable.
+
+- The walk-up always takes the interactive parent's identity, even if the leaf has its own `accessibilityLabel`.
+- Stops at the first interactive ancestor (nested clickables: inner wins).
+- Max ancestor search depth: **10 levels**.
+- If no interactive ancestor is found within 10 levels, the leaf's own identity (or hash fallback) is used.
+
 The `$el_id` property uses different resolution rules for UIKit and SwiftUI:
 
 ### UIKit Resolution Order

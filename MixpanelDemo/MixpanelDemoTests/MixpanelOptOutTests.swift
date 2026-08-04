@@ -350,20 +350,17 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         waitForAsyncTasks()
 
-        XCTAssertNotNil(
-            testMixpanel.autocaptureManager,
-            "AutocaptureManager should be created when not opted out")
-        XCTAssertTrue(
-            testMixpanel.autocaptureManager!.isStarted,
-            "AutocaptureManager should be started")
+        XCTAssertNotNil(testMixpanel.autocaptureManager,
+                        "AutocaptureManager should be created when not opted out")
+        XCTAssertTrue(testMixpanel.autocaptureManager!.isStarted,
+                      "AutocaptureManager should be started")
 
         testMixpanel.optOutTracking()
         waitForTrackingQueue(testMixpanel)
         waitForAsyncTasks()
 
-        XCTAssertFalse(
-            testMixpanel.autocaptureManager!.isStarted,
-            "AutocaptureManager should be stopped after opt-out")
+        XCTAssertFalse(testMixpanel.autocaptureManager!.isStarted,
+                       "AutocaptureManager should be stopped after opt-out")
 
         removeDBfile(token)
     }
@@ -387,20 +384,17 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         testMixpanel.optOutTracking()
         waitForTrackingQueue(testMixpanel)
         waitForAsyncTasks()
-        XCTAssertFalse(
-            testMixpanel.autocaptureManager!.isStarted,
-            "AutocaptureManager should be stopped after opt-out")
+        XCTAssertFalse(testMixpanel.autocaptureManager!.isStarted,
+                       "AutocaptureManager should be stopped after opt-out")
 
         // Opt in — autocapture restarts
         testMixpanel.optInTracking()
         waitForTrackingQueue(testMixpanel)
         waitForAsyncTasks()
-        XCTAssertNotNil(
-            testMixpanel.autocaptureManager,
-            "AutocaptureManager should exist after opt-in")
-        XCTAssertTrue(
-            testMixpanel.autocaptureManager!.isStarted,
-            "AutocaptureManager should be started after opt-in")
+        XCTAssertNotNil(testMixpanel.autocaptureManager,
+                        "AutocaptureManager should exist after opt-in")
+        XCTAssertTrue(testMixpanel.autocaptureManager!.isStarted,
+                      "AutocaptureManager should be started after opt-in")
 
         removeDBfile(token)
     }
@@ -420,21 +414,18 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         waitForAsyncTasks()
 
-        XCTAssertNil(
-            testMixpanel.autocaptureManager,
-            "AutocaptureManager should not be created when opted out by default")
+        XCTAssertNil(testMixpanel.autocaptureManager,
+                     "AutocaptureManager should not be created when opted out by default")
 
         // Opt in — autocapture should be created and started
         testMixpanel.optInTracking()
         waitForTrackingQueue(testMixpanel)
         waitForAsyncTasks()
 
-        XCTAssertNotNil(
-            testMixpanel.autocaptureManager,
-            "AutocaptureManager should be created after opt-in")
-        XCTAssertTrue(
-            testMixpanel.autocaptureManager!.isStarted,
-            "AutocaptureManager should be started after opt-in")
+        XCTAssertNotNil(testMixpanel.autocaptureManager,
+                        "AutocaptureManager should be created after opt-in")
+        XCTAssertTrue(testMixpanel.autocaptureManager!.isStarted,
+                      "AutocaptureManager should be started after opt-in")
 
         removeDBfile(token)
     }

@@ -79,10 +79,8 @@ open class Autocapture {
         trackClickEvent("$mp_dead_click", clickEvent: clickEvent, properties: properties)
     }
 
-    private func trackClickEvent(
-        _ eventName: String, clickEvent: ClickEvent,
-        properties: Properties? = nil
-    ) {
+    private func trackClickEvent(_ eventName: String, clickEvent: ClickEvent,
+                                 properties: Properties? = nil) {
         var mergedProperties = clickEvent.toProperties()
 
         if let properties = properties {
@@ -97,10 +95,8 @@ open class Autocapture {
 
     // MARK: - Private Helpers
 
-    private func trackScreenEvent(
-        _ eventName: String, screenName: String,
-        properties: Properties? = nil
-    ) {
+    private func trackScreenEvent(_ eventName: String, screenName: String,
+                                  properties: Properties? = nil) {
         guard !screenName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             MixpanelLogger.warn(
                 message: "\(eventName) called with empty screenName, ignoring event")

@@ -6,6 +6,7 @@
 //  Copyright (c) Mixpanel. All rights reserved.
 //
 
+import SwiftUI
 import XCTest
 
 @testable import Mixpanel
@@ -616,6 +617,372 @@ class AutocaptureWalkUpUIKitTests: MixpanelBaseTests {
             let events = eventQueue(token: mixpanel.apiToken)
             if let match = events.first(where: { ($0["event"] as? String) == eventName }),
                 let props = match["properties"] as? [String: Any]
+            {
+                return (name: eventName, properties: props)
+            }
+
+            RunLoop.current.run(mode: .default, before: Date(timeIntervalSinceNow: 0.1))
+        }
+
+        return nil
+    }
+}
+
+// MARK: - SwiftUI Walk-Up Test View
+
+/// SwiftUI test view for walk-up-to-clickable-parent instrumentation tests.
+///
+/// Each scenario is a row in a VStack. The `scenarioIndex` function maps a
+/// 0-based index to the center point of that row so the test class can
+/// simulate taps by index.
+@available(iOS 14.0, *)
+struct WalkUpSwiftUITestView: View {
+
+    /// Fixed height per scenario row (padding included).
+    static let rowHeight: CGFloat = 56
+    /// VStack spacing.
+    static let spacing: CGFloat = 16
+    /// Outer padding.
+    static let outerPadding: CGFloat = 16
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: Self.spacing) {
+
+                // 1. Non-interactive Text inside Button → walk-up → Button's label
+                Button(action: {}) {
+                    Text("Plain text inside button")
+                        .frame(maxWidth: .infinity, minHeight: Self.rowHeight)
+                }
+                .accessibilityLabel("swiftui_card")
+
+                // 2. Text with own label inside Button → walk-up → Button's label
+                Button(action: {}) {
+                    Text("Labeled text inside button")
+                        .frame(maxWidth: .infinity, minHeight: Self.rowHeight)
+                }
+                .accessibilityLabel("swiftui_parent_of_labeled")
+
+                // 3. Button with NO explicit identity → hash fallback
+                Button(action: {}) {
+                    Text("Button no identity")
+                        .frame(maxWidth: .infinity, minHeight: Self.rowHeight)
+                }
+                // No accessibilityLabel or accessibilityIdentifier
+
+                // 4. Button WITH identity → own ID
+                Button(action: {}) {
+                    Text("Button with identity")
+                        .frame(maxWidth: .infinity, minHeight: Self.rowHeight)
+                }
+                .accessibilityLabel("swiftui_inner_btn")
+
+                // 5. Text, no clickable ancestor → hash fallback
+                Text("Orphan text no ancestor")
+                    .frame(maxWidth: .infinity, minHeight: Self.rowHeight)
+
+                // 6. Text with label, no clickable ancestor → own label
+                Text("Labeled orphan text")
+                    .accessibilityLabel("swiftui_orphan_label")
+                    .frame(maxWidth: .infinity, minHeight: Self.rowHeight)
+
+                // 7. Nested: outer clickable > inner clickable > Text → inner wins
+                Button(action: {}) {
+                    Button(action: {}) {
+                        Text("Leaf inside nested buttons")
+                            .frame(maxWidth: .infinity, minHeight: Self.rowHeight)
+                    }
+                    .accessibilityLabel("swiftui_inner")
+                }
+                .accessibilityLabel("swiftui_outer")
+
+                // 8. Deep nesting: Button > 8 VStacks > Text
+                Button(action: {}) {
+                    VStack { VStack { VStack { VStack {
+                        VStack { VStack { VStack { VStack {
+                            Text("Deep leaf in SwiftUI")
+                                .frame(maxWidth: .infinity, minHeight: Self.rowHeight)
+                        } } } }
+                    } } } }
+                }
+                .accessibilityLabel("swiftui_deep_parent")
+            }
+            .padding(Self.outerPadding)
+        }
+    }
+}
+
+// MARK: - Walk-Up SwiftUI Tests
+
+/// Instrumented tests documenting `$el_id` resolution behavior for SwiftUI views.
+///
+/// **Known limitation (iOS 26+):** SwiftUI renders all content in a single
+/// `PlatformGroupContainer` with zero UIKit subviews. Accessibility labels set via
+/// `.accessibilityLabel()` are stored in SwiftUI's internal accessibility tree, which
+/// is only accessible via `accessibilityHitTest` when an accessibility client (VoiceOver)
+/// is active. Without VoiceOver, `accessibilityHitTest` returns nil.
+///
+/// As a result, all SwiftUI elements currently resolve to hash-based `$el_id` values
+/// (e.g., `PlatformGroupContainer_<hex>`). This differs from Android Compose where
+/// `findNodeAtPosition` accesses the semantics tree directly.
+///
+/// These tests document the current behavior and will be updated when SwiftUI `$el_id`
+/// extraction is implemented. Tests 9 & 10 (disabled button) are skipped because
+/// `.disabled(true)` removes the element from the accessibility tree entirely.
+@available(iOS 14.0, *)
+class AutocaptureWalkUpSwiftUITests: MixpanelBaseTests {
+
+    private var testWindow: UIWindow!
+    private var hostingController: UIHostingController<WalkUpSwiftUITestView>!
+    private var mixpanel: MixpanelInstance!
+
+    // MARK: - Setup / Teardown
+
+    override func setUp() {
+        super.setUp()
+
+        let setupExpectation = expectation(description: "Setup complete")
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.hostingController = UIHostingController(rootView: WalkUpSwiftUITestView())
+            self.testWindow = UIWindow(frame: UIScreen.main.bounds)
+            self.testWindow.rootViewController = self.hostingController
+            self.testWindow.makeKeyAndVisible()
+            self.hostingController.view.layoutIfNeeded()
+            self.testWindow.layoutIfNeeded()
+            setupExpectation.fulfill()
+        }
+        wait(for: [setupExpectation], timeout: 5)
+
+        // Allow SwiftUI to fully render
+        let renderExpectation = expectation(description: "SwiftUI rendering")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            renderExpectation.fulfill()
+        }
+        wait(for: [renderExpectation], timeout: 5)
+
+        let token = randomId()
+        let autocaptureOptions = AutocaptureOptions(
+            clickOptions: ClickOptions(enabled: true),
+            rageClickOptions: RageClickOptions(enabled: true, clickThreshold: 4, timeWindowMs: 1000),
+            deadClickOptions: DeadClickOptions(enabled: true, timeWindowMs: 500)
+        )
+
+        let options = MixpanelOptions(
+            token: token,
+            flushInterval: 60,
+            instanceName: token,
+            trackAutomaticEvents: false,
+            optOutTrackingByDefault: false,
+            serverURL: kFakeServerUrl,
+            autocaptureOptions: autocaptureOptions
+        )
+
+        mixpanel = Mixpanel.initialize(options: options)
+        waitForAsyncTasks()
+    }
+
+    override func tearDown() {
+        let teardownExpectation = expectation(description: "Teardown complete")
+        DispatchQueue.main.async { [weak self] in
+            self?.testWindow?.isHidden = true
+            self?.testWindow = nil
+            self?.hostingController = nil
+            teardownExpectation.fulfill()
+        }
+        wait(for: [teardownExpectation], timeout: 5)
+
+        if let token = mixpanel?.apiToken {
+            removeDBfile(token)
+        }
+        super.tearDown()
+    }
+
+    // MARK: - Test 1: Non-interactive text inside Button
+    // Expected: Button's accessibilityLabel ("swiftui_card")
+    // Actual: PlatformGroupContainer_<hex> (SwiftUI labels not accessible from UIKit)
+
+    func testWalkUp_NonInteractiveTextInsideButton_DocumentBehavior() {
+        simulateTap(scenarioIndex: 0)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click for text inside button")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertTrue(
+                elId.hasPrefix("PlatformGroupContainer_"),
+                "SwiftUI elements currently resolve to PlatformGroupContainer hash, got: \(elId)")
+        }
+    }
+
+    // MARK: - Test 2: Text with label inside Button
+    // Expected: Button's accessibilityLabel ("swiftui_parent_of_labeled")
+    // Actual: PlatformGroupContainer_<hex>
+
+    func testWalkUp_TextWithLabelInsideButton_DocumentBehavior() {
+        simulateTap(scenarioIndex: 1)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click for labeled text inside button")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertTrue(
+                elId.hasPrefix("PlatformGroupContainer_"),
+                "SwiftUI elements currently resolve to PlatformGroupContainer hash, got: \(elId)")
+        }
+    }
+
+    // MARK: - Test 3: Button with no identity → hash fallback
+
+    func testNoWalkUp_ButtonNoIdentity_HashFallback() {
+        simulateTap(scenarioIndex: 2)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click for button with no identity")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertTrue(
+                elId.hasPrefix("PlatformGroupContainer_"),
+                "SwiftUI elements currently resolve to PlatformGroupContainer hash, got: \(elId)")
+        }
+    }
+
+    // MARK: - Test 4: Button with identity
+    // Expected: Button's accessibilityLabel ("swiftui_inner_btn")
+    // Actual: PlatformGroupContainer_<hex>
+
+    func testNoWalkUp_ButtonWithIdentity_DocumentBehavior() {
+        simulateTap(scenarioIndex: 3)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click for button with identity")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertTrue(
+                elId.hasPrefix("PlatformGroupContainer_"),
+                "SwiftUI elements currently resolve to PlatformGroupContainer hash, got: \(elId)")
+        }
+    }
+
+    // MARK: - Test 5: Text, no clickable ancestor → hash fallback
+
+    func testNoWalkUp_OrphanText_HashFallback() {
+        simulateTap(scenarioIndex: 4)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click for orphan text")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertTrue(
+                elId.hasPrefix("PlatformGroupContainer_"),
+                "SwiftUI elements currently resolve to PlatformGroupContainer hash, got: \(elId)")
+        }
+    }
+
+    // MARK: - Test 6: Text with label, no clickable ancestor
+    // Expected: Text's accessibilityLabel ("swiftui_orphan_label")
+    // Actual: PlatformGroupContainer_<hex>
+
+    func testNoWalkUp_OrphanTextWithLabel_DocumentBehavior() {
+        simulateTap(scenarioIndex: 5)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click for labeled orphan text")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertTrue(
+                elId.hasPrefix("PlatformGroupContainer_"),
+                "SwiftUI elements currently resolve to PlatformGroupContainer hash, got: \(elId)")
+        }
+    }
+
+    // MARK: - Test 7: Nested buttons
+    // Expected: Inner button's accessibilityLabel ("swiftui_inner")
+    // Actual: PlatformGroupContainer_<hex>
+
+    func testWalkUp_NestedButtons_DocumentBehavior() {
+        simulateTap(scenarioIndex: 6)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click for nested buttons")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertTrue(
+                elId.hasPrefix("PlatformGroupContainer_"),
+                "SwiftUI elements currently resolve to PlatformGroupContainer hash, got: \(elId)")
+        }
+    }
+
+    // MARK: - Test 8: Deep nesting
+    // Expected: Button ancestor's accessibilityLabel ("swiftui_deep_parent")
+    // Actual: PlatformGroupContainer_<hex>
+
+    func testWalkUp_DeepNesting_DocumentBehavior() {
+        simulateTap(scenarioIndex: 7)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click for deeply nested text")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertTrue(
+                elId.hasPrefix("PlatformGroupContainer_"),
+                "SwiftUI elements currently resolve to PlatformGroupContainer hash, got: \(elId)")
+        }
+    }
+
+    // MARK: - Helper Methods
+
+    /// Simulate a tap at the center of a scenario row by index.
+    private func simulateTap(scenarioIndex: Int) {
+        let tapExpectation = expectation(description: "Tap simulated")
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self,
+                  let window = self.testWindow else {
+                tapExpectation.fulfill()
+                return
+            }
+
+            let safeAreaTop = window.safeAreaInsets.top
+            let row = WalkUpSwiftUITestView.rowHeight
+            let spacing = WalkUpSwiftUITestView.spacing
+            let pad = WalkUpSwiftUITestView.outerPadding
+
+            let centerY = safeAreaTop + pad + CGFloat(scenarioIndex) * (row + spacing) + row / 2
+            let centerX = window.bounds.midX
+            let point = CGPoint(x: centerX, y: centerY)
+
+            if let hitView = window.hitTest(point, with: nil) {
+                self.mixpanel.autocaptureManager?.handleTouch(
+                    at: point, view: hitView, window: window)
+            }
+
+            tapExpectation.fulfill()
+        }
+
+        wait(for: [tapExpectation], timeout: 2)
+    }
+
+    /// Poll the event queue until an event with the given name appears, or timeout.
+    private func waitForEvent(named eventName: String, timeout: TimeInterval) -> (
+        name: String, properties: [String: Any]
+    )? {
+        let startTime = Date()
+
+        while Date().timeIntervalSince(startTime) < timeout {
+            waitForTrackingQueue(mixpanel)
+
+            let events = eventQueue(token: mixpanel.apiToken)
+            if let match = events.first(where: { ($0["event"] as? String) == eventName }),
+               let props = match["properties"] as? [String: Any]
             {
                 return (name: eventName, properties: props)
             }

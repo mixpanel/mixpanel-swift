@@ -159,6 +159,32 @@ class WalkUpUIKitTestViewController: UIViewController {
         return label
     }()
 
+    // MARK: - Scenario 8: Disabled interactive parent (UIButton with isEnabled=false)
+
+    let enabledGrandparent: UIView = {
+        let view = UIView()
+        view.accessibilityIdentifier = "enabled_grandparent"
+        view.backgroundColor = .systemRed.withAlphaComponent(0.1)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    let disabledParent: UIButton = {
+        let button = UIButton(type: .system)
+        button.isEnabled = false
+        button.accessibilityIdentifier = "disabled_parent"
+        button.setTitle("Disabled Button", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
+    let disabledLeaf: UILabel = {
+        let label = UILabel()
+        label.text = "Leaf inside disabled button"
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
@@ -220,6 +246,13 @@ class WalkUpUIKitTestViewController: UIViewController {
         }
         currentParent.addSubview(deepLeaf)
 
+        // -- Scenario 8: enabledGrandparent > disabledParent (UIButton, disabled) > disabledLeaf
+        let tapGestureGrandparent = UITapGestureRecognizer(target: self, action: #selector(noOp))
+        enabledGrandparent.addGestureRecognizer(tapGestureGrandparent)
+        disabledParent.addTarget(self, action: #selector(noOp), for: .touchUpInside)
+        disabledParent.addSubview(disabledLeaf)
+        enabledGrandparent.addSubview(disabledParent)
+
         // Assemble into a scroll view with a vertical stack
         let stackView = UIStackView(arrangedSubviews: [
             basicContainer,
@@ -229,6 +262,7 @@ class WalkUpUIKitTestViewController: UIViewController {
             nonInteractiveContainer,
             outerInteractive,
             deepParent,
+            enabledGrandparent,
         ])
         stackView.axis = .vertical
         stackView.spacing = 12
@@ -308,6 +342,16 @@ class WalkUpUIKitTestViewController: UIViewController {
         NSLayoutConstraint.activate([
             deepLeaf.centerXAnchor.constraint(equalTo: currentParent.centerXAnchor),
             deepLeaf.centerYAnchor.constraint(equalTo: currentParent.centerYAnchor),
+        ])
+
+        // Scenario 8
+        NSLayoutConstraint.activate([
+            disabledParent.topAnchor.constraint(equalTo: enabledGrandparent.topAnchor, constant: 4),
+            disabledParent.leadingAnchor.constraint(equalTo: enabledGrandparent.leadingAnchor, constant: 4),
+            disabledParent.trailingAnchor.constraint(equalTo: enabledGrandparent.trailingAnchor, constant: -4),
+            disabledParent.bottomAnchor.constraint(equalTo: enabledGrandparent.bottomAnchor, constant: -4),
+            disabledLeaf.centerXAnchor.constraint(equalTo: disabledParent.centerXAnchor),
+            disabledLeaf.centerYAnchor.constraint(equalTo: disabledParent.centerYAnchor),
         ])
     }
 
@@ -506,6 +550,36 @@ class AutocaptureWalkUpUIKitTests: MixpanelBaseTests {
             XCTAssertEqual(
                 props["$el_id"] as? String, "deep_parent",
                 "Walk-up should find interactive ancestor within 10 levels of nesting")
+        }
+    }
+
+    // MARK: - Test 8: Disabled interactive parent -> walk-up stops at disabled parent
+
+    func testWalkUp_DisabledInteractiveParent_StopsAtDisabledParent() {
+        simulateTap(on: testVC.disabledLeaf)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click event for leaf inside disabled interactive parent")
+
+        if let props = event?.properties {
+            XCTAssertEqual(
+                props["$el_id"] as? String, "disabled_parent",
+                "Walk-up should stop at disabled UIButton (still has targets, so still interactive)")
+        }
+    }
+
+    // MARK: - Test 9: Disabled button tapped directly -> keeps own identity
+
+    func testNoWalkUp_DisabledButtonTappedDirectly_KeepsOwnId() {
+        simulateTap(on: testVC.disabledParent)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click event for disabled button tapped directly")
+
+        if let props = event?.properties {
+            XCTAssertEqual(
+                props["$el_id"] as? String, "disabled_parent",
+                "Disabled button tapped directly should keep its own identity")
         }
     }
 

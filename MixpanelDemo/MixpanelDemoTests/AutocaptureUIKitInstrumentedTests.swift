@@ -157,6 +157,37 @@ class AutocaptureUIKitInstrumentedTests: MixpanelBaseTests {
         }
     }
 
+    // MARK: - Test: Child text does not leak when accessibilityLabel is not set
+
+    /// A clickable container with child text but no explicit accessibilityLabel must
+    /// not leak the child's visible text into $attr-aria-label or $el_id.
+    ///
+    /// Simulates a React Native Pressable where the developer did not set
+    /// accessibilityLabel. The container has isAccessibilityElement=false and a child
+    /// UILabel. UIKit auto-derives accessibilityLabel from child text — the SDK must
+    /// not capture that auto-derived value.
+    func testNotAccessibleElement_ChildTextDoesNotLeakIntoAriaLabel() {
+        let view = testViewController.notAccessibleView
+
+        simulateTap(on: view)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Click event should still be captured")
+
+        if let props = event?.properties {
+            // $el_id must NOT contain the child label text
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertFalse(
+                elId.contains("Sensitive"),
+                "$el_id should not contain child text. Got: \(elId)")
+
+            // $attr-aria-label must be absent — auto-derived label must not leak
+            XCTAssertNil(
+                props["$attr-aria-label"],
+                "$attr-aria-label must not be present when accessibilityLabel is auto-derived")
+        }
+    }
+
     // MARK: - Test 4: Rage Click Detection
 
     func testRageClickDetection() {
@@ -461,6 +492,29 @@ class UIKitAutocaptureTestViewController: UIViewController {
         return button
     }()
 
+    /// Simulates a React Native Pressable with accessible={false} containing child text.
+    /// The container has isAccessibilityElement=false and a child UILabel whose text
+    /// UIKit auto-derives into the container's accessibilityLabel.
+    /// This auto-derived label must NOT leak into $el_id or $attr-aria-label.
+    let notAccessibleView: UIView = {
+        let container = UIView()
+        container.isAccessibilityElement = false
+        container.backgroundColor = .systemBlue.withAlphaComponent(0.1)
+        container.translatesAutoresizingMaskIntoConstraints = false
+        let tap = UITapGestureRecognizer(target: nil, action: nil)
+        container.addGestureRecognizer(tap)
+        // Child label — UIKit auto-derives container's accessibilityLabel from this text
+        let childLabel = UILabel()
+        childLabel.text = "Sensitive Account 1234"
+        childLabel.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(childLabel)
+        NSLayoutConstraint.activate([
+            childLabel.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            childLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+        ])
+        return container
+    }()
+
     /// Button with no action handler (for dead click testing)
     let deadButton: UIButton = {
         let button = UIButton(type: .system)
@@ -490,6 +544,7 @@ class UIKitAutocaptureTestViewController: UIViewController {
             bothButton,
             rageButton,
             deadButton,
+            notAccessibleView,
         ])
         stackView.axis = .vertical
         stackView.spacing = 16

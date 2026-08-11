@@ -131,7 +131,8 @@ final class SemanticExtractor {
     /// the label when isAccessibilityElement is true — in React Native, this maps
     /// to `accessible={true}`, signaling an explicitly set label.
     private func findAccessibilityLabel(in view: UIView) -> String? {
-        let isKnownControl = view is UIButton || view is UILabel || view is UISwitch
+        let isKnownControl =
+            view is UIButton || view is UILabel || view is UISwitch
             || view is UISlider || view is UITextField || view is UITextView
             || view is UISegmentedControl || view is UIStepper || view is UIImageView
         if !isKnownControl && !view.isAccessibilityElement

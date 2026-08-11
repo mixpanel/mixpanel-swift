@@ -119,7 +119,26 @@ final class SemanticExtractor {
         return nil
     }
 
+    /// Returns the view's accessibilityLabel only if it was explicitly set by the developer.
+    ///
+    /// UIKit auto-derives accessibilityLabel from child text content for container
+    /// views where isAccessibilityElement is false. That derived text may contain
+    /// sensitive information (e.g., account numbers, personal details).
+    ///
+    /// For known UIKit controls (UIButton, UILabel, etc.) and SwiftUI views, the
+    /// label is always intentional (title-derived or explicitly set), so we capture it.
+    /// For generic container views (e.g., React Native's RCTView), we only capture
+    /// the label when isAccessibilityElement is true — in React Native, this maps
+    /// to `accessible={true}`, signaling an explicitly set label.
     private func findAccessibilityLabel(in view: UIView) -> String? {
+        let isKnownControl = view is UIButton || view is UILabel || view is UISwitch
+            || view is UISlider || view is UITextField || view is UITextView
+            || view is UISegmentedControl || view is UIStepper || view is UIImageView
+        if !isKnownControl && !view.isAccessibilityElement
+            && !AutocaptureDefaults.isSwiftUIView(view)
+        {
+            return nil
+        }
         if let label = view.accessibilityLabel, !label.isEmpty {
             return label
         }

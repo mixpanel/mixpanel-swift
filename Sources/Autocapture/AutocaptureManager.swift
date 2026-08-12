@@ -147,6 +147,14 @@ final class AutocaptureManager {
             return
         }
 
+        // Skip invisible views — hidden or fully transparent views should not produce events.
+        // In production UIKit's hitTest already skips these, but this guard protects against
+        // programmatic handleTouch calls and future code paths that bypass hitTest.
+        if !isViewVisible(view) {
+            MixpanelLogger.debug(message: "AutocaptureManager: skipping invisible view at \(point)")
+            return
+        }
+
         // Extract semantic information
         let clickEvent = semanticExtractor.extractSemantics(from: view, at: point)
 
@@ -171,6 +179,20 @@ final class AutocaptureManager {
         if let detector = deadClickDetector, let window = window {
             detector.startMonitoring(event: clickEvent, view: view, in: window)
         }
+    }
+
+    // MARK: - Visibility Check
+
+    /// Returns false if the view (or any ancestor up to the window) is hidden or fully transparent.
+    private func isViewVisible(_ view: UIView) -> Bool {
+        var current: UIView? = view
+        while let v = current {
+            if v.isHidden || v.alpha <= 0 {
+                return false
+            }
+            current = v.superview
+        }
+        return true
     }
 
 }

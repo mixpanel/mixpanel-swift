@@ -188,6 +188,156 @@ class AutocaptureUIKitInstrumentedTests: MixpanelBaseTests {
         }
     }
 
+    // MARK: - Test: Empty accessibilityLabel on UIButton with sensitive title
+
+    /// UIButton with title "4111-1111-1111-1234" and accessibilityLabel="".
+    /// The button title must not leak into $attr-aria-label or $el_id.
+    func testEmptyAccessibilityLabel_ButtonTitleDoesNotLeak() {
+        let button = testViewController.emptyLabelButton
+
+        simulateTap(on: button)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Click event should still be captured")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertFalse(
+                elId.contains("4111"),
+                "$el_id should not contain button title. Got: \(elId)")
+
+            let ariaLabel = props["$attr-aria-label"] as? String
+            XCTAssertTrue(
+                ariaLabel == nil || !ariaLabel!.contains("4111"),
+                "$attr-aria-label should not contain button title. Got: \(ariaLabel ?? "nil")")
+        }
+    }
+
+    // MARK: - Visibility Tests
+
+    /// A hidden button (isHidden=true) must not produce autocapture events.
+    /// Validates that neither the accessibilityIdentifier nor the accessibilityLabel
+    /// of the hidden view leaks into event attributes ($el_id, $attr-aria-label).
+    func testHiddenView_NoEventCaptured() {
+        let button = testViewController.hiddenButton
+
+        // Directly invoke handleTouch — bypasses hitTest to test extraction guard
+        simulateTap(on: button)
+
+        Thread.sleep(forTimeInterval: 0.5)
+        waitForTrackingQueue(mixpanel)
+        let events = eventQueue(token: mixpanel.apiToken)
+        let matchingEvents = events.filter {
+            guard let props = $0["properties"] as? [String: Any] else { return false }
+            let elId = props["$el_id"] as? String ?? ""
+            let ariaLabel = props["$attr-aria-label"] as? String ?? ""
+            return elId.contains("hidden_btn") || elId.contains("Hidden Sensitive")
+                || ariaLabel.contains("Hidden Sensitive")
+        }
+
+        XCTAssertEqual(
+            matchingEvents.count, 0,
+            "Hidden view's identifier and accessibilityLabel must not appear in autocapture events")
+    }
+
+    /// A zero-alpha button (alpha=0, fully transparent) must not produce
+    /// autocapture events. Validates that neither the accessibilityIdentifier
+    /// nor the accessibilityLabel leaks into event attributes.
+    func testZeroAlphaView_NoEventCaptured() {
+        let button = testViewController.zeroAlphaButton
+
+        simulateTap(on: button)
+
+        Thread.sleep(forTimeInterval: 0.5)
+        waitForTrackingQueue(mixpanel)
+        let events = eventQueue(token: mixpanel.apiToken)
+        let matchingEvents = events.filter {
+            guard let props = $0["properties"] as? [String: Any] else { return false }
+            let elId = props["$el_id"] as? String ?? ""
+            let ariaLabel = props["$attr-aria-label"] as? String ?? ""
+            return elId.contains("zero_alpha_btn") || elId.contains("ZeroAlpha Sensitive")
+                || ariaLabel.contains("ZeroAlpha Sensitive")
+        }
+
+        XCTAssertEqual(
+            matchingEvents.count, 0,
+            "Zero-alpha view's identifier and accessibilityLabel must not appear in autocapture events")
+    }
+
+    // MARK: - Accessibility Guard Tests
+
+    /// Scenario 2: View IS accessible (isAccessibilityElement=true) but has no explicit
+    /// accessibilityLabel. UIKit auto-derives label from child text — the SDK must NOT
+    /// capture that auto-derived value.
+    func testAccessibleNoLabel_ChildTextDoesNotLeak() {
+        let view = testViewController.accessibleNoLabelView
+
+        simulateTap(on: view)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Click event should still be captured")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertFalse(
+                elId.contains("Sensitive") || elId.contains("5678"),
+                "$el_id should not contain child text. Got: \(elId)")
+
+            XCTAssertNil(
+                props["$attr-aria-label"],
+                "$attr-aria-label must not be present when accessibilityLabel is auto-derived")
+        }
+    }
+
+    /// Scenario 4: View is NOT accessible (isAccessibilityElement=false) but HAS an
+    /// explicit accessibilityLabel. The label must NOT be captured because the view
+    /// is not an accessibility element.
+    func testNotAccessibleWithLabel_LabelDoesNotLeak() {
+        let view = testViewController.notAccessibleWithLabelView
+
+        simulateTap(on: view)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Click event should still be captured")
+
+        if let props = event?.properties {
+            // Neither accessibilityLabel nor child text must appear in $el_id
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertFalse(
+                elId.contains("Sensitive") || elId.contains("9999"),
+                "$el_id should not contain accessibilityLabel. Got: \(elId)")
+            XCTAssertFalse(
+                elId.contains("Some Label"),
+                "$el_id should not contain child text. Got: \(elId)")
+
+            // $attr-aria-label must be absent — neither label nor child text
+            XCTAssertNil(
+                props["$attr-aria-label"],
+                "$attr-aria-label must not be present when view is not accessible")
+        }
+    }
+
+    /// Positive case: View IS accessible AND HAS explicit accessibilityLabel.
+    /// The label SHOULD be captured in $el_id and $attr-aria-label.
+    func testAccessibleWithLabel_LabelIsCaptured() {
+        let view = testViewController.accessibleWithLabelView
+
+        simulateTap(on: view)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Click event should be captured")
+
+        if let props = event?.properties {
+            XCTAssertEqual(
+                props["$el_id"] as? String, "Intended Label",
+                "$el_id should use the explicit accessibilityLabel")
+
+            XCTAssertEqual(
+                props["$attr-aria-label"] as? String, "Intended Label",
+                "$attr-aria-label should be present with explicit label")
+        }
+    }
+
     // MARK: - Test 4: Rage Click Detection
 
     func testRageClickDetection() {
@@ -515,6 +665,108 @@ class UIKitAutocaptureTestViewController: UIViewController {
         return container
     }()
 
+    /// Button with a sensitive title and accessibilityLabel explicitly set to "".
+    /// Tests whether UIKit auto-derives the label from the title or respects "".
+    let emptyLabelButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("4111-1111-1111-1234", for: .normal)
+        button.accessibilityLabel = ""
+        button.accessibilityIdentifier = nil
+        button.backgroundColor = .systemRed
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 8
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(nil, action: #selector(buttonTapped), for: .touchUpInside)
+        return button
+    }()
+
+    /// Scenario 2: Accessible + no accessibilityLabel + child text.
+    /// isAccessibilityElement=true, no explicit accessibilityLabel set.
+    /// Child text must NOT leak into $el_id or $attr-aria-label.
+    let accessibleNoLabelView: UIView = {
+        let container = UIView()
+        container.isAccessibilityElement = true
+        container.backgroundColor = .systemGreen.withAlphaComponent(0.1)
+        container.translatesAutoresizingMaskIntoConstraints = false
+        let tap = UITapGestureRecognizer(target: nil, action: nil)
+        container.addGestureRecognizer(tap)
+        let childLabel = UILabel()
+        childLabel.text = "Sensitive Account 5678"
+        childLabel.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(childLabel)
+        NSLayoutConstraint.activate([
+            childLabel.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            childLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+        ])
+        return container
+    }()
+
+    /// Scenario 4: Not accessible + HAS explicit accessibilityLabel.
+    /// isAccessibilityElement=false, accessibilityLabel="Sensitive Account 9999".
+    /// Neither the label nor child text should leak.
+    let notAccessibleWithLabelView: UIView = {
+        let container = UIView()
+        container.isAccessibilityElement = false
+        container.accessibilityLabel = "Sensitive Account 9999"
+        container.backgroundColor = .systemPurple.withAlphaComponent(0.1)
+        container.translatesAutoresizingMaskIntoConstraints = false
+        let tap = UITapGestureRecognizer(target: nil, action: nil)
+        container.addGestureRecognizer(tap)
+        let childLabel = UILabel()
+        childLabel.text = "Some Label"
+        childLabel.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(childLabel)
+        NSLayoutConstraint.activate([
+            childLabel.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            childLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+        ])
+        return container
+    }()
+
+    /// Positive case: Accessible + explicit accessibilityLabel.
+    /// isAccessibilityElement=true, accessibilityLabel="Intended Label".
+    /// The label SHOULD be captured.
+    let accessibleWithLabelView: UIView = {
+        let container = UIView()
+        container.isAccessibilityElement = true
+        container.accessibilityLabel = "Intended Label"
+        container.backgroundColor = .systemBlue.withAlphaComponent(0.1)
+        container.translatesAutoresizingMaskIntoConstraints = false
+        let tap = UITapGestureRecognizer(target: nil, action: nil)
+        container.addGestureRecognizer(tap)
+        return container
+    }()
+
+    /// Hidden button — isHidden=true, not drawn at all
+    let hiddenButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Hidden Button", for: .normal)
+        button.accessibilityIdentifier = "hidden_btn"
+        button.accessibilityLabel = "Hidden Sensitive PII"
+        button.backgroundColor = .systemGray
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 8
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(nil, action: #selector(buttonTapped), for: .touchUpInside)
+        button.isHidden = true
+        return button
+    }()
+
+    /// Zero-alpha button — alpha=0, fully transparent
+    let zeroAlphaButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Zero Alpha Button", for: .normal)
+        button.accessibilityIdentifier = "zero_alpha_btn"
+        button.accessibilityLabel = "ZeroAlpha Sensitive PII"
+        button.backgroundColor = .systemGray
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 8
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(nil, action: #selector(buttonTapped), for: .touchUpInside)
+        button.alpha = 0
+        return button
+    }()
+
     /// Button with no action handler (for dead click testing)
     let deadButton: UIButton = {
         let button = UIButton(type: .system)
@@ -543,8 +795,14 @@ class UIKitAutocaptureTestViewController: UIViewController {
             rule3Button,
             bothButton,
             rageButton,
+            hiddenButton,
+            zeroAlphaButton,
             deadButton,
             notAccessibleView,
+            emptyLabelButton,
+            accessibleNoLabelView,
+            notAccessibleWithLabelView,
+            accessibleWithLabelView,
         ])
         stackView.axis = .vertical
         stackView.spacing = 16

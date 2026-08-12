@@ -56,8 +56,16 @@ final class SemanticExtractor {
         }
 
         let className = String(describing: type(of: targetView))
-        let elementId = generateElementId(for: targetView)
-        let accessibleLabel = findAccessibilityLabel(in: targetView)
+        var accessibleLabel = findAccessibilityLabel(in: targetView)
+
+        // SwiftUI views render as internal UIKit views (e.g., PlatformGroupContainer) that
+        // don't carry the SwiftUI accessibilityLabel on the UIKit view. Query the SwiftUI
+        // accessibility element tree at the touch point to retrieve the label.
+        if accessibleLabel == nil, AutocaptureDefaults.isSwiftUIView(targetView) {
+            accessibleLabel = findSwiftUIAccessibilityLabel(at: point, view: targetView)
+        }
+
+        let elementId = accessibleLabel ?? generateElementId(for: targetView)
         let role = determineRole(for: targetView)
         let tagName = resolveTagName(className: className, role: role, view: targetView)
         let elements = buildViewHierarchy(from: targetView)
@@ -280,6 +288,39 @@ final class SemanticExtractor {
             current = v.superview
             depth += 1
         }
+        return nil
+    }
+
+    /// Query the SwiftUI accessibility element tree at the touch point to retrieve the label.
+    ///
+    /// SwiftUI views render as internal UIKit views (e.g., PlatformGroupContainer) that don't
+    /// expose `accessibilityLabel` on the UIKit view. The label lives in SwiftUI's accessibility
+    /// element tree, which we can query via `accessibilityHitTest`.
+    ///
+    /// We walk up to find the UIHostingController's view (class name contains "Hosting"),
+    /// which owns the full SwiftUI accessibility tree. Calling `accessibilityHitTest` on
+    /// a leaf PlatformGroupContainer won't traverse the tree properly.
+    private func findSwiftUIAccessibilityLabel(at windowPoint: CGPoint, view: UIView) -> String? {
+        guard #available(iOS 18.0, *) else { return nil }
+        guard let window = view.window else { return nil }
+
+        // Walk up to find the UIHostingController's view which owns the accessibility tree
+        var current: UIView? = view
+        var depth = 0
+        while let v = current, depth < AutocaptureDefaults.maxAncestorSearchDepth {
+            let className = String(describing: type(of: v))
+            if className.contains("Hosting") {
+                let screenPoint = window.convert(windowPoint, to: window.screen.coordinateSpace)
+                if let element = v.accessibilityHitTest(screenPoint, event: nil) as? NSObject,
+                   let label = element.accessibilityLabel, !label.isEmpty {
+                    return label
+                }
+                break
+            }
+            current = v.superview
+            depth += 1
+        }
+
         return nil
     }
 

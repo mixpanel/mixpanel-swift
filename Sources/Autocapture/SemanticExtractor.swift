@@ -312,7 +312,8 @@ final class SemanticExtractor {
             if className.contains("Hosting") {
                 let screenPoint = window.convert(windowPoint, to: window.screen.coordinateSpace)
                 if let element = v.accessibilityHitTest(screenPoint, event: nil) as? NSObject,
-                   let label = element.accessibilityLabel, !label.isEmpty {
+                    let label = element.accessibilityLabel, !label.isEmpty
+                {
                     return label
                 }
                 break

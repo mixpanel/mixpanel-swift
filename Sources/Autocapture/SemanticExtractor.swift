@@ -84,18 +84,16 @@ final class SemanticExtractor {
 
     // MARK: - Element ID Generation
 
-    /// Generate element ID following platform-specific resolution rules:
+    /// Generate a hash-based element ID as fallback when no accessibility label is available.
     ///
-    /// Resolution order (same for UIKit and SwiftUI):
-    /// 1. `accessibilityLabel` (if non-empty)
-    /// 2. `accessibilityIdentifier` (if non-empty)
-    /// 3. `ClassName_<hash>`
+    /// Resolution order:
+    /// 1. `accessibilityIdentifier` (if non-empty)
+    /// 2. `ClassName_<hash>`
+    ///
+    /// Note: `accessibilityLabel` is checked by the caller (`extractSemantics`) via
+    /// `findAccessibilityLabel` before falling back to this method.
     private func generateElementId(for view: UIView) -> String {
-        // accessibilityLabel is primary for both UIKit and SwiftUI
-        if let label = findAccessibilityLabel(in: view), !label.isEmpty {
-            return label
-        }
-        // accessibilityIdentifier as fallback
+        // accessibilityIdentifier as primary fallback
         if let identifier = findAccessibilityIdentifier(in: view), !identifier.isEmpty {
             return identifier
         }

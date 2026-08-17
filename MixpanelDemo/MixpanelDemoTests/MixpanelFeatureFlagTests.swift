@@ -2240,6 +2240,92 @@ class FeatureFlagManagerTests: XCTestCase {
         }
     }
 
+    // MARK: Custom Operator Filter Tests
+
+    func testFirstTimeEventMatching_SemverFilterMatch() {
+        let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
+        let initialVariant = createControlVariant(value: false)
+        let filters: [String: Any] = ["semver_compare": [["var": "app_version"], ">=", "1.2.3"]]
+
+        setupAndTriggerFirstTimeEvent(
+            flagKey: "semver-flag",
+            eventName: "App Open",
+            eventProperties: ["app_version": "1.10.0"],
+            filters: filters,
+            pendingVariant: pendingVariant,
+            initialVariant: initialVariant,
+            firstTimeEventHash: "semverhash"
+        ) { mockMgr in
+            let flag = mockMgr.flags?["semver-flag"]
+            XCTAssertEqual(flag?.key, "premium")
+            XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("semver-flag:semverhash"))
+        }
+    }
+
+    func testFirstTimeEventMatching_SemverFilterNoMatch() {
+        let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
+        let initialVariant = createControlVariant(value: false)
+        let filters: [String: Any] = ["semver_compare": [["var": "app_version"], ">=", "1.2.3"]]
+
+        setupAndTriggerFirstTimeEvent(
+            flagKey: "semver-flag",
+            eventName: "App Open",
+            eventProperties: ["app_version": "1.2.2"],
+            filters: filters,
+            pendingVariant: pendingVariant,
+            initialVariant: initialVariant,
+            firstTimeEventHash: "semverhash",
+            expectActivation: false
+        ) { mockMgr in
+            let flag = mockMgr.flags?["semver-flag"]
+            XCTAssertEqual(flag?.key, "control")
+            XCTAssertFalse(mockMgr.activatedFirstTimeEvents.contains("semver-flag:semverhash"))
+        }
+    }
+
+    func testFirstTimeEventMatching_DatetimeFilterMatch() {
+        let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
+        let initialVariant = createControlVariant(value: false)
+        // 2026-07-16T00:00:00Z in epoch milliseconds.
+        let filters: [String: Any] = ["datetime_compare": [["var": "signup"], "<", 1_784_160_000_000]]
+
+        setupAndTriggerFirstTimeEvent(
+            flagKey: "datetime-flag",
+            eventName: "Signup",
+            eventProperties: ["signup": "2026-07-15T00:00:00Z"],
+            filters: filters,
+            pendingVariant: pendingVariant,
+            initialVariant: initialVariant,
+            firstTimeEventHash: "datehash"
+        ) { mockMgr in
+            let flag = mockMgr.flags?["datetime-flag"]
+            XCTAssertEqual(flag?.key, "premium")
+            XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("datetime-flag:datehash"))
+        }
+    }
+
+    func testFirstTimeEventMatching_DatetimeFilterNoMatch() {
+        let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
+        let initialVariant = createControlVariant(value: false)
+        // 2026-07-16T00:00:00Z in epoch milliseconds.
+        let filters: [String: Any] = ["datetime_compare": [["var": "signup"], ">", 1_784_160_000_000]]
+
+        setupAndTriggerFirstTimeEvent(
+            flagKey: "datetime-flag",
+            eventName: "Signup",
+            eventProperties: ["signup": "2026-07-15T00:00:00Z"],
+            filters: filters,
+            pendingVariant: pendingVariant,
+            initialVariant: initialVariant,
+            firstTimeEventHash: "datehash",
+            expectActivation: false
+        ) { mockMgr in
+            let flag = mockMgr.flags?["datetime-flag"]
+            XCTAssertEqual(flag?.key, "control")
+            XCTAssertFalse(mockMgr.activatedFirstTimeEvents.contains("datetime-flag:datehash"))
+        }
+    }
+
     // MARK: Activation State Tests
 
     func testFirstTimeEventActivatesOnlyOnce() {

@@ -515,6 +515,7 @@
 			packageReferences = (
 				17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */,
 				1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */,
+				17VERSIONPKG00000001 /* XCRemoteSwiftPackageReference "Version" */,
 			);
 			productRefGroup = E115947E1CFF1491007F8B4F /* Products */;
 			projectDirPath = "";

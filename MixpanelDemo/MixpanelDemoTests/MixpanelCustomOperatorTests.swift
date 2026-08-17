@@ -447,6 +447,10 @@ class MixpanelCustomOperatorTests: XCTestCase {
         XCTAssertFalse(eval(
             "{\"datetime_compare\":[{\"var\":\"signup\"},\">\",1e308]}",
             stringData("signup", "2026-07-16T00:00:00Z")))
+        // target beyond representable range, less-than also false
+        XCTAssertFalse(eval(
+            "{\"datetime_compare\":[{\"var\":\"signup\"},\"<\",1e308]}",
+            stringData("signup", "2026-07-16T00:00:00Z")))
         // Fail-closed: subject must be an RFC3339 string, target must be an epoch-ms number.
         // numeric subject, no match
         XCTAssertFalse(eval(datetimeRule("signup", "=", jul16Ms), numberData("signup", jul16Ms)))

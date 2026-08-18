@@ -51,7 +51,7 @@ private func comparatorMatches(_ cmp: Int64, _ symbol: String) -> Bool {
     }
 }
 
-/// `Version(tolerant:)` only tolerates a lowercase "v", so the prefix is stripped here instead.
+/// A leading v is accepted in either case, so it is stripped before the version is parsed.
 private func stripVersionPrefix(_ version: String) -> String {
     guard let first = version.first, first == "v" || first == "V" else {
         return version
@@ -59,8 +59,8 @@ private func stripVersionPrefix(_ version: String) -> String {
     return String(version.dropFirst())
 }
 
-/// Build metadata is ignored for precedence by SemVer 2.0.0, but `Version(tolerant:)` fails to parse a
-/// version that carries it, so it is removed after validation and before parsing.
+/// Build metadata carries no precedence under SemVer 2.0.0, and the parser rejects the dots inside it, so
+/// it is dropped after validation and before parsing.
 private func stripBuildMetadata(_ version: String) -> String {
     guard let plus = version.firstIndex(of: "+") else {
         return version
@@ -123,10 +123,9 @@ private func semverCompare(_ json: JSON?) -> JSON {
     guard isValidSemver(actualNormalized), isValidSemver(targetNormalized) else {
         return .Bool(false)
     }
-    guard let actualVer = Version(tolerant: stripBuildMetadata(actualNormalized)) else {
-        return .Bool(false)
-    }
-    guard let targetVer = Version(tolerant: stripBuildMetadata(targetNormalized)) else {
+    guard let actualVer = try? Version(stripBuildMetadata(actualNormalized)),
+        let targetVer = try? Version(stripBuildMetadata(targetNormalized))
+    else {
         return .Bool(false)
     }
     let cmp: Int64 = actualVer < targetVer ? -1 : (actualVer > targetVer ? 1 : 0)

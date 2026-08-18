@@ -23,8 +23,8 @@ let package = Package(
             from: "1.0.0"
         ),
         .package(
-            url: "https://github.com/mxcl/Version",
-            from: "2.0.0"
+            url: "https://github.com/mrackwitz/Version",
+            from: "0.8.0"
         ),
     ],
     targets: [

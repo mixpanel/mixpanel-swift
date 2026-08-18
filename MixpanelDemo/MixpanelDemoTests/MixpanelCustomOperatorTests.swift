@@ -115,9 +115,11 @@ class MixpanelCustomOperatorTests: XCTestCase {
         // more prerelease fields wins
         XCTAssertTrue(eval(semverRule("app_version", "<", "1.0.0-alpha.1"), stringData("app_version", "1.0.0-alpha")))
         // numeric identifier below alphanumeric
-        XCTAssertTrue(eval(semverRule("app_version", "<", "1.0.0-alpha.beta"), stringData("app_version", "1.0.0-alpha.1")))
+        XCTAssertTrue(
+            eval(semverRule("app_version", "<", "1.0.0-alpha.beta"), stringData("app_version", "1.0.0-alpha.1")))
         // fewer fields below alphanumeric
-        XCTAssertTrue(eval(semverRule("app_version", "<", "1.0.0-alpha.beta"), stringData("app_version", "1.0.0-alpha")))
+        XCTAssertTrue(
+            eval(semverRule("app_version", "<", "1.0.0-alpha.beta"), stringData("app_version", "1.0.0-alpha")))
         // numeric identifiers compare numerically
         XCTAssertTrue(eval(semverRule("app_version", "<", "1.0.0-beta.11"), stringData("app_version", "1.0.0-beta.2")))
         // dotted identifier ordering, letters
@@ -159,7 +161,8 @@ class MixpanelCustomOperatorTests: XCTestCase {
         // build metadata ignored
         XCTAssertTrue(eval(semverRule("app_version", "=", "1.0.0+build2"), stringData("app_version", "1.0.0+build1")))
         // build metadata ignored with prerelease
-        XCTAssertTrue(eval(semverRule("app_version", "=", "1.0.0-alpha"), stringData("app_version", "1.0.0-alpha+build")))
+        XCTAssertTrue(
+            eval(semverRule("app_version", "=", "1.0.0-alpha"), stringData("app_version", "1.0.0-alpha+build")))
         // Ignored means equal, so every symbol has to agree with that.
         // build metadata leaves versions equal
         XCTAssertFalse(eval(semverRule("app_version", "!=", "1.0.0+build2"), stringData("app_version", "1.0.0+build1")))
@@ -363,11 +366,13 @@ class MixpanelCustomOperatorTests: XCTestCase {
         XCTAssertTrue(eval(datetimeRule("signup", "=", leapDayMs), stringData("signup", "2024-02-29T00:00:00Z")))
         // offset with half-hour minutes
         // rfc3339 subject with offset
-        XCTAssertTrue(eval(datetimeRule("signup", "=", jul16IndiaMs), stringData("signup", "2026-07-16T00:00:00+05:30")))
+        XCTAssertTrue(
+            eval(datetimeRule("signup", "=", jul16IndiaMs), stringData("signup", "2026-07-16T00:00:00+05:30")))
         // positive offset precedes utc midnight
         XCTAssertTrue(eval(datetimeRule("signup", "<", jul16Ms), stringData("signup", "2026-07-16T00:00:00+05:30")))
         // negative offset
-        XCTAssertTrue(eval(datetimeRule("signup", "=", jul16PacificMs), stringData("signup", "2026-07-16T00:00:00-08:00")))
+        XCTAssertTrue(
+            eval(datetimeRule("signup", "=", jul16PacificMs), stringData("signup", "2026-07-16T00:00:00-08:00")))
         // negative offset follows utc midnight
         XCTAssertTrue(eval(datetimeRule("signup", ">", jul16Ms), stringData("signup", "2026-07-16T00:00:00-08:00")))
         // zero offset equals Z
@@ -379,7 +384,8 @@ class MixpanelCustomOperatorTests: XCTestCase {
         // six-digit fraction
         XCTAssertTrue(eval(datetimeRule("signup", "=", jul16Ms), stringData("signup", "2026-07-16T00:00:00.123456Z")))
         // nine-digit fraction
-        XCTAssertTrue(eval(datetimeRule("signup", "=", jul16Ms), stringData("signup", "2026-07-16T00:00:00.999999999Z")))
+        XCTAssertTrue(
+            eval(datetimeRule("signup", "=", jul16Ms), stringData("signup", "2026-07-16T00:00:00.999999999Z")))
         // zero fraction
         // fractional seconds truncated
         // end-of-day target drops its .999
@@ -440,17 +446,20 @@ class MixpanelCustomOperatorTests: XCTestCase {
         // comma fractional separator, not-equal also false
         XCTAssertFalse(eval(datetimeRule("signup", "!=", jul16Ms), stringData("signup", "2026-07-16T00:00:00,5Z")))
         // A target too large for Int64 fails closed rather than trapping.
-        XCTAssertFalse(eval(
-            "{\"datetime_compare\":[{\"var\":\"signup\"},\"=\",1e308]}",
-            stringData("signup", "2026-07-16T00:00:00Z")))
+        XCTAssertFalse(
+            eval(
+                "{\"datetime_compare\":[{\"var\":\"signup\"},\"=\",1e308]}",
+                stringData("signup", "2026-07-16T00:00:00Z")))
         // target beyond representable range, greater-than also false
-        XCTAssertFalse(eval(
-            "{\"datetime_compare\":[{\"var\":\"signup\"},\">\",1e308]}",
-            stringData("signup", "2026-07-16T00:00:00Z")))
+        XCTAssertFalse(
+            eval(
+                "{\"datetime_compare\":[{\"var\":\"signup\"},\">\",1e308]}",
+                stringData("signup", "2026-07-16T00:00:00Z")))
         // target beyond representable range, less-than also false
-        XCTAssertFalse(eval(
-            "{\"datetime_compare\":[{\"var\":\"signup\"},\"<\",1e308]}",
-            stringData("signup", "2026-07-16T00:00:00Z")))
+        XCTAssertFalse(
+            eval(
+                "{\"datetime_compare\":[{\"var\":\"signup\"},\"<\",1e308]}",
+                stringData("signup", "2026-07-16T00:00:00Z")))
         // Fail-closed: subject must be an RFC3339 string, target must be an epoch-ms number.
         // numeric subject, no match
         XCTAssertFalse(eval(datetimeRule("signup", "=", jul16Ms), numberData("signup", jul16Ms)))

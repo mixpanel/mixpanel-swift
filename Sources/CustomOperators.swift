@@ -23,7 +23,7 @@ func applyRuleWithCustomOperators(_ rule: String, to data: String) throws -> Boo
 }
 
 private func operands(_ json: JSON?) -> (actual: JSON, symbol: String, target: JSON)? {
-    guard case let .Array(values)? = json, values.count == 3 else {
+    guard case .Array(let values)? = json, values.count == 3 else {
         return nil
     }
     guard let symbol = values[1].string else {
@@ -34,20 +34,20 @@ private func operands(_ json: JSON?) -> (actual: JSON, symbol: String, target: J
 
 private func comparatorMatches(_ cmp: Int64, _ symbol: String) -> Bool {
     switch symbol {
-    case "=":
-        return cmp == 0
-    case "!=":
-        return cmp != 0
-    case "<":
-        return cmp < 0
-    case "<=":
-        return cmp <= 0
-    case ">":
-        return cmp > 0
-    case ">=":
-        return cmp >= 0
-    default:
-        return false
+        case "=":
+            return cmp == 0
+        case "!=":
+            return cmp != 0
+        case "<":
+            return cmp < 0
+        case "<=":
+            return cmp <= 0
+        case ">":
+            return cmp > 0
+        case ">=":
+            return cmp >= 0
+        default:
+            return false
     }
 }
 
@@ -152,7 +152,7 @@ private func datetimeCompare(_ json: JSON?) -> JSON {
 }
 
 private func convertRfc3339ToUnixSeconds(_ json: JSON) -> Int64? {
-    guard case let .String(value) = json else {
+    guard case .String(let value) = json else {
         return nil
     }
     return parseRFC3339Seconds(value)
@@ -160,16 +160,16 @@ private func convertRfc3339ToUnixSeconds(_ json: JSON) -> Int64? {
 
 private func convertUnixMillisecondsToSeconds(_ json: JSON) -> Int64? {
     switch json {
-    case let .Int(value):
-        return value / 1000
-    case let .Double(value):
-        // Int64(_:) traps on a value that is NaN, infinite, or beyond Int64's range.
-        guard let milliseconds = Int64(exactly: value.rounded(.towardZero)) else {
+        case .Int(let value):
+            return value / 1000
+        case .Double(let value):
+            // Int64(_:) traps on a value that is NaN, infinite, or beyond Int64's range.
+            guard let milliseconds = Int64(exactly: value.rounded(.towardZero)) else {
+                return nil
+            }
+            return milliseconds / 1000
+        default:
             return nil
-        }
-        return milliseconds / 1000
-    default:
-        return nil
     }
 }
 

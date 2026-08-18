@@ -10,12 +10,6 @@ import JSON
 import Version
 import jsonlogic
 
-// semver_compare / datetime_compare: custom JsonLogic operators for typed runtime targeting.
-// Shape: {"<op>": [{"var": key}, "<symbol>", <target>]}, symbol in = != < <= > >=.
-// The engine resolves {"var": key} before the operator runs, so each closure receives the
-// evaluated [actual, symbol, target] triple as a JSON array. Any shape, type, or parse failure
-// returns false (fail closed) rather than throwing.
-
 // SemVer 2.0.0 requires major.minor.patch; partial versions are zero-padded to this.
 private let SEMVER_PARTS = 3
 

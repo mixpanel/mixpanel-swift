@@ -851,4 +851,247 @@ private class MockUITouch: UITouch {
     }
 }
 
+// MARK: - UIKit accessibilityLabel Auto-Derivation Verification Tests
+
+/// These tests verify UIKit's auto-derivation behavior for each control type listed
+/// in SemanticExtractor.findAccessibilityLabel's known-control bypass.
+///
+/// For each control, we check:
+/// 1. When accessibilityLabel is nil (not set), does UIKit auto-derive it from visible text?
+/// 2. When accessibilityLabel is "" (explicitly empty), does UIKit respect the empty value?
+///
+/// This documents the actual runtime behavior to inform PII-safe extraction decisions.
+class UIKitAccessibilityLabelDerivationTests: XCTestCase {
+
+    // MARK: - UIButton
+
+    func testUIButton_NilLabel_DoesNotDeriveFromTitle() {
+        let button = UIButton(type: .system)
+        button.setTitle("Card 4111-1111-1111-1234", for: .normal)
+        // accessibilityLabel is NOT set (nil by default)
+
+        let label = button.accessibilityLabel
+        // UIButton does NOT auto-derive accessibilityLabel from title at the property level.
+        // VoiceOver reads the title, but view.accessibilityLabel remains nil.
+        XCTAssertNil(label, "UIButton should NOT auto-derive accessibilityLabel from title")
+    }
+
+    func testUIButton_EmptyLabel_DoesNotDeriveFromTitle() {
+        let button = UIButton(type: .system)
+        button.setTitle("Card 4111-1111-1111-1234", for: .normal)
+        button.accessibilityLabel = ""
+
+        let label = button.accessibilityLabel
+        // Check whether UIKit respects empty string or falls back to title
+        let isEmpty = (label == nil || label!.isEmpty)
+        XCTAssertTrue(
+            isEmpty,
+            "UIButton with accessibilityLabel='' should not derive from title. Got: \(label ?? "nil")")
+    }
+
+    // MARK: - UILabel
+
+    func testUILabel_NilLabel_DoesNotDeriveFromText() {
+        let uiLabel = UILabel()
+        uiLabel.text = "Account 9876-5432"
+        // accessibilityLabel is NOT set
+
+        let label = uiLabel.accessibilityLabel
+        // UILabel does NOT auto-derive accessibilityLabel from text at the property level.
+        // VoiceOver reads the text, but view.accessibilityLabel remains nil.
+        XCTAssertNil(label, "UILabel should NOT auto-derive accessibilityLabel from text")
+    }
+
+    func testUILabel_EmptyLabel_DoesNotDeriveFromText() {
+        let uiLabel = UILabel()
+        uiLabel.text = "Account 9876-5432"
+        uiLabel.accessibilityLabel = ""
+
+        let label = uiLabel.accessibilityLabel
+        let isEmpty = (label == nil || label!.isEmpty)
+        XCTAssertTrue(
+            isEmpty,
+            "UILabel with accessibilityLabel='' should not derive from text. Got: \(label ?? "nil")")
+    }
+
+    // MARK: - UISwitch
+
+    func testUISwitch_NilLabel_CheckDerivation() {
+        let toggle = UISwitch()
+        toggle.isOn = true
+        // accessibilityLabel is NOT set
+
+        let label = toggle.accessibilityLabel
+        // UISwitch has no visible text — document whether label is nil or has a default
+        // (This test documents behavior, not asserts a specific value)
+        if let label = label, !label.isEmpty {
+            // If non-nil, it should NOT contain user data (switch has no text input)
+            XCTAssertFalse(
+                label.contains("Account") || label.contains("1234"),
+                "UISwitch should not contain user data. Got: \(label)")
+        }
+        // Record the actual value for documentation
+        print("UISwitch default accessibilityLabel: \(label ?? "nil")")
+    }
+
+    // MARK: - UISlider
+
+    func testUISlider_NilLabel_CheckDerivation() {
+        let slider = UISlider()
+        slider.minimumValue = 0
+        slider.maximumValue = 100
+        slider.value = 50
+        // accessibilityLabel is NOT set
+
+        let label = slider.accessibilityLabel
+        if let label = label, !label.isEmpty {
+            XCTAssertFalse(
+                label.contains("Account") || label.contains("1234"),
+                "UISlider should not contain user data. Got: \(label)")
+        }
+        print("UISlider default accessibilityLabel: \(label ?? "nil")")
+    }
+
+    // MARK: - UITextField
+
+    func testUITextField_NilLabel_WithTypedText() {
+        let textField = UITextField()
+        textField.text = "john.doe@example.com"
+        textField.placeholder = "Enter email"
+        // accessibilityLabel is NOT set
+
+        let label = textField.accessibilityLabel
+        // Critical: does the TYPED TEXT leak into accessibilityLabel?
+        if let label = label, !label.isEmpty {
+            let typedTextLeaks = label.contains("john.doe") || label.contains("example.com")
+            print("UITextField accessibilityLabel with typed text: \(label)")
+            print("UITextField typed text leaks into accessibilityLabel: \(typedTextLeaks)")
+        } else {
+            print("UITextField default accessibilityLabel: nil/empty")
+        }
+    }
+
+    func testUITextField_NilLabel_WithPlaceholderOnly() {
+        let textField = UITextField()
+        textField.text = nil
+        textField.placeholder = "Enter email"
+        // accessibilityLabel is NOT set
+
+        let label = textField.accessibilityLabel
+        print("UITextField accessibilityLabel with placeholder only: \(label ?? "nil")")
+    }
+
+    func testUITextField_NilLabel_CheckAccessibilityValue() {
+        let textField = UITextField()
+        textField.text = "john.doe@example.com"
+        textField.placeholder = "Enter email"
+
+        let label = textField.accessibilityLabel
+        let value = textField.accessibilityValue
+        print("UITextField accessibilityLabel: \(label ?? "nil")")
+        print("UITextField accessibilityValue: \(value ?? "nil")")
+        // Document whether typed text goes to label, value, or both
+    }
+
+    // MARK: - UITextView
+
+    func testUITextView_NilLabel_WithTypedText() {
+        let textView = UITextView()
+        textView.text = "SSN: 123-45-6789"
+        // accessibilityLabel is NOT set
+
+        let label = textView.accessibilityLabel
+        if let label = label, !label.isEmpty {
+            let typedTextLeaks = label.contains("123-45") || label.contains("6789")
+            print("UITextView accessibilityLabel with typed text: \(label)")
+            print("UITextView typed text leaks into accessibilityLabel: \(typedTextLeaks)")
+        } else {
+            print("UITextView default accessibilityLabel: nil/empty")
+        }
+    }
+
+    func testUITextView_NilLabel_CheckAccessibilityValue() {
+        let textView = UITextView()
+        textView.text = "SSN: 123-45-6789"
+
+        let label = textView.accessibilityLabel
+        let value = textView.accessibilityValue
+        print("UITextView accessibilityLabel: \(label ?? "nil")")
+        print("UITextView accessibilityValue: \(value ?? "nil")")
+    }
+
+    // MARK: - UISegmentedControl
+
+    func testUISegmentedControl_NilLabel_DerivesFromSegments() {
+        let segControl = UISegmentedControl(items: ["Personal", "Business", "Account 1234"])
+        segControl.selectedSegmentIndex = 0
+        // accessibilityLabel is NOT set
+
+        let label = segControl.accessibilityLabel
+        print("UISegmentedControl accessibilityLabel: \(label ?? "nil")")
+        // Check if segment titles leak into the overall control's label
+        if let label = label, !label.isEmpty {
+            let segmentTextLeaks = label.contains("Personal") || label.contains("1234")
+            print("UISegmentedControl segment text leaks: \(segmentTextLeaks)")
+        }
+    }
+
+    // MARK: - UIStepper
+
+    func testUIStepper_NilLabel_CheckDerivation() {
+        let stepper = UIStepper()
+        stepper.value = 5
+        stepper.minimumValue = 0
+        stepper.maximumValue = 10
+        // accessibilityLabel is NOT set
+
+        let label = stepper.accessibilityLabel
+        print("UIStepper default accessibilityLabel: \(label ?? "nil")")
+    }
+
+    // MARK: - UIImageView
+
+    func testUIImageView_NilLabel_CheckDerivation() {
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "star.fill")
+        imageView.accessibilityLabel = nil
+        // accessibilityLabel is NOT set
+
+        let label = imageView.accessibilityLabel
+        print("UIImageView default accessibilityLabel: \(label ?? "nil")")
+        // UIImageView has no text — label should be nil unless derived from image name
+    }
+
+    // MARK: - UIScrollView (not a known control, but in role detection)
+
+    func testUIScrollView_NilLabel_CheckDerivation() {
+        let scrollView = UIScrollView()
+        let childLabel = UILabel()
+        childLabel.text = "Secret Data 9999"
+        scrollView.addSubview(childLabel)
+
+        let label = scrollView.accessibilityLabel
+        print("UIScrollView default accessibilityLabel: \(label ?? "nil")")
+        if let label = label, !label.isEmpty {
+            let childTextLeaks = label.contains("Secret") || label.contains("9999")
+            print("UIScrollView child text leaks: \(childTextLeaks)")
+        }
+    }
+
+    // MARK: - UITableViewCell (common clickable container with child text)
+
+    func testUITableViewCell_NilLabel_WithChildText() {
+        let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
+        cell.textLabel?.text = "Card ending 1234"
+        // accessibilityLabel is NOT set
+
+        let label = cell.accessibilityLabel
+        print("UITableViewCell accessibilityLabel: \(label ?? "nil")")
+        if let label = label, !label.isEmpty {
+            let childTextLeaks = label.contains("1234")
+            print("UITableViewCell child text leaks: \(childTextLeaks)")
+        }
+    }
+}
+
 #endif

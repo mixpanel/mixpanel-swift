@@ -144,8 +144,6 @@ class AutocaptureSwiftUIInstrumentedTests: MixpanelBaseTests {
         }
     }
 
-    // MARK: - Test 2: accessibilityIdentifier fallback
-
     func testSwiftUIElementIdResolutionRule2() {
         // In SwiftUI, accessibilityLabel is primary
         simulateTapOnSwiftUIButton(index: 1, setAccessibility: "Rule Two SwiftUI")
@@ -964,6 +962,310 @@ struct SwiftUIAutocaptureTestView: View {
                 .cornerRadius(8)
             }
             .padding()
+        }
+    }
+}
+
+// MARK: - SwiftUI accessibilityLabel Auto-Derivation Verification Tests
+
+/// These tests verify how SwiftUI controls expose accessibilityLabel on their
+/// UIKit backing views when no explicit .accessibilityLabel() modifier is set.
+///
+/// SwiftUI renders through internal UIKit views (PlatformGroupContainer, _UIGraphicsView, etc.).
+/// We host each SwiftUI view, find the UIKit backing view via hitTest, and check
+/// whether view.accessibilityLabel is populated or nil.
+@available(iOS 14.0, *)
+class SwiftUIAccessibilityLabelDerivationTests: XCTestCase {
+
+    private var testWindow: UIWindow!
+
+    override func setUp() {
+        super.setUp()
+        let setupExpectation = expectation(description: "Setup")
+        DispatchQueue.main.async {
+            self.testWindow = UIWindow(frame: UIScreen.main.bounds)
+            self.testWindow.makeKeyAndVisible()
+            setupExpectation.fulfill()
+        }
+        wait(for: [setupExpectation], timeout: 2)
+    }
+
+    override func tearDown() {
+        let teardownExpectation = expectation(description: "Teardown")
+        DispatchQueue.main.async {
+            self.testWindow?.isHidden = true
+            self.testWindow = nil
+            teardownExpectation.fulfill()
+        }
+        wait(for: [teardownExpectation], timeout: 2)
+        super.tearDown()
+    }
+
+    /// Host a SwiftUI view and return the UIKit backing view at the center point.
+    private func hostAndFindBackingView<V: View>(_ swiftUIView: V) -> UIView? {
+        var result: UIView?
+        let exp = expectation(description: "Host view")
+
+        DispatchQueue.main.async {
+            let hostingController = UIHostingController(rootView: swiftUIView)
+            hostingController.view.frame = self.testWindow.bounds
+            self.testWindow.rootViewController = hostingController
+            self.testWindow.makeKeyAndVisible()
+
+            // Force layout
+            hostingController.view.setNeedsLayout()
+            hostingController.view.layoutIfNeeded()
+
+            // Allow SwiftUI rendering to complete
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                let center = hostingController.view.center
+                let hitView = hostingController.view.hitTest(center, with: nil)
+                result = hitView
+                exp.fulfill()
+            }
+        }
+
+        wait(for: [exp], timeout: 3)
+        return result
+    }
+
+    // MARK: - Button
+
+    func testSwiftUIButton_NoLabel_CheckDerivation() {
+        let view = hostAndFindBackingView(
+            Button("Card 4111-1111-1111-1234") {}
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let className = String(describing: type(of: view))
+            print("SwiftUI Button backing view: \(className)")
+            print("SwiftUI Button accessibilityLabel (no modifier): \(label ?? "nil")")
+            print("SwiftUI Button isAccessibilityElement: \(view.isAccessibilityElement)")
+        }
+    }
+
+    func testSwiftUIButton_WithLabel_CheckDerivation() {
+        let view = hostAndFindBackingView(
+            Button("Card 4111-1111-1111-1234") {}
+                .accessibilityLabel("Safe Label")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let className = String(describing: type(of: view))
+            print("SwiftUI Button (with label) backing view: \(className)")
+            print("SwiftUI Button (with label) accessibilityLabel: \(label ?? "nil")")
+        }
+    }
+
+    // MARK: - Text
+
+    func testSwiftUIText_NoLabel_CheckDerivation() {
+        let view = hostAndFindBackingView(
+            Text("Account 9876-5432")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let className = String(describing: type(of: view))
+            print("SwiftUI Text backing view: \(className)")
+            print("SwiftUI Text accessibilityLabel (no modifier): \(label ?? "nil")")
+            print("SwiftUI Text isAccessibilityElement: \(view.isAccessibilityElement)")
+        }
+    }
+
+    // MARK: - Toggle (equivalent of UISwitch)
+
+    func testSwiftUIToggle_NoLabel_CheckDerivation() {
+        let view = hostAndFindBackingView(
+            Toggle("Enable notifications", isOn: .constant(true))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let className = String(describing: type(of: view))
+            print("SwiftUI Toggle backing view: \(className)")
+            print("SwiftUI Toggle accessibilityLabel (no modifier): \(label ?? "nil")")
+            print("SwiftUI Toggle isAccessibilityElement: \(view.isAccessibilityElement)")
+        }
+    }
+
+    // MARK: - Slider
+
+    func testSwiftUISlider_NoLabel_CheckDerivation() {
+        let view = hostAndFindBackingView(
+            Slider(value: .constant(0.5))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let className = String(describing: type(of: view))
+            print("SwiftUI Slider backing view: \(className)")
+            print("SwiftUI Slider accessibilityLabel (no modifier): \(label ?? "nil")")
+        }
+    }
+
+    // MARK: - TextField
+
+    func testSwiftUITextField_NoLabel_WithTypedText() {
+        let view = hostAndFindBackingView(
+            TextField("Enter email", text: .constant("john.doe@example.com"))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let value = view.accessibilityValue
+            let className = String(describing: type(of: view))
+            print("SwiftUI TextField backing view: \(className)")
+            print("SwiftUI TextField accessibilityLabel: \(label ?? "nil")")
+            print("SwiftUI TextField accessibilityValue: \(value ?? "nil")")
+            if let label = label {
+                let typedTextLeaks = label.contains("john.doe") || label.contains("example.com")
+                print("SwiftUI TextField typed text leaks into label: \(typedTextLeaks)")
+            }
+        }
+    }
+
+    // MARK: - TextEditor (equivalent of UITextView)
+
+    func testSwiftUITextEditor_NoLabel_WithText() {
+        let view = hostAndFindBackingView(
+            TextEditor(text: .constant("SSN: 123-45-6789"))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let value = view.accessibilityValue
+            let className = String(describing: type(of: view))
+            print("SwiftUI TextEditor backing view: \(className)")
+            print("SwiftUI TextEditor accessibilityLabel: \(label ?? "nil")")
+            print("SwiftUI TextEditor accessibilityValue: \(value ?? "nil")")
+        }
+    }
+
+    // MARK: - Picker (equivalent of UISegmentedControl)
+
+    func testSwiftUIPicker_Segmented_NoLabel_CheckDerivation() {
+        let view = hostAndFindBackingView(
+            Picker("Account Type", selection: .constant(0)) {
+                Text("Personal").tag(0)
+                Text("Business").tag(1)
+                Text("Account 1234").tag(2)
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let className = String(describing: type(of: view))
+            print("SwiftUI Picker (segmented) backing view: \(className)")
+            print("SwiftUI Picker accessibilityLabel: \(label ?? "nil")")
+        }
+    }
+
+    // MARK: - Stepper
+
+    func testSwiftUIStepper_NoLabel_CheckDerivation() {
+        let view = hostAndFindBackingView(
+            Stepper("Quantity", value: .constant(5), in: 0...10)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let className = String(describing: type(of: view))
+            print("SwiftUI Stepper backing view: \(className)")
+            print("SwiftUI Stepper accessibilityLabel: \(label ?? "nil")")
+        }
+    }
+
+    // MARK: - Image
+
+    func testSwiftUIImage_NoLabel_CheckDerivation() {
+        let view = hostAndFindBackingView(
+            Image(systemName: "star.fill")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let className = String(describing: type(of: view))
+            print("SwiftUI Image backing view: \(className)")
+            print("SwiftUI Image accessibilityLabel: \(label ?? "nil")")
+        }
+    }
+
+    // MARK: - VStack with child Text (container scenario)
+
+    func testSwiftUIVStack_WithChildText_NoLabel() {
+        let view = hostAndFindBackingView(
+            VStack {
+                Text("Sensitive Account 1234")
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onTapGesture {}
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let className = String(describing: type(of: view))
+            print("SwiftUI VStack (tappable) backing view: \(className)")
+            print("SwiftUI VStack accessibilityLabel: \(label ?? "nil")")
+            print("SwiftUI VStack isAccessibilityElement: \(view.isAccessibilityElement)")
+            if let label = label {
+                let childTextLeaks = label.contains("Sensitive") || label.contains("1234")
+                print("SwiftUI VStack child text leaks: \(childTextLeaks)")
+            }
+        }
+    }
+
+    // MARK: - List row (common pattern for PII display)
+
+    func testSwiftUIListRow_WithSensitiveText() {
+        let view = hostAndFindBackingView(
+            List {
+                HStack {
+                    Text("Card ending")
+                    Spacer()
+                    Text("4111-1111-1111-1234")
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        )
+
+        XCTAssertNotNil(view, "Should find a UIKit backing view")
+        if let view = view {
+            let label = view.accessibilityLabel
+            let className = String(describing: type(of: view))
+            print("SwiftUI List row backing view: \(className)")
+            print("SwiftUI List row accessibilityLabel: \(label ?? "nil")")
+            print("SwiftUI List row isAccessibilityElement: \(view.isAccessibilityElement)")
         }
     }
 }

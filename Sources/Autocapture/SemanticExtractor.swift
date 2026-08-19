@@ -321,8 +321,7 @@ final class SemanticExtractor {
     /// returns nil in an XCTest host — both this and the label helper are exercised on device, not
     /// by the instrumented tests. `DefaultElementIdExtractorTests` covers what happens with the
     /// values once resolved.
-    private func findSwiftUIAccessibilityIdentifier(at windowPoint: CGPoint, view: UIView) -> String?
-    {
+    private func findSwiftUIAccessibilityIdentifier(at windowPoint: CGPoint, view: UIView) -> String? {
         guard #available(iOS 18.0, *) else { return nil }
         guard let window = view.window else { return nil }
 

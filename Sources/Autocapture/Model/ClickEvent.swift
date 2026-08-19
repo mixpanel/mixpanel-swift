@@ -33,10 +33,16 @@ public struct ClickEvent {
 
     /// A stable identifier for the tapped element, used to group clicks in analytics.
     ///
-    /// Recommended sources (in order of preference):
-    /// - `accessibilityLabel` — human-readable, consistent across UIKit and SwiftUI
+    /// Autocapture resolves this in the following order (see `DefaultElementIdExtractor`), and the
+    /// same preferences apply when tracking manually:
+    /// - React Native `nativeID` — the JS-side prop, read through the Objective-C runtime
+    ///   (skipped for SwiftUI views, which React Native never renders)
     /// - `accessibilityIdentifier` — stable and not user-visible
-    /// - A custom string like `"buy_button"` or `"settings_cell_notifications"`
+    /// - `accessibilityLabel` — human-readable, and only when intentionally set
+    /// - `<ClassName>_<hash>` as a last resort
+    ///
+    /// Supply an `ElementIdExtractor` through `AutocaptureOptions` to override this entirely — for
+    /// example a custom string like `"buy_button"` or `"settings_cell_notifications"`.
     ///
     /// Avoid dynamic values (e.g., cell index, timestamp) — they prevent meaningful grouping.
     public let elementId: String

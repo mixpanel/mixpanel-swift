@@ -77,6 +77,8 @@
 		A18176D6C7255FA1611B3BF1 /* SemanticExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06325D1AC34056FFA59B35DF /* SemanticExtractor.swift */; };
 		A5507733A1B4945D84E53B33 /* SemanticExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74DC0B63B575B53F8DE3BF79 /* SemanticExtractor.swift */; };
 		A9364BC8EBB564C53ADC5156 /* AutocaptureOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60F434067003D809DE25DFE /* AutocaptureOptions.swift */; };
+		1A2B3C4D5E6F70819AB0C001 /* ElementIdExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F70819AB0C004 /* ElementIdExtractor.swift */; };
+		1A2B3C4D5E6F70819AB0C002 /* ElementIdExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F70819AB0C003 /* ElementIdExtractor.swift */; };
 		BB9614171F3BB87700C3EF3E /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */; };
 		C694CF0F56D88BC591A0054A /* DeadClickDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99155E36042EDC3C22F18B45 /* DeadClickDetector.swift */; };
 		E10D118D1EC0F30900195CCD /* AutomaticEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151FA371E70DFB5002EF53D /* AutomaticEvents.swift */; };
@@ -144,6 +146,7 @@
 		1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/Mixpanel/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
 		1CD6F1660CF2314121E328BE /* DeadClickDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DeadClickDetector.swift; path = Sources/Autocapture/DeadClickDetector.swift; sourceTree = "<group>"; };
 		38B29F5E5066FADE60A88040 /* AutocaptureOptions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutocaptureOptions.swift; sourceTree = "<group>"; };
+		1A2B3C4D5E6F70819AB0C003 /* ElementIdExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ElementIdExtractor.swift; sourceTree = "<group>"; };
 		51DD56791D306B740045D3DB /* MixpanelLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelLogger.swift; sourceTree = "<group>"; };
 		51DD56801D306B7B0045D3DB /* PrintLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrintLogging.swift; sourceTree = "<group>"; };
 		51DD56811D306B7B0045D3DB /* FileLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileLogging.swift; sourceTree = "<group>"; };
@@ -162,6 +165,7 @@
 		A6AFC14475BD4DC3722712CA /* AutocaptureManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AutocaptureManager.swift; path = Sources/Autocapture/AutocaptureManager.swift; sourceTree = "<group>"; };
 		BB9614161F3BB87700C3EF3E /* ReadWriteLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadWriteLock.swift; sourceTree = "<group>"; };
 		D60F434067003D809DE25DFE /* AutocaptureOptions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AutocaptureOptions.swift; path = Sources/Autocapture/AutocaptureOptions.swift; sourceTree = "<group>"; };
+		1A2B3C4D5E6F70819AB0C004 /* ElementIdExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ElementIdExtractor.swift; path = Sources/Autocapture/ElementIdExtractor.swift; sourceTree = "<group>"; };
 		E115947D1CFF1491007F8B4F /* Mixpanel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mixpanel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E11594821CFF1491007F8B4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../Info.plist; sourceTree = "<group>"; };
 		E115948A1CFF1538007F8B4F /* Mixpanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mixpanel.swift; sourceTree = "<group>"; };
@@ -247,6 +251,7 @@
 				CC6DD07E38E5B14C184263E3 /* Model */,
 				99F9956D2BF2A5F6398C0A59 /* AutocaptureManager.swift */,
 				38B29F5E5066FADE60A88040 /* AutocaptureOptions.swift */,
+				1A2B3C4D5E6F70819AB0C003 /* ElementIdExtractor.swift */,
 				99155E36042EDC3C22F18B45 /* DeadClickDetector.swift */,
 				53AF035597E8943FA5E9E2F0 /* RageClickTracker.swift */,
 				06325D1AC34056FFA59B35DF /* SemanticExtractor.swift */,
@@ -656,6 +661,7 @@
 				E115948B1CFF1538007F8B4F /* Mixpanel.swift in Sources */,
 				48D1B82CD01A008022E3D759 /* AutocaptureManager.swift in Sources */,
 				A9364BC8EBB564C53ADC5156 /* AutocaptureOptions.swift in Sources */,
+				1A2B3C4D5E6F70819AB0C001 /* ElementIdExtractor.swift in Sources */,
 				662C13B6649508B946312234 /* DeadClickDetector.swift in Sources */,
 				5C6E56DD87033A7A76E027E7 /* RageClickTracker.swift in Sources */,
 				A5507733A1B4945D84E53B33 /* SemanticExtractor.swift in Sources */,
@@ -663,6 +669,7 @@
 				EA0C3E40CD32AC89419401FF /* ClickEvent.swift in Sources */,
 				4FB79FD4199BD2C1AEA83B1C /* AutocaptureManager.swift in Sources */,
 				2A5D30DD0C468327425DC577 /* AutocaptureOptions.swift in Sources */,
+				1A2B3C4D5E6F70819AB0C002 /* ElementIdExtractor.swift in Sources */,
 				C694CF0F56D88BC591A0054A /* DeadClickDetector.swift in Sources */,
 				E2281F33D7C441677B124788 /* RageClickTracker.swift in Sources */,
 				A18176D6C7255FA1611B3BF1 /* SemanticExtractor.swift in Sources */,

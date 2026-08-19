@@ -118,6 +118,25 @@ class AutocaptureUIKitInstrumentedTests: MixpanelBaseTests {
         }
     }
 
+    // MARK: - Test 1a: accessibilityIdentifier outranks accessibilityLabel
+
+    /// When a view carries both, the identifier wins $el_id — it is developer-assigned and never
+    /// user-visible, so unlike a label it cannot carry PII. The label still travels as
+    /// $attr-aria-label.
+    func testElementIdIdentifierWinsOverLabel() {
+        let button = testViewController.bothButton
+
+        simulateTap(on: button)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click event")
+
+        if let props = event?.properties {
+            XCTAssertEqual(props["$el_id"] as? String, "both_id")
+            XCTAssertEqual(props["$attr-aria-label"] as? String, "Both Label")
+        }
+    }
+
     // MARK: - Test 2: Element ID Resolution Rule 2 (accessibilityLabel fallback)
 
     func testElementIdResolutionRule2() {

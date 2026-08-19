@@ -211,11 +211,36 @@ public struct AutocaptureOptions {
     /// Configuration for dead click detection.
     public let deadClickOptions: DeadClickOptions
 
+    #if os(iOS)
+    /// Optional custom resolver for the `$el_id` reported on autocaptured interactions.
+    ///
+    /// When `nil` (the default), the SDK resolves `$el_id` internally: React Native `nativeID`,
+    /// then `accessibilityIdentifier`, then `accessibilityLabel`, then an anonymous `<ClassName>_<hash>`
+    /// identifier. Supply an implementation to control exactly which identifier is reported and to
+    /// keep personally identifiable information out of the payload.
+    ///
+    /// - SeeAlso: ``ElementIdExtractor``
+    public let elementIdExtractor: ElementIdExtractor?
+    #endif
+
     /// Returns `true` if any autocapture feature is enabled.
     public var isEnabled: Bool {
         return clickOptions.enabled || rageClickOptions.enabled || deadClickOptions.enabled
     }
 
+    #if os(iOS)
+    public init(
+        clickOptions: ClickOptions = ClickOptions(),
+        rageClickOptions: RageClickOptions = RageClickOptions(),
+        deadClickOptions: DeadClickOptions = DeadClickOptions(),
+        elementIdExtractor: ElementIdExtractor? = nil
+    ) {
+        self.clickOptions = clickOptions
+        self.rageClickOptions = rageClickOptions
+        self.deadClickOptions = deadClickOptions
+        self.elementIdExtractor = elementIdExtractor
+    }
+    #else
     public init(
         clickOptions: ClickOptions = ClickOptions(),
         rageClickOptions: RageClickOptions = RageClickOptions(),
@@ -225,4 +250,5 @@ public struct AutocaptureOptions {
         self.rageClickOptions = rageClickOptions
         self.deadClickOptions = deadClickOptions
     }
+    #endif
 }

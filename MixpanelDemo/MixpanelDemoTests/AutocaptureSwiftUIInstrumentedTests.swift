@@ -144,8 +144,35 @@ class AutocaptureSwiftUIInstrumentedTests: MixpanelBaseTests {
         }
     }
 
+    // MARK: - Test 2a: accessibilityIdentifier outranks accessibilityLabel
+
+    /// On a SwiftUI-rendered view (`PlatformGroupContainer`), an accessibilityIdentifier must win
+    /// $el_id over the label: it is developer-assigned and never user-visible, so it cannot carry
+    /// PII the way a label can. The label still travels as $attr-aria-label.
+    ///
+    /// Note both properties are stamped onto the backing UIView here, exactly as the other SwiftUI
+    /// tests do. SwiftUI keeps `.accessibilityIdentifier(…)` / `.accessibilityLabel(…)` in its own
+    /// accessibility element tree, which is only populated while an accessibility client is
+    /// attached — never in this test host, where `accessibilityHitTest` returns nil.
+    func testSwiftUIElementIdIdentifierWinsOverLabel() {
+        setSwiftUIButtonAccessibility(
+            index: 3, identifier: "swiftui_both_id", label: "Both Label SwiftUI")
+
+        simulateTapOnSwiftUIButton(index: 3)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should capture $mp_click event")
+
+        if let props = event?.properties {
+            XCTAssertEqual(props["$el_id"] as? String, "swiftui_both_id")
+            XCTAssertEqual(props["$attr-aria-label"] as? String, "Both Label SwiftUI")
+        }
+    }
+
+    // MARK: - Test 2: accessibilityLabel fallback (no identifier on the view)
+
     func testSwiftUIElementIdResolutionRule2() {
-        // In SwiftUI, accessibilityLabel is primary
+        // With no accessibilityIdentifier on the backing view, the label is next in line.
         simulateTapOnSwiftUIButton(index: 1, setAccessibility: "Rule Two SwiftUI")
 
         let event = waitForEvent(named: "$mp_click", timeout: 5)

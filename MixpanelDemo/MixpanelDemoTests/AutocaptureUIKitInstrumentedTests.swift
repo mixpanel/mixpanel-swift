@@ -122,7 +122,7 @@ class AutocaptureUIKitInstrumentedTests: MixpanelBaseTests {
 
     /// When a view carries both, the identifier wins $el_id — it is developer-assigned and never
     /// user-visible, so unlike a label it cannot carry PII. The label still travels as
-    /// $attr-aria-label.
+    /// The label is not reported at all.
     func testElementIdIdentifierWinsOverLabel() {
         let button = testViewController.bothButton
 
@@ -133,25 +133,31 @@ class AutocaptureUIKitInstrumentedTests: MixpanelBaseTests {
 
         if let props = event?.properties {
             XCTAssertEqual(props["$el_id"] as? String, "both_id")
-            XCTAssertEqual(props["$attr-aria-label"] as? String, "Both Label")
+            XCTAssertNil(
+                props["$attr-aria-label"],
+                "Accessibility labels are localized and can carry user data — never reported")
         }
     }
 
     // MARK: - Test 2: Element ID Resolution Rule 2 (accessibilityLabel fallback)
 
-    func testElementIdResolutionRule2() {
+    func testElementIdResolutionRule2_LabelIsNotUsed() {
         // Given: A button with only accessibilityLabel (no accessibilityIdentifier)
         let button = testViewController.rule2Button
 
         // When: Simulate tap
         simulateTap(on: button)
 
-        // Then: Element ID should use accessibilityLabel
+        // Then: the label is neither the element id nor reported — identity falls back to the
+        // structural hash, because a localized label cannot be a stable identifier.
         let event = waitForEvent(named: "$mp_click", timeout: 5)
         XCTAssertNotNil(event, "Should capture $mp_click event")
 
         if let props = event?.properties {
-            XCTAssertEqual(props["$el_id"] as? String, "Rule Two Label")
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertTrue(elId.hasPrefix("UIButton_"), "Expected the hash fallback, got: \(elId)")
+            XCTAssertNil(props["$attr-aria-label"])
+            XCTAssertFalse(elId.contains("Rule Two"), "Label must not leak into $el_id")
         }
     }
 
@@ -336,9 +342,11 @@ class AutocaptureUIKitInstrumentedTests: MixpanelBaseTests {
         }
     }
 
-    /// Positive case: View IS accessible AND HAS explicit accessibilityLabel.
-    /// The label SHOULD be captured in $el_id and $attr-aria-label.
-    func testAccessibleWithLabel_LabelIsCaptured() {
+    /// A view that is an accessibility element with an explicit, intentional accessibilityLabel
+    /// still must not have that text reported. Labels are localized — the same element would report
+    /// a different $el_id per language — and they can carry user data, so identity falls back to the
+    /// structural hash and no aria-label is emitted.
+    func testAccessibleWithLabel_LabelIsNeverCaptured() {
         let view = testViewController.accessibleWithLabelView
 
         simulateTap(on: view)
@@ -347,13 +355,13 @@ class AutocaptureUIKitInstrumentedTests: MixpanelBaseTests {
         XCTAssertNotNil(event, "Click event should be captured")
 
         if let props = event?.properties {
-            XCTAssertEqual(
-                props["$el_id"] as? String, "Intended Label",
-                "$el_id should use the explicit accessibilityLabel")
-
-            XCTAssertEqual(
-                props["$attr-aria-label"] as? String, "Intended Label",
-                "$attr-aria-label should be present with explicit label")
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertFalse(
+                elId.contains("Intended Label"),
+                "An intentional label must still not become $el_id, got: \(elId)")
+            XCTAssertNil(
+                props["$attr-aria-label"],
+                "$attr-aria-label must never be present")
         }
     }
 

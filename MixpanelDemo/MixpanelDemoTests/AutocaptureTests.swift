@@ -291,7 +291,6 @@ class ClickEventTests: XCTestCase {
             y: 200,
             elementId: "test_button",
             tagName: "UIButton",
-            accessibleLabel: "Test Button",
             role: "Button",
             elements: "UIButton > UIView"
         )
@@ -302,7 +301,7 @@ class ClickEventTests: XCTestCase {
         XCTAssertEqual(props["$y"] as? Int, 200)
         XCTAssertEqual(props["$el_id"] as? String, "test_button")
         XCTAssertEqual(props["$el_tag_name"] as? String, "UIButton")
-        XCTAssertEqual(props["$attr-aria-label"] as? String, "Test Button")
+        XCTAssertNil(props["$attr-aria-label"], "Accessibility labels are never reported")
         XCTAssertEqual(props["$attr-role"] as? String, "Button")
         XCTAssertEqual(props["$elements"] as? String, "UIButton > UIView")
     }
@@ -345,7 +344,8 @@ private final class ConstantElementIdExtractor: ElementIdExtractor {
 }
 
 /// Tests the `$el_id` resolution order implemented by `DefaultElementIdExtractor`:
-/// React Native `nativeID` > `accessibilityIdentifier` > `accessibilityLabel` > `<ClassName>_<hash>`.
+/// React Native `nativeID` > `accessibilityIdentifier` > `<ClassName>_<hash>`. Accessibility labels
+/// are never a source: they are localized and can carry user data.
 class DefaultElementIdExtractorTests: XCTestCase {
 
     /// Matches the anonymous fallback: ClassName_hexHash.
@@ -389,8 +389,8 @@ class DefaultElementIdExtractorTests: XCTestCase {
 
     // MARK: - Priority 2: accessibilityIdentifier
 
-    func testIdentifierWinsOverLabel() {
-        // The identifier is stable and never user-visible, so it outranks the label.
+    func testIdentifierIsUsedAndLabelIsIgnored() {
+        // The identifier is stable and never user-visible; the label is neither.
         let button = UIButton()
         button.accessibilityIdentifier = "checkout_identifier"
         button.accessibilityLabel = "Checkout"
@@ -398,61 +398,42 @@ class DefaultElementIdExtractorTests: XCTestCase {
         XCTAssertEqual(extractor.extractElementId(from: button), "checkout_identifier")
     }
 
-    func testEmptyIdentifierFallsThroughToLabel() {
+    func testEmptyIdentifierFallsThroughToTheStructuralHash() {
         let button = UIButton()
         button.accessibilityIdentifier = ""
         button.accessibilityLabel = "Checkout"
 
-        XCTAssertEqual(extractor.extractElementId(from: button), "Checkout")
+        let elementId = extractor.extractElementId(from: button) ?? ""
+        assertMatchesHashFallback(elementId)
+        XCTAssertFalse(elementId.contains("Checkout"), "Labels are never used as identity")
     }
 
     func testInternalIdentifiersAreSkipped() {
         for internalIdentifier in ["_privateThing", "AXID-42", "UITransitionView-1"] {
             let button = UIButton()
             button.accessibilityIdentifier = internalIdentifier
-            button.accessibilityLabel = "Checkout"
 
-            XCTAssertEqual(
-                extractor.extractElementId(from: button), "Checkout",
+            assertMatchesHashFallback(
+                extractor.extractElementId(from: button) ?? "",
                 "Framework-internal identifier \(internalIdentifier) should be skipped")
         }
     }
 
-    // MARK: - Priority 3: accessibilityLabel
+    // MARK: - Accessibility labels are never used
 
-    func testLabelUsedWhenNothingElseResolves() {
-        let label = UILabel()
-        label.accessibilityLabel = "Order Total"
+    func testLabelIsNeverUsedAsIdentity() {
+        // Localized text would give the same element a different id per language, and a label can
+        // carry user data, so no view shape may resolve to it.
+        for view in [UILabel(), UIButton(), UIView()] as [UIView] {
+            view.isAccessibilityElement = true
+            view.accessibilityLabel = "Account ending 4321"
 
-        XCTAssertEqual(extractor.extractElementId(from: label), "Order Total")
-    }
-
-    func testLabelOnGenericContainerIgnoredUnlessAccessibilityElement() {
-        // UIKit auto-derives container labels from child text, which can carry user data. A generic
-        // container (e.g. React Native's RCTView) is only trusted when the developer marked it as an
-        // accessibility element — `accessible={true}` in React Native.
-        let container = UIView()
-        container.accessibilityLabel = "Account ending 4321"
-        container.isAccessibilityElement = false
-
-        let elementId = extractor.extractElementId(from: container) ?? ""
-        assertMatchesHashFallback(elementId)
-        XCTAssertFalse(elementId.contains("4321"), "Derived label must not leak into $el_id")
-    }
-
-    func testLabelOnGenericContainerUsedWhenAccessibilityElement() {
-        let container = UIView()
-        container.accessibilityLabel = "Explicit Label"
-        container.isAccessibilityElement = true
-
-        XCTAssertEqual(extractor.extractElementId(from: container), "Explicit Label")
-    }
-
-    func testEmptyLabelFallsThroughToHash() {
-        let button = UIButton()
-        button.accessibilityLabel = ""
-
-        assertMatchesHashFallback(extractor.extractElementId(from: button) ?? "")
+            let elementId = extractor.extractElementId(from: view) ?? ""
+            assertMatchesHashFallback(elementId)
+            XCTAssertFalse(
+                elementId.contains("4321"),
+                "\(type(of: view)) leaked its label into $el_id")
+        }
     }
 
     // MARK: - Priority 4: hash fallback
@@ -465,16 +446,34 @@ class DefaultElementIdExtractorTests: XCTestCase {
             "Expected UIButton_<hash>, got: \(elementId)")
     }
 
-    func testHashFallbackIsStablePerViewAndDistinctAcrossViews() {
-        let first = UIButton()
-        let second = UIButton()
+    func testHashFallbackIsStableForTheSameStructure() {
+        // The hash describes where the view sits, not which instance it is, so an identical layout
+        // built twice — as on every launch — resolves to the same id.
+        func buildLeaf() -> UIView {
+            let root = UIView()
+            let row = UIView()
+            let leaf = UIButton()
+            row.addSubview(leaf)
+            root.addSubview(row)
+            return leaf
+        }
 
         XCTAssertEqual(
-            extractor.extractElementId(from: first), extractor.extractElementId(from: first),
-            "Same view must resolve to the same id")
+            extractor.extractElementId(from: buildLeaf()),
+            extractor.extractElementId(from: buildLeaf()),
+            "The same structure must resolve to the same id")
+    }
+
+    func testHashFallbackDistinguishesSiblingPositions() {
+        let root = UIView()
+        let first = UIButton()
+        let second = UIButton()
+        root.addSubview(first)
+        root.addSubview(second)
+
         XCTAssertNotEqual(
             extractor.extractElementId(from: first), extractor.extractElementId(from: second),
-            "Different views must resolve to different ids")
+            "Siblings at different positions must resolve to different ids")
     }
 
     func testAnonymousIdMatchesTheDefaultChainFallback() {
@@ -494,11 +493,9 @@ class DefaultElementIdExtractorTests: XCTestCase {
 
         XCTAssertEqual(
             extractor.elementId(
-                for: view,
-                accessibilityIdentifierFallback: "swiftui_checkout",
-                accessibilityLabelFallback: "Checkout From Tree"),
+                for: view, accessibilityIdentifierFallback: "swiftui_checkout"),
             "swiftui_checkout",
-            "Identifier fallback must outrank the label fallback")
+            "The SwiftUI identifier read from the accessibility tree is used")
     }
 
     func testViewIdentifierWinsOverIdentifierFallback() {
@@ -506,41 +503,31 @@ class DefaultElementIdExtractorTests: XCTestCase {
         view.accessibilityIdentifier = "own_identifier"
 
         XCTAssertEqual(
-            extractor.elementId(
-                for: view,
-                accessibilityIdentifierFallback: "tree_identifier",
-                accessibilityLabelFallback: nil),
+            extractor.elementId(for: view, accessibilityIdentifierFallback: "tree_identifier"),
             "own_identifier")
     }
 
-    func testLabelFallbackUsedWhenNoIdentifierAnywhere() {
+    func testStructuralHashUsedWhenNoIdentifierAnywhere() {
         let view = UIView()
 
-        XCTAssertEqual(
-            extractor.elementId(
-                for: view,
-                accessibilityIdentifierFallback: nil,
-                accessibilityLabelFallback: "Checkout From Tree"),
-            "Checkout From Tree")
+        assertMatchesHashFallback(
+            extractor.elementId(for: view, accessibilityIdentifierFallback: nil))
     }
 
     func testInternalIdentifierFallbackIsSkipped() {
         let view = UIView()
 
         let elementId = extractor.elementId(
-            for: view,
-            accessibilityIdentifierFallback: "_UIKitInternal",
-            accessibilityLabelFallback: nil)
+            for: view, accessibilityIdentifierFallback: "_UIKitInternal")
 
         assertMatchesHashFallback(elementId)
     }
 
-    func testEmptyFallbacksResolveToHash() {
+    func testEmptyIdentifierFallbackResolvesToHash() {
         let view = UIView()
 
         assertMatchesHashFallback(
-            extractor.elementId(
-                for: view, accessibilityIdentifierFallback: "", accessibilityLabelFallback: ""))
+            extractor.elementId(for: view, accessibilityIdentifierFallback: ""))
     }
 }
 
@@ -601,8 +588,8 @@ class SemanticExtractorElementIdTests: XCTestCase {
             DefaultElementIdExtractor.anonymousId(for: button))
     }
 
-    func testAccessibilityLabelStillReportedSeparatelyFromElementId() {
-        // The identifier wins $el_id, but the label must still travel as $attr-aria-label.
+    func testAccessibilityLabelIsNeverReported() {
+        // The identifier wins $el_id, and the label is not reported anywhere.
         let button = UIButton()
         button.accessibilityIdentifier = "checkout_identifier"
         button.accessibilityLabel = "Checkout"
@@ -611,7 +598,9 @@ class SemanticExtractorElementIdTests: XCTestCase {
             .extractSemantics(from: button, at: point)
 
         XCTAssertEqual(event.elementId, "checkout_identifier")
-        XCTAssertEqual(event.accessibleLabel, "Checkout")
+        XCTAssertNil(
+            event.toProperties()["$attr-aria-label"],
+            "Accessibility labels are localized and can carry user data — never reported")
     }
 }
 

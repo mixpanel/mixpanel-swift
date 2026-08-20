@@ -41,8 +41,10 @@ public struct ClickEvent: Sendable {
     /// - React Native `nativeID` — the JS-side prop, read through the Objective-C runtime
     ///   (skipped for SwiftUI views, which React Native never renders)
     /// - `accessibilityIdentifier` — stable and not user-visible
-    /// - `accessibilityLabel` — human-readable, and only when intentionally set
-    /// - `<ClassName>_<hash>` as a last resort
+    /// - `<ClassName>_<hash>` as a last resort, hashed from the element's position in the hierarchy
+    ///
+    /// `accessibilityLabel` is deliberately not a source: it is localized, so the same element would
+    /// report a different identifier per language, and it can carry personal data.
     ///
     /// Supply an `ElementIdExtractor` through `AutocaptureOptions` to override this entirely — for
     /// example a custom string like `"buy_button"` or `"settings_cell_notifications"`.
@@ -56,13 +58,6 @@ public struct ClickEvent: Sendable {
     /// Use `String(describing: type(of: view))` to get the class name.
     /// Set to `nil` if not available.
     public let tagName: String?
-
-    /// The human-readable accessibility label of the element.
-    ///
-    /// This is the text read aloud by VoiceOver — typically the view's `accessibilityLabel`.
-    /// Examples: `"Add to cart"`, `"Play video"`, `"Close"`.
-    /// Set to `nil` if the element has no accessibility label.
-    public let accessibleLabel: String?
 
     /// The semantic role describing what the element does.
     ///
@@ -100,7 +95,6 @@ public struct ClickEvent: Sendable {
     ///     y: touch.location(in: view.window).y,
     ///     elementId: button.accessibilityIdentifier ?? "buy_button",
     ///     tagName: String(describing: type(of: button)),
-    ///     accessibleLabel: button.accessibilityLabel,
     ///     role: "button",
     ///     elements: "UIButton > UIStackView > UIView"
     /// )
@@ -112,13 +106,12 @@ public struct ClickEvent: Sendable {
     ///   - y: Touch Y coordinate in window points
     ///   - elementId: Stable identifier for the tapped element
     ///   - tagName: Class name of the tapped element (defaults to nil)
-    ///   - accessibleLabel: The element's accessibility label (defaults to nil)
     ///   - role: Semantic role like `"button"`, `"switch"`, `"link"` (defaults to nil)
     ///   - elements: View hierarchy path, `">"` separated (defaults to nil)
     ///   - isInteractive: Whether the element is interactive (defaults to true)
     public init(
         x: CGFloat, y: CGFloat, elementId: String,
-        tagName: String? = nil, accessibleLabel: String? = nil,
+        tagName: String? = nil,
         role: String? = nil, elements: String? = nil,
         isInteractive: Bool = true
     ) {
@@ -126,7 +119,6 @@ public struct ClickEvent: Sendable {
         self.y = y
         self.elementId = elementId
         self.tagName = tagName
-        self.accessibleLabel = accessibleLabel
         self.role = role
         self.elements = elements
         self.isInteractive = isInteractive
@@ -148,10 +140,6 @@ public struct ClickEvent: Sendable {
 
         if let elements = elements {
             props["$elements"] = elements
-        }
-
-        if let accessibleLabel = accessibleLabel {
-            props["$attr-aria-label"] = accessibleLabel
         }
 
         if let role = role {

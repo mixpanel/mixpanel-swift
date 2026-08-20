@@ -137,8 +137,10 @@ class AutocaptureSwiftUIInstrumentedTests: MixpanelBaseTests {
         XCTAssertNotNil(event, "Should capture $mp_click event")
 
         if let props = event?.properties {
-            // SwiftUI uses accessibilityLabel as primary element ID
-            XCTAssertEqual(props["$el_id"] as? String, "SwiftUI Rule 1")
+            // The label is not an identity source: identity falls back to the structural hash.
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertFalse(elId.contains("SwiftUI Rule 1"), "Label must not leak into $el_id")
+            XCTAssertNil(props["$attr-aria-label"], "Labels are never reported")
             XCTAssertNotNil(props["$x"], "Should have $x coordinate")
             XCTAssertNotNil(props["$y"], "Should have $y coordinate")
         }
@@ -165,22 +167,24 @@ class AutocaptureSwiftUIInstrumentedTests: MixpanelBaseTests {
 
         if let props = event?.properties {
             XCTAssertEqual(props["$el_id"] as? String, "swiftui_both_id")
-            XCTAssertEqual(props["$attr-aria-label"] as? String, "Both Label SwiftUI")
+            XCTAssertNil(props["$attr-aria-label"], "Labels are never reported")
         }
     }
 
     // MARK: - Test 2: accessibilityLabel fallback (no identifier on the view)
 
-    func testSwiftUIElementIdResolutionRule2() {
-        // With no accessibilityIdentifier on the backing view, the label is next in line.
+    func testSwiftUIElementIdResolutionRule2_LabelIsNotUsed() {
+        // With no accessibilityIdentifier on the backing view, resolution falls to the structural
+        // hash — a localized label cannot serve as a stable identifier.
         simulateTapOnSwiftUIButton(index: 1, setAccessibility: "Rule Two SwiftUI")
 
         let event = waitForEvent(named: "$mp_click", timeout: 5)
         XCTAssertNotNil(event, "Should capture $mp_click event")
 
         if let props = event?.properties {
-            // Should use accessibilityLabel as ID
-            XCTAssertEqual(props["$el_id"] as? String, "Rule Two SwiftUI")
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertFalse(elId.contains("Rule Two"), "Label must not leak into $el_id")
+            XCTAssertNil(props["$attr-aria-label"], "Labels are never reported")
         }
     }
 

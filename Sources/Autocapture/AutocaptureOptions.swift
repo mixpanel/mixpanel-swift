@@ -23,6 +23,12 @@ enum AutocaptureDefaults {
     static let maxAncestorSearchDepth = 10
     static let maxRecursionDepth = 20
 
+    /// Number of recent clicks the rage click tracker keeps before pruning entries that have
+    /// aged out of the time window. Only a bound on memory: clicks outside the window are
+    /// already ignored when counting, so this never affects detection. Sized well above the
+    /// default threshold of 4 so that a burst of taps cannot evict clicks still in the window.
+    static let maxTrackedClicks = 20
+
     #if os(iOS)
     /// UIKit controls with inherent visual feedback that should be excluded from
     /// dead click detection. These controls always produce a visible UI response

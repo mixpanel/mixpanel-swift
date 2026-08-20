@@ -93,7 +93,7 @@ final class RageClickTracker {
         let isRageClick = nearbyCount >= (clickThreshold - 1)
 
         // Clean old clicks to prevent memory growth
-        if recentClicks.count > 20 {
+        if recentClicks.count > AutocaptureDefaults.maxTrackedClicks {
             cleanOldClicks(currentTime: now)
         }
 

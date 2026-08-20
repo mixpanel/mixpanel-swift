@@ -24,6 +24,15 @@ final class AutocaptureManager {
     private let deadClickDetector: DeadClickDetector?
     private let touchInterceptor = TouchInterceptor()
 
+    /// Serial queue for the non-UI part of touch handling.
+    ///
+    /// Touches arrive on the main thread, and the parts of processing that must read the view
+    /// hierarchy stay there. Everything after that — rage click bookkeeping and event emission —
+    /// is pure computation, so it is handed off here to keep SDK work off the main thread.
+    /// Serial so that clicks are processed in the order the user made them, which rage click
+    /// detection depends on.
+    private let processingQueue = DispatchQueue(label: "com.mixpanel.autocapture.processing")
+
     // MARK: - Autocapture Reference
 
     /// Reference to the Autocapture instance for event tracking.
@@ -155,29 +164,40 @@ final class AutocaptureManager {
             return
         }
 
-        // Extract semantic information
+        // Extract semantic information. Reads the view hierarchy, so it has to run here on the
+        // main thread, synchronously with the touch.
         let clickEvent = semanticExtractor.extractSemantics(from: view, at: point)
 
-        // Check for rage click
-        let rageClickResult = rageClickTracker?.trackClick(x: point.x, y: point.y)
-
-        // Emit click event
-        if options.clickOptions.enabled {
-            autocapture?.trackClick(clickEvent)
-            MixpanelLogger.debug(
-                message: "AutocaptureManager: emitted $mp_click for \(clickEvent.elementId)")
-        }
-
-        // Emit rage click event (independent of regular click)
-        if rageClickResult?.isRageClick == true {
-            autocapture?.trackRageClick(clickEvent)
-            MixpanelLogger.debug(
-                message: "AutocaptureManager: emitted $mp_rage_click for \(clickEvent.elementId)")
-        }
-
-        // Start dead click monitoring
+        // Start dead click monitoring. Also main-thread and synchronous by necessity: it captures
+        // a baseline snapshot of the window that must be taken before the app's click handler can
+        // change the UI, otherwise a fast response is absorbed into the baseline and the click
+        // looks dead.
         if let detector = deadClickDetector, let window = window {
             detector.startMonitoring(event: clickEvent, view: view, in: window)
+        }
+
+        // Everything below is pure computation over values already extracted — no UIKit access —
+        // so it runs off the main thread.
+        processingQueue.async { [weak self] in
+            guard let self = self else { return }
+
+            // Check for rage click
+            let rageClickResult = self.rageClickTracker?.trackClick(x: point.x, y: point.y)
+
+            // Emit click event
+            if self.options.clickOptions.enabled {
+                self.autocapture?.trackClick(clickEvent)
+                MixpanelLogger.debug(
+                    message: "AutocaptureManager: emitted $mp_click for \(clickEvent.elementId)")
+            }
+
+            // Emit rage click event (independent of regular click)
+            if rageClickResult?.isRageClick == true {
+                self.autocapture?.trackRageClick(clickEvent)
+                MixpanelLogger.debug(
+                    message:
+                        "AutocaptureManager: emitted $mp_rage_click for \(clickEvent.elementId)")
+            }
         }
     }
 

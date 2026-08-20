@@ -141,8 +141,12 @@ final class DeadClickDetector {
             checkTask = Task { [weak self] in
                 try? await Task.sleep(nanoseconds: UInt64(timeWindow) * 1_000_000)
                 guard !Task.isCancelled else { return }
-                await MainActor.run {
-                    self?.performFinalCheck()
+                // Bind before hopping to the main actor: referencing the captured `weak var`
+                // from inside the concurrently-executing closure is a warning under Swift 5 and
+                // an error in the Swift 6 language mode.
+                guard let self = self else { return }
+                await MainActor.run { [self] in
+                    self.performFinalCheck()
                 }
             }
         } else {

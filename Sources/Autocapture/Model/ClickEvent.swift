@@ -14,7 +14,10 @@ import UIKit
 /// Contains all semantic information about the clicked element and its context.
 /// Create a `ClickEvent` and pass it to `mixpanel.autocapture.trackClick(_:)` to
 /// track click events with full element metadata.
-public struct ClickEvent {
+/// All stored properties are value types (`CGFloat`, `String`, `Bool`), so the event can safely
+/// cross threads — it is handed from the main thread, where it is extracted, to the queue that
+/// emits it.
+public struct ClickEvent: Sendable {
     // MARK: - Position
 
     /// Touch X coordinate in the window's coordinate space (points).

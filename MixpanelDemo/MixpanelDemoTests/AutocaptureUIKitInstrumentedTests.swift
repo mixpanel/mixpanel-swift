@@ -234,20 +234,14 @@ class AutocaptureUIKitInstrumentedTests: MixpanelBaseTests {
         // When: Simulate tap
         simulateTap(on: button)
 
-        // Wait and check event queue for full properties
-        waitForTrackingQueue(mixpanel)
+        // Wait for the event rather than reading the queue straight after the tap: autocapture
+        // hands click processing to a background queue, so emission no longer happens inline with
+        // the touch. waitForEvent polls and drains the tracking queue on each attempt.
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Should have autocapture events in queue")
 
         // Then: Should have standard Mixpanel properties
-        let events = eventQueue(token: mixpanel.apiToken)
-        let clickEvents = events.filter {
-            ($0["event"] as? String)?.hasPrefix("$mp_") == true
-        }
-
-        XCTAssertFalse(clickEvents.isEmpty, "Should have autocapture events in queue")
-
-        if let firstEvent = clickEvents.first,
-            let props = firstEvent["properties"] as? [String: Any]
-        {
+        if let props = event?.properties {
             XCTAssertNotNil(props["distinct_id"], "Should have distinct_id")
             XCTAssertNotNil(props["token"], "Should have token")
         }

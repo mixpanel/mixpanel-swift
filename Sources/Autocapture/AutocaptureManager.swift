@@ -89,6 +89,13 @@ final class AutocaptureManager {
     // MARK: - Lifecycle
 
     /// Start autocapture by installing the touch interceptor.
+    /// Logged at warning level, once per start, so developers who never read the documentation
+    /// still learn that autocapture is not yet GA.
+    private static let experimentalWarning =
+        "Autocapture is experimental (beta): it may contain issues, and its API and captured "
+        + "properties may change before general availability. Pin your SDK version if you build "
+        + "reports on autocaptured events."
+
     func start() {
         lock.lock()
         defer { lock.unlock() }
@@ -104,6 +111,7 @@ final class AutocaptureManager {
         touchInterceptor.install(manager: self)
 
         MixpanelLogger.info(message: "AutocaptureManager: started")
+        MixpanelLogger.warn(message: AutocaptureManager.experimentalWarning)
     }
 
     /// Stop autocapture and clean up.

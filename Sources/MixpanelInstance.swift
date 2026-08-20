@@ -104,6 +104,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var people: People!
 
     /// Accessor to the Mixpanel Autocapture API object.
+    ///
+    /// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the
+    ///   properties it captures may change in a future release before general availability.
     open var autocapture: Autocapture!
 
     #if os(iOS)

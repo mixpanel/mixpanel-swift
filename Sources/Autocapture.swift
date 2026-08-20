@@ -11,6 +11,9 @@ import Foundation
 
 /// Access to autocapture tracking methods, available as an accessible variable from
 /// the main Mixpanel instance.
+///
+/// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the
+///   properties it captures may change in a future release before general availability.
 open class Autocapture {
 
     weak var mixpanelInstance: MixpanelInstance?

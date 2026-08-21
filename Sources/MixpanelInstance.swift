@@ -109,8 +109,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     ///   properties it captures may change in a future release before general availability.
     open var autocapture: Autocapture!
 
-    #if os(iOS)
+    #if os(iOS) && !targetEnvironment(macCatalyst)
     /// Autocapture manager for click, rage click, and dead click detection.
+    /// Not available on Mac Catalyst, where automatic capture is unsupported.
     var autocaptureManager: AutocaptureManager?
     #endif
 
@@ -558,11 +559,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             optOutTracking()
         }
 
-        // Initialize autocapture if enabled (iOS only)
+        // Initialize autocapture if enabled (iOS only, excluding Mac Catalyst)
         // Done after opt-out check so autocapture is not started when tracking is opted out.
         // Note: optOutTracking() runs async on trackingQueue, so hasOptedOutTracking() may
         // not reflect the default yet. Check optOutTrackingByDefault directly as well.
-        #if os(iOS)
+        #if os(iOS) && !targetEnvironment(macCatalyst)
         if let autocaptureOpts = self.options.autocaptureOptions, autocaptureOpts.isEnabled {
             if optOutTrackingByDefault || hasOptedOutTracking() {
                 MixpanelLogger.info(message: "Autocapture disabled: tracking is opted out")
@@ -576,6 +577,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 autocaptureManager?.start()
                 MixpanelLogger.info(message: "AutocaptureManager started")
             }
+        }
+        #elseif os(iOS) && targetEnvironment(macCatalyst)
+        if let autocaptureOpts = self.options.autocaptureOptions, autocaptureOpts.isEnabled {
+            MixpanelLogger.info(message: "Autocapture is not supported on Mac Catalyst")
         }
         #endif
 
@@ -679,7 +684,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     deinit {
         NotificationCenter.default.removeObserver(self)
-        #if os(iOS)
+        #if os(iOS) && !targetEnvironment(macCatalyst)
         autocaptureManager?.stop()
         #endif
         #if os(iOS) && !os(watchOS) && !targetEnvironment(macCatalyst)
@@ -1384,9 +1389,12 @@ extension MixpanelInstance {
       This cancels any pending dead click detection to prevent false positives.
 
       This method is safe to call even if autocapture is not enabled; it will simply do nothing.
+      On Mac Catalyst, where autocapture is unsupported, it is always a no-op.
      */
     public func signalUIChange() {
+        #if !targetEnvironment(macCatalyst)
         autocaptureManager?.signalUIChange()
+        #endif
     }
     #endif
 
@@ -1900,7 +1908,7 @@ extension MixpanelInstance {
                 flagManager.reset()
             }
 
-            #if os(iOS)
+            #if os(iOS) && !targetEnvironment(macCatalyst)
             self.autocaptureManager?.stop()
             #endif
         }
@@ -1932,7 +1940,7 @@ extension MixpanelInstance {
             }
             self.track(event: "$opt_in", properties: properties)
 
-            #if os(iOS)
+            #if os(iOS) && !targetEnvironment(macCatalyst)
             // Restart autocapture if it was configured but stopped due to opt-out
             if self.autocaptureManager == nil,
                 let autocaptureOpts = self.options.autocaptureOptions,

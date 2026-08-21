@@ -8,12 +8,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         willConnectTo session: UISceneSession,
         options connectionOptions: UIScene.ConnectionOptions
     ) {
-        guard let windowScene = (scene as? UIWindowScene) else { return }
-
-        window = UIWindow(windowScene: windowScene)
-
-        // The window will be set up from the Main storyboard automatically
-        // This ensures the storyboard-based UI is properly loaded
+        // When using storyboards, the window and root view controller are created automatically
+        // from the storyboard specified in Info.plist's UISceneStoryboardFile
+        guard let _ = (scene as? UIWindowScene) else { return }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

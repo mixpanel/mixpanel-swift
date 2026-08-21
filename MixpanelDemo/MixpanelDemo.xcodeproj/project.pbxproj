@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1668B43D2FF79B9C00AF2B30 /* JSONHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1668B43B2FF79B9C00AF2B30 /* JSONHandlerTests.swift */; };
 		1668B43E2FF79B9C00AF2B30 /* MixpanelBackupHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1668B43C2FF79B9C00AF2B30 /* MixpanelBackupHostTests.swift */; };
+		169483E23037612D0080D934 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169483E13037612D0080D934 /* SceneDelegate.swift */; };
 		171E4C1C2DB055BC00B7CB11 /* MixpanelFeatureFlagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C1B2DB055A900B7CB11 /* MixpanelFeatureFlagTests.swift */; };
 		174205522F15A7210031EEDC /* MixpanelDeviceIdProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174205512F15A7210031EEDC /* MixpanelDeviceIdProviderTests.swift */; };
 		174563BA2DD74E9ABE905B9A /* MixpanelScreenTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3018131FE6FE484786E6788E /* MixpanelScreenTrackingTests.swift */; };
@@ -267,6 +268,7 @@
 /* Begin PBXFileReference section */
 		1668B43B2FF79B9C00AF2B30 /* JSONHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONHandlerTests.swift; sourceTree = "<group>"; };
 		1668B43C2FF79B9C00AF2B30 /* MixpanelBackupHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelBackupHostTests.swift; sourceTree = "<group>"; };
+		169483E13037612D0080D934 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		171E4C1B2DB055A900B7CB11 /* MixpanelFeatureFlagTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelFeatureFlagTests.swift; sourceTree = "<group>"; };
 		174205512F15A7210031EEDC /* MixpanelDeviceIdProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelDeviceIdProviderTests.swift; sourceTree = "<group>"; };
 		1A1B2C3D4E5F60718293A4B1 /* MixpanelFeatureFlagPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelFeatureFlagPersistenceTests.swift; sourceTree = "<group>"; };
@@ -606,6 +608,7 @@
 		E15FF7D51D0461130076CDE3 /* MixpanelDemo */ = {
 			isa = PBXGroup;
 			children = (
+				169483E13037612D0080D934 /* SceneDelegate.swift */,
 				E16BAEB41D3DB4FC00C442CE /* MixpanelDemo.entitlements */,
 				E15FF7DA1D0461130076CDE3 /* Main.storyboard */,
 				E15FF7D61D0461130076CDE3 /* AppDelegate.swift */,
@@ -1143,6 +1146,7 @@
 			files = (
 				60CB587123D77F9200F1632B /* LoginViewController.swift in Sources */,
 				E146F1941D398D0A00D75B49 /* TrackingViewController.swift in Sources */,
+				169483E23037612D0080D934 /* SceneDelegate.swift in Sources */,
 				E146F1961D398D1600D75B49 /* PeopleViewController.swift in Sources */,
 				E146F19A1D399AF300D75B49 /* UtilityViewController.swift in Sources */,
 				E15FF7D71D0461130076CDE3 /* AppDelegate.swift in Sources */,
@@ -1826,7 +1830,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -1880,7 +1884,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -1903,7 +1907,7 @@
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = MixpanelDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1933,7 +1937,7 @@
 				CURRENT_PROJECT_VERSION = 6;
 				DEFINES_MODULE = YES;
 				INFOPLIST_FILE = MixpanelDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

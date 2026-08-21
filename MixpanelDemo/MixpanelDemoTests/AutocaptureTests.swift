@@ -74,18 +74,6 @@ class AutocaptureOptionsTests: XCTestCase {
         XCTAssertTrue(options.deadClickOptions.enabled)
     }
 
-    func testAutocaptureOptionsDefaultToNoElementIdExtractor() {
-        XCTAssertNil(AutocaptureOptions().elementIdExtractor)
-    }
-
-    func testAutocaptureOptionsRetainTheElementIdExtractor() {
-        let extractor = ConstantElementIdExtractor("custom_el_id")
-        let options = AutocaptureOptions(elementIdExtractor: extractor)
-
-        XCTAssertNotNil(options.elementIdExtractor)
-        XCTAssertEqual(options.elementIdExtractor?.extractElementId(from: UIView()), "custom_el_id")
-    }
-
     func testAutocaptureOptionsIsEnabledWhenAnyFeatureEnabled() {
         // Only click enabled
         let clickOnly = AutocaptureOptions(
@@ -330,19 +318,6 @@ private final class FakeReactNativeView: UIView {
     @objc var nativeID: String?
 }
 
-/// Returns a fixed identifier for every view.
-private final class ConstantElementIdExtractor: ElementIdExtractor {
-    let identifier: String?
-
-    init(_ identifier: String?) {
-        self.identifier = identifier
-    }
-
-    func extractElementId(from view: UIView) -> String? {
-        return identifier
-    }
-}
-
 /// Tests the `$el_id` resolution order implemented by `DefaultElementIdExtractor`:
 /// React Native `nativeID` > `accessibilityIdentifier` > `<ClassName>_<hash>`. Accessibility labels
 /// are never a source: they are localized and can carry user data.
@@ -352,6 +327,12 @@ class DefaultElementIdExtractorTests: XCTestCase {
     private let hashIdPattern = "^[A-Za-z0-9_]+_[0-9a-f]+$"
 
     private let extractor = DefaultElementIdExtractor.shared
+
+    /// The resolver takes a SwiftUI accessibility-tree fallback identifier; the cases below exercise
+    /// the UIKit path, where there is none. The SwiftUI cases pass one explicitly.
+    private func elementId(for view: UIView) -> String {
+        return extractor.elementId(for: view, accessibilityIdentifierFallback: nil)
+    }
 
     private func assertMatchesHashFallback(_ elementId: String, _ message: String = "") {
         XCTAssertNotNil(
@@ -368,7 +349,7 @@ class DefaultElementIdExtractorTests: XCTestCase {
         view.isAccessibilityElement = true
         view.accessibilityLabel = "Checkout"
 
-        XCTAssertEqual(extractor.extractElementId(from: view), "rn_checkout_button")
+        XCTAssertEqual(elementId(for: view), "rn_checkout_button")
     }
 
     func testEmptyNativeIdFallsThroughToIdentifier() {
@@ -376,7 +357,7 @@ class DefaultElementIdExtractorTests: XCTestCase {
         view.nativeID = ""
         view.accessibilityIdentifier = "checkout_identifier"
 
-        XCTAssertEqual(extractor.extractElementId(from: view), "checkout_identifier")
+        XCTAssertEqual(elementId(for: view), "checkout_identifier")
     }
 
     func testViewWithoutNativeIdPropertyIsHandled() {
@@ -384,7 +365,7 @@ class DefaultElementIdExtractorTests: XCTestCase {
         let view = UIView()
         view.accessibilityIdentifier = "plain_view"
 
-        XCTAssertEqual(extractor.extractElementId(from: view), "plain_view")
+        XCTAssertEqual(elementId(for: view), "plain_view")
     }
 
     // MARK: - Priority 2: accessibilityIdentifier
@@ -395,7 +376,7 @@ class DefaultElementIdExtractorTests: XCTestCase {
         button.accessibilityIdentifier = "checkout_identifier"
         button.accessibilityLabel = "Checkout"
 
-        XCTAssertEqual(extractor.extractElementId(from: button), "checkout_identifier")
+        XCTAssertEqual(elementId(for: button), "checkout_identifier")
     }
 
     func testEmptyIdentifierFallsThroughToTheStructuralHash() {
@@ -403,7 +384,7 @@ class DefaultElementIdExtractorTests: XCTestCase {
         button.accessibilityIdentifier = ""
         button.accessibilityLabel = "Checkout"
 
-        let elementId = extractor.extractElementId(from: button) ?? ""
+        let elementId = elementId(for: button)
         assertMatchesHashFallback(elementId)
         XCTAssertFalse(elementId.contains("Checkout"), "Labels are never used as identity")
     }
@@ -414,7 +395,7 @@ class DefaultElementIdExtractorTests: XCTestCase {
             button.accessibilityIdentifier = internalIdentifier
 
             assertMatchesHashFallback(
-                extractor.extractElementId(from: button) ?? "",
+                elementId(for: button),
                 "Framework-internal identifier \(internalIdentifier) should be skipped")
         }
     }
@@ -428,7 +409,7 @@ class DefaultElementIdExtractorTests: XCTestCase {
             view.isAccessibilityElement = true
             view.accessibilityLabel = "Account ending 4321"
 
-            let elementId = extractor.extractElementId(from: view) ?? ""
+            let elementId = elementId(for: view)
             assertMatchesHashFallback(elementId)
             XCTAssertFalse(
                 elementId.contains("4321"),
@@ -439,7 +420,7 @@ class DefaultElementIdExtractorTests: XCTestCase {
     // MARK: - Priority 4: hash fallback
 
     func testHashFallbackUsesClassName() {
-        let elementId = extractor.extractElementId(from: UIButton()) ?? ""
+        let elementId = elementId(for: UIButton())
 
         XCTAssertNotNil(
             elementId.range(of: "^UIButton_[0-9a-f]+$", options: .regularExpression),
@@ -459,8 +440,8 @@ class DefaultElementIdExtractorTests: XCTestCase {
         }
 
         XCTAssertEqual(
-            extractor.extractElementId(from: buildLeaf()),
-            extractor.extractElementId(from: buildLeaf()),
+            elementId(for: buildLeaf()),
+            elementId(for: buildLeaf()),
             "The same structure must resolve to the same id")
     }
 
@@ -472,17 +453,17 @@ class DefaultElementIdExtractorTests: XCTestCase {
         root.addSubview(second)
 
         XCTAssertNotEqual(
-            extractor.extractElementId(from: first), extractor.extractElementId(from: second),
+            elementId(for: first), elementId(for: second),
             "Siblings at different positions must resolve to different ids")
     }
 
     func testAnonymousIdMatchesTheDefaultChainFallback() {
-        // resolveElementId() hands a nil-returning custom extractor over to anonymousId(); both
-        // paths must produce the same shape.
+        // The end of the resolution chain and anonymousId() must produce the same identifier — the
+        // hash fallback has no second implementation.
         let view = UIButton()
 
         XCTAssertEqual(
-            extractor.extractElementId(from: view),
+            elementId(for: view),
             DefaultElementIdExtractor.anonymousId(for: view))
     }
 
@@ -531,61 +512,34 @@ class DefaultElementIdExtractorTests: XCTestCase {
     }
 }
 
-/// Verifies that `AutocaptureOptions.elementIdExtractor` actually governs the `$el_id` that reaches
-/// the `ClickEvent` — the integration point between the option and the hit-test path.
+/// Verifies the `$el_id` that reaches the `ClickEvent` — the integration point between
+/// `DefaultElementIdExtractor` and the hit-test path.
 class SemanticExtractorElementIdTests: XCTestCase {
 
     private let point = CGPoint(x: 10, y: 20)
 
-    private func elementId(for view: UIView, options: AutocaptureOptions) -> String {
-        return SemanticExtractor(autocaptureOptions: options)
+    private func elementId(for view: UIView) -> String {
+        return SemanticExtractor()
             .extractSemantics(from: view, at: point)
             .elementId
     }
 
-    func testDefaultResolutionUsedWhenNoExtractorProvided() {
+    func testAccessibilityIdentifierResolvesElementId() {
         let button = UIButton()
         button.accessibilityIdentifier = "checkout_identifier"
         button.accessibilityLabel = "Checkout"
 
-        XCTAssertEqual(
-            elementId(for: button, options: AutocaptureOptions()), "checkout_identifier")
+        XCTAssertEqual(elementId(for: button), "checkout_identifier")
     }
 
-    func testCustomExtractorReplacesDefaultResolution() {
+    func testViewWithoutIdentifierFallsBackToAnonymousId() {
         let button = UIButton()
-        button.accessibilityIdentifier = "checkout_identifier"
-
-        let options = AutocaptureOptions(
-            elementIdExtractor: ConstantElementIdExtractor("custom_el_id"))
-
-        XCTAssertEqual(elementId(for: button, options: options), "custom_el_id")
-    }
-
-    func testCustomExtractorReturningNilFallsBackToAnonymousId() {
-        // Returning nil means "report nothing identifying" — the SDK must not quietly fall back to
-        // metadata the developer declined to expose.
-        let button = UIButton()
-        button.accessibilityIdentifier = "checkout_identifier"
         button.accessibilityLabel = "Checkout"
 
-        let options = AutocaptureOptions(elementIdExtractor: ConstantElementIdExtractor(nil))
-        let resolved = elementId(for: button, options: options)
+        let resolved = elementId(for: button)
 
         XCTAssertEqual(resolved, DefaultElementIdExtractor.anonymousId(for: button))
-        XCTAssertFalse(resolved.contains("checkout_identifier"))
         XCTAssertFalse(resolved.contains("Checkout"))
-    }
-
-    func testCustomExtractorReturningEmptyStringFallsBackToAnonymousId() {
-        let button = UIButton()
-        button.accessibilityIdentifier = "checkout_identifier"
-
-        let options = AutocaptureOptions(elementIdExtractor: ConstantElementIdExtractor(""))
-
-        XCTAssertEqual(
-            elementId(for: button, options: options),
-            DefaultElementIdExtractor.anonymousId(for: button))
     }
 
     func testAccessibilityLabelIsNeverReported() {
@@ -594,7 +548,7 @@ class SemanticExtractorElementIdTests: XCTestCase {
         button.accessibilityIdentifier = "checkout_identifier"
         button.accessibilityLabel = "Checkout"
 
-        let event = SemanticExtractor(autocaptureOptions: AutocaptureOptions())
+        let event = SemanticExtractor()
             .extractSemantics(from: button, at: point)
 
         XCTAssertEqual(event.elementId, "checkout_identifier")
@@ -604,8 +558,8 @@ class SemanticExtractorElementIdTests: XCTestCase {
     }
 }
 
-/// End-to-end coverage for the extractor: an implementation handed to `MixpanelOptions` must survive
-/// SDK initialization and govern the `$el_id` of a `$mp_click` produced by a real touch.
+/// End-to-end coverage for `$el_id`: the identifier the SDK resolves must survive SDK
+/// initialization and govern the `$el_id` of a `$mp_click` produced by a real touch.
 class ElementIdExtractorEndToEndTests: MixpanelBaseTests {
 
     private var testWindow: UIWindow!
@@ -660,34 +614,8 @@ class ElementIdExtractorEndToEndTests: MixpanelBaseTests {
 
     @objc private func buttonTapped() {}
 
-    func testCustomExtractorGovernsElementIdEndToEnd() {
-        startMixpanel(extractor: ConstantElementIdExtractor("custom_el_id"))
-
-        simulateTap()
-
-        let properties = waitForClickProperties()
-        XCTAssertNotNil(properties, "Should capture $mp_click event")
-        XCTAssertEqual(properties?["$el_id"] as? String, "custom_el_id")
-    }
-
-    func testExtractorReturningNilYieldsAnonymousIdEndToEnd() {
-        startMixpanel(extractor: ConstantElementIdExtractor(nil))
-
-        simulateTap()
-
-        let properties = waitForClickProperties()
-        XCTAssertNotNil(properties, "Should capture $mp_click event")
-        let elementId = properties?["$el_id"] as? String ?? ""
-        XCTAssertNotNil(
-            elementId.range(of: "^UIButton_[0-9a-f]+$", options: .regularExpression),
-            "Expected the anonymous id, got: \(elementId)")
-        XCTAssertFalse(
-            elementId.contains("checkout_identifier"),
-            "Suppressed identifier must not leak into $el_id")
-    }
-
-    func testDefaultResolutionEndToEndWithoutExtractor() {
-        startMixpanel(extractor: nil)
+    func testDefaultResolutionEndToEnd() {
+        startMixpanel()
 
         simulateTap()
 
@@ -699,7 +627,7 @@ class ElementIdExtractorEndToEndTests: MixpanelBaseTests {
     /// A React Native view exposes the JS-side `nativeID` prop as an `@objc` property; it must win
     /// $el_id over the accessibility metadata React Native also sets.
     func testReactNativeNativeIdWinsEndToEnd() {
-        startMixpanel(extractor: nil)
+        startMixpanel()
 
         let setupExpectation = expectation(description: "RN view added")
         let rnView = FakeReactNativeView()
@@ -739,7 +667,7 @@ class ElementIdExtractorEndToEndTests: MixpanelBaseTests {
 
     // MARK: - Helpers
 
-    private func startMixpanel(extractor: ElementIdExtractor?) {
+    private func startMixpanel() {
         let token = randomId()
         let options = MixpanelOptions(
             token: token,
@@ -751,8 +679,7 @@ class ElementIdExtractorEndToEndTests: MixpanelBaseTests {
             autocaptureOptions: AutocaptureOptions(
                 clickOptions: ClickOptions(enabled: true),
                 rageClickOptions: RageClickOptions(enabled: false),
-                deadClickOptions: DeadClickOptions(enabled: false),
-                elementIdExtractor: extractor
+                deadClickOptions: DeadClickOptions(enabled: false)
             )
         )
 

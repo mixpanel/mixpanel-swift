@@ -8,54 +8,11 @@
 #if os(iOS)
 import UIKit
 
-// MARK: - ElementIdExtractor
+// MARK: - DefaultElementIdExtractor
 
 /// Resolves the `$el_id` property reported for an autocaptured interaction.
 ///
-/// Provide an implementation via `AutocaptureOptions(elementIdExtractor:)` to take full control
-/// over which identifier the SDK reports for a tapped view. This is the recommended way to keep
-/// personally identifiable information out of autocapture events: the SDK only ever reports what
-/// this method returns.
-///
-/// When no extractor is provided, the SDK falls back to an internal default implementation that
-/// resolves the identifier from the React Native `nativeID`, then `accessibilityIdentifier`, then a
-/// structural fallback. `accessibilityLabel` is deliberately not a source: it is localized, so the
-/// same element would report a different identifier per language, and it can carry user data.
-///
-/// **Example:**
-/// ```swift
-/// final class TrackingIdExtractor: ElementIdExtractor {
-///     func extractElementId(from view: UIView) -> String? {
-///         // Only report identifiers the team explicitly opted into.
-///         guard let id = view.accessibilityIdentifier, id.hasPrefix("track_") else { return nil }
-///         return id
-///     }
-/// }
-///
-/// let options = MixpanelOptions(
-///     token: "YOUR_TOKEN",
-///     autocaptureOptions: AutocaptureOptions(elementIdExtractor: TrackingIdExtractor())
-/// )
-/// ```
-///
-/// **Threading:** `extractElementId(from:)` is called on the main thread immediately after the hit
-/// test that resolved the tapped view. Keep the implementation fast and side-effect free.
-///
-/// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the properties
-///   it captures may change in a future release before general availability. Pin your SDK version if
-///   you build reports on autocaptured events.
-public protocol ElementIdExtractor {
-    /// Returns the `$el_id` to report for the given view.
-    ///
-    /// - Parameter view: The view resolved by the autocapture hit test.
-    /// - Returns: The identifier to report, or `nil` to let the SDK report an anonymous
-    ///   `<ClassName>_<hash>` identifier instead. Empty strings are treated as `nil`.
-    func extractElementId(from view: UIView) -> String?
-}
-
-// MARK: - DefaultElementIdExtractor
-
-/// Default `ElementIdExtractor` used when the host app does not supply its own.
+/// This is the SDK's only `$el_id` resolver; there is no way for a host app to substitute its own.
 ///
 /// Resolution priority:
 /// 1. **React Native `nativeID`** — read through the Objective-C runtime so the SDK carries no
@@ -72,7 +29,7 @@ public protocol ElementIdExtractor {
 /// For SwiftUI, step 1 is skipped and the identifier lives in SwiftUI's accessibility element tree
 /// rather than on the backing `UIView`, so `SemanticExtractor` resolves it from that tree and passes
 /// it in as the `accessibilityIdentifierFallback` argument below.
-final class DefaultElementIdExtractor: ElementIdExtractor {
+final class DefaultElementIdExtractor {
 
     static let shared = DefaultElementIdExtractor()
 
@@ -83,10 +40,6 @@ final class DefaultElementIdExtractor: ElementIdExtractor {
         "UITransitionView",
         "UILayoutContainerView",
     ]
-
-    func extractElementId(from view: UIView) -> String? {
-        return elementId(for: view, accessibilityIdentifierFallback: nil)
-    }
 
     /// Resolution with an optional precomputed identifier used at priority step 2.
     ///

@@ -133,17 +133,6 @@ final class AutocaptureManager {
         MixpanelLogger.info(message: "AutocaptureManager: stopped")
     }
 
-    /// Signals that a UI change occurred.
-    ///
-    /// Call this when a UI change happens that the dead click detector cannot observe,
-    /// such as navigation in React Native or other framework-driven UI changes.
-    /// This cancels any pending dead click detection to prevent false positives.
-    func signalUIChange() {
-        deadClickDetector?.cancelPendingCheck()
-        rageClickTracker?.reset()
-        MixpanelLogger.debug(message: "AutocaptureManager: UI change signaled, cancelled pending detections")
-    }
-
     // MARK: - Touch Handling
 
     /// Handle a touch event from the interceptor.

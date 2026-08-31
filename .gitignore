@@ -34,6 +34,6 @@ Carthage/Build/
 
 MixpanelDemo/build/
 
-# Claude.ai instructions
-CLAUDE.md
+# Claude Code personal settings stay ignored; CLAUDE.md is tracked —
+# it is a one-line bridge importing AGENTS.md (see AGENTS.md)
 .claude/*

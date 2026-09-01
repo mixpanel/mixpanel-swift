@@ -8,6 +8,7 @@
 
 import Mixpanel
 import StoreKit
+import SwiftUI
 import UIKit
 
 class UtilityViewController: UIViewController, UITableViewDelegate, UITableViewDataSource,

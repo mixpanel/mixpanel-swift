@@ -27,9 +27,9 @@ private let devicePrefix = "$device:"
 public protocol MixpanelProxyServerDelegate: AnyObject {
     /**
        Asks the delegate to return API resource items like query params & headers for proxy Server.
-    
+
        - parameter mixpanel: The mixpanel instance
-    
+
        - returns: return ServerProxyResource to give custom headers and query params.
        */
     func mixpanelResourceForProxyServer(_ name: String) -> ServerProxyResource?
@@ -39,9 +39,9 @@ public protocol MixpanelProxyServerDelegate: AnyObject {
 public protocol MixpanelDelegate: AnyObject {
     /**
        Asks the delegate if data should be uploaded to the server.
-    
+
        - parameter mixpanel: The mixpanel instance
-    
+
        - returns: return true to upload now or false to defer until later
        */
     func mixpanelWillFlush(_ mixpanel: MixpanelInstance) -> Bool
@@ -105,6 +105,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     /// Accessor to the Mixpanel Autocapture API object.
     open var autocapture: Autocapture!
+
+    #if os(iOS)
+    /// Autocapture manager for click, rage click, and dead click detection.
+    var autocaptureManager: AutocaptureManager?
+    #endif
 
     /// Accessor the Mixpanel Feature Flags API object.
     open var flags: MixpanelFlags!
@@ -550,6 +555,27 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             optOutTracking()
         }
 
+        // Initialize autocapture if enabled (iOS only)
+        // Done after opt-out check so autocapture is not started when tracking is opted out.
+        // Note: optOutTracking() runs async on trackingQueue, so hasOptedOutTracking() may
+        // not reflect the default yet. Check optOutTrackingByDefault directly as well.
+        #if os(iOS)
+        if let autocaptureOpts = self.options.autocaptureOptions, autocaptureOpts.isEnabled {
+            if optOutTrackingByDefault || hasOptedOutTracking() {
+                MixpanelLogger.info(message: "Autocapture disabled: tracking is opted out")
+            } else if MixpanelInstance.isiOSAppExtension() {
+                MixpanelLogger.info(message: "Autocapture disabled in app extension")
+            } else {
+                autocaptureManager = AutocaptureManager(
+                    options: autocaptureOpts,
+                    autocapture: autocapture
+                )
+                autocaptureManager?.start()
+                MixpanelLogger.info(message: "AutocaptureManager started")
+            }
+        }
+        #endif
+
         if let superProperties = superProperties {
             registerSuperProperties(superProperties)
         }
@@ -570,6 +596,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if self.options.featureFlagOptions.prefetchFlags {
             flags.loadFlags()
         }
+
     }
 
     public func getOptions() -> MixpanelOptions {
@@ -649,6 +676,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     deinit {
         NotificationCenter.default.removeObserver(self)
+        #if os(iOS)
+        autocaptureManager?.stop()
+        #endif
         #if os(iOS) && !os(watchOS) && !targetEnvironment(macCatalyst)
         if let reachability = self.reachability {
             if !SCNetworkReachabilitySetCallback(reachability, nil, nil) {
@@ -899,33 +929,33 @@ extension MixpanelInstance {
 
     /**
        Sets the distinct ID of the current user.
-    
+
        Mixpanel uses a randomly generated persistent UUID  as the default local distinct ID.
-    
+
        If you want to  use a unique persistent UUID, you can define the
        <code>MIXPANEL_UNIQUE_DISTINCT_ID</code> flag in your <code>Active Compilation Conditions</code>
        build settings. It then uses the IFV String (`UIDevice.current().identifierForVendor`) as
        the default local distinct ID. This ID will identify a user across all apps by the same vendor, but cannot be
        used to link the same user across apps from different vendors. If we are unable to get an IFV, we will fall
        back to generating a random persistent UUID.
-    
+
        For tracking events, you do not need to call `identify:`. However,
        **Mixpanel User profiles always requires an explicit call to `identify:`.**
        If calls are made to
        `set:`, `increment` or other `People`
        methods prior to calling `identify:`, then they are queued up and
        flushed once `identify:` is called.
-    
+
        If you'd like to use the default distinct ID for Mixpanel People as well
        (recommended), call `identify:` using the current distinct ID:
        `mixpanelInstance.identify(mixpanelInstance.distinctId)`.
-    
+
        When the distinct ID actually changes, this method also resets feature-flag state
        (in-memory variants, on-disk cache, and activated first-time-event set) before fetching
        flags under the new identity. Any `flags.loadFlags(completion:)` callbacks pending from
        a fetch that was in flight at the moment identify was called will fire with `false`
        (so callers don't hang) — they will *not* receive the result of the new identity's fetch.
-    
+
        - parameter distinctId: string that uniquely identifies the current user
        - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
        This should only be set to false if you wish to prevent people profile updates for that user.
@@ -1009,18 +1039,18 @@ extension MixpanelInstance {
     /**
        The alias method creates an alias which Mixpanel will use to remap one id to another.
        Multiple aliases can point to the same identifier.
-    
+
        Please note: With Mixpanel Identity Merge enabled, calling alias is no longer required
        but can be used to merge two IDs in scenarios where identify() would fail
-    
-    
+
+
        `mixpanelInstance.createAlias("New ID", distinctId: mixpanelInstance.distinctId)`
-    
+
        You can add multiple id aliases to the existing id
-    
+
        `mixpanelInstance.createAlias("Newer ID", distinctId: mixpanelInstance.distinctId)`
-    
-    
+
+
        - parameter alias:      A unique identifier that you want to use as an identifier for this user.
        - parameter distinctId: The current user identifier.
        - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
@@ -1112,7 +1142,7 @@ extension MixpanelInstance {
     /**
        Clears all stored properties including the distinct Id.
        Useful if your app's user logs out.
-    
+
        - parameter completion: an optional completion handler for when the reset has completed.
        */
     public func reset(completion: (() -> Void)? = nil) {
@@ -1244,12 +1274,12 @@ extension MixpanelInstance {
 
     /**
        Uploads queued data to the Mixpanel server.
-    
+
        By default, queued data is flushed to the Mixpanel servers every minute (the
        default for `flushInterval`), and on background (since
        `flushOnBackground` is on by default). You only need to call this
        method manually if you want to force a flush at a particular moment.
-    
+
        - parameter performFullFlush: A optional boolean value indicating whether a full flush should be performed. If `true`, a full flush will be triggered, sending all events to the server. Default to `false`, a partial flush will be executed for reducing memory footprint.
        - parameter completion: an optional completion handler for when the flush has completed.
        */
@@ -1340,6 +1370,23 @@ extension MixpanelInstance {
         }
     }
 
+    // MARK: - Autocapture
+
+    #if os(iOS)
+    /**
+      Signals to the SDK that a UI change occurred.
+
+      Call this when a UI change happens that the dead click detector cannot observe,
+      such as navigation in React Native or other framework-driven UI changes.
+      This cancels any pending dead click detection to prevent false positives.
+
+      This method is safe to call even if autocapture is not enabled; it will simply do nothing.
+     */
+    public func signalUIChange() {
+        autocaptureManager?.signalUIChange()
+    }
+    #endif
+
 }
 
 extension MixpanelInstance {
@@ -1348,12 +1395,12 @@ extension MixpanelInstance {
     /**
        Tracks an event with properties.
        Properties are optional and can be added only if needed.
-    
+
        Properties will allow you to segment your events in your Mixpanel reports.
        Property keys must be String objects and the supported value types need to conform to MixpanelType.
        MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
        If the event is being timed, the timer will stop and be added as a property.
-    
+
        - parameter event:      event name
        - parameter properties: properties dictionary
        */
@@ -1403,12 +1450,12 @@ extension MixpanelInstance {
     /**
        Tracks an event with properties and to specific groups.
        Properties and groups are optional and can be added only if needed.
-    
+
        Properties will allow you to segment your events in your Mixpanel reports.
        Property and group keys must be String objects and the supported value types need to conform to MixpanelType.
        MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
        If the event is being timed, the timer will stop and be added as a property.
-    
+
        - parameter event:      event name
        - parameter properties: properties dictionary
        - parameter groups:     groups dictionary
@@ -1494,13 +1541,13 @@ extension MixpanelInstance {
     /**
        Starts a timer that will be stopped and added as a property when a
        corresponding event is tracked.
-    
+
        This method is intended to be used in advance of events that have
        a duration. For example, if a developer were to track an "Image Upload" event
        she might want to also know how long the upload took. Calling this method
        before the upload code would implicitly cause the `track`
        call to record its duration.
-    
+
        - precondition:
        // begin timing the image upload:
        mixpanelInstance.time(event:"Image Upload")
@@ -1509,9 +1556,9 @@ extension MixpanelInstance {
        // track the event
        mixpanelInstance.track("Image Upload")
        }
-    
+
        - parameter event: the event name to be timed
-    
+
        */
     public func time(event: String) {
         let startTime = Date().timeIntervalSince1970
@@ -1528,7 +1575,7 @@ extension MixpanelInstance {
 
     /**
        Retrieves the time elapsed for the named event since time(event:) was called.
-    
+
        - parameter event: the name of the event to be tracked that was passed to time(event:)
        */
     public func eventElapsedTime(event: String) -> Double {
@@ -1559,7 +1606,7 @@ extension MixpanelInstance {
 
     /**
        Clears the event timer for the named event.
-    
+
        - parameter event: the name of the event to clear the timer for
        */
     public func clearTimedEvent(event: String) {
@@ -1574,7 +1621,7 @@ extension MixpanelInstance {
 
     /**
        Returns the currently set super properties.
-    
+
        - returns: the current super properties
        */
     public func currentSuperProperties() -> [String: Any] {
@@ -1599,13 +1646,13 @@ extension MixpanelInstance {
 
     /**
        Registers super properties, overwriting ones that have already been set.
-    
+
        Super properties, once registered, are automatically sent as properties for
        all event tracking calls. They save you having to maintain and add a common
        set of properties to your events.
        Property keys must be String objects and the supported value types need to conform to MixpanelType.
        MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
-    
+
        - parameter properties: properties dictionary
        */
     public func registerSuperProperties(_ properties: Properties) {
@@ -1627,10 +1674,10 @@ extension MixpanelInstance {
     /**
        Registers super properties without overwriting ones that have already been set,
        unless the existing value is equal to defaultValue. defaultValue is optional.
-    
+
        Property keys must be String objects and the supported value types need to conform to MixpanelType.
        MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
-    
+
        - parameter properties:   properties dictionary
        - parameter defaultValue: Optional. overwrite existing properties that have this value
        */
@@ -1656,7 +1703,7 @@ extension MixpanelInstance {
 
     /**
        Removes a previously registered super property.
-    
+
        As an alternative to clearing all properties, unregistering specific super
        properties prevents them from being recorded on future events. This operation
        does not affect the value of other super properties. Any property name that is
@@ -1664,7 +1711,7 @@ extension MixpanelInstance {
        Note that after removing a super property, events will show the attribute as
        having the value `undefined` in Mixpanel until a new value is
        registered.
-    
+
        - parameter propertyName: array of property name strings to remove
        */
     public func unregisterSuperProperty(_ propertyName: String) {
@@ -1685,7 +1732,7 @@ extension MixpanelInstance {
 
     /**
        Updates a super property atomically. The update function
-    
+
        - parameter update: closure to apply to super properties
        */
     func updateSuperProperty(
@@ -1709,7 +1756,7 @@ extension MixpanelInstance {
 
     /**
        Convenience method to set a single group the user belongs to.
-    
+
        - parameter groupKey: The property name associated with this group type (must already have been set up).
        - parameter groupID: The group the user belongs to.
        */
@@ -1723,7 +1770,7 @@ extension MixpanelInstance {
 
     /**
        Set the groups this user belongs to.
-    
+
        - parameter groupKey: The property name associated with this group type (must already have been set up).
        - parameter groupIDs: The list of groups the user belongs to.
        */
@@ -1739,7 +1786,7 @@ extension MixpanelInstance {
 
     /**
        Add a group to this user's membership for a particular group key
-    
+
        - parameter groupKey: The property name associated with this group type (must already have been set up).
        - parameter groupID: The new group the user belongs to.
        */
@@ -1772,7 +1819,7 @@ extension MixpanelInstance {
 
     /**
        Remove a group from this user's membership for a particular group key
-    
+
        - parameter groupKey: The property name associated with this group type (must already have been set up).
        - parameter groupID: The group value to remove.
        */
@@ -1805,7 +1852,7 @@ extension MixpanelInstance {
 
     /**
        Opt out tracking.
-    
+
        This method is used to opt out tracking. This causes all events and people request no longer
        to be sent back to the Mixpanel server.
        */
@@ -1849,17 +1896,21 @@ extension MixpanelInstance {
             if let flagManager = self.flags as? FeatureFlagManager {
                 flagManager.reset()
             }
+
+            #if os(iOS)
+            self.autocaptureManager?.stop()
+            #endif
         }
     }
 
     /**
        Opt in tracking.
-    
+
        Use this method to opt in an already opted out user from tracking. People updates and track calls will be
        sent to Mixpanel after using this method.
-    
+
        This method will internally track an opt in event to your project.
-    
+
        - parameter distinctId: an optional string to use as the distinct ID for events
        - parameter properties: an optional properties dictionary that could be passed to add properties to the opt-in event
        that is sent to Mixpanel
@@ -1877,13 +1928,34 @@ extension MixpanelInstance {
                 self.identify(distinctId: distinctId)
             }
             self.track(event: "$opt_in", properties: properties)
+
+            #if os(iOS)
+            // Restart autocapture if it was configured but stopped due to opt-out
+            if self.autocaptureManager == nil,
+                let autocaptureOpts = self.options.autocaptureOptions,
+                autocaptureOpts.isEnabled,
+                !MixpanelInstance.isiOSAppExtension()
+            {
+                let manager = AutocaptureManager(
+                    options: autocaptureOpts,
+                    autocapture: self.autocapture
+                )
+                self.autocaptureManager = manager
+                DispatchQueue.main.async {
+                    manager.start()
+                }
+                MixpanelLogger.info(message: "AutocaptureManager started after opt-in")
+            } else {
+                self.autocaptureManager?.start()
+            }
+            #endif
         }
 
     }
 
     /**
        Returns if the current user has opted out tracking.
-    
+
        - returns: the current super opted out tracking status
        */
     public func hasOptedOutTracking() -> Bool {

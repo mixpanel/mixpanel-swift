@@ -50,7 +50,7 @@ final class AutocaptureManager {
         self.autocapture = autocapture
 
         // Initialize components
-        self.semanticExtractor = SemanticExtractor()
+        self.semanticExtractor = SemanticExtractor(autocaptureOptions: options)
 
         // Initialize rage click tracker if enabled
         if options.rageClickOptions.enabled {

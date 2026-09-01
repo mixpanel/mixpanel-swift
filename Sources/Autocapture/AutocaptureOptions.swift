@@ -17,7 +17,10 @@ import UIKit
 /// Internal configuration constants not exposed in public API
 enum AutocaptureDefaults {
     static let maxHierarchyDepth = 5
-    static let maxAncestorSearchDepth = 20
+    /// Maximum ancestors to walk when searching for a clickable parent.
+    /// Set to 10: covers all practical view depths (typically 1–5 levels),
+    /// with safety margin, while avoiding walk-up into navigation-level containers.
+    static let maxAncestorSearchDepth = 10
     static let maxRecursionDepth = 20
 
     #if os(iOS)

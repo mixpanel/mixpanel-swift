@@ -17,6 +17,8 @@ class AutocaptureMenuViewController: UIViewController, UITableViewDelegate, UITa
         "SwiftUI Autocapture Tests",
         "Stress Test UIKit (500+ views)",
         "Stress Test SwiftUI (500+ views)",
+        "UIKit Walk-Up Tests",
+        "SwiftUI Walk-Up Tests",
     ]
 
     override func viewDidLoad() {
@@ -71,6 +73,14 @@ class AutocaptureMenuViewController: UIViewController, UITableViewDelegate, UITa
             case 3:
                 if #available(iOS 14.0, *) {
                     let vc = ComplexSwiftUIStressTestHostingController()
+                    navigationController?.pushViewController(vc, animated: true)
+                }
+            case 4:
+                let vc = UIKitWalkUpTestViewController()
+                navigationController?.pushViewController(vc, animated: true)
+            case 5:
+                if #available(iOS 14.0, *) {
+                    let vc = SwiftUIWalkUpTestHostingController()
                     navigationController?.pushViewController(vc, animated: true)
                 }
             default:

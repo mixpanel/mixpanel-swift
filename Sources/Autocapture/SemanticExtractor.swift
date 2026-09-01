@@ -13,6 +13,14 @@ import UIKit
 ///
 /// Handles element identification and role detection.
 final class SemanticExtractor {
+    // MARK: - Configuration
+
+    private let autocaptureOptions: AutocaptureOptions
+
+    init(autocaptureOptions: AutocaptureOptions = AutocaptureOptions()) {
+        self.autocaptureOptions = autocaptureOptions
+    }
+
     // MARK: - Constants
 
     private static let maxHierarchyDepth = AutocaptureDefaults.maxHierarchyDepth
@@ -27,7 +35,7 @@ final class SemanticExtractor {
         // UIKit hit-testing returns the deepest view. For UIButton > UILabel,
         // we get the UILabel — wrong role, wrong el_id, not interactive.
         // Walk up to the nearest clickable ancestor when the leaf isn't interactive.
-        let interactiveAncestor = isInteractive(view) ? view : findInteractiveAncestor(of: view)
+        let interactiveAncestor: UIView? = isInteractive(view) ? view : findInteractiveAncestor(of: view)
         // Use the interactive ancestor as target for semantic extraction, but never UIWindow —
         // its gesture recognizers are infrastructure (TouchInterceptor), not user-facing controls.
         // Using UIWindow would produce wrong $el_id, tagName, role, etc.

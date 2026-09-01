@@ -1378,26 +1378,6 @@ extension MixpanelInstance {
         }
     }
 
-    // MARK: - Autocapture
-
-    #if os(iOS)
-    /**
-      Signals to the SDK that a UI change occurred.
-
-      Call this when a UI change happens that the dead click detector cannot observe,
-      such as navigation in React Native or other framework-driven UI changes.
-      This cancels any pending dead click detection to prevent false positives.
-
-      This method is safe to call even if autocapture is not enabled; it will simply do nothing.
-      On Mac Catalyst, where autocapture is unsupported, it is always a no-op.
-     */
-    public func signalUIChange() {
-        #if !targetEnvironment(macCatalyst)
-        autocaptureManager?.signalUIChange()
-        #endif
-    }
-    #endif
-
 }
 
 extension MixpanelInstance {

@@ -508,18 +508,22 @@ class AutocaptureWalkUpUIKitTests: MixpanelBaseTests {
         }
     }
 
-    // MARK: - Test 5b: Non-interactive leaf with label, no interactive ancestor -> own label
+    // MARK: - Test 5b: Non-interactive leaf with an accessibilityLabel -> still hash fallback
 
-    func testNoWalkUp_NonInteractiveLeafWithLabelNoInteractiveAncestor_GetsOwnLabel() {
+    func testNoWalkUp_NonInteractiveLeafWithLabelNoInteractiveAncestor_IgnoresAccessibilityLabel() {
         simulateTap(on: testVC.nonInteractiveLabeledLeaf)
 
         let event = waitForEvent(named: "$mp_click", timeout: 5)
         XCTAssertNotNil(event, "Should capture $mp_click event for orphan labeled leaf")
 
         if let props = event?.properties {
-            XCTAssertEqual(
-                props["$el_id"] as? String, "orphan_label",
-                "Non-interactive leaf with label but no interactive ancestor should use own accessibilityLabel")
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertNotEqual(
+                elId, "orphan_label",
+                "accessibilityLabel is never a source for $el_id")
+            XCTAssertTrue(
+                elId.hasPrefix("UILabel_"),
+                "Leaf with only an accessibilityLabel should use hash fallback, got: \(elId)")
         }
     }
 

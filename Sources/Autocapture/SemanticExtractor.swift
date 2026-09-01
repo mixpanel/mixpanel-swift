@@ -56,8 +56,16 @@ final class SemanticExtractor {
         }
 
         let className = String(describing: type(of: targetView))
-        let elementId = generateElementId(for: targetView)
-        let accessibleLabel = findAccessibilityLabel(in: targetView)
+        var accessibleLabel = findAccessibilityLabel(in: targetView)
+
+        // SwiftUI views render as internal UIKit views (e.g., PlatformGroupContainer) that
+        // don't carry the SwiftUI accessibilityLabel on the UIKit view. Query the SwiftUI
+        // accessibility element tree at the touch point to retrieve the label.
+        if accessibleLabel == nil, AutocaptureDefaults.isSwiftUIView(targetView) {
+            accessibleLabel = findSwiftUIAccessibilityLabel(at: point, view: targetView)
+        }
+
+        let elementId = accessibleLabel ?? generateElementId(for: targetView)
         let role = determineRole(for: targetView)
         let tagName = resolveTagName(className: className, role: role, view: targetView)
         let elements = buildViewHierarchy(from: targetView)
@@ -76,18 +84,16 @@ final class SemanticExtractor {
 
     // MARK: - Element ID Generation
 
-    /// Generate element ID following platform-specific resolution rules:
+    /// Generate a hash-based element ID as fallback when no accessibility label is available.
     ///
-    /// Resolution order (same for UIKit and SwiftUI):
-    /// 1. `accessibilityLabel` (if non-empty)
-    /// 2. `accessibilityIdentifier` (if non-empty)
-    /// 3. `ClassName_<hash>`
+    /// Resolution order:
+    /// 1. `accessibilityIdentifier` (if non-empty)
+    /// 2. `ClassName_<hash>`
+    ///
+    /// Note: `accessibilityLabel` is checked by the caller (`extractSemantics`) via
+    /// `findAccessibilityLabel` before falling back to this method.
     private func generateElementId(for view: UIView) -> String {
-        // accessibilityLabel is primary for both UIKit and SwiftUI
-        if let label = findAccessibilityLabel(in: view), !label.isEmpty {
-            return label
-        }
-        // accessibilityIdentifier as fallback
+        // accessibilityIdentifier as primary fallback
         if let identifier = findAccessibilityIdentifier(in: view), !identifier.isEmpty {
             return identifier
         }
@@ -119,7 +125,27 @@ final class SemanticExtractor {
         return nil
     }
 
+    /// Returns the view's accessibilityLabel only if it was explicitly set by the developer.
+    ///
+    /// UIKit auto-derives accessibilityLabel from child text content for container
+    /// views where isAccessibilityElement is false. That derived text may contain
+    /// sensitive information (e.g., account numbers, personal details).
+    ///
+    /// For known UIKit controls (UIButton, UILabel, etc.) and SwiftUI views, the
+    /// label is always intentional (title-derived or explicitly set), so we capture it.
+    /// For generic container views (e.g., React Native's RCTView), we only capture
+    /// the label when isAccessibilityElement is true — in React Native, this maps
+    /// to `accessible={true}`, signaling an explicitly set label.
     private func findAccessibilityLabel(in view: UIView) -> String? {
+        let isKnownControl =
+            view is UIButton || view is UILabel || view is UISwitch
+            || view is UISlider || view is UITextField || view is UITextView
+            || view is UISegmentedControl || view is UIStepper || view is UIImageView
+        if !isKnownControl && !view.isAccessibilityElement
+            && !AutocaptureDefaults.isSwiftUIView(view)
+        {
+            return nil
+        }
         if let label = view.accessibilityLabel, !label.isEmpty {
             return label
         }
@@ -260,6 +286,40 @@ final class SemanticExtractor {
             current = v.superview
             depth += 1
         }
+        return nil
+    }
+
+    /// Query the SwiftUI accessibility element tree at the touch point to retrieve the label.
+    ///
+    /// SwiftUI views render as internal UIKit views (e.g., PlatformGroupContainer) that don't
+    /// expose `accessibilityLabel` on the UIKit view. The label lives in SwiftUI's accessibility
+    /// element tree, which we can query via `accessibilityHitTest`.
+    ///
+    /// We walk up to find the UIHostingController's view (class name contains "Hosting"),
+    /// which owns the full SwiftUI accessibility tree. Calling `accessibilityHitTest` on
+    /// a leaf PlatformGroupContainer won't traverse the tree properly.
+    private func findSwiftUIAccessibilityLabel(at windowPoint: CGPoint, view: UIView) -> String? {
+        guard #available(iOS 18.0, *) else { return nil }
+        guard let window = view.window else { return nil }
+
+        // Walk up to find the UIHostingController's view which owns the accessibility tree
+        var current: UIView? = view
+        var depth = 0
+        while let v = current, depth < AutocaptureDefaults.maxAncestorSearchDepth {
+            let className = String(describing: type(of: v))
+            if className.contains("Hosting") {
+                let screenPoint = window.convert(windowPoint, to: window.screen.coordinateSpace)
+                if let element = v.accessibilityHitTest(screenPoint, event: nil) as? NSObject,
+                    let label = element.accessibilityLabel, !label.isEmpty
+                {
+                    return label
+                }
+                break
+            }
+            current = v.superview
+            depth += 1
+        }
+
         return nil
     }
 

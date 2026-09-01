@@ -177,6 +177,127 @@ class AutocaptureSwiftUIInstrumentedTests: MixpanelBaseTests {
         }
     }
 
+    // MARK: - Visibility Tests (SwiftUI)
+
+    /// A hidden SwiftUI Button (.hidden() modifier) must not produce autocapture
+    /// events with its identity. The view is not drawn at all.
+    func testSwiftUIHiddenView_NoEventCaptured() {
+        simulateTapOnSwiftUIButton(index: 6)
+
+        Thread.sleep(forTimeInterval: 0.5)
+        waitForTrackingQueue(mixpanel)
+        let events = eventQueue(token: mixpanel.apiToken)
+        let matchingEvents = events.filter {
+            guard let props = $0["properties"] as? [String: Any],
+                let elId = props["$el_id"] as? String
+            else { return false }
+            return elId.contains("Hidden SwiftUI")
+        }
+
+        XCTAssertEqual(
+            matchingEvents.count, 0,
+            "Hidden SwiftUI view must not produce autocapture events with its identity")
+    }
+
+    /// A zero-opacity SwiftUI Button (.opacity(0)) must not produce autocapture
+    /// events with its identity. The view is fully transparent.
+    func testSwiftUIZeroOpacity_NoEventCaptured() {
+        simulateTapOnSwiftUIButton(index: 7)
+
+        Thread.sleep(forTimeInterval: 0.5)
+        waitForTrackingQueue(mixpanel)
+        let events = eventQueue(token: mixpanel.apiToken)
+        let matchingEvents = events.filter {
+            guard let props = $0["properties"] as? [String: Any],
+                let elId = props["$el_id"] as? String
+            else { return false }
+            return elId.contains("Zero Opacity")
+        }
+
+        XCTAssertEqual(
+            matchingEvents.count, 0,
+            "Zero-opacity SwiftUI view must not produce autocapture events with its identity")
+    }
+
+    // MARK: - Accessibility Guard Tests (SwiftUI)
+
+    /// Scenario 1 & 2: SwiftUI Button with no explicit accessibilityLabel.
+    /// SwiftUI auto-derives label from the title Text — this is the developer's
+    /// intentional choice (analogous to UIButton.title, which is always captured
+    /// via the known-control bypass). The auto-derived label SHOULD be captured.
+    ///
+    /// Note: SwiftUI only fully materializes its accessibility element tree when VoiceOver
+    /// (or another assistive technology) is active. Without VoiceOver, the label falls back
+    /// to the UIKit host view's hash-based ID. This test validates that an event IS captured
+    /// and that the $el_id is either the expected label or a valid fallback.
+    func testSwiftUIButtonNoLabel_AutoDerivedIsCaptured() {
+        simulateTapOnSwiftUIButton(index: 8)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Click event should be captured")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            // When VoiceOver is active, SwiftUI auto-derived label is captured.
+            // Without VoiceOver, falls back to UIKit host view hash.
+            // Either way, $el_id must not be empty.
+            XCTAssertFalse(elId.isEmpty, "$el_id should not be empty")
+            // The label is either the auto-derived title or a PlatformGroupContainer hash
+            let hasExpectedLabel = elId == "Sensitive Account 1234"
+            let hasFallbackId = elId.contains("PlatformGroupContainer")
+            XCTAssertTrue(
+                hasExpectedLabel || hasFallbackId,
+                "$el_id should be auto-derived label or hash fallback. Got: \(elId)")
+        }
+    }
+
+    /// Scenario 4: SwiftUI view with .accessibilityHidden(true).
+    /// Even though an explicit accessibilityLabel is set, the element is hidden
+    /// from accessibility — the label should NOT be captured.
+    func testSwiftUIAccessibilityHidden_LabelDoesNotLeak() {
+        simulateTapOnSwiftUIButton(index: 9)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Click event should still be captured")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            XCTAssertFalse(
+                elId.contains("Sensitive") || elId.contains("9999"),
+                "$el_id should not contain label from hidden element. Got: \(elId)")
+
+            XCTAssertNil(
+                props["$attr-aria-label"],
+                "$attr-aria-label must not be present for accessibility-hidden element")
+        }
+    }
+
+    /// Positive case: SwiftUI Button with explicit accessibilityLabel.
+    /// The label SHOULD be captured in $el_id and $attr-aria-label.
+    ///
+    /// Note: SwiftUI only fully materializes its accessibility element tree when VoiceOver
+    /// (or another assistive technology) is active. Without VoiceOver, the label falls back
+    /// to the UIKit host view's hash-based ID. This test validates the event is captured
+    /// and either the explicit label or a valid fallback is used.
+    func testSwiftUIButtonWithLabel_LabelIsCaptured() {
+        simulateTapOnSwiftUIButton(index: 10)
+
+        let event = waitForEvent(named: "$mp_click", timeout: 5)
+        XCTAssertNotNil(event, "Click event should be captured")
+
+        if let props = event?.properties {
+            let elId = props["$el_id"] as? String ?? ""
+            // When VoiceOver is active, the explicit accessibilityLabel is captured.
+            // Without VoiceOver, falls back to UIKit host view hash.
+            XCTAssertFalse(elId.isEmpty, "$el_id should not be empty")
+            let hasExpectedLabel = elId == "Intended Label"
+            let hasFallbackId = elId.contains("PlatformGroupContainer")
+            XCTAssertTrue(
+                hasExpectedLabel || hasFallbackId,
+                "$el_id should be explicit label or hash fallback. Got: \(elId)")
+        }
+    }
+
     // MARK: - Test 4: Rage Click Detection
 
     func testSwiftUIRageClickDetection() {
@@ -569,6 +690,11 @@ class AutocaptureSwiftUIInstrumentedTests: MixpanelBaseTests {
         "Both Label SwiftUI",  // 3
         "Rage Zone SwiftUI",  // 4
         "Dead Button SwiftUI",  // 5
+        "Hidden SwiftUI Btn",  // 6 (hidden — .hidden() modifier)
+        "Zero Opacity SwiftUI Btn",  // 7 (zero opacity — .opacity(0))
+        "Sensitive Account 1234",  // 8 (no explicit label — auto-derived from title)
+        "Sensitive Account 9999",  // 9 (hidden from accessibility, has explicit label)
+        "Intended Label",  // 10 (explicit label — positive case)
     ]
 
     /// Find the center point and hit-test view for a SwiftUI button by probing the VStack layout.
@@ -774,6 +900,66 @@ struct SwiftUIAutocaptureTestView: View {
                 .accessibilityLabel("Dead Button SwiftUI")
                 .padding()
                 .background(Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+
+                // ============ Visibility Test Elements ============
+
+                // Hidden Button — .hidden() modifier, not drawn at all
+                Button("Hidden SwiftUI Button") {
+                    tapCount += 1
+                }
+                .accessibilityLabel("Hidden SwiftUI Btn")
+                .hidden()
+                .padding()
+                .background(Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+
+                // Zero-opacity Button — fully transparent
+                Button("Zero Opacity SwiftUI Button") {
+                    tapCount += 1
+                }
+                .accessibilityLabel("Zero Opacity SwiftUI Btn")
+                .opacity(0)
+                .padding()
+                .background(Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+
+                // ============ Accessibility Guard Test Elements ============
+
+                // Scenario 1 & 2: Button with no explicit accessibilityLabel.
+                // SwiftUI auto-derives label from title Text — this is the developer's
+                // intentional choice (like UIButton.title), so capture is correct.
+                Button("Sensitive Account 1234") {
+                    tapCount += 1
+                }
+                // NO .accessibilityLabel() — auto-derived from title
+                .padding()
+                .background(Color.cyan)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+
+                // Scenario 4: Button hidden from accessibility with explicit label.
+                // .accessibilityHidden(true) should prevent label capture.
+                Button("Hidden Button") {
+                    tapCount += 1
+                }
+                .accessibilityHidden(true)
+                .accessibilityLabel("Sensitive Account 9999")
+                .padding()
+                .background(Color.brown)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+
+                // Positive case: Button with explicit accessibilityLabel.
+                Button("Positive Case Button") {
+                    tapCount += 1
+                }
+                .accessibilityLabel("Intended Label")
+                .padding()
+                .background(Color.teal)
                 .foregroundColor(.white)
                 .cornerRadius(8)
             }

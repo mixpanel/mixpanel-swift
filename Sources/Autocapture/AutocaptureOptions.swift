@@ -53,10 +53,13 @@ enum AutocaptureDefaults {
         "DatePicker",  // SwiftUI DatePicker
     ]
 
-    /// Check if a single view is a SwiftUI view (class name contains "Hosting" or "SwiftUI").
+    /// Check if a single view is a SwiftUI view.
+    /// Matches internal UIKit class names used by SwiftUI: *Hosting*, *SwiftUI*, and
+    /// PlatformGroupContainer (introduced in iOS 26).
     static func isSwiftUIView(_ view: UIView) -> Bool {
         let className = String(describing: type(of: view))
         return className.contains("Hosting") || className.contains("SwiftUI")
+            || className.hasPrefix("PlatformGroup")
     }
 
     /// Check if a view is interactive (UIControl with targets, has enabled tap gesture recognizer,

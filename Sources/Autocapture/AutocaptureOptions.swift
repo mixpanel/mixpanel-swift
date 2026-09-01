@@ -221,6 +221,9 @@ public struct DeadClickOptions {
 /// )
 /// ```
 ///
+/// **Platform support:** iOS only. Mac Catalyst builds accept these options so shared iOS sources
+/// keep compiling, but automatic capture never starts there.
+///
 /// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the properties
 ///   it captures may change in a future release before general availability. Pin your SDK version if
 ///   you build reports on autocaptured events.

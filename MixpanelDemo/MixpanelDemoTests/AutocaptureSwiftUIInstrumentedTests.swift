@@ -966,7 +966,7 @@ struct SwiftUIAutocaptureTestView: View {
                 }
                 // NO .accessibilityLabel() — auto-derived from title
                 .padding()
-                .background(Color.cyan)
+                .background(Color(UIColor.cyan))
                 .foregroundColor(.white)
                 .cornerRadius(8)
 
@@ -978,7 +978,7 @@ struct SwiftUIAutocaptureTestView: View {
                 .accessibilityHidden(true)
                 .accessibilityLabel("Sensitive Account 9999")
                 .padding()
-                .background(Color.brown)
+                .background(Color(UIColor.brown))
                 .foregroundColor(.white)
                 .cornerRadius(8)
 
@@ -988,7 +988,7 @@ struct SwiftUIAutocaptureTestView: View {
                 }
                 .accessibilityLabel("Intended Label")
                 .padding()
-                .background(Color.teal)
+                .background(Color(UIColor.systemTeal))
                 .foregroundColor(.white)
                 .cornerRadius(8)
             }

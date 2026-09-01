@@ -18,8 +18,9 @@ import UIKit
 /// this method returns.
 ///
 /// When no extractor is provided, the SDK falls back to an internal default implementation that
-/// resolves the identifier from the React Native `nativeID`, then `accessibilityIdentifier`, then
-/// `accessibilityLabel`.
+/// resolves the identifier from the React Native `nativeID`, then `accessibilityIdentifier`, then a
+/// structural fallback. `accessibilityLabel` is deliberately not a source: it is localized, so the
+/// same element would report a different identifier per language, and it can carry user data.
 ///
 /// **Example:**
 /// ```swift
@@ -58,15 +59,15 @@ public protocol ElementIdExtractor {
 ///    through UIKit, never SwiftUI, so the probe could only ever be wasted work there.
 /// 2. **`accessibilityIdentifier`** — stable, developer-assigned, and not user-visible. Internal
 ///    framework identifiers (e.g. `_UIKit…`, `AXID-…`) are skipped.
-/// 3. **`accessibilityLabel`** — only when the label was intentionally set (see
-///    `intentionalAccessibilityLabel(for:)`), so framework-derived text that may contain user data
-///    is not reported.
-/// 4. **Anonymous fallback** — `<ClassName>_<hash>` derived from the view's class and hash.
+/// 3. **Anonymous fallback** — `<ClassName>_<hash>`, where the hash describes the view's position in
+///    the hierarchy (see `structuralPath(for:)`) rather than its identity.
 ///
-/// For SwiftUI, steps 1–3 collapse to `accessibilityIdentifier` > `accessibilityLabel` > hash. Both
-/// of those properties live in SwiftUI's accessibility element tree rather than on the backing
-/// `UIView`, so `SemanticExtractor` resolves them from that tree and passes them in as the
-/// `accessibilityIdentifierFallback` / `accessibilityLabelFallback` arguments below.
+/// `accessibilityLabel` is deliberately absent. It is user-facing text: localized, so the same
+/// element would report a different identifier per language, and capable of carrying personal data.
+///
+/// For SwiftUI, step 1 is skipped and the identifier lives in SwiftUI's accessibility element tree
+/// rather than on the backing `UIView`, so `SemanticExtractor` resolves it from that tree and passes
+/// it in as the `accessibilityIdentifierFallback` argument below.
 final class DefaultElementIdExtractor: ElementIdExtractor {
 
     static let shared = DefaultElementIdExtractor()
@@ -80,21 +81,18 @@ final class DefaultElementIdExtractor: ElementIdExtractor {
     ]
 
     func extractElementId(from view: UIView) -> String? {
-        return elementId(
-            for: view, accessibilityIdentifierFallback: nil, accessibilityLabelFallback: nil)
+        return elementId(for: view, accessibilityIdentifierFallback: nil)
     }
 
-    /// Resolution with optional precomputed values used at priority steps 2 and 3.
+    /// Resolution with an optional precomputed identifier used at priority step 2.
     ///
-    /// SwiftUI renders its views as internal UIKit views that carry neither
-    /// `accessibilityIdentifier` nor `accessibilityLabel` on the UIKit view itself; the caller
-    /// resolves those from SwiftUI's accessibility element tree and passes them here so SwiftUI
-    /// elements still get a meaningful `$el_id`. Each fallback is consulted only after the view's
-    /// own property for that step, so an identifier always outranks any label.
+    /// SwiftUI renders its views as internal UIKit views that do not carry
+    /// `accessibilityIdentifier` on the UIKit view itself; the caller resolves it from SwiftUI's
+    /// accessibility element tree and passes it here so SwiftUI elements still get a meaningful
+    /// `$el_id`. The fallback is consulted only after the view's own identifier.
     func elementId(
         for view: UIView,
-        accessibilityIdentifierFallback: String?,
-        accessibilityLabelFallback: String?
+        accessibilityIdentifierFallback: String?
     ) -> String {
         // 1. React Native nativeID (UIKit-backed views only)
         if let nativeId = reactNativeId(for: view) {
@@ -115,15 +113,7 @@ final class DefaultElementIdExtractor: ElementIdExtractor {
             return fallbackIdentifier
         }
 
-        // 3. accessibilityLabel (only when intentionally set)
-        if let label = intentionalAccessibilityLabel(for: view) {
-            return label
-        }
-        if let fallbackLabel = accessibilityLabelFallback, !fallbackLabel.isEmpty {
-            return fallbackLabel
-        }
-
-        // 4. Anonymous fallback
+        // 3. Anonymous fallback
         return DefaultElementIdExtractor.anonymousId(for: view)
     }
 
@@ -147,32 +137,6 @@ final class DefaultElementIdExtractor: ElementIdExtractor {
         return nativeId
     }
 
-    // MARK: - Accessibility
-
-    /// Returns the view's `accessibilityLabel` only when it was intentionally set.
-    ///
-    /// UIKit auto-derives `accessibilityLabel` from child text for container views whose
-    /// `isAccessibilityElement` is false, and that derived text may contain sensitive information
-    /// (account numbers, personal details). Known UIKit controls and SwiftUI views always carry an
-    /// intentional (title-derived or explicitly set) label, so they are trusted; generic containers
-    /// — e.g. React Native's `RCTView` — are trusted only when `isAccessibilityElement` is true,
-    /// which in React Native maps to `accessible={true}`.
-    private func intentionalAccessibilityLabel(for view: UIView) -> String? {
-        let isKnownControl =
-            view is UIButton || view is UILabel || view is UISwitch
-            || view is UISlider || view is UITextField || view is UITextView
-            || view is UISegmentedControl || view is UIStepper || view is UIImageView
-        if !isKnownControl && !view.isAccessibilityElement
-            && !AutocaptureDefaults.isSwiftUIView(view)
-        {
-            return nil
-        }
-        if let label = view.accessibilityLabel, !label.isEmpty {
-            return label
-        }
-        return nil
-    }
-
     private static func isInternalIdentifier(_ identifier: String) -> Bool {
         for prefix in internalIdentifierPrefixes where identifier.hasPrefix(prefix) {
             return true
@@ -184,11 +148,51 @@ final class DefaultElementIdExtractor: ElementIdExtractor {
 
     /// The anonymous, PII-free identifier used when nothing else resolves:
     /// `<ClassName>_<hash>` (e.g. `UIButton_3f2a1b`).
+    ///
+    /// The hash describes the view's **position in the hierarchy**, not its identity. `view.hash` is
+    /// per-instance and, because Swift seeds hashing per process, differs on every launch — an
+    /// element with no identifier would get a new `$el_id` every session and could never be grouped.
+    ///
+    /// It identifies a *position* rather than a specific element: reordering siblings changes the id,
+    /// and two rows of the same list differ by index, not by content.
     static func anonymousId(for view: UIView) -> String {
         let className = String(describing: type(of: view))
-        // abs(Int.min) traps, so map it to Int.max.
-        let safeHash = view.hash == Int.min ? Int.max : abs(view.hash)
-        return "\(className)_\(String(safeHash, radix: 16))"
+        return "\(className)_\(stableHash(structuralPath(for: view)))"
+    }
+
+    /// Class names and sibling indices only — never text — so the path cannot carry user data:
+    /// `UIButton@UIStackView[2]/UIScrollView[0]/UIView[1]`.
+    static func structuralPath(for view: UIView) -> String {
+        var path = String(describing: type(of: view)) + "@"
+        var current: UIView = view
+        var depth = 0
+
+        while let parent = current.superview, depth < AutocaptureDefaults.maxHierarchyDepth {
+            if depth > 0 {
+                path += "/"
+            }
+            let index = parent.subviews.firstIndex(of: current) ?? -1
+            path += "\(String(describing: type(of: parent)))[\(index)]"
+            current = parent
+            depth += 1
+        }
+
+        if depth == 0 {
+            path += "detached"
+        }
+        return path
+    }
+
+    /// FNV-1a over the path's UTF-8 bytes.
+    ///
+    /// Swift's `hashValue` is seeded per process, so it cannot be used here: the whole point of the
+    /// structural id is that it is identical across launches.
+    private static func stableHash(_ value: String) -> String {
+        var hash: UInt32 = 2_166_136_261
+        for byte in value.utf8 {
+            hash = (hash ^ UInt32(byte)) &* 16_777_619
+        }
+        return String(hash, radix: 16)
     }
 }
 #endif

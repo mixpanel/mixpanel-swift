@@ -27,7 +27,7 @@ struct SwiftUIWalkUpTestView: View {
                     .foregroundColor(.gray)
 
                 Button("Add to Cart") {}
-                    .accessibilityLabel("add_to_cart")
+                    .accessibilityIdentifier("add_to_cart")
                     .buttonStyle(TestButtonStyle())
 
                 // MARK: - 2. Nested Clickables
@@ -49,7 +49,7 @@ struct SwiftUIWalkUpTestView: View {
                             Text("Delete")
                         }
                     }
-                    .accessibilityLabel("delete_item")
+                    .accessibilityIdentifier("delete_item")
                     .buttonStyle(TestButtonStyle(color: .red))
                 }
                 .padding()
@@ -57,7 +57,7 @@ struct SwiftUIWalkUpTestView: View {
                 .background(Color(UIColor.systemGray6))
                 .cornerRadius(12)
                 .onTapGesture {}
-                .accessibilityLabel("product_card")
+                .accessibilityIdentifier("product_card")
 
                 // MARK: - 3. Clickable Container with Icon + Text
                 SectionHeader("Clickable Container with Icon + Text")
@@ -76,7 +76,7 @@ struct SwiftUIWalkUpTestView: View {
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .accessibilityLabel("checkout_action")
+                .accessibilityIdentifier("checkout_action")
                 .buttonStyle(TestButtonStyle())
 
                 // MARK: - 4. No Clickable Ancestor
@@ -95,16 +95,16 @@ struct SwiftUIWalkUpTestView: View {
                 SectionHeader("Leaf Has Own Identity")
 
                 Text(
-                    "Tap the text. Even though it has its own accessibilityLabel (\"inner_label\"), walk-up still activates and takes the clickable parent's identity. $el_id = \"outer_button\"."
+                    "Tap the text. Even though it has its own accessibilityIdentifier (\"inner_label\"), walk-up still activates and takes the clickable parent's identity. $el_id = \"outer_button\"."
                 )
                 .font(.caption)
                 .foregroundColor(.gray)
 
                 Button(action: {}) {
                     Text("I have my own identity")
-                        .accessibilityLabel("inner_label")
+                        .accessibilityIdentifier("inner_label")
                 }
-                .accessibilityLabel("outer_button")
+                .accessibilityIdentifier("outer_button")
                 .buttonStyle(TestButtonStyle())
             }
             .padding()

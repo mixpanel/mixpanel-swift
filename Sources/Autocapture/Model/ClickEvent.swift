@@ -65,9 +65,16 @@ public struct ClickEvent: Sendable {
 
     /// The semantic role describing what the element does.
     ///
-    /// Common values: `"button"`, `"link"`, `"switch"`, `"checkbox"`, `"slider"`,
-    /// `"tab"`, `"textfield"`, `"image"`.
-    /// Set to `nil` if the element has no specific role.
+    /// Autocapture emits one of these exact values, resolved from the view's class and then its
+    /// accessibility traits (see `SemanticExtractor`). They are Title Case — match on them
+    /// verbatim when building reports on `$attr-role`:
+    ///
+    /// `"Button"`, `"Link"`, `"Switch"`, `"Slider"`, `"Stepper"`, `"SegmentedControl"`,
+    /// `"TextField"`, `"TextArea"`, `"SearchField"`, `"Text"`, `"Image"`, `"List"`, `"Grid"`,
+    /// `"ScrollView"`, `"Header"`, `"TabBar"`, `"Adjustable"`.
+    ///
+    /// Set to `nil` if the element has no specific role. When constructing a `ClickEvent`
+    /// yourself, prefer one of the values above so manual and autocaptured events group together.
     public let role: String?
 
     /// View hierarchy path from the tapped element up to 5 ancestor levels, `">"` separated.

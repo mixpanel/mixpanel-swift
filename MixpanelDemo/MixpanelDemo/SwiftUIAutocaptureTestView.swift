@@ -31,17 +31,23 @@ struct SwiftUIAutocaptureTestView: View {
 
                 SectionHeader("$el_id Resolution")
 
-                Button("Rule 1 - accessibilityLabel (primary)") {}
-                    .accessibilityLabel("swiftui_rule1")
+                // Rule 1: accessibilityIdentifier is the only $el_id source for SwiftUI.
+                // Reading it needs iOS 18+ and a materialized accessibility tree; below that it
+                // falls back to the hash no matter what is set here.
+                Button("Rule 1 - accessibilityIdentifier (iOS 18+)") {}
+                    .accessibilityIdentifier("swiftui_rule1")
                     .buttonStyle(TestButtonStyle())
 
-                Button("Rule 2 - identifier only (-> hash, needs VoiceOver)") {}
-                    .accessibilityIdentifier("ident_only")
+                // Rule 2: accessibilityLabel is never an $el_id source — this falls back to the
+                // hash. The label is set deliberately so the screen proves it is ignored.
+                Button("Rule 2 - Label only (ignored -> hash)") {}
+                    .accessibilityLabel("swiftui_label_only")
                     .buttonStyle(TestButtonStyle())
 
-                Button("Label Wins over Identifier") {}
-                    .accessibilityLabel("label_wins")
-                    .accessibilityIdentifier("id_loses")
+                // Identifier is used and the label is ignored, even when both are present.
+                Button("Identifier Wins over Label") {}
+                    .accessibilityLabel("label_ignored")
+                    .accessibilityIdentifier("id_wins")
                     .buttonStyle(TestButtonStyle())
 
                 Button("Rule 3 - No ID, No Label (hash)") {}
@@ -51,7 +57,7 @@ struct SwiftUIAutocaptureTestView: View {
                     .resizable()
                     .frame(width: 44, height: 44)
                     .foregroundColor(.yellow)
-                    .accessibilityLabel("tappable_image")
+                    .accessibilityIdentifier("tappable_image")
                     .onTapGesture {}
 
                 // MARK: - Dead Click
@@ -59,7 +65,7 @@ struct SwiftUIAutocaptureTestView: View {
                 SectionHeader("Dead Click")
 
                 Button("Dead Button (empty action) -> $mp_dead_click") {}
-                    .accessibilityLabel("swiftui_dead_btn")
+                    .accessibilityIdentifier("swiftui_dead_btn")
                     .buttonStyle(TestButtonStyle())
 
                 // MARK: - Rage Click
@@ -67,14 +73,14 @@ struct SwiftUIAutocaptureTestView: View {
                 SectionHeader("Rage Click - tap 4+ times")
 
                 Button("Rage Zone - tap rapidly") {}
-                    .accessibilityLabel("swiftui_rage_btn")
+                    .accessibilityIdentifier("swiftui_rage_btn")
                     .frame(maxWidth: .infinity, minHeight: 80)
                     .background(Color.red.opacity(0.12))
 
                 Button("Click + Rage - tap 4x (both events): \(tapCount)x") {
                     tapCount += 1
                 }
-                .accessibilityLabel("swiftui_rage_click_btn")
+                .accessibilityIdentifier("swiftui_rage_click_btn")
                 .buttonStyle(TestButtonStyle())
 
                 // MARK: - Excluded Controls
@@ -96,25 +102,25 @@ struct SwiftUIAutocaptureTestView: View {
                 Button("Show Alert") {
                     showAlert = true
                 }
-                .accessibilityLabel("swiftui_alert_trigger")
+                .accessibilityIdentifier("swiftui_alert_trigger")
                 .buttonStyle(TestButtonStyle())
 
                 Button("Show Sheet") {
                     showSheet = true
                 }
-                .accessibilityLabel("swiftui_sheet_trigger")
+                .accessibilityIdentifier("swiftui_sheet_trigger")
                 .buttonStyle(TestButtonStyle())
 
                 Button("Show Confirmation Dialog") {
                     showConfirmationDialog = true
                 }
-                .accessibilityLabel("swiftui_confirmation_trigger")
+                .accessibilityIdentifier("swiftui_confirmation_trigger")
                 .buttonStyle(TestButtonStyle())
 
                 Button("Show Popover") {
                     showPopover = true
                 }
-                .accessibilityLabel("swiftui_popover_trigger")
+                .accessibilityIdentifier("swiftui_popover_trigger")
                 .buttonStyle(TestButtonStyle())
 
                 // MARK: - Mixed Framework Dead Click Tests
@@ -138,8 +144,12 @@ struct SwiftUIAutocaptureTestView: View {
                     3. Tap 4+ times rapidly on Rage Zone for $mp_rage_click
                     4. Tap Dead Button and wait 500ms for $mp_dead_click
 
-                    Note: SwiftUI uses accessibilityLabel as primary $el_id
-                    (accessibilityIdentifier requires VoiceOver to be active)
+                    Note: accessibilityIdentifier is the only $el_id source.
+                    accessibilityLabel is never used as identity and is never
+                    reported. SwiftUI keeps the identifier in the accessibility
+                    element tree, which the SDK can only read on iOS 18+ with a
+                    materialized tree — below that, elements fall back to
+                    <ClassName>_<hash> whatever identifier you set.
                     """
                 )
                 .font(.caption)
@@ -153,15 +163,15 @@ struct SwiftUIAutocaptureTestView: View {
             NavigationView {
                 VStack(spacing: 12) {
                     Button("Sheet Action 1") {}
-                        .accessibilityLabel("swiftui_sheet_action_1")
+                        .accessibilityIdentifier("swiftui_sheet_action_1")
                         .buttonStyle(TestButtonStyle())
 
                     Button("Sheet Action 2") {}
-                        .accessibilityLabel("swiftui_sheet_action_2")
+                        .accessibilityIdentifier("swiftui_sheet_action_2")
                         .buttonStyle(TestButtonStyle())
 
                     Button("Sheet Action 3") {}
-                        .accessibilityLabel("swiftui_sheet_action_3")
+                        .accessibilityIdentifier("swiftui_sheet_action_3")
                         .buttonStyle(TestButtonStyle())
 
                     Button("Close") {
@@ -210,19 +220,19 @@ private struct MixedFrameworkTestSection: View {
             Button("3. SwiftUI Btn -> UIKit Text") {
                 uikitCounter += 1
             }
-            .accessibilityLabel("swiftui_btn_uikit_text")
+            .accessibilityIdentifier("swiftui_btn_uikit_text")
             .buttonStyle(TestButtonStyle())
 
             // Case 4: SwiftUI Button -> SwiftUI Text
             Button("4. SwiftUI Btn -> SwiftUI Text") {
                 swiftUICounter += 1
             }
-            .accessibilityLabel("swiftui_btn_swiftui_text")
+            .accessibilityIdentifier("swiftui_btn_swiftui_text")
             .buttonStyle(TestButtonStyle())
 
             // SwiftUI text counter (updated by cases 2 & 4)
             Text("SwiftUI counter: \(swiftUICounter)")
-                .accessibilityLabel("swiftui_text_counter")
+                .accessibilityIdentifier("swiftui_text_counter")
         }
     }
 }
@@ -256,7 +266,7 @@ private struct UIKitButtonsView: UIViewRepresentable {
         // Case 1: UIKit Button -> UIKit Text
         let btn1 = UIButton(type: .system)
         btn1.setTitle("1. UIKit Btn -> UIKit Text", for: .normal)
-        btn1.accessibilityLabel = "uikit_btn_uikit_text"
+        btn1.accessibilityIdentifier = "uikit_btn_uikit_text"
         btn1.layer.borderWidth = 1
         btn1.layer.cornerRadius = 8
         btn1.layer.borderColor = UIColor.systemBlue.cgColor
@@ -267,14 +277,14 @@ private struct UIKitButtonsView: UIViewRepresentable {
         // UIKit counter label
         let counterLabel = UILabel()
         counterLabel.text = "UIKit counter: 0"
-        counterLabel.accessibilityLabel = "uikit_text_counter"
+        counterLabel.accessibilityIdentifier = "uikit_text_counter"
         context.coordinator.counterLabel = counterLabel
         stack.addArrangedSubview(counterLabel)
 
         // Case 2: UIKit Button -> SwiftUI Text
         let btn2 = UIButton(type: .system)
         btn2.setTitle("2. UIKit Btn -> SwiftUI Text", for: .normal)
-        btn2.accessibilityLabel = "uikit_btn_swiftui_text"
+        btn2.accessibilityIdentifier = "uikit_btn_swiftui_text"
         btn2.layer.borderWidth = 1
         btn2.layer.cornerRadius = 8
         btn2.layer.borderColor = UIColor.systemBlue.cgColor
@@ -318,7 +328,7 @@ private struct AlertModifier: ViewModifier {
             content
                 .alert("Test Alert", isPresented: $isPresented) {
                     Button("Confirm") {}
-                        .accessibilityLabel("swiftui_alert_confirm")
+                        .accessibilityIdentifier("swiftui_alert_confirm")
                     Button("Cancel", role: .cancel) {}
                 }
         } else {
@@ -345,11 +355,11 @@ private struct ConfirmationDialogModifier: ViewModifier {
             content
                 .confirmationDialog("Choose Option", isPresented: $isPresented) {
                     Button("Option 1") {}
-                        .accessibilityLabel("swiftui_dialog_option_1")
+                        .accessibilityIdentifier("swiftui_dialog_option_1")
                     Button("Option 2") {}
-                        .accessibilityLabel("swiftui_dialog_option_2")
+                        .accessibilityIdentifier("swiftui_dialog_option_2")
                     Button("Option 3") {}
-                        .accessibilityLabel("swiftui_dialog_option_3")
+                        .accessibilityIdentifier("swiftui_dialog_option_3")
                     Button("Cancel", role: .cancel) {}
                 }
         } else {

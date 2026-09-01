@@ -64,20 +64,20 @@ struct ComplexSwiftUIStressTestView: View {
                 Text("Tap Count: \(tapCount)")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                    .accessibilityLabel("stress_test_tap_count_swiftui")
+                    .accessibilityIdentifier("stress_test_tap_count_swiftui")
 
                 // MARK: - Search Bar
 
                 HStack(spacing: 8) {
                     TextField("Search products...", text: $searchText)
                         .padding(8)
-                        .accessibilityLabel("stress_search_field_swiftui")
+                        .accessibilityIdentifier("stress_search_field_swiftui")
 
                     Button(action: { tapCount += 1 }) {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.blue)
                     }
-                    .accessibilityLabel("stress_search_button_swiftui")
+                    .accessibilityIdentifier("stress_search_button_swiftui")
                     .padding(.trailing, 8)
                 }
                 .background(Color.gray.opacity(0.12))
@@ -101,7 +101,7 @@ struct ComplexSwiftUIStressTestView: View {
                                     .foregroundColor(index == selectedCategory ? .white : .primary)
                                     .cornerRadius(16)
                             }
-                            .accessibilityLabel("category_chip_swiftui_\(index)")
+                            .accessibilityIdentifier("category_chip_swiftui_\(index)")
                         }
                     }
                     .padding(.horizontal, 4)
@@ -216,7 +216,7 @@ private struct StressTestProductCard: View {
                             .background(Color.blue)
                             .cornerRadius(6)
                     }
-                    .accessibilityLabel("add_to_cart_swiftui_\(index)")
+                    .accessibilityIdentifier("add_to_cart_swiftui_\(index)")
 
                     Spacer()
 
@@ -227,7 +227,7 @@ private struct StressTestProductCard: View {
                         Image(systemName: isFavorite ? "heart.fill" : "heart")
                             .foregroundColor(.pink)
                     }
-                    .accessibilityLabel("favorite_swiftui_\(index)")
+                    .accessibilityIdentifier("favorite_swiftui_\(index)")
                 }
             }
             .padding(.horizontal, 8)
@@ -237,7 +237,7 @@ private struct StressTestProductCard: View {
         .cornerRadius(10)
         .shadow(color: Color.black.opacity(0.05), radius: 3, y: 2)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Product \(index) \(name)")
+        .accessibilityIdentifier("Product \(index) \(name)")
     }
 }
 

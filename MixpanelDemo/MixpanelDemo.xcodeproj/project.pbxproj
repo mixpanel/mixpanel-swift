@@ -25,7 +25,6 @@
 		673ABE4321405A0500B1784B /* MixpanelGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673ABE4221405A0500B1784B /* MixpanelGroupTests.swift */; };
 		7F3A4B5C6D7E8F9A0B1C2D3E /* MixpanelScreenTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D5E6F7A8B9C0D1E2F3A4B5C /* MixpanelScreenTrackingTests.swift */; };
 		7E01564E4913076E148AE9E1 /* AutocaptureSwiftUIInstrumentedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73B0A4D17C3AB8AF617801F4 /* AutocaptureSwiftUIInstrumentedTests.swift */; };
-		8A2F3B5C1D9E7A4B0C6F8D2E /* AutocaptureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4D6E8F2A1B3C5D7E0F9A4B /* AutocaptureTests.swift */; };
 		860BE3132072B85D00C12F18 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 860BE30F2072B83E00C12F18 /* CoreTelephony.framework */; };
 		860BE3712076FBCC00C12F18 /* GDPRViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 860BE3702076FBCC00C12F18 /* GDPRViewController.swift */; };
 		862773E3206B3B1D00CBE79E /* MixpanelOptOutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862773E2206B3B1D00CBE79E /* MixpanelOptOutTests.swift */; };
@@ -66,7 +65,6 @@
 		86F86F2E22460B4F00B69832 /* Mixpanel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E16C35E41D872045003500AC /* Mixpanel.framework */; };
 		86F86F2F22460B4F00B69832 /* Mixpanel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E16C35E41D872045003500AC /* Mixpanel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8A2F3B5C1D9E7A4B0C6F8D2E /* AutocaptureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4D6E8F2A1B3C5D7E0F9A4B /* AutocaptureTests.swift */; };
-		A4E1266DF2B6E40D2408CB44 /* AutocaptureUIKitInstrumentedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41EE1ACA2C88917BC782B4D6 /* AutocaptureUIKitInstrumentedTests.swift */; };
 		A4E1266DF2B6E40D2408CB44 /* AutocaptureUIKitInstrumentedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41EE1ACA2C88917BC782B4D6 /* AutocaptureUIKitInstrumentedTests.swift */; };
 		C5D8E3F2A7B1094C6E2D3F9A /* AutocaptureWalkUpInstrumentedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F7A2D19E4C06853D1F7B8A /* AutocaptureWalkUpInstrumentedTests.swift */; };
 		A88996800DA044B4B1886E99 /* MixpanelScreenTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C8D4E5F3A1B2C7D8E9F0A1B /* MixpanelScreenTrackingTests.swift */; };
@@ -851,12 +849,14 @@
 				E15FF7D01D0461130076CDE3 /* Frameworks */,
 				E15FF7D11D0461130076CDE3 /* Resources */,
 				E15FF8001D0461D70076CDE3 /* Embed Frameworks */,
+				86F86EB522440C6000B69832 /* Embed Watch Content */,
 				60DDD15223D39621004F7CBB /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				E15FF7FF1D0461D70076CDE3 /* PBXTargetDependency */,
+				86F86EA722440C6000B69832 /* PBXTargetDependency */,
 			);
 			name = MixpanelDemo;
 			productName = MixpanelDemo;

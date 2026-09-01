@@ -74,8 +74,9 @@ class UIKitAutocaptureTestViewController: UIViewController, UIPopoverPresentatio
             hasAction: true
         )
 
-        // Rule 2: accessibilityLabel fallback
-        let rule2Btn = makeButton("Rule 2 - accessibilityLabel only", hasAction: true)
+        // Rule 2: accessibilityLabel is never an $el_id source — this falls back to the hash.
+        // The label is set deliberately so the screen proves it is ignored.
+        let rule2Btn = makeButton("Rule 2 - Label only (ignored -> hash)", hasAction: true)
         rule2Btn.accessibilityLabel = "Rule Two"
         stackView.addArrangedSubview(rule2Btn)
 
@@ -87,8 +88,8 @@ class UIKitAutocaptureTestViewController: UIViewController, UIPopoverPresentatio
             hasAction: true
         )
 
-        // Rule 1 wins over Rule 2
-        let bothBtn = makeButton("Rule 1 Wins - Both ID + Label", hasAction: true)
+        // Identifier is used and the label is ignored, even when both are present.
+        let bothBtn = makeButton("Identifier Wins - Both ID + Label", hasAction: true)
         bothBtn.accessibilityIdentifier = "both_id"
         bothBtn.accessibilityLabel = "Both Label"
         stackView.addArrangedSubview(bothBtn)
@@ -464,7 +465,7 @@ private struct MixedFrameworkSwiftUIContent: View {
             Button("3. SwiftUI Btn -> UIKit Text") {
                 onUikitTextUpdate()
             }
-            .accessibilityLabel("swiftui_btn_uikit_text_in_uikit")
+            .accessibilityIdentifier("swiftui_btn_uikit_text_in_uikit")
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -479,7 +480,7 @@ private struct MixedFrameworkSwiftUIContent: View {
             Button("4. SwiftUI Btn -> SwiftUI Text") {
                 model.counter += 1
             }
-            .accessibilityLabel("swiftui_btn_swiftui_text_in_uikit")
+            .accessibilityIdentifier("swiftui_btn_swiftui_text_in_uikit")
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -492,7 +493,7 @@ private struct MixedFrameworkSwiftUIContent: View {
 
             // SwiftUI text counter (updated by cases 2 & 4)
             Text("SwiftUI counter: \(model.counter)")
-                .accessibilityLabel("swiftui_text_counter_in_uikit")
+                .accessibilityIdentifier("swiftui_text_counter_in_uikit")
         }
     }
 }

@@ -60,12 +60,12 @@ class UIKitWalkUpTestViewController: UIViewController {
         stackView.addArrangedSubview(
             descriptionLabel(
                 "Tap the button. The UILabel inside is the hit-test target. "
-                    + "$el_id should be \"add_to_cart\" from the UIButton's accessibilityLabel."
+                    + "$el_id should be \"add_to_cart\" from the UIButton's accessibilityIdentifier."
             ))
 
         let addToCartBtn = UIButton(type: .system)
         addToCartBtn.setTitle("Add to Cart", for: .normal)
-        addToCartBtn.accessibilityLabel = "add_to_cart"
+        addToCartBtn.accessibilityIdentifier = "add_to_cart"
         addToCartBtn.addTarget(self, action: #selector(noOp), for: .touchUpInside)
         addToCartBtn.backgroundColor = .systemBlue
         addToCartBtn.setTitleColor(.white, for: .normal)
@@ -85,7 +85,7 @@ class UIKitWalkUpTestViewController: UIViewController {
         card.backgroundColor = .systemGray6
         card.layer.cornerRadius = 12
         card.isUserInteractionEnabled = true
-        card.accessibilityLabel = "product_card"
+        card.accessibilityIdentifier = "product_card"
         let cardTap = UITapGestureRecognizer(target: self, action: #selector(noOp))
         card.addGestureRecognizer(cardTap)
 
@@ -108,7 +108,7 @@ class UIKitWalkUpTestViewController: UIViewController {
 
         let deleteBtn = UIButton(type: .system)
         deleteBtn.setTitle("Delete", for: .normal)
-        deleteBtn.accessibilityLabel = "delete_item"
+        deleteBtn.accessibilityIdentifier = "delete_item"
         deleteBtn.addTarget(self, action: #selector(noOp), for: .touchUpInside)
         deleteBtn.backgroundColor = .systemRed
         deleteBtn.setTitleColor(.white, for: .normal)
@@ -127,7 +127,7 @@ class UIKitWalkUpTestViewController: UIViewController {
 
         let checkoutRow = UIView()
         checkoutRow.isUserInteractionEnabled = true
-        checkoutRow.accessibilityLabel = "checkout_action"
+        checkoutRow.accessibilityIdentifier = "checkout_action"
         let checkoutTap = UITapGestureRecognizer(target: self, action: #selector(noOp))
         checkoutRow.addGestureRecognizer(checkoutTap)
 
@@ -176,14 +176,14 @@ class UIKitWalkUpTestViewController: UIViewController {
         stackView.addArrangedSubview(sectionLabel("Leaf Has Own Identity"))
         stackView.addArrangedSubview(
             descriptionLabel(
-                "Tap the label. Even though it has its own accessibilityLabel (\"inner_label\"), "
+                "Tap the label. Even though it has its own accessibilityIdentifier (\"inner_label\"), "
                     + "walk-up still activates and takes the clickable parent's identity. "
                     + "$el_id should be \"outer_container\"."
             ))
 
         let outerView = UIView()
         outerView.isUserInteractionEnabled = true
-        outerView.accessibilityLabel = "outer_container"
+        outerView.accessibilityIdentifier = "outer_container"
         let outerTap = UITapGestureRecognizer(target: self, action: #selector(noOp))
         outerView.addGestureRecognizer(outerTap)
         outerView.backgroundColor = .systemGray6
@@ -191,7 +191,7 @@ class UIKitWalkUpTestViewController: UIViewController {
 
         let innerLabel = UILabel()
         innerLabel.text = "I have my own identity"
-        innerLabel.accessibilityLabel = "inner_label"
+        innerLabel.accessibilityIdentifier = "inner_label"
         innerLabel.translatesAutoresizingMaskIntoConstraints = false
         outerView.addSubview(innerLabel)
         NSLayoutConstraint.activate([

@@ -267,11 +267,8 @@ public class MixpanelOptions {
     /// ```
     ///
     /// **Note:** Autocapture is only available on iOS.
-    #if os(iOS)
     public let autocaptureOptions: AutocaptureOptions?
-    #endif
 
-    #if os(iOS)
     public init(
         token: String,
         flushInterval: Double = 60,
@@ -302,7 +299,11 @@ public class MixpanelOptions {
         self.useGzipCompression = useGzipCompression
         self.deviceIdProvider = deviceIdProvider
         self.excludeProperties = excludeProperties
+        #if os(iOS)
         self.autocaptureOptions = autocaptureOptions
+        #else
+        self.autocaptureOptions = nil
+        #endif
 
         if let featureFlagOptions = featureFlagOptions {
             self.featureFlagOptions = featureFlagOptions
@@ -313,45 +314,4 @@ public class MixpanelOptions {
             )
         }
     }
-    #else
-    public init(
-        token: String,
-        flushInterval: Double = 60,
-        instanceName: String? = nil,
-        trackAutomaticEvents: Bool = false,
-        optOutTrackingByDefault: Bool = false,
-        useUniqueDistinctId: Bool = false,
-        superProperties: Properties? = nil,
-        serverURL: String? = nil,
-        proxyServerConfig: ProxyServerConfig? = nil,
-        useGzipCompression: Bool = true,
-        featureFlagsEnabled: Bool = false,
-        featureFlagsContext: [String: Any] = [:],
-        deviceIdProvider: (() -> String?)? = nil,
-        featureFlagOptions: FeatureFlagOptions? = nil,
-        excludeProperties: Set<String> = []
-    ) {
-        self.token = token
-        self.flushInterval = flushInterval
-        self.instanceName = instanceName
-        self.trackAutomaticEvents = trackAutomaticEvents
-        self.optOutTrackingByDefault = optOutTrackingByDefault
-        self.useUniqueDistinctId = useUniqueDistinctId
-        self.superProperties = superProperties
-        self.serverURL = serverURL
-        self.proxyServerConfig = proxyServerConfig
-        self.useGzipCompression = useGzipCompression
-        self.deviceIdProvider = deviceIdProvider
-        self.excludeProperties = excludeProperties
-
-        if let featureFlagOptions = featureFlagOptions {
-            self.featureFlagOptions = featureFlagOptions
-        } else {
-            self.featureFlagOptions = FeatureFlagOptions(
-                enabled: featureFlagsEnabled,
-                context: featureFlagsContext
-            )
-        }
-    }
-    #endif
 }

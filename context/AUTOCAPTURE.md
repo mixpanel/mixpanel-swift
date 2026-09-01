@@ -40,19 +40,22 @@ That's it! No additional setup required. Autocapture automatically intercepts al
 
 ### RageClickOptions
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `enabled` | `true` | Track rage click events |
-| `clickThreshold` | `4` | Number of clicks required to trigger |
-| `timeWindowMs` | `1000` | Time window in milliseconds |
-| `radius` | `44` | Spatial threshold in points |
+| Option | Default | Minimum | Description |
+|--------|---------|---------|-------------|
+| `enabled` | `true` | — | Track rage click events |
+| `clickThreshold` | `4` | `2` | Number of clicks required to trigger |
+| `timeWindowMs` | `1000` | `1` | Time window in milliseconds |
+| `radius` | `44` | `0` | Spatial threshold in points |
 
 ### DeadClickOptions
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `enabled` | `true` | Track dead click events |
-| `timeWindowMs` | `500` | Response wait time in milliseconds |
+| Option | Default | Minimum | Description |
+|--------|---------|---------|-------------|
+| `enabled` | `true` | — | Track dead click events |
+| `timeWindowMs` | `500` | `1` | Response wait time in milliseconds |
+
+Values below the minimum are clamped rather than rejected, matching the Android SDK. Passing an
+invalid value never throws and never crashes the host app.
 
 ### Custom Configuration Example
 

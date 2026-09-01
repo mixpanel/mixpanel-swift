@@ -29,6 +29,25 @@ enum AutocaptureDefaults {
     /// default threshold of 4 so that a burst of taps cannot evict clicks still in the window.
     static let maxTrackedClicks = 20
 
+    // MARK: - Option bounds
+    //
+    // Host apps can pass any value through the public option initializers, so the
+    // bounds are enforced there. Mirrors the Android SDK, whose option builders clamp
+    // with the same minimums.
+
+    /// Minimum rage click threshold. Below `2` the "N taps in a row" comparison
+    /// (`nearbyCount >= clickThreshold - 1`) is satisfied by the first tap, so every
+    /// tap would be reported as a rage click.
+    static let minRageClickThreshold = 2
+
+    /// Minimum detection window in milliseconds. A negative dead click window traps when
+    /// converted to an unsigned nanosecond count for `Task.sleep`; zero would check for a
+    /// UI response before the UI has any chance to produce one.
+    static let minTimeWindowMs = 1
+
+    /// `minTimeWindowMs` for the rage click tracker, which stores its window as `Int64`.
+    static let minTimeWindowMs64: Int64 = 1
+
     #if os(iOS)
     /// UIKit controls with inherent visual feedback that should be excluded from
     /// dead click detection. These controls always produce a visible UI response
@@ -133,18 +152,28 @@ public struct RageClickOptions {
 
     /// Number of clicks required to trigger a rage click event.
     /// Defaults to `4` (triggers on the 4th click within the time window).
+    ///
+    /// Clamped to a minimum of `2`: a threshold below that would mark every
+    /// single tap as a rage click.
     public let clickThreshold: Int
 
     /// Time window in milliseconds for rage click detection.
     /// Clicks must occur within this window to count as a rage click sequence.
     /// Defaults to `1000` (1 second).
+    ///
+    /// Clamped to a minimum of `1`.
     public let timeWindowMs: Int64
 
     /// Spatial threshold for rage click detection in points (pt).
     /// Clicks must be within this radius of each other to count as part of the same sequence.
     /// Defaults to `44` (matching iOS minimum tap target size).
+    ///
+    /// Clamped to a minimum of `0`.
     public let radius: CGFloat
 
+    /// Out-of-range values are clamped rather than rejected, matching the Android SDK.
+    /// Passing an invalid value must never crash the host app or turn every tap into a
+    /// rage click, so the bounds are enforced here at the only entry point.
     public init(
         enabled: Bool = true,
         clickThreshold: Int = 4,
@@ -152,9 +181,9 @@ public struct RageClickOptions {
         radius: CGFloat = 44
     ) {
         self.enabled = enabled
-        self.clickThreshold = clickThreshold
-        self.timeWindowMs = timeWindowMs
-        self.radius = radius
+        self.clickThreshold = max(AutocaptureDefaults.minRageClickThreshold, clickThreshold)
+        self.timeWindowMs = max(AutocaptureDefaults.minTimeWindowMs64, timeWindowMs)
+        self.radius = max(0, radius)
     }
 }
 
@@ -175,14 +204,19 @@ public struct DeadClickOptions {
     /// Time window in milliseconds to wait for UI response after a click.
     /// If no UI change is detected within this window, a dead click is recorded.
     /// Defaults to `500` (0.5 seconds).
+    ///
+    /// Clamped to a minimum of `1`: a non-positive window is converted to an unsigned
+    /// nanosecond count when the check is scheduled, which traps on a negative value,
+    /// and a zero window would check before the UI has any chance to respond.
     public let timeWindowMs: Int
 
+    /// Out-of-range values are clamped rather than rejected, matching the Android SDK.
     public init(
         enabled: Bool = true,
         timeWindowMs: Int = 500
     ) {
         self.enabled = enabled
-        self.timeWindowMs = timeWindowMs
+        self.timeWindowMs = max(AutocaptureDefaults.minTimeWindowMs, timeWindowMs)
     }
 }
 

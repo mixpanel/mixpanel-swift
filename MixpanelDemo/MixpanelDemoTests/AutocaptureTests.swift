@@ -47,6 +47,55 @@ class AutocaptureOptionsTests: XCTestCase {
         XCTAssertEqual(options.radius, 60)
     }
 
+    // MARK: - RageClickOptions Clamping Tests
+
+    func testRageClickThresholdClampedToMinimum() {
+        // Below 2, `nearbyCount >= clickThreshold - 1` is satisfied by the very first
+        // tap, so every tap would be reported as a rage click.
+        XCTAssertEqual(RageClickOptions(clickThreshold: 1).clickThreshold, 2)
+        XCTAssertEqual(RageClickOptions(clickThreshold: 0).clickThreshold, 2)
+        XCTAssertEqual(RageClickOptions(clickThreshold: -5).clickThreshold, 2)
+    }
+
+    func testRageClickThresholdAtOrAboveMinimumIsUnchanged() {
+        XCTAssertEqual(RageClickOptions(clickThreshold: 2).clickThreshold, 2)
+        XCTAssertEqual(RageClickOptions(clickThreshold: 10).clickThreshold, 10)
+    }
+
+    func testRageClickTimeWindowClampedToMinimum() {
+        XCTAssertEqual(RageClickOptions(timeWindowMs: 0).timeWindowMs, 1)
+        XCTAssertEqual(RageClickOptions(timeWindowMs: -1000).timeWindowMs, 1)
+        XCTAssertEqual(RageClickOptions(timeWindowMs: 1).timeWindowMs, 1)
+    }
+
+    func testRageClickRadiusClampedToNonNegative() {
+        XCTAssertEqual(RageClickOptions(radius: -10).radius, 0)
+        XCTAssertEqual(RageClickOptions(radius: 0).radius, 0)
+        XCTAssertEqual(RageClickOptions(radius: 60).radius, 60)
+    }
+
+    func testClampedRageClickThresholdDoesNotFireOnASingleTap() {
+        // Guards the actual symptom, not just the stored value.
+        let tracker = RageClickTracker(options: RageClickOptions(clickThreshold: 0))
+        XCTAssertFalse(
+            tracker.trackClick(x: 100, y: 100).isRageClick,
+            "A single tap must never be a rage click, whatever threshold was requested")
+    }
+
+    // MARK: - DeadClickOptions Clamping Tests
+
+    func testDeadClickTimeWindowClampedToMinimum() {
+        // A negative window traps when converted to an unsigned nanosecond count for
+        // Task.sleep; zero would check before the UI can respond.
+        XCTAssertEqual(DeadClickOptions(timeWindowMs: -1).timeWindowMs, 1)
+        XCTAssertEqual(DeadClickOptions(timeWindowMs: 0).timeWindowMs, 1)
+    }
+
+    func testDeadClickTimeWindowAtOrAboveMinimumIsUnchanged() {
+        XCTAssertEqual(DeadClickOptions(timeWindowMs: 1).timeWindowMs, 1)
+        XCTAssertEqual(DeadClickOptions(timeWindowMs: 500).timeWindowMs, 500)
+    }
+
     // MARK: - DeadClickOptions Tests
 
     func testDeadClickOptionsDefaults() {

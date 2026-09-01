@@ -42,7 +42,7 @@ Pod::Spec.new do |s|
   }
 
   s.subspec 'Complete' do |ss|
-    ss.ios.source_files = ['Sources/*.swift']
+    ss.ios.source_files = ['Sources/**/*.swift']
     ss.tvos.source_files = base_source_files
     ss.osx.source_files = base_source_files
     ss.watchos.source_files = base_source_files

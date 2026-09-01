@@ -1,0 +1,216 @@
+//
+//  AutocaptureManager.swift
+//  Mixpanel
+//
+//  Created by Mixpanel on 2026-06-13.
+//  Copyright (c) Mixpanel. All rights reserved.
+//
+
+#if os(iOS)
+import UIKit
+
+/// Main coordinator for autocapture functionality.
+///
+/// Manages lifecycle, coordinates components, and dispatches events to Mixpanel.
+final class AutocaptureManager {
+    // MARK: - Configuration
+
+    private let options: AutocaptureOptions
+
+    // MARK: - Components
+
+    private let semanticExtractor: SemanticExtractor
+    private let rageClickTracker: RageClickTracker?
+    private let deadClickDetector: DeadClickDetector?
+    private let touchInterceptor = TouchInterceptor()
+
+    /// Serial queue for the non-UI part of touch handling.
+    ///
+    /// Touches arrive on the main thread, and the parts of processing that must read the view
+    /// hierarchy stay there. Everything after that — rage click bookkeeping and event emission —
+    /// is pure computation, so it is handed off here to keep SDK work off the main thread.
+    /// Serial so that clicks are processed in the order the user made them, which rage click
+    /// detection depends on.
+    private let processingQueue = DispatchQueue(label: "com.mixpanel.autocapture.processing")
+
+    // MARK: - Autocapture Reference
+
+    /// Reference to the Autocapture instance for event tracking.
+    /// Weak to avoid retain cycles with MixpanelInstance.
+    private weak var autocapture: Autocapture?
+
+    // MARK: - State
+
+    private(set) var isStarted = false
+    private let lock = NSLock()
+
+    // MARK: - Initialization
+
+    /// Create an AutocaptureManager with the given options.
+    ///
+    /// - Parameters:
+    ///   - options: Autocapture configuration options
+    ///   - autocapture: The Autocapture instance for event tracking
+    init(
+        options: AutocaptureOptions,
+        autocapture: Autocapture
+    ) {
+        self.options = options
+        self.autocapture = autocapture
+
+        // Initialize components
+        self.semanticExtractor = SemanticExtractor()
+
+        // Initialize rage click tracker if enabled
+        if options.rageClickOptions.enabled {
+            self.rageClickTracker = RageClickTracker(options: options.rageClickOptions)
+        } else {
+            self.rageClickTracker = nil
+        }
+
+        // Initialize dead click detector if enabled
+        if options.deadClickOptions.enabled {
+            self.deadClickDetector = DeadClickDetector(options: options.deadClickOptions)
+            self.deadClickDetector?.onDeadClick = { [weak self] event in
+                self?.autocapture?.trackDeadClick(event)
+                MixpanelLogger.debug(
+                    message: "AutocaptureManager: emitted $mp_dead_click for \(event.elementId)")
+            }
+        } else {
+            self.deadClickDetector = nil
+        }
+
+        MixpanelLogger.info(
+            message:
+                "AutocaptureManager: initialized (click=\(options.clickOptions.enabled), rage=\(options.rageClickOptions.enabled), dead=\(options.deadClickOptions.enabled))"
+        )
+    }
+
+    // MARK: - Lifecycle
+
+    /// Start autocapture by installing the touch interceptor.
+    /// Logged at warning level, once per start, so developers who never read the documentation
+    /// still learn that autocapture is not yet GA.
+    private static let experimentalWarning =
+        "Autocapture is experimental (beta): it may contain issues, and its API and captured "
+        + "properties may change before general availability. Pin your SDK version if you build "
+        + "reports on autocaptured events."
+
+    func start() {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard !isStarted else {
+            MixpanelLogger.debug(message: "AutocaptureManager: already started")
+            return
+        }
+
+        isStarted = true
+
+        // Install touch interceptor
+        touchInterceptor.install(manager: self)
+
+        MixpanelLogger.info(message: "AutocaptureManager: started")
+        MixpanelLogger.warn(message: AutocaptureManager.experimentalWarning)
+    }
+
+    /// Stop autocapture and clean up.
+    func stop() {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard isStarted else { return }
+
+        isStarted = false
+
+        // Uninstall touch interceptor
+        touchInterceptor.uninstall()
+
+        // Reset components
+        rageClickTracker?.reset()
+        deadClickDetector?.cancelPendingCheck()
+
+        MixpanelLogger.info(message: "AutocaptureManager: stopped")
+    }
+
+    // MARK: - Touch Handling
+
+    /// Handle a touch event from the interceptor.
+    ///
+    /// Called by TouchInterceptor when a touch ends.
+    func handleTouch(at point: CGPoint, view: UIView?, window: UIWindow?) {
+        do {
+            try processTouch(at: point, view: view, window: window)
+        } catch {
+            MixpanelLogger.error(message: "AutocaptureManager: error processing touch: \(error)")
+            // Never rethrow - silently fail and let the app continue
+        }
+    }
+
+    private func processTouch(at point: CGPoint, view: UIView?, window: UIWindow?) throws {
+        guard let view = view else {
+            MixpanelLogger.debug(message: "AutocaptureManager: no view for touch at \(point)")
+            return
+        }
+
+        // Skip invisible views — hidden or fully transparent views should not produce events.
+        // In production UIKit's hitTest already skips these, but this guard protects against
+        // programmatic handleTouch calls and future code paths that bypass hitTest.
+        if !isViewVisible(view) {
+            MixpanelLogger.debug(message: "AutocaptureManager: skipping invisible view at \(point)")
+            return
+        }
+
+        // Extract semantic information. Reads the view hierarchy, so it has to run here on the
+        // main thread, synchronously with the touch.
+        let clickEvent = semanticExtractor.extractSemantics(from: view, at: point)
+
+        // Start dead click monitoring. Also main-thread and synchronous by necessity: it captures
+        // a baseline snapshot of the window that must be taken before the app's click handler can
+        // change the UI, otherwise a fast response is absorbed into the baseline and the click
+        // looks dead.
+        if let detector = deadClickDetector, let window = window {
+            detector.startMonitoring(event: clickEvent, view: view, in: window)
+        }
+
+        // Everything below is pure computation over values already extracted — no UIKit access —
+        // so it runs off the main thread.
+        processingQueue.async { [weak self] in
+            guard let self = self else { return }
+
+            // Check for rage click
+            let rageClickResult = self.rageClickTracker?.trackClick(x: point.x, y: point.y)
+
+            // Emit click event
+            if self.options.clickOptions.enabled {
+                self.autocapture?.trackClick(clickEvent)
+                MixpanelLogger.debug(
+                    message: "AutocaptureManager: emitted $mp_click for \(clickEvent.elementId)")
+            }
+
+            // Emit rage click event (independent of regular click)
+            if rageClickResult?.isRageClick == true {
+                self.autocapture?.trackRageClick(clickEvent)
+                MixpanelLogger.debug(
+                    message:
+                        "AutocaptureManager: emitted $mp_rage_click for \(clickEvent.elementId)")
+            }
+        }
+    }
+
+    // MARK: - Visibility Check
+
+    /// Returns false if the view (or any ancestor up to the window) is hidden or fully transparent.
+    private func isViewVisible(_ view: UIView) -> Bool {
+        var current: UIView? = view
+        while let v = current {
+            if v.isHidden || v.alpha <= 0 {
+                return false
+            }
+            current = v.superview
+        }
+        return true
+    }
+
+}
+#endif

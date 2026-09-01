@@ -267,6 +267,9 @@ public class MixpanelOptions {
     /// ```
     ///
     /// **Note:** Autocapture is only available on iOS.
+    ///
+    /// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the
+    ///   properties it captures may change in a future release before general availability.
     public let autocaptureOptions: AutocaptureOptions?
 
     public init(

@@ -17,6 +17,10 @@ import UIKit
 /// All stored properties are value types (`CGFloat`, `String`, `Bool`), so the event can safely
 /// cross threads — it is handed from the main thread, where it is extracted, to the queue that
 /// emits it.
+///
+/// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the properties
+///   it captures may change in a future release before general availability. Pin your SDK version if
+///   you build reports on autocaptured events.
 public struct ClickEvent: Sendable {
     // MARK: - Position
 

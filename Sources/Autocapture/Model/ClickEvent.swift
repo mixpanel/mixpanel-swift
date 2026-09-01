@@ -50,8 +50,8 @@ public struct ClickEvent: Sendable {
     /// `accessibilityLabel` is deliberately not a source: it is localized, so the same element would
     /// report a different identifier per language, and it can carry personal data.
     ///
-    /// Supply an `ElementIdExtractor` through `AutocaptureOptions` to override this entirely — for
-    /// example a custom string like `"buy_button"` or `"settings_cell_notifications"`.
+    /// When constructing a `ClickEvent` yourself, prefer a stable, human-readable string such as
+    /// `"buy_button"` or `"settings_cell_notifications"`.
     ///
     /// Avoid dynamic values (e.g., cell index, timestamp) — they prevent meaningful grouping.
     public let elementId: String

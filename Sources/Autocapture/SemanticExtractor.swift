@@ -13,14 +13,6 @@ import UIKit
 ///
 /// Handles element identification and role detection.
 final class SemanticExtractor {
-    // MARK: - Configuration
-
-    private let autocaptureOptions: AutocaptureOptions
-
-    init(autocaptureOptions: AutocaptureOptions = AutocaptureOptions()) {
-        self.autocaptureOptions = autocaptureOptions
-    }
-
     // MARK: - Constants
 
     private static let maxHierarchyDepth = AutocaptureDefaults.maxHierarchyDepth
@@ -87,25 +79,14 @@ final class SemanticExtractor {
 
     /// Resolve the `$el_id` for the target view.
     ///
-    /// When the host app supplied an ``ElementIdExtractor`` through `AutocaptureOptions`, that
-    /// extractor is the only source of the identifier: a `nil`/empty return yields the anonymous
-    /// `<ClassName>_<hash>` identifier rather than silently falling back to view metadata the developer
-    /// chose not to expose.
-    ///
-    /// Otherwise `DefaultElementIdExtractor` resolves it (React Native `nativeID` >
-    /// `accessibilityIdentifier` > `<ClassName>_<hash>`; for SwiftUI the `nativeID` step is skipped).
-    /// Accessibility labels are never used: they are localized and can carry user data.
+    /// `DefaultElementIdExtractor` resolves it (React Native `nativeID` > `accessibilityIdentifier` >
+    /// `<ClassName>_<hash>`; for SwiftUI the `nativeID` step is skipped). Accessibility labels are
+    /// never used: they are localized and can carry user data.
     ///
     /// - Parameters:
     ///   - derivedIdentifier: Identifier read from SwiftUI's accessibility element tree, used at the
     ///     `accessibilityIdentifier` priority step when the view carries none itself.
     private func resolveElementId(for view: UIView, derivedIdentifier: String?) -> String {
-        if let custom = autocaptureOptions.elementIdExtractor {
-            if let customId = custom.extractElementId(from: view), !customId.isEmpty {
-                return customId
-            }
-            return DefaultElementIdExtractor.anonymousId(for: view)
-        }
         return DefaultElementIdExtractor.shared.elementId(
             for: view, accessibilityIdentifierFallback: derivedIdentifier)
     }

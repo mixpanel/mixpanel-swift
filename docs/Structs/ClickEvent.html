@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>ClickEvent Structure Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Struct/ClickEvent" class="dashAnchor"></a>
+    <a title="ClickEvent Structure Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">Mixpanel 6.6.0 Docs</a> (73% documented)</p>
+        <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
+        <div class="header-right">
+          <form role="search" action="../search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </div>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">Mixpanel</a>
+        <img id="carat" src="../img/carat.png" alt=""/>
+        <a href="../Structs.html">Structures</a>
+        <img id="carat" src="../img/carat.png" alt=""/>
+        ClickEvent Structure Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/Autocapture.html">Autocapture</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Group.html">Group</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Mixpanel.html">Mixpanel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MixpanelInstance.html">MixpanelInstance</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MixpanelLogger.html">MixpanelLogger</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MixpanelOptions.html">MixpanelOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/People.html">People</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Enums/GzipError.html">GzipError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MixpanelLogLevel.html">MixpanelLogLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/VariantLookupPolicy.html">VariantLookupPolicy</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/Array.html">Array</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Bool.html">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Data.html">Data</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Date.html">Date</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Dictionary.html">Dictionary</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Double.html">Double</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Float.html">Float</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Int.html">Int</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/NSArray.html">NSArray</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/NSNull.html">NSNull</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/NSNumber.html">NSNumber</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/NSString.html">NSString</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/Optional.html">Optional</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/String.html">String</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UInt.html">UInt</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/URL.html">URL</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelDelegate.html">MixpanelDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelFlagDelegate.html">MixpanelFlagDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelFlags.html">MixpanelFlags</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelLogging.html">MixpanelLogging</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelProxyServerDelegate.html">MixpanelProxyServerDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/MixpanelType.html">MixpanelType</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/AutocaptureOptions.html">AutocaptureOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ClickEvent.html">ClickEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ClickOptions.html">ClickOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/DeadClickOptions.html">DeadClickOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/FeatureFlagOptions.html">FeatureFlagOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MixpanelFlagVariant.html">MixpanelFlagVariant</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MixpanelFlagVariant/Source.html">– Source</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MixpanelFlagVariant/FallbackReason.html">– FallbackReason</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/MixpanelLogMessage.html">MixpanelLogMessage</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ProxyServerConfig.html">ProxyServerConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/RageClickOptions.html">RageClickOptions</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ServerProxyResource.html">ServerProxyResource</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Typealiases.html">Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>ClickEvent</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">ClickEvent</span> <span class="p">:</span> <span class="kt">Sendable</span></code></pre>
+
+                </div>
+              </div>
+            <p>Represents a captured click event with element metadata.</p>
+
+<p>Contains all semantic information about the clicked element and its context.
+Create a <code>ClickEvent</code> and pass it to <code>mixpanel.autocapture.trackClick(_:)</code> to
+track click events with full element metadata.
+All stored properties are value types (<code>CGFloat</code>, <code>String</code>, <code>Bool</code>), so the event can safely
+cross threads — it is handed from the main thread, where it is extracted, to the queue that
+emits it.</p>
+<div class="aside aside-warning">
+    <p class="aside-title">Warning</p>
+    <strong>Experimental (beta).</strong> Autocapture may contain issues, and its API and the properties
+it captures may change in a future release before general availability. Pin your SDK version if
+you build reports on autocaptured events.
+
+</div>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Position"></a>
+                <a name="//apple_ref/swift/Section/Position" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Position"></a>
+                  <h3 class="section-name"><span>Position</span>
+</h3>
+                </div>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel10ClickEventV1x14CoreFoundation7CGFloatVvp"></a>
+                    <a name="//apple_ref/swift/Property/x" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel10ClickEventV1x14CoreFoundation7CGFloatVvp">x</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Touch X coordinate in the window&rsquo;s coordinate space (points).</p>
+
+<p>The SDK captures this as <code>touch.location(in: window).x</code>.
+When tracking manually, use <code>touch.location(in: view.window).x</code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">x</span><span class="p">:</span> <span class="kt">CGFloat</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel10ClickEventV1y14CoreFoundation7CGFloatVvp"></a>
+                    <a name="//apple_ref/swift/Property/y" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel10ClickEventV1y14CoreFoundation7CGFloatVvp">y</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Touch Y coordinate in the window&rsquo;s coordinate space (points).</p>
+
+<p>The SDK captures this as <code>touch.location(in: window).y</code>.
+When tracking manually, use <code>touch.location(in: view.window).y</code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">y</span><span class="p">:</span> <span class="kt">CGFloat</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Element%20Identification"></a>
+                <a name="//apple_ref/swift/Section/Element Identification" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Element%20Identification"></a>
+                  <h3 class="section-name"><span>Element Identification</span>
+</h3>
+                </div>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel10ClickEventV9elementIdSSvp"></a>
+                    <a name="//apple_ref/swift/Property/elementId" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel10ClickEventV9elementIdSSvp">elementId</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A stable identifier for the tapped element, used to group clicks in analytics.</p>
+
+<p>Autocapture resolves this in the following order (see <code>DefaultElementIdExtractor</code>), and the
+same preferences apply when tracking manually:</p>
+
+<ul>
+<li>React Native <code>nativeID</code> — the JS-side prop, read through the Objective-C runtime
+(skipped for SwiftUI views, which React Native never renders)</li>
+<li><code>accessibilityIdentifier</code> — stable and not user-visible</li>
+<li><code>&lt;ClassName&gt;_&lt;hash&gt;</code> as a last resort, hashed from the element&rsquo;s position in the hierarchy</li>
+</ul>
+
+<p><code>accessibilityLabel</code> is deliberately not a source: it is localized, so the same element would
+report a different identifier per language, and it can carry personal data.</p>
+
+<p>When constructing a <code>ClickEvent</code> yourself, prefer a stable, human-readable string such as
+<code>&quot;buy_button&quot;</code> or <code>&quot;settings_cell_notifications&quot;</code>.</p>
+
+<p>Avoid dynamic values (e.g., cell index, timestamp) — they prevent meaningful grouping.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">elementId</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel10ClickEventV7tagNameSSSgvp"></a>
+                    <a name="//apple_ref/swift/Property/tagName" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel10ClickEventV7tagNameSSSgvp">tagName</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The class name or component type of the tapped element.</p>
+
+<p>Examples: <code>&quot;UIButton&quot;</code>, <code>&quot;UITableViewCell&quot;</code>, <code>&quot;Button&quot;</code> (SwiftUI).
+Use <code>String(describing: type(of: view))</code> to get the class name.
+Set to <code>nil</code> if not available.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">tagName</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel10ClickEventV4roleSSSgvp"></a>
+                    <a name="//apple_ref/swift/Property/role" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel10ClickEventV4roleSSSgvp">role</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The semantic role describing what the element does.</p>
+
+<p>Autocapture emits one of these exact values, resolved from the view&rsquo;s class and then its
+accessibility traits (see <code>SemanticExtractor</code>). They are Title Case — match on them
+verbatim when building reports on <code>$attr-role</code>:</p>
+
+<p><code>&quot;Button&quot;</code>, <code>&quot;Link&quot;</code>, <code>&quot;Switch&quot;</code>, <code>&quot;Slider&quot;</code>, <code>&quot;Stepper&quot;</code>, <code>&quot;SegmentedControl&quot;</code>,
+<code>&quot;TextField&quot;</code>, <code>&quot;TextArea&quot;</code>, <code>&quot;SearchField&quot;</code>, <code>&quot;Text&quot;</code>, <code>&quot;Image&quot;</code>, <code>&quot;List&quot;</code>, <code>&quot;Grid&quot;</code>,
+<code>&quot;ScrollView&quot;</code>, <code>&quot;Header&quot;</code>, <code>&quot;TabBar&quot;</code>, <code>&quot;Adjustable&quot;</code>.</p>
+
+<p>Set to <code>nil</code> if the element has no specific role. When constructing a <code>ClickEvent</code>
+yourself, prefer one of the values above so manual and autocaptured events group together.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">role</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel10ClickEventV8elementsSSSgvp"></a>
+                    <a name="//apple_ref/swift/Property/elements" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel10ClickEventV8elementsSSSgvp">elements</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>View hierarchy path from the tapped element up to 5 ancestor levels, <code>&quot;&gt;&quot;</code> separated.</p>
+
+<p>Example: <code>&quot;UIButton &gt; UIStackView &gt; UITableViewCell &gt; UITableView &gt; UIView&quot;</code>.
+Useful for identifying where in the view tree the click occurred.
+Set to <code>nil</code> if not available.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">elements</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:8Mixpanel10ClickEventV1x1y9elementId7tagName4role8elements13isInteractiveAC14CoreFoundation7CGFloatV_AMS2SSgA2NSbtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(x:y:elementId:tagName:role:elements:isInteractive:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel10ClickEventV1x1y9elementId7tagName4role8elements13isInteractiveAC14CoreFoundation7CGFloatV_AMS2SSgA2NSbtcfc">init(x:<wbr>y:<wbr>elementId:<wbr>tagName:<wbr>role:<wbr>elements:<wbr>isInteractive:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Creates a new ClickEvent.</p>
+
+<p>Only <code><a href="../Structs/ClickEvent.html#/s:8Mixpanel10ClickEventV1x14CoreFoundation7CGFloatVvp">x</a></code>, <code><a href="../Structs/ClickEvent.html#/s:8Mixpanel10ClickEventV1y14CoreFoundation7CGFloatVvp">y</a></code>, and <code><a href="../Structs/ClickEvent.html#/s:8Mixpanel10ClickEventV9elementIdSSvp">elementId</a></code> are required. All other parameters have sensible defaults.</p>
+
+<p><strong>Minimal usage:</strong></p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">click</span> <span class="o">=</span> <span class="kt">ClickEvent</span><span class="p">(</span><span class="nv">x</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span> <span class="nv">y</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="nv">elementId</span><span class="p">:</span> <span class="s">"buy_button"</span><span class="p">)</span>
+<span class="n">mixpanel</span><span class="o">.</span><span class="n">autocapture</span><span class="o">.</span><span class="nf">trackClick</span><span class="p">(</span><span class="n">click</span><span class="p">)</span>
+</code></pre>
+
+<p><strong>Full usage:</strong></p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">click</span> <span class="o">=</span> <span class="kt">ClickEvent</span><span class="p">(</span>
+    <span class="nv">x</span><span class="p">:</span> <span class="n">touch</span><span class="o">.</span><span class="nf">location</span><span class="p">(</span><span class="nv">in</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+    <span class="nv">y</span><span class="p">:</span> <span class="n">touch</span><span class="o">.</span><span class="nf">location</span><span class="p">(</span><span class="nv">in</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+    <span class="nv">elementId</span><span class="p">:</span> <span class="n">button</span><span class="o">.</span><span class="n">accessibilityIdentifier</span> <span class="p">??</span> <span class="s">"buy_button"</span><span class="p">,</span>
+    <span class="nv">tagName</span><span class="p">:</span> <span class="kt">String</span><span class="p">(</span><span class="nv">describing</span><span class="p">:</span> <span class="nf">type</span><span class="p">(</span><span class="nv">of</span><span class="p">:</span> <span class="n">button</span><span class="p">)),</span>
+    <span class="nv">role</span><span class="p">:</span> <span class="s">"button"</span><span class="p">,</span>
+    <span class="nv">elements</span><span class="p">:</span> <span class="s">"UIButton &gt; UIStackView &gt; UIView"</span>
+<span class="p">)</span>
+<span class="n">mixpanel</span><span class="o">.</span><span class="n">autocapture</span><span class="o">.</span><span class="nf">trackClick</span><span class="p">(</span><span class="n">click</span><span class="p">)</span>
+</code></pre>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span>
+    <span class="nv">x</span><span class="p">:</span> <span class="kt">CGFloat</span><span class="p">,</span> <span class="nv">y</span><span class="p">:</span> <span class="kt">CGFloat</span><span class="p">,</span> <span class="nv">elementId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+    <span class="nv">tagName</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+    <span class="nv">role</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span> <span class="nv">elements</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+    <span class="nv">isInteractive</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span>
+<span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>x</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Touch X coordinate in window points</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>y</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Touch Y coordinate in window points</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>elementId</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Stable identifier for the tapped element</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>tagName</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Class name of the tapped element (defaults to nil)</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>role</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Semantic role like <code>&quot;button&quot;</code>, <code>&quot;switch&quot;</code>, <code>&quot;link&quot;</code> (defaults to nil)</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>elements</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>View hierarchy path, <code>&quot;&gt;&quot;</code> separated (defaults to nil)</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>isInteractive</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Whether the element is interactive (defaults to true)</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-09-02)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</html>

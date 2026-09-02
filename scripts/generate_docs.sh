@@ -20,7 +20,8 @@ xcodebuild build \
 # mustache <= 1.1.2 and once jazzy fixes lib/jazzy/config.rb:546 upstream, so
 # it is safe to leave in place until then.
 SHIM_DIR=$(mktemp -d)
-trap 'rm -rf "$SHIM_DIR"' EXIT INT TERM
+trap 'rm -rf "$SHIM_DIR"' EXIT
+trap 'rm -rf "$SHIM_DIR"; trap - INT TERM; kill -s TERM $$' INT TERM
 
 cat > "$SHIM_DIR/mustache_pathname_shim.rb" <<'RUBY'
 require 'pathname'

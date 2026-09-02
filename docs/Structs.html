@@ -17,8 +17,9 @@
     <a title="Structures  Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="index.html">Mixpanel 6.6.0 Docs</a> (73% documented)</p>
+        <p><a href="index.html">Mixpanel 6.5.1 Docs</a> (70% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="img/gh.png" alt="GitHub"/>View on GitHub</a></p>
+        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Frunner%2Fwork%2Fmixpanel-swift%2Fmixpanel-swift%2Fbuild"><img src="img/dash.png" alt="Dash"/>Install in Dash</a></p>
         <div class="header-right">
           <form role="search" action="search.json">
             <input type="text" placeholder="Search documentation" data-typeahead>
@@ -156,18 +157,6 @@
             <a href="Structs.html">Structures</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
-                <a href="Structs/AutocaptureOptions.html">AutocaptureOptions</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Structs/ClickEvent.html">ClickEvent</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Structs/ClickOptions.html">ClickOptions</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Structs/DeadClickOptions.html">DeadClickOptions</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="Structs/FeatureFlagOptions.html">FeatureFlagOptions</a>
               </li>
               <li class="nav-group-task">
@@ -184,9 +173,6 @@
               </li>
               <li class="nav-group-task">
                 <a href="Structs/ProxyServerConfig.html">ProxyServerConfig</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Structs/RageClickOptions.html">RageClickOptions</a>
               </li>
               <li class="nav-group-task">
                 <a href="Structs/ServerProxyResource.html">ServerProxyResource</a>
@@ -211,283 +197,6 @@
 
           </section>
           <section class="section task-group-section">
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Click%20Options"></a>
-                <a name="//apple_ref/swift/Section/Click Options" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/Click%20Options"></a>
-                  <h3 class="section-name"><span>Click Options</span>
-</h3>
-                </div>
-              </div>
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel12ClickOptionsV"></a>
-                    <a name="//apple_ref/swift/Struct/ClickOptions" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel12ClickOptionsV">ClickOptions</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Configuration options for click event capture.</p>
-
-<p>When enabled, a <code>$mp_click</code> event is tracked for every tap on any element.
-Each event includes the touch coordinates, element identifier, class name, semantic role, and
-view hierarchy path. Accessibility labels are never captured: they are localized and can carry
-user data.</p>
-<div class="aside aside-warning">
-    <p class="aside-title">Warning</p>
-    <strong>Experimental (beta).</strong> Autocapture may contain issues, and its API and the properties
-it captures may change in a future release before general availability. Pin your SDK version if
-you build reports on autocaptured events.
-
-</div>
-
-                        <a href="Structs/ClickOptions.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">ClickOptions</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Rage%20Click%20Options"></a>
-                <a name="//apple_ref/swift/Section/Rage Click Options" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/Rage%20Click%20Options"></a>
-                  <h3 class="section-name"><span>Rage Click Options</span>
-</h3>
-                </div>
-              </div>
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel16RageClickOptionsV"></a>
-                    <a name="//apple_ref/swift/Struct/RageClickOptions" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel16RageClickOptionsV">RageClickOptions</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Configuration options for rage click detection.</p>
-
-<p>Rage clicks are detected when a user taps rapidly multiple times in the same area,
-indicating frustration with an unresponsive element.</p>
-<div class="aside aside-warning">
-    <p class="aside-title">Warning</p>
-    <strong>Experimental (beta).</strong> Autocapture may contain issues, and its API and the properties
-it captures may change in a future release before general availability. Pin your SDK version if
-you build reports on autocaptured events.
-
-</div>
-
-                        <a href="Structs/RageClickOptions.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">RageClickOptions</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Dead%20Click%20Options"></a>
-                <a name="//apple_ref/swift/Section/Dead Click Options" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/Dead%20Click%20Options"></a>
-                  <h3 class="section-name"><span>Dead Click Options</span>
-</h3>
-                </div>
-              </div>
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel16DeadClickOptionsV"></a>
-                    <a name="//apple_ref/swift/Struct/DeadClickOptions" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel16DeadClickOptionsV">DeadClickOptions</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Configuration options for dead click detection.</p>
-
-<p>Dead clicks are detected when a user taps on an interactive element
-but no visible UI change occurs, indicating a broken or unresponsive element.</p>
-<div class="aside aside-warning">
-    <p class="aside-title">Warning</p>
-    <strong>Experimental (beta).</strong> Autocapture may contain issues, and its API and the properties
-it captures may change in a future release before general availability. Pin your SDK version if
-you build reports on autocaptured events.
-
-</div>
-
-                        <a href="Structs/DeadClickOptions.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">DeadClickOptions</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Autocapture%20Options"></a>
-                <a name="//apple_ref/swift/Section/Autocapture Options" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/Autocapture%20Options"></a>
-                  <h3 class="section-name"><span>Autocapture Options</span>
-</h3>
-                </div>
-              </div>
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel18AutocaptureOptionsV"></a>
-                    <a name="//apple_ref/swift/Struct/AutocaptureOptions" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel18AutocaptureOptionsV">AutocaptureOptions</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Configuration options for automatic event capture (clicks, rage clicks, dead clicks).</p>
-
-<p>Autocapture is <strong>disabled by default</strong> and must be explicitly enabled by providing
-<code>AutocaptureOptions</code> during SDK initialization.</p>
-
-<p><strong>Example - Enable with defaults:</strong></p>
-<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">options</span> <span class="o">=</span> <span class="kt">MixpanelOptions</span><span class="p">(</span>
-    <span class="nv">token</span><span class="p">:</span> <span class="s">"YOUR_TOKEN"</span><span class="p">,</span>
-    <span class="nv">autocaptureOptions</span><span class="p">:</span> <span class="kt">AutocaptureOptions</span><span class="p">()</span>
-<span class="p">)</span>
-</code></pre>
-
-<p><strong>Example - Custom configuration:</strong></p>
-<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">autocaptureOpts</span> <span class="o">=</span> <span class="kt">AutocaptureOptions</span><span class="p">(</span>
-    <span class="nv">clickOptions</span><span class="p">:</span> <span class="kt">ClickOptions</span><span class="p">(</span><span class="nv">enabled</span><span class="p">:</span> <span class="kc">true</span><span class="p">),</span>
-    <span class="nv">rageClickOptions</span><span class="p">:</span> <span class="kt">RageClickOptions</span><span class="p">(</span>
-        <span class="nv">enabled</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nv">clickThreshold</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>        <span class="c1">// Require 5 clicks instead of 4</span>
-        <span class="nv">timeWindowMs</span><span class="p">:</span> <span class="mi">800</span>         <span class="c1">// Shorter time window</span>
-    <span class="p">),</span>
-    <span class="nv">deadClickOptions</span><span class="p">:</span> <span class="kt">DeadClickOptions</span><span class="p">(</span>
-        <span class="nv">enabled</span><span class="p">:</span> <span class="kc">false</span>            <span class="c1">// Disable dead click detection</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-<span class="k">let</span> <span class="nv">options</span> <span class="o">=</span> <span class="kt">MixpanelOptions</span><span class="p">(</span>
-    <span class="nv">token</span><span class="p">:</span> <span class="s">"YOUR_TOKEN"</span><span class="p">,</span>
-    <span class="nv">autocaptureOptions</span><span class="p">:</span> <span class="n">autocaptureOpts</span>
-<span class="p">)</span>
-</code></pre>
-
-<p><strong>Platform support:</strong> iOS only. Mac Catalyst builds accept these options so shared iOS sources
-keep compiling, but automatic capture never starts there.</p>
-<div class="aside aside-warning">
-    <p class="aside-title">Warning</p>
-    <strong>Experimental (beta).</strong> Autocapture may contain issues, and its API and the properties
-it captures may change in a future release before general availability. Pin your SDK version if
-you build reports on autocaptured events.
-
-</div>
-
-                        <a href="Structs/AutocaptureOptions.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">AutocaptureOptions</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel10ClickEventV"></a>
-                    <a name="//apple_ref/swift/Struct/ClickEvent" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel10ClickEventV">ClickEvent</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Represents a captured click event with element metadata.</p>
-
-<p>Contains all semantic information about the clicked element and its context.
-Create a <code>ClickEvent</code> and pass it to <code>mixpanel.autocapture.trackClick(_:)</code> to
-track click events with full element metadata.
-All stored properties are value types (<code>CGFloat</code>, <code>String</code>, <code>Bool</code>), so the event can safely
-cross threads — it is handed from the main thread, where it is extracted, to the queue that
-emits it.</p>
-<div class="aside aside-warning">
-    <p class="aside-title">Warning</p>
-    <strong>Experimental (beta).</strong> Autocapture may contain issues, and its API and the properties
-it captures may change in a future release before general availability. Pin your SDK version if
-you build reports on autocaptured events.
-
-</div>
-
-                        <a href="Structs/ClickEvent.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">ClickEvent</span> <span class="p">:</span> <span class="kt">Sendable</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
             <div class="task-group">
               <div class="task-name-container">
                 <a name="/AnyCodable"></a>
@@ -667,7 +376,7 @@ call <code>mp.flags.loadFlags()</code> explicitly to ensure flags are fetched.</
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-09-02)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-07-15)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

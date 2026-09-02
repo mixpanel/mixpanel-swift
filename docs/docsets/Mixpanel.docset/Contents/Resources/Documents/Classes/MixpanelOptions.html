@@ -17,8 +17,9 @@
     <a title="MixpanelOptions Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 6.6.0 Docs</a> (73% documented)</p>
+        <p><a href="../index.html">Mixpanel 6.5.1 Docs</a> (70% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
+        <p class="header-right"><a href="dash-feed://erivedDataPath%2C%2FUsers%2Frunner%2Fwork%2Fmixpanel-swift%2Fmixpanel-swift%2Fbuild"><img src="../img/dash.png" alt="Dash"/>Install in Dash</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
             <input type="text" placeholder="Search documentation" data-typeahead>
@@ -158,18 +159,6 @@
             <a href="../Structs.html">Structures</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
-                <a href="../Structs/AutocaptureOptions.html">AutocaptureOptions</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Structs/ClickEvent.html">ClickEvent</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Structs/ClickOptions.html">ClickOptions</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Structs/DeadClickOptions.html">DeadClickOptions</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Structs/FeatureFlagOptions.html">FeatureFlagOptions</a>
               </li>
               <li class="nav-group-task">
@@ -186,9 +175,6 @@
               </li>
               <li class="nav-group-task">
                 <a href="../Structs/ProxyServerConfig.html">ProxyServerConfig</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Structs/RageClickOptions.html">RageClickOptions</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Structs/ServerProxyResource.html">ServerProxyResource</a>
@@ -746,56 +732,9 @@ returns a value different from the persisted anonymous ID.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:8Mixpanel0A7OptionsC011autocaptureB0AA011AutocaptureB0VSgvp"></a>
-                    <a name="//apple_ref/swift/Property/autocaptureOptions" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A7OptionsC011autocaptureB0AA011AutocaptureB0VSgvp">autocaptureOptions</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Configuration for automatic event capture (clicks, rage clicks, dead clicks).</p>
-
-<p>Autocapture is <strong>disabled by default</strong>. Provide an <code><a href="../Structs/AutocaptureOptions.html">AutocaptureOptions</a></code> instance
-to enable automatic capture of user interactions.</p>
-
-<p><strong>Example — Enable autocapture with defaults:</strong></p>
-<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">options</span> <span class="o">=</span> <span class="kt">MixpanelOptions</span><span class="p">(</span>
-    <span class="nv">token</span><span class="p">:</span> <span class="s">"YOUR_TOKEN"</span><span class="p">,</span>
-    <span class="nv">autocaptureOptions</span><span class="p">:</span> <span class="kt">AutocaptureOptions</span><span class="p">()</span>
-<span class="p">)</span>
-</code></pre>
-
-<p><strong>Note:</strong> Autocapture is only available on iOS. It is not supported when the app runs as a
-Mac Catalyst build; the options are accepted so shared iOS sources still compile, but no
-automatic capture takes place there.</p>
-<div class="aside aside-warning">
-    <p class="aside-title">Warning</p>
-    <strong>Experimental (beta).</strong> Autocapture may contain issues, and its API and the
-properties it captures may change in a future release before general availability.
-
-</div>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">autocaptureOptions</span><span class="p">:</span> <span class="kt"><a href="../Structs/AutocaptureOptions.html">AutocaptureOptions</a></span><span class="p">?</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContext06deviceS8Provider011featureFlagB007excludeU0011autocaptureB0ACSS_SdSSSgS3bSDySSAA0A4Type_pGSgAtA05ProxyyZ0VSgS2bSDySSypGATycSgAA011FeatureFlagB0VSgShySSGAA011AutocaptureB0VSgtcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:deviceIdProvider:featureFlagOptions:excludeProperties:autocaptureOptions:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContext06deviceS8Provider011featureFlagB007excludeU0011autocaptureB0ACSS_SdSSSgS3bSDySSAA0A4Type_pGSgAtA05ProxyyZ0VSgS2bSDySSypGATycSgAA011FeatureFlagB0VSgShySSGAA011AutocaptureB0VSgtcfc">init(token:<wbr>flushInterval:<wbr>instanceName:<wbr>trackAutomaticEvents:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>proxyServerConfig:<wbr>useGzipCompression:<wbr>featureFlagsEnabled:<wbr>featureFlagsContext:<wbr>deviceIdProvider:<wbr>featureFlagOptions:<wbr>excludeProperties:<wbr>autocaptureOptions:<wbr>)</a>
+                    <a name="/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContext06deviceS8Provider011featureFlagB007excludeU0ACSS_SdSSSgS3bSDySSAA0A4Type_pGSgAsA05ProxyyZ0VSgS2bSDySSypGASycSgAA011FeatureFlagB0VSgShySSGtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:deviceIdProvider:featureFlagOptions:excludeProperties:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:8Mixpanel0A7OptionsC5token13flushInterval12instanceName20trackAutomaticEvents23optOutTrackingByDefault19useUniqueDistinctId15superProperties9serverURL17proxyServerConfig0P15GzipCompression19featureFlagsEnabled19featureFlagsContext06deviceS8Provider011featureFlagB007excludeU0ACSS_SdSSSgS3bSDySSAA0A4Type_pGSgAsA05ProxyyZ0VSgS2bSDySSypGASycSgAA011FeatureFlagB0VSgShySSGtcfc">init(token:<wbr>flushInterval:<wbr>instanceName:<wbr>trackAutomaticEvents:<wbr>optOutTrackingByDefault:<wbr>useUniqueDistinctId:<wbr>superProperties:<wbr>serverURL:<wbr>proxyServerConfig:<wbr>useGzipCompression:<wbr>featureFlagsEnabled:<wbr>featureFlagsContext:<wbr>deviceIdProvider:<wbr>featureFlagOptions:<wbr>excludeProperties:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -820,13 +759,12 @@ properties it captures may change in a future release before general availabilit
     <span class="nv">superProperties</span><span class="p">:</span> <span class="kt"><a href="../Typealiases.html#/s:8Mixpanel10Propertiesa">Properties</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
     <span class="nv">serverURL</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
     <span class="nv">proxyServerConfig</span><span class="p">:</span> <span class="kt"><a href="../Structs/ProxyServerConfig.html">ProxyServerConfig</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-    <span class="nv">useGzipCompression</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="nv">useGzipCompression</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">,</span>  <span class="c1">// NOTE: This is a new default value!</span>
     <span class="nv">featureFlagsEnabled</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
     <span class="nv">featureFlagsContext</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[:],</span>
     <span class="nv">deviceIdProvider</span><span class="p">:</span> <span class="p">(()</span> <span class="o">-&gt;</span> <span class="kt">String</span><span class="p">?)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
     <span class="nv">featureFlagOptions</span><span class="p">:</span> <span class="kt"><a href="../Structs/FeatureFlagOptions.html">FeatureFlagOptions</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-    <span class="nv">excludeProperties</span><span class="p">:</span> <span class="kt">Set</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">[],</span>
-    <span class="nv">autocaptureOptions</span><span class="p">:</span> <span class="kt"><a href="../Structs/AutocaptureOptions.html">AutocaptureOptions</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="nv">excludeProperties</span><span class="p">:</span> <span class="kt">Set</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="p">)</span></code></pre>
 
                         </div>
@@ -839,7 +777,7 @@ properties it captures may change in a future release before general availabilit
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-09-02)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-07-15)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

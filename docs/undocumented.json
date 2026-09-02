@@ -1,20 +1,6 @@
 {
   "warnings": [
     {
-      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Autocapture/AutocaptureOptions.swift",
-      "line": 134,
-      "symbol": "ClickOptions.init(enabled:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.instance",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Autocapture/AutocaptureOptions.swift",
-      "line": 279,
-      "symbol": "AutocaptureOptions.init(clickOptions:rageClickOptions:deadClickOptions:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.instance",
-      "warning": "undocumented"
-    },
-    {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/Data+Compression.swift",
       "line": 11,
       "symbol": "GzipError",
@@ -177,49 +163,49 @@
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 267,
+      "line": 258,
       "symbol": "MixpanelInstance.useGzipCompression",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 319,
+      "line": 310,
       "symbol": "MixpanelInstance.minimumSessionDuration",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 610,
+      "line": 575,
       "symbol": "MixpanelInstance.getOptions()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 614,
+      "line": 579,
       "symbol": "MixpanelInstance.getDistinctId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 618,
+      "line": 583,
       "symbol": "MixpanelInstance.getAnonymousId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 1208,
+      "line": 1170,
       "symbol": "MixpanelInstance.archive()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 1476,
+      "line": 1438,
       "symbol": "MixpanelInstance.getGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
@@ -359,8 +345,8 @@
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelOptions.swift",
-      "line": 277,
-      "symbol": "MixpanelOptions.init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:deviceIdProvider:featureFlagOptions:excludeProperties:autocaptureOptions:)",
+      "line": 256,
+      "symbol": "MixpanelOptions.init(token:flushInterval:instanceName:trackAutomaticEvents:optOutTrackingByDefault:useUniqueDistinctId:superProperties:serverURL:proxyServerConfig:useGzipCompression:featureFlagsEnabled:featureFlagsContext:deviceIdProvider:featureFlagOptions:excludeProperties:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },

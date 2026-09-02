@@ -48,7 +48,7 @@ RUBYOPT="-r$SHIM_DIR/mustache_pathname_shim.rb" jazzy \
   -a Mixpanel \
   -u http://mixpanel.com \
   --github_url https://github.com/mixpanel/mixpanel-swift \
-  --module-version 6.5.1 \
+  --module-version 6.6.0 \
   --framework-root . \
   --module Mixpanel \
   --xcodebuild-arguments "-scheme,Mixpanel,-destination,generic/platform=iOS,-derivedDataPath,$DERIVED_DATA"

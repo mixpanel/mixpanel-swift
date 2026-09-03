@@ -27,17 +27,21 @@ final class SemanticExtractor {
         // UIKit hit-testing returns the deepest view. For UIButton > UILabel,
         // we get the UILabel — wrong role, wrong el_id, not interactive.
         // Walk up to the nearest clickable ancestor when the leaf isn't interactive.
-        let interactiveAncestor: UIView? = isInteractive(view) ? view : findInteractiveAncestor(of: view)
-        // Use the interactive ancestor as target for semantic extraction, but never UIWindow —
-        // its gesture recognizers are infrastructure (TouchInterceptor), not user-facing controls.
-        // Using UIWindow would produce wrong $el_id, tagName, role, etc.
-        let targetView: UIView
-        if let ancestor = interactiveAncestor, !(ancestor is UIWindow) {
-            targetView = ancestor
-        } else {
-            targetView = view
-        }
-        var viewIsInteractive = interactiveAncestor != nil
+        let ancestors: (interactive: UIView?, identified: UIView?) =
+            isInteractive(view) ? (view, nil) : searchAncestors(of: view)
+        // Never extract from UIWindow: its gesture recognizers are TouchInterceptor infrastructure,
+        // not user-facing controls, so it would yield a wrong $el_id, tagName and role.
+        //
+        // The identified ancestor covers hierarchies whose interactivity UIKit cannot see. React
+        // Native dispatches touches from a single recognizer on the surface root, so a pressable
+        // has no UIControl target, no gesture recognizer and — absent an explicit
+        // accessibilityRole — no `.button` trait, in either architecture. Hit-testing returns its
+        // `<Text>` child, and reporting that leaf gives a structural hash for an element the
+        // developer named. This redirects attribution only; the interactivity claim below still
+        // rests on UIKit evidence alone.
+        let targetView =
+            ancestors.interactive.flatMap { $0 is UIWindow ? nil : $0 } ?? ancestors.identified ?? view
+        var viewIsInteractive = ancestors.interactive != nil
 
         // SwiftUI buttons are rendered as internal UIKit views (e.g., PlatformGroupContainer)
         // that lack UIKit interactivity signals (UIControl targets, gesture recognizers).
@@ -250,21 +254,26 @@ final class SemanticExtractor {
         return nil
     }
 
-    /// Walk up the view hierarchy to find the nearest interactive ancestor.
-    /// Returns nil if no interactive ancestor is found within maxDepth levels.
-    private func findInteractiveAncestor(of view: UIView, maxDepth: Int = AutocaptureDefaults.maxAncestorSearchDepth)
-        -> UIView?
+    /// One upward pass collecting the nearest interactive ancestor and the nearest one carrying an
+    /// identifier of its own; either is nil when absent within maxDepth levels. Stops at the first
+    /// interactive ancestor, which wins whatever lies above it.
+    private func searchAncestors(of view: UIView, maxDepth: Int = AutocaptureDefaults.maxAncestorSearchDepth)
+        -> (interactive: UIView?, identified: UIView?)
     {
         var current = view.superview
         var depth = 0
+        var identified: UIView?
         while let v = current, depth < maxDepth {
-            if isInteractive(v) {
-                return v
+            if isInteractive(v) { return (v, identified) }
+            if identified == nil, !(v is UIWindow),
+                DefaultElementIdExtractor.shared.explicitIdentifier(for: v) != nil
+            {
+                identified = v
             }
             current = v.superview
             depth += 1
         }
-        return nil
+        return (nil, identified)
     }
 
 }

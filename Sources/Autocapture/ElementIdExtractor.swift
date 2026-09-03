@@ -16,7 +16,8 @@ import UIKit
 ///
 /// Resolution priority:
 /// 1. **React Native `nativeID`** — read through the Objective-C runtime so the SDK carries no
-///    compile-time dependency on React Native. Skipped for SwiftUI views: React Native renders
+///    compile-time dependency on React Native. Both the new-architecture (`nativeId`) and legacy
+///    (`nativeID`) property spellings are probed. Skipped for SwiftUI views: React Native renders
 ///    through UIKit, never SwiftUI, so the probe could only ever be wasted work there.
 /// 2. **`accessibilityIdentifier`** — stable, developer-assigned, and not user-visible. Internal
 ///    framework identifiers (e.g. `_UIKit…`, `AXID-…`) are skipped.
@@ -32,6 +33,10 @@ import UIKit
 final class DefaultElementIdExtractor {
 
     static let shared = DefaultElementIdExtractor()
+
+    /// Where React Native puts the `nativeID` prop: `nativeId` on Fabric, `nativeID` on the legacy
+    /// bridge. Probed in this order.
+    private static let reactNativeIdKeys = ["nativeId", "nativeID"]
 
     /// Framework-internal identifier prefixes that carry no product meaning.
     private static let internalIdentifierPrefixes = [
@@ -52,15 +57,8 @@ final class DefaultElementIdExtractor {
         accessibilityIdentifierFallback: String?
     ) -> String {
         // 1. React Native nativeID (UIKit-backed views only)
-        if let nativeId = reactNativeId(for: view) {
-            return nativeId
-        }
-
         // 2. accessibilityIdentifier
-        if let identifier = view.accessibilityIdentifier,
-            !identifier.isEmpty,
-            !DefaultElementIdExtractor.isInternalIdentifier(identifier)
-        {
+        if let identifier = explicitIdentifier(for: view) {
             return identifier
         }
         if let fallbackIdentifier = accessibilityIdentifierFallback,
@@ -74,24 +72,41 @@ final class DefaultElementIdExtractor {
         return DefaultElementIdExtractor.anonymousId(for: view)
     }
 
+    /// Steps 1 and 2 only: the identifier the view carries itself, nil when it would resolve to
+    /// nothing but a structural hash. `SemanticExtractor` uses that distinction to prefer a named
+    /// ancestor over an anonymous leaf.
+    func explicitIdentifier(for view: UIView) -> String? {
+        if let nativeId = reactNativeId(for: view) {
+            return nativeId
+        }
+        if let identifier = view.accessibilityIdentifier,
+            !identifier.isEmpty,
+            !DefaultElementIdExtractor.isInternalIdentifier(identifier)
+        {
+            return identifier
+        }
+        return nil
+    }
+
     // MARK: - React Native
 
-    /// Reads React Native's `nativeID` property through the Objective-C runtime.
+    /// Reads React Native's `nativeID` prop through the Objective-C runtime, trying both spellings:
+    /// Fabric assigns `RCTViewComponentView.nativeId`, the legacy bridge the `UIView (React)`
+    /// category's `nativeID`. `responds(to:)` guards each read so KVC never throws — necessary but
+    /// not sufficient, since React-Core compiles that category into every app: *every* `UIView`
+    /// responds to `nativeID` even on Fabric, where nothing assigns it, so an empty read must fall
+    /// through to the next spelling rather than end resolution.
     ///
-    /// `RCTView` (and friends) expose `nativeID` as an Objective-C property carrying the JS-side
-    /// `nativeID` prop. `responds(to:)` is checked first so KVC never throws on views that do not
-    /// declare the key.
-    ///
-    /// Skipped entirely for SwiftUI views — React Native renders through the UIKit view hierarchy,
-    /// so a SwiftUI view can never carry a `nativeID`.
+    /// Skipped for SwiftUI views — React Native renders through UIKit, so they never carry one.
     private func reactNativeId(for view: UIView) -> String? {
         guard !AutocaptureDefaults.isSwiftUIView(view) else { return nil }
-        let selector = NSSelectorFromString("nativeID")
-        guard view.responds(to: selector) else { return nil }
-        guard let nativeId = view.value(forKey: "nativeID") as? String, !nativeId.isEmpty else {
-            return nil
+        for key in DefaultElementIdExtractor.reactNativeIdKeys {
+            guard view.responds(to: NSSelectorFromString(key)) else { continue }
+            if let nativeId = view.value(forKey: key) as? String, !nativeId.isEmpty {
+                return nativeId
+            }
         }
-        return nativeId
+        return nil
     }
 
     private static func isInternalIdentifier(_ identifier: String) -> Bool {

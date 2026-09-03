@@ -367,6 +367,14 @@ private final class FakeReactNativeView: UIView {
     @objc var nativeID: String?
 }
 
+/// Stands in for a Fabric `RCTViewComponentView`, which carries the prop as `nativeId`. It declares
+/// `nativeID` too and leaves it unset: React-Core compiles its `UIView (React)` category into every
+/// app, so a new-architecture view still *responds* to the legacy spelling while nothing assigns it.
+private final class FakeFabricReactNativeView: UIView {
+    @objc var nativeId: String?
+    @objc var nativeID: String?
+}
+
 /// Tests the `$el_id` resolution order implemented by `DefaultElementIdExtractor`:
 /// React Native `nativeID` > `accessibilityIdentifier` > `<ClassName>_<hash>`. Accessibility labels
 /// are never a source: they are localized and can carry user data.
@@ -415,6 +423,32 @@ class DefaultElementIdExtractorTests: XCTestCase {
         view.accessibilityIdentifier = "plain_view"
 
         XCTAssertEqual(elementId(for: view), "plain_view")
+    }
+
+    func testFabricNativeIdIsUsed() {
+        // The new architecture is the default from React Native 0.76 on.
+        let view = FakeFabricReactNativeView()
+        view.nativeId = "rn_fabric_button"
+        view.accessibilityIdentifier = "testid_identifier"
+
+        XCTAssertEqual(elementId(for: view), "rn_fabric_button")
+    }
+
+    func testUnsetFabricNativeIdFallsThroughToTheLegacySpelling() {
+        // Responding to a spelling is not the same as carrying a value, so an empty read has to
+        // continue to the next spelling rather than end resolution.
+        let view = FakeFabricReactNativeView()
+        view.nativeId = ""
+        view.nativeID = "rn_legacy_button"
+
+        XCTAssertEqual(elementId(for: view), "rn_legacy_button")
+    }
+
+    func testViewCarryingNeitherSpellingFallsThroughToIdentifier() {
+        let view = FakeFabricReactNativeView()
+        view.accessibilityIdentifier = "testid_identifier"
+
+        XCTAssertEqual(elementId(for: view), "testid_identifier")
     }
 
     // MARK: - Priority 2: accessibilityIdentifier
@@ -765,6 +799,99 @@ class ElementIdExtractorEndToEndTests: MixpanelBaseTests {
             RunLoop.current.run(mode: .default, before: Date(timeIntervalSinceNow: 0.1))
         }
         return nil
+    }
+}
+
+// MARK: - Extraction Target: identified ancestors
+
+/// Stands in for a React Native pressable: it carries a `nativeID` but, because React Native
+/// dispatches touches from a single recognizer on the surface root, none of the UIKit interactivity
+/// signals `isInteractive` looks for.
+private final class FakePressableView: UIView {
+    @objc var nativeId: String?
+}
+
+/// Tests which view `SemanticExtractor` extracts from when the tapped leaf is not interactive:
+/// nearest interactive ancestor first, then nearest ancestor carrying an identifier, then the leaf.
+class SemanticExtractorTargetTests: XCTestCase {
+
+    private let extractor = SemanticExtractor()
+
+    private func elementId(tapping view: UIView) -> String {
+        return extractor.extractSemantics(from: view, at: .zero).elementId
+    }
+
+    private func interactiveView(identifier: String) -> UIView {
+        let view = UIView()
+        view.accessibilityIdentifier = identifier
+        view.addGestureRecognizer(UITapGestureRecognizer())
+        return view
+    }
+
+    func testLeafWithoutIdentityResolvesToIdentifiedAncestor() {
+        let container = UIView()
+        container.accessibilityIdentifier = "card_container"
+        let leaf = UILabel()
+        container.addSubview(leaf)
+
+        XCTAssertEqual(
+            elementId(tapping: leaf), "card_container",
+            "A named ancestor identifies the element better than the leaf's structural hash")
+    }
+
+    func testLeafResolvesToReactNativePressableAncestor() {
+        // The motivating case: hit-testing returns the `<Text>` inside a pressable, and only the
+        // pressable carries the developer-assigned identity.
+        let pressable = FakePressableView()
+        pressable.nativeId = "rn_checkout_button"
+        let leaf = UILabel()
+        pressable.addSubview(leaf)
+
+        XCTAssertEqual(elementId(tapping: leaf), "rn_checkout_button")
+    }
+
+    func testInteractiveAncestorWinsOverNearerIdentifiedAncestor() {
+        let interactive = interactiveView(identifier: "outer_button")
+        let identified = UIView()
+        identified.accessibilityIdentifier = "inner_card"
+        let leaf = UILabel()
+        identified.addSubview(leaf)
+        interactive.addSubview(identified)
+
+        XCTAssertEqual(
+            elementId(tapping: leaf), "outer_button",
+            "Confirmed interactivity outranks identity, even from further up the chain")
+    }
+
+    func testInteractiveLeafKeepsItsOwnIdentityDespiteIdentifiedAncestor() {
+        let container = UIView()
+        container.accessibilityIdentifier = "card_container"
+        let leaf = interactiveView(identifier: "inner_button")
+        container.addSubview(leaf)
+
+        XCTAssertEqual(elementId(tapping: leaf), "inner_button", "An interactive leaf never walks up")
+    }
+
+    func testLeafWithoutAnyIdentifiedAncestorKeepsItsStructuralHash() {
+        let container = UIView()
+        let leaf = UILabel()
+        container.addSubview(leaf)
+
+        let elementId = elementId(tapping: leaf)
+        XCTAssertNotNil(
+            elementId.range(of: "^UILabel_[0-9a-f]+$", options: .regularExpression),
+            "Expected UILabel_<hash>, got: \(elementId)")
+    }
+
+    func testFrameworkInternalIdentifierDoesNotMakeAnAncestorATarget() {
+        let container = UIView()
+        container.accessibilityIdentifier = "_UIKitPrivateContainer"
+        let leaf = UILabel()
+        container.addSubview(leaf)
+
+        XCTAssertNotNil(
+            elementId(tapping: leaf).range(of: "^UILabel_[0-9a-f]+$", options: .regularExpression),
+            "Framework-internal identifiers carry no product meaning and must be skipped")
     }
 }
 #endif

@@ -2293,7 +2293,7 @@ class FeatureFlagManagerTests: XCTestCase {
             ("<", "1.2.2", "1.2.3"),
             ("<=", "1.2.3", "1.2.4"),
             (">", "1.10.0", "1.2.3"),
-            (">=", "1.10.0", "1.2.2")
+            (">=", "1.10.0", "1.2.2"),
         ]
 
         for testCase in cases {
@@ -2328,7 +2328,7 @@ class FeatureFlagManagerTests: XCTestCase {
             ("<", dayBefore, onTarget),
             ("<=", onTarget, dayAfter),
             (">", dayAfter, onTarget),
-            (">=", onTarget, dayBefore)
+            (">=", onTarget, dayBefore),
         ]
 
         for testCase in cases {

@@ -22,9 +22,8 @@ Pod::Spec.new do |s|
     'Sources/MixpanelLogger.swift', 'Sources/JSONHandler.swift', 'Sources/Error.swift', 'Sources/AutomaticProperties.swift',
     'Sources/Constants.swift', 'Sources/MixpanelType.swift', 'Sources/Mixpanel.swift', 'Sources/MixpanelInstance.swift',
     'Sources/Flush.swift', 'Sources/Track.swift', 'Sources/People.swift', 'Sources/AutomaticEvents.swift',
-    'Sources/Group.swift', 'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift', 'Sources/MPDB.swift', 'Sources/MixpanelPersistence.swift', 
+    'Sources/Group.swift', 'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift', 'Sources/MPDB.swift', 'Sources/MixpanelPersistence.swift', 'Sources/CustomOperators.swift',
     'Sources/Data+Compression.swift', 'Sources/MixpanelOptions.swift', 'Sources/FeatureFlags.swift',
-    'Sources/CustomOperators.swift',
     'Sources/Autocapture.swift']
   s.tvos.deployment_target = '12.0'
   s.tvos.frameworks = 'UIKit', 'Foundation'
@@ -37,7 +36,7 @@ Pod::Spec.new do |s|
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) MAC_OS'
   }
 
-  s.watchos.deployment_target = '5.0'
+  s.watchos.deployment_target = '4.0'
   s.watchos.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) WATCH_OS'
   }

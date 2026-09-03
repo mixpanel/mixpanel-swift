@@ -15,10 +15,6 @@
 		17JSONMOD00000B03 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A03 /* JSON */; };
 		17JSONMOD00000B04 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A04 /* JSON */; };
 		17JSONMOD00000B05 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A05 /* JSON */; };
-		17VERSIONMOD00000B02 /* Version in Frameworks */ = {isa = PBXBuildFile; productRef = 17VERSIONMOD00000A02 /* Version */; };
-		17VERSIONMOD00000B03 /* Version in Frameworks */ = {isa = PBXBuildFile; productRef = 17VERSIONMOD00000A03 /* Version */; };
-		17VERSIONMOD00000B04 /* Version in Frameworks */ = {isa = PBXBuildFile; productRef = 17VERSIONMOD00000A04 /* Version */; };
-		17VERSIONMOD00000B05 /* Version in Frameworks */ = {isa = PBXBuildFile; productRef = 17VERSIONMOD00000A05 /* Version */; };
 		1651FD822F83B6E30065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD812F83B6E30065BB7E /* MixpanelSwiftCommon */; };
 		1651FD852F83B6F10065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD842F83B6F10065BB7E /* MixpanelSwiftCommon */; };
 		1651FD872F83B6F50065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD862F83B6F50065BB7E /* MixpanelSwiftCommon */; };
@@ -177,7 +173,6 @@
 			files = (
 				16178FD42F687EE200E022F2 /* jsonlogic in Frameworks */,
 				17JSONMOD00000B05 /* JSON in Frameworks */,
-				17VERSIONMOD00000B05 /* Version in Frameworks */,
 				1651FD892F83B6F80065BB7E /* MixpanelSwiftCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -189,7 +184,6 @@
 				1651FD822F83B6E30065BB7E /* MixpanelSwiftCommon in Frameworks */,
 				16178FD12F687EE200E022F2 /* jsonlogic in Frameworks */,
 				17JSONMOD00000B02 /* JSON in Frameworks */,
-				17VERSIONMOD00000B02 /* Version in Frameworks */,
 				E15FF7C61D02C9E10076CDE3 /* CoreTelephony.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -200,7 +194,6 @@
 			files = (
 				16178FD22F687EE200E022F2 /* jsonlogic in Frameworks */,
 				17JSONMOD00000B03 /* JSON in Frameworks */,
-				17VERSIONMOD00000B03 /* Version in Frameworks */,
 				1651FD852F83B6F10065BB7E /* MixpanelSwiftCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -211,7 +204,6 @@
 			files = (
 				16178FD32F687EE200E022F2 /* jsonlogic in Frameworks */,
 				17JSONMOD00000B04 /* JSON in Frameworks */,
-				17VERSIONMOD00000B04 /* Version in Frameworks */,
 				1651FD872F83B6F50065BB7E /* MixpanelSwiftCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -398,7 +390,6 @@
 			packageProductDependencies = (
 				17JSONLOGIC00000005 /* jsonlogic */,
 				17JSONMOD00000A05 /* JSON */,
-				17VERSIONMOD00000A05 /* Version */,
 				1651FD882F83B6F80065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel_watchOS;
@@ -422,7 +413,6 @@
 			packageProductDependencies = (
 				17JSONLOGIC00000002 /* jsonlogic */,
 				17JSONMOD00000A02 /* JSON */,
-				17VERSIONMOD00000A02 /* Version */,
 				1651FD812F83B6E30065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel;
@@ -446,7 +436,6 @@
 			packageProductDependencies = (
 				17JSONLOGIC00000003 /* jsonlogic */,
 				17JSONMOD00000A03 /* JSON */,
-				17VERSIONMOD00000A03 /* Version */,
 				1651FD842F83B6F10065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel_tvOS;
@@ -470,7 +459,6 @@
 			packageProductDependencies = (
 				17JSONLOGIC00000004 /* jsonlogic */,
 				17JSONMOD00000A04 /* JSON */,
-				17VERSIONMOD00000A04 /* Version */,
 				1651FD862F83B6F50065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel_OSX;
@@ -521,7 +509,6 @@
 			packageReferences = (
 				17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */,
 				1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */,
-				17VERSIONPKG00000001 /* XCRemoteSwiftPackageReference "Version" */,
 			);
 			productRefGroup = E115947E1CFF1491007F8B4F /* Products */;
 			projectDirPath = "";
@@ -1195,7 +1182,7 @@
 			repositoryURL = "https://github.com/mixpanel/mixpanel-swift-common";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
+				minimumVersion = 1.1.0;
 			};
 		};
 		17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */ = {
@@ -1204,14 +1191,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.2.0;
-			};
-		};
-		17VERSIONPKG00000001 /* XCRemoteSwiftPackageReference "Version" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/mrackwitz/Version";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.8.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -1276,26 +1255,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
 			productName = JSON;
-		};
-		17VERSIONMOD00000A02 /* Version */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 17VERSIONPKG00000001 /* XCRemoteSwiftPackageReference "Version" */;
-			productName = Version;
-		};
-		17VERSIONMOD00000A03 /* Version */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 17VERSIONPKG00000001 /* XCRemoteSwiftPackageReference "Version" */;
-			productName = Version;
-		};
-		17VERSIONMOD00000A04 /* Version */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 17VERSIONPKG00000001 /* XCRemoteSwiftPackageReference "Version" */;
-			productName = Version;
-		};
-		17VERSIONMOD00000A05 /* Version */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 17VERSIONPKG00000001 /* XCRemoteSwiftPackageReference "Version" */;
-			productName = Version;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -2242,87 +2242,135 @@ class FeatureFlagManagerTests: XCTestCase {
 
     // MARK: Custom Operator Filter Tests
 
-    func testFirstTimeEventMatching_SemverFilterMatch() {
-        let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
-        let initialVariant = createControlVariant(value: false)
-        let filters: [String: Any] = ["semver_compare": [["var": "app_version"], ">=", "1.2.3"]]
+    /// Drives one comparator symbol through the runtime-event path and asserts whether the pending
+    /// variant was activated.
+    ///
+    /// The event key carries the symbol and the property value, because `activatedFirstTimeEvents`
+    /// is not cleared between calls: a repeated key would be skipped as already activated and a
+    /// no-match expectation would then pass without the filter having been consulted.
+    private func assertOperatorFilter(
+        _ operatorName: String,
+        property: String,
+        symbol: String,
+        target: Any,
+        value: Any,
+        matches: Bool,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
+        let flagKey = "\(operatorName)-flag"
+        let hash = "\(symbol)-\(value)"
+        let eventKey = "\(flagKey):\(hash)"
+        let context = "\(operatorName): \(value) \(symbol) \(target)"
 
         setupAndTriggerFirstTimeEvent(
-            flagKey: "semver-flag",
-            eventName: "App Open",
-            eventProperties: ["app_version": "1.10.0"],
-            filters: filters,
-            pendingVariant: pendingVariant,
-            initialVariant: initialVariant,
-            firstTimeEventHash: "semverhash"
+            flagKey: flagKey,
+            eventName: "Filter Probe",
+            eventProperties: [property: value],
+            filters: [operatorName: [["var": property], symbol, target]],
+            pendingVariant: MixpanelFlagVariant(key: "premium", value: true),
+            initialVariant: createControlVariant(value: false),
+            firstTimeEventHash: hash,
+            expectActivation: matches
         ) { mockMgr in
-            let flag = mockMgr.flags?["semver-flag"]
-            XCTAssertEqual(flag?.key, "premium")
-            XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("semver-flag:semverhash"))
+            let flag = mockMgr.flags?[flagKey]
+            XCTAssertEqual(flag?.key, matches ? "premium" : "control", context, file: file, line: line)
+            XCTAssertEqual(
+                mockMgr.activatedFirstTimeEvents.contains(eventKey),
+                matches,
+                context,
+                file: file,
+                line: line
+            )
         }
     }
 
-    func testFirstTimeEventMatching_SemverFilterNoMatch() {
-        let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
-        let initialVariant = createControlVariant(value: false)
-        let filters: [String: Any] = ["semver_compare": [["var": "app_version"], ">=", "1.2.3"]]
+    func testFirstTimeEventMatching_SemverFilterEverySymbol() {
+        // 1.10.0 is on the matching side of > and >=, so a lexicographic comparison fails here.
+        let cases: [(symbol: String, matching: String, notMatching: String)] = [
+            ("===", "1.2.3", "1.2.4"),
+            ("!==", "1.2.4", "1.2.3"),
+            ("<", "1.2.2", "1.2.3"),
+            ("<=", "1.2.3", "1.2.4"),
+            (">", "1.10.0", "1.2.3"),
+            (">=", "1.10.0", "1.2.2")
+        ]
 
-        setupAndTriggerFirstTimeEvent(
-            flagKey: "semver-flag",
-            eventName: "App Open",
-            eventProperties: ["app_version": "1.2.2"],
-            filters: filters,
-            pendingVariant: pendingVariant,
-            initialVariant: initialVariant,
-            firstTimeEventHash: "semverhash",
-            expectActivation: false
-        ) { mockMgr in
-            let flag = mockMgr.flags?["semver-flag"]
-            XCTAssertEqual(flag?.key, "control")
-            XCTAssertFalse(mockMgr.activatedFirstTimeEvents.contains("semver-flag:semverhash"))
+        for testCase in cases {
+            assertOperatorFilter(
+                "semver_compare",
+                property: "app_version",
+                symbol: testCase.symbol,
+                target: "1.2.3",
+                value: testCase.matching,
+                matches: true
+            )
+            assertOperatorFilter(
+                "semver_compare",
+                property: "app_version",
+                symbol: testCase.symbol,
+                target: "1.2.3",
+                value: testCase.notMatching,
+                matches: false
+            )
         }
     }
 
-    func testFirstTimeEventMatching_DatetimeFilterMatch() {
-        let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
-        let initialVariant = createControlVariant(value: false)
-        // 2026-07-16T00:00:00Z in epoch milliseconds.
-        let filters: [String: Any] = ["datetime_compare": [["var": "signup"], "<", 1_784_160_000_000]]
+    func testFirstTimeEventMatching_DatetimeFilterEverySymbol() {
+        // The target is 2026-07-16T00:00:00Z in epoch milliseconds; the subjects sit a day either
+        // side of it and on it.
+        let onTarget = "2026-07-16T00:00:00Z"
+        let dayBefore = "2026-07-15T00:00:00Z"
+        let dayAfter = "2026-07-17T00:00:00Z"
+        let cases: [(symbol: String, matching: String, notMatching: String)] = [
+            ("===", onTarget, dayAfter),
+            ("!==", dayAfter, onTarget),
+            ("<", dayBefore, onTarget),
+            ("<=", onTarget, dayAfter),
+            (">", dayAfter, onTarget),
+            (">=", onTarget, dayBefore)
+        ]
 
-        setupAndTriggerFirstTimeEvent(
-            flagKey: "datetime-flag",
-            eventName: "Signup",
-            eventProperties: ["signup": "2026-07-15T00:00:00Z"],
-            filters: filters,
-            pendingVariant: pendingVariant,
-            initialVariant: initialVariant,
-            firstTimeEventHash: "datehash"
-        ) { mockMgr in
-            let flag = mockMgr.flags?["datetime-flag"]
-            XCTAssertEqual(flag?.key, "premium")
-            XCTAssertTrue(mockMgr.activatedFirstTimeEvents.contains("datetime-flag:datehash"))
+        for testCase in cases {
+            assertOperatorFilter(
+                "datetime_compare",
+                property: "signup",
+                symbol: testCase.symbol,
+                target: 1_784_160_000_000,
+                value: testCase.matching,
+                matches: true
+            )
+            assertOperatorFilter(
+                "datetime_compare",
+                property: "signup",
+                symbol: testCase.symbol,
+                target: 1_784_160_000_000,
+                value: testCase.notMatching,
+                matches: false
+            )
         }
     }
 
-    func testFirstTimeEventMatching_DatetimeFilterNoMatch() {
-        let pendingVariant = MixpanelFlagVariant(key: "premium", value: true)
-        let initialVariant = createControlVariant(value: false)
-        // 2026-07-16T00:00:00Z in epoch milliseconds.
-        let filters: [String: Any] = ["datetime_compare": [["var": "signup"], ">", 1_784_160_000_000]]
-
-        setupAndTriggerFirstTimeEvent(
-            flagKey: "datetime-flag",
-            eventName: "Signup",
-            eventProperties: ["signup": "2026-07-15T00:00:00Z"],
-            filters: filters,
-            pendingVariant: pendingVariant,
-            initialVariant: initialVariant,
-            firstTimeEventHash: "datehash",
-            expectActivation: false
-        ) { mockMgr in
-            let flag = mockMgr.flags?["datetime-flag"]
-            XCTAssertEqual(flag?.key, "control")
-            XCTAssertFalse(mockMgr.activatedFirstTimeEvents.contains("datetime-flag:datehash"))
+    func testFirstTimeEventMatching_FilterFailsClosedOnUnreadableProperty() {
+        // A property the operator cannot read leaves the variant alone under both === and !==, so
+        // an unreadable value cannot invert into a match rather than failing closed.
+        for symbol in ["===", "!=="] {
+            assertOperatorFilter(
+                "semver_compare",
+                property: "app_version",
+                symbol: symbol,
+                target: "1.2.3",
+                value: "not-a-version",
+                matches: false
+            )
+            assertOperatorFilter(
+                "datetime_compare",
+                property: "signup",
+                symbol: symbol,
+                target: 1_784_160_000_000,
+                value: "yesterday",
+                matches: false
+            )
         }
     }
 

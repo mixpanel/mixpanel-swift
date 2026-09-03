@@ -7,11 +7,8 @@
 
 import Foundation
 import JSON
-import Version
+import MixpanelSwiftCommon
 import jsonlogic
-
-// SemVer 2.0.0 requires major.minor.patch; partial versions are zero-padded to this.
-private let SEMVER_PARTS = 3
 
 let mixpanelCustomOperators: [String: (JSON?) -> JSON] = [
     "semver_compare": semverCompare,
@@ -34,9 +31,9 @@ private func operands(_ json: JSON?) -> (actual: JSON, symbol: String, target: J
 
 private func comparatorMatches(_ cmp: Int64, _ symbol: String) -> Bool {
     switch symbol {
-        case "=":
+        case "===":
             return cmp == 0
-        case "!=":
+        case "!==":
             return cmp != 0
         case "<":
             return cmp < 0
@@ -51,66 +48,8 @@ private func comparatorMatches(_ cmp: Int64, _ symbol: String) -> Bool {
     }
 }
 
-/// A leading v is accepted in either case, so it is stripped before the version is parsed.
-private func stripVersionPrefix(_ version: String) -> String {
-    guard let first = version.first, first == "v" || first == "V" else {
-        return version
-    }
-    return String(version.dropFirst())
-}
-
-/// Build metadata carries no precedence under SemVer 2.0.0, and the parser rejects the dots inside it, so
-/// it is dropped after validation and before parsing.
-private func stripBuildMetadata(_ version: String) -> String {
-    guard let plus = version.firstIndex(of: "+") else {
-        return version
-    }
-    return String(version[version.startIndex..<plus])
-}
-
-private func normalizeSemver(_ version: String) -> String {
-    let trimmed = version.trimmingCharacters(in: .whitespacesAndNewlines)
-    let stripped = stripVersionPrefix(trimmed)
-
-    var suffixStart = stripped.endIndex
-    for separator: Character in ["-", "+"] {
-        if let index = stripped.firstIndex(of: separator), index < suffixStart {
-            suffixStart = index
-        }
-    }
-
-    let core = stripped[stripped.startIndex..<suffixStart]
-    let suffix = stripped[suffixStart...]
-
-    // A core that is empty or holds more than three segments stays as it is, so it is never padded into
-    // a version such as "0.0.0" that would then pass validation.
-    let segments = core.split(separator: ".", omittingEmptySubsequences: false).map(String.init)
-    guard (1...SEMVER_PARTS).contains(segments.count) else {
-        return stripped
-    }
-    let padded = segments + Array(repeating: "0", count: SEMVER_PARTS - segments.count)
-    return padded.joined(separator: ".") + suffix
-}
-
-// Using the official semantic versioning 2.0.0 regular expression to handle cross-platform validation
-// differences on other SDK's. For example, some platforms allow leading zeros even though it is not valid
-// as part of the Semver 2.0.0 spec. See https://semver.org/
-private let semverRegex = try? NSRegularExpression(
-    pattern: "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)"
-        + "(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
-        + "(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
-)
-
-private func isValidSemver(_ version: String) -> Bool {
-    guard let regex = semverRegex else {
-        return false
-    }
-    let range = NSRange(version.startIndex..<version.endIndex, in: version)
-    return regex.firstMatch(in: version, range: range) != nil
-}
-
 // Implements a custom operation for semantic versioning comparison that conforms to the semver 2.0.0
-// standard. Prior to comparison, any leading version prefix is stripped.
+// standard. The comparison itself lives in MixpanelSwiftCommon so it can back either engine.
 private func semverCompare(_ json: JSON?) -> JSON {
     guard let (actual, symbol, target) = operands(json) else {
         return .Bool(false)
@@ -118,17 +57,9 @@ private func semverCompare(_ json: JSON?) -> JSON {
     guard let actualStr = actual.string, let targetStr = target.string else {
         return .Bool(false)
     }
-    let actualNormalized = normalizeSemver(actualStr)
-    let targetNormalized = normalizeSemver(targetStr)
-    guard isValidSemver(actualNormalized), isValidSemver(targetNormalized) else {
+    guard let cmp = SemanticVersion.compare(actualStr, targetStr) else {
         return .Bool(false)
     }
-    guard let actualVer = try? Version(stripBuildMetadata(actualNormalized)),
-        let targetVer = try? Version(stripBuildMetadata(targetNormalized))
-    else {
-        return .Bool(false)
-    }
-    let cmp: Int64 = actualVer < targetVer ? -1 : (actualVer > targetVer ? 1 : 0)
     let matches = comparatorMatches(cmp, symbol)
     return .Bool(matches)
 }
@@ -155,51 +86,16 @@ private func convertRfc3339ToUnixSeconds(_ json: JSON) -> Int64? {
     guard case .String(let value) = json else {
         return nil
     }
-    return parseRFC3339Seconds(value)
+    return Rfc3339.toUnixSeconds(value)
 }
 
 private func convertUnixMillisecondsToSeconds(_ json: JSON) -> Int64? {
     switch json {
         case .Int(let value):
-            return value / 1000
+            return Rfc3339.epochMillisToUnixSeconds(value)
         case .Double(let value):
-            // Int64(_:) traps on a value that is NaN, infinite, or beyond Int64's range.
-            guard let milliseconds = Int64(exactly: value.rounded(.towardZero)) else {
-                return nil
-            }
-            return milliseconds / 1000
+            return Rfc3339.epochMillisToUnixSeconds(value)
         default:
             return nil
     }
-}
-
-// Strict RFC3339 guard for datetime strings.
-private let rfc3339Regex = try? NSRegularExpression(
-    pattern: "^\\d{4}-\\d{2}-\\d{2}[Tt]\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([Zz]|[+-]\\d{2}:\\d{2})$"
-)
-
-private let rfc3339Formatter: ISO8601DateFormatter = {
-    let formatter = ISO8601DateFormatter()
-    formatter.formatOptions = [.withInternetDateTime]
-    return formatter
-}()
-
-private let rfc3339FractionalFormatter: ISO8601DateFormatter = {
-    let formatter = ISO8601DateFormatter()
-    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-    return formatter
-}()
-
-private func parseRFC3339Seconds(_ value: String) -> Int64? {
-    let normalized = value.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-    let range = NSRange(normalized.startIndex..<normalized.endIndex, in: normalized)
-    guard let regex = rfc3339Regex, regex.firstMatch(in: normalized, range: range) != nil else {
-        return nil
-    }
-    let date = rfc3339Formatter.date(from: normalized) ?? rfc3339FractionalFormatter.date(from: normalized)
-    guard let parsed = date else {
-        return nil
-    }
-    let seconds = parsed.timeIntervalSince1970.rounded(.down)
-    return Int64(exactly: seconds)
 }

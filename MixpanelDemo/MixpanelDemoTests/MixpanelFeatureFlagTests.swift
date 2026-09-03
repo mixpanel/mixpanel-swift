@@ -2240,6 +2240,140 @@ class FeatureFlagManagerTests: XCTestCase {
         }
     }
 
+    // MARK: Custom Operator Filter Tests
+
+    /// Drives one comparator symbol through the runtime-event path and asserts whether the pending
+    /// variant was activated.
+    ///
+    /// The event key carries the symbol and the property value, because `activatedFirstTimeEvents`
+    /// is not cleared between calls: a repeated key would be skipped as already activated and a
+    /// no-match expectation would then pass without the filter having been consulted.
+    private func assertOperatorFilter(
+        _ operatorName: String,
+        property: String,
+        symbol: String,
+        target: Any,
+        value: Any,
+        matches: Bool,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
+        let flagKey = "\(operatorName)-flag"
+        let hash = "\(symbol)-\(value)"
+        let eventKey = "\(flagKey):\(hash)"
+        let context = "\(operatorName): \(value) \(symbol) \(target)"
+
+        setupAndTriggerFirstTimeEvent(
+            flagKey: flagKey,
+            eventName: "Filter Probe",
+            eventProperties: [property: value],
+            filters: [operatorName: [["var": property], symbol, target]],
+            pendingVariant: MixpanelFlagVariant(key: "premium", value: true),
+            initialVariant: createControlVariant(value: false),
+            firstTimeEventHash: hash,
+            expectActivation: matches
+        ) { mockMgr in
+            let flag = mockMgr.flags?[flagKey]
+            XCTAssertEqual(flag?.key, matches ? "premium" : "control", context, file: file, line: line)
+            XCTAssertEqual(
+                mockMgr.activatedFirstTimeEvents.contains(eventKey),
+                matches,
+                context,
+                file: file,
+                line: line
+            )
+        }
+    }
+
+    func testFirstTimeEventMatching_SemverFilterEverySymbol() {
+        // 1.10.0 is on the matching side of > and >=, so a lexicographic comparison fails here.
+        let cases: [(symbol: String, matching: String, notMatching: String)] = [
+            ("===", "1.2.3", "1.2.4"),
+            ("!==", "1.2.4", "1.2.3"),
+            ("<", "1.2.2", "1.2.3"),
+            ("<=", "1.2.3", "1.2.4"),
+            (">", "1.10.0", "1.2.3"),
+            (">=", "1.10.0", "1.2.2"),
+        ]
+
+        for testCase in cases {
+            assertOperatorFilter(
+                "semver_compare",
+                property: "app_version",
+                symbol: testCase.symbol,
+                target: "1.2.3",
+                value: testCase.matching,
+                matches: true
+            )
+            assertOperatorFilter(
+                "semver_compare",
+                property: "app_version",
+                symbol: testCase.symbol,
+                target: "1.2.3",
+                value: testCase.notMatching,
+                matches: false
+            )
+        }
+    }
+
+    func testFirstTimeEventMatching_DatetimeFilterEverySymbol() {
+        // The target is 2026-07-16T00:00:00Z in epoch milliseconds; the subjects sit a day either
+        // side of it and on it.
+        let onTarget = "2026-07-16T00:00:00Z"
+        let dayBefore = "2026-07-15T00:00:00Z"
+        let dayAfter = "2026-07-17T00:00:00Z"
+        let cases: [(symbol: String, matching: String, notMatching: String)] = [
+            ("===", onTarget, dayAfter),
+            ("!==", dayAfter, onTarget),
+            ("<", dayBefore, onTarget),
+            ("<=", onTarget, dayAfter),
+            (">", dayAfter, onTarget),
+            (">=", onTarget, dayBefore),
+        ]
+
+        for testCase in cases {
+            assertOperatorFilter(
+                "datetime_compare",
+                property: "signup",
+                symbol: testCase.symbol,
+                target: 1_784_160_000_000,
+                value: testCase.matching,
+                matches: true
+            )
+            assertOperatorFilter(
+                "datetime_compare",
+                property: "signup",
+                symbol: testCase.symbol,
+                target: 1_784_160_000_000,
+                value: testCase.notMatching,
+                matches: false
+            )
+        }
+    }
+
+    func testFirstTimeEventMatching_FilterFailsClosedOnUnreadableProperty() {
+        // A property the operator cannot read leaves the variant alone under both === and !==, so
+        // an unreadable value cannot invert into a match rather than failing closed.
+        for symbol in ["===", "!=="] {
+            assertOperatorFilter(
+                "semver_compare",
+                property: "app_version",
+                symbol: symbol,
+                target: "1.2.3",
+                value: "not-a-version",
+                matches: false
+            )
+            assertOperatorFilter(
+                "datetime_compare",
+                property: "signup",
+                symbol: symbol,
+                target: 1_784_160_000_000,
+                value: "yesterday",
+                matches: false
+            )
+        }
+    }
+
     // MARK: Activation State Tests
 
     func testFirstTimeEventActivatesOnlyOnce() {

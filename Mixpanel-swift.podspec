@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
                      :tag => "#{s.version}" }
   s.resource_bundles = {'Mixpanel' => ['Sources/Mixpanel/PrivacyInfo.xcprivacy']}
   s.dependency 'jsonlogic', '~> 1.2.0'
-  s.dependency 'MixpanelSwiftCommon', '~> 1.0.0'
+  s.dependency 'MixpanelSwiftCommon', '~> 1.1.0'
   s.ios.deployment_target = '12.0'
   s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   s.ios.pod_target_xcconfig = {
@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
     'Sources/MixpanelLogger.swift', 'Sources/JSONHandler.swift', 'Sources/Error.swift', 'Sources/AutomaticProperties.swift',
     'Sources/Constants.swift', 'Sources/MixpanelType.swift', 'Sources/Mixpanel.swift', 'Sources/MixpanelInstance.swift',
     'Sources/Flush.swift', 'Sources/Track.swift', 'Sources/People.swift', 'Sources/AutomaticEvents.swift',
-    'Sources/Group.swift', 'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift', 'Sources/MPDB.swift', 'Sources/MixpanelPersistence.swift', 
+    'Sources/Group.swift', 'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift', 'Sources/MPDB.swift', 'Sources/MixpanelPersistence.swift', 'Sources/CustomOperators.swift',
     'Sources/Data+Compression.swift', 'Sources/MixpanelOptions.swift', 'Sources/FeatureFlags.swift',
     'Sources/Autocapture.swift', 'Sources/Autocapture/AutocaptureOptions.swift']
     

@@ -37,11 +37,34 @@ final class SemanticExtractor {
         // has no UIControl target, no gesture recognizer and — absent an explicit
         // accessibilityRole — no `.button` trait, in either architecture. Hit-testing returns its
         // `<Text>` child, and reporting that leaf gives a structural hash for an element the
-        // developer named. This redirects attribution only; the interactivity claim below still
-        // rests on UIKit evidence alone.
+        // developer named.
         let targetView =
             ancestors.interactive.flatMap { $0 is UIWindow ? nil : $0 } ?? ancestors.identified ?? view
         var viewIsInteractive = ancestors.interactive != nil
+
+        // A React Native `nativeID` is treated as an interactivity signal in its own right.
+        //
+        // UIKit exposes nothing that separates a pressable from a plain `<View>` on iOS: both are
+        // an `RCTViewComponentView` with no `UIControl`, no gesture recognizer, no `.button` trait,
+        // and — measured on React Native 0.86 — `canBecomeFocused == false`, because the JS
+        // `focusable` prop is not forwarded to iOS. Android has `isClickable()`; iOS has no
+        // equivalent, which is why dead clicks never fired for React Native elements here.
+        //
+        // `nativeID` is the one marker the SDK asks React Native developers to put on clickable
+        // elements, so it stands in for the missing signal. `accessibilityIdentifier` (React
+        // Native's `testID`) deliberately does not: it is routinely applied to containers, labels
+        // and whole screens for end-to-end testing, and treating those as clickable would report
+        // dead clicks for elements that were never meant to respond. `testID` therefore still
+        // redirects attribution, but only `nativeID` claims interactivity.
+        //
+        // Costs one Objective-C runtime probe on the already-selected target, and only when UIKit
+        // found no interactive ancestor. Pure UIKit and SwiftUI hierarchies never carry a
+        // `nativeID`, so they are unaffected.
+        if !viewIsInteractive,
+            DefaultElementIdExtractor.shared.reactNativeId(for: targetView) != nil
+        {
+            viewIsInteractive = true
+        }
 
         // SwiftUI buttons are rendered as internal UIKit views (e.g., PlatformGroupContainer)
         // that lack UIKit interactivity signals (UIControl targets, gesture recognizers).

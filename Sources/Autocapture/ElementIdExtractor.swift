@@ -98,7 +98,7 @@ final class DefaultElementIdExtractor {
     /// through to the next spelling rather than end resolution.
     ///
     /// Skipped for SwiftUI views — React Native renders through UIKit, so they never carry one.
-    private func reactNativeId(for view: UIView) -> String? {
+    func reactNativeId(for view: UIView) -> String? {
         guard !AutocaptureDefaults.isSwiftUIView(view) else { return nil }
         for key in DefaultElementIdExtractor.reactNativeIdKeys {
             guard view.responds(to: NSSelectorFromString(key)) else { continue }

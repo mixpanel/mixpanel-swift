@@ -1,3 +1,12 @@
+Last tag: 6.6.0
+## [6.6.1](https://github.com/mixpanel/mixpanel-swift/tree/6.6.1) (2026-09-08)
+
+### Fixes
+
+- read the React Native nativeID on the new architecture (#781) ([#781](https://github.com/mixpanel/mixpanel-swift/pull/781))
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.6.0...6.6.1)
+
 Last tag: 6.5.1
 ## [6.6.0](https://github.com/mixpanel/mixpanel-swift/tree/6.6.0) (2026-09-02)
 

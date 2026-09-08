@@ -16,7 +16,8 @@ import UIKit
 ///
 /// Resolution priority:
 /// 1. **React Native `nativeID`** — read through the Objective-C runtime so the SDK carries no
-///    compile-time dependency on React Native. Skipped for SwiftUI views: React Native renders
+///    compile-time dependency on React Native. Both the new-architecture (`nativeId`) and legacy
+///    (`nativeID`) spellings are probed. Skipped for SwiftUI views: React Native renders
 ///    through UIKit, never SwiftUI, so the probe could only ever be wasted work there.
 /// 2. **`accessibilityIdentifier`** — stable, developer-assigned, and not user-visible. Internal
 ///    framework identifiers (e.g. `_UIKit…`, `AXID-…`) are skipped.
@@ -32,6 +33,13 @@ import UIKit
 final class DefaultElementIdExtractor {
 
     static let shared = DefaultElementIdExtractor()
+
+    /// Where React Native stores the `nativeID` prop, newest architecture first.
+    ///
+    /// The new architecture (Fabric) assigns `RCTViewComponentView.nativeId`; the legacy bridge
+    /// assigns the `UIView (React)` category's `nativeID`. A view can carry either depending on the
+    /// architecture the host app runs, so both are probed.
+    private static let reactNativeIdKeys = ["nativeId", "nativeID"]
 
     /// Framework-internal identifier prefixes that carry no product meaning.
     private static let internalIdentifierPrefixes = [
@@ -76,22 +84,26 @@ final class DefaultElementIdExtractor {
 
     // MARK: - React Native
 
-    /// Reads React Native's `nativeID` property through the Objective-C runtime.
+    /// Reads React Native's `nativeID` prop through the Objective-C runtime, trying both spellings
+    /// React Native uses for it (see `reactNativeIdKeys`).
     ///
-    /// `RCTView` (and friends) expose `nativeID` as an Objective-C property carrying the JS-side
-    /// `nativeID` prop. `responds(to:)` is checked first so KVC never throws on views that do not
-    /// declare the key.
+    /// `responds(to:)` guards each read so KVC never throws on a view that does not declare the
+    /// key. That guard is necessary but not sufficient: React-Core compiles the `UIView (React)`
+    /// category into every app, so *every* `UIView` responds to `nativeID` — including on Fabric,
+    /// where nothing ever assigns it. An empty read must therefore fall through to the next
+    /// spelling rather than end resolution, or the prop is never found on the new architecture.
     ///
     /// Skipped entirely for SwiftUI views — React Native renders through the UIKit view hierarchy,
     /// so a SwiftUI view can never carry a `nativeID`.
     private func reactNativeId(for view: UIView) -> String? {
         guard !AutocaptureDefaults.isSwiftUIView(view) else { return nil }
-        let selector = NSSelectorFromString("nativeID")
-        guard view.responds(to: selector) else { return nil }
-        guard let nativeId = view.value(forKey: "nativeID") as? String, !nativeId.isEmpty else {
-            return nil
+        for key in DefaultElementIdExtractor.reactNativeIdKeys {
+            guard view.responds(to: NSSelectorFromString(key)) else { continue }
+            if let nativeId = view.value(forKey: key) as? String, !nativeId.isEmpty {
+                return nativeId
+            }
         }
-        return nativeId
+        return nil
     }
 
     private static func isInternalIdentifier(_ identifier: String) -> Bool {

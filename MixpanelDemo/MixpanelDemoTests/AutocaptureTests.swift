@@ -895,101 +895,66 @@ class SemanticExtractorTargetTests: XCTestCase {
     }
 }
 
-// MARK: - Interactivity Inference: React Native nativeID
+// MARK: - Interactivity: React Native
 
-/// Stands in for a legacy-bridge React Native pressable, which spells the prop `nativeID`.
-private final class FakeLegacyPressableView: UIView {
-    @objc var nativeID: String?
-}
-
-/// `isInteractive` gates dead click detection. UIKit exposes no signal that separates a React
-/// Native pressable from a plain `<View>`, so a `nativeID` stands in for one. A `testID`
-/// (`accessibilityIdentifier`) deliberately does not — it is applied to containers and labels
-/// as often as to buttons.
-class ReactNativeInteractivityInferenceTests: XCTestCase {
+/// `isInteractive` gates dead click detection, and React Native pressables carry no UIKit signal
+/// that could set it: no `UIControl`, no gesture recognizer, and no `.button` trait unless the app
+/// passes an explicit `accessibilityRole`. Dead clicks therefore depend on that role.
+///
+/// A `nativeID` deliberately does **not** stand in for it. Identifiers get applied to layout
+/// wrappers, scroll anchors and test hooks as readily as to buttons, so inferring interactivity
+/// from one would report dead clicks on containers that were never meant to respond. Identity and
+/// clickability are separate claims, and only the first can be read from an identifier.
+class ReactNativeInteractivityTests: XCTestCase {
 
     private let extractor = SemanticExtractor()
 
-    private func isInteractive(tapping view: UIView) -> Bool {
-        return extractor.extractSemantics(from: view, at: .zero).isInteractive
+    private func semantics(tapping view: UIView) -> ClickEvent {
+        return extractor.extractSemantics(from: view, at: .zero)
     }
 
-    func testLeafInsideNativeIdPressableIsInteractive() {
-        // The motivating case: the tap lands on the `<Text>`, the pressable holds the identity.
-        let pressable = FakePressableView()
-        pressable.nativeId = "rn_checkout_button"
-        let leaf = UILabel()
-        pressable.addSubview(leaf)
-
-        XCTAssertTrue(isInteractive(tapping: leaf))
+    private func pressable(nativeId: String? = nil, role: Bool = false) -> FakePressableView {
+        let view = FakePressableView()
+        view.nativeId = nativeId
+        if role { view.accessibilityTraits = .button }
+        return view
     }
 
-    func testNativeIdPressableTappedDirectlyIsInteractive() {
-        // Tapping the pressable's own padding rather than its label.
-        let pressable = FakePressableView()
-        pressable.nativeId = "rn_checkout_button"
-
-        XCTAssertTrue(isInteractive(tapping: pressable))
-    }
-
-    func testLegacySpellingAlsoInfersInteractivity() {
-        let pressable = FakeLegacyPressableView()
-        pressable.nativeID = "rn_checkout_button"
-        let leaf = UILabel()
-        pressable.addSubview(leaf)
-
-        XCTAssertTrue(isInteractive(tapping: leaf))
-    }
-
-    func testTestIdAloneDoesNotInferInteractivity() {
-        // `testID` identifies the element for attribution but says nothing about clickability;
-        // inferring it would report dead clicks on containers that were never meant to respond.
-        let container = UIView()
-        container.accessibilityIdentifier = "card_container"
+    func testNativeIdIdentifiesTheElementButDoesNotMakeItInteractive() {
+        let container = pressable(nativeId: "rn_checkout_button")
         let leaf = UILabel()
         container.addSubview(leaf)
 
-        XCTAssertFalse(isInteractive(tapping: leaf))
+        let event = semantics(tapping: leaf)
+
         XCTAssertEqual(
-            extractor.extractSemantics(from: leaf, at: .zero).elementId, "card_container",
-            "testID still redirects attribution, it just does not claim interactivity")
+            event.elementId, "rn_checkout_button",
+            "attribution still walks up to the named ancestor")
+        XCTAssertFalse(
+            event.isInteractive,
+            "a nativeID says which element was tapped, not that it was clickable")
     }
 
-    func testPlainLeafWithNoIdentityIsNotInteractive() {
-        XCTAssertFalse(isInteractive(tapping: UILabel()))
-    }
-
-    func testEmptyNativeIdDoesNotInferInteractivity() {
-        let pressable = FakePressableView()
-        pressable.nativeId = ""
+    func testAccessibilityRoleMakesAReactNativeElementInteractive() {
+        let button = pressable(role: true)
         let leaf = UILabel()
-        pressable.addSubview(leaf)
+        button.addSubview(leaf)
 
-        XCTAssertFalse(isInteractive(tapping: leaf))
+        XCTAssertTrue(semantics(tapping: leaf).isInteractive)
     }
 
-    func testUIKitControlRemainsInteractiveWithoutAnyNativeId() {
-        let button = UIButton()
-        button.addTarget(self, action: #selector(noop), for: .touchUpInside)
+    func testRoleAndNativeIdTogetherGiveInteractivityAndIdentity() {
+        // The combination React Native apps are asked to use: the role earns dead click
+        // detection, the nativeID earns a stable $el_id.
+        let button = pressable(nativeId: "rn_checkout_button", role: true)
+        let leaf = UILabel()
+        button.addSubview(leaf)
 
-        XCTAssertTrue(isInteractive(tapping: button))
+        let event = semantics(tapping: leaf)
+
+        XCTAssertTrue(event.isInteractive)
+        XCTAssertEqual(event.elementId, "rn_checkout_button")
     }
-
-    func testNativeIdBeyondSearchDepthIsNotReached() {
-        // The inference rides on the existing bounded walk-up; it does not widen it.
-        let pressable = FakePressableView()
-        pressable.nativeId = "rn_far_button"
-        var current: UIView = pressable
-        for _ in 0...AutocaptureDefaults.maxAncestorSearchDepth {
-            let spacer = UIView()
-            current.addSubview(spacer)
-            current = spacer
-        }
-
-        XCTAssertFalse(isInteractive(tapping: current))
-    }
-
-    @objc private func noop() {}
 }
 
 #endif

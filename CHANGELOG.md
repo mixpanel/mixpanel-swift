@@ -1,3 +1,12 @@
+Last tag: 6.6.1
+## [6.7.0](https://github.com/mixpanel/mixpanel-swift/tree/6.7.0) (2026-09-09)
+
+### Features
+
+- Implement semver and date custom operators for flags runtime events (#763) ([#763](https://github.com/mixpanel/mixpanel-swift/pull/763))
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.6.1...6.7.0)
+
 Last tag: 6.6.0
 ## [6.6.1](https://github.com/mixpanel/mixpanel-swift/tree/6.6.1) (2026-09-08)
 

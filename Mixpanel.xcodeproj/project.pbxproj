@@ -15,10 +15,18 @@
 		16178FD22F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000003 /* jsonlogic */; };
 		16178FD32F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000004 /* jsonlogic */; };
 		16178FD42F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000005 /* jsonlogic */; };
+		17JSONMOD00000B02 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A02 /* JSON */; };
+		17JSONMOD00000B03 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A03 /* JSON */; };
+		17JSONMOD00000B04 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A04 /* JSON */; };
+		17JSONMOD00000B05 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A05 /* JSON */; };
 		1651FD822F83B6E30065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD812F83B6E30065BB7E /* MixpanelSwiftCommon */; };
 		1651FD852F83B6F10065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD842F83B6F10065BB7E /* MixpanelSwiftCommon */; };
 		1651FD872F83B6F50065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD862F83B6F50065BB7E /* MixpanelSwiftCommon */; };
 		1651FD892F83B6F80065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD882F83B6F80065BB7E /* MixpanelSwiftCommon */; };
+		17CUSTOMOP0000B002 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
+		17CUSTOMOP0000B003 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
+		17CUSTOMOP0000B004 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
+		17CUSTOMOP0000B005 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
 		171E4C122DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C132DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C142DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
@@ -137,6 +145,7 @@
 		04558C747B60EA2884344AC4 /* TouchInterceptor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TouchInterceptor.swift; sourceTree = "<group>"; };
 		06325D1AC34056FFA59B35DF /* SemanticExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticExtractor.swift; sourceTree = "<group>"; };
 		171E4C112DAF108400B7CB11 /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
+		17CUSTOMOP0000F001 /* CustomOperators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomOperators.swift; sourceTree = "<group>"; };
 		171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelOptions.swift; sourceTree = "<group>"; };
 		1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/Mixpanel/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
 		1A2B3C4D5E6F70819AB0C003 /* ElementIdExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ElementIdExtractor.swift; sourceTree = "<group>"; };
@@ -182,6 +191,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16178FD42F687EE200E022F2 /* jsonlogic in Frameworks */,
+				17JSONMOD00000B05 /* JSON in Frameworks */,
 				1651FD892F83B6F80065BB7E /* MixpanelSwiftCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -192,6 +202,7 @@
 			files = (
 				1651FD822F83B6E30065BB7E /* MixpanelSwiftCommon in Frameworks */,
 				16178FD12F687EE200E022F2 /* jsonlogic in Frameworks */,
+				17JSONMOD00000B02 /* JSON in Frameworks */,
 				E15FF7C61D02C9E10076CDE3 /* CoreTelephony.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -201,6 +212,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16178FD22F687EE200E022F2 /* jsonlogic in Frameworks */,
+				17JSONMOD00000B03 /* JSON in Frameworks */,
 				1651FD852F83B6F10065BB7E /* MixpanelSwiftCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -210,6 +222,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16178FD32F687EE200E022F2 /* jsonlogic in Frameworks */,
+				17JSONMOD00000B04 /* JSON in Frameworks */,
 				1651FD872F83B6F50065BB7E /* MixpanelSwiftCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -316,6 +329,7 @@
 				E115948A1CFF1538007F8B4F /* Mixpanel.swift */,
 				E115948D1D000709007F8B4F /* MixpanelInstance.swift */,
 				171E4C112DAF108400B7CB11 /* FeatureFlags.swift */,
+				17CUSTOMOP0000F001 /* CustomOperators.swift */,
 				E115949E1D01BE14007F8B4F /* Flush.swift */,
 				E11594A01D01C597007F8B4F /* Track.swift */,
 				E15FF7C71D0435670076CDE3 /* People.swift */,
@@ -418,6 +432,7 @@
 			name = Mixpanel_watchOS;
 			packageProductDependencies = (
 				17JSONLOGIC00000005 /* jsonlogic */,
+				17JSONMOD00000A05 /* JSON */,
 				1651FD882F83B6F80065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel_watchOS;
@@ -440,6 +455,7 @@
 			name = Mixpanel;
 			packageProductDependencies = (
 				17JSONLOGIC00000002 /* jsonlogic */,
+				17JSONMOD00000A02 /* JSON */,
 				1651FD812F83B6E30065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel;
@@ -462,6 +478,7 @@
 			name = Mixpanel_tvOS;
 			packageProductDependencies = (
 				17JSONLOGIC00000003 /* jsonlogic */,
+				17JSONMOD00000A03 /* JSON */,
 				1651FD842F83B6F10065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel_tvOS;
@@ -484,6 +501,7 @@
 			name = Mixpanel_macOS;
 			packageProductDependencies = (
 				17JSONLOGIC00000004 /* jsonlogic */,
+				17JSONMOD00000A04 /* JSON */,
 				1651FD862F83B6F50065BB7E /* MixpanelSwiftCommon */,
 			);
 			productName = Mixpanel_OSX;
@@ -604,6 +622,7 @@
 				86F86EC022443A0800B69832 /* MixpanelType.swift in Sources */,
 				86F86EBE224439FA00B69832 /* Network.swift in Sources */,
 				171E4C142DAF108400B7CB11 /* FeatureFlags.swift in Sources */,
+				17CUSTOMOP0000B004 /* CustomOperators.swift in Sources */,
 				86F86EBD224439F500B69832 /* Flush.swift in Sources */,
 				86F86EBC224439F100B69832 /* PrintLogging.swift in Sources */,
 				868550AF2699096F001FCDDC /* MixpanelPersistence.swift in Sources */,
@@ -636,6 +655,7 @@
 				E1D335D01D3059A800E68E12 /* AutomaticProperties.swift in Sources */,
 				51DD567C1D306B740045D3DB /* MixpanelLogger.swift in Sources */,
 				171E4C122DAF108400B7CB11 /* FeatureFlags.swift in Sources */,
+				17CUSTOMOP0000B002 /* CustomOperators.swift in Sources */,
 				E165228F1D6781DF000D5949 /* MixpanelType.swift in Sources */,
 				BB9614171F3BB87700C3EF3E /* ReadWriteLock.swift in Sources */,
 				E190522D1F9FC1BC00900E5D /* SessionMetadata.swift in Sources */,
@@ -676,6 +696,7 @@
 				E12782C41D4AB5CB0025FB05 /* FlushRequest.swift in Sources */,
 				E12782C51D4AB5CB0025FB05 /* Track.swift in Sources */,
 				171E4C132DAF108400B7CB11 /* FeatureFlags.swift in Sources */,
+				17CUSTOMOP0000B003 /* CustomOperators.swift in Sources */,
 				E12782C61D4AB5CB0025FB05 /* People.swift in Sources */,
 				AC10CA0002000003 /* Autocapture.swift in Sources */,
 				E19052001F9548F000900E5D /* ReadWriteLock.swift in Sources */,
@@ -709,6 +730,7 @@
 				E1F15FDE1E64B60A00391AE3 /* MixpanelType.swift in Sources */,
 				E1F15FDA1E64B60A00391AE3 /* JSONHandler.swift in Sources */,
 				171E4C152DAF108400B7CB11 /* FeatureFlags.swift in Sources */,
+				17CUSTOMOP0000B005 /* CustomOperators.swift in Sources */,
 				E1F15FE31E64B60D00391AE3 /* Track.swift in Sources */,
 				E19052011F9548F000900E5D /* ReadWriteLock.swift in Sources */,
 				868550AE2699096F001FCDDC /* MixpanelPersistence.swift in Sources */,
@@ -1214,7 +1236,7 @@
 			repositoryURL = "https://github.com/mixpanel/mixpanel-swift-common";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
+				minimumVersion = 1.1.0;
 			};
 		};
 		17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */ = {
@@ -1267,6 +1289,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
 			productName = jsonlogic;
+		};
+		17JSONMOD00000A02 /* JSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = JSON;
+		};
+		17JSONMOD00000A03 /* JSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = JSON;
+		};
+		17JSONMOD00000A04 /* JSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = JSON;
+		};
+		17JSONMOD00000A05 /* JSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17JSONLOGIC00000001 /* XCRemoteSwiftPackageReference "json-logic-swift" */;
+			productName = JSON;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1512,7 +1512,7 @@ class FeatureFlagManager: MixpanelFlags {
 
                 // Evaluate the filter
                 do {
-                    let result: Bool = try applyRule(rulesString, to: dataString)
+                    let result: Bool = try applyRuleWithCustomOperators(rulesString, to: dataString)
                     if !result {
                         MixpanelLogger.debug(message: "JsonLogic filter evaluated to false for event '\(eventKey)'")
                         continue

@@ -18,13 +18,13 @@ jobs:
         run: |
 
           # Conventional commit pattern
-          # Supports: feat, fix, chore, release
+          # Supports: feat, fix, chore, docs, release
           # Examples:
           #   feat: Add new feature
           #   fix: Resolve bug
           #   release: prepare 6.3.0
 
-          PATTERN='^(feat|fix|chore|release): .+$'
+          PATTERN='^(feat|fix|chore|docs|release): .+$'
 
           if [[ ! "$PR_TITLE" =~ $PATTERN ]]; then
             echo "❌ PR title does not follow conventional commit format"
@@ -39,12 +39,14 @@ jobs:
             echo "  feat    - New feature"
             echo "  fix     - Bug fix"
             echo "  chore   - Maintenance task"
+            echo "  docs    - Documentation update"
             echo "  release - Release preparation"
             echo ""
             echo "Valid examples:"
             echo "  ✅ feat: Add automatic event tracking"
             echo "  ✅ fix: Resolve SwiftUI accent color override"
             echo "  ✅ chore: Update dependencies"
+            echo "  ✅ docs: Update integration guide"
             echo "  ✅ release: prepare 6.3.0"
             echo ""
             echo "Invalid examples:"

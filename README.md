@@ -12,6 +12,11 @@
 [![Swift Package Manager compatible](https://img.shields.io/badge/Swift%20Package%20Manager-compatible-brightgreen.svg)](https://github.com/apple/swift-package-manager)
 [![Apache License](http://img.shields.io/cocoapods/l/Mixpanel-swift.svg)](https://mixpanel.com)
 [![Documentation](https://mixpanel.github.io/mixpanel-swift/badge.svg)](https://mixpanel.github.io/mixpanel-swift)
+
+For installation and implementation steps, see the official Mixpanel docs:
+
+[Swift SDK](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift) — event tracking, identity, and people properties
+
 # Table of Contents
 
 <!-- MarkdownTOC -->
@@ -39,7 +44,7 @@ We'd also love for you to come and work with us! Check out **[Jobs](https://mixp
 
 If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
 
-Check out our [Advanced iOS Swift Guide](https://developer.mixpanel.com/docs/swift) for additional advanced configurations and use cases, like setting up your project with European Union data storage.
+Check out our [Advanced iOS Swift Guide](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift) for additional advanced configurations and use cases, like setting up your project with European Union data storage.
 
 ---
 
@@ -162,14 +167,14 @@ func application(_ application: UIApplication,
 [See all configuration options](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html)
 
 ## 3. Send Data
-Let's get started by sending event data. You can send an event from anywhere in your application. Better understand user behavior by storing details that are specific to the event (properties). After initializing the library, Mixpanel will [automatically collect common mobile events](https://mixpanel.com/help/questions/articles/which-common-mobile-events-can-mixpanel-collect-on-my-behalf-automatically). You can enable/disable automatic collection through your [project settings](https://help.mixpanel.com/hc/en-us/articles/115004596186#enable-or-disable-common-mobile-events). Also, Mixpanel automatically tracks some properties by default. [learn more](https://help.mixpanel.com/hc/en-us/articles/115004613766-Default-Properties-Collected-by-Mixpanel#iOS)
+Let's get started by sending event data. You can send an event from anywhere in your application. Better understand user behavior by storing details that are specific to the event (properties). After initializing the library, Mixpanel can [automatically collect common mobile events](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#legacy-automatically-tracked-events). These events are now considered legacy and are disabled by default. You can enable them by setting `trackAutomaticEvents` to `true` in `MixpanelOptions` when initializing the library. Regardless of this setting, Mixpanel still automatically tracks some [default event and user properties](https://docs.mixpanel.com/docs/data-structure/property-reference/default-properties#client-side-sdks).
 ```swift
 Mixpanel.mainInstance().track(event: "Sign Up", properties: [
    "source": "Pat's affiliate site",
    "Opted out of email": true
 ])
 ```
-In addition to event data, you can also send [user profile data](https://developer.mixpanel.com/docs/swift#storing-user-profiles). We recommend this after completing the quickstart guide.
+In addition to event data, you can also send [user profile data](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#storing-user-profiles). We recommend this after completing the quickstart guide.
 
 ## 4. Check for Success
 [Open up Events in Mixpanel](http://mixpanel.com/report/events) to view incoming events. 
@@ -198,11 +203,11 @@ func application(_ application: UIApplication,
 # FAQ
 **I want to stop tracking an event/event property in Mixpanel. Is that possible?**
 
-Yes, in Lexicon, you can intercept and drop incoming events or properties. Mixpanel won’t store any new data for the event or property you select to drop. [See this article for more information](https://help.mixpanel.com/hc/en-us/articles/360001307806#dropping-events-and-properties).
+Yes, in Lexicon, you can intercept and block incoming events or properties. Mixpanel won’t store any new data for the event or property you select to block. [See this article for more information](https://docs.mixpanel.com/docs/data-governance/lexicon#blocking-data).
 
 **I have a test user I would like to opt out of tracking. How do I do that?**
 
-Mixpanel’s client-side tracking library contains the [optOutTracking()](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14optOutTrackingyyF) method, which will set the user’s local opt-out state to “true” and will prevent data from being sent from a user’s device. More detailed instructions can be found in the section, [Opting users out of tracking](https://developer.mixpanel.com/docs/swift#opting-users-out-of-tracking).
+Mixpanel’s client-side tracking library contains the [optOutTracking()](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14optOutTrackingyyF) method, which will set the user’s local opt-out state to “true” and will prevent data from being sent from a user’s device. More detailed instructions can be found in the section, [Opting users out of tracking](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#opt-out-of-tracking).
 
 **Why aren't my events showing up?**
 
@@ -210,9 +215,26 @@ First, make sure your test device has internet access. To preserve battery life 
 ```swift
 Mixpanel.mainInstance().flush()
 ```
+You can also change how often the library flushes automatically by setting `flushInterval` (in seconds) in `MixpanelOptions` at initialization. For example, to flush every 30 seconds:
+```swift
+let options = MixpanelOptions(
+    token: "YOUR_PROJECT_TOKEN",
+    flushInterval: 30  // Flush every 30 seconds
+)
+Mixpanel.initialize(options: options)
+```
 If your events are still not showing up after 60 seconds, check if you have opted out of tracking. You can also enable Mixpanel debugging and logging, it allows you to see the debug output from the Mixpanel library. To enable it, set [loggingEnabled](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14loggingEnabledSbvp) to true.
 ```swift
 Mixpanel.mainInstance().loggingEnabled = true
+```
+**Data Residency:** For projects with EU or India data residency, you must configure the SDK to use the correct regional endpoint. Events sent to the wrong region will not be ingested. Learn more about [configuring the SDK region](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#sdk-configuration-using-mixpaneloptions) and [data residency](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#data-residency).
+```swift
+/// Initialize Mixpanel with EU data residency
+let options = MixpanelOptions(
+    token: "YOUR_PROJECT_TOKEN",
+    serverURL: "https://api-eu.mixpanel.com"
+)
+Mixpanel.initialize(options: options)
 ```
 **Starting with iOS 14.5, do I need to request the user’s permission through the AppTrackingTransparency framework to use Mixpanel?**
 
@@ -226,11 +248,11 @@ Please refer to our [Apple App Developer Privacy Guidance](https://mixpanel.com/
 ## I want to know more!
 
 No worries, here are some links that you will find useful:
-* **[Advanced iOS - Swift Guide](https://developer.mixpanel.com/docs/swift)**
+* **[Advanced iOS - Swift Guide](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift)**
 * **[Sample app](https://github.com/mixpanel/mixpanel-swift/tree/master/MixpanelDemo)**
 * **[Full API Reference](https://mixpanel.github.io/mixpanel-swift)**
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/mixpanel/mixpanel-swift)
 
-Have any questions? Reach out to Mixpanel [Support](https://help.mixpanel.com/hc/en-us/requests/new) to speak to someone smart, quickly.
+Have any questions? Reach out to Mixpanel [Support](https://mixpanel.com/get-support) to speak to someone smart, quickly. You can also visit the [Support Hub](https://mixpanel.com/contact-us/support/) for more help.
 

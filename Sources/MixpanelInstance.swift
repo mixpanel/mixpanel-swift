@@ -1408,12 +1408,16 @@ extension MixpanelInstance {
                 self.flushQueue(peopleQueue, type: .people)
                 self.flushQueue(groupsQueue, type: .groups)
 
-                // Continue while at least one queue produced a full batch (a short batch means
-                // that queue is empty, or was truncated by the byte budget / automatic-event
-                // filter and waits for the next flush). The next iteration re-enters through
-                // the guard above, which terminates the drain on opt-out or once failed sends
-                // engage the request backoff — sent rows are deleted before the next read, so
-                // the loop either makes progress or is cut after a bounded number of attempts.
+                // Continue while any queue returned at least one row. A short batch is NOT the
+                // same as an empty one: readRows can legitimately return fewer than `batchSize`
+                // rows while more remain queued — truncated by the byte budget, or shrunk by
+                // dropped oversized/malformed rows — so comparing against `batchSize` would stop
+                // the drain early and strand deliverable events until the next flush. Only a
+                // genuinely empty read means there's nothing left to send right now. The next
+                // iteration re-enters through the guard above, which terminates the drain on
+                // opt-out or once failed sends engage the request backoff — sent rows are
+                // deleted before the next read, so the loop either makes progress or is cut
+                // after a bounded number of attempts.
                 //
                 // removeProcessedEntities (called above, per type, on success) enqueues its
                 // delete on trackingQueue asynchronously rather than blocking this thread. That
@@ -1422,8 +1426,7 @@ extension MixpanelInstance {
                 // read, so FIFO guarantees the deletes run first. This breaks if trackingQueue
                 // is ever made concurrent, or if this recursion is reordered before the sends.
                 let mayHaveMore =
-                    eventQueue.count == batchSize || peopleQueue.count == batchSize
-                    || groupsQueue.count == batchSize
+                    !eventQueue.isEmpty || !peopleQueue.isEmpty || !groupsQueue.isEmpty
                 if mayHaveMore {
                     self.flushBatches(completion: completion)
                     return

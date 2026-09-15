@@ -214,45 +214,93 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
         removeDBfile(mpdb.apiToken)
     }
 
-    /// Many malformed rows must not exhaust the read budget and starve valid events.
+    /// A batch that is entirely malformed rows must still delete them, even though the read
+    /// itself returns nothing for that call.
     ///
-    /// If the batch contains many malformed rows (e.g., 50) followed by valid events, each read
-    /// would consume the row budget on malformed rows and return empty, blocking the valid events.
-    /// Malformed rows must be skipped and deleted without counting toward the budget.
-    func testManyMalformedRowsDoNotStarvValidEvents() {
+    /// `readRows` has no internal pagination: if every physical row within its `numRows` window
+    /// is malformed, the call returns empty (there is nothing behind that window for it to see).
+    /// That's fine — the malformed rows are still deleted as a side effect, so the *next* call
+    /// against the same window finds them gone and reaches whatever is behind them. Starvation
+    /// is avoided at the drain-loop level (MixpanelInstance.flushBatches), which keeps calling
+    /// as long as the previous read returned anything at all — see
+    /// testFlushDrainsPastAFullyMalformedBatch below for that half of the fix.
+    func testFullyMalformedBatchIsDeletedEvenThoughTheReadReturnsEmpty() {
         let mpdb = MPDB.init(token: randomId())
         mpdb.open()
 
         let batchSize = APIConstants.maxBatchSize
         let invalidJSON = "{\"broken".data(using: .utf8)!
 
-        // Insert many malformed rows
+        // Insert enough malformed rows to fill one whole read window.
         for _ in 0..<batchSize {
             mpdb.insertRow(.events, data: invalidJSON)
         }
 
-        // Insert valid events after the malformed rows
+        // Insert valid events right behind them.
         for index in 0..<10 {
             let event: InternalProperties = ["event": "event\(index)", "properties": ["index": index]]
             mpdb.insertRow(.events, data: JSONHandler.serializeJSONObject(event)!)
         }
 
-        // Read should skip malformed rows and return valid events
-        let rows = mpdb.readRows(.events, numRows: batchSize)
-        XCTAssertEqual(rows.count, 10, "all valid events should be read despite malformed rows")
-        XCTAssertTrue(
-            rows.allSatisfy { ($0["event"] as? String)?.hasPrefix("event") == true },
-            "only valid events should be returned")
+        // First call: the window is entirely malformed rows, so nothing valid comes back —
+        // but they must still be deleted.
+        let firstRead = mpdb.readRows(.events, numRows: batchSize)
+        XCTAssertTrue(firstRead.isEmpty, "a window of only malformed rows returns nothing")
 
-        // Verify malformed rows are deleted: second read should return empty
-        let rowsAfter = mpdb.readRows(.events, numRows: batchSize)
-        XCTAssertTrue(rowsAfter.isEmpty, "malformed rows should have been deleted")
+        // Second call: the malformed rows are gone, so this window now reaches the valid events.
+        let secondRead = mpdb.readRows(.events, numRows: batchSize)
+        XCTAssertEqual(secondRead.count, 10, "valid events should surface once malformed rows ahead of them are gone")
+        XCTAssertTrue(
+            secondRead.allSatisfy { ($0["event"] as? String)?.hasPrefix("event") == true },
+            "only valid events should be returned")
 
         mpdb.close()
         removeDBfile(mpdb.apiToken)
     }
 
     // MARK: - Drain loop
+
+    /// A short-but-non-empty batch (byte budget truncation, or dropped oversized/malformed rows)
+    /// must not be mistaken for an empty queue — the drain must keep going past it within the
+    /// same flush() call.
+    ///
+    /// Previously the drain loop only continued when a read returned exactly `flushBatchSize`
+    /// rows, treating anything less as "queue empty." A batch of malformed rows exactly filling
+    /// one read window, with valid events immediately behind it, used to end the flush right
+    /// there: the malformed rows were deleted, but the valid events were left queued until some
+    /// later flush. The loop must instead keep draining as long as the previous read returned
+    /// anything at all, stopping only on a genuinely empty read.
+    func testFlushDrainsPastAFullyMalformedBatch() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+
+        let batchSize = testMixpanel.flushBatchSize
+        let invalidJSON = "{\"broken".data(using: .utf8)!
+        let mpdb = MPDB.init(token: testMixpanel.apiToken)
+        mpdb.open()
+        // Fill exactly one read window with malformed rows so the first drain iteration reads
+        // and deletes them but returns nothing to send.
+        for _ in 0..<batchSize {
+            mpdb.insertRow(.events, data: invalidJSON)
+        }
+        mpdb.close()
+
+        // Valid events queued right behind the malformed window.
+        let total = 10
+        for index in 0..<total {
+            testMixpanel.track(event: "event\(index)")
+        }
+        waitForTrackingQueue(testMixpanel)
+
+        testMixpanel.flush()
+        waitForTrackingQueue(testMixpanel)
+        waitForTrackingQueue(testMixpanel)
+
+        XCTAssertTrue(
+            eventQueue(token: testMixpanel.apiToken).isEmpty,
+            "the valid events behind a fully-malformed batch should still be sent within this flush")
+        removeDBfile(testMixpanel.apiToken)
+    }
 
     /// A single flush call must drain a queue larger than one batch, by repeating
     /// read → send → delete in `flushBatchSize` batches until the table is empty.
@@ -267,8 +315,12 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
         XCTAssertEqual(eventQueue(token: testMixpanel.apiToken).count, total)
 
         testMixpanel.flush()
-        // Each waitForTrackingQueue pass drains two read → send iterations of the chain;
-        // three batches need two passes.
+        // Each waitForTrackingQueue pass drains two read → send iterations of the chain: three
+        // real batches (50 + 50 + 20) plus one extra, empty iteration the drain loop now runs
+        // to confirm the queue is exhausted (it continues on any non-empty read, not just a
+        // full one) — four iterations in total. Three passes leaves margin over the two that
+        // would exactly cover it.
+        waitForTrackingQueue(testMixpanel)
         waitForTrackingQueue(testMixpanel)
         waitForTrackingQueue(testMixpanel)
 

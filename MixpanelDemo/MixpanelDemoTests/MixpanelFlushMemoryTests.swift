@@ -179,6 +179,79 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
         removeDBfile(token)
     }
 
+    /// Rows that fail JSON deserialization must be dropped and deleted, not left to block valid events.
+    ///
+    /// When a serialized row cannot be deserialized, it must be deleted to prevent it from
+    /// consuming the read budget on every flush. A batch of malformed rows followed by valid
+    /// events would return an empty batch and stop, starving the valid events indefinitely.
+    func testMalformedRowsThatFailDeserializationAreDeleted() {
+        let mpdb = MPDB.init(token: randomId())
+        mpdb.open()
+
+        let first: InternalProperties = ["event": "first", "properties": ["index": 1]]
+        mpdb.insertRow(.events, data: JSONHandler.serializeJSONObject(first)!)
+
+        // Insert a row with invalid JSON data (truncated JSON string)
+        let invalidJSON = "{\"event\": \"broken".data(using: .utf8)!
+        mpdb.insertRow(.events, data: invalidJSON)
+
+        let last: InternalProperties = ["event": "last", "properties": ["index": 2]]
+        mpdb.insertRow(.events, data: JSONHandler.serializeJSONObject(last)!)
+
+        // First read: malformed row should be skipped and deleted, so we get first and last
+        let rows = mpdb.readRows(.events, numRows: 100)
+        XCTAssertEqual(
+            rows.compactMap { $0["event"] as? String }, ["first", "last"],
+            "malformed row should be skipped while its neighbours read successfully")
+
+        // Second read: malformed row must be gone, not re-read
+        let rowsAfter = mpdb.readRows(.events, numRows: 100)
+        XCTAssertEqual(
+            rowsAfter.compactMap { $0["event"] as? String }, ["first", "last"],
+            "malformed row should have been deleted, not re-read")
+
+        mpdb.close()
+        removeDBfile(mpdb.apiToken)
+    }
+
+    /// Many malformed rows must not exhaust the read budget and starve valid events.
+    ///
+    /// If the batch contains many malformed rows (e.g., 50) followed by valid events, each read
+    /// would consume the row budget on malformed rows and return empty, blocking the valid events.
+    /// Malformed rows must be skipped and deleted without counting toward the budget.
+    func testManyMalformedRowsDoNotStarvValidEvents() {
+        let mpdb = MPDB.init(token: randomId())
+        mpdb.open()
+
+        let batchSize = APIConstants.maxBatchSize
+        let invalidJSON = "{\"broken".data(using: .utf8)!
+
+        // Insert many malformed rows
+        for _ in 0..<batchSize {
+            mpdb.insertRow(.events, data: invalidJSON)
+        }
+
+        // Insert valid events after the malformed rows
+        for index in 0..<10 {
+            let event: InternalProperties = ["event": "event\(index)", "properties": ["index": index]]
+            mpdb.insertRow(.events, data: JSONHandler.serializeJSONObject(event)!)
+        }
+
+        // Read should skip malformed rows and return valid events
+        let rows = mpdb.readRows(.events, numRows: batchSize)
+        XCTAssertEqual(rows.count, 10, "all valid events should be read despite malformed rows")
+        XCTAssertTrue(
+            rows.allSatisfy { ($0["event"] as? String)?.hasPrefix("event") == true },
+            "only valid events should be returned")
+
+        // Verify malformed rows are deleted: second read should return empty
+        let rowsAfter = mpdb.readRows(.events, numRows: batchSize)
+        XCTAssertTrue(rowsAfter.isEmpty, "malformed rows should have been deleted")
+
+        mpdb.close()
+        removeDBfile(mpdb.apiToken)
+    }
+
     // MARK: - Drain loop
 
     /// A single flush call must drain a queue larger than one batch, by repeating

@@ -273,12 +273,13 @@ class MPDB {
             var rowsRead: Int = 0
             // Cumulative blob bytes handed to the deserializer. Reading stops before the row that
             // would push this past `byteBudget`, bounding the read in bytes as well as rows.
-            // Dropped oversized rows never count toward it.
+            // Dropped oversized and malformed rows never count toward it.
             var bytesRead: Int = 0
             var byteBudgetExhausted = false
-            // Rows too large to parse safely. Collected here and deleted once the statement is
-            // finalized rather than mid-iteration, so the delete never runs against a live SELECT.
-            var oversizedIds: [Int32] = []
+            // Rows too large to parse safely or that fail deserialization. Collected here and
+            // deleted once the statement is finalized rather than mid-iteration, so the delete
+            // never runs against a live SELECT.
+            var droppedIds: [Int32] = []
             if sqlite3_prepare_v2(db, selectString, -1, &selectStatement, nil) == SQLITE_OK {
                 while !byteBudgetExhausted, sqlite3_step(selectStatement) == SQLITE_ROW {
                     autoreleasepool {
@@ -294,7 +295,7 @@ class MPDB {
                                     message:
                                         "Dropping oversized row \(id) from table \(tableName): \(blobLength) bytes exceeds the \(APIConstants.maxRowByteSize) byte limit"
                                 )
-                                oversizedIds.append(id)
+                                droppedIds.append(id)
                                 return
                             }
 
@@ -311,9 +312,15 @@ class MPDB {
                                 var entity = jsonObject
                                 entity["id"] = id
                                 rows.append(entity)
+                                rowsRead += 1
+                                bytesRead += Int(blobLength)
+                            } else {
+                                MixpanelLogger.warn(
+                                    message:
+                                        "Dropping malformed row \(id) from table \(tableName): JSON deserialization failed"
+                                )
+                                droppedIds.append(id)
                             }
-                            rowsRead += 1
-                            bytesRead += Int(blobLength)
                         } else {
                             logSqlError(message: "No blob found in data column for row in \(tableName)")
                         }
@@ -326,8 +333,8 @@ class MPDB {
                 logSqlError(message: "SELECT statement for table \(tableName) could not be prepared")
             }
             sqlite3_finalize(selectStatement)
-            if !oversizedIds.isEmpty {
-                deleteRows(persistenceType, ids: oversizedIds)
+            if !droppedIds.isEmpty {
+                deleteRows(persistenceType, ids: droppedIds)
             }
         } else {
             reconnect()

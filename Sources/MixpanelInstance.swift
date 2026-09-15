@@ -168,14 +168,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// The `flushBatchSize` property determines the number of events read from local storage and sent
     /// per network request to the Mixpanel server. A flush drains the whole queue in successive
     /// batches of this size (each read is also subject to the byte budget), so this bounds memory
-    /// per batch, not how much a flush sends in total. The maximum size is 50; any value over 50
-    /// will default to 50.
+    /// per batch, not how much a flush sends in total. The minimum size is 1 and maximum is 50;
+    /// any value outside this range will be clamped to it.
     open var flushBatchSize: Int {
         get {
             return flushInstance.flushBatchSize
         }
         set {
-            flushInstance.flushBatchSize = min(newValue, APIConstants.maxBatchSize)
+            flushInstance.flushBatchSize = max(1, min(newValue, APIConstants.maxBatchSize))
         }
     }
 
@@ -1378,8 +1378,9 @@ extension MixpanelInstance {
 
             // Each iteration reads up to `flushBatchSize` (capped at `APIConstants.maxBatchSize`)
             // rows per queue, further bounded in bytes by MPDB's read budget, and sends each
-            // batch as a single network request.
-            let batchSize = self.flushBatchSize
+            // batch as a single network request. Batch size must be positive to avoid infinite
+            // recursion when all queues are empty and count == batchSize == 0.
+            let batchSize = max(1, self.flushBatchSize)
 
             // automatic events will NOT be flushed until one of the flags is non-nil
             let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(

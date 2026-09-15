@@ -360,4 +360,54 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
         testMixpanel.delegate = nil
         removeDBfile(testMixpanel.apiToken)
     }
+
+    // MARK: - Batch size validation
+
+    /// A zero or negative batch size must not cause infinite recursion.
+    ///
+    /// If batchSize is 0, each read returns empty queues. The drain loop checks
+    /// `eventQueue.count == batchSize` to detect full batches; with both being 0, this is true,
+    /// causing infinite recursive reschedules with no progress. Batch size must be clamped to
+    /// at least 1.
+    func testZeroBatchSizeIsClampedToOne() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.track(event: "event1")
+        waitForTrackingQueue(testMixpanel)
+
+        // Attempt to set batch size to 0 (should be clamped to 1)
+        testMixpanel.flushBatchSize = 0
+        XCTAssertGreaterThanOrEqual(
+            testMixpanel.flushBatchSize, 1,
+            "batch size should be clamped to at least 1")
+
+        testMixpanel.flush()
+        waitForTrackingQueue(testMixpanel)
+
+        XCTAssertTrue(
+            eventQueue(token: testMixpanel.apiToken).isEmpty,
+            "flush should complete and drain queue even with 0-attempt")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    /// Negative batch sizes must also be clamped to 1.
+    func testNegativeBatchSizeIsClampedToOne() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.track(event: "event1")
+        waitForTrackingQueue(testMixpanel)
+
+        testMixpanel.flushBatchSize = -5
+        XCTAssertGreaterThanOrEqual(
+            testMixpanel.flushBatchSize, 1,
+            "batch size should be clamped to at least 1")
+
+        testMixpanel.flush()
+        waitForTrackingQueue(testMixpanel)
+
+        XCTAssertTrue(
+            eventQueue(token: testMixpanel.apiToken).isEmpty,
+            "flush should complete even with negative batch size input")
+        removeDBfile(testMixpanel.apiToken)
+    }
 }

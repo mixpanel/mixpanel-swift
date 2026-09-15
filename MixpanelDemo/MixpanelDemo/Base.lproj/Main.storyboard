@@ -259,6 +259,29 @@
                                             <segue destination="wFR-dE-Xpq" kind="show" id="epT-UC-jqL"/>
                                         </connections>
                                     </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="acp-Mn-u01">
+                                        <rect key="frame" x="0.0" y="444.5" width="375" height="80"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="acp-Mn-u01" id="acp-Cv-u02">
+                                            <rect key="frame" x="0.0" y="0.0" width="350.5" height="80"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Autocapture" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="acp-Lb-u03">
+                                                    <rect key="frame" x="15" y="29" width="95" height="22.5"/>
+                                                    <fontDescription key="fontDescription" name=".SFUIText" family=".SF UI Text" pointSize="20"/>
+                                                    <color key="textColor" red="0.20000000300000001" green="0.20000000300000001" blue="0.20000000300000001" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="acp-Lb-u03" firstAttribute="leading" secondItem="acp-Cv-u02" secondAttribute="leading" constant="15" id="acp-Cn-u04"/>
+                                                <constraint firstItem="acp-Lb-u03" firstAttribute="centerY" secondItem="acp-Cv-u02" secondAttribute="centerY" id="acp-Cn-u05"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <segue destination="acp-Vc-u06" kind="show" id="acp-Sg-u07"/>
+                                        </connections>
+                                    </tableViewCell>
                                 </cells>
                             </tableViewSection>
                         </sections>
@@ -573,6 +596,21 @@
                 </view>
             </objects>
             <point key="canvasLocation" x="953" y="1137"/>
+        </scene>
+        <!--Autocapture-->
+        <scene sceneID="acp-Sc-u08">
+            <objects>
+                <viewController id="acp-Vc-u06" customClass="AutocaptureMenuViewController" customModule="MixpanelDemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="acp-Vw-u09">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="Autocapture" id="acp-Ni-u10"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="acp-Fr-u11" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2633" y="310"/>
         </scene>
     </scenes>
     <resources>

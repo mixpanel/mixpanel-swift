@@ -1,3 +1,34 @@
+Last tag: 6.6.1
+## [6.7.0](https://github.com/mixpanel/mixpanel-swift/tree/6.7.0) (2026-09-09)
+
+### Features
+
+- Implement semver and date custom operators for flags runtime events (#763) ([#763](https://github.com/mixpanel/mixpanel-swift/pull/763))
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.6.1...6.7.0)
+
+Last tag: 6.6.0
+## [6.6.1](https://github.com/mixpanel/mixpanel-swift/tree/6.6.1) (2026-09-08)
+
+### Fixes
+
+- read the React Native nativeID on the new architecture (#781) ([#781](https://github.com/mixpanel/mixpanel-swift/pull/781))
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.6.0...6.6.1)
+
+Last tag: 6.5.1
+## [6.6.0](https://github.com/mixpanel/mixpanel-swift/tree/6.6.0) (2026-09-02)
+
+### Features
+
+- autocapture (beta) — clicks, rage clicks and dead clicks (#776) ([#776](https://github.com/mixpanel/mixpanel-swift/pull/776))
+
+### Fixes
+
+- Added scene delegate functionality to sample app (#769) ([#769](https://github.com/mixpanel/mixpanel-swift/pull/769))
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.5.1...6.6.0)
+
 Last tag: 6.5.0
 ## [6.5.1](https://github.com/mixpanel/mixpanel-swift/tree/6.5.1) (2026-07-15)
 

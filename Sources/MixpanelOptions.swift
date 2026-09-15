@@ -253,6 +253,27 @@ public class MixpanelOptions {
     /// ```
     public let deviceIdProvider: (() -> String?)?
 
+    /// Configuration for automatic event capture (clicks, rage clicks, dead clicks).
+    ///
+    /// Autocapture is **disabled by default**. Provide an `AutocaptureOptions` instance
+    /// to enable automatic capture of user interactions.
+    ///
+    /// **Example — Enable autocapture with defaults:**
+    /// ```swift
+    /// let options = MixpanelOptions(
+    ///     token: "YOUR_TOKEN",
+    ///     autocaptureOptions: AutocaptureOptions()
+    /// )
+    /// ```
+    ///
+    /// **Note:** Autocapture is only available on iOS. It is not supported when the app runs as a
+    /// Mac Catalyst build; the options are accepted so shared iOS sources still compile, but no
+    /// automatic capture takes place there.
+    ///
+    /// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the
+    ///   properties it captures may change in a future release before general availability.
+    public let autocaptureOptions: AutocaptureOptions?
+
     public init(
         token: String,
         flushInterval: Double = 60,
@@ -263,12 +284,13 @@ public class MixpanelOptions {
         superProperties: Properties? = nil,
         serverURL: String? = nil,
         proxyServerConfig: ProxyServerConfig? = nil,
-        useGzipCompression: Bool = true,  // NOTE: This is a new default value!
+        useGzipCompression: Bool = true,
         featureFlagsEnabled: Bool = false,
         featureFlagsContext: [String: Any] = [:],
         deviceIdProvider: (() -> String?)? = nil,
         featureFlagOptions: FeatureFlagOptions? = nil,
-        excludeProperties: Set<String> = []
+        excludeProperties: Set<String> = [],
+        autocaptureOptions: AutocaptureOptions? = nil
     ) {
         self.token = token
         self.flushInterval = flushInterval
@@ -282,8 +304,12 @@ public class MixpanelOptions {
         self.useGzipCompression = useGzipCompression
         self.deviceIdProvider = deviceIdProvider
         self.excludeProperties = excludeProperties
+        #if os(iOS)
+        self.autocaptureOptions = autocaptureOptions
+        #else
+        self.autocaptureOptions = nil
+        #endif
 
-        // When featureFlagOptions is explicitly provided, it takes precedence
         if let featureFlagOptions = featureFlagOptions {
             self.featureFlagOptions = featureFlagOptions
         } else {

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'Mixpanel-swift'
-  s.version = '6.5.1'
+  s.version = '6.7.0'
   s.module_name = 'Mixpanel'
   s.license = 'Apache License, Version 2.0'
   s.summary = 'Mixpanel tracking library for iOS (Swift)'
@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
                      :tag => "#{s.version}" }
   s.resource_bundles = {'Mixpanel' => ['Sources/Mixpanel/PrivacyInfo.xcprivacy']}
   s.dependency 'jsonlogic', '~> 1.2.0'
-  s.dependency 'MixpanelSwiftCommon', '~> 1.0.0'
+  s.dependency 'MixpanelSwiftCommon', '~> 1.1.0'
   s.ios.deployment_target = '12.0'
   s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   s.ios.pod_target_xcconfig = {
@@ -22,9 +22,18 @@ Pod::Spec.new do |s|
     'Sources/MixpanelLogger.swift', 'Sources/JSONHandler.swift', 'Sources/Error.swift', 'Sources/AutomaticProperties.swift',
     'Sources/Constants.swift', 'Sources/MixpanelType.swift', 'Sources/Mixpanel.swift', 'Sources/MixpanelInstance.swift',
     'Sources/Flush.swift', 'Sources/Track.swift', 'Sources/People.swift', 'Sources/AutomaticEvents.swift',
-    'Sources/Group.swift', 'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift', 'Sources/MPDB.swift', 'Sources/MixpanelPersistence.swift', 
+    'Sources/Group.swift', 'Sources/ReadWriteLock.swift', 'Sources/SessionMetadata.swift', 'Sources/MPDB.swift', 'Sources/MixpanelPersistence.swift', 'Sources/CustomOperators.swift',
     'Sources/Data+Compression.swift', 'Sources/MixpanelOptions.swift', 'Sources/FeatureFlags.swift',
-    'Sources/Autocapture.swift']
+    'Sources/Autocapture.swift', 'Sources/Autocapture/AutocaptureOptions.swift']
+    
+  # Autocapture implementation is iOS-only: every file below is wrapped in `#if os(iOS)`,
+  # so it is added to the iOS source lists only. AutocaptureOptions.swift stays in
+  # base_source_files because MixpanelOptions exposes it on every platform.
+  ios_autocapture_source_files = ['Sources/Autocapture/AutocaptureManager.swift',
+    'Sources/Autocapture/DeadClickDetector.swift', 'Sources/Autocapture/ElementIdExtractor.swift',
+    'Sources/Autocapture/RageClickTracker.swift', 'Sources/Autocapture/SemanticExtractor.swift',
+    'Sources/Autocapture/TouchInterceptor.swift', 'Sources/Autocapture/Model/ClickEvent.swift']
+
   s.tvos.deployment_target = '12.0'
   s.tvos.frameworks = 'UIKit', 'Foundation'
   s.tvos.pod_target_xcconfig = {
@@ -42,14 +51,14 @@ Pod::Spec.new do |s|
   }
 
   s.subspec 'Complete' do |ss|
-    ss.ios.source_files = ['Sources/*.swift']
+    ss.ios.source_files = ['Sources/**/*.swift']
     ss.tvos.source_files = base_source_files
     ss.osx.source_files = base_source_files
     ss.watchos.source_files = base_source_files
   end
 
   s.subspec 'Core' do |ss|
-    ss.ios.source_files = base_source_files
+    ss.ios.source_files = base_source_files + ios_autocapture_source_files
     ss.tvos.source_files = base_source_files
     ss.osx.source_files = base_source_files
     ss.watchos.source_files = base_source_files

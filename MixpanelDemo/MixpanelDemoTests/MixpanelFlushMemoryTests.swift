@@ -260,35 +260,41 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
 
     // MARK: - Drain loop
 
-    /// A short-but-non-empty batch (byte budget truncation, or dropped oversized/malformed rows)
-    /// must not be mistaken for an empty queue — the drain must keep going past it within the
-    /// same flush() call.
+    /// A short-but-non-empty batch (here, shrunk by dropped malformed rows sharing its read
+    /// window) must not be mistaken for an empty queue — the drain must keep going past it
+    /// within the same flush() call, reaching valid events queued behind it.
     ///
     /// Previously the drain loop only continued when a read returned exactly `flushBatchSize`
-    /// rows, treating anything less as "queue empty." A batch of malformed rows exactly filling
-    /// one read window, with valid events immediately behind it, used to end the flush right
-    /// there: the malformed rows were deleted, but the valid events were left queued until some
-    /// later flush. The loop must instead keep draining as long as the previous read returned
-    /// anything at all, stopping only on a genuinely empty read.
-    func testFlushDrainsPastAFullyMalformedBatch() {
+    /// rows, treating anything less as "queue empty." A read window containing mostly malformed
+    /// rows plus a few valid ones returns fewer than `flushBatchSize` entries even though more
+    /// valid events are queued right behind that window — the old check would stop the flush
+    /// there, stranding those events until some later flush. The loop must instead keep draining
+    /// as long as the previous read returned anything at all, stopping only on a genuinely empty
+    /// read.
+    func testFlushDrainsPastAShortBatchCausedByMalformedRows() {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
 
         let batchSize = testMixpanel.flushBatchSize
         let invalidJSON = "{\"broken".data(using: .utf8)!
+        let validInFirstWindow = 3
         let mpdb = MPDB.init(token: testMixpanel.apiToken)
         mpdb.open()
-        // Fill exactly one read window with malformed rows so the first drain iteration reads
-        // and deletes them but returns nothing to send.
-        for _ in 0..<batchSize {
+        // Malformed rows fill most of the first read window; a few valid ones fill the rest,
+        // so that window's read returns a short (non-empty, non-full) batch.
+        for _ in 0..<(batchSize - validInFirstWindow) {
             mpdb.insertRow(.events, data: invalidJSON)
         }
         mpdb.close()
+        for index in 0..<validInFirstWindow {
+            testMixpanel.track(event: "firstWindowEvent\(index)")
+        }
+        waitForTrackingQueue(testMixpanel)
 
-        // Valid events queued right behind the malformed window.
-        let total = 10
-        for index in 0..<total {
-            testMixpanel.track(event: "event\(index)")
+        // More valid events, reachable only once the drain continues past the first window.
+        let secondWindowCount = 10
+        for index in 0..<secondWindowCount {
+            testMixpanel.track(event: "secondWindowEvent\(index)")
         }
         waitForTrackingQueue(testMixpanel)
 
@@ -298,7 +304,8 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
 
         XCTAssertTrue(
             eventQueue(token: testMixpanel.apiToken).isEmpty,
-            "the valid events behind a fully-malformed batch should still be sent within this flush")
+            "valid events queued behind a short (malformed-shrunk) batch should still be sent within this flush"
+        )
         removeDBfile(testMixpanel.apiToken)
     }
 

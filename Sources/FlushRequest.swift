@@ -70,7 +70,20 @@ class FlushRequest: Network {
                 result = success
                 semaphore.signal()
             })
-        _ = semaphore.wait(timeout: .now() + 120.0)
+        if semaphore.wait(timeout: .now() + 120.0) == .timedOut {
+            // The network completion didn't arrive within our wait window. It may still fire
+            // later (handleFlushFailure/handleFlushSuccess run independently of this semaphore
+            // and will update these same counters then), but that's too late for the caller,
+            // who is about to decide whether to retry based on requestNotAllowed() right now.
+            // Treat the timeout itself as a failure so that check reflects it immediately,
+            // rather than leaving stale state that lets an immediate retry through.
+            MixpanelLogger.warn(
+                message: "Request to \(resource.path) timed out waiting for a response")
+            self.handleFlushFailure(
+                path: resource.path, reason: .semaphoreTimeout, response: nil, completion:  { success in
+                    result = success
+                })
+        }
         return result
     }
 
@@ -172,6 +185,8 @@ class FlushRequest: Network {
             case .notOKStatusCode(let statusCode):
                 return !(400..<500).contains(statusCode)
             case .parseError:
+                return false
+            case .semaphoreTimeout:
                 return false
         }
     }

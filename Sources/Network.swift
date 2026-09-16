@@ -81,6 +81,7 @@ enum Reason {
     case noData
     case notOKStatusCode(statusCode: Int)
     case other(Error)
+    case semaphoreTimeout
 }
 
 public struct ServerProxyResource {

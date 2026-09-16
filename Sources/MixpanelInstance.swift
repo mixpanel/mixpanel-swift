@@ -764,7 +764,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             // Protect an existing flush too. endFlush(completion:) calls
             // invokeCompletionHandler to end the background task, even with a nil completion.
             if taskId == .invalid {
-                taskId = sharedApplication.beginBackgroundTask(expirationHandler: {[weak self] in
+                taskId = sharedApplication.beginBackgroundTask(expirationHandler: { [weak self] in
                     // Expiration must end the task immediately, even while a flush is active.
                     self?.endBackgroundTask()
                 })

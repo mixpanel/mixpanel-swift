@@ -7,8 +7,8 @@
 //  NSMallocException inside JSONSerialization during MPDB.readRows.
 //
 
-import XCTest
 import UIKit
+import XCTest
 
 @testable import Mixpanel
 
@@ -449,8 +449,9 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
 
         let overlapping = expectation(description: "overlapping flush returned")
         testMixpanel.flush {
-            XCTAssertEqual(testMixpanel.taskId, backgroundTaskId,
-                           "An overlapping completion must preserve background execution")
+            XCTAssertEqual(
+                testMixpanel.taskId, backgroundTaskId,
+                "An overlapping completion must preserve background execution")
             overlapping.fulfill()
         }
         wait(for: [overlapping], timeout: 5)

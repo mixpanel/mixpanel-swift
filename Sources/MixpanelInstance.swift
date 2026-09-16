@@ -356,7 +356,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     let sessionMetadata: SessionMetadata
     let flushInstance: Flush
     let trackInstance: Track
-    /// Guards `isFlushing`. Held only across a test-and-set, never across a queue hop.
+    /// Guards reads and updates of `isFlushing`; never held during network requests or callbacks.
     private let flushStateLock = ReadWriteLock(label: "com.mixpanel.flushstate")
     /// Whether a flush has claimed the flush slot and not yet finished. See `beginFlush()`.
     private var isFlushing = false
@@ -765,24 +765,26 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             // invokeCompletionHandler to end the background task, even with a nil completion.
             if taskId == .invalid {
                 taskId = sharedApplication.beginBackgroundTask(expirationHandler: {[weak self] in
+                    // Expiration must end the task immediately, even while a flush is active.
                     self?.endBackgroundTask()
                 })
             }
-            // Claim the flush slot before starting a background task. If a timer or manual flush is
-            // already draining the queue, let that flush continue rather than issuing an overlapping
-            // full flush whose completion would immediately end this background task.
+            // Background execution is requested before claiming the flush slot, so an existing
+            // timer or manual flush is protected too. Start a flush only if none is active.
             if beginFlush() {
                 flushBatches(completion: nil)
             }
         }
     }
-    
+
+    /// Ends the current background task on the main thread, if one exists.
+    /// Expiration calls this directly; normal completion first checks whether flushing is idle.
     fileprivate func endBackgroundTask() {
         #if !os(OSX) && !os(watchOS)
         guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
             return
         }
-        
+
         if taskId != UIBackgroundTaskIdentifier.invalid {
             sharedApplication.endBackgroundTask(taskId)
             taskId = UIBackgroundTaskIdentifier.invalid
@@ -1308,18 +1310,20 @@ extension MixpanelInstance {
        `flushOnBackground` is on by default). You only need to call this
        method manually if you want to force a flush at a particular moment.
 
-       A flush drains the entire queue: it repeats read → send → delete in batches of
-       `flushBatchSize` rows until the queue is empty or a request fails, so memory is
-       bounded by one batch regardless of how much is queued. Rows left behind by a
-       failure stay in local storage for the next flush.
+       A flush repeats read → send → delete with up to `flushBatchSize` rows per queue,
+       subject to a byte budget. It stops when all three reads return empty, tracking is
+       opted out, the delegate vetoes flushing, or request backoff applies. Failed sends
+       can be retried within the same flush until backoff engages; unsent rows stay in
+       local storage. Memory is bounded by batches rather than the total queue size.
 
        Only one flush runs at a time. If a flush is already in progress when this method
        is called, the call returns immediately without queuing another flush. Queued data
-       remains in local storage and will be sent by the next flush (timer-based, manual,
-       or on background).
+       remains in local storage for the active flush or a later flush. Empty reads caused
+       by filtering or a full window of discarded rows can leave later rows for another flush.
 
        - parameter performFullFlush: retained for backward compatibility and no longer changes behavior — every flush drains the full queue in batches.
-       - parameter completion: an optional completion handler for when the flush has completed.
+       - parameter completion: an optional handler dispatched on the main queue when this flush
+         finishes. Rejected calls dispatch it immediately without waiting for an active flush.
        */
     public func flush(performFullFlush: Bool = false, completion: (() -> Void)? = nil) {
         // Opted-out calls are rejected before `beginFlush()`, so opting out never claims (and
@@ -1328,7 +1332,7 @@ extension MixpanelInstance {
         //
         // Only one flush runs at a time; overlapping calls return here instead of queueing.
         //
-        // A flush reads its payload on `trackingQueue` in milliseconds but sends it on
+        // A flush reads its payload on `trackingQueue` but sends it on
         // `networkQueue`, where each batch blocks on a semaphore for as long as the request takes.
         // Queued flushes therefore accumulate far faster than they drain, and each one holds a
         // full events/people/groups payload alive in its pending closure until its turn comes.
@@ -1336,8 +1340,8 @@ extension MixpanelInstance {
         // They also duplicate work: rows are only deleted after a successful send, so a flush that
         // starts mid-send re-reads rows already in flight and sends them twice.
         //
-        // Dropping the overlapping call loses nothing. Queued data lives in SQLite until it is
-        // acknowledged, so whatever this call would have sent is picked up by the next flush.
+        // Rejecting an overlapping call leaves its queued rows in SQLite for the active or a
+        // later flush. Invoke only this caller's completion; do not clean up background execution.
         guard !hasOptedOutTracking(), beginFlush() else {
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
@@ -1351,11 +1355,10 @@ extension MixpanelInstance {
     /// One iteration of the drain loop: read one batch per queue on `trackingQueue`, send it on
     /// `networkQueue`, then either re-arm for the next batch or release the flush slot.
     ///
-    /// The loop continues only while every send succeeded AND at least one queue produced a
-    /// full batch. A full batch that was sent has also been deleted, so each continuation is
-    /// guaranteed progress — the loop cannot spin on rows it never removes (for example, rows
-    /// held back by the automatic-events filter or truncated by the byte budget; those end the
-    /// drain early and wait for the next flush). A short batch means that queue is empty.
+    /// Continue whenever any queue returned rows, including a short batch. Each iteration
+    /// checks opt-out, backoff, and the delegate before reading. Failed rows remain queued
+    /// and may be retried until backoff applies. Stop when all three reads return empty;
+    /// filtering or discarding a full window can leave later rows for another flush.
     ///
     /// Must only be entered while holding the flush slot (`beginFlush()` returned `true`);
     /// every exit path releases it exactly once.
@@ -1368,10 +1371,8 @@ extension MixpanelInstance {
                 return
             }
 
-            // Checked before the reads, so an iteration that cannot send — opt-out, the
-            // delegate's veto, or the request backoff after consecutive failures — costs no
-            // SQLite reads or JSON parsing. Every drain iteration re-enters through this
-            // guard, which is also what terminates the drain once backoff engages.
+            // Check opt-out and request backoff before SQLite reads or JSON parsing.
+            // Every iteration re-enters this guard; the delegate's veto is checked next.
             if self.hasOptedOutTracking()
                 || self.flushInstance.flushRequest.requestNotAllowed()
             {
@@ -1386,11 +1387,11 @@ extension MixpanelInstance {
 
             // Each iteration reads up to `flushBatchSize` (capped at `APIConstants.maxBatchSize`)
             // rows per queue, further bounded in bytes by MPDB's read budget, and sends each
-            // batch as a single network request. Batch size must be positive to avoid infinite
-            // recursion when all queues are empty and count == batchSize == 0.
+            // batch as a single network request. A positive batch size ensures reads can
+            // retrieve queued rows instead of returning empty solely because the limit is zero.
             let batchSize = max(1, self.flushBatchSize)
 
-            // automatic events will NOT be flushed until one of the flags is non-nil
+            // Exclude automatic events when automatic-event tracking is disabled.
             let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(
                 type: self.persistenceTypeFromFlushType(.events),
                 batchSize: batchSize,
@@ -1420,8 +1421,9 @@ extension MixpanelInstance {
                 // same as an empty one: readRows can legitimately return fewer than `batchSize`
                 // rows while more remain queued — truncated by the byte budget, or shrunk by
                 // dropped oversized/malformed rows — so comparing against `batchSize` would stop
-                // the drain early and strand deliverable events until the next flush. Only a
-                // genuinely empty read means there's nothing left to send right now. The next
+                // the drain early and strand deliverable events until the next flush. All three
+                // reads returning empty ends this pass, though filtering or discarded rows can
+                // hide later deliverable rows until another flush. The next
                 // iteration re-enters through the guard above, which terminates the drain on
                 // opt-out or once failed sends engage the request backoff — sent rows are
                 // deleted before the next read, so the loop either makes progress or is cut
@@ -1446,7 +1448,8 @@ extension MixpanelInstance {
     }
 
     /// Ends background execution once flushing is idle, then invokes the caller's completion.
-    /// Rejected overlapping calls must leave an active flush's background task intact.
+    /// Recheck state on the main queue: another flush may start before this callback executes.
+    /// Rejected overlapping calls bypass this helper and dispatch only their own completion.
     fileprivate func invokeCompletionHandler(_ completion: (() -> Void)?) {
         DispatchQueue.main.async { [weak self] in
             #if !os(OSX) && !os(watchOS)
@@ -1455,13 +1458,13 @@ extension MixpanelInstance {
                 self.flushStateLock.read {
                     flushIsActive = self.isFlushing
                 }
-                
+
                 if !flushIsActive {
                     self.endBackgroundTask()
                 }
             }
             #endif
-            
+
             completion?()
         }
     }
@@ -1479,8 +1482,8 @@ extension MixpanelInstance {
         }
     }
 
-    /// Releases the flush slot and schedules completion. Must be called exactly once for every `beginFlush()` that
-    /// returned `true`, or flushing stops for the lifetime of the instance.
+    /// Releases the flush slot, then schedules background cleanup and the caller's completion.
+    /// Must be called exactly once for every successful `beginFlush()` while the instance exists.
     private func endFlush(completion: (() -> Void)?) {
         flushStateLock.write {
             isFlushing = false

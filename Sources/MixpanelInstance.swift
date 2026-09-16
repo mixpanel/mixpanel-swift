@@ -766,13 +766,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             }
         }
 
-        taskId = sharedApplication.beginBackgroundTask(expirationHandler: completionHandler)
-
         // Ensure that any session replay ID is cleared when the app enters the background
         unregisterSuperProperty("$mp_replay_id")
 
-        if flushOnBackground {
-            flush(performFullFlush: true, completion: completionHandler)
+        // Claim the flush slot before starting a background task. If a timer or manual flush is
+        // already draining the queue, let that flush continue rather than issuing an overlapping
+        // full flush whose completion would immediately end this background task.
+        if flushOnBackground && beginFlush() {
+            taskId = sharedApplication.beginBackgroundTask(expirationHandler: completionHandler)
+            flushBatches(completion: completionHandler)
         }
     }
 

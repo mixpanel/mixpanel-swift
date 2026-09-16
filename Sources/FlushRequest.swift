@@ -80,7 +80,8 @@ class FlushRequest: Network {
             MixpanelLogger.warn(
                 message: "Request to \(resource.path) timed out waiting for a response")
             self.handleFlushFailure(
-                path: resource.path, reason: .semaphoreTimeout, response: nil, completion:  { success in
+                path: resource.path, reason: .semaphoreTimeout, response: nil,
+                completion: { success in
                     result = success
                 })
         }

@@ -8,6 +8,7 @@
 //
 
 import XCTest
+import UIKit
 
 @testable import Mixpanel
 
@@ -418,6 +419,45 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
 
         testMixpanel.delegate = nil
         removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testBackgroundTaskProtectsActiveFlushUntilItFinishes() throws {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 0)
+        let delegate = GatedFlushDelegate()
+        testMixpanel.delegate = delegate
+        defer {
+            delegate.openGate()
+            testMixpanel.delegate = nil
+            removeDBfile(testMixpanel.apiToken)
+        }
+
+        let finished = expectation(description: "active flush finished")
+        testMixpanel.flush {
+            XCTAssertEqual(testMixpanel.taskId, .invalid)
+            finished.fulfill()
+        }
+
+        NotificationCenter.default.post(
+            name: UIApplication.didEnterBackgroundNotification, object: nil)
+        let backgroundTaskId = testMixpanel.taskId
+        if backgroundTaskId == .invalid {
+            delegate.openGate()
+            wait(for: [finished], timeout: 5)
+            throw XCTSkip("The test host was not granted UIKit background execution")
+        }
+
+        let overlapping = expectation(description: "overlapping flush returned")
+        testMixpanel.flush {
+            XCTAssertEqual(testMixpanel.taskId, backgroundTaskId,
+                           "An overlapping completion must preserve background execution")
+            overlapping.fulfill()
+        }
+        wait(for: [overlapping], timeout: 5)
+
+        delegate.openGate()
+        wait(for: [finished], timeout: 5)
+        XCTAssertEqual(delegate.willFlushCount, 1)
     }
 
     // MARK: - Batch size validation

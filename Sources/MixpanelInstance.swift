@@ -757,25 +757,37 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             return
         }
 
-        let completionHandler: () -> Void = { [weak self] in
-            guard let self = self else { return }
-
-            if self.taskId != UIBackgroundTaskIdentifier.invalid {
-                sharedApplication.endBackgroundTask(self.taskId)
-                self.taskId = UIBackgroundTaskIdentifier.invalid
-            }
-        }
-
         // Ensure that any session replay ID is cleared when the app enters the background
         unregisterSuperProperty("$mp_replay_id")
 
-        // Claim the flush slot before starting a background task. If a timer or manual flush is
-        // already draining the queue, let that flush continue rather than issuing an overlapping
-        // full flush whose completion would immediately end this background task.
-        if flushOnBackground && beginFlush() {
-            taskId = sharedApplication.beginBackgroundTask(expirationHandler: completionHandler)
-            flushBatches(completion: completionHandler)
+        if flushOnBackground {
+            // Protect an existing flush too. endFlush(completion:) calls
+            // invokeCompletionHandler to end the background task, even with a nil completion.
+            if taskId == .invalid {
+                taskId = sharedApplication.beginBackgroundTask(expirationHandler: {[weak self] in
+                    self?.endBackgroundTask()
+                })
+            }
+            // Claim the flush slot before starting a background task. If a timer or manual flush is
+            // already draining the queue, let that flush continue rather than issuing an overlapping
+            // full flush whose completion would immediately end this background task.
+            if beginFlush() {
+                flushBatches(completion: nil)
+            }
         }
+    }
+    
+    fileprivate func endBackgroundTask() {
+        #if !os(OSX) && !os(watchOS)
+        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
+            return
+        }
+        
+        if taskId != UIBackgroundTaskIdentifier.invalid {
+            sharedApplication.endBackgroundTask(taskId)
+            taskId = UIBackgroundTaskIdentifier.invalid
+        }
+        #endif
     }
 
     @objc private func applicationWillEnterForeground(_ notification: Notification) {
@@ -1363,18 +1375,12 @@ extension MixpanelInstance {
             if self.hasOptedOutTracking()
                 || self.flushInstance.flushRequest.requestNotAllowed()
             {
-                self.endFlush()
-                if let completion = completion {
-                    DispatchQueue.main.async(execute: completion)
-                }
+                self.endFlush(completion: completion)
                 return
             }
 
             if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
-                self.endFlush()
-                if let completion = completion {
-                    DispatchQueue.main.async(execute: completion)
-                }
+                self.endFlush(completion: completion)
                 return
             }
 
@@ -1434,17 +1440,35 @@ extension MixpanelInstance {
                     return
                 }
 
-                self.endFlush()
-                if let completion = completion {
-                    DispatchQueue.main.async(execute: completion)
+                self.endFlush(completion: completion)
+            }
+        }
+    }
+
+    /// Ends background execution once flushing is idle, then invokes the caller's completion.
+    /// Rejected overlapping calls must leave an active flush's background task intact.
+    fileprivate func invokeCompletionHandler(_ completion: (() -> Void)?) {
+        DispatchQueue.main.async { [weak self] in
+            #if !os(OSX) && !os(watchOS)
+            if let self = self {
+                var flushIsActive = false
+                self.flushStateLock.read {
+                    flushIsActive = self.isFlushing
+                }
+                
+                if !flushIsActive {
+                    self.endBackgroundTask()
                 }
             }
+            #endif
+            
+            completion?()
         }
     }
 
     /// Claims the flush slot, returning `false` when a flush is already in flight.
     ///
-    /// A caller that gets `false` must not proceed, and must not call `endFlush()`.
+    /// A caller that gets `false` must not proceed, and must not call `endFlush(completion:)`.
     private func beginFlush() -> Bool {
         return flushStateLock.write {
             if isFlushing {
@@ -1455,12 +1479,13 @@ extension MixpanelInstance {
         }
     }
 
-    /// Releases the flush slot. Must be called exactly once for every `beginFlush()` that
+    /// Releases the flush slot and schedules completion. Must be called exactly once for every `beginFlush()` that
     /// returned `true`, or flushing stops for the lifetime of the instance.
-    private func endFlush() {
+    private func endFlush(completion: (() -> Void)?) {
         flushStateLock.write {
             isFlushing = false
         }
+        invokeCompletionHandler(completion)
     }
 
     private func persistenceTypeFromFlushType(_ type: FlushType) -> PersistenceType {

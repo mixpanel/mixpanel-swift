@@ -273,7 +273,7 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
     /// read.
     func testFlushDrainsPastAShortBatchCausedByMalformedRows() {
         let testMixpanel = Mixpanel.initialize(
-            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+            token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
 
         let batchSize = testMixpanel.flushBatchSize
         let invalidJSON = "{\"broken".data(using: .utf8)!
@@ -313,7 +313,7 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
     /// read → send → delete in `flushBatchSize` batches until the table is empty.
     func testSingleFlushDrainsQueueLargerThanOneBatch() {
         let testMixpanel = Mixpanel.initialize(
-            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+            token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
         let total = APIConstants.maxBatchSize * 2 + 20
         for index in 0..<total {
             testMixpanel.track(event: "event\(index)")
@@ -341,7 +341,7 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
     /// may not spin against a dead endpoint, and nothing may be deleted without a send.
     func testFailedSendStopsDrainAndKeepsRows() {
         let testMixpanel = Mixpanel.initialize(
-            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+            token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
         testMixpanel.serverURL = kFakeServerUrl
         let total = APIConstants.maxBatchSize * 2 + 20
         for index in 0..<total {
@@ -388,7 +388,7 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
     /// flush per-event piled up enough of those payloads to exhaust memory.
     func testOverlappingFlushesAreCoalesced() {
         let testMixpanel = Mixpanel.initialize(
-            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+            token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
         let delegate = GatedFlushDelegate()
         testMixpanel.delegate = delegate
         testMixpanel.track(event: "event")
@@ -430,7 +430,7 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
     /// at least 1.
     func testZeroBatchSizeIsClampedToOne() {
         let testMixpanel = Mixpanel.initialize(
-            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+            token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
         testMixpanel.track(event: "event1")
         waitForTrackingQueue(testMixpanel)
 
@@ -452,7 +452,7 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
     /// Negative batch sizes must also be clamped to 1.
     func testNegativeBatchSizeIsClampedToOne() {
         let testMixpanel = Mixpanel.initialize(
-            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+            token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
         testMixpanel.track(event: "event1")
         waitForTrackingQueue(testMixpanel)
 

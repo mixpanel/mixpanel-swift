@@ -1379,9 +1379,9 @@ extension MixpanelInstance {
     /// Each invocation reads up to `flushBatchSize` rows from the current queue type, bounded
     /// by `APIConstants.maxRowByteSize` and MPDB's memory budget, then sends them as a single
     /// network request. Processing continues:
-    /// - When `performFullFlush` is `true`(recommanded): within the current queue until empty (all events
-    ///   before any people), then to the next queue when current is empty (events → people →
-    ///   groups), until all three queues return empty.
+    /// - When `performFullFlush` is `true` (the default, recommended for most callers): within
+    ///   the current queue until empty (all events before any people), then to the next queue
+    ///   when current is empty (events → people → groups), until all three queues return empty.
     /// - When `performFullFlush` is `false`: exactly one batch per queue type, then the next
     ///   queue type, regardless of whether rows remain — never more than three batches total.
     ///   Any rows left behind wait for a later flush.

@@ -65,6 +65,7 @@
 		86F86F2E22460B4F00B69832 /* Mixpanel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E16C35E41D872045003500AC /* Mixpanel.framework */; };
 		86F86F2F22460B4F00B69832 /* Mixpanel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E16C35E41D872045003500AC /* Mixpanel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8A2F3B5C1D9E7A4B0C6F8D2E /* AutocaptureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4D6E8F2A1B3C5D7E0F9A4B /* AutocaptureTests.swift */; };
+		C8E4B1A67D3F520E94A1D6B3 /* DeadClickDetectorCancellationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D5C7E39B420F6D81C4E5A7 /* DeadClickDetectorCancellationTests.swift */; };
 		A4E1266DF2B6E40D2408CB44 /* AutocaptureUIKitInstrumentedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41EE1ACA2C88917BC782B4D6 /* AutocaptureUIKitInstrumentedTests.swift */; };
 		C5D8E3F2A7B1094C6E2D3F9A /* AutocaptureWalkUpInstrumentedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F7A2D19E4C06853D1F7B8A /* AutocaptureWalkUpInstrumentedTests.swift */; };
 		A88996800DA044B4B1886E99 /* MixpanelScreenTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C8D4E5F3A1B2C7D8E9F0A1B /* MixpanelScreenTrackingTests.swift */; };
@@ -348,6 +349,7 @@
 		86F86F2222460B3300B69832 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8C72DDD552B64791AD52E1DC /* MixpanelEventBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelEventBridgeTests.swift; sourceTree = "<group>"; };
 		9C4D6E8F2A1B3C5D7E0F9A4B /* AutocaptureTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutocaptureTests.swift; sourceTree = "<group>"; };
+		A1D5C7E39B420F6D81C4E5A7 /* DeadClickDetectorCancellationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeadClickDetectorCancellationTests.swift; sourceTree = "<group>"; };
 		9C8D4E5F3A1B2C7D8E9F0A1B /* MixpanelScreenTrackingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelScreenTrackingTests.swift; sourceTree = "<group>"; };
 		A83EAF4BE599F7053770EA4B /* SwiftUIAutocaptureTestView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SwiftUIAutocaptureTestView.swift; sourceTree = "<group>"; };
 		F1A1B1C1D1E1F101A2B2C2D3 /* SwiftUIWalkUpTestView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SwiftUIWalkUpTestView.swift; sourceTree = "<group>"; };
@@ -677,6 +679,7 @@
 				41EE1ACA2C88917BC782B4D6 /* AutocaptureUIKitInstrumentedTests.swift */,
 				B3F7A2D19E4C06853D1F7B8A /* AutocaptureWalkUpInstrumentedTests.swift */,
 				73B0A4D17C3AB8AF617801F4 /* AutocaptureSwiftUIInstrumentedTests.swift */,
+				A1D5C7E39B420F6D81C4E5A7 /* DeadClickDetectorCancellationTests.swift */,
 			);
 			path = MixpanelDemoTests;
 			sourceTree = "<group>";
@@ -1217,6 +1220,7 @@
 				B1AB7B0E940444B7A9B0876A /* MixpanelEventBridgeTests.swift in Sources */,
 				174563BA2DD74E9ABE905B9A /* MixpanelScreenTrackingTests.swift in Sources */,
 				8A2F3B5C1D9E7A4B0C6F8D2E /* AutocaptureTests.swift in Sources */,
+				C8E4B1A67D3F520E94A1D6B3 /* DeadClickDetectorCancellationTests.swift in Sources */,
 				A4E1266DF2B6E40D2408CB44 /* AutocaptureUIKitInstrumentedTests.swift in Sources */,
 				C5D8E3F2A7B1094C6E2D3F9A /* AutocaptureWalkUpInstrumentedTests.swift in Sources */,
 				7E01564E4913076E148AE9E1 /* AutocaptureSwiftUIInstrumentedTests.swift in Sources */,

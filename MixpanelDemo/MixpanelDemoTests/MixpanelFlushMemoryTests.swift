@@ -510,4 +510,139 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
             "flush should complete even with negative batch size input")
         removeDBfile(testMixpanel.apiToken)
     }
+
+    // MARK: - Sequential queue ordering (events → people → groups)
+
+    /// While any events remain queued, people and groups must not be touched at all.
+    ///
+    /// The flush drain previously loaded and sent one batch from all three queues in every
+    /// iteration (events, people, and groups interleaved). It now advances to `.people` only
+    /// once `.events` returns empty, matching the Android SDK's per-table drain order. A batch
+    /// size of 1 and a large event count make it effectively impossible for the whole events
+    /// queue to drain before this loop can observe an in-progress state.
+    func testFlushDrainsEventsCompletelyBeforeTouchingPeopleOrGroups() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.flushBatchSize = 1
+
+        let eventsTotal = 40
+        for index in 0..<eventsTotal {
+            testMixpanel.track(event: "event\(index)")
+        }
+        testMixpanel.people.set(properties: ["prop": "value"])
+        testMixpanel.getGroup(groupKey: "company", groupID: "mixpanel").set(properties: ["prop": "value"])
+        waitForTrackingQueue(testMixpanel)
+
+        let peopleCountBefore = peopleQueue(token: testMixpanel.apiToken).count
+        let groupCountBefore = groupQueue(token: testMixpanel.apiToken).count
+        XCTAssertGreaterThan(peopleCountBefore, 0)
+        XCTAssertGreaterThan(groupCountBefore, 0)
+
+        testMixpanel.flush()
+
+        // Poll while events still has rows. At every such checkpoint, people/groups must remain
+        // exactly as they started — interleaved batching would have sent at least one people and
+        // groups batch alongside the very first events batch. Bounded by eventsTotal so a stuck
+        // drain fails the test instead of hanging.
+        var observedProgress = false
+        for _ in 0..<eventsTotal {
+            waitForTrackingQueue(testMixpanel)
+            let eventsRemaining = eventQueue(token: testMixpanel.apiToken).count
+            if eventsRemaining < eventsTotal {
+                observedProgress = true
+            }
+            if eventsRemaining == 0 {
+                break
+            }
+            XCTAssertEqual(
+                peopleQueue(token: testMixpanel.apiToken).count, peopleCountBefore,
+                "people must not be touched while any events remain queued")
+            XCTAssertEqual(
+                groupQueue(token: testMixpanel.apiToken).count, groupCountBefore,
+                "groups must not be touched while any events remain queued")
+        }
+
+        XCTAssertTrue(observedProgress, "events queue should have started draining")
+        XCTAssertTrue(
+            eventQueue(token: testMixpanel.apiToken).isEmpty,
+            "events queue should fully drain within this bounded loop")
+
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    /// While any people rows remain queued, groups must not be touched. Events start empty here
+    /// so the drain advances past `.events` in a single (empty) iteration before this invariant
+    /// is exercised.
+    func testFlushDrainsPeopleCompletelyBeforeTouchingGroups() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.flushBatchSize = 1
+
+        let peopleTotal = 40
+        for index in 0..<peopleTotal {
+            testMixpanel.people.set(properties: ["index": index])
+        }
+        testMixpanel.getGroup(groupKey: "company", groupID: "mixpanel").set(properties: ["prop": "value"])
+        waitForTrackingQueue(testMixpanel)
+
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty)
+        let groupCountBefore = groupQueue(token: testMixpanel.apiToken).count
+        XCTAssertGreaterThan(groupCountBefore, 0)
+
+        testMixpanel.flush()
+
+        var observedProgress = false
+        for _ in 0..<(peopleTotal + 2) {
+            waitForTrackingQueue(testMixpanel)
+            let peopleRemaining = peopleQueue(token: testMixpanel.apiToken).count
+            if peopleRemaining < peopleTotal {
+                observedProgress = true
+            }
+            if peopleRemaining == 0 {
+                break
+            }
+            XCTAssertEqual(
+                groupQueue(token: testMixpanel.apiToken).count, groupCountBefore,
+                "groups must not be touched while any people rows remain queued")
+        }
+
+        XCTAssertTrue(observedProgress, "people queue should have started draining")
+        XCTAssertTrue(
+            peopleQueue(token: testMixpanel.apiToken).isEmpty,
+            "people queue should fully drain within this bounded loop")
+
+        waitForTrackingQueue(testMixpanel)
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(
+            groupQueue(token: testMixpanel.apiToken).isEmpty,
+            "groups should drain once people is fully empty")
+
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    /// Empty leading queue types must be skipped without error, landing on the first non-empty
+    /// type. Exercises the `if !queue.isEmpty` guard around the send call (added so an empty
+    /// queue never reaches `flushQueue`), together with the events → people → groups state
+    /// advancement when both events and people start empty.
+    func testFlushSkipsEmptyLeadingQueuesAndDrainsGroups() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+
+        testMixpanel.getGroup(groupKey: "company", groupID: "mixpanel").set(properties: ["prop": "value"])
+        waitForTrackingQueue(testMixpanel)
+
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty)
+        XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty)
+        XCTAssertFalse(groupQueue(token: testMixpanel.apiToken).isEmpty)
+
+        testMixpanel.flush()
+        waitForTrackingQueue(testMixpanel)
+        waitForTrackingQueue(testMixpanel)
+
+        XCTAssertTrue(
+            groupQueue(token: testMixpanel.apiToken).isEmpty,
+            "groups should still drain when both preceding queue types start empty")
+
+        removeDBfile(testMixpanel.apiToken)
+    }
 }

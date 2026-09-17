@@ -1352,17 +1352,41 @@ extension MixpanelInstance {
         flushBatches(completion: completion)
     }
 
-    /// One iteration of the drain loop: read one batch per queue on `trackingQueue`, send it on
-    /// `networkQueue`, then either re-arm for the next batch or release the flush slot.
+    /// Tracks which queue type is currently being drained during a flush pass.
+    /// Sequential processing ensures events → people → groups ordering to match Android SDK.
+    private enum FlushQueueState {
+        case events
+        case people
+        case groups
+
+        var next: FlushQueueState? {
+            switch self {
+            case .events: return .people
+            case .people: return .groups
+            case .groups: return nil
+            }
+        }
+    }
+
+    /// Drains all queued rows across events, people, and groups in sequential order.
     ///
-    /// Continue whenever any queue returned rows, including a short batch. Each iteration
-    /// checks opt-out, backoff, and the delegate before reading. Failed rows remain queued
-    /// and may be retried until backoff applies. Stop when all three reads return empty;
-    /// filtering or discarding a full window can leave later rows for another flush.
+    /// Each invocation reads up to `flushBatchSize` rows from the current queue type, bounded
+    /// by `APIConstants.maxRowByteSize` and MPDB's memory budget, then sends them as a single
+    /// network request. Processing continues:
+    /// - Within the current queue until empty (all events before any people)
+    /// - To the next queue when current is empty (events → people → groups)
+    /// - Until all three queues return empty
+    ///
+    /// Guards (opt-out, request backoff, delegate veto) are checked on every iteration. Failed
+    /// sends engage request backoff; successful sends delete the sent rows before the next read.
+    /// Rows too large to parse are skipped and deleted individually. Short batches (< batchSize)
+    /// may indicate truncation by the byte budget or dropped oversized rows, not queue exhaustion,
+    /// and may be retried until backoff applies. Filtering or discarding a full window can leave
+    /// later rows for another flush.
     ///
     /// Must only be entered while holding the flush slot (`beginFlush()` returned `true`);
     /// every exit path releases it exactly once.
-    private func flushBatches(completion: (() -> Void)?) {
+    private func flushBatches(queueState: FlushQueueState = .events, completion: (() -> Void)?) {
         trackingQueue.async { [weak self, completion] in
             guard let self = self else {
                 if let completion = completion {
@@ -1386,25 +1410,41 @@ extension MixpanelInstance {
             }
 
             // Each iteration reads up to `flushBatchSize` (capped at `APIConstants.maxBatchSize`)
-            // rows per queue, further bounded in bytes by MPDB's read budget, and sends each
-            // batch as a single network request. A positive batch size ensures reads can
-            // retrieve queued rows instead of returning empty solely because the limit is zero.
+            // rows from the current queue type, further bounded in bytes by MPDB's read budget,
+            // and sends the batch as a single network request. A positive batch size ensures
+            // reads can retrieve queued rows instead of returning empty solely because the limit is zero.
             let batchSize = max(1, self.flushBatchSize)
 
-            // Exclude automatic events when automatic-event tracking is disabled.
-            let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(
-                type: self.persistenceTypeFromFlushType(.events),
-                batchSize: batchSize,
-                excludeAutomaticEvents: !self.trackAutomaticEventsEnabled
-            )
-            let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(
-                type: self.persistenceTypeFromFlushType(.people),
-                batchSize: batchSize
-            )
-            let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(
-                type: self.persistenceTypeFromFlushType(.groups),
-                batchSize: batchSize
-            )
+            // Load only the current queue type based on state
+            let (flushType, queue): (FlushType, Queue) = {
+                switch queueState {
+                case .events:
+                    return (
+                        .events,
+                        self.mixpanelPersistence.loadEntitiesInBatch(
+                            type: self.persistenceTypeFromFlushType(.events),
+                            batchSize: batchSize,
+                            excludeAutomaticEvents: !self.trackAutomaticEventsEnabled
+                        )
+                    )
+                case .people:
+                    return (
+                        .people,
+                        self.mixpanelPersistence.loadEntitiesInBatch(
+                            type: self.persistenceTypeFromFlushType(.people),
+                            batchSize: batchSize
+                        )
+                    )
+                case .groups:
+                    return (
+                        .groups,
+                        self.mixpanelPersistence.loadEntitiesInBatch(
+                            type: self.persistenceTypeFromFlushType(.groups),
+                            batchSize: batchSize
+                        )
+                    )
+                }
+            }()
 
             self.networkQueue.async { [weak self, completion] in
                 guard let self = self else {
@@ -1413,36 +1453,39 @@ extension MixpanelInstance {
                     }
                     return
                 }
-                self.flushQueue(eventQueue, type: .events)
-                self.flushQueue(peopleQueue, type: .people)
-                self.flushQueue(groupsQueue, type: .groups)
 
-                // Continue while any queue returned at least one row. A short batch is NOT the
-                // same as an empty one: readRows can legitimately return fewer than `batchSize`
-                // rows while more remain queued — truncated by the byte budget, or shrunk by
-                // dropped oversized/malformed rows — so comparing against `batchSize` would stop
-                // the drain early and strand deliverable events until the next flush. All three
-                // reads returning empty ends this pass, though filtering or discarded rows can
-                // hide later deliverable rows until another flush. The next
-                // iteration re-enters through the guard above, which terminates the drain on
-                // opt-out or once failed sends engage the request backoff — sent rows are
-                // deleted before the next read, so the loop either makes progress or is cut
-                // after a bounded number of attempts.
-                //
-                // removeProcessedEntities (called above, per type, on success) enqueues its
-                // delete on trackingQueue asynchronously rather than blocking this thread. That
-                // is safe only because trackingQueue is serial: every delete for this iteration
-                // is enqueued, in this order, before the recursive call below enqueues the next
-                // read, so FIFO guarantees the deletes run first. This breaks if trackingQueue
-                // is ever made concurrent, or if this recursion is reordered before the sends.
-                let mayHaveMore =
-                    !eventQueue.isEmpty || !peopleQueue.isEmpty || !groupsQueue.isEmpty
-                if mayHaveMore {
-                    self.flushBatches(completion: completion)
-                    return
+                // Send only the current queue type
+                if !queue.isEmpty {
+                    self.flushQueue(queue, type: flushType)
                 }
 
-                self.endFlush(completion: completion)
+                // Sequential drain logic: Continue within the current queue while it has rows,
+                // advance to the next queue when current is empty, or end flush when all are done.
+                // A short batch is NOT the same as an empty one: readRows can legitimately return
+                // fewer than `batchSize` rows while more remain queued — truncated by the byte
+                // budget, or shrunk by dropped oversized/malformed rows — so comparing against
+                // `batchSize` would stop the drain early and strand deliverable events until the
+                // next flush. The next iteration re-enters through the guard above, which terminates
+                // the drain on opt-out or once failed sends engage the request backoff — sent rows
+                // are deleted before the next read, so the loop either makes progress or is cut
+                // after a bounded number of attempts.
+                //
+                // removeProcessedEntities (called by flushQueue on success) enqueues its delete on
+                // trackingQueue asynchronously rather than blocking this thread. That is safe only
+                // because trackingQueue is serial: the delete for this iteration is enqueued before
+                // the recursive call below enqueues the next read, so FIFO guarantees the delete
+                // runs first. This breaks if trackingQueue is ever made concurrent, or if this
+                // recursion is reordered before the send.
+                if !queue.isEmpty {
+                    // Current queue has more rows, continue draining it
+                    self.flushBatches(queueState: queueState, completion: completion)
+                } else if let nextState = queueState.next {
+                    // Current queue empty, advance to next queue type
+                    self.flushBatches(queueState: nextState, completion: completion)
+                } else {
+                    // All queues processed
+                    self.endFlush(completion: completion)
+                }
             }
         }
     }

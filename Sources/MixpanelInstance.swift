@@ -774,7 +774,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             // Full drain: the app may be suspended or killed once backgrounded, so this is the
             // last reliable chance to send everything queued, not just one batch per type.
             if beginFlush() {
-                flushBatches(performFullFlush: true, completion: nil)
+                flushBatches(
+                    performFullFlush: true,
+                    flushStartTime: Date().timeIntervalSince1970 * 1000,
+                    completion: nil)
             }
         }
     }
@@ -783,11 +786,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Expiration calls this directly; normal completion first checks whether flushing is idle.
     fileprivate func endBackgroundTask() {
         #if !os(OSX) && !os(watchOS)
-        guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
-            return
-        }
 
         if taskId != UIBackgroundTaskIdentifier.invalid {
+            guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
+                return
+            }
+            
             sharedApplication.endBackgroundTask(taskId)
             taskId = UIBackgroundTaskIdentifier.invalid
         }
@@ -1355,7 +1359,10 @@ extension MixpanelInstance {
             return
         }
 
-        flushBatches(performFullFlush: performFullFlush, completion: completion)
+        flushBatches(
+            performFullFlush: performFullFlush,
+            flushStartTime: Date().timeIntervalSince1970 * 1000,
+            completion: completion)
     }
 
     /// Tracks which queue type is currently being drained during a flush pass.
@@ -1374,6 +1381,32 @@ extension MixpanelInstance {
         }
     }
 
+    /// The client-side capture time (epoch milliseconds) of the most recent row in a batch, used
+    /// to bound how long a single queue type may keep recursing during a full flush.
+    ///
+    /// Events carry it nested under `properties["time"]` (`Track.swift:78`); people and groups
+    /// carry it at the top level as `$time` (`People.swift:61`, `Group.swift:66`). Both are
+    /// populated from the same `round(Date().timeIntervalSince1970 * 1000)` at
+    /// track()/set()-call time, so they're directly comparable across queue types despite the
+    /// different key path. Rows are read `ORDER BY time`, so the batch's last element is its
+    /// most recent — no need to scan the rest.
+    private func lastRowTimestamp(_ queue: Queue, queueState: FlushQueueState) -> Double? {
+        guard let lastRow = queue.last else {
+            return nil
+        }
+        let rawValue: Any?
+        switch queueState {
+        case .events:
+            rawValue = (lastRow["properties"] as? [String: Any])?["time"]
+        case .people, .groups:
+            rawValue = lastRow["$time"]
+        }
+        if let number = rawValue as? NSNumber {
+            return number.doubleValue
+        }
+        return rawValue as? Double
+    }
+
     /// Drains queued rows across events, people, and groups in sequential order.
     ///
     /// Each invocation reads up to `flushBatchSize` rows from the current queue type, bounded
@@ -1382,6 +1415,10 @@ extension MixpanelInstance {
     /// - When `performFullFlush` is `true` (the default, recommended for most callers): within
     ///   the current queue until empty (all events before any people), then to the next queue
     ///   when current is empty (events → people → groups), until all three queues return empty.
+    ///   A queue type is also considered done, and the drain advances to the next type, once a
+    ///   batch's last row was captured after `flushStartTime` — rows tracked while this flush is
+    ///   running are left for a later flush rather than chased indefinitely, which would starve
+    ///   the remaining queue types under continuous tracking.
     /// - When `performFullFlush` is `false`: exactly one batch per queue type, then the next
     ///   queue type, regardless of whether rows remain — never more than three batches total.
     ///   Any rows left behind wait for a later flush.
@@ -1397,6 +1434,7 @@ extension MixpanelInstance {
     /// every exit path releases it exactly once.
     private func flushBatches(
         performFullFlush: Bool = true, queueState: FlushQueueState = .events,
+        flushStartTime: Double = Date().timeIntervalSince1970 * 1000,
         completion: (() -> Void)?
     ) {
         trackingQueue.async { [weak self, completion] in
@@ -1487,23 +1525,35 @@ extension MixpanelInstance {
                 // just sent above — advance to the next type (or end) regardless of whether more
                 // rows remain, rather than recursing on the same state.
                 //
+                // A queue type also stops recursing once its batch's last (most recent) row was
+                // captured after flushStartTime, even under performFullFlush — otherwise a queue
+                // fed faster than it drains (e.g. continuous tracking) would never read empty,
+                // and people/groups would never get a turn. Rows tracked during this flush are
+                // left for a later flush rather than chased indefinitely. A missing/unparseable
+                // timestamp falls back to the pre-existing behavior (keep draining) rather than
+                // risk cutting off legitimate backlog over a row this SDK couldn't read the time
+                // from.
+                //
                 // removeProcessedEntities (called by flushQueue on success) enqueues its delete on
                 // trackingQueue asynchronously rather than blocking this thread. That is safe only
                 // because trackingQueue is serial: the delete for this iteration is enqueued before
                 // the recursive call below enqueues the next read, so FIFO guarantees the delete
                 // runs first. This breaks if trackingQueue is ever made concurrent, or if this
                 // recursion is reordered before the send.
-                if performFullFlush && !queue.isEmpty {
-                    // Current queue has more rows, continue draining it
+                let lastRowTime = self.lastRowTimestamp(queue, queueState: queueState)
+                let crossedFlushWatermark = lastRowTime.map { $0 > flushStartTime } ?? false
+
+                if performFullFlush && !queue.isEmpty && !crossedFlushWatermark {
+                    // Current queue has more pre-flush rows, continue draining it
                     self.flushBatches(
                         performFullFlush: performFullFlush, queueState: queueState,
-                        completion: completion)
+                        flushStartTime: flushStartTime, completion: completion)
                 } else if let nextState = queueState.next {
-                    // Either this queue type is empty, or a single-batch flush has already sent
-                    // its one batch for it — advance to the next queue type either way.
+                    // This queue type is either empty, done for a single-batch flush, or has
+                    // reached rows tracked during this flush — advance to the next queue type.
                     self.flushBatches(
                         performFullFlush: performFullFlush, queueState: nextState,
-                        completion: completion)
+                        flushStartTime: flushStartTime, completion: completion)
                 } else {
                     // All queue types processed
                     self.endFlush(completion: completion)

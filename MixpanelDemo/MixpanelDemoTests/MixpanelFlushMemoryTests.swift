@@ -645,4 +645,57 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
 
         removeDBfile(testMixpanel.apiToken)
     }
+
+    /// Continuous tracking during a flush must not starve people/groups behind an
+    /// ever-refilling events queue.
+    ///
+    /// track() and the flush's own reads share the same serial trackingQueue, so a burst of
+    /// track() calls issued immediately after flush() races ahead of the flush's later
+    /// iterations (each of which only gets re-enqueued once the previous batch's network round
+    /// trip completes) — landing in the table before those later reads run. This reliably
+    /// produces reads whose rows were tracked after the flush began, exercising the
+    /// flushStartTime watermark: without it, the drain would keep recursing on `.events` as
+    /// long as reads return rows, leaving people/groups untouched within this bounded wait
+    /// window (it would still finish eventually, once the flood itself ran out, just far later
+    /// than the few passes given below).
+    func testFlushDoesNotStarvePeopleAndGroupsUnderContinuousEventTracking() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.flushBatchSize = 5
+
+        // A small pre-flush backlog of events.
+        for index in 0..<5 {
+            testMixpanel.track(event: "preFlushEvent\(index)")
+        }
+        testMixpanel.people.set(properties: ["prop": "value"])
+        testMixpanel.getGroup(groupKey: "company", groupID: "mixpanel").set(properties: ["prop": "value"])
+        waitForTrackingQueue(testMixpanel)
+
+        XCTAssertEqual(eventQueue(token: testMixpanel.apiToken).count, 5)
+        XCTAssertFalse(peopleQueue(token: testMixpanel.apiToken).isEmpty)
+        XCTAssertFalse(groupQueue(token: testMixpanel.apiToken).isEmpty)
+
+        testMixpanel.flush()
+        // Flood far more events than could possibly drain within the bounded wait below,
+        // simulating tracking that continuously outpaces the drain.
+        for index in 0..<200 {
+            testMixpanel.track(event: "duringFlushEvent\(index)")
+        }
+
+        waitForTrackingQueue(testMixpanel)
+        waitForTrackingQueue(testMixpanel)
+        waitForTrackingQueue(testMixpanel)
+
+        XCTAssertTrue(
+            peopleQueue(token: testMixpanel.apiToken).isEmpty,
+            "people must be drained even while events keep being tracked faster than they empty")
+        XCTAssertTrue(
+            groupQueue(token: testMixpanel.apiToken).isEmpty,
+            "groups must be drained even while events keep being tracked faster than they empty")
+        XCTAssertFalse(
+            eventQueue(token: testMixpanel.apiToken).isEmpty,
+            "events tracked during this flush should be left for a later flush, not chased indefinitely")
+
+        removeDBfile(testMixpanel.apiToken)
+    }
 }

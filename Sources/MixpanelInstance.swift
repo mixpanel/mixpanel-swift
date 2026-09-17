@@ -771,8 +771,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             }
             // Background execution is requested before claiming the flush slot, so an existing
             // timer or manual flush is protected too. Start a flush only if none is active.
+            // Full drain: the app may be suspended or killed once backgrounded, so this is the
+            // last reliable chance to send everything queued, not just one batch per type.
             if beginFlush() {
-                flushBatches(completion: nil)
+                flushBatches(performFullFlush: true, completion: nil)
             }
         }
     }
@@ -1321,11 +1323,15 @@ extension MixpanelInstance {
        remains in local storage for the active flush or a later flush. Empty reads caused
        by filtering or a full window of discarded rows can leave later rows for another flush.
 
-       - parameter performFullFlush: retained for backward compatibility and no longer changes behavior — every flush drains the full queue in batches.
+       - parameter performFullFlush: defaults to `true`, draining each of events, people, and
+         groups completely, in that order, before the flush ends. Pass `false` to send exactly
+         one batch (up to `flushBatchSize` rows) per queue type and no more — suited to callers
+         on a tight time budget, such as an app extension, where a full drain of a large backlog
+         could run long enough to be killed by the OS. Any rows left behind wait for a later flush.
        - parameter completion: an optional handler dispatched on the main queue when this flush
          finishes. Rejected calls dispatch it immediately without waiting for an active flush.
        */
-    public func flush(performFullFlush: Bool = false, completion: (() -> Void)? = nil) {
+    public func flush(performFullFlush: Bool = true, completion: (() -> Void)? = nil) {
         // Opted-out calls are rejected before `beginFlush()`, so opting out never claims (and
         // thus never has to release) the flush slot — `beginFlush()` is only reached, and only
         // evaluated, once tracking is confirmed enabled.
@@ -1349,7 +1355,7 @@ extension MixpanelInstance {
             return
         }
 
-        flushBatches(completion: completion)
+        flushBatches(performFullFlush: performFullFlush, completion: completion)
     }
 
     /// Tracks which queue type is currently being drained during a flush pass.
@@ -1368,14 +1374,17 @@ extension MixpanelInstance {
         }
     }
 
-    /// Drains all queued rows across events, people, and groups in sequential order.
+    /// Drains queued rows across events, people, and groups in sequential order.
     ///
     /// Each invocation reads up to `flushBatchSize` rows from the current queue type, bounded
     /// by `APIConstants.maxRowByteSize` and MPDB's memory budget, then sends them as a single
     /// network request. Processing continues:
-    /// - Within the current queue until empty (all events before any people)
-    /// - To the next queue when current is empty (events → people → groups)
-    /// - Until all three queues return empty
+    /// - When `performFullFlush` is `true`(recommanded): within the current queue until empty (all events
+    ///   before any people), then to the next queue when current is empty (events → people →
+    ///   groups), until all three queues return empty.
+    /// - When `performFullFlush` is `false`: exactly one batch per queue type, then the next
+    ///   queue type, regardless of whether rows remain — never more than three batches total.
+    ///   Any rows left behind wait for a later flush.
     ///
     /// Guards (opt-out, request backoff, delegate veto) are checked on every iteration. Failed
     /// sends engage request backoff; successful sends delete the sent rows before the next read.
@@ -1386,7 +1395,10 @@ extension MixpanelInstance {
     ///
     /// Must only be entered while holding the flush slot (`beginFlush()` returned `true`);
     /// every exit path releases it exactly once.
-    private func flushBatches(queueState: FlushQueueState = .events, completion: (() -> Void)?) {
+    private func flushBatches(
+        performFullFlush: Bool = true, queueState: FlushQueueState = .events,
+        completion: (() -> Void)?
+    ) {
         trackingQueue.async { [weak self, completion] in
             guard let self = self else {
                 if let completion = completion {
@@ -1459,16 +1471,21 @@ extension MixpanelInstance {
                     self.flushQueue(queue, type: flushType)
                 }
 
-                // Sequential drain logic: Continue within the current queue while it has rows,
-                // advance to the next queue when current is empty, or end flush when all are done.
-                // A short batch is NOT the same as an empty one: readRows can legitimately return
-                // fewer than `batchSize` rows while more remain queued — truncated by the byte
-                // budget, or shrunk by dropped oversized/malformed rows — so comparing against
-                // `batchSize` would stop the drain early and strand deliverable events until the
-                // next flush. The next iteration re-enters through the guard above, which terminates
-                // the drain on opt-out or once failed sends engage the request backoff — sent rows
-                // are deleted before the next read, so the loop either makes progress or is cut
+                // Sequential drain logic: when performFullFlush is true, continue within the
+                // current queue while it has rows, advance to the next queue when current is
+                // empty, or end flush when all are done. A short batch is NOT the same as an
+                // empty one: readRows can legitimately return fewer than `batchSize` rows while
+                // more remain queued — truncated by the byte budget, or shrunk by dropped
+                // oversized/malformed rows — so comparing against `batchSize` would stop the
+                // drain early and strand deliverable events until the next flush. The next
+                // iteration re-enters through the guard above, which terminates the drain on
+                // opt-out or once failed sends engage the request backoff — sent rows are
+                // deleted before the next read, so the loop either makes progress or is cut
                 // after a bounded number of attempts.
+                //
+                // When performFullFlush is false, this queue type gets exactly the one batch
+                // just sent above — advance to the next type (or end) regardless of whether more
+                // rows remain, rather than recursing on the same state.
                 //
                 // removeProcessedEntities (called by flushQueue on success) enqueues its delete on
                 // trackingQueue asynchronously rather than blocking this thread. That is safe only
@@ -1476,14 +1493,19 @@ extension MixpanelInstance {
                 // the recursive call below enqueues the next read, so FIFO guarantees the delete
                 // runs first. This breaks if trackingQueue is ever made concurrent, or if this
                 // recursion is reordered before the send.
-                if !queue.isEmpty {
+                if performFullFlush && !queue.isEmpty {
                     // Current queue has more rows, continue draining it
-                    self.flushBatches(queueState: queueState, completion: completion)
+                    self.flushBatches(
+                        performFullFlush: performFullFlush, queueState: queueState,
+                        completion: completion)
                 } else if let nextState = queueState.next {
-                    // Current queue empty, advance to next queue type
-                    self.flushBatches(queueState: nextState, completion: completion)
+                    // Either this queue type is empty, or a single-batch flush has already sent
+                    // its one batch for it — advance to the next queue type either way.
+                    self.flushBatches(
+                        performFullFlush: performFullFlush, queueState: nextState,
+                        completion: completion)
                 } else {
-                    // All queues processed
+                    // All queue types processed
                     self.endFlush(completion: completion)
                 }
             }

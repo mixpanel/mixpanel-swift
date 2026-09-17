@@ -791,7 +791,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             guard let sharedApplication = MixpanelInstance.sharedUIApplication() else {
                 return
             }
-            
+
             sharedApplication.endBackgroundTask(taskId)
             taskId = UIBackgroundTaskIdentifier.invalid
         }
@@ -1374,9 +1374,9 @@ extension MixpanelInstance {
 
         var next: FlushQueueState? {
             switch self {
-            case .events: return .people
-            case .people: return .groups
-            case .groups: return nil
+                case .events: return .people
+                case .people: return .groups
+                case .groups: return nil
             }
         }
     }
@@ -1396,10 +1396,10 @@ extension MixpanelInstance {
         }
         let rawValue: Any?
         switch queueState {
-        case .events:
-            rawValue = (lastRow["properties"] as? [String: Any])?["time"]
-        case .people, .groups:
-            rawValue = lastRow["$time"]
+            case .events:
+                rawValue = (lastRow["properties"] as? [String: Any])?["time"]
+            case .people, .groups:
+                rawValue = lastRow["$time"]
         }
         if let number = rawValue as? NSNumber {
             return number.doubleValue
@@ -1468,31 +1468,31 @@ extension MixpanelInstance {
             // Load only the current queue type based on state
             let (flushType, queue): (FlushType, Queue) = {
                 switch queueState {
-                case .events:
-                    return (
-                        .events,
-                        self.mixpanelPersistence.loadEntitiesInBatch(
-                            type: self.persistenceTypeFromFlushType(.events),
-                            batchSize: batchSize,
-                            excludeAutomaticEvents: !self.trackAutomaticEventsEnabled
+                    case .events:
+                        return (
+                            .events,
+                            self.mixpanelPersistence.loadEntitiesInBatch(
+                                type: self.persistenceTypeFromFlushType(.events),
+                                batchSize: batchSize,
+                                excludeAutomaticEvents: !self.trackAutomaticEventsEnabled
+                            )
                         )
-                    )
-                case .people:
-                    return (
-                        .people,
-                        self.mixpanelPersistence.loadEntitiesInBatch(
-                            type: self.persistenceTypeFromFlushType(.people),
-                            batchSize: batchSize
+                    case .people:
+                        return (
+                            .people,
+                            self.mixpanelPersistence.loadEntitiesInBatch(
+                                type: self.persistenceTypeFromFlushType(.people),
+                                batchSize: batchSize
+                            )
                         )
-                    )
-                case .groups:
-                    return (
-                        .groups,
-                        self.mixpanelPersistence.loadEntitiesInBatch(
-                            type: self.persistenceTypeFromFlushType(.groups),
-                            batchSize: batchSize
+                    case .groups:
+                        return (
+                            .groups,
+                            self.mixpanelPersistence.loadEntitiesInBatch(
+                                type: self.persistenceTypeFromFlushType(.groups),
+                                batchSize: batchSize
+                            )
                         )
-                    )
                 }
             }()
 

@@ -776,7 +776,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             if beginFlush() {
                 flushBatches(
                     performFullFlush: true,
-                    flushStartTime: Date().timeIntervalSince1970 * 1000,
+                    flushStartTime: round(Date().timeIntervalSince1970 * 1000),
                     completion: nil)
             }
         }
@@ -1361,7 +1361,7 @@ extension MixpanelInstance {
 
         flushBatches(
             performFullFlush: performFullFlush,
-            flushStartTime: Date().timeIntervalSince1970 * 1000,
+            flushStartTime: round(Date().timeIntervalSince1970 * 1000),
             completion: completion)
     }
 
@@ -1434,7 +1434,7 @@ extension MixpanelInstance {
     /// every exit path releases it exactly once.
     private func flushBatches(
         performFullFlush: Bool = true, queueState: FlushQueueState = .events,
-        flushStartTime: Double = Date().timeIntervalSince1970 * 1000,
+        flushStartTime: Double = round(Date().timeIntervalSince1970 * 1000),
         completion: (() -> Void)?
     ) {
         trackingQueue.async { [weak self, completion] in

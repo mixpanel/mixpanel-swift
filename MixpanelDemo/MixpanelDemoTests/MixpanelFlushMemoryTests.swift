@@ -523,6 +523,7 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
     func testFlushDrainsEventsCompletelyBeforeTouchingPeopleOrGroups() {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.identify(distinctId: "d1")
         testMixpanel.flushBatchSize = 1
 
         let eventsTotal = 40
@@ -570,12 +571,14 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
-    /// While any people rows remain queued, groups must not be touched. Events start empty here
-    /// so the drain advances past `.events` in a single (empty) iteration before this invariant
-    /// is exercised.
+    /// While any people rows remain queued, groups must not be touched. Events start with only
+    /// the single "$identify" event queued by identify() below, so the drain advances past
+    /// `.events` in a single iteration (sending just that one event, since flushBatchSize is 1)
+    /// before this invariant is exercised.
     func testFlushDrainsPeopleCompletelyBeforeTouchingGroups() {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.identify(distinctId: "d1")
         testMixpanel.flushBatchSize = 1
 
         let peopleTotal = 40
@@ -585,7 +588,9 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
         testMixpanel.getGroup(groupKey: "company", groupID: "mixpanel").set(properties: ["prop": "value"])
         waitForTrackingQueue(testMixpanel)
 
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty)
+        XCTAssertEqual(
+            eventQueue(token: testMixpanel.apiToken).count, 1,
+            "identify() above queues its own $identify event")
         let groupCountBefore = groupQueue(token: testMixpanel.apiToken).count
         XCTAssertGreaterThan(groupCountBefore, 0)
 
@@ -650,17 +655,25 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
     /// ever-refilling events queue.
     ///
     /// track() and the flush's own reads share the same serial trackingQueue, so a burst of
-    /// track() calls issued immediately after flush() races ahead of the flush's later
-    /// iterations (each of which only gets re-enqueued once the previous batch's network round
-    /// trip completes) — landing in the table before those later reads run. This reliably
-    /// produces reads whose rows were tracked after the flush began, exercising the
-    /// flushStartTime watermark: without it, the drain would keep recursing on `.events` as
-    /// long as reads return rows, leaving people/groups untouched within this bounded wait
-    /// window (it would still finish eventually, once the flood itself ran out, just far later
-    /// than the few passes given below).
+    /// track() calls issued after flush() races ahead of the flush's later iterations (each of
+    /// which only gets re-enqueued once the previous batch's network round trip completes) —
+    /// landing in the table before those later reads run. This reliably produces reads whose
+    /// rows were tracked after the flush began, exercising the flushStartTime watermark: without
+    /// it, the drain would keep recursing on `.events` as long as reads return rows, leaving
+    /// people/groups untouched indefinitely.
+    ///
+    /// The short sleep before the flood matters: track() captures its timestamp synchronously,
+    /// at call time, not when the row is later written, and both it and flushStartTime round to
+    /// millisecond resolution. A flood fired immediately after flush() can round to the exact
+    /// same millisecond as flushStartTime and tie rather than exceed it — real continuous
+    /// tracking from real user/sensor events naturally spreads across milliseconds, but a tight
+    /// Swift loop does not. Without the sleep, every flood row can be misread as pre-flush
+    /// backlog, and the drain would only stop once the whole flood was consumed rather than
+    /// demonstrating the watermark cutting it short.
     func testFlushDoesNotStarvePeopleAndGroupsUnderContinuousEventTracking() {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.identify(distinctId: "d1")
         testMixpanel.flushBatchSize = 5
 
         // A small pre-flush backlog of events.
@@ -671,20 +684,34 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
         testMixpanel.getGroup(groupKey: "company", groupID: "mixpanel").set(properties: ["prop": "value"])
         waitForTrackingQueue(testMixpanel)
 
-        XCTAssertEqual(eventQueue(token: testMixpanel.apiToken).count, 5)
+        // identify() above queued its own "$identify" event ahead of the 5 tracked here.
+        XCTAssertEqual(eventQueue(token: testMixpanel.apiToken).count, 6)
         XCTAssertFalse(peopleQueue(token: testMixpanel.apiToken).isEmpty)
         XCTAssertFalse(groupQueue(token: testMixpanel.apiToken).isEmpty)
 
         testMixpanel.flush()
-        // Flood far more events than could possibly drain within the bounded wait below,
-        // simulating tracking that continuously outpaces the drain.
+        // track() captures Date() synchronously on this thread (MixpanelInstance.swift:1659),
+        // not when the row is later written — so a flood fired immediately after flush() could
+        // round to the exact same millisecond as flushStartTime, tying rather than exceeding it
+        // (real continuous tracking from real user/sensor events would naturally spread across
+        // milliseconds; a tight loop does not). This sleep guarantees the flood is captured in a
+        // clearly later millisecond, so it reliably exceeds flushStartTime.
+        Thread.sleep(forTimeInterval: 0.01)
+        // Flood far more events than could possibly drain within a few batches, simulating
+        // tracking that continuously outpaces the drain.
         for index in 0..<200 {
             testMixpanel.track(event: "duringFlushEvent\(index)")
         }
 
-        waitForTrackingQueue(testMixpanel)
-        waitForTrackingQueue(testMixpanel)
-        waitForTrackingQueue(testMixpanel)
+        // Poll instead of assuming a fixed wait count, so this adapts to actual network timing.
+        for _ in 0..<10 {
+            waitForTrackingQueue(testMixpanel)
+            if peopleQueue(token: testMixpanel.apiToken).isEmpty
+                && groupQueue(token: testMixpanel.apiToken).isEmpty
+            {
+                break
+            }
+        }
 
         XCTAssertTrue(
             peopleQueue(token: testMixpanel.apiToken).isEmpty,

@@ -98,13 +98,18 @@ class Flush: AppLifecycle {
             autoreleaseFrequency: .workItem)
     }
 
+    /// Returns `false` only when a real network send failed; `true` for a request-not-allowed
+    /// no-op, an empty queue, an unserializable batch (handled by dropping it), or a successful
+    /// send. Callers use this to decide whether to keep draining the same queue type or move on
+    /// to the next one — a single failed type should not block the others in the same pass.
+    @discardableResult
     func flushQueue(
         _ queue: Queue, type: FlushType, headers: [String: String], queryItems: [URLQueryItem]
-    ) {
+    ) -> Bool {
         if flushRequest.requestNotAllowed() {
-            return
+            return true
         }
-        flushQueueInBatches(queue, type: type, headers: headers, queryItems: queryItems)
+        return flushQueueInBatches(queue, type: type, headers: headers, queryItems: queryItems)
     }
 
     func startFlushTimer() {
@@ -146,12 +151,17 @@ class Flush: AppLifecycle {
     /// Rows are removed only once the server has accepted them, or when they cannot be
     /// serialized at all — an unserializable batch would otherwise be re-read and retried by
     /// every later flush forever. A failed send leaves the rows queued for the next flush.
+    ///
+    /// Returns `false` only for a real network send failure; `true` for an empty queue or an
+    /// unserializable batch (dropped, not retried) as well as a successful send.
+    @discardableResult
     func flushQueueInBatches(
         _ queue: Queue, type: FlushType, headers: [String: String], queryItems: [URLQueryItem]
-    ) {
+    ) -> Bool {
         guard !queue.isEmpty else {
-            return
+            return true
         }
+        var sendSucceeded = true
         // Drains this batch's encoding temporaries before the caller's next queue is encoded,
         // rather than letting all three (events, people, groups) accumulate in one work item.
         autoreleasepool {
@@ -186,7 +196,9 @@ class Flush: AppLifecycle {
             if success {
                 delegate?.removeProcessedEntities(type: type, ids: ids)
             }
+            sendSucceeded = success
         }
+        return sendSucceeded
     }
 
     // MARK: - Lifecycle

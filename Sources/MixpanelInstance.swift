@@ -1418,17 +1418,22 @@ extension MixpanelInstance {
     ///   A queue type is also considered done, and the drain advances to the next type, once a
     ///   batch's last row was captured after `flushStartTime` — rows tracked while this flush is
     ///   running are left for a later flush rather than chased indefinitely, which would starve
-    ///   the remaining queue types under continuous tracking.
+    ///   the remaining queue types under continuous tracking — or once its send fails, so one
+    ///   struggling queue type cannot consume both retries backoff allows and block the other
+    ///   two from ever being attempted in this pass (matching the Android SDK's per-table
+    ///   independence).
     /// - When `performFullFlush` is `false`: exactly one batch per queue type, then the next
     ///   queue type, regardless of whether rows remain — never more than three batches total.
     ///   Any rows left behind wait for a later flush.
     ///
-    /// Guards (opt-out, request backoff, delegate veto) are checked on every iteration. Failed
-    /// sends engage request backoff; successful sends delete the sent rows before the next read.
-    /// Rows too large to parse are skipped and deleted individually. Short batches (< batchSize)
-    /// may indicate truncation by the byte budget or dropped oversized rows, not queue exhaustion,
-    /// and may be retried until backoff applies. Filtering or discarding a full window can leave
-    /// later rows for another flush.
+    /// Guards (opt-out, request backoff, delegate veto) are checked on every iteration. A failed
+    /// send does not retry the same queue type here — it advances to the next type immediately —
+    /// but two failures within a pass (whether the same type retried under a short batch or two
+    /// different types) still engage request backoff, which the next iteration's guard enforces.
+    /// Successful sends delete the sent rows before the next read. Rows too large to parse are
+    /// skipped and deleted individually. Short batches (< batchSize) may indicate truncation by
+    /// the byte budget or dropped oversized rows, not queue exhaustion. Filtering or discarding a
+    /// full window can leave later rows for another flush.
     ///
     /// Must only be entered while holding the flush slot (`beginFlush()` returned `true`);
     /// every exit path releases it exactly once.
@@ -1504,26 +1509,34 @@ extension MixpanelInstance {
                     return
                 }
 
-                // Send only the current queue type
+                // Send only the current queue type. A failed send leaves the batch queued for a
+                // later flush; sendSucceeded stays true for an empty queue (nothing to send).
+                var sendSucceeded = true
                 if !queue.isEmpty {
-                    self.flushQueue(queue, type: flushType)
+                    sendSucceeded = self.flushQueue(queue, type: flushType)
                 }
 
                 // Sequential drain logic: when performFullFlush is true, continue within the
-                // current queue while it has rows, advance to the next queue when current is
-                // empty, or end flush when all are done. A short batch is NOT the same as an
-                // empty one: readRows can legitimately return fewer than `batchSize` rows while
-                // more remain queued — truncated by the byte budget, or shrunk by dropped
+                // current queue while it has rows and its send succeeded, advance to the next
+                // queue otherwise, or end flush when all are done. A short batch is NOT the same
+                // as an empty one: readRows can legitimately return fewer than `batchSize` rows
+                // while more remain queued — truncated by the byte budget, or shrunk by dropped
                 // oversized/malformed rows — so comparing against `batchSize` would stop the
-                // drain early and strand deliverable events until the next flush. The next
-                // iteration re-enters through the guard above, which terminates the drain on
-                // opt-out or once failed sends engage the request backoff — sent rows are
-                // deleted before the next read, so the loop either makes progress or is cut
-                // after a bounded number of attempts.
+                // drain early and strand deliverable events until the next flush.
                 //
-                // When performFullFlush is false, this queue type gets exactly the one batch
-                // just sent above — advance to the next type (or end) regardless of whether more
-                // rows remain, rather than recursing on the same state.
+                // A failed send advances to the next queue type immediately rather than retrying
+                // the same type here, matching the Android SDK: sendAllData attempts every table
+                // once per pass regardless of an earlier table's failure, only the next scheduled
+                // flush is gated by backoff. Retrying the same type risks reaching two consecutive
+                // failures — which engages request backoff — before the other types ever got a
+                // turn, so an events-only outage could otherwise starve people/groups completely
+                // instead of just leaving events queued. The next iteration (or the next external
+                // flush) re-enters through the guard above, which terminates the drain on opt-out
+                // or once backoff applies.
+                //
+                // When performFullFlush is false, this queue type gets exactly the one batch just
+                // sent above — advance to the next type (or end) regardless of whether more rows
+                // remain or the send succeeded.
                 //
                 // A queue type also stops recursing once its batch's last (most recent) row was
                 // captured after flushStartTime, even under performFullFlush — otherwise a queue
@@ -1543,14 +1556,16 @@ extension MixpanelInstance {
                 let lastRowTime = self.lastRowTimestamp(queue, queueState: queueState)
                 let crossedFlushWatermark = lastRowTime.map { $0 > flushStartTime } ?? false
 
-                if performFullFlush && !queue.isEmpty && !crossedFlushWatermark {
-                    // Current queue has more pre-flush rows, continue draining it
+                if performFullFlush && !queue.isEmpty && !crossedFlushWatermark && sendSucceeded {
+                    // Current queue has more pre-flush rows and the last send succeeded, continue
+                    // draining it
                     self.flushBatches(
                         performFullFlush: performFullFlush, queueState: queueState,
                         flushStartTime: flushStartTime, completion: completion)
                 } else if let nextState = queueState.next {
-                    // This queue type is either empty, done for a single-batch flush, or has
-                    // reached rows tracked during this flush — advance to the next queue type.
+                    // This queue type is either empty, done for a single-batch flush, has reached
+                    // rows tracked during this flush, or its send just failed — advance to the
+                    // next queue type either way.
                     self.flushBatches(
                         performFullFlush: performFullFlush, queueState: nextState,
                         flushStartTime: flushStartTime, completion: completion)
@@ -1617,15 +1632,17 @@ extension MixpanelInstance {
         }
     }
 
-    func flushQueue(_ queue: Queue, type: FlushType) {
+    /// Returns `false` only for a real network send failure — see `Flush.flushQueue`.
+    @discardableResult
+    func flushQueue(_ queue: Queue, type: FlushType) -> Bool {
         if hasOptedOutTracking() {
-            return
+            return true
         }
         let proxyServerResource = proxyServerDelegate?.mixpanelResourceForProxyServer(name)
         let headers: [String: String] = proxyServerResource?.headers ?? [:]
         let queryItems = proxyServerResource?.queryItems ?? []
 
-        self.flushInstance.flushQueue(queue, type: type, headers: headers, queryItems: queryItems)
+        return self.flushInstance.flushQueue(queue, type: type, headers: headers, queryItems: queryItems)
     }
 
     func removeProcessedEntities(type: FlushType, ids: [Int32]) {

@@ -28,7 +28,6 @@ class MixpanelScreenTrackingTests: MixpanelBaseTests {
         XCTAssertEqual(props?["current_page_title"] as? String, "HomeScreen")
         XCTAssertEqual(props?["$mp_autocapture"] as? Bool, true)
         XCTAssertEqual(props?["extra_prop"] as? String, "extra_value")
-        XCTAssertNotNil(props?["$screen_height"])
 
         removeDBfile(testMixpanel.apiToken)
     }

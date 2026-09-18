@@ -103,6 +103,25 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
                 return
             }
         }
+
+        // The two sync pairs above reliably wait out two read/send hops of the flush drain, but
+        // the sequential drain can take more hops than that to release the flush slot — e.g.
+        // advancing through empty people/groups after a failed events send still costs a full
+        // hop each. If a flush is still in progress, keep waiting rather than returning early:
+        // a caller that immediately issues another explicit flush() (as
+        // flushAndWaitForTrackingQueue does) would otherwise have that call silently coalesced
+        // away by a flush that hasn't actually finished yet, undercounting things like
+        // consecutive network failures. Bounded so a genuinely stuck flush fails the test instead
+        // of hanging.
+        var remainingAttempts = 20
+        while mixpanel.isFlushInProgress && remainingAttempts > 0 {
+            mixpanel.trackingQueue.sync {
+                mixpanel.networkQueue.sync {
+                    return
+                }
+            }
+            remainingAttempts -= 1
+        }
     }
 
     func randomId() -> String {

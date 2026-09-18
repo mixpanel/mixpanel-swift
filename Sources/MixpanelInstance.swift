@@ -360,6 +360,19 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     private let flushStateLock = ReadWriteLock(label: "com.mixpanel.flushstate")
     /// Whether a flush has claimed the flush slot and not yet finished. See `beginFlush()`.
     private var isFlushing = false
+
+    /// Test-only observation of the flush slot. Not part of the public API — the sequential
+    /// drain can take more async hops to release the slot than a fixed-count synchronization
+    /// helper (e.g. a test's own trackingQueue/networkQueue sync pair) can guarantee it has
+    /// waited out, so tests that need to know a flush has truly finished should poll this rather
+    /// than assume a fixed number of hops.
+    var isFlushInProgress: Bool {
+        var flushIsActive = false
+        flushStateLock.read {
+            flushIsActive = isFlushing
+        }
+        return flushIsActive
+    }
     #if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
     let automaticEvents = AutomaticEvents()
     #endif

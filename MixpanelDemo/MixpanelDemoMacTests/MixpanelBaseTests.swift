@@ -34,6 +34,19 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     }
 
     func removeDBfile(_ token: String? = nil) {
+        // Mixpanel.initialize(token:...) registers the instance under its token (the default
+        // instanceName) in a static registry that otherwise holds it for the lifetime of the
+        // process. Without this, the instance never deinits, so it never unregisters from
+        // NotificationCenter (object: nil — it reacts to a background notification posted by
+        // any sender, not just the real UIApplication) and keeps reacting to background
+        // notifications posted by unrelated, later tests — including
+        // testBackgroundTaskProtectsActiveFlushUntilItFinishes's manual post — triggering an
+        // unwanted flush of a "finished" test's leftover data, or claiming beginFlush() and
+        // blocking a later test's own explicit flush() calls.
+        if let token = token {
+            Mixpanel.removeInstance(name: token)
+        }
+
         do {
             let fileManager = FileManager.default
 

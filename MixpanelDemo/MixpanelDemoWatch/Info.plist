@@ -20,14 +20,7 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-	</array>
 	<key>WKCompanionAppBundleIdentifier</key>
 	<string>com.mixpanel.swiftsdkdemo</string>
-	<key>WKWatchKitApp</key>
-	<true/>
 </dict>
 </plist>

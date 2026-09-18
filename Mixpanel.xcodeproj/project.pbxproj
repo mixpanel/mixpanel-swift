@@ -15,18 +15,10 @@
 		16178FD22F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000003 /* jsonlogic */; };
 		16178FD32F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000004 /* jsonlogic */; };
 		16178FD42F687EE200E022F2 /* jsonlogic in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONLOGIC00000005 /* jsonlogic */; };
-		17JSONMOD00000B02 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A02 /* JSON */; };
-		17JSONMOD00000B03 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A03 /* JSON */; };
-		17JSONMOD00000B04 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A04 /* JSON */; };
-		17JSONMOD00000B05 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A05 /* JSON */; };
 		1651FD822F83B6E30065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD812F83B6E30065BB7E /* MixpanelSwiftCommon */; };
 		1651FD852F83B6F10065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD842F83B6F10065BB7E /* MixpanelSwiftCommon */; };
 		1651FD872F83B6F50065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD862F83B6F50065BB7E /* MixpanelSwiftCommon */; };
 		1651FD892F83B6F80065BB7E /* MixpanelSwiftCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1651FD882F83B6F80065BB7E /* MixpanelSwiftCommon */; };
-		17CUSTOMOP0000B002 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
-		17CUSTOMOP0000B003 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
-		17CUSTOMOP0000B004 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
-		17CUSTOMOP0000B005 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
 		171E4C122DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C132DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
 		171E4C142DAF108400B7CB11 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171E4C112DAF108400B7CB11 /* FeatureFlags.swift */; };
@@ -40,6 +32,14 @@
 		17C6547B2BB1F16000C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
 		17C6547C2BB1F16400C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
 		17C6547D2BB1F16800C8A126 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */; };
+		17CUSTOMOP0000B002 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
+		17CUSTOMOP0000B003 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
+		17CUSTOMOP0000B004 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
+		17CUSTOMOP0000B005 /* CustomOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CUSTOMOP0000F001 /* CustomOperators.swift */; };
+		17JSONMOD00000B02 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A02 /* JSON */; };
+		17JSONMOD00000B03 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A03 /* JSON */; };
+		17JSONMOD00000B04 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A04 /* JSON */; };
+		17JSONMOD00000B05 /* JSON in Frameworks */ = {isa = PBXBuildFile; productRef = 17JSONMOD00000A05 /* JSON */; };
 		1A2B3C4D5E6F70819AB0C002 /* ElementIdExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F70819AB0C003 /* ElementIdExtractor.swift */; };
 		2A5D30DD0C468327425DC577 /* AutocaptureOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38B29F5E5066FADE60A88040 /* AutocaptureOptions.swift */; };
 		4FB79FD4199BD2C1AEA83B1C /* AutocaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F9956D2BF2A5F6398C0A59 /* AutocaptureManager.swift */; };
@@ -145,9 +145,9 @@
 		04558C747B60EA2884344AC4 /* TouchInterceptor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TouchInterceptor.swift; sourceTree = "<group>"; };
 		06325D1AC34056FFA59B35DF /* SemanticExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticExtractor.swift; sourceTree = "<group>"; };
 		171E4C112DAF108400B7CB11 /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
-		17CUSTOMOP0000F001 /* CustomOperators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomOperators.swift; sourceTree = "<group>"; };
 		171E4C162DAF2B3100B7CB11 /* MixpanelOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelOptions.swift; sourceTree = "<group>"; };
 		1728208D2BA8BDE4002CD973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/Mixpanel/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
+		17CUSTOMOP0000F001 /* CustomOperators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomOperators.swift; sourceTree = "<group>"; };
 		1A2B3C4D5E6F70819AB0C003 /* ElementIdExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ElementIdExtractor.swift; sourceTree = "<group>"; };
 		38B29F5E5066FADE60A88040 /* AutocaptureOptions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutocaptureOptions.swift; sourceTree = "<group>"; };
 		51DD56791D306B740045D3DB /* MixpanelLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelLogger.swift; sourceTree = "<group>"; };
@@ -782,7 +782,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 4.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
@@ -822,7 +822,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 4.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
 		};
@@ -876,7 +876,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -932,7 +932,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -974,7 +974,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1026,7 +1026,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1075,7 +1075,7 @@
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 12.0;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
 			};
 			name = Debug;
 		};
@@ -1108,7 +1108,7 @@
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 12.0;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
 			};
 			name = Release;
 		};
@@ -1133,7 +1133,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = Mixpanel;
@@ -1166,7 +1166,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mixpanel.Mixpanel;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = Mixpanel;

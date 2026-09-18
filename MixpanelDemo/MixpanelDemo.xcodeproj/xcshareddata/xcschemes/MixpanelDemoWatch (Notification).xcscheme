@@ -61,7 +61,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "86F86E8A22440C5C00B69832"
             BuildableName = "MixpanelDemoWatch.app"
-            BlueprintName = "MixpanelDemoWatch"
             ReferencedContainer = "container:MixpanelDemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -79,7 +78,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "86F86E8A22440C5C00B69832"
             BuildableName = "MixpanelDemoWatch.app"
-            BlueprintName = "MixpanelDemoWatch"
             ReferencedContainer = "container:MixpanelDemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

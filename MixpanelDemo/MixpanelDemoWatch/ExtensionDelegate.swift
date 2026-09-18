@@ -1,6 +1,6 @@
 //
 //  ExtensionDelegate.swift
-//  MixpanelDemoWatch Extension
+//  MixpanelDemoWatch
 //
 //  Created by Zihe Jia on 3/21/19.
 //  Copyright © 2019 Mixpanel. All rights reserved.
@@ -9,10 +9,9 @@
 import Mixpanel
 import WatchKit
 
-class ExtensionDelegate: NSObject, WKExtensionDelegate {
+class ExtensionDelegate: NSObject, WKApplicationDelegate {
 
     func applicationDidFinishLaunching() {
-        var ADD_YOUR_MIXPANEL_TOKEN_BELOW_🛠🛠🛠🛠🛠🛠: String
         Mixpanel.initialize(token: "MIXPANEL_TOKEN")
         Mixpanel.mainInstance().loggingEnabled = true
         Mixpanel.mainInstance().registerSuperProperties(["super watch properties": 1])

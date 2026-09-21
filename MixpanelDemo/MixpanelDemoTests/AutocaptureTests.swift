@@ -318,6 +318,62 @@ class RageClickTrackerTests: XCTestCase {
         let result = tracker.trackClick(x: 100, y: 100)
         XCTAssertTrue(result.isRageClick)
     }
+
+    // MARK: - History Reset After Emission
+
+    func testHistoryClearedAfterEmissionEightTapsFireOnFourAndEight() {
+        let options = RageClickOptions()  // defaults: threshold 4, 1000ms, 44pt
+        var currentTime: Int64 = 1000
+        let tracker = RageClickTracker(options: options, timeProvider: { currentTime })
+
+        // 8 stationary taps within one second (100ms apart)
+        var rageTaps: [Int] = []
+        for tap in 1...8 {
+            let result = tracker.trackClick(x: 100, y: 100)
+            if result.isRageClick {
+                rageTaps.append(tap)
+            }
+            currentTime += 100
+        }
+
+        XCTAssertEqual(rageTaps, [4, 8], "Rage events should fire only on taps 4 and 8")
+    }
+
+    func testHistoryClearedAfterEmissionWithCustomThreshold() {
+        let options = RageClickOptions(clickThreshold: 3)
+        var currentTime: Int64 = 1000
+        let tracker = RageClickTracker(options: options, timeProvider: { currentTime })
+
+        var rageTaps: [Int] = []
+        for tap in 1...6 {
+            let result = tracker.trackClick(x: 100, y: 100)
+            if result.isRageClick {
+                rageTaps.append(tap)
+            }
+            currentTime += 100
+        }
+
+        XCTAssertEqual(rageTaps, [3, 6], "With threshold 3, rage events should fire only on taps 3 and 6")
+    }
+
+    func testTapAfterEmissionBehavesLikeFirstClick() {
+        let options = RageClickOptions(clickThreshold: 4)
+        var currentTime: Int64 = 1000
+        let tracker = RageClickTracker(options: options, timeProvider: { currentTime })
+
+        // Burst that triggers a rage click on tap 4
+        for _ in 1...4 {
+            _ = tracker.trackClick(x: 100, y: 100)
+            currentTime += 100
+        }
+
+        // Next 3 taps must not trigger; history was cleared on emission
+        for tap in 5...7 {
+            let result = tracker.trackClick(x: 100, y: 100)
+            XCTAssertFalse(result.isRageClick, "Tap \(tap) should not be rage click after history reset")
+            currentTime += 100
+        }
+    }
 }
 
 class ClickEventTests: XCTestCase {

@@ -262,8 +262,10 @@ class MPDB {
     /// The read is bounded in bytes as well as rows: it stops before the row that would push the
     /// cumulative blob size past `byteBudget`, though the first row is always read so a queue can
     /// never stall. Rows that cannot be sent are dropped and deleted in the same pass — those over
-    /// `APIConstants.maxRowByteSize` and those that fail JSON deserialization. Dropped rows do not
-    /// count toward either bound. Rows past the bounds stay in SQLite for the next read.
+    /// `APIConstants.maxRowByteSize` and those that fail JSON deserialization. Dropped rows still
+    /// consume the SQL row limit; only successfully decoded rows contribute to the byte counter.
+    /// An entirely dropped window returns empty even if later rows remain queued.
+    /// Rows past the bounds stay in SQLite for the next read.
     ///
     /// - parameter persistenceType: which table to read.
     /// - parameter numRows: maximum rows to return; applied as the SQL `LIMIT`.

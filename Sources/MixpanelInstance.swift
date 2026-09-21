@@ -1509,8 +1509,7 @@ extension MixpanelInstance {
                             .events,
                             self.mixpanelPersistence.loadEntitiesInBatch(
                                 type: self.persistenceTypeFromFlushType(.events),
-                                batchSize: batchSize,
-                                excludeAutomaticEvents: !self.trackAutomaticEventsEnabled
+                                batchSize: batchSize
                             )
                         )
                     case .people:

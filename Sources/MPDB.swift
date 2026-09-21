@@ -256,6 +256,19 @@ class MPDB {
         }
     }
 
+    /// Reads up to `numRows` rows from the table for `persistenceType`, oldest first, and returns
+    /// them deserialized with their row `id` attached.
+    ///
+    /// The read is bounded in bytes as well as rows: it stops before the row that would push the
+    /// cumulative blob size past `byteBudget`, though the first row is always read so a queue can
+    /// never stall. Rows that cannot be sent are dropped and deleted in the same pass — those over
+    /// `APIConstants.maxRowByteSize` and those that fail JSON deserialization. Dropped rows do not
+    /// count toward either bound. Rows past the bounds stay in SQLite for the next read.
+    ///
+    /// - parameter persistenceType: which table to read.
+    /// - parameter numRows: maximum rows to return; applied as the SQL `LIMIT`.
+    /// - parameter flag: reads only rows whose `flag` column matches.
+    /// - parameter byteBudget: maximum cumulative blob bytes handed to the deserializer.
     func readRows(
         _ persistenceType: PersistenceType, numRows: Int, flag: Bool = false,
         byteBudget: Int = APIConstants.maxReadBatchByteSize

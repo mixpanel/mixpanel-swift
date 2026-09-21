@@ -123,16 +123,9 @@ class MixpanelPersistence {
     }
 
     func loadEntitiesInBatch(
-        type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false,
-        excludeAutomaticEvents: Bool = false
+        type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false
     ) -> [InternalProperties] {
-        var entities = mpdb.readRows(type, numRows: batchSize, flag: flag)
-        if excludeAutomaticEvents && type == .events {
-            // A row with a missing or non-String `event` is malformed rather than automatic, so it
-            // is kept and left for the API to reject. Force-unwrapping here took the process down
-            // on any such row.
-            entities = entities.filter { ($0["event"] as? String)?.hasPrefix("$ae_") != true }
-        }
+        let entities = mpdb.readRows(type, numRows: batchSize, flag: flag)
         if type == PersistenceType.people {
             let distinctId = MixpanelPersistence.loadIdentity(instanceName: instanceName).distinctID
             return entities.map { entityWithDistinctId($0, distinctId: distinctId) }

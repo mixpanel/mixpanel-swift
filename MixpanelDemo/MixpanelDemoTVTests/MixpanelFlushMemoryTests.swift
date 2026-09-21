@@ -157,28 +157,6 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
 
     // MARK: - Malformed rows
 
-    /// Excluding automatic events must tolerate a row with no `event` key.
-    ///
-    /// The filter used to force-unwrap `$0["event"] as! String`, so a single malformed row took
-    /// the process down on every flush. Such a row is kept and left for the API to reject.
-    func testExcludingAutomaticEventsToleratesRowWithoutEventKey() {
-        let token = randomId()
-        let persistence = MixpanelPersistence(instanceName: token)
-
-        persistence.saveEntity(["properties": ["index": 1]], type: .events)
-        persistence.saveEntity(["event": "real", "properties": ["index": 2]], type: .events)
-        persistence.saveEntity(["event": "$ae_session", "properties": ["index": 3]], type: .events)
-
-        let entities = persistence.loadEntitiesInBatch(type: .events, excludeAutomaticEvents: true)
-
-        XCTAssertEqual(entities.count, 2, "the malformed row should be kept and $ae_ excluded")
-        XCTAssertNil(entities.first?["event"], "the malformed row should be the first one kept")
-        XCTAssertEqual(entities.last?["event"] as? String, "real")
-
-        persistence.closeDB()
-        removeDBfile(token)
-    }
-
     /// Rows that fail JSON deserialization must be dropped and deleted, not left to block valid events.
     ///
     /// When a serialized row cannot be deserialized, it must be deleted to prevent it from

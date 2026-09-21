@@ -361,12 +361,16 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Whether a flush has claimed the flush slot and not yet finished. See `beginFlush()`.
     private var isFlushing = false
 
-    /// Test-only observation of the flush slot. Not part of the public API — the sequential
-    /// drain can take more async hops to release the slot than a fixed-count synchronization
-    /// helper (e.g. a test's own trackingQueue/networkQueue sync pair) can guarantee it has
-    /// waited out, so tests that need to know a flush has truly finished should poll this rather
-    /// than assume a fixed number of hops.
-    var isFlushInProgress: Bool {
+    /// Whether a flush is currently running.
+    ///
+    /// `true` from the moment a flush claims the flush slot — via `flush()`, the flush timer, or
+    /// the background flush — until it has finished draining and its completion is scheduled.
+    /// Only one flush runs at a time, so an app can consult this before scheduling its own flush
+    /// and skip it when one is already draining the queue.
+    ///
+    /// This is a snapshot: a flush can start or finish immediately after the read. To know
+    /// whether a particular call actually started a flush, use the value `flush()` returns.
+    public var isFlushInProgress: Bool {
         var flushIsActive = false
         flushStateLock.read {
             flushIsActive = isFlushing
@@ -1336,9 +1340,11 @@ extension MixpanelInstance {
        local storage. Memory is bounded by batches rather than the total queue size.
 
        Only one flush runs at a time. If a flush is already in progress when this method
-       is called, the call returns immediately without queuing another flush. Queued data
-       remains in local storage for the active flush or a later flush. Empty reads caused
+       is called, the call returns `false` immediately without queuing another flush. Queued
+       data remains in local storage for the active flush or a later flush. Empty reads caused
        by filtering or a full window of discarded rows can leave later rows for another flush.
+
+       The delegate's `mixpanelWillFlush` is asked once per flush, before the first batch.
 
        - parameter performFullFlush: defaults to `true`, draining each of events, people, and
          groups completely, in that order, before the flush ends. Pass `false` to send exactly
@@ -1347,8 +1353,13 @@ extension MixpanelInstance {
          could run long enough to be killed by the OS. Any rows left behind wait for a later flush.
        - parameter completion: an optional handler dispatched on the main queue when this flush
          finishes. Rejected calls dispatch it immediately without waiting for an active flush.
+       - returns: `true` if this call started a flush, `false` if it was rejected because a
+         flush is already in progress or tracking is opted out. Existing callers can ignore
+         the result. To check for a running flush without starting one, read
+         `isFlushInProgress`.
        */
-    public func flush(performFullFlush: Bool = true, completion: (() -> Void)? = nil) {
+    @discardableResult
+    public func flush(performFullFlush: Bool = true, completion: (() -> Void)? = nil) -> Bool {
         // Opted-out calls are rejected before `beginFlush()`, so opting out never claims (and
         // thus never has to release) the flush slot — `beginFlush()` is only reached, and only
         // evaluated, once tracking is confirmed enabled.
@@ -1365,17 +1376,19 @@ extension MixpanelInstance {
         //
         // Rejecting an overlapping call leaves its queued rows in SQLite for the active or a
         // later flush. Invoke only this caller's completion; do not clean up background execution.
+        // The `false` return lets callers tell a rejected call apart from a finished flush.
         guard !hasOptedOutTracking(), beginFlush() else {
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
             }
-            return
+            return false
         }
 
         flushBatches(
             performFullFlush: performFullFlush,
             flushStartTime: round(Date().timeIntervalSince1970 * 1000),
             completion: completion)
+        return true
     }
 
     /// Tracks which queue type is currently being drained during a flush pass.
@@ -1439,7 +1452,10 @@ extension MixpanelInstance {
     ///   queue type, regardless of whether rows remain — never more than three batches total.
     ///   Any rows left behind wait for a later flush.
     ///
-    /// Guards (opt-out, request backoff, delegate veto) are checked on every iteration. A failed
+    /// Opt-out and request backoff are checked on every iteration. The delegate's
+    /// `mixpanelWillFlush` veto is asked only once per flush, on the first iteration
+    /// (`askDelegate` is `true` for the entry call and `false` for every recursive one), matching
+    /// the one-call-per-flush contract the delegate had before the drain became iterative. A failed
     /// send does not retry the same queue type here — it advances to the next type immediately —
     /// but two failures within a pass (whether the same type retried under a short batch or two
     /// different types) still engage request backoff, which the next iteration's guard enforces.
@@ -1453,6 +1469,7 @@ extension MixpanelInstance {
     private func flushBatches(
         performFullFlush: Bool = true, queueState: FlushQueueState = .events,
         flushStartTime: Double = round(Date().timeIntervalSince1970 * 1000),
+        askDelegate: Bool = true,
         completion: (() -> Void)?
     ) {
         trackingQueue.async { [weak self, completion] in
@@ -1464,7 +1481,8 @@ extension MixpanelInstance {
             }
 
             // Check opt-out and request backoff before SQLite reads or JSON parsing.
-            // Every iteration re-enters this guard; the delegate's veto is checked next.
+            // Every iteration re-enters this guard; the delegate's veto is checked next, but
+            // only on the first iteration of a flush.
             if self.hasOptedOutTracking()
                 || self.flushInstance.flushRequest.requestNotAllowed()
             {
@@ -1472,7 +1490,7 @@ extension MixpanelInstance {
                 return
             }
 
-            if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
+            if askDelegate, let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
                 self.endFlush(completion: completion)
                 return
             }
@@ -1574,14 +1592,14 @@ extension MixpanelInstance {
                     // draining it
                     self.flushBatches(
                         performFullFlush: performFullFlush, queueState: queueState,
-                        flushStartTime: flushStartTime, completion: completion)
+                        flushStartTime: flushStartTime, askDelegate: false, completion: completion)
                 } else if let nextState = queueState.next {
                     // This queue type is either empty, done for a single-batch flush, has reached
                     // rows tracked during this flush, or its send just failed — advance to the
                     // next queue type either way.
                     self.flushBatches(
                         performFullFlush: performFullFlush, queueState: nextState,
-                        flushStartTime: flushStartTime, completion: completion)
+                        flushStartTime: flushStartTime, askDelegate: false, completion: completion)
                 } else {
                     // All queue types processed
                     self.endFlush(completion: completion)

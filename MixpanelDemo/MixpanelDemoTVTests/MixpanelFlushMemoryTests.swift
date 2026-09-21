@@ -393,17 +393,31 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
         testMixpanel.delegate = delegate
         testMixpanel.track(event: "event")
 
-        // Claims the flush slot, then parks in mixpanelWillFlush on the tracking queue.
-        testMixpanel.flush()
+        XCTAssertFalse(testMixpanel.isFlushInProgress, "no flush should be running before the first call")
 
-        // Every one of these must be dropped by the coalescing guard while the first is parked.
+        // Claims the flush slot, then parks in mixpanelWillFlush on the tracking queue.
+        XCTAssertTrue(testMixpanel.flush(), "the first flush should claim the slot and start")
+        XCTAssertTrue(
+            testMixpanel.isFlushInProgress,
+            "the public flag must report the parked flush so apps can skip scheduling another")
+
+        // Every one of these must be dropped by the coalescing guard while the first is parked,
+        // report that via the return value, and still fire its own completion right away.
+        let rejectedCompletions = expectation(description: "rejected completions fired")
+        rejectedCompletions.expectedFulfillmentCount = 5
         for _ in 0..<5 {
-            testMixpanel.flush()
+            let started = testMixpanel.flush {
+                rejectedCompletions.fulfill()
+            }
+            XCTAssertFalse(started, "an overlapping flush must report that it did not start")
         }
+        wait(for: [rejectedCompletions], timeout: 5)
 
         delegate.shouldGate = false
         delegate.openGate()
         waitForTrackingQueue(testMixpanel)
+        XCTAssertFalse(
+            testMixpanel.isFlushInProgress, "the flag must clear once the flush releases its slot")
 
         XCTAssertEqual(
             delegate.willFlushCount, 1,
@@ -415,6 +429,50 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         XCTAssertEqual(
             delegate.willFlushCount, 2, "the flush slot should be released after a flush finishes")
+
+        testMixpanel.delegate = nil
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    // MARK: - Delegate cadence
+
+    /// Counts delegate calls without vetoing, so the drain actually runs its iterations.
+    private final class CountingFlushDelegate: MixpanelDelegate {
+        private(set) var willFlushCount = 0
+
+        func mixpanelWillFlush(_ mixpanel: MixpanelInstance) -> Bool {
+            willFlushCount += 1
+            return true
+        }
+    }
+
+    /// `mixpanelWillFlush` is a per-flush question, not a per-batch one.
+    ///
+    /// The drain runs one iteration per batch and per queue type, so a flush that visits events,
+    /// people, and groups runs at least three iterations. The delegate must still be asked exactly
+    /// once — apps doing heavy work in that callback must not see it multiply with the backlog.
+    func testDelegateIsAskedOncePerFlush() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.serverURL = kFakeServerUrl
+        let delegate = CountingFlushDelegate()
+        testMixpanel.delegate = delegate
+        let total = APIConstants.maxBatchSize * 2 + 20
+        for index in 0..<total {
+            testMixpanel.track(event: "event\(index)")
+        }
+        waitForTrackingQueue(testMixpanel)
+
+        let finished = expectation(description: "flush finished")
+        XCTAssertTrue(testMixpanel.flush { finished.fulfill() })
+        wait(for: [finished], timeout: 10)
+
+        XCTAssertEqual(
+            delegate.willFlushCount, 1,
+            "the delegate should be asked once per flush, not once per batch or queue type")
+        XCTAssertEqual(
+            eventQueue(token: testMixpanel.apiToken).count, total,
+            "sanity check: the drain ran against the fake server and left every row queued")
 
         testMixpanel.delegate = nil
         removeDBfile(testMixpanel.apiToken)

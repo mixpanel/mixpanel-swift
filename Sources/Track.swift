@@ -68,9 +68,8 @@ class Track {
         // never persisted while `trackAutomaticEventsEnabled` is false. Once a row makes it past
         // this check, it is sent like any other event even if the flag is turned off afterward —
         // there is deliberately no filter later in the pipeline (e.g. at flush/read time) that
-        // would withhold it. That matches the rest of the SDK's behavior for tracking toggles:
-        // `optOutTracking()` flushes (sends) whatever is already queued before opting out rather
-        // than discarding it; the only API that discards queued data is the explicit `reset()`.
+        // would withhold it. This collection toggle differs from `optOutTracking()`, which
+        // prevents queued batches from being sent once the opt-out status is set.
         // It also matches Android, whose equivalent flag (`mTrackAutomaticEvents` in
         // `MixpanelAPI.java`) is set once at init and can never change, so its write-time gate is
         // its only gate too — a runtime toggle can't retroactively affect data already collected

@@ -92,8 +92,11 @@ final class RageClickTracker {
         // (so the current click is the Nth click)
         let isRageClick = nearbyCount >= (clickThreshold - 1)
 
-        // Clean old clicks to prevent memory growth
-        if recentClicks.count > AutocaptureDefaults.maxTrackedClicks {
+        if isRageClick {
+            // Match Android: clear history on emission so the next burst starts fresh
+            recentClicks.removeAll()
+        } else if recentClicks.count > AutocaptureDefaults.maxTrackedClicks {
+            // Clean old clicks to prevent memory growth
             cleanOldClicks(currentTime: now)
         }
 

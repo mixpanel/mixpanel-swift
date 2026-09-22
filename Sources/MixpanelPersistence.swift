@@ -111,9 +111,20 @@ class MixpanelPersistence {
     }
 
     func saveEntity(_ entity: InternalProperties, type: PersistenceType, flag: Bool = false) {
-        if let data = JSONHandler.serializeJSONObject(entity) {
-            mpdb.insertRow(type, data: data, flag: flag)
+        guard let data = JSONHandler.serializeJSONObject(entity) else {
+            return
         }
+        // Same limit readRows enforces; rejecting here keeps oversized rows off disk entirely.
+        // readRows still drops any written by older SDK versions.
+        if data.count > APIConstants.maxRowByteSize {
+            let name = (entity["event"] as? String) ?? "\(type) row"
+            MixpanelLogger.error(
+                message:
+                    "Dropping \(name) (\(data.count) bytes): exceeds the \(APIConstants.maxRowByteSize) byte row limit"
+            )
+            return
+        }
+        mpdb.insertRow(type, data: data, flag: flag)
     }
 
     func saveEntities(_ entities: Queue, type: PersistenceType, flag: Bool = false) {
@@ -123,9 +134,10 @@ class MixpanelPersistence {
     }
 
     func loadEntitiesInBatch(
-        type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false
+        type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false,
+        maxRowId: Int32? = nil
     ) -> [InternalProperties] {
-        let entities = mpdb.readRows(type, numRows: batchSize, flag: flag)
+        let entities = mpdb.readRows(type, numRows: batchSize, flag: flag, maxRowId: maxRowId)
         if type == PersistenceType.people {
             let distinctId = MixpanelPersistence.loadIdentity(instanceName: instanceName).distinctID
             return entities.map { entityWithDistinctId($0, distinctId: distinctId) }
@@ -139,6 +151,10 @@ class MixpanelPersistence {
         var result = entity
         result["$distinct_id"] = distinctId
         return result
+    }
+
+    func maxRowId(type: PersistenceType) -> Int32 {
+        mpdb.maxRowId(type)
     }
 
     func removeEntitiesInBatch(type: PersistenceType, ids: [Int32]) {

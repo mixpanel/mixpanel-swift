@@ -694,19 +694,13 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
     /// track() and the flush's own reads share the same serial trackingQueue, so a burst of
     /// track() calls issued after flush() races ahead of the flush's later iterations (each of
     /// which only gets re-enqueued once the previous batch's network round trip completes) —
-    /// landing in the table before those later reads run. This reliably produces reads whose
-    /// rows were tracked after the flush began, exercising the flushStartTime watermark: without
-    /// it, the drain would keep recursing on `.events` as long as reads return rows, leaving
-    /// people/groups untouched indefinitely.
+    /// landing in the table before those later reads run. Without the row-id watermark taken at
+    /// flush start, the drain would keep recursing on `.events` as long as reads return rows,
+    /// leaving people/groups untouched indefinitely.
     ///
-    /// The short sleep before the flood matters: track() captures its timestamp synchronously,
-    /// at call time, not when the row is later written, and both it and flushStartTime round to
-    /// millisecond resolution. A flood fired immediately after flush() can round to the exact
-    /// same millisecond as flushStartTime and tie rather than exceed it — real continuous
-    /// tracking from real user/sensor events naturally spreads across milliseconds, but a tight
-    /// Swift loop does not. Without the sleep, every flood row can be misread as pre-flush
-    /// backlog, and the drain would only stop once the whole flood was consumed rather than
-    /// demonstrating the watermark cutting it short.
+    /// No delay is needed between flush() and the flood: flush() enqueues the block that takes
+    /// the watermark before it returns, and every flood row is inserted by a block enqueued
+    /// after it, so each one has a higher id than the watermark regardless of timing.
     func testFlushDoesNotStarvePeopleAndGroupsUnderContinuousEventTracking() {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
@@ -727,13 +721,6 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
         XCTAssertFalse(groupQueue(token: testMixpanel.apiToken).isEmpty)
 
         testMixpanel.flush()
-        // track() captures Date() synchronously on this thread (MixpanelInstance.swift:1659),
-        // not when the row is later written — so a flood fired immediately after flush() could
-        // round to the exact same millisecond as flushStartTime, tying rather than exceeding it
-        // (real continuous tracking from real user/sensor events would naturally spread across
-        // milliseconds; a tight loop does not). This sleep guarantees the flood is captured in a
-        // clearly later millisecond, so it reliably exceeds flushStartTime.
-        Thread.sleep(forTimeInterval: 0.01)
         // Flood far more events than could possibly drain within a few batches, simulating
         // tracking that continuously outpaces the drain.
         for index in 0..<200 {
@@ -761,5 +748,147 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
             "events tracked during this flush should be left for a later flush, not chased indefinitely")
 
         removeDBfile(testMixpanel.apiToken)
+    }
+
+    /// Events tracked during a flush with a backdated custom `time` must still be left for a
+    /// later flush.
+    ///
+    /// The watermark is the SQLite row id, not the payload timestamp, so an app that overrides
+    /// `time` (allowed for every property) cannot make its during-flush rows look like pre-flush
+    /// backlog and keep the events drain going while people/groups starve.
+    func testBackdatedEventsTrackedDuringFlushDoNotStarveOtherQueues() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.identify(distinctId: "d1")
+        testMixpanel.flushBatchSize = 5
+
+        for index in 0..<5 {
+            testMixpanel.track(event: "preFlushEvent\(index)")
+        }
+        testMixpanel.people.set(properties: ["prop": "value"])
+        testMixpanel.getGroup(groupKey: "company", groupID: "mixpanel").set(properties: ["prop": "value"])
+        waitForTrackingQueue(testMixpanel)
+
+        testMixpanel.flush()
+        let oneHourAgo = (Date().timeIntervalSince1970 - 3600) * 1000
+        for index in 0..<200 {
+            testMixpanel.track(event: "backdatedEvent\(index)", properties: ["time": oneHourAgo])
+        }
+
+        for _ in 0..<10 {
+            waitForTrackingQueue(testMixpanel)
+            if peopleQueue(token: testMixpanel.apiToken).isEmpty
+                && groupQueue(token: testMixpanel.apiToken).isEmpty
+            {
+                break
+            }
+        }
+
+        XCTAssertTrue(
+            peopleQueue(token: testMixpanel.apiToken).isEmpty,
+            "people must drain even when during-flush events carry backdated timestamps")
+        XCTAssertTrue(
+            groupQueue(token: testMixpanel.apiToken).isEmpty,
+            "groups must drain even when during-flush events carry backdated timestamps")
+        XCTAssertFalse(
+            eventQueue(token: testMixpanel.apiToken).isEmpty,
+            "backdated events tracked during the flush must be left for a later flush")
+
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    /// A queued event with a future custom `time` must not end the events drain early.
+    ///
+    /// Only rows above the row-id watermark are excluded; a pre-flush row is drained whatever
+    /// its payload timestamp says, so a full flush still empties the whole backlog.
+    func testFutureCustomEventTimeDoesNotStopFullFlushEarly() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.flushBatchSize = 2
+
+        let tomorrow = (Date().timeIntervalSince1970 + 86_400) * 1000
+        testMixpanel.track(event: "futureEvent", properties: ["time": tomorrow])
+        for index in 0..<4 {
+            testMixpanel.track(event: "event\(index)")
+        }
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertEqual(eventQueue(token: testMixpanel.apiToken).count, 5)
+
+        let finished = expectation(description: "flush finished")
+        testMixpanel.flush {
+            finished.fulfill()
+        }
+        wait(for: [finished], timeout: 30)
+        waitForTrackingQueue(testMixpanel)
+
+        XCTAssertTrue(
+            eventQueue(token: testMixpanel.apiToken).isEmpty,
+            "every pre-flush event should be sent regardless of its custom time")
+
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    /// `maxRowId` and `readRows(maxRowId:)` agree exactly at the boundary: the watermark row is
+    /// included, the next row is excluded, and an empty table yields a watermark that reads
+    /// nothing.
+    func testReadRowsHonorsRowIdWatermarkBoundary() {
+        let mpdb = MPDB.init(token: randomId())
+        mpdb.open()
+
+        XCTAssertEqual(mpdb.maxRowId(.events), 0, "an empty table has no rows to watermark")
+        XCTAssertTrue(
+            mpdb.readRows(.events, numRows: 100, maxRowId: 0).isEmpty,
+            "a watermark of 0 must read nothing")
+
+        for index in 0..<3 {
+            let event: InternalProperties = ["event": "event\(index)", "properties": ["index": index]]
+            mpdb.insertRow(.events, data: JSONHandler.serializeJSONObject(event)!)
+        }
+        let watermark = mpdb.maxRowId(.events)
+        XCTAssertGreaterThan(watermark, 0)
+
+        let late: InternalProperties = ["event": "late", "properties": ["index": 3]]
+        mpdb.insertRow(.events, data: JSONHandler.serializeJSONObject(late)!)
+        XCTAssertEqual(mpdb.maxRowId(.events), watermark + 1, "ids are consecutive AUTOINCREMENT")
+
+        let bounded = mpdb.readRows(.events, numRows: 100, maxRowId: watermark)
+        XCTAssertEqual(
+            bounded.compactMap { $0["event"] as? String }, ["event0", "event1", "event2"],
+            "the watermark row is included and the row after it is excluded")
+        XCTAssertEqual(bounded.last?["id"] as? Int32, watermark)
+
+        let unbounded = mpdb.readRows(.events, numRows: 100)
+        XCTAssertEqual(unbounded.count, 4, "without a watermark every row is read")
+
+        mpdb.close()
+        removeDBfile(mpdb.apiToken)
+    }
+
+    /// An oversized entity must be rejected at save time, never written to SQLite.
+    ///
+    /// `readRows` already drops rows over `maxRowByteSize`, but that is a safety net for rows
+    /// written by older SDK versions; new ones should never reach disk. `maxRowId` proves the
+    /// row was skipped rather than inserted and later dropped.
+    func testSaveEntityRejectsOversizedRowBeforeInsert() {
+        let token = randomId()
+        let persistence = MixpanelPersistence(instanceName: token)
+
+        persistence.saveEntity(["event": "first", "properties": ["index": 1]], type: .events)
+        let oversized: InternalProperties = [
+            "event": "oversized",
+            "properties": ["blob": String(repeating: "a", count: APIConstants.maxRowByteSize)],
+        ]
+        persistence.saveEntity(oversized, type: .events)
+        persistence.saveEntity(["event": "last", "properties": ["index": 2]], type: .events)
+
+        XCTAssertEqual(
+            persistence.mpdb.maxRowId(.events), 2,
+            "only the two valid rows should have been inserted")
+        XCTAssertEqual(
+            persistence.loadEntitiesInBatch(type: .events).compactMap { $0["event"] as? String },
+            ["first", "last"])
+
+        persistence.closeDB()
+        removeDBfile(token)
     }
 }

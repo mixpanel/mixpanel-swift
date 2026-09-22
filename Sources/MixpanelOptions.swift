@@ -154,6 +154,7 @@ public class MixpanelOptions {
     public let token: String
     public let flushInterval: Double
     public let instanceName: String?
+    @available(*, deprecated, message: "Automatic Events are deprecated and will be removed in a future major version. Use autocaptureOptions instead.")
     public let trackAutomaticEvents: Bool
     public let optOutTrackingByDefault: Bool
     public let useUniqueDistinctId: Bool

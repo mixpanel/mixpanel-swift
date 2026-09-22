@@ -128,6 +128,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var showNetworkActivityIndicator = true
 
     /// This allows enabling or disabling collecting common mobile events,
+    @available(*, deprecated, message: "Automatic Events are deprecated and will be removed in a future major version. Use autocaptureOptions instead.")
     open var trackAutomaticEventsEnabled: Bool
 
     /// Flush timer's interval.

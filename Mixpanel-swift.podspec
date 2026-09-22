@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.resource_bundles = {'Mixpanel' => ['Sources/Mixpanel/PrivacyInfo.xcprivacy']}
   s.dependency 'jsonlogic', '~> 1.2.0'
   s.dependency 'MixpanelSwiftCommon', '~> 1.1.0'
-  s.ios.deployment_target = '12.0'
+  s.ios.deployment_target = '15.0'
   s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   s.ios.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) IOS'
@@ -34,18 +34,18 @@ Pod::Spec.new do |s|
     'Sources/Autocapture/RageClickTracker.swift', 'Sources/Autocapture/SemanticExtractor.swift',
     'Sources/Autocapture/TouchInterceptor.swift', 'Sources/Autocapture/Model/ClickEvent.swift']
 
-  s.tvos.deployment_target = '12.0'
+  s.tvos.deployment_target = '15.0'
   s.tvos.frameworks = 'UIKit', 'Foundation'
   s.tvos.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) TV_OS'
   }
-  s.osx.deployment_target = '10.13'
+  s.osx.deployment_target = '12.0'
   s.osx.frameworks = 'Cocoa', 'Foundation'
   s.osx.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) MAC_OS'
   }
 
-  s.watchos.deployment_target = '4.0'
+  s.watchos.deployment_target = '9.0'
   s.watchos.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) WATCH_OS'
   }

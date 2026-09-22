@@ -167,7 +167,7 @@ func application(_ application: UIApplication,
 [See all configuration options](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html)
 
 ## 3. Send Data
-Let's get started by sending event data. You can send an event from anywhere in your application. Better understand user behavior by storing details that are specific to the event (properties). After initializing the library, Mixpanel can [automatically collect common mobile events](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#legacy-automatically-tracked-events). These events are now considered legacy and are disabled by default. You can enable them by setting `trackAutomaticEvents` to `true` in `MixpanelOptions` when initializing the library. Regardless of this setting, Mixpanel still automatically tracks some [default event and user properties](https://docs.mixpanel.com/docs/data-structure/property-reference/default-properties#client-side-sdks).
+Let's get started by sending event data. You can send an event from anywhere in your application. Better understand user behavior by storing details that are specific to the event (properties). You can also let Mixpanel capture interactions for you with [Autocapture](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#autocapture), which automatically collects events like screen views and button taps without additional instrumentation. Regardless of your tracking approach, Mixpanel automatically tracks some [default event and user properties](https://docs.mixpanel.com/docs/data-structure/property-reference/default-properties#client-side-sdks).
 ```swift
 Mixpanel.mainInstance().track(event: "Sign Up", properties: [
    "source": "Pat's affiliate site",
@@ -236,6 +236,17 @@ let options = MixpanelOptions(
 )
 Mixpanel.initialize(options: options)
 ```
+**What are legacy automatically tracked events?**
+
+Before [Autocapture](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#autocapture), the SDK could collect a fixed set of common mobile events (such as app opens, updates, and crashes). These are now considered [legacy automatically tracked events](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#legacy-automatically-tracked-events) and are disabled by default. We recommend using Autocapture instead, but if you still need the legacy behavior you can enable it by setting `trackAutomaticEvents` to `true` in `MixpanelOptions` when initializing the library:
+```swift
+let options = MixpanelOptions(
+    token: "YOUR_PROJECT_TOKEN",
+    trackAutomaticEvents: true
+)
+Mixpanel.initialize(options: options)
+```
+
 **Starting with iOS 14.5, do I need to request the user’s permission through the AppTrackingTransparency framework to use Mixpanel?**
 
 No, Mixpanel does not use IDFA so it does not require user permission through the AppTrackingTransparency(ATT) framework.

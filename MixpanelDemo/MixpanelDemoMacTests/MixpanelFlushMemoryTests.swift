@@ -849,4 +849,30 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
         persistence.closeDB()
         removeDBfile(token)
     }
+
+    /// A row whose data column is NULL or zero-length must be deleted, not left in place.
+    ///
+    /// Such a row is never returned, so if it were not deleted it would occupy a slot in every
+    /// bounded read forever and permanently hide the valid rows behind it. A one-row window makes
+    /// that stall visible: the first read drops the empty row, and the second must reach the
+    /// valid one.
+    func testEmptyDataRowIsDeletedSoItCannotBlockTheQueue() {
+        let mpdb = MPDB.init(token: randomId())
+        mpdb.open()
+
+        mpdb.insertRow(.events, data: Data())
+        XCTAssertEqual(mpdb.maxRowId(.events), 1, "the empty row must actually be inserted")
+        let valid: InternalProperties = ["event": "valid", "properties": ["index": 1]]
+        mpdb.insertRow(.events, data: JSONHandler.serializeJSONObject(valid)!)
+
+        XCTAssertTrue(
+            mpdb.readRows(.events, numRows: 1).isEmpty,
+            "the first one-row window holds only the empty row, which is dropped")
+        XCTAssertEqual(
+            mpdb.readRows(.events, numRows: 1).compactMap { $0["event"] as? String }, ["valid"],
+            "the empty row must be gone so the next window reaches the valid row")
+
+        mpdb.close()
+        removeDBfile(mpdb.apiToken)
+    }
 }

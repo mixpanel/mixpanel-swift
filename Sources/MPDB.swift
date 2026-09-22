@@ -367,7 +367,12 @@ class MPDB {
                                 droppedIds.append(id)
                             }
                         } else {
-                            logSqlError(message: "No blob found in data column for row in \(tableName)")
+                            // NULL or zero-length data. The schema allows it, and such a row can
+                            // never be sent, so it must be deleted or it occupies a slot in every
+                            // bounded read forever.
+                            MixpanelLogger.warn(
+                                message: "Dropping row \(id) from table \(tableName): data column is empty")
+                            droppedIds.append(id)
                         }
                     }
                 }

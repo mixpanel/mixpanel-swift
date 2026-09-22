@@ -80,13 +80,11 @@ final class TouchInterceptor: NSObject, UIGestureRecognizerDelegate {
             addGestureRecognizer(to: window)
         }
 
-        // Also check connected scenes for windows (iOS 13+)
-        if #available(iOS 13.0, *) {
-            for scene in application.connectedScenes {
-                if let windowScene = scene as? UIWindowScene {
-                    for window in windowScene.windows {
-                        addGestureRecognizer(to: window)
-                    }
+        // Also check connected scenes for windows
+        for scene in application.connectedScenes {
+            if let windowScene = scene as? UIWindowScene {
+                for window in windowScene.windows {
+                    addGestureRecognizer(to: window)
                 }
             }
         }

@@ -30,7 +30,7 @@ final class DeadClickDetector {
 
     private var pendingCheck: PendingCheck?
     private weak var currentWindow: UIWindow?
-    private var checkTask: Any?  // Task<Void, Never> on iOS 13+
+    private var checkTask: Task<Void, Never>?
     private let lock = NSLock()
 
     // MARK: - Types
@@ -137,22 +137,15 @@ final class DeadClickDetector {
 
         // Schedule final check as a cancellable task
         let timeWindow = timeWindowMs
-        if #available(iOS 13.0, *) {
-            checkTask = Task { [weak self] in
-                try? await Task.sleep(nanoseconds: UInt64(timeWindow) * 1_000_000)
-                guard !Task.isCancelled else { return }
-                // Bind before hopping to the main actor: referencing the captured `weak var`
-                // from inside the concurrently-executing closure is a warning under Swift 5 and
-                // an error in the Swift 6 language mode.
-                guard let self = self else { return }
-                await MainActor.run { [self] in
-                    self.performFinalCheck()
-                }
-            }
-        } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeWindow)) {
-                [weak self] in
-                self?.performFinalCheck()
+        checkTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(timeWindow) * 1_000_000)
+            guard !Task.isCancelled else { return }
+            // Bind before hopping to the main actor: referencing the captured `weak var`
+            // from inside the concurrently-executing closure is a warning under Swift 5 and
+            // an error in the Swift 6 language mode.
+            guard let self = self else { return }
+            await MainActor.run { [self] in
+                self.performFinalCheck()
             }
         }
     }
@@ -161,9 +154,7 @@ final class DeadClickDetector {
     ///
     /// Call this when the user navigates away or the app backgrounds.
     func cancelPendingCheck() {
-        if #available(iOS 13.0, *) {
-            (checkTask as? Task<Void, Never>)?.cancel()
-        }
+        checkTask?.cancel()
         checkTask = nil
         lock.lock()
         pendingCheck = nil
@@ -202,16 +193,11 @@ final class DeadClickDetector {
         var contentHash = 17
 
         // Count visible windows (handles alerts, sheets, etc.)
-        // Use windowScene.windows for iOS 13+, fallback to just counting this window
         let windowCount: Int
-        if #available(iOS 13.0, *) {
-            if let scene = window.windowScene {
-                windowCount = scene.windows.filter { $0.isKeyWindow || !$0.isHidden }.count
-            } else {
-                windowCount = 1
-            }
+        if let scene = window.windowScene {
+            windowCount = scene.windows.filter { $0.isKeyWindow || !$0.isHidden }.count
         } else {
-            windowCount = 1  // Fallback for older iOS
+            windowCount = 1
         }
 
         // Walk view hierarchy

@@ -70,7 +70,12 @@ class FlushRequest: Network {
                 result = success
                 semaphore.signal()
             })
-        _ = semaphore.wait(timeout: .now() + 120.0)
+        if semaphore.wait(timeout: .now() + 120.0) == .timedOut {
+            MixpanelLogger.warn(
+                message: "Request to \(resource.path) timed out waiting for a response")
+            networkConsecutiveFailures += 1
+            updateRetryDelay(nil)
+        }
         return result
     }
 

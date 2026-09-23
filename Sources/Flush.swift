@@ -9,7 +9,7 @@
 import Foundation
 
 protocol FlushDelegate: AnyObject {
-    /// Returns `true` if a flush was started, `false` if one was already in flight.
+    /// Returns `true` if the flush started successfully; `false` if the request was rejected because another flush is already in progress.
     @discardableResult
     func flush(performFullFlush: Bool, completion: (() -> Void)?) -> Bool
     func removeProcessedEntities(type: FlushType, ids: [Int32])

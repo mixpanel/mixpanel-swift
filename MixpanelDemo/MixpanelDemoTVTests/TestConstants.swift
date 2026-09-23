@@ -2,7 +2,6 @@
 //  TestConstants.swift
 //  MixpanelDemo
 //
-//  Created by Yarden Eitan on 6/28/16.
 //  Copyright © 2016 Mixpanel. All rights reserved.
 //
 

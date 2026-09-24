@@ -1193,6 +1193,10 @@ extension MixpanelInstance {
        Clears all stored properties including the distinct Id.
        Useful if your app's user logs out.
 
+       Events and profile/group updates already queued are still sent, under the identity that
+       created them. Only profile updates made before any `identify()` are discarded, so they
+       can't be attributed to the next user.
+
        - parameter completion: an optional completion handler for when the reset has completed.
        */
     public func reset(completion: (() -> Void)? = nil) {
@@ -1214,7 +1218,10 @@ extension MixpanelInstance {
                 self.alias = nil
             }
 
-            self.mixpanelPersistence.resetEntities()
+            // Not a full wipe (formerly resetEntities()): the flush above reads people and groups
+            // only after events, so wiping here deleted them unsent. Queued rows keep their own
+            // distinct id; only pre-identify profile updates go, so they can't reach the next user.
+            self.mixpanelPersistence.removeUnidentifiedPeople()
             self.archive()
 
             // reset() does not call identify(), so the loadFlags() call inside identify() never
@@ -1330,21 +1337,21 @@ extension MixpanelInstance {
        `flushOnBackground` is on by default). You only need to call this
        method manually if you want to force a flush at a particular moment.
 
-       A flush repeats read → send → delete with up to `flushBatchSize` rows per queue,
-       subject to a byte budget. It stops when all three reads return empty, tracking is
-       opted out, the delegate vetoes flushing, or request backoff applies. Failed sends
-       can be retried within the same flush until backoff engages; unsent rows stay in
-       local storage. Memory is bounded by batches rather than the total queue size.
+       A flush repeats read → send → delete with up to `flushBatchSize` rows per request,
+       subject to a byte budget, so memory is bounded by batches rather than queue size. It
+       sends only rows queued before it started; rows tracked during a flush wait for the next
+       one. A failed send leaves its rows queued and moves on to the next queue type. The flush
+       stops when every queue is drained, tracking is opted out, the delegate vetoes it, or
+       request backoff applies.
 
        Only one flush runs at a time. If a flush is already in progress when this method
-       is called, the call returns `false` immediately without queuing another flush. Queued
-       data remains in local storage for the active flush or a later flush. Empty reads caused
-       by filtering or a full window of discarded rows can leave later rows for another flush.
+       is called, the call returns `false` immediately without queuing another flush; queued
+       data stays in local storage for the active flush or a later one.
 
        The delegate's `mixpanelWillFlush` is asked once per flush, before the first batch.
 
        - parameter performFullFlush: defaults to `true`, draining each of events, people, and
-         groups completely, in that order, before the flush ends. Pass `false` to send exactly
+         groups in that order before the flush ends. Pass `false` to send exactly
          one batch (up to `flushBatchSize` rows) per queue type and no more — suited to callers
          on a tight time budget, such as an app extension, where a full drain of a large backlog
          could run long enough to be killed by the OS. Any rows left behind wait for a later flush.

@@ -234,6 +234,29 @@ class MPDB {
         return sqlString
     }
 
+    /// Deletes every row in the table for `persistenceType` whose `flag` column matches.
+    func deleteRows(_ persistenceType: PersistenceType, flag: Bool) {
+        if let db = connection {
+            let tableName = tableNameFor(persistenceType)
+            let deleteString = "DELETE FROM \(tableName) WHERE flag = \(flag ? 1 : 0)"
+            var deleteStatement: OpaquePointer?
+            if sqlite3_prepare_v2(db, deleteString, -1, &deleteStatement, nil) == SQLITE_OK {
+                if sqlite3_step(deleteStatement) == SQLITE_DONE {
+                    MixpanelLogger.info(message: "Successfully deleted rows from table \(tableName)")
+                } else {
+                    logSqlError(message: "Failed to delete rows from table \(tableName)")
+                    recreate()
+                }
+            } else {
+                logSqlError(message: "DELETE statement for table \(tableName) could not be prepared")
+                recreate()
+            }
+            sqlite3_finalize(deleteStatement)
+        } else {
+            reconnect()
+        }
+    }
+
     func updateRowsFlag(_ persistenceType: PersistenceType, newFlag: Bool) {
         if let db = connection {
             let tableName = tableNameFor(persistenceType)

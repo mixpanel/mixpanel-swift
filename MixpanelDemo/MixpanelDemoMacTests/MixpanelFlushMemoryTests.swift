@@ -11,6 +11,67 @@ import XCTest
 
 @testable import Mixpanel
 
+/// Answers every request to `kFakeServerUrl` with a successful response and records the path and
+/// body of each, so tests can see exactly what was sent without touching the real API.
+private class RecordingURLProtocol: URLProtocol {
+    private static let lock = NSLock()
+    private static var recorded: [(path: String, body: String)] = []
+
+    static func reset() {
+        lock.lock()
+        recorded = []
+        lock.unlock()
+    }
+
+    static func requests() -> [(path: String, body: String)] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recorded
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        return request.url?.host == URL(string: kFakeServerUrl)?.host
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        return request
+    }
+
+    override func startLoading() {
+        guard let url = request.url else { return }
+        RecordingURLProtocol.lock.lock()
+        // `path` drops the trailing slash: "/track/" is recorded as "/track".
+        RecordingURLProtocol.recorded.append((url.path, Self.bodyString(of: request)))
+        RecordingURLProtocol.lock.unlock()
+
+        let response = HTTPURLResponse(
+            url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: nil)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: "1".data(using: .utf8)!)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+
+    /// URLSession moves `httpBody` into `httpBodyStream` before a protocol sees the request.
+    private static func bodyString(of request: URLRequest) -> String {
+        if let body = request.httpBody {
+            return String(decoding: body, as: UTF8.self)
+        }
+        guard let stream = request.httpBodyStream else { return "" }
+        stream.open()
+        defer { stream.close() }
+        var data = Data()
+        var buffer = [UInt8](repeating: 0, count: 4096)
+        while stream.hasBytesAvailable {
+            let count = stream.read(&buffer, maxLength: buffer.count)
+            if count <= 0 { break }
+            data.append(buffer, count: count)
+        }
+        return String(decoding: data, as: UTF8.self)
+    }
+}
+
 class MixpanelFlushMemoryTests: MixpanelBaseTests {
 
     // MARK: - Oversized rows
@@ -874,5 +935,76 @@ class MixpanelFlushMemoryTests: MixpanelBaseTests {
 
         mpdb.close()
         removeDBfile(mpdb.apiToken)
+    }
+
+    /// reset() must still send what was queued before it, under the pre-reset identity.
+    ///
+    /// Queued events and identified people rows already carry their distinct id, so reset keeps
+    /// them rather than deleting them, and the flush it starts sends them under the user who
+    /// created them. People rows must not be re-stamped with the post-reset identity when read.
+    func testResetSendsPendingDataUnderPreResetIdentity() {
+        RecordingURLProtocol.reset()
+        URLProtocol.registerClass(RecordingURLProtocol.self)
+        defer { URLProtocol.unregisterClass(RecordingURLProtocol.self) }
+
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
+        testMixpanel.serverURL = kFakeServerUrl
+        testMixpanel.identify(distinctId: "userBeforeReset")
+        testMixpanel.track(event: "beforeReset")
+        testMixpanel.people.set(properties: ["prop": "value"])
+        testMixpanel.getGroup(groupKey: "company", groupID: "mixpanel").set(properties: ["prop": "value"])
+        waitForTrackingQueue(testMixpanel)
+
+        let resetFinished = expectation(description: "reset finished")
+        testMixpanel.reset {
+            resetFinished.fulfill()
+        }
+        wait(for: [resetFinished], timeout: 10)
+        waitForTrackingQueue(testMixpanel)
+
+        let requests = RecordingURLProtocol.requests()
+        let paths = Set(requests.map { $0.path })
+        XCTAssertTrue(paths.contains("/track"), "pending events should be sent after reset")
+        XCTAssertTrue(paths.contains("/engage"), "pending people updates should be sent after reset")
+        XCTAssertTrue(paths.contains("/groups"), "pending group updates should be sent after reset")
+        XCTAssertTrue(
+            requests.contains { $0.path == "/engage" && $0.body.contains("userBeforeReset") },
+            "people updates must keep the pre-reset distinct id")
+
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    /// Profile updates made before any identify() must not survive reset() and attach to the
+    /// next identified user.
+    func testResetDiscardsUnidentifiedPeopleUpdates() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), flushInterval: 60, trackAutomaticEvents: false)
+        let persistence = MixpanelPersistence(instanceName: testMixpanel.apiToken)
+        testMixpanel.people.set(properties: ["anonymousProp": "value"])
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertFalse(
+            persistence.loadEntitiesInBatch(
+                type: .people, flag: PersistenceConstant.unIdentifiedFlag
+            ).isEmpty,
+            "a profile update before identify() is queued as unidentified")
+
+        testMixpanel.reset()
+        testMixpanel.identify(distinctId: "nextUser")
+        waitForTrackingQueue(testMixpanel)
+
+        XCTAssertTrue(
+            persistence.loadEntitiesInBatch(
+                type: .people, flag: PersistenceConstant.unIdentifiedFlag
+            ).isEmpty,
+            "reset should discard unidentified profile updates")
+        XCTAssertFalse(
+            peopleQueue(token: testMixpanel.apiToken).contains {
+                ($0["$set"] as? InternalProperties)?["anonymousProp"] != nil
+            },
+            "pre-reset anonymous updates must not be attributed to the next identified user")
+
+        persistence.closeDB()
+        removeDBfile(testMixpanel.apiToken)
     }
 }

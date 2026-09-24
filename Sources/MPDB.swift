@@ -234,6 +234,29 @@ class MPDB {
         return sqlString
     }
 
+    /// Deletes every row in the table for `persistenceType` whose `flag` column matches.
+    func deleteRows(_ persistenceType: PersistenceType, flag: Bool) {
+        if let db = connection {
+            let tableName = tableNameFor(persistenceType)
+            let deleteString = "DELETE FROM \(tableName) WHERE flag = \(flag ? 1 : 0)"
+            var deleteStatement: OpaquePointer?
+            if sqlite3_prepare_v2(db, deleteString, -1, &deleteStatement, nil) == SQLITE_OK {
+                if sqlite3_step(deleteStatement) == SQLITE_DONE {
+                    MixpanelLogger.info(message: "Successfully deleted rows from table \(tableName)")
+                } else {
+                    logSqlError(message: "Failed to delete rows from table \(tableName)")
+                    recreate()
+                }
+            } else {
+                logSqlError(message: "DELETE statement for table \(tableName) could not be prepared")
+                recreate()
+            }
+            sqlite3_finalize(deleteStatement)
+        } else {
+            reconnect()
+        }
+    }
+
     func updateRowsFlag(_ persistenceType: PersistenceType, newFlag: Bool) {
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
@@ -256,34 +279,123 @@ class MPDB {
         }
     }
 
-    func readRows(_ persistenceType: PersistenceType, numRows: Int, flag: Bool = false)
+    /// Returns the highest row `id` in the table for `persistenceType`, or `0` if the table is
+    /// empty. Ids are `AUTOINCREMENT`, so this is a strictly increasing, never-reused watermark
+    /// that `readRows(maxRowId:)` can use to exclude rows inserted after it was taken.
+    func maxRowId(_ persistenceType: PersistenceType) -> Int32 {
+        var maxId: Int32 = 0
+        if let db = connection {
+            let tableName = tableNameFor(persistenceType)
+            let selectString = "SELECT MAX(id) FROM \(tableName)"
+            var selectStatement: OpaquePointer?
+            if sqlite3_prepare_v2(db, selectString, -1, &selectStatement, nil) == SQLITE_OK {
+                // MAX over an empty table yields NULL, which sqlite3_column_int reads as 0.
+                if sqlite3_step(selectStatement) == SQLITE_ROW {
+                    maxId = sqlite3_column_int(selectStatement, 0)
+                } else {
+                    logSqlError(message: "Failed to read max row id from table \(tableName)")
+                }
+            } else {
+                logSqlError(message: "MAX(id) statement for table \(tableName) could not be prepared")
+            }
+            sqlite3_finalize(selectStatement)
+        } else {
+            reconnect()
+        }
+        return maxId
+    }
+
+    /// Reads up to `numRows` rows from the table for `persistenceType`, oldest first, and returns
+    /// them deserialized with their row `id` attached.
+    ///
+    /// The read is bounded in bytes as well as rows: it stops before the row that would push the
+    /// cumulative blob size past `byteBudget`, though the first row is always read so a queue can
+    /// never stall. Rows that cannot be sent are dropped and deleted in the same pass — those over
+    /// `APIConstants.maxRowByteSize` and those that fail JSON deserialization. Dropped rows still
+    /// consume the SQL row limit; only successfully decoded rows contribute to the byte counter.
+    /// An entirely dropped window returns empty even if later rows remain queued.
+    /// Rows past the bounds stay in SQLite for the next read.
+    ///
+    /// - parameter persistenceType: which table to read.
+    /// - parameter numRows: maximum rows to return; applied as the SQL `LIMIT`.
+    /// - parameter flag: reads only rows whose `flag` column matches.
+    /// - parameter maxRowId: when set, reads only rows with `id <= maxRowId`, so rows inserted
+    ///   after a watermark taken with `maxRowId(_:)` are excluded. `0` reads nothing.
+    /// - parameter byteBudget: maximum cumulative blob bytes handed to the deserializer.
+    func readRows(
+        _ persistenceType: PersistenceType, numRows: Int, flag: Bool = false,
+        maxRowId: Int32? = nil,
+        byteBudget: Int = APIConstants.maxReadBatchByteSize
+    )
         -> [InternalProperties]
     {
         var rows: [InternalProperties] = []
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
+            let watermarkClause = maxRowId.map { " AND id <= \($0)" } ?? ""
             let selectString = """
-                SELECT id, data FROM \(tableName) WHERE flag = \(flag ? 1 : 0) \
-                ORDER BY time\(numRows == Int.max ? "" : " LIMIT \(numRows)")
+                SELECT id, data FROM \(tableName) WHERE flag = \(flag ? 1 : 0)\(watermarkClause) \
+                ORDER BY time LIMIT \(numRows)
                 """
             var selectStatement: OpaquePointer?
             var rowsRead: Int = 0
+            // Cumulative blob bytes handed to the deserializer. Reading stops before the row that
+            // would push this past `byteBudget`, bounding the read in bytes as well as rows.
+            // Dropped oversized and malformed rows never count toward it.
+            var bytesRead: Int = 0
+            var byteBudgetExhausted = false
+            // Rows too large to parse safely or that fail deserialization. Collected here and
+            // deleted once the statement is finalized rather than mid-iteration, so the delete
+            // never runs against a live SELECT.
+            var droppedIds: [Int32] = []
             if sqlite3_prepare_v2(db, selectString, -1, &selectStatement, nil) == SQLITE_OK {
-                while sqlite3_step(selectStatement) == SQLITE_ROW {
+                while !byteBudgetExhausted, sqlite3_step(selectStatement) == SQLITE_ROW {
                     autoreleasepool {
+                        let id = sqlite3_column_int(selectStatement, 0)
                         if let blob = sqlite3_column_blob(selectStatement, 1) {
                             let blobLength = sqlite3_column_bytes(selectStatement, 1)
-                            let data = Data(bytes: blob, count: Int(blobLength))
-                            let id = sqlite3_column_int(selectStatement, 0)
 
+                            // Checked before the blob is copied or parsed: an oversized row can
+                            // exhaust memory during deserialization, which Foundation raises as an
+                            // uncatchable NSMallocException. See APIConstants.maxRowByteSize.
+                            if blobLength > APIConstants.maxRowByteSize {
+                                MixpanelLogger.error(
+                                    message:
+                                        "Dropping oversized row \(id) from table \(tableName): \(blobLength) bytes exceeds the \(APIConstants.maxRowByteSize) byte limit"
+                                )
+                                droppedIds.append(id)
+                                return
+                            }
+
+                            // The first row is always read regardless of budget — the per-row cap
+                            // above bounds it — so a budget smaller than one row can never stall
+                            // the queue.
+                            if rowsRead > 0, bytesRead + Int(blobLength) > byteBudget {
+                                byteBudgetExhausted = true
+                                return
+                            }
+
+                            let data = Data(bytes: blob, count: Int(blobLength))
                             if let jsonObject = JSONHandler.deserializeData(data) as? InternalProperties {
                                 var entity = jsonObject
                                 entity["id"] = id
                                 rows.append(entity)
+                                rowsRead += 1
+                                bytesRead += Int(blobLength)
+                            } else {
+                                MixpanelLogger.warn(
+                                    message:
+                                        "Dropping malformed row \(id) from table \(tableName): JSON deserialization failed"
+                                )
+                                droppedIds.append(id)
                             }
-                            rowsRead += 1
                         } else {
-                            logSqlError(message: "No blob found in data column for row in \(tableName)")
+                            // NULL or zero-length data. The schema allows it, and such a row can
+                            // never be sent, so it must be deleted or it occupies a slot in every
+                            // bounded read forever.
+                            MixpanelLogger.warn(
+                                message: "Dropping row \(id) from table \(tableName): data column is empty")
+                            droppedIds.append(id)
                         }
                     }
                 }
@@ -294,6 +406,9 @@ class MPDB {
                 logSqlError(message: "SELECT statement for table \(tableName) could not be prepared")
             }
             sqlite3_finalize(selectStatement)
+            if !droppedIds.isEmpty {
+                deleteRows(persistenceType, ids: droppedIds)
+            }
         } else {
             reconnect()
         }

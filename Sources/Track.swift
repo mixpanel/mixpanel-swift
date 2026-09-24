@@ -64,6 +64,20 @@ class Track {
             MixpanelLogger.info(
                 message: "mixpanel track called with empty event parameter. using 'mp_event'")
         }
+        // This is the only place automatic-event tracking is gated: an `$ae_` event is simply
+        // never persisted while `trackAutomaticEventsEnabled` is false. Once a row makes it past
+        // this check, it is sent like any other event even if the flag is turned off afterward —
+        // there is deliberately no filter later in the pipeline (e.g. at flush/read time) that
+        // would withhold it. This collection toggle differs from `optOutTracking()`, which
+        // prevents queued batches from being sent once the opt-out status is set.
+        // It also matches Android, whose equivalent flag (`mTrackAutomaticEvents` in
+        // `MixpanelAPI.java`) is set once at init and can never change, so its write-time gate is
+        // its only gate too — a runtime toggle can't retroactively affect data already collected
+        // there either, it just can't happen at all. A prior version of this SDK added a
+        // read-time filter for the mutable-flag case Android can't hit, but that filter fought
+        // this same precedent (and, once flush reads became bounded by batch size, could stall
+        // the events queue by filling an entire read window with rows it excluded but never
+        // deleted) — so it was removed rather than patched further.
         if !(mixpanelInstance?.trackAutomaticEventsEnabled ?? false) && ev.hasPrefix("$ae_") {
             return timedEvents
         }

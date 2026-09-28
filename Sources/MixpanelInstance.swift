@@ -1378,9 +1378,9 @@ extension MixpanelInstance {
     /// even though data exists.
     ///
     /// **How this prevents it:** Reserves 20% of the flush interval for people/groups. At
-    /// elapsed time = (flushInterval * 0.8), skip events and process people/groups instead.
+    /// elapsed time = (interval * 0.8), skip events and process people/groups instead.
     /// This guarantees: even under continuous event streams, people/groups drain within each
-    /// flush cycle before the auto-flush timer fires again.
+    /// flush cycle. For manual flush (interval=0), defaults to 60s for starvation prevention.
     ///
     /// Must be called on `trackingQueue`.
     private func shouldSkipEventQueue(for type: FlushType) -> Bool {
@@ -1388,8 +1388,10 @@ extension MixpanelInstance {
             return false
         }
         let elapsed = Date().timeIntervalSince(startTime)
-        let timeToReserve = flushInterval * 0.2
-        let threshold = flushInterval - timeToReserve
+        // Use configured interval, or default 60s for manual flush (interval=0).
+        let interval = flushInterval > 0 ? flushInterval : 60.0
+        let timeToReserve = interval * 0.2
+        let threshold = interval - timeToReserve
         return elapsed >= threshold
     }
 

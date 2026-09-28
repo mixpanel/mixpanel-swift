@@ -347,6 +347,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     private var isFlushing = false
     private var hasPendingFlush = false
     private var pendingFlushCompletion: (() -> Void)?
+    private var flushStartTime: Date?
 
     var optOutStatus: Bool?
     var useUniqueDistinctId: Bool
@@ -1349,12 +1350,14 @@ extension MixpanelInstance {
             return
         }
         isFlushing = true
+        flushStartTime = Date()
         flushNextBatch([.events, .people, .groups], completion: completion)
     }
 
     /// Must be called on `trackingQueue`.
     private func finishFlushPass(completion: (() -> Void)?) {
         isFlushing = false
+        flushStartTime = nil
         if let completion = completion {
             DispatchQueue.main.async(execute: completion)
         }
@@ -1366,6 +1369,30 @@ extension MixpanelInstance {
         }
     }
 
+    /// Returns true if event queue processing should be skipped to allow people/groups
+    /// to flush before the auto-flush timer fires.
+    ///
+    /// **Why starvation occurs:** If events continuously replenish the queue (new events arrive
+    /// faster than they're sent), the flush loop reads events indefinitely: read 50 → send (2s) →
+    /// read next 50 (full again). People/Groups queues never get a turn, so they're never flushed
+    /// even though data exists.
+    ///
+    /// **How this prevents it:** Reserves 20% of the flush interval for people/groups. At
+    /// elapsed time = (flushInterval * 0.8), skip events and process people/groups instead.
+    /// This guarantees: even under continuous event streams, people/groups drain within each
+    /// flush cycle before the auto-flush timer fires again.
+    ///
+    /// Must be called on `trackingQueue`.
+    private func shouldSkipEventQueue(for type: FlushType) -> Bool {
+        guard type == .events, let startTime = flushStartTime else {
+            return false
+        }
+        let elapsed = Date().timeIntervalSince(startTime)
+        let timeToReserve = flushInterval * 0.2
+        let threshold = flushInterval - timeToReserve
+        return elapsed >= threshold
+    }
+
     /// Reads one batch of the first remaining type on `trackingQueue`, sends it on `networkQueue`,
     /// then returns to `trackingQueue` to delete what was sent and read the next batch. Deleting
     /// and reading in the same block guarantees a batch is never read twice.
@@ -1375,6 +1402,15 @@ extension MixpanelInstance {
             finishFlushPass(completion: completion)
             return
         }
+
+        // Prevent event starvation: if we're 80% through the flush interval,
+        // skip events and process people/groups. This ensures they complete before the
+        // auto-flush timer fires again, even with continuous event streams.
+        if shouldSkipEventQueue(for: type) {
+            flushNextBatch(types.dropFirst(), completion: completion)
+            return
+        }
+
         let batchSize = flushBatchSize
         let batch = mixpanelPersistence.loadEntitiesInBatch(
             type: persistenceTypeFromFlushType(type), batchSize: batchSize)

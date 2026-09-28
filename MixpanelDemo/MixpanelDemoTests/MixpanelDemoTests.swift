@@ -1363,6 +1363,28 @@ class MixpanelDemoTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
+    func testMPDBReadRowsDeletesUnreadableRows() {
+        let token = randomId()
+        let mpdb = MPDB(token: token)
+        // More unreadable rows than one batch, ahead of the readable ones. One is valid JSON but not
+        // an object, which is also unreadable as a record.
+        for _ in 0..<55 {
+            mpdb.insertRow(.events, data: "not json".data(using: .utf8)!)
+        }
+        mpdb.insertRow(.events, data: "[1, 2]".data(using: .utf8)!)
+        for i in 0..<10 {
+            mpdb.insertRow(.events, data: JSONHandler.serializeJSONObject(["event": "e\(i)"])!)
+        }
+
+        let rows = mpdb.readRows(.events, numRows: 50)
+        XCTAssertEqual(
+            Set(rows.compactMap { $0["event"] as? String }), Set((0..<10).map { "e\($0)" }),
+            "readable rows behind unreadable ones should be returned")
+        XCTAssertEqual(rowCount(token, table: "events"), 10, "unreadable rows should be deleted")
+        mpdb.close()
+        removeDBfile(token)
+    }
+
     func testMPDBUpdateRowReportsOutcome() {
         let token = randomId()
         let mpdb = MPDB(token: token)
@@ -1712,6 +1734,27 @@ class MixpanelFlushLoopTests: MixpanelBaseTests {
             FlushRecordingURLProtocol.batches(pathContaining: "track").count, 1,
             "a failed batch should end that queue's pass")
         XCTAssertEqual(eventQueue(token: testMixpanel.apiToken).count, 3, "failed rows must be kept")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testUnreadableRowsDoNotBlockFlush() {
+        let testMixpanel = makeInstance()
+        // A full batch of unreadable rows at the head of the queue used to come back as an empty
+        // batch, so the pass skipped events and left the readable rows behind them unsent.
+        testMixpanel.trackingQueue.sync {
+            for _ in 0..<60 {
+                testMixpanel.mixpanelPersistence.mpdb.insertRow(.events, data: "not json".data(using: .utf8)!)
+            }
+        }
+        for i in 0..<5 {
+            testMixpanel.track(event: "event \(i)")
+        }
+        waitForTrackingQueue(testMixpanel)
+
+        flushOnce(testMixpanel)
+
+        XCTAssertEqual(Set(trackedEventNames()), Set((0..<5).map { "event \($0)" }))
+        XCTAssertEqual(rowCount(testMixpanel.apiToken, table: "events"), 0, "no row should be left behind")
         removeDBfile(testMixpanel.apiToken)
     }
 

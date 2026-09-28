@@ -335,10 +335,34 @@ class MPDB {
         }
     }
 
+    /// Reads up to `numRows` decodable rows. Rows whose data can't be decoded are deleted and the
+    /// read is repeated, so they can't fill a batch and hide the readable rows behind them.
     func readRows(_ persistenceType: PersistenceType, numRows: Int, flag: Bool = false)
         -> [InternalProperties]
     {
+        var deletedIds = Set<Int32>()
+        while true {
+            let (rows, unreadableIds) = selectRows(persistenceType, numRows: numRows, flag: flag)
+            // Stop once every row decoded, or if rows already deleted come back, meaning the delete
+            // didn't take effect and re-reading would loop forever.
+            if unreadableIds.isEmpty || !deletedIds.isDisjoint(with: unreadableIds) {
+                return rows
+            }
+            MixpanelLogger.warn(
+                message:
+                    "Deleting \(unreadableIds.count) unreadable rows from table \(tableNameFor(persistenceType))")
+            deleteRows(persistenceType, ids: unreadableIds)
+            deletedIds.formUnion(unreadableIds)
+        }
+    }
+
+    /// One read of up to `numRows` rows. Returns the decoded rows and the ids of rows that have no
+    /// data or whose data isn't a JSON object.
+    private func selectRows(_ persistenceType: PersistenceType, numRows: Int, flag: Bool)
+        -> (rows: [InternalProperties], unreadableIds: [Int32])
+    {
         var rows: [InternalProperties] = []
+        var unreadableIds: [Int32] = []
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
             let selectString = """
@@ -350,19 +374,22 @@ class MPDB {
             if sqlite3_prepare_v2(db, selectString, -1, &selectStatement, nil) == SQLITE_OK {
                 while sqlite3_step(selectStatement) == SQLITE_ROW {
                     autoreleasepool {
+                        let id = sqlite3_column_int(selectStatement, 0)
                         if let blob = sqlite3_column_blob(selectStatement, 1) {
                             let blobLength = sqlite3_column_bytes(selectStatement, 1)
                             let data = Data(bytes: blob, count: Int(blobLength))
-                            let id = sqlite3_column_int(selectStatement, 0)
 
                             if let jsonObject = JSONHandler.deserializeData(data) as? InternalProperties {
                                 var entity = jsonObject
                                 entity["id"] = id
                                 rows.append(entity)
+                            } else {
+                                unreadableIds.append(id)
                             }
                             rowsRead += 1
                         } else {
                             logSqlError(message: "No blob found in data column for row in \(tableName)")
+                            unreadableIds.append(id)
                         }
                     }
                 }
@@ -376,7 +403,7 @@ class MPDB {
         } else {
             reconnect()
         }
-        return rows
+        return (rows, unreadableIds)
     }
 
     private func logSqlError(message: String? = nil) {

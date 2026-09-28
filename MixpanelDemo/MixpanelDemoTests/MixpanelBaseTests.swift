@@ -78,6 +78,26 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         sqlite3_close(db)
     }
 
+    /// Counts every row in one of `token`'s tables, readable or not, through a separate connection.
+    func rowCount(_ token: String, table: String) -> Int {
+        var db: OpaquePointer?
+        guard sqlite3_open(dbFilePath(token), &db) == SQLITE_OK else {
+            XCTFail("could not open the test database")
+            return -1
+        }
+        defer { sqlite3_close(db) }
+        var statement: OpaquePointer?
+        guard
+            sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM mixpanel_\(token)_\(table)", -1, &statement, nil)
+                == SQLITE_OK
+        else {
+            XCTFail("could not count rows in \(table)")
+            return -1
+        }
+        defer { sqlite3_finalize(statement) }
+        return sqlite3_step(statement) == SQLITE_ROW ? Int(sqlite3_column_int(statement, 0)) : -1
+    }
+
     func mixpanelWillFlush(_ mixpanel: MixpanelInstance) -> Bool {
         return mixpanelWillFlush
     }

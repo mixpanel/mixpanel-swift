@@ -234,23 +234,102 @@ class MPDB {
         return sqlString
     }
 
-    func updateRowsFlag(_ persistenceType: PersistenceType, newFlag: Bool) {
+    /// Returns true only when SQLite applied the update. On a SQLite error the database is
+    /// recreated, as in every other write path.
+    @discardableResult
+    func updateRow(_ persistenceType: PersistenceType, id: Int32, data: Data, flag: Bool) -> Bool {
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
-            let updateString = "UPDATE \(tableName) SET flag = \(newFlag) where flag = \(!newFlag)"
+            let updateString = "UPDATE \(tableName) SET data = ?, flag = ? WHERE id = ?;"
             var updateStatement: OpaquePointer?
-            if sqlite3_prepare_v2(db, updateString, -1, &updateStatement, nil) == SQLITE_OK {
-                if sqlite3_step(updateStatement) == SQLITE_DONE {
-                    MixpanelLogger.info(message: "Successfully updated rows from table \(tableName)")
+            var succeeded = false
+            var failed = false
+            data.withUnsafeBytes { rawBuffer in
+                if let pointer = rawBuffer.baseAddress {
+                    if sqlite3_prepare_v2(db, updateString, -1, &updateStatement, nil) == SQLITE_OK {
+                        sqlite3_bind_blob(updateStatement, 1, pointer, Int32(rawBuffer.count), SQLITE_TRANSIENT)
+                        sqlite3_bind_int(updateStatement, 2, flag ? 1 : 0)
+                        sqlite3_bind_int(updateStatement, 3, id)
+                        if sqlite3_step(updateStatement) == SQLITE_DONE {
+                            MixpanelLogger.info(message: "Successfully updated row \(id) in table \(tableName)")
+                            succeeded = true
+                        } else {
+                            logSqlError(message: "Failed to update row \(id) in table \(tableName)")
+                            failed = true
+                        }
+                    } else {
+                        logSqlError(message: "UPDATE statement for table \(tableName) could not be prepared")
+                        failed = true
+                    }
+                    sqlite3_finalize(updateStatement)
+                }
+            }
+            // Recreate only after finalizing: SQLite won't close a connection with a live statement,
+            // and a clean close is what removes the WAL file.
+            if failed {
+                recreate()
+            }
+            return succeeded
+        } else {
+            reconnect()
+            return false
+        }
+    }
+
+    func deleteRows(_ persistenceType: PersistenceType, flag: Bool) {
+        if let db = connection {
+            let tableName = tableNameFor(persistenceType)
+            let deleteString = "DELETE FROM \(tableName) WHERE flag = \(flag ? 1 : 0)"
+            var deleteStatement: OpaquePointer?
+            if sqlite3_prepare_v2(db, deleteString, -1, &deleteStatement, nil) == SQLITE_OK {
+                if sqlite3_step(deleteStatement) == SQLITE_DONE {
+                    MixpanelLogger.info(message: "Successfully deleted flag=\(flag) rows from table \(tableName)")
                 } else {
-                    logSqlError(message: "Failed to update rows from table \(tableName)")
+                    logSqlError(message: "Failed to delete flag=\(flag) rows from table \(tableName)")
                     recreate()
                 }
             } else {
-                logSqlError(message: "UPDATE statement for table \(tableName) could not be prepared")
+                logSqlError(message: "DELETE statement for table \(tableName) could not be prepared")
                 recreate()
             }
-            sqlite3_finalize(updateStatement)
+            sqlite3_finalize(deleteStatement)
+        } else {
+            reconnect()
+        }
+    }
+
+    func beginTransaction() {
+        execute("BEGIN TRANSACTION;")
+    }
+
+    /// Returns true only when an open transaction was committed. On a failed commit the database
+    /// is recreated.
+    @discardableResult
+    func commitTransaction() -> Bool {
+        guard let db = connection else {
+            return false
+        }
+        // No open transaction means an earlier write in this transaction already recreated the
+        // database. Committing now would fail and delete the fresh database a second time, and the
+        // transaction's work is already lost, so report failure.
+        if sqlite3_get_autocommit(db) != 0 {
+            return false
+        }
+        if sqlite3_exec(db, "COMMIT TRANSACTION;", nil, nil, nil) != SQLITE_OK {
+            logSqlError(message: "Failed to commit transaction")
+            // Closing the connection rolls back the open transaction, so later writes can't run
+            // inside it.
+            recreate()
+            return false
+        }
+        return true
+    }
+
+    private func execute(_ sql: String) {
+        if let db = connection {
+            if sqlite3_exec(db, sql, nil, nil, nil) != SQLITE_OK {
+                logSqlError(message: "Failed to execute: \(sql)")
+            }
         } else {
             reconnect()
         }

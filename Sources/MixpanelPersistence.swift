@@ -123,23 +123,26 @@ class MixpanelPersistence {
     }
 
     func loadEntitiesInBatch(
-        type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false,
-        excludeAutomaticEvents: Bool = false
+        type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false
     ) -> [InternalProperties] {
-        var entities = mpdb.readRows(type, numRows: batchSize, flag: flag)
-        if excludeAutomaticEvents && type == .events {
-            entities = entities.filter { !($0["event"] as! String).hasPrefix("$ae_") }
-        }
-        if type == PersistenceType.people {
+        let entities = mpdb.readRows(type, numRows: batchSize, flag: flag)
+        if type == PersistenceType.people && flag != PersistenceConstant.unIdentifiedFlag {
             let distinctId = MixpanelPersistence.loadIdentity(instanceName: instanceName).distinctID
             return entities.map { entityWithDistinctId($0, distinctId: distinctId) }
         }
         return entities
     }
 
+    /// Identified rows get `$distinct_id` when they become identified: at enqueue, or in
+    /// `identifyPeople` for rows queued before identify. Only fill it in when missing, for rows
+    /// written by older SDK versions or migrated from legacy archives. An existing id is never
+    /// overwritten, so an identity change before the flush can't misattribute a row.
     private func entityWithDistinctId(_ entity: InternalProperties, distinctId: String)
         -> InternalProperties
     {
+        guard entity["$distinct_id"] == nil else {
+            return entity
+        }
         var result = entity
         result["$distinct_id"] = distinctId
         return result
@@ -149,14 +152,44 @@ class MixpanelPersistence {
         mpdb.deleteRows(type, ids: ids)
     }
 
-    func identifyPeople(token: String) {
-        mpdb.updateRowsFlag(.people, newFlag: !PersistenceConstant.unIdentifiedFlag)
+    /// Writes `distinctId` into every people row queued before identify and marks the rows as
+    /// identified, so they stay attributed to this user even if the identity changes again
+    /// before the next flush. Works in pages so a large anonymous queue is never fully in memory.
+    func identifyPeople(distinctId: String) {
+        let pageSize = APIConstants.maxBatchSize
+        while true {
+            let rows = mpdb.readRows(.people, numRows: pageSize, flag: PersistenceConstant.unIdentifiedFlag)
+            if rows.isEmpty {
+                return
+            }
+            var updated = 0
+            mpdb.beginTransaction()
+            for row in rows {
+                var entity = row
+                guard let id = entity.removeValue(forKey: "id") as? Int32 else {
+                    continue
+                }
+                entity["$distinct_id"] = distinctId
+                guard let data = JSONHandler.serializeJSONObject(entity) else {
+                    MixpanelLogger.warn(message: "Could not re-serialize people row \(id); leaving it unidentified")
+                    continue
+                }
+                if mpdb.updateRow(.people, id: id, data: data, flag: !PersistenceConstant.unIdentifiedFlag) {
+                    updated += 1
+                }
+            }
+            // Continue only after a committed page that made real progress. Otherwise the same rows
+            // would be read again, looping forever on a persistent write failure.
+            guard mpdb.commitTransaction(), updated > 0 else {
+                return
+            }
+        }
     }
 
-    func resetEntities() {
-        for pType in PersistenceType.allCases {
-            mpdb.deleteRows(pType, isDeleteAll: true)
-        }
+    /// Drops people rows queued before identify. Their target identity was never known, so they
+    /// can't be attributed after a reset.
+    func removeUnidentifiedPeople() {
+        mpdb.deleteRows(.people, flag: PersistenceConstant.unIdentifiedFlag)
     }
 
     static func saveOptOutStatusFlag(value: Bool, instanceName: String) {

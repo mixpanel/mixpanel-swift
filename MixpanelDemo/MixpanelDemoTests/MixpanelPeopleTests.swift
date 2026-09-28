@@ -69,6 +69,117 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
+    func testIdentifyStampsQueuedUnidentifiedPeopleRecords() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.people.set(properties: ["p1": "a"])
+        waitForTrackingQueue(testMixpanel)
+        let queued = unIdentifiedPeopleQueue(token: testMixpanel.apiToken)
+        XCTAssertEqual(queued.count, 1)
+        XCTAssertNil(queued.first?["$distinct_id"], "unidentified record must not carry a distinct id yet")
+        XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty)
+
+        testMixpanel.identify(distinctId: "d1")
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(
+            unIdentifiedPeopleQueue(token: testMixpanel.apiToken).isEmpty,
+            "identify should move queued records to the identified queue")
+        let identified = peopleQueue(token: testMixpanel.apiToken)
+        XCTAssertEqual(identified.count, 1)
+        XCTAssertEqual(identified.first?["$distinct_id"] as? String, "d1")
+        XCTAssertEqual((identified.first?["$set"] as? InternalProperties)?["p1"] as? String, "a")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testQueuedPeopleRecordsKeepIdentityAcrossIdentifyChange() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.identify(distinctId: "A")
+        testMixpanel.people.set(properties: ["p1": "a"])
+        waitForTrackingQueue(testMixpanel)
+        testMixpanel.identify(distinctId: "B")
+        testMixpanel.people.set(properties: ["p2": "b"])
+        waitForTrackingQueue(testMixpanel)
+
+        let identified = peopleQueue(token: testMixpanel.apiToken)
+        XCTAssertEqual(identified.count, 2)
+        let forA = identified.first { ($0["$set"] as? InternalProperties)?["p1"] != nil }
+        let forB = identified.first { ($0["$set"] as? InternalProperties)?["p2"] != nil }
+        XCTAssertEqual(forA?["$distinct_id"] as? String, "A", "record queued under A was re-attributed")
+        XCTAssertEqual(forB?["$distinct_id"] as? String, "B")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testResetDropsOnlyUnidentifiedPeopleRecords() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.people.set(properties: ["p1": "a"])
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: testMixpanel.apiToken).count, 1)
+
+        testMixpanel.delegate = self  // mixpanelWillFlush is false: no network inside reset()
+        testMixpanel.reset()
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(unIdentifiedPeopleQueue(token: testMixpanel.apiToken).isEmpty)
+        XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty, "reset must not promote unidentified records")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testLoadPeopleFillsMissingDistinctIdOnly() {
+        let token = randomId()
+        let testMixpanel = Mixpanel.initialize(
+            token: token, trackAutomaticEvents: false, flushInterval: 60)
+        testMixpanel.identify(distinctId: "current")
+        waitForTrackingQueue(testMixpanel)
+
+        // Simulate rows written by older SDK versions: identified flag but no $distinct_id.
+        let persistence = MixpanelPersistence(instanceName: token)
+        persistence.saveEntity(["$token": token, "$set": ["legacy": true]], type: .people)
+        persistence.saveEntity(
+            ["$token": token, "$distinct_id": "someone-else", "$set": ["stamped": true]], type: .people)
+
+        let loaded = persistence.loadEntitiesInBatch(type: .people)
+        XCTAssertEqual(loaded.count, 2)
+        let legacy = loaded.first { ($0["$set"] as? InternalProperties)?["legacy"] != nil }
+        let stamped = loaded.first { ($0["$set"] as? InternalProperties)?["stamped"] != nil }
+        XCTAssertEqual(legacy?["$distinct_id"] as? String, "current", "missing id should be filled in")
+        XCTAssertEqual(stamped?["$distinct_id"] as? String, "someone-else", "existing id must never be overwritten")
+        removeDBfile(token)
+    }
+
+    func testIdentifyStopsWhenPeopleRowUpdatesFail() {
+        let token = randomId()
+        let testMixpanel = Mixpanel.initialize(
+            token: token, trackAutomaticEvents: false, flushInterval: 60)
+        for i in 0..<3 {
+            testMixpanel.people.set(properties: ["p\(i)": i])
+        }
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: token).count, 3)
+
+        failPeopleUpdates(token)
+        testMixpanel.identify(distinctId: "d1")
+        // Before the fix this block never ran: identify re-read the same rows forever. Stop here
+        // on a timeout, because anything that waits on trackingQueue would then hang the run.
+        let identifyFinished = XCTestExpectation(description: "identify returned")
+        testMixpanel.trackingQueue.async { identifyFinished.fulfill() }
+        guard XCTWaiter().wait(for: [identifyFinished], timeout: 10) == .completed else {
+            return XCTFail("identify never returned after a failed write")
+        }
+
+        XCTAssertTrue(
+            unIdentifiedPeopleQueue(token: token).isEmpty,
+            "a failed write should recreate the database, as other write paths do")
+        XCTAssertTrue(peopleQueue(token: token).isEmpty)
+
+        testMixpanel.track(event: "after failure")
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(
+            eventQueue(token: token).contains { ($0["event"] as? String) == "after failure" },
+            "tracking should keep working after the failed identify")
+        removeDBfile(token)
+    }
+
     func testDropUnidentifiedPeopleRecords() {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), trackAutomaticEvents: true, flushInterval: 60)

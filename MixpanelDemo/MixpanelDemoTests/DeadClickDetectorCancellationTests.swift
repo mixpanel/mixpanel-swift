@@ -11,8 +11,7 @@ import XCTest
 
 #if os(iOS)
 
-/// Tests that a new tap always supersedes the pending dead-click check, matching Android's
-/// `DeadClickDetector.startDetection`.
+/// Tests that a new tap always supersedes the pending dead-click check.
 ///
 /// These drive `DeadClickDetector` directly against an offscreen window whose hierarchy never
 /// changes, so a check that survives cancellation always fires. That isolates the cancellation

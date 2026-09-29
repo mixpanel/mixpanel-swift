@@ -108,8 +108,7 @@ final class DeadClickDetector {
     func startMonitoring(event: ClickEvent, view: UIView, in window: UIWindow) {
         // Any new tap supersedes the pending check: the user has already moved on, so the
         // previous click can no longer be called dead. Cancel before the eligibility guards
-        // below so an ineligible tap still clears it — this mirrors Android's
-        // DeadClickDetector.startDetection, which cancels before checking interactivity.
+        // below so an ineligible tap still clears it.
         cancelPendingCheck()
 
         // Only monitor interactive elements — tapping a non-interactive view

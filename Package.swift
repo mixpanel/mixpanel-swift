@@ -23,7 +23,7 @@ let package = Package(
         .target(
             name: "Mixpanel",
             dependencies: [
-                .product(name: "MixpanelSwiftCommon", package: "mixpanel-swift-common"),
+                .product(name: "MixpanelSwiftCommon", package: "mixpanel-swift-common")
             ],
             path: "Sources",
             resources: [

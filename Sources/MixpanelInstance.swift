@@ -130,7 +130,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var showNetworkActivityIndicator = true
 
     /// This allows enabling or disabling collecting common mobile events,
-    @available(*, deprecated, message: "Automatic Events are deprecated and will be removed in a future major version. Use autocaptureOptions instead.")
+    @available(
+        *, deprecated,
+        message:
+            "Automatic Events are deprecated and will be removed in a future major version. Use autocaptureOptions instead."
+    )
     open var trackAutomaticEventsEnabled: Bool
 
     /// Flush timer's interval.
@@ -855,7 +859,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if os(iOS)
     // No-op: the status-bar network indicator is ignored on iOS 13+, below the SDK's iOS 15 floor.
     func updateNetworkActivityIndicator(_ on: Bool) {}
-    
+
     #if os(iOS) && !targetEnvironment(macCatalyst)
     @objc func setCurrentRadio() {
         var radio = ""

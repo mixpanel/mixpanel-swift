@@ -847,7 +847,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if os(OSX)
     static func macOSIdentifier() -> String? {
         let platformExpert: io_service_t = IOServiceGetMatchingService(
-            kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
+            kIOMainPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
         let serialNumberAsCFString =
             IORegistryEntryCreateCFProperty(
                 platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0)
@@ -1508,7 +1508,7 @@ extension MixpanelInstance {
     }
 
     func removeCachedGroup(groupKey: String, groupID: MixpanelType) {
-        readWriteLock.write {
+        _ = readWriteLock.write {
             groups.removeValue(forKey: makeMapKey(groupKey: groupKey, groupID: groupID))
         }
     }

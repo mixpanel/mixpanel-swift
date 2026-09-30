@@ -118,7 +118,9 @@ class MixpanelPersistence {
 
     func saveEntities(_ entities: Queue, type: PersistenceType, flag: Bool = false) {
         for entity in entities {
-            saveEntity(entity, type: type)
+            // Keep the flag so migrated anonymous people rows stay unidentified; `reset()` and
+            // `identifyPeople` tell rows apart by it.
+            saveEntity(entity, type: type, flag: flag)
         }
     }
 

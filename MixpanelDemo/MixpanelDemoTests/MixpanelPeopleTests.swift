@@ -125,6 +125,33 @@ class MixpanelPeopleTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
+    func testSaveEntitiesKeepsFlag() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        let row: InternalProperties = ["$set": ["p1": "a"]]
+        testMixpanel.trackingQueue.sync {
+            testMixpanel.mixpanelPersistence.saveEntities(
+                [row], type: .people, flag: PersistenceConstant.unIdentifiedFlag)
+            testMixpanel.mixpanelPersistence.saveEntities([row], type: .people)
+        }
+        XCTAssertEqual(
+            unIdentifiedPeopleQueue(token: testMixpanel.apiToken).count, 1,
+            "the unidentified flag must survive saveEntities")
+        XCTAssertEqual(
+            peopleQueue(token: testMixpanel.apiToken).count, 1,
+            "the default flag still saves identified rows")
+
+        testMixpanel.delegate = self  // mixpanelWillFlush is false: no network inside reset()
+        testMixpanel.reset()
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(
+            unIdentifiedPeopleQueue(token: testMixpanel.apiToken).isEmpty,
+            "reset drops the unidentified row")
+        XCTAssertEqual(
+            peopleQueue(token: testMixpanel.apiToken).count, 1, "reset keeps the identified row")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
     func testLoadPeopleFillsMissingDistinctIdOnly() {
         let token = randomId()
         let testMixpanel = Mixpanel.initialize(

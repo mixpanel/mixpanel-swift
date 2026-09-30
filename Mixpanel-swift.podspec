@@ -10,8 +10,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => 'https://github.com/mixpanel/mixpanel-swift.git',
                      :tag => "#{s.version}" }
   s.resource_bundles = {'Mixpanel' => ['Sources/Mixpanel/PrivacyInfo.xcprivacy']}
-  s.dependency 'jsonlogic', '~> 1.2.0'
-  s.dependency 'MixpanelSwiftCommon', '~> 1.1.0'
+  s.dependency 'MixpanelSwiftCommon', '~> 2.0.0'
   s.ios.deployment_target = '15.0'
   s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   s.ios.pod_target_xcconfig = {

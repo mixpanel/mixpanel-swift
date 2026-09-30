@@ -8,10 +8,6 @@
 
 import Foundation
 
-#if !os(OSX)
-import UIKit
-#endif  // !os(OSX)
-
 struct QueueConstants {
     static var queueSize = 5000
 }
@@ -31,11 +27,3 @@ struct BundleConstants {
 struct GzipSettings {
     static let gzipHeaderOffset = Int32(16)
 }
-
-#if !os(OSX) && !os(watchOS) && !os(visionOS)
-extension UIDevice {
-    var iPhoneX: Bool {
-        return UIScreen.main.nativeBounds.height == 2436
-    }
-}
-#endif  // !os(OSX)

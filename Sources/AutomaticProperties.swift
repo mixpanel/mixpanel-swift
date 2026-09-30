@@ -101,7 +101,10 @@ class AutomaticProperties {
             // The write lock executes closures on its internal queue (background thread),
             // so we must access UIScreen/NSScreen here while still on main thread.
             #if os(iOS) || os(tvOS)
-            let screenSize = UIScreen.main.bounds.size
+            // UIScreen.main fallback covers app extensions and launches before a scene connects.
+            let windowScene = MixpanelInstance.sharedUIApplication()?.connectedScenes
+                .compactMap { $0 as? UIWindowScene }.first
+            let screenSize = windowScene?.screen.bounds.size ?? UIScreen.main.bounds.size
             let height = Int(screenSize.height)
             let width = Int(screenSize.width)
             #elseif os(macOS)

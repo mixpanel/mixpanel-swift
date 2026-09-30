@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.resource_bundles = {'Mixpanel' => ['Sources/Mixpanel/PrivacyInfo.xcprivacy']}
   s.dependency 'jsonlogic', '~> 1.2.0'
   s.dependency 'MixpanelSwiftCommon', '~> 1.1.0'
-  s.ios.deployment_target = '12.0'
+  s.ios.deployment_target = '15.0'
   s.ios.frameworks = 'UIKit', 'Foundation', 'CoreTelephony'
   s.ios.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) IOS'

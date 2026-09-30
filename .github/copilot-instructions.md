@@ -5,7 +5,7 @@
 This repository contains the **Mixpanel Swift SDK** - an analytics tracking library for Apple platforms. It enables iOS, tvOS, macOS, and watchOS applications to send event and user data to Mixpanel. The SDK supports Swift Package Manager, CocoaPods, and Carthage for installation.
 
 **Languages/Frameworks:** Swift 5.0+  
-**Platforms:** iOS 12+, tvOS 11+, macOS 10.13+, watchOS 4+  
+**Platforms:** iOS 15+, tvOS 11+, macOS 10.13+, watchOS 4+  
 **Project Size:** ~6,000 lines of Swift code across ~25 source files
 
 ## Building and Testing

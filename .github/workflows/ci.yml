@@ -72,3 +72,16 @@ jobs:
         xcode-version: '27.0'
     - name: pod lib lint (Xcode 27)
       run: pod lib lint Mixpanel-swift.podspec --allow-warnings --platforms=ios,tvos,osx,watchos
+
+  carthage-build:
+    name: carthage build (Xcode 27.0)
+    runs-on: xcode-27
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+    - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90  # v1
+      with:
+        xcode-version: '27.0'
+    - name: Install Carthage
+      run: brew install carthage
+    - name: carthage build (Xcode 27)
+      run: carthage build --no-skip-current --use-xcframeworks --platform iOS,tvOS,macOS,watchOS --no-use-binaries

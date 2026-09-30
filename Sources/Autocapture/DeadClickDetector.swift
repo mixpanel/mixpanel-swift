@@ -30,7 +30,11 @@ final class DeadClickDetector {
 
     private var pendingCheck: PendingCheck?
     private weak var currentWindow: UIWindow?
-    private var checkTask: Task<Void, Never>?
+    private var checkTask: Any?  // Task<Void, Never> on iOS 13+
+    /// Bumped every time a check is scheduled or cancelled. A scheduled check only runs while
+    /// the generation it captured is still current, so a superseded timer can never emit — not
+    /// even on iOS 12, where the `asyncAfter` fallback cannot be cancelled.
+    private var generation: UInt64 = 0
     private let lock = NSLock()
 
     // MARK: - Types
@@ -102,6 +106,11 @@ final class DeadClickDetector {
     ///   - view: The view that was tapped
     ///   - window: The window containing the view
     func startMonitoring(event: ClickEvent, view: UIView, in window: UIWindow) {
+        // Any new tap supersedes the pending check: the user has already moved on, so the
+        // previous click can no longer be called dead. Cancel before the eligibility guards
+        // below so an ineligible tap still clears it.
+        cancelPendingCheck()
+
         // Only monitor interactive elements — tapping a non-interactive view
         // (plain label, image without gesture) is expected to do nothing.
         guard event.isInteractive else {
@@ -117,9 +126,6 @@ final class DeadClickDetector {
             return
         }
 
-        // Cancel any in-flight detection before starting a new one
-        cancelPendingCheck()
-
         // Capture baseline synchronously at click time — before the click handler
         // has a chance to update the UI. This prevents fast UI responses (e.g.,
         // showing a UIAlertController) from being absorbed into the baseline,
@@ -127,6 +133,8 @@ final class DeadClickDetector {
         let baseline = captureSnapshot(window: window)
 
         lock.lock()
+        generation &+= 1
+        let scheduledGeneration = generation
         currentWindow = window
         pendingCheck = PendingCheck(
             event: event,
@@ -135,9 +143,43 @@ final class DeadClickDetector {
         )
         lock.unlock()
 
-        // Schedule final check as a cancellable task
+        scheduleFinalCheck(for: scheduledGeneration)
+    }
+
+    /// Cancel any pending dead click check.
+    ///
+    /// Call this when the user navigates away or the app backgrounds.
+    func cancelPendingCheck() {
+        lock.lock()
+        let task = checkTask
+        checkTask = nil
+        pendingCheck = nil
+        currentWindow = nil
+        generation &+= 1
+        lock.unlock()
+
+        if #available(iOS 13.0, *) {
+            (task as? Task<Void, Never>)?.cancel()
+        }
+    }
+
+    // MARK: - Private
+
+    /// Schedule `performFinalCheck` one time window from now, tagged with the generation it
+    /// belongs to. The task is retained only while that generation is still current, so a
+    /// cancellation that lands between scheduling and storing still takes effect.
+    private func scheduleFinalCheck(for scheduledGeneration: UInt64) {
         let timeWindow = timeWindowMs
-        checkTask = Task { [weak self] in
+
+        guard #available(iOS 13.0, *) else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeWindow)) {
+                [weak self] in
+                self?.performFinalCheck(for: scheduledGeneration)
+            }
+            return
+        }
+
+        let task = Task { [weak self] in
             try? await Task.sleep(nanoseconds: UInt64(timeWindow) * 1_000_000)
             guard !Task.isCancelled else { return }
             // Bind before hopping to the main actor: referencing the captured `weak var`
@@ -145,32 +187,34 @@ final class DeadClickDetector {
             // an error in the Swift 6 language mode.
             guard let self = self else { return }
             await MainActor.run { [self] in
-                self.performFinalCheck()
+                self.performFinalCheck(for: scheduledGeneration)
             }
+        }
+
+        lock.lock()
+        let isCurrent = generation == scheduledGeneration
+        if isCurrent {
+            checkTask = task
+        }
+        lock.unlock()
+
+        if !isCurrent {
+            task.cancel()
         }
     }
 
-    /// Cancel any pending dead click check.
-    ///
-    /// Call this when the user navigates away or the app backgrounds.
-    func cancelPendingCheck() {
-        checkTask?.cancel()
-        checkTask = nil
+    private func performFinalCheck(for scheduledGeneration: UInt64) {
         lock.lock()
-        pendingCheck = nil
-        lock.unlock()
-    }
-
-    // MARK: - Private
-
-    private func performFinalCheck() {
-        lock.lock()
-        guard let check = pendingCheck, let window = currentWindow else {
-            pendingCheck = nil
+        // A newer tap (or an explicit cancel) has taken over — this timer is stale and must
+        // not emit, and must not clear the check that replaced it.
+        guard scheduledGeneration == generation,
+            let check = pendingCheck, let window = currentWindow
+        else {
             lock.unlock()
             return
         }
         pendingCheck = nil
+        checkTask = nil
         lock.unlock()
 
         let current = captureSnapshot(window: window)
@@ -193,11 +237,16 @@ final class DeadClickDetector {
         var contentHash = 17
 
         // Count visible windows (handles alerts, sheets, etc.)
+        // Use windowScene.windows for iOS 13+, fallback to just counting this window
         let windowCount: Int
-        if let scene = window.windowScene {
-            windowCount = scene.windows.filter { $0.isKeyWindow || !$0.isHidden }.count
+        if #available(iOS 13.0, *) {
+            if let scene = window.windowScene {
+                windowCount = scene.windows.filter { $0.isKeyWindow || !$0.isHidden }.count
+            } else {
+                windowCount = 1
+            }
         } else {
-            windowCount = 1
+            windowCount = 1  // Fallback for older iOS
         }
 
         // Walk view hierarchy

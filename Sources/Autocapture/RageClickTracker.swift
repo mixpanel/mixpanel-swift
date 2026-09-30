@@ -29,7 +29,9 @@ final class RageClickTracker {
 
     private let clickThreshold: Int
     private let timeWindowMs: Int64
-    private let spatialRadius: CGFloat
+    /// Squared spatial radius, cached so `countNearbyClicks` can compare squared
+    /// distances and avoid a `sqrt` per stored click.
+    private let spatialRadiusSq: CGFloat
 
     // MARK: - State
 
@@ -61,7 +63,7 @@ final class RageClickTracker {
     ) {
         self.clickThreshold = options.clickThreshold
         self.timeWindowMs = options.timeWindowMs
-        self.spatialRadius = options.radius
+        self.spatialRadiusSq = options.radius * options.radius
         self.timeProvider = timeProvider
     }
 
@@ -92,8 +94,11 @@ final class RageClickTracker {
         // (so the current click is the Nth click)
         let isRageClick = nearbyCount >= (clickThreshold - 1)
 
-        // Clean old clicks to prevent memory growth
-        if recentClicks.count > AutocaptureDefaults.maxTrackedClicks {
+        if isRageClick {
+            // Clear history on emission so the next burst starts fresh
+            recentClicks.removeAll()
+        } else if recentClicks.count > AutocaptureDefaults.maxTrackedClicks {
+            // Clean old clicks to prevent memory growth
             cleanOldClicks(currentTime: now)
         }
 
@@ -117,8 +122,9 @@ final class RageClickTracker {
     private func countNearbyClicks(x: CGFloat, y: CGFloat) -> Int {
         var count = 0
         for click in recentClicks {
-            let distance = sqrt(pow(click.x - x, 2) + pow(click.y - y, 2))
-            if distance <= spatialRadius {
+            let dx = click.x - x
+            let dy = click.y - y
+            if (dx * dx + dy * dy) <= spatialRadiusSq {
                 count += 1
             }
         }

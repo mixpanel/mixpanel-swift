@@ -111,9 +111,20 @@ class MixpanelPersistence {
     }
 
     func saveEntity(_ entity: InternalProperties, type: PersistenceType, flag: Bool = false) {
-        if let data = JSONHandler.serializeJSONObject(entity) {
-            mpdb.insertRow(type, data: data, flag: flag)
+        guard let data = JSONHandler.serializeJSONObject(entity) else {
+            return
         }
+        // Same limit readRows enforces; rejecting here keeps oversized rows off disk entirely.
+        // readRows still drops any written by older SDK versions.
+        if data.count > APIConstants.maxRowByteSize {
+            let name = (entity["event"] as? String) ?? "\(type) row"
+            MixpanelLogger.error(
+                message:
+                    "Dropping \(name) (\(data.count) bytes): exceeds the \(APIConstants.maxRowByteSize) byte row limit"
+            )
+            return
+        }
+        mpdb.insertRow(type, data: data, flag: flag)
     }
 
     func saveEntities(_ entities: Queue, type: PersistenceType, flag: Bool = false) {
@@ -124,12 +135,9 @@ class MixpanelPersistence {
 
     func loadEntitiesInBatch(
         type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false,
-        excludeAutomaticEvents: Bool = false
+        maxRowId: Int32? = nil
     ) -> [InternalProperties] {
-        var entities = mpdb.readRows(type, numRows: batchSize, flag: flag)
-        if excludeAutomaticEvents && type == .events {
-            entities = entities.filter { !($0["event"] as! String).hasPrefix("$ae_") }
-        }
+        let entities = mpdb.readRows(type, numRows: batchSize, flag: flag, maxRowId: maxRowId)
         if type == PersistenceType.people {
             let distinctId = MixpanelPersistence.loadIdentity(instanceName: instanceName).distinctID
             return entities.map { entityWithDistinctId($0, distinctId: distinctId) }
@@ -140,9 +148,19 @@ class MixpanelPersistence {
     private func entityWithDistinctId(_ entity: InternalProperties, distinctId: String)
         -> InternalProperties
     {
+        // Identified rows are stamped with $distinct_id when saved; keep it so a row is sent
+        // under the user who created it even if identity changed since. Rows identified later
+        // (queued before identify()) have none and take the current one.
+        guard entity["$distinct_id"] == nil else {
+            return entity
+        }
         var result = entity
         result["$distinct_id"] = distinctId
         return result
+    }
+
+    func maxRowId(type: PersistenceType) -> Int32 {
+        mpdb.maxRowId(type)
     }
 
     func removeEntitiesInBatch(type: PersistenceType, ids: [Int32]) {
@@ -153,10 +171,11 @@ class MixpanelPersistence {
         mpdb.updateRowsFlag(.people, newFlag: !PersistenceConstant.unIdentifiedFlag)
     }
 
-    func resetEntities() {
-        for pType in PersistenceType.allCases {
-            mpdb.deleteRows(pType, isDeleteAll: true)
-        }
+    /// Deletes people updates made before any identify(). Everything else stays queued: events and
+    /// identified people rows already carry their distinct id, so they're sent under the user who
+    /// created them. Matches Android's reset, which clears only its anonymous-people table.
+    func removeUnidentifiedPeople() {
+        mpdb.deleteRows(.people, flag: PersistenceConstant.unIdentifiedFlag)
     }
 
     static func saveOptOutStatusFlag(value: Bool, instanceName: String) {

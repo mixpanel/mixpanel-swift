@@ -643,8 +643,6 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(
             testMixpanel.currentSuperProperties().isEmpty,
             "super properties failed to reset")
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty, "events queue failed to reset")
-        XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty, "people queue failed to reset")
         let testMixpanel2 = Mixpanel.initialize(token: randomId(), flushInterval: 60)
         waitForTrackingQueue(testMixpanel2)
         #if MIXPANEL_UNIQUE_DISTINCT_ID

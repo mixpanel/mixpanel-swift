@@ -9,7 +9,9 @@
 import Foundation
 
 protocol FlushDelegate: AnyObject {
-    func flush(performFullFlush: Bool, completion: (() -> Void)?)
+    /// Returns `true` if the flush started successfully; `false` if the request was rejected because another flush is already in progress.
+    @discardableResult
+    func flush(performFullFlush: Bool, completion: (() -> Void)?) -> Bool
     func removeProcessedEntities(type: FlushType, ids: [Int32])
 
     #if os(iOS)
@@ -76,7 +78,6 @@ class Flush: AppLifecycle {
                     _flushInterval = newValue
                 })
 
-            delegate?.flush(performFullFlush: false, completion: nil)
             startFlushTimer()
         }
     }
@@ -99,13 +100,18 @@ class Flush: AppLifecycle {
             autoreleaseFrequency: .workItem)
     }
 
+    /// Returns `false` only when a real network send failed; `true` for a request-not-allowed
+    /// no-op, an empty queue, an unserializable batch (handled by dropping it), or a successful
+    /// send. Callers use this to decide whether to keep draining the same queue type or move on
+    /// to the next one — a single failed type should not block the others in the same pass.
+    @discardableResult
     func flushQueue(
         _ queue: Queue, type: FlushType, headers: [String: String], queryItems: [URLQueryItem]
-    ) {
+    ) -> Bool {
         if flushRequest.requestNotAllowed() {
-            return
+            return true
         }
-        flushQueueInBatches(queue, type: type, headers: headers, queryItems: queryItems)
+        return flushQueueInBatches(queue, type: type, headers: headers, queryItems: queryItems)
     }
 
     func startFlushTimer() {
@@ -128,7 +134,7 @@ class Flush: AppLifecycle {
     }
 
     @objc func flushSelector() {
-        delegate?.flush(performFullFlush: false, completion: nil)
+        delegate?.flush(performFullFlush: true, completion: nil)
     }
 
     func stopFlushTimer() {
@@ -140,76 +146,61 @@ class Flush: AppLifecycle {
         }
     }
 
+    /// Sends `queue` as one request. The caller reads at most `flushBatchSize` rows per queue,
+    /// so what arrives here is already a single request's worth; draining more than that is the
+    /// caller's loop, not this method's.
+    ///
+    /// Rows are removed only once the server has accepted them, or when they cannot be
+    /// serialized at all — an unserializable batch would otherwise be re-read and retried by
+    /// every later flush forever. A failed send leaves the rows queued for the next flush.
+    ///
+    /// Returns `false` only for a real network send failure; `true` for an empty queue or an
+    /// unserializable batch (dropped, not retried) as well as a successful send.
+    @discardableResult
     func flushQueueInBatches(
         _ queue: Queue, type: FlushType, headers: [String: String], queryItems: [URLQueryItem]
-    ) {
-        var mutableQueue = queue
-        while !mutableQueue.isEmpty {
-            var shouldBreak = false
-            autoreleasepool {
-                let batchSize = min(mutableQueue.count, flushBatchSize)
-                let range = 0..<batchSize
-                var batch = Array(mutableQueue[range])
-                let ids: [Int32] = batch.map { entity in
-                    (entity["id"] as? Int32) ?? 0
-                }
-                MixpanelLogger.debug(message: "Sending batch of data")
-                MixpanelLogger.debug(message: batch as Any)
-                let requestData = JSONHandler.encodeAPIData(batch)
-
-                batch = []
-
-                guard let requestData = requestData else {
-                    MixpanelLogger.warn(message: "Failed to serialize batch, dropping \(ids.count) events")
-                    delegate?.removeProcessedEntities(type: type, ids: ids)
-                    mutableQueue = self.removeProcessedBatch(
-                        batchSize: batchSize,
-                        queue: mutableQueue,
-                        type: type)
-                    return
-                }
-
-                #if os(iOS)
-                if !MixpanelInstance.isiOSAppExtension() {
-                    delegate?.updateNetworkActivityIndicator(true)
-                }
-                #endif  // os(iOS)
-                let success = flushRequest.sendRequest(
-                    requestData,
-                    type: type,
-                    useIP: useIPAddressForGeoLocation,
-                    headers: headers,
-                    queryItems: queryItems, useGzipCompression: useGzipCompression)
-                #if os(iOS)
-                if !MixpanelInstance.isiOSAppExtension() {
-                    delegate?.updateNetworkActivityIndicator(false)
-                }
-                #endif  // os(iOS)
-                if success {
-                    delegate?.removeProcessedEntities(type: type, ids: ids)
-                    mutableQueue = self.removeProcessedBatch(
-                        batchSize: batchSize,
-                        queue: mutableQueue,
-                        type: type)
-                } else {
-                    shouldBreak = true
-                }
-            }
-            if shouldBreak {
-                break
-            }
+    ) -> Bool {
+        guard !queue.isEmpty else {
+            return true
         }
-    }
+        var sendSucceeded = true
+        // Drains this batch's encoding temporaries before the caller's next queue is encoded,
+        // rather than letting all three (events, people, groups) accumulate in one work item.
+        autoreleasepool {
+            let ids: [Int32] = queue.map { entity in
+                (entity["id"] as? Int32) ?? 0
+            }
+            MixpanelLogger.debug(message: "Sending batch of data")
+            MixpanelLogger.debug(message: queue as Any)
 
-    func removeProcessedBatch(batchSize: Int, queue: Queue, type: FlushType) -> Queue {
-        var shadowQueue = queue
-        let range = 0..<batchSize
-        if let lastIndex = range.last, shadowQueue.count - 1 > lastIndex {
-            shadowQueue.removeSubrange(range)
-        } else {
-            shadowQueue.removeAll()
+            guard let requestData = JSONHandler.encodeAPIData(queue) else {
+                MixpanelLogger.warn(message: "Failed to serialize batch, dropping \(ids.count) events")
+                delegate?.removeProcessedEntities(type: type, ids: ids)
+                return
+            }
+
+            #if os(iOS)
+            if !MixpanelInstance.isiOSAppExtension() {
+                delegate?.updateNetworkActivityIndicator(true)
+            }
+            #endif  // os(iOS)
+            let success = flushRequest.sendRequest(
+                requestData,
+                type: type,
+                useIP: useIPAddressForGeoLocation,
+                headers: headers,
+                queryItems: queryItems, useGzipCompression: useGzipCompression)
+            #if os(iOS)
+            if !MixpanelInstance.isiOSAppExtension() {
+                delegate?.updateNetworkActivityIndicator(false)
+            }
+            #endif  // os(iOS)
+            if success {
+                delegate?.removeProcessedEntities(type: type, ids: ids)
+            }
+            sendSucceeded = success
         }
-        return shadowQueue
+        return sendSucceeded
     }
 
     // MARK: - Lifecycle

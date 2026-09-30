@@ -36,7 +36,7 @@ def generate_docs():
     subprocess.call('git push', shell=True)
 
 def add_tag():
-    subprocess.call('git tag -a v{} -m "version {}"'.format(args.new, args.new), shell=True)
+    subprocess.call('git tag -a {} -m "version {}"'.format(args.new, args.new), shell=True)
     subprocess.call('git push origin --tags', shell=True)
 
 def pushPod():

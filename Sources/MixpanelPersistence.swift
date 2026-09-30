@@ -128,6 +128,8 @@ class MixpanelPersistence {
         type: PersistenceType, batchSize: Int = Int.max, flag: Bool = false
     ) -> [InternalProperties] {
         let entities = mpdb.readRows(type, numRows: batchSize, flag: flag)
+        // Only identified people rows are backfilled, and only when `$distinct_id` is missing.
+        // Unidentified rows have no owner yet; `identifyPeople` stamps them when one is known.
         if type == PersistenceType.people && flag != PersistenceConstant.unIdentifiedFlag {
             let distinctId = MixpanelPersistence.loadIdentity(instanceName: instanceName).distinctID
             return entities.map { entityWithDistinctId($0, distinctId: distinctId) }

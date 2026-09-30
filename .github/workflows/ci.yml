@@ -17,12 +17,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Current Xcode (runner default)
-          - { platform: iOS,     xcode: current, runner: macos-latest, scheme: MixpanelDemo,      action: test,  destination: "platform=iOS Simulator,name=iPhone 17 Pro,OS=latest" }
-          - { platform: macOS,   xcode: current, runner: macos-latest, scheme: MixpanelDemoMac,   action: test,  destination: "platform=macOS,arch=arm64" }
-          - { platform: tvOS,    xcode: current, runner: macos-latest, scheme: MixpanelDemoTV,    action: test,  destination: "platform=tvOS Simulator,name=Apple TV" }
-          - { platform: watchOS, xcode: current, runner: macos-latest, scheme: MixpanelDemoWatch, action: build, destination: "generic/platform=watchOS Simulator" }
-          # Xcode 27 (preview image)
+          # Latest Xcode 26.x
+          - { platform: iOS,     xcode: '26',   runner: macos-26,     scheme: MixpanelDemo,      action: test,  destination: "platform=iOS Simulator,name=iPhone 17 Pro,OS=latest" }
+          - { platform: macOS,   xcode: '26',   runner: macos-26,     scheme: MixpanelDemoMac,   action: test,  destination: "platform=macOS,arch=arm64" }
+          - { platform: tvOS,    xcode: '26',   runner: macos-26,     scheme: MixpanelDemoTV,    action: test,  destination: "platform=tvOS Simulator,name=Apple TV" }
+          - { platform: watchOS, xcode: '26',   runner: macos-26,     scheme: MixpanelDemoWatch, action: build, destination: "generic/platform=watchOS Simulator" }
+          # Xcode 27 
           - { platform: iOS,     xcode: '27.0', runner: xcode-27, scheme: MixpanelDemo,      action: test,  destination: "platform=iOS Simulator,name=iPhone 18 Pro,OS=27.0" }
           - { platform: macOS,   xcode: '27.0', runner: xcode-27, scheme: MixpanelDemoMac,   action: test,  destination: "platform=macOS,arch=arm64" }
           - { platform: tvOS,    xcode: '27.0', runner: xcode-27, scheme: MixpanelDemoTV,    action: test,  destination: "platform=tvOS Simulator,name=Apple TV 4K (3rd generation),OS=27.0" }
@@ -30,12 +30,11 @@ jobs:
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
     - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90  # v1
-      if: matrix.xcode != 'current'
       with:
         xcode-version: ${{ matrix.xcode }}
 
     - name: Ensure ${{ matrix.platform }} simulator runtime is installed
-      if: matrix.xcode != 'current' && (matrix.platform == 'tvOS' || matrix.platform == 'watchOS')
+      if: matrix.xcode == '27.0' && (matrix.platform == 'tvOS' || matrix.platform == 'watchOS')
       run: xcodebuild -downloadPlatform ${{ matrix.platform }}
 
     - name: Build and ${{ matrix.action }} (${{ matrix.platform }}, Xcode ${{ matrix.xcode }})

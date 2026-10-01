@@ -133,6 +133,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Flush timer's interval.
     /// Setting a flush interval of 0 will turn off the flush timer and you need to call the flush() API manually
     /// to upload queued data to the Mixpanel server.
+    /// As of SDK version 6.8.0, setting it no longer flushes immediately. Data left from the previous
+    /// session is sent once, 10 seconds after launch, so a `serverURL` set after initialization, such
+    /// as the EU or India data center, applies first. With an interval of 0 (manual flush), this
+    /// launch flush stays disabled too.
     open var flushInterval: Double {
         get {
             return flushInstance.flushInterval
@@ -339,6 +343,12 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     var superProperties = InternalProperties()
     var trackingQueue: DispatchQueue
     var networkQueue: DispatchQueue
+
+    // Flush loop state. Read and written only on `trackingQueue`.
+    private var isFlushing = false
+    private var hasPendingFlush = false
+    private var pendingFlushCompletion: (() -> Void)?
+
     var optOutStatus: Bool?
     var useUniqueDistinctId: Bool
     var timedEvents = InternalProperties()
@@ -533,6 +543,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         autocapture = Autocapture()
         autocapture.mixpanelInstance = self
         flushInstance.flushInterval = flushInterval
+        scheduleLaunchFlush(flushInterval: flushInterval)
         #if !os(watchOS)
         setupListeners()
         #endif
@@ -1021,7 +1032,7 @@ extension MixpanelInstance {
                 self.readWriteLock.write {
                     self.people.distinctId = distinctId
                 }
-                self.mixpanelPersistence.identifyPeople(token: self.apiToken)
+                self.mixpanelPersistence.identifyPeople(distinctId: distinctId)
             } else {
                 self.people.distinctId = nil
             }
@@ -1151,6 +1162,10 @@ extension MixpanelInstance {
        Clears all stored properties including the distinct Id.
        Useful if your app's user logs out.
 
+       As of SDK version 6.8.0, queued events and identified people updates are kept and sent
+       under the identity they were tracked with. People updates queued before `identify()` are
+       discarded.
+
        - parameter completion: an optional completion handler for when the reset has completed.
        */
     public func reset(completion: (() -> Void)? = nil) {
@@ -1172,7 +1187,10 @@ extension MixpanelInstance {
                 self.alias = nil
             }
 
-            self.mixpanelPersistence.resetEntities()
+            // Queued events and identified people/group updates already carry their identity and
+            // are sent by later flushes. Only people updates queued before identify are dropped:
+            // their target identity was never known.
+            self.mixpanelPersistence.removeUnidentifiedPeople()
             self.archive()
 
             // reset() does not call identify(), so the loadFlags() call inside identify() never
@@ -1288,7 +1306,11 @@ extension MixpanelInstance {
        `flushOnBackground` is on by default). You only need to call this
        method manually if you want to force a flush at a particular moment.
 
-       - parameter performFullFlush: A optional boolean value indicating whether a full flush should be performed. If `true`, a full flush will be triggered, sending all events to the server. Default to `false`, a partial flush will be executed for reducing memory footprint.
+       As of SDK version 6.8.0, every flush sends the whole queue in batches of `flushBatchSize`,
+       holding one batch in memory at a time. A flush requested while one is running is merged
+       into a single follow-up flush.
+
+       - parameter performFullFlush: Kept for compatibility. As of SDK version 6.8.0 it has no effect.
        - parameter completion: an optional completion handler for when the flush has completed.
        */
     public func flush(performFullFlush: Bool = false, completion: (() -> Void)? = nil) {
@@ -1305,42 +1327,110 @@ extension MixpanelInstance {
                 }
                 return
             }
+            if self.isFlushing {
+                // One follow-up pass covers every flush requested meanwhile, but every caller's
+                // completion must still fire, so completions are chained rather than replaced.
+                self.hasPendingFlush = true
+                if let completion = completion {
+                    let earlier = self.pendingFlushCompletion
+                    self.pendingFlushCompletion = {
+                        earlier?()
+                        completion()
+                    }
+                }
+                return
+            }
+            self.startFlushPass(completion: completion)
+        }
+    }
 
-            if let shouldFlush = self.delegate?.mixpanelWillFlush(self), !shouldFlush {
+    private static let launchFlushDelay: TimeInterval = 10
+
+    /// Sends data left from the previous session once, shortly after launch. The delay lets the app
+    /// set a `serverURL` after initialization first. Skipped in manual mode (interval 0) and when
+    /// the timer would fire before it.
+    private func scheduleLaunchFlush(flushInterval: Double) {
+        guard flushInterval > MixpanelInstance.launchFlushDelay else {
+            return
+        }
+        trackingQueue.asyncAfter(deadline: .now() + MixpanelInstance.launchFlushDelay) { [weak self] in
+            // Re-check: the app may have switched to manual mode (interval 0) since init.
+            guard let self = self, self.flushInterval > 0 else {
+                return
+            }
+            self.flush()
+        }
+    }
+
+    /// Must be called on `trackingQueue`.
+    private func startFlushPass(completion: (() -> Void)?) {
+        if let shouldFlush = delegate?.mixpanelWillFlush(self), !shouldFlush {
+            finishFlushPass(completion: completion)
+            return
+        }
+        isFlushing = true
+        flushNextBatch([.events, .people, .groups], completion: completion)
+    }
+
+    /// Must be called on `trackingQueue`.
+    private func finishFlushPass(completion: (() -> Void)?) {
+        isFlushing = false
+        if let completion = completion {
+            DispatchQueue.main.async(execute: completion)
+        }
+        if hasPendingFlush {
+            hasPendingFlush = false
+            let pendingCompletion = pendingFlushCompletion
+            pendingFlushCompletion = nil
+            startFlushPass(completion: pendingCompletion)
+        }
+    }
+
+    /// Reads one batch of the first remaining type on `trackingQueue`, sends it on `networkQueue`,
+    /// then returns to `trackingQueue` to delete what was sent and read the next batch. Deleting
+    /// and reading in the same block guarantees a batch is never read twice.
+    /// Must be called on `trackingQueue`.
+    private func flushNextBatch(_ types: ArraySlice<FlushType>, completion: (() -> Void)?) {
+        guard let type = types.first, !hasOptedOutTracking() else {
+            finishFlushPass(completion: completion)
+            return
+        }
+        let batchSize = flushBatchSize
+        let batch = mixpanelPersistence.loadEntitiesInBatch(
+            type: persistenceTypeFromFlushType(type), batchSize: batchSize)
+        if batch.isEmpty {
+            flushNextBatch(types.dropFirst(), completion: completion)
+            return
+        }
+        let ids: [Int32] = batch.map { ($0["id"] as? Int32) ?? 0 }
+        let isLastBatch = batch.count < batchSize
+
+        networkQueue.async { [weak self] in
+            guard let self = self else {
                 if let completion = completion {
                     DispatchQueue.main.async(execute: completion)
                 }
                 return
             }
-
-            // automatic events will NOT be flushed until one of the flags is non-nil
-            let eventQueue = self.mixpanelPersistence.loadEntitiesInBatch(
-                type: self.persistenceTypeFromFlushType(.events),
-                batchSize: performFullFlush ? Int.max : self.flushBatchSize,
-                excludeAutomaticEvents: !self.trackAutomaticEventsEnabled
-            )
-            let peopleQueue = self.mixpanelPersistence.loadEntitiesInBatch(
-                type: self.persistenceTypeFromFlushType(.people),
-                batchSize: performFullFlush ? Int.max : self.flushBatchSize
-            )
-            let groupsQueue = self.mixpanelPersistence.loadEntitiesInBatch(
-                type: self.persistenceTypeFromFlushType(.groups),
-                batchSize: performFullFlush ? Int.max : self.flushBatchSize
-            )
-
-            self.networkQueue.async { [weak self, completion] in
+            let result = self.sendBatch(batch, type: type)
+            self.trackingQueue.async { [weak self] in
                 guard let self = self else {
                     if let completion = completion {
                         DispatchQueue.main.async(execute: completion)
                     }
                     return
                 }
-                self.flushQueue(eventQueue, type: .events)
-                self.flushQueue(peopleQueue, type: .people)
-                self.flushQueue(groupsQueue, type: .groups)
-
-                if let completion = completion {
-                    DispatchQueue.main.async(execute: completion)
+                switch result {
+                    case .sent, .dropped:
+                        self.mixpanelPersistence.removeEntitiesInBatch(
+                            type: self.persistenceTypeFromFlushType(type), ids: ids)
+                        self.flushNextBatch(
+                            isLastBatch ? types.dropFirst() : types, completion: completion)
+                    case .failed:
+                        // Keep the rows and try the remaining types, as before.
+                        self.flushNextBatch(types.dropFirst(), completion: completion)
+                    case .notAllowed:
+                        self.finishFlushPass(completion: completion)
                 }
             }
         }
@@ -1357,27 +1447,17 @@ extension MixpanelInstance {
         }
     }
 
-    func flushQueue(_ queue: Queue, type: FlushType) {
+    /// Must be called on `networkQueue`.
+    func sendBatch(_ batch: Queue, type: FlushType) -> FlushBatchResult {
         if hasOptedOutTracking() {
-            return
+            return .notAllowed
         }
         let proxyServerResource = proxyServerDelegate?.mixpanelResourceForProxyServer(name)
         let headers: [String: String] = proxyServerResource?.headers ?? [:]
         let queryItems = proxyServerResource?.queryItems ?? []
 
-        self.flushInstance.flushQueue(queue, type: type, headers: headers, queryItems: queryItems)
+        return flushInstance.sendBatch(batch, type: type, headers: headers, queryItems: queryItems)
     }
-
-    func removeProcessedEntities(type: FlushType, ids: [Int32]) {
-        trackingQueue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-            self.mixpanelPersistence.removeEntitiesInBatch(
-                type: self.persistenceTypeFromFlushType(type), ids: ids)
-        }
-    }
-
 }
 
 extension MixpanelInstance {

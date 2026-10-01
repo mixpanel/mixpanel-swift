@@ -16,7 +16,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/mixpanel/mixpanel-swift-common.git",
-            branch: "main"
+            from: "2.0.0"
         )
     ],
     targets: [

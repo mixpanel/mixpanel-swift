@@ -1354,7 +1354,11 @@ extension MixpanelInstance {
             return
         }
         trackingQueue.asyncAfter(deadline: .now() + MixpanelInstance.launchFlushDelay) { [weak self] in
-            self?.flush()
+            // Re-check: the app may have switched to manual mode (interval 0) since init.
+            guard let self = self, self.flushInterval > 0 else {
+                return
+            }
+            self.flush()
         }
     }
 

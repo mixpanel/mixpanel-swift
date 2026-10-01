@@ -1799,10 +1799,17 @@ class MixpanelFlushLoopTests: MixpanelBaseTests {
         timed.serverURL = "https://\(FlushRecordingURLProtocol.host)"
         // Manual mode (interval 0) never flushes on its own.
         let manual = makeInstance()
+        // Starts on the default interval, then switches to manual mode before the launch flush.
+        let switched = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        switched.serverURL = "https://\(FlushRecordingURLProtocol.host)"
+        switched.flushInterval = 0
         timed.track(event: "timed")
         manual.track(event: "manual")
+        switched.track(event: "switched")
         waitForTrackingQueue(timed)
         waitForTrackingQueue(manual)
+        waitForTrackingQueue(switched)
 
         pause(2)
         XCTAssertTrue(trackedEventNames().isEmpty, "nothing should be sent right after init")
@@ -1810,7 +1817,11 @@ class MixpanelFlushLoopTests: MixpanelBaseTests {
         pause(11)
         XCTAssertEqual(trackedEventNames(), ["timed"], "only the timer instance flushes at launch")
         XCTAssertEqual(eventQueue(token: manual.apiToken).count, 1, "manual mode keeps its queue")
+        XCTAssertEqual(
+            eventQueue(token: switched.apiToken).count, 1,
+            "switching to manual mode cancels the launch flush")
         removeDBfile(timed.apiToken)
         removeDBfile(manual.apiToken)
+        removeDBfile(switched.apiToken)
     }
 }

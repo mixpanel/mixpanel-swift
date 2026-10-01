@@ -9,8 +9,8 @@ import Foundation
 import MixpanelSwiftCommon
 
 let mixpanelCustomOperators: [String: MixpanelJSONLogicRule.CustomOperator] = [
-    "semver_compare": semverCompare,
-    "datetime_compare": datetimeCompare,
+    "semver_compare": { semverCompare($0) },
+    "datetime_compare": { datetimeCompare($0) },
 ]
 
 func applyRuleWithCustomOperators(_ rule: String, to data: String) throws -> Bool {

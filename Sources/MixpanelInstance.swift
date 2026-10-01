@@ -125,8 +125,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     /// Controls whether to show spinning network activity indicator when flushing
     /// data to the Mixpanel servers. Defaults to true.
-    /// No-op: the status-bar network indicator is ignored on iOS 13+, below the SDK's iOS 15 floor.
-    @available(iOS, deprecated: 13.0, message: "No effect on iOS 13+")
     open var showNetworkActivityIndicator = true
 
     /// This allows enabling or disabling collecting common mobile events,
@@ -857,8 +855,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif  // os(OSX)
 
     #if os(iOS)
-    // No-op: the status-bar network indicator is ignored on iOS 13+, below the SDK's iOS 15 floor.
-    func updateNetworkActivityIndicator(_ on: Bool) {}
+    func updateNetworkActivityIndicator(_ on: Bool) {
+        if showNetworkActivityIndicator {
+            DispatchQueue.main.async { [on] in
+                MixpanelInstance.sharedUIApplication()?.isNetworkActivityIndicatorVisible = on
+            }
+        }
+    }
 
     #if os(iOS) && !targetEnvironment(macCatalyst)
     @objc func setCurrentRadio() {

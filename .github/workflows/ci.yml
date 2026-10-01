@@ -84,4 +84,4 @@ jobs:
     - name: Install Carthage
       run: brew install carthage
     - name: carthage build (Xcode 27)
-      run: carthage build --no-skip-current --use-xcframeworks --platform iOS,tvOS,macOS,watchOS --no-use-binaries
+      run: ./scripts/carthage.sh

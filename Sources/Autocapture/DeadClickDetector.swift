@@ -30,7 +30,7 @@ final class DeadClickDetector {
 
     private var pendingCheck: PendingCheck?
     private weak var currentWindow: UIWindow?
-    private var checkTask: Any?  // Task<Void, Never> on iOS 13+
+    private var checkTask: Task<Void, Never>?
     /// Bumped every time a check is scheduled or cancelled. A scheduled check only runs while
     /// the generation it captured is still current, so a superseded timer can never emit — not
     /// even on iOS 12, where the `asyncAfter` fallback cannot be cancelled.
@@ -158,9 +158,7 @@ final class DeadClickDetector {
         generation &+= 1
         lock.unlock()
 
-        if #available(iOS 13.0, *) {
-            (task as? Task<Void, Never>)?.cancel()
-        }
+        task?.cancel()
     }
 
     // MARK: - Private
@@ -170,14 +168,6 @@ final class DeadClickDetector {
     /// cancellation that lands between scheduling and storing still takes effect.
     private func scheduleFinalCheck(for scheduledGeneration: UInt64) {
         let timeWindow = timeWindowMs
-
-        guard #available(iOS 13.0, *) else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeWindow)) {
-                [weak self] in
-                self?.performFinalCheck(for: scheduledGeneration)
-            }
-            return
-        }
 
         let task = Task { [weak self] in
             try? await Task.sleep(nanoseconds: UInt64(timeWindow) * 1_000_000)
@@ -237,17 +227,7 @@ final class DeadClickDetector {
         var contentHash = 17
 
         // Count visible windows (handles alerts, sheets, etc.)
-        // Use windowScene.windows for iOS 13+, fallback to just counting this window
-        let windowCount: Int
-        if #available(iOS 13.0, *) {
-            if let scene = window.windowScene {
-                windowCount = scene.windows.filter { $0.isKeyWindow || !$0.isHidden }.count
-            } else {
-                windowCount = 1
-            }
-        } else {
-            windowCount = 1  // Fallback for older iOS
-        }
+        let windowCount = window.windowScene?.windows.filter { $0.isKeyWindow || !$0.isHidden }.count ?? 1
 
         // Walk view hierarchy
         func processView(_ view: UIView, depth: Int = 0) {

@@ -1421,6 +1421,17 @@ class MixpanelDemoTests: MixpanelBaseTests {
         removeDBfile(token)
     }
 
+    func testMPDBBeginTransactionReportsOutcome() {
+        let token = randomId()
+        let mpdb = MPDB(token: token)
+        XCTAssertTrue(mpdb.beginTransaction(), "opening a transaction should succeed")
+        // SQLite rejects a nested BEGIN, which stands in for any failure to open a transaction.
+        XCTAssertFalse(mpdb.beginTransaction(), "a failed BEGIN should report failure")
+        XCTAssertTrue(mpdb.commitTransaction())
+        mpdb.close()
+        removeDBfile(token)
+    }
+
     func testMPDB() {
         // we test with this crazy string because the "token" here can be the instanceName
         // which can be any string the user likes, MPDB should strip the non-alphanumeric characters to prevent SQL errors
@@ -1773,5 +1784,33 @@ class MixpanelFlushLoopTests: MixpanelBaseTests {
         XCTAssertEqual(Set(trackedEventNames()), ["$ae_session", "regular"])
         XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty, "no row should be stranded")
         removeDBfile(testMixpanel.apiToken)
+    }
+
+    private func pause(_ seconds: TimeInterval) {
+        let done = expectation(description: "pause \(seconds)s")
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) { done.fulfill() }
+        wait(for: [done], timeout: seconds + 10)
+    }
+
+    func testLaunchFlushSendsQueuedDataOnceAfterDelay() {
+        // The timer instance sets its serverURL after initialize, as an EU or India app would.
+        let timed = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 60)
+        timed.serverURL = "https://\(FlushRecordingURLProtocol.host)"
+        // Manual mode (interval 0) never flushes on its own.
+        let manual = makeInstance()
+        timed.track(event: "timed")
+        manual.track(event: "manual")
+        waitForTrackingQueue(timed)
+        waitForTrackingQueue(manual)
+
+        pause(2)
+        XCTAssertTrue(trackedEventNames().isEmpty, "nothing should be sent right after init")
+
+        pause(11)
+        XCTAssertEqual(trackedEventNames(), ["timed"], "only the timer instance flushes at launch")
+        XCTAssertEqual(eventQueue(token: manual.apiToken).count, 1, "manual mode keeps its queue")
+        removeDBfile(timed.apiToken)
+        removeDBfile(manual.apiToken)
     }
 }

@@ -281,25 +281,33 @@ class MPDB {
             let tableName = tableNameFor(persistenceType)
             let deleteString = "DELETE FROM \(tableName) WHERE flag = \(flag ? 1 : 0)"
             var deleteStatement: OpaquePointer?
+            var failed = false
             if sqlite3_prepare_v2(db, deleteString, -1, &deleteStatement, nil) == SQLITE_OK {
                 if sqlite3_step(deleteStatement) == SQLITE_DONE {
                     MixpanelLogger.info(message: "Successfully deleted flag=\(flag) rows from table \(tableName)")
                 } else {
                     logSqlError(message: "Failed to delete flag=\(flag) rows from table \(tableName)")
-                    recreate()
+                    failed = true
                 }
             } else {
                 logSqlError(message: "DELETE statement for table \(tableName) could not be prepared")
-                recreate()
+                failed = true
             }
             sqlite3_finalize(deleteStatement)
+            // Recreate only after finalizing: SQLite won't close a connection with a live statement.
+            if failed {
+                recreate()
+            }
         } else {
             reconnect()
         }
     }
 
-    func beginTransaction() {
-        execute("BEGIN TRANSACTION;")
+    /// Returns true only when a transaction was opened. Callers must stop on false: their writes
+    /// would otherwise autocommit one by one and the later commit would report failure.
+    @discardableResult
+    func beginTransaction() -> Bool {
+        return execute("BEGIN TRANSACTION;")
     }
 
     /// Returns true only when an open transaction was committed. On a failed commit the database
@@ -325,13 +333,16 @@ class MPDB {
         return true
     }
 
-    private func execute(_ sql: String) {
+    private func execute(_ sql: String) -> Bool {
         if let db = connection {
             if sqlite3_exec(db, sql, nil, nil, nil) != SQLITE_OK {
                 logSqlError(message: "Failed to execute: \(sql)")
+                return false
             }
+            return true
         } else {
             reconnect()
+            return false
         }
     }
 

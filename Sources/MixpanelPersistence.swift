@@ -167,7 +167,11 @@ class MixpanelPersistence {
                 return
             }
             var updated = 0
-            mpdb.beginTransaction()
+            // Without a transaction the updates would autocommit and the commit below would fail,
+            // so stop here and leave the rows unidentified.
+            guard mpdb.beginTransaction() else {
+                return
+            }
             for row in rows {
                 var entity = row
                 guard let id = entity.removeValue(forKey: "id") as? Int32 else {

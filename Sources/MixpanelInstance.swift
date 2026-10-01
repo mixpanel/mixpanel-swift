@@ -133,9 +133,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Flush timer's interval.
     /// Setting a flush interval of 0 will turn off the flush timer and you need to call the flush() API manually
     /// to upload queued data to the Mixpanel server.
-    /// As of SDK version 6.8.0, setting it no longer triggers an immediate flush, including during
-    /// initialization. Queued data is no longer sent to the default server before a `serverURL` set
-    /// after initialization, such as the EU or India data center, takes effect.
+    /// As of SDK version 6.8.0, setting it no longer flushes immediately. Data left from the previous
+    /// session is sent once, 10 seconds after launch, so a `serverURL` set after initialization, such
+    /// as the EU or India data center, applies first. With an interval of 0 (manual flush), this
+    /// launch flush stays disabled too.
     open var flushInterval: Double {
         get {
             return flushInstance.flushInterval
@@ -542,6 +543,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         autocapture = Autocapture()
         autocapture.mixpanelInstance = self
         flushInstance.flushInterval = flushInterval
+        scheduleLaunchFlush(flushInterval: flushInterval)
         #if !os(watchOS)
         setupListeners()
         #endif
@@ -1339,6 +1341,20 @@ extension MixpanelInstance {
                 return
             }
             self.startFlushPass(completion: completion)
+        }
+    }
+
+    private static let launchFlushDelay: TimeInterval = 10
+
+    /// Sends data left from the previous session once, shortly after launch. The delay lets the app
+    /// set a `serverURL` after initialization first. Skipped in manual mode (interval 0) and when
+    /// the timer would fire before it.
+    private func scheduleLaunchFlush(flushInterval: Double) {
+        guard flushInterval > MixpanelInstance.launchFlushDelay else {
+            return
+        }
+        trackingQueue.asyncAfter(deadline: .now() + MixpanelInstance.launchFlushDelay) { [weak self] in
+            self?.flush()
         }
     }
 

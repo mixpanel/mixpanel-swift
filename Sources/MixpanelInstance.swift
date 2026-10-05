@@ -572,7 +572,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if optOutTrackingByDefault && (hasOptedOutTracking() || optOutStatus == nil) {
             optOutTracking()
         }
-        
+
         flushInstance.flushInterval = flushInterval
 
         // Initialize autocapture if enabled (iOS only, excluding Mac Catalyst)
@@ -1416,7 +1416,7 @@ extension MixpanelInstance {
                             isLastBatch ? types.dropFirst() : types, completion: completion)
                     case .failed:
                         // Keep the rows and try the remaining types, as before.
-                    MixpanelLogger.info(message: "Flush failed for \(type), moving to the next type")
+                        MixpanelLogger.info(message: "Flush failed for \(type), moving to the next type")
                         self.flushNextBatch(types.dropFirst(), completion: completion)
                     case .notAllowed:
                         self.finishFlushPass(completion: completion)

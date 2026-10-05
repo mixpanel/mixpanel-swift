@@ -547,7 +547,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         people.delegate = self
         autocapture = Autocapture()
         autocapture.mixpanelInstance = self
-        flushInstance.flushInterval = flushInterval
         #if !os(watchOS)
         setupListeners()
         #endif
@@ -573,6 +572,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if optOutTrackingByDefault && (hasOptedOutTracking() || optOutStatus == nil) {
             optOutTracking()
         }
+        
+        flushInstance.flushInterval = flushInterval
 
         // Initialize autocapture if enabled (iOS only, excluding Mac Catalyst)
         // Done after opt-out check so autocapture is not started when tracking is opted out.
@@ -1385,6 +1386,7 @@ extension MixpanelInstance {
         let batch = mixpanelPersistence.loadEntitiesInBatch(
             type: persistenceTypeFromFlushType(type), batchSize: batchSize)
         if batch.isEmpty {
+            MixpanelLogger.info(message: "No records found for \(type), moving to the next type")
             flushNextBatch(types.dropFirst(), completion: completion)
             return
         }
@@ -1414,6 +1416,7 @@ extension MixpanelInstance {
                             isLastBatch ? types.dropFirst() : types, completion: completion)
                     case .failed:
                         // Keep the rows and try the remaining types, as before.
+                    MixpanelLogger.info(message: "Flush failed for \(type), moving to the next type")
                         self.flushNextBatch(types.dropFirst(), completion: completion)
                     case .notAllowed:
                         self.finishFlushPass(completion: completion)

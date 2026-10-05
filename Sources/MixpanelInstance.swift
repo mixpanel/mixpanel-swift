@@ -137,7 +137,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     ///
     /// Deprecated as of SDK version 6.8.0: set the interval with `MixpanelOptions.flushInterval`
     /// when initializing instead.
-    @available(*, deprecated, message: "Set flushInterval in MixpanelOptions when initializing instead, this property will be marked as internal in future releases.")
+    @available(
+        *, deprecated,
+        message:
+            "Configure flushInterval through MixpanelOptions during initialization. This property will become private in a future release."
+    )
     open var flushInterval: Double {
         get {
             return flushInstance.flushInterval

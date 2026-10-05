@@ -133,10 +133,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Flush timer's interval.
     /// Setting a flush interval of 0 will turn off the flush timer and you need to call the flush() API manually
     /// to upload queued data to the Mixpanel server.
-    /// As of SDK version 6.8.0, setting it no longer flushes immediately. Data left from the previous
-    /// session is sent once, 10 seconds after launch, so a `serverURL` set after initialization, such
-    /// as the EU or India data center, applies first. With an interval of 0 (manual flush), this
-    /// launch flush stays disabled too.
+    /// As of SDK version 6.8.0, setting an interval of 0 no longer triggers a flush.
+    ///
+    /// Deprecated as of SDK version 6.8.0: set the interval with `MixpanelOptions.flushInterval`
+    /// when initializing instead.
+    @available(*, deprecated, message: "Set flushInterval in MixpanelOptions when initializing instead, this property will be marked as internal in future releases.")
     open var flushInterval: Double {
         get {
             return flushInstance.flushInterval

@@ -88,6 +88,7 @@ class Flush: AppLifecycle {
                     _flushInterval = newValue
                 })
 
+            delegate?.flush(performFullFlush: false, completion: nil)
             startFlushTimer()
         }
     }

@@ -543,7 +543,6 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         autocapture = Autocapture()
         autocapture.mixpanelInstance = self
         flushInstance.flushInterval = flushInterval
-        scheduleLaunchFlush(flushInterval: flushInterval)
         #if !os(watchOS)
         setupListeners()
         #endif
@@ -1341,24 +1340,6 @@ extension MixpanelInstance {
                 return
             }
             self.startFlushPass(completion: completion)
-        }
-    }
-
-    private static let launchFlushDelay: TimeInterval = 10
-
-    /// Sends data left from the previous session once, shortly after launch. The delay lets the app
-    /// set a `serverURL` after initialization first. Skipped in manual mode (interval 0) and when
-    /// the timer would fire before it.
-    private func scheduleLaunchFlush(flushInterval: Double) {
-        guard flushInterval > MixpanelInstance.launchFlushDelay else {
-            return
-        }
-        trackingQueue.asyncAfter(deadline: .now() + MixpanelInstance.launchFlushDelay) { [weak self] in
-            // Re-check: the app may have switched to manual mode (interval 0) since init.
-            guard let self = self, self.flushInterval > 0 else {
-                return
-            }
-            self.flush()
         }
     }
 

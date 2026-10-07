@@ -844,6 +844,8 @@ class MixpanelDemoTests: MixpanelBaseTests {
         testMixpanel.registerSuperProperties(p)
         testMixpanel.people.set(properties: p)
         testMixpanel.archive()
+        // Suppress the network flush inside reset() so the queues can be inspected afterwards.
+        testMixpanel.delegate = self
         testMixpanel.reset()
         waitForTrackingQueue(testMixpanel)
 
@@ -857,8 +859,22 @@ class MixpanelDemoTests: MixpanelBaseTests {
         XCTAssertTrue(
             testMixpanel.currentSuperProperties().isEmpty,
             "super properties failed to reset")
-        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty, "events queue failed to reset")
-        XCTAssertTrue(peopleQueue(token: testMixpanel.apiToken).isEmpty, "people queue failed to reset")
+        // Queued events and identified people updates survive reset under their original identity.
+        let e1 = eventQueue(token: testMixpanel.apiToken).first { ($0["event"] as? String) == "e1" }
+        XCTAssertNotNil(e1, "queued event was dropped by reset")
+        XCTAssertEqual(
+            (e1?["properties"] as? InternalProperties)?["distinct_id"] as? String, "d1",
+            "queued event lost its original identity")
+        // Automatic events add a first-open `$set_once` row, so look for the explicit `$set`.
+        let peopleAfterReset = peopleQueue(token: testMixpanel.apiToken)
+        let p1Update = peopleAfterReset.first { ($0["$set"] as? InternalProperties)?["p1"] != nil }
+        XCTAssertNotNil(p1Update, "identified people update was dropped by reset")
+        XCTAssertTrue(
+            peopleAfterReset.allSatisfy { ($0["$distinct_id"] as? String) == "d1" },
+            "identified people updates lost their original identity")
+        XCTAssertTrue(
+            unIdentifiedPeopleQueue(token: testMixpanel.apiToken).isEmpty,
+            "unidentified people queue failed to reset")
         let testMixpanel2 = Mixpanel.initialize(
             token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
         waitForAsyncTasks()
@@ -1347,6 +1363,75 @@ class MixpanelDemoTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
+    func testMPDBReadRowsDeletesUnreadableRows() {
+        let token = randomId()
+        let mpdb = MPDB(token: token)
+        // More unreadable rows than one batch, ahead of the readable ones. One is valid JSON but not
+        // an object, which is also unreadable as a record.
+        for _ in 0..<55 {
+            mpdb.insertRow(.events, data: "not json".data(using: .utf8)!)
+        }
+        mpdb.insertRow(.events, data: "[1, 2]".data(using: .utf8)!)
+        for i in 0..<10 {
+            mpdb.insertRow(.events, data: JSONHandler.serializeJSONObject(["event": "e\(i)"])!)
+        }
+
+        let rows = mpdb.readRows(.events, numRows: 50)
+        XCTAssertEqual(
+            Set(rows.compactMap { $0["event"] as? String }), Set((0..<10).map { "e\($0)" }),
+            "readable rows behind unreadable ones should be returned")
+        XCTAssertEqual(rowCount(token, table: "events"), 10, "unreadable rows should be deleted")
+        mpdb.close()
+        removeDBfile(token)
+    }
+
+    func testMPDBUpdateRowReportsOutcome() {
+        let token = randomId()
+        let mpdb = MPDB(token: token)
+        let data = JSONHandler.serializeJSONObject(["$set": ["p1": "a"]])!
+        mpdb.insertRow(.people, data: data, flag: true)
+        guard let id = mpdb.readRows(.people, numRows: 1, flag: true).first?["id"] as? Int32 else {
+            return XCTFail("inserted row should be readable")
+        }
+
+        XCTAssertTrue(
+            mpdb.updateRow(.people, id: id, data: data, flag: false), "a valid update should succeed")
+        XCTAssertEqual(mpdb.readRows(.people, numRows: 10, flag: false).count, 1)
+
+        failPeopleUpdates(token)
+        XCTAssertFalse(
+            mpdb.updateRow(.people, id: id, data: data, flag: true), "a failed update should report failure")
+        XCTAssertTrue(
+            mpdb.readRows(.people, numRows: 10, flag: false).isEmpty,
+            "a failed update should recreate the database")
+        mpdb.close()
+        removeDBfile(token)
+    }
+
+    func testMPDBCommitTransactionReportsOutcome() {
+        let token = randomId()
+        let mpdb = MPDB(token: token)
+        XCTAssertFalse(mpdb.commitTransaction(), "committing with no open transaction should report failure")
+
+        mpdb.beginTransaction()
+        mpdb.insertRow(.events, data: JSONHandler.serializeJSONObject(["event": "e1"])!)
+        XCTAssertTrue(mpdb.commitTransaction(), "committing an open transaction should succeed")
+        XCTAssertEqual(mpdb.readRows(.events, numRows: 10).count, 1)
+        mpdb.close()
+        removeDBfile(token)
+    }
+
+    func testMPDBBeginTransactionReportsOutcome() {
+        let token = randomId()
+        let mpdb = MPDB(token: token)
+        XCTAssertTrue(mpdb.beginTransaction(), "opening a transaction should succeed")
+        // SQLite rejects a nested BEGIN, which stands in for any failure to open a transaction.
+        XCTAssertFalse(mpdb.beginTransaction(), "a failed BEGIN should report failure")
+        XCTAssertTrue(mpdb.commitTransaction())
+        mpdb.close()
+        removeDBfile(token)
+    }
+
     func testMPDB() {
         // we test with this crazy string because the "token" here can be the instanceName
         // which can be any string the user likes, MPDB should strip the non-alphanumeric characters to prevent SQL errors
@@ -1504,5 +1589,200 @@ class MixpanelDemoTests: MixpanelBaseTests {
         let testMixpanel = Mixpanel.initialize(token: randomId(), trackAutomaticEvents: false)
         XCTAssertTrue(
             testMixpanel.useGzipCompression == false, "the default gzip option disabled failed")
+    }
+}
+
+/// Records the records in every request body sent to `host`, so flush tests can count batches and
+/// rows without touching the network.
+private class FlushRecordingURLProtocol: URLProtocol {
+    static let host = "flush-loop-test.mixpanel.com"
+    private static let lock = NSLock()
+    private static var statusCode = 200
+    private static var recorded: [(path: String, records: [InternalProperties])] = []
+
+    static func reset(statusCode: Int = 200) {
+        lock.lock()
+        self.statusCode = statusCode
+        recorded = []
+        lock.unlock()
+    }
+
+    static func batches(pathContaining fragment: String) -> [[InternalProperties]] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recorded.filter { $0.path.contains(fragment) }.map { $0.records }
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        return request.url?.host == host
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        return request
+    }
+
+    override func startLoading() {
+        guard let url = request.url else { return }
+        let body = FlushRecordingURLProtocol.readBody(request)
+        let records = (try? JSONSerialization.jsonObject(with: body)) as? [InternalProperties] ?? []
+        FlushRecordingURLProtocol.lock.lock()
+        FlushRecordingURLProtocol.recorded.append((path: url.path, records: records))
+        let statusCode = FlushRecordingURLProtocol.statusCode
+        FlushRecordingURLProtocol.lock.unlock()
+
+        let response = HTTPURLResponse(
+            url: url, statusCode: statusCode, httpVersion: "HTTP/1.1", headerFields: nil)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: "1".data(using: .utf8)!)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+
+    private static func readBody(_ request: URLRequest) -> Data {
+        if let body = request.httpBody {
+            return body
+        }
+        guard let stream = request.httpBodyStream else {
+            return Data()
+        }
+        stream.open()
+        defer { stream.close() }
+        var data = Data()
+        var buffer = [UInt8](repeating: 0, count: 4096)
+        while stream.hasBytesAvailable {
+            let read = stream.read(&buffer, maxLength: buffer.count)
+            if read <= 0 {
+                break
+            }
+            data.append(buffer, count: read)
+        }
+        return data
+    }
+}
+
+class MixpanelFlushLoopTests: MixpanelBaseTests {
+
+    override func setUp() {
+        super.setUp()
+        FlushRecordingURLProtocol.reset()
+        URLProtocol.registerClass(FlushRecordingURLProtocol.self)
+    }
+
+    override func tearDown() {
+        URLProtocol.unregisterClass(FlushRecordingURLProtocol.self)
+        FlushRecordingURLProtocol.reset()
+        super.tearDown()
+    }
+
+    private func makeInstance() -> MixpanelInstance {
+        // flushInterval 0 disables the timer so only explicit flushes run.
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 0)
+        testMixpanel.serverURL = "https://\(FlushRecordingURLProtocol.host)"
+        waitForTrackingQueue(testMixpanel)
+        return testMixpanel
+    }
+
+    private func flushOnce(_ testMixpanel: MixpanelInstance) {
+        let flushed = expectation(description: "flush completed")
+        testMixpanel.flush { flushed.fulfill() }
+        wait(for: [flushed], timeout: 30)
+    }
+
+    private func trackedEventNames() -> [String] {
+        return FlushRecordingURLProtocol.batches(pathContaining: "track")
+            .flatMap { $0 }
+            .compactMap { $0["event"] as? String }
+    }
+
+    func testFlushDrainsQueueInBatches() {
+        let testMixpanel = makeInstance()
+        for i in 0..<130 {
+            testMixpanel.track(event: "event \(i)")
+        }
+        waitForTrackingQueue(testMixpanel)
+
+        flushOnce(testMixpanel)
+
+        let batchSizes = FlushRecordingURLProtocol.batches(pathContaining: "track").map { $0.count }
+        XCTAssertEqual(batchSizes, [50, 50, 30], "one flush should drain the queue in batches of 50")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty)
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testOverlappingFlushesSendEachRowOnce() {
+        let testMixpanel = makeInstance()
+        for i in 0..<20 {
+            testMixpanel.track(event: "event \(i)")
+        }
+        waitForTrackingQueue(testMixpanel)
+
+        let completions = (0..<5).map { expectation(description: "flush \($0) completed") }
+        for completion in completions {
+            testMixpanel.flush { completion.fulfill() }
+        }
+        wait(for: completions, timeout: 30)
+
+        let names = trackedEventNames()
+        XCTAssertEqual(names.count, 20, "every row should be sent")
+        XCTAssertEqual(Set(names).count, 20, "no row should be sent twice")
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty)
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testFailedFlushKeepsRows() {
+        FlushRecordingURLProtocol.reset(statusCode: 500)
+        let testMixpanel = makeInstance()
+        for i in 0..<3 {
+            testMixpanel.track(event: "event \(i)")
+        }
+        waitForTrackingQueue(testMixpanel)
+
+        flushOnce(testMixpanel)
+
+        XCTAssertEqual(
+            FlushRecordingURLProtocol.batches(pathContaining: "track").count, 1,
+            "a failed batch should end that queue's pass")
+        XCTAssertEqual(eventQueue(token: testMixpanel.apiToken).count, 3, "failed rows must be kept")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testUnreadableRowsDoNotBlockFlush() {
+        let testMixpanel = makeInstance()
+        // A full batch of unreadable rows at the head of the queue used to come back as an empty
+        // batch, so the pass skipped events and left the readable rows behind them unsent.
+        testMixpanel.trackingQueue.sync {
+            for _ in 0..<60 {
+                testMixpanel.mixpanelPersistence.mpdb.insertRow(.events, data: "not json".data(using: .utf8)!)
+            }
+        }
+        for i in 0..<5 {
+            testMixpanel.track(event: "event \(i)")
+        }
+        waitForTrackingQueue(testMixpanel)
+
+        flushOnce(testMixpanel)
+
+        XCTAssertEqual(Set(trackedEventNames()), Set((0..<5).map { "event \($0)" }))
+        XCTAssertEqual(rowCount(testMixpanel.apiToken, table: "events"), 0, "no row should be left behind")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testAutomaticEventRowsAreFlushed() {
+        let testMixpanel = makeInstance()
+        // A row queued while automatic events were enabled must still be sent after they are turned off.
+        testMixpanel.trackingQueue.sync {
+            testMixpanel.mixpanelPersistence.saveEntity(
+                ["event": "$ae_session", "properties": ["token": testMixpanel.apiToken]], type: .events)
+        }
+        testMixpanel.track(event: "regular")
+        waitForTrackingQueue(testMixpanel)
+
+        flushOnce(testMixpanel)
+
+        XCTAssertEqual(Set(trackedEventNames()), ["$ae_session", "regular"])
+        XCTAssertTrue(eventQueue(token: testMixpanel.apiToken).isEmpty, "no row should be stranded")
+        removeDBfile(testMixpanel.apiToken)
     }
 }

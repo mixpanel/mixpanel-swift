@@ -64,6 +64,40 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
         return urlUnwrapped
     }
 
+    /// Makes every UPDATE on `token`'s people table fail with a real SQLite error, by installing an
+    /// aborting trigger through a separate connection. The connection is closed right away, so
+    /// the SDK's connection is the only one left and its recreate closes cleanly.
+    func failPeopleUpdates(_ token: String) {
+        var db: OpaquePointer?
+        XCTAssertEqual(sqlite3_open(dbFilePath(token), &db), SQLITE_OK)
+        let sql = """
+            CREATE TRIGGER fail_people_updates BEFORE UPDATE ON mixpanel_\(token)_people \
+            BEGIN SELECT RAISE(ABORT, 'forced update failure'); END;
+            """
+        XCTAssertEqual(sqlite3_exec(db, sql, nil, nil, nil), SQLITE_OK)
+        sqlite3_close(db)
+    }
+
+    /// Counts every row in one of `token`'s tables, readable or not, through a separate connection.
+    func rowCount(_ token: String, table: String) -> Int {
+        var db: OpaquePointer?
+        guard sqlite3_open(dbFilePath(token), &db) == SQLITE_OK else {
+            XCTFail("could not open the test database")
+            return -1
+        }
+        defer { sqlite3_close(db) }
+        var statement: OpaquePointer?
+        guard
+            sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM mixpanel_\(token)_\(table)", -1, &statement, nil)
+                == SQLITE_OK
+        else {
+            XCTFail("could not count rows in \(table)")
+            return -1
+        }
+        defer { sqlite3_finalize(statement) }
+        return sqlite3_step(statement) == SQLITE_ROW ? Int(sqlite3_column_int(statement, 0)) : -1
+    }
+
     func mixpanelWillFlush(_ mixpanel: MixpanelInstance) -> Bool {
         return mixpanelWillFlush
     }
@@ -115,9 +149,13 @@ class MixpanelBaseTests: XCTestCase, MixpanelDelegate {
     }
 
     func flushAndWaitForTrackingQueue(_ mixpanel: MixpanelInstance) {
-        mixpanel.flush()
-        waitForTrackingQueue(mixpanel)
-        mixpanel.flush()
+        // A flush now drains in several queue hops, so wait on its completion rather than on the
+        // queues. Two flushes are kept so existing retry and backoff expectations still hold.
+        for _ in 0..<2 {
+            let flushed = expectation(description: "flush completed")
+            mixpanel.flush { flushed.fulfill() }
+            wait(for: [flushed], timeout: 130)
+        }
         waitForTrackingQueue(mixpanel)
     }
 

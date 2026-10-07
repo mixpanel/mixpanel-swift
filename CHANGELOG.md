@@ -1,3 +1,14 @@
+Last tag: 6.7.0
+## [6.8.0](https://github.com/mixpanel/mixpanel-swift/tree/6.8.0) (2026-10-07)
+
+### Fixes
+
+- NSMallocException crash in flush pipeline (#791) ([#791](https://github.com/mixpanel/mixpanel-swift/pull/791))
+- cancel pending dead-click check on any new tap (#788) ([#788](https://github.com/mixpanel/mixpanel-swift/pull/788))
+- reset rage-click history after emission (#790) ([#790](https://github.com/mixpanel/mixpanel-swift/pull/790))
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.7.0...6.8.0)
+
 Last tag: 6.6.1
 ## [6.7.0](https://github.com/mixpanel/mixpanel-swift/tree/6.7.0) (2026-09-09)
 

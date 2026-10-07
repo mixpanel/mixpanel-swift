@@ -17,7 +17,7 @@
     <a title="MixpanelInstance Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">Mixpanel 6.7.0 Docs</a> (73% documented)</p>
+        <p><a href="../index.html">Mixpanel 6.8.0 Docs</a> (73% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="../img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <div class="header-right">
           <form role="search" action="../search.json">
@@ -570,14 +570,19 @@ data to the Mixpanel servers. Defaults to true.</p>
                       <div class="abstract">
                         <p>Flush timer&rsquo;s interval.
 Setting a flush interval of 0 will turn off the flush timer and you need to call the flush() API manually
-to upload queued data to the Mixpanel server.</p>
+to upload queued data to the Mixpanel server.
+As of SDK version 6.8.0, setting an interval of 0 no longer triggers a flush.</p>
+
+<p>Deprecated as of SDK version 6.8.0: set the interval with <code><a href="../Classes/MixpanelOptions.html#/s:8Mixpanel0A7OptionsC13flushIntervalSdvp">MixpanelOptions.flushInterval</a></code>
+when initializing instead.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">open</span> <span class="k">var</span> <span class="nv">flushInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">deprecated</span><span class="p">,</span> <span class="nv">message</span><span class="p">:</span> <span class="s">"Configure flushInterval through MixpanelOptions during initialization. This property will become private in a future release."</span><span class="p">)</span>
+<span class="kd">open</span> <span class="k">var</span> <span class="nv">flushInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -1321,6 +1326,10 @@ This should only be set to false if you wish to prevent people profile updates f
                         <p>Clears all stored properties including the distinct Id.
 Useful if your app&rsquo;s user logs out.</p>
 
+<p>As of SDK version 6.8.0, queued events and identified people updates are kept and sent
+under the identity they were tracked with. People updates queued before <code>identify()</code> are
+discarded.</p>
+
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
@@ -1425,6 +1434,10 @@ default for <code><a href="../Classes/MixpanelInstance.html#/s:8Mixpanel0A8Insta
 <code><a href="../Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC17flushOnBackgroundSbvp">flushOnBackground</a></code> is on by default). You only need to call this
 method manually if you want to force a flush at a particular moment.</p>
 
+<p>As of SDK version 6.8.0, every flush sends the whole queue in batches of <code><a href="../Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14flushBatchSizeSivp">flushBatchSize</a></code>,
+holding one batch in memory at a time. A flush requested while one is running is merged
+into a single follow-up flush.</p>
+
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
@@ -1446,7 +1459,7 @@ method manually if you want to force a flush at a particular moment.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>A optional boolean value indicating whether a full flush should be performed. If <code>true</code>, a full flush will be triggered, sending all events to the server. Default to <code>false</code>, a partial flush will be executed for reducing memory footprint.</p>
+                                  <p>Kept for compatibility. As of SDK version 6.8.0 it has no effect.</p>
                                 </div>
                               </td>
                             </tr>
@@ -2422,8 +2435,8 @@ that is sent to Mixpanel</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-09-09)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-10-07)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.5</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>
     </div>

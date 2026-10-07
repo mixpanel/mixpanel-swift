@@ -177,49 +177,49 @@
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 267,
+      "line": 276,
       "symbol": "MixpanelInstance.useGzipCompression",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 319,
+      "line": 328,
       "symbol": "MixpanelInstance.minimumSessionDuration",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 610,
+      "line": 626,
       "symbol": "MixpanelInstance.getOptions()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 614,
+      "line": 630,
       "symbol": "MixpanelInstance.getDistinctId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 618,
+      "line": 634,
       "symbol": "MixpanelInstance.getAnonymousId()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 1208,
+      "line": 1231,
       "symbol": "MixpanelInstance.archive()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/mixpanel-swift/mixpanel-swift/Sources/MixpanelInstance.swift",
-      "line": 1476,
+      "line": 1545,
       "symbol": "MixpanelInstance.getGroup(groupKey:groupID:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"

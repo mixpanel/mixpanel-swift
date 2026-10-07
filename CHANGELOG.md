@@ -3,9 +3,15 @@ Last tag: 6.7.0
 
 ### Fixes
 
-- NSMallocException crash in flush pipeline (#791) ([#791](https://github.com/mixpanel/mixpanel-swift/pull/791))
-- cancel pending dead-click check on any new tap (#788) ([#788](https://github.com/mixpanel/mixpanel-swift/pull/788))
-- reset rage-click history after emission (#790) ([#790](https://github.com/mixpanel/mixpanel-swift/pull/790))
+- NSMallocException crash in flush pipeline (#791)
+  - Every flush (timer, background and manual) now sends the whole queue in batches of up to 50, one batch in memory at a time. Previously the timer sent one batch per tick, so a large offline backlog now goes out as back-to-back requests in one pass. A `flush(completion:)` called while one is running completes after a follow-up flush, not immediately.
+  - Setting `flushInterval` to `0` (manual mode) no longer triggers a flush. `MixpanelInstance.flushInterval` is deprecated; set it in `MixpanelOptions` instead.
+  - `reset()` no longer deletes queued events, group updates or identified people updates. They are sent under the identity they were tracked with. Only people updates queued before `identify()` are dropped. Use `optOutTracking()` if you need to purge queued data.
+  - Queued people updates keep the `$distinct_id` they were tracked with and are no longer re-stamped with the current identity at flush. For example, `identify("A")`, then `people.set(...)`, then `identify("B")` before a flush now sends as A, not B.
+  - Queued `$ae_` events are now sent even if `trackAutomaticEventsEnabled` is turned off later, and unreadable rows in the local database are deleted when read instead of blocking the queue.
+  - Upgrade note: people updates queued before 6.8.0 that lack a `$distinct_id`, and legacy pre-SQLite anonymous people updates, may take the current identity at flush time once, at upgrade.
+- cancel pending dead-click check on any new tap (#788)
+- reset rage-click history after emission (#790)
 
 [Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.7.0...6.8.0)
 

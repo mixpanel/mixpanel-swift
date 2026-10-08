@@ -1,3 +1,22 @@
+Last tag: 6.8.0
+## [7.0.0](https://github.com/mixpanel/mixpanel-swift/tree/7.0.0) (2026-10-08)
+
+
+### Breaking changes ([#793](https://github.com/mixpanel/mixpanel-swift/pull/793))
+
+- Minimum OS versions are now iOS 15, tvOS 15, macOS 12 and watchOS 9, matching Xcode 27.
+- SPM needs swift-tools-version 5.7.
+- Requires MixpanelSwiftCommon 2.0.
+- `json-logic-swift` is no longer a separate dependency. Feature Flags filtering now uses a copy bundled in MixpanelSwiftCommon.
+
+### Deprecations
+- `trackAutomaticEventsEnabled` is deprecated. Use `autocaptureOptions` instead.
+
+### Older OS or Xcode
+Stay on 6.x with Xcode 26. It gets security and critical fixes until April 2027.
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.8.0...7.0.0)
+
 Last tag: 6.7.0
 ## [6.8.0](https://github.com/mixpanel/mixpanel-swift/tree/6.8.0) (2026-10-07)
 

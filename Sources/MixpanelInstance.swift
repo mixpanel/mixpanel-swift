@@ -128,6 +128,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var showNetworkActivityIndicator = true
 
     /// This allows enabling or disabling collecting common mobile events,
+    @available(
+        *, deprecated,
+        message:
+            "Automatic Events are deprecated and will be removed in a future major version. Use autocaptureOptions instead."
+    )
     open var trackAutomaticEventsEnabled: Bool
 
     /// Flush timer's interval.
@@ -856,7 +861,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if os(OSX)
     static func macOSIdentifier() -> String? {
         let platformExpert: io_service_t = IOServiceGetMatchingService(
-            kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
+            kIOMainPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
         let serialNumberAsCFString =
             IORegistryEntryCreateCFProperty(
                 platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0)
@@ -873,35 +878,29 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             }
         }
     }
+
     #if os(iOS) && !targetEnvironment(macCatalyst)
     @objc func setCurrentRadio() {
         var radio = ""
         let prefix = "CTRadioAccessTechnology"
-        if #available(iOS 12.0, *) {
-            if let radioDict = MixpanelInstance.telephonyInfo.serviceCurrentRadioAccessTechnology {
-                for (_, value) in radioDict where !value.isEmpty && value.hasPrefix(prefix) {
-                    // the first should be the prefix, second the target
-                    let components = value.components(separatedBy: prefix)
+        if let radioDict = MixpanelInstance.telephonyInfo.serviceCurrentRadioAccessTechnology {
+            for (_, value) in radioDict where !value.isEmpty && value.hasPrefix(prefix) {
+                // the first should be the prefix, second the target
+                let components = value.components(separatedBy: prefix)
 
-                    // Something went wrong and we have more than prefix:target
-                    guard components.count == 2 else {
-                        continue
-                    }
-
-                    // Safe to directly access by index since we confirmed count == 2 above
-                    let radioValue = components[1]
-
-                    // Send to parent
-                    radio += radio.isEmpty ? radioValue : ", \(radioValue)"
+                // Something went wrong and we have more than prefix:target
+                guard components.count == 2 else {
+                    continue
                 }
 
-                radio = radio.isEmpty ? "None" : radio
+                // Safe to directly access by index since we confirmed count == 2 above
+                let radioValue = components[1]
+
+                // Send to parent
+                radio += radio.isEmpty ? radioValue : ", \(radioValue)"
             }
-        } else {
-            radio = MixpanelInstance.telephonyInfo.currentRadioAccessTechnology ?? "None"
-            if radio.hasPrefix(prefix) {
-                radio = (radio as NSString).substring(from: prefix.count)
-            }
+
+            radio = radio.isEmpty ? "None" : radio
         }
 
         trackingQueue.async {
@@ -913,18 +912,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 }
 
                 AutomaticProperties.properties["$carrier"] = ""
-                if #available(iOS 12.0, *) {
-                    if let carrierName = MixpanelInstance.telephonyInfo
-                        .serviceSubscriberCellularProviders?.first?.value.carrierName
-                    {
-                        AutomaticProperties.properties["$carrier"] = carrierName
-                    }
-                } else {
-                    if let carrierName = MixpanelInstance.telephonyInfo.subscriberCellularProvider?
-                        .carrierName
-                    {
-                        AutomaticProperties.properties["$carrier"] = carrierName
-                    }
+                if let carrierName = MixpanelInstance.telephonyInfo
+                    .serviceSubscriberCellularProviders?.first?.value.carrierName, carrierName != "--"
+                {
+                    AutomaticProperties.properties["$carrier"] = carrierName
                 }
             }
         }
@@ -1589,7 +1580,7 @@ extension MixpanelInstance {
     }
 
     func removeCachedGroup(groupKey: String, groupID: MixpanelType) {
-        readWriteLock.write {
+        _ = readWriteLock.write {
             groups.removeValue(forKey: makeMapKey(groupKey: groupKey, groupID: groupID))
         }
     }

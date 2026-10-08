@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.platform }} (Xcode ${{ matrix.xcode }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Latest Xcode 26.x
+          - { platform: iOS,     xcode: '26',   runner: macos-26,     scheme: MixpanelDemo,      action: test,  destination: "platform=iOS Simulator,name=iPhone 17 Pro,OS=latest" }
+          - { platform: macOS,   xcode: '26',   runner: macos-26,     scheme: MixpanelDemoMac,   action: test,  destination: "platform=macOS,arch=arm64" }
+          - { platform: tvOS,    xcode: '26',   runner: macos-26,     scheme: MixpanelDemoTV,    action: test,  destination: "platform=tvOS Simulator,name=Apple TV" }
+          - { platform: watchOS, xcode: '26',   runner: macos-26,     scheme: MixpanelDemoWatch, action: build, destination: "generic/platform=watchOS Simulator" }
+          # Xcode 27 
+          - { platform: iOS,     xcode: '27.0', runner: xcode-27, scheme: MixpanelDemo,      action: test,  destination: "platform=iOS Simulator,name=iPhone 18 Pro,OS=27.0" }
+          - { platform: macOS,   xcode: '27.0', runner: xcode-27, scheme: MixpanelDemoMac,   action: test,  destination: "platform=macOS,arch=arm64" }
+          - { platform: tvOS,    xcode: '27.0', runner: xcode-27, scheme: MixpanelDemoTV,    action: test,  destination: "platform=tvOS Simulator,name=Apple TV 4K (3rd generation),OS=27.0" }
+          - { platform: watchOS, xcode: '27.0', runner: xcode-27, scheme: MixpanelDemoWatch, action: build, destination: "generic/platform=watchOS Simulator" }
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+    - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90  # v1
+      with:
+        xcode-version: ${{ matrix.xcode }}
+
+    - name: Ensure ${{ matrix.platform }} simulator runtime is installed
+      if: matrix.xcode == '27.0' && (matrix.platform == 'tvOS' || matrix.platform == 'watchOS')
+      run: xcodebuild -downloadPlatform ${{ matrix.platform }}
+
+    - name: Build and ${{ matrix.action }} (${{ matrix.platform }}, Xcode ${{ matrix.xcode }})
+      working-directory: MixpanelDemo
+      run: |
+        set -o pipefail
+        TEST_FLAGS=()
+        if [ "${{ matrix.action }}" = "test" ]; then
+          TEST_FLAGS=(-enableCodeCoverage YES -retry-tests-on-failure -test-iterations 3)
+        fi
+        NSUnbufferedIO=YES xcodebuild \
+          -scheme ${{ matrix.scheme }} \
+          -derivedDataPath Build/ \
+          -destination "${{ matrix.destination }}" \
+          -configuration Debug \
+          "${TEST_FLAGS[@]}" \
+          ONLY_ACTIVE_ARCH=NO \
+          ENABLE_TESTABILITY=YES \
+          clean build ${{ matrix.action == 'test' && 'test' || '' }} | xcbeautify --renderer github-actions
+
+    - name: Code Coverage Report (${{ matrix.platform }}, Xcode ${{ matrix.xcode }})
+      if: matrix.action == 'test'
+      working-directory: MixpanelDemo/Build/Logs/Test
+      run: |
+        xcrun xccov view --report --files-for-target Mixpanel.framework *.xcresult
+        xcrun xccov view --report --only-targets *.xcresult
+
+  pod-lint:
+    name: pod lib lint (Xcode 27.0)
+    runs-on: xcode-27
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+    - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90  # v1
+      with:
+        xcode-version: '27.0'
+    - name: pod lib lint (Xcode 27)
+      run: pod lib lint Mixpanel-swift.podspec --allow-warnings --platforms=ios,tvos,osx,watchos
+
+  carthage-build:
+    name: carthage build (Xcode 27.0)
+    runs-on: xcode-27
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+    - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90  # v1
+      with:
+        xcode-version: '27.0'
+    - name: Install Carthage
+      run: brew install carthage
+    - name: carthage build (Xcode 27)
+      run: ./scripts/carthage.sh

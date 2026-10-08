@@ -98,12 +98,10 @@ class Track {
         }
 
         // Notify event bridge listeners (non-blocking)
-        if #available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *) {
-            MixpanelEventBridge.shared.notifyListeners(
-                eventName: ev,
-                properties: p
-            )
-        }
+        MixpanelEventBridge.shared.notifyListeners(
+            eventName: ev,
+            properties: p
+        )
 
         // Check for first-time event matches
         if let mixpanelInstance = mixpanelInstance,

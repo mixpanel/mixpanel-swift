@@ -139,13 +139,9 @@ github "mixpanel/mixpanel-swift"
 ```
 Check out the [Carthage docs](https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos) for more info.
 
-### Dependencies
+### Supported Platforms
 
-The Mixpanel Swift SDK includes the following third-party dependencies:
-
-- **json-logic-swift** (v1.2.0+) - Used for evaluating property filters in first-time event targeting for Feature Flags.
-
-This dependency is automatically managed by your package manager (Swift Package Manager, CocoaPods, or Carthage) and does not require manual installation.
+As of SDK version 7.0.0, the minimum supported versions are iOS 15, tvOS 15, macOS 12 and watchOS 9, matching the minimum deployment target of Xcode 27. Need an older OS? Stay on the 6.x releases (`maintenance/6.x`) with Xcode 26. We add support for each new Xcode's floor promptly after its release and drop the old floor only when Apple's App Store SDK deadline requires it. 6.x receives security and critical fixes until April 2027.
 
 ## 2. Initialize Mixpanel
 Import Mixpanel into AppDelegate.swift, and initialize Mixpanel within application:didFinishLaunchingWithOptions:

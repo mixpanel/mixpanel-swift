@@ -1,10 +1,31 @@
 Last tag: 6.8.0
 ## [7.0.0](https://github.com/mixpanel/mixpanel-swift/tree/7.0.0) (2026-10-08)
 
-### Features
 
--  Raise deployment floor to iOS 15 / macOS 12 / watchOS 9 for Xcode 27 (#793) ([#793](https://github.com/mixpanel/mixpanel-swift/pull/793))
+### Breaking changes ([#793](https://github.com/mixpanel/mixpanel-swift/pull/793))
 
+- **Minimum OS versions are raised** to match the Xcode 27 deployment floor:
+
+  | Platform | Before | Now |
+  |---|---|---|
+  | iOS | 12.0 | 15.0 |
+  | tvOS | 12.0 | 15.0 |
+  | macOS | 10.13 | 12.0 |
+  | watchOS | 4.0 | 9.0 |
+
+  The new floors apply to Swift Package Manager, CocoaPods and Carthage.
+- **Swift Package Manager now needs swift-tools-version 5.7** (was 5.3).
+- **Requires MixpanelSwiftCommon 2.0.** Use `~> 2.0.0` in CocoaPods or `from: "2.0.0"` in SPM and Carthage.
+- **No separate `json-logic-swift` (`jsonlogic`) dependency.** Feature Flags property filtering now uses a copy bundled inside MixpanelSwiftCommon 2.0, so the SDK no longer pulls in `jsonlogic` or `JSON` as separate modules. If your app only had `json-logic-swift` as a transitive dependency of this SDK, it's no longer added to your project. If you use it directly, keep your own dependency on it.
+
+### Things to know
+
+- `trackAutomaticEventsEnabled` is deprecated and will be removed in a future major version. Use `autocaptureOptions` instead.
+- The SDK builds with Xcode 27. Redundant `#available` checks that the new floors make unnecessary were removed.
+
+### Staying on an older OS or Xcode
+
+Apps that need iOS 12 to 14 (or the older tvOS, macOS and watchOS floors) should stay on 6.x with Xcode 26. The 6.x line gets security and critical fixes until April 2027.
 [Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.8.0...7.0.0)
 
 Last tag: 6.7.0

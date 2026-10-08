@@ -1,3 +1,12 @@
+Last tag: 6.8.0
+## [7.0.0](https://github.com/mixpanel/mixpanel-swift/tree/7.0.0) (2026-10-08)
+
+### Features
+
+-  Raise deployment floor to iOS 15 / macOS 12 / watchOS 9 for Xcode 27 (#793) ([#793](https://github.com/mixpanel/mixpanel-swift/pull/793))
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/6.8.0...7.0.0)
+
 Last tag: 6.7.0
 ## [6.8.0](https://github.com/mixpanel/mixpanel-swift/tree/6.8.0) (2026-10-07)
 

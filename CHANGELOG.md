@@ -1,3 +1,12 @@
+Last tag: 7.0.0
+## [7.1.0](https://github.com/mixpanel/mixpanel-swift/tree/7.1.0) (2026-10-30)
+
+### Features
+
+- graduate autocapture from beta to general availability (#796) ([#796](https://github.com/mixpanel/mixpanel-swift/pull/796))
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/7.0.0...7.1.0)
+
 Last tag: 6.8.0
 ## [7.0.0](https://github.com/mixpanel/mixpanel-swift/tree/7.0.0) (2026-10-08)
 

@@ -98,6 +98,26 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(distinctId(mixpanel), "$company:acme|$user:user_123")
     }
 
+    @available(*, deprecated)
+    func testSettingDistinctIdIsIgnored() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        mixpanel.distinctId = "user_456"
+        mixpanel.track(event: "Viewed Report")
+
+        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["distinct_id"] as? String, "user_123")
+        XCTAssertEqual(distinctId(mixpanel), "$company:acme|$user:user_123")
+    }
+
+    @available(*, deprecated)
+    func testDisabledSettingDistinctIdStillApplies() {
+        let mixpanel = newApi(false)
+        mixpanel.distinctId = "user_456"
+        mixpanel.track(event: "Viewed Report")
+
+        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["distinct_id"] as? String, "user_456")
+    }
+
     func testIdentifyEventCarriesTheNewCompany() {
         let mixpanel = newApi(true)
         identify(mixpanel, "user_123", "acme")

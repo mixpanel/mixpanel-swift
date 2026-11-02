@@ -110,6 +110,14 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             return resolvedDistinctId()
         }
         set {
+            guard !hierarchicalGroups else {
+                MixpanelLogger.error(
+                    message:
+                        "Setting distinctId is not supported for hierarchical groups projects, which identify a "
+                        + "user by company and user id. Use identify(identity: MixpanelIdentity(userId:companyId:)). "
+                        + "The distinct id was not changed.")
+                return
+            }
             readWriteLock.write {
                 eventsDistinctId = newValue
             }

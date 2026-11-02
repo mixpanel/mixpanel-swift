@@ -22,6 +22,8 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
             removeDBfile(mixpanel.apiToken)
         }
         instances = []
+        URLProtocol.unregisterClass(FlagsRecordingURLProtocol.self)
+        FlagsRecordingURLProtocol.reset()
         super.tearDown()
     }
 
@@ -702,6 +704,115 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertNil(groups.first?["$company_id"])
     }
 
+    // MARK: - Feature flags
+
+    private func newFlagsApi(_ hierarchicalGroups: Bool) -> MixpanelInstance {
+        URLProtocol.registerClass(FlagsRecordingURLProtocol.self)
+        let options = MixpanelOptions(
+            token: randomId(), flushInterval: 60,
+            serverURL: "https://\(FlagsRecordingURLProtocol.host)",
+            featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false),
+            hierarchicalGroups: hierarchicalGroups)
+        let mixpanel = Mixpanel.initialize(options: options)
+        mixpanel.delegate = self
+        instances.append(mixpanel)
+        waitForTrackingQueue(mixpanel)
+        return mixpanel
+    }
+
+    private func loadFlags(_ mixpanel: MixpanelInstance) {
+        let loaded = expectation(description: "flags loaded")
+        mixpanel.flags.loadFlags { _ in loaded.fulfill() }
+        wait(for: [loaded], timeout: 10)
+    }
+
+    private func lastFlagsContext() -> NSDictionary? {
+        guard
+            let request = FlagsRecordingURLProtocol.requests().last(where: { $0.url.path == "/flags" }),
+            let items = URLComponents(url: request.url, resolvingAgainstBaseURL: false)?.queryItems,
+            let context = items.first(where: { $0.name == "context" })?.value?.data(using: .utf8)
+        else {
+            XCTFail("No /flags request was sent")
+            return nil
+        }
+        return (try? JSONSerialization.jsonObject(with: context)) as? NSDictionary
+    }
+
+    func testFlagsContextCarriesUserAndCompany() {
+        let mixpanel = newFlagsApi(true)
+        identify(mixpanel, "user_123", "acme")
+        loadFlags(mixpanel)
+
+        let expected: NSDictionary = [
+            "distinct_id": "user_123", "device_id": mixpanel.anonymousId!,
+            "$user_id": "user_123", "$company_id": "acme",
+        ]
+        XCTAssertEqual(lastFlagsContext(), expected)
+    }
+
+    func testFlagsContextBeforeIdentifyIsAnonymous() {
+        let mixpanel = newFlagsApi(true)
+        loadFlags(mixpanel)
+
+        let anonymousId = mixpanel.anonymousId!
+        let expected: NSDictionary = ["distinct_id": "$device:\(anonymousId)", "device_id": anonymousId]
+        XCTAssertEqual(lastFlagsContext(), expected)
+    }
+
+    func testDisabledFlagsContextIsUnchanged() {
+        let mixpanel = newFlagsApi(false)
+        mixpanel.identify(distinctId: "user_123")
+        waitForTrackingQueue(mixpanel)
+        loadFlags(mixpanel)
+
+        let expected: NSDictionary = ["distinct_id": "user_123", "device_id": mixpanel.anonymousId!]
+        XCTAssertEqual(lastFlagsContext(), expected)
+    }
+
+    func testFirstTimeEventCarriesUserAndCompany() {
+        FlagsRecordingURLProtocol.flagsResponse = """
+            {"flags": {}, "pending_first_time_events": [{
+              "flag_key": "hg-flag", "flag_id": "flag-123", "project_id": 3,
+              "first_time_event_hash": "abc123", "event_name": "Purchase",
+              "pending_variant": {"variant_key": "treatment", "variant_value": true}
+            }]}
+            """
+        let mixpanel = newFlagsApi(true)
+        identify(mixpanel, "user_123", "acme")
+        loadFlags(mixpanel)
+        mixpanel.track(event: "Purchase")
+
+        let path = "/flags/flag-123/first-time-events"
+        let recorded = XCTNSPredicateExpectation(
+            predicate: NSPredicate { _, _ in
+                FlagsRecordingURLProtocol.requests().contains { $0.url.path == path }
+            }, object: nil)
+        wait(for: [recorded], timeout: 10)
+
+        let body = FlagsRecordingURLProtocol.requests().first { $0.url.path == path }?.body ?? Data()
+        let expected: NSDictionary = [
+            "distinct_id": "user_123", "project_id": 3, "first_time_event_hash": "abc123",
+            "$user_id": "user_123", "$company_id": "acme",
+        ]
+        XCTAssertEqual((try? JSONSerialization.jsonObject(with: body)) as? NSDictionary, expected)
+    }
+
+    func testExperimentStartedCarriesUserAndCompany() {
+        FlagsRecordingURLProtocol.flagsResponse = """
+            {"flags": {"hg-flag": {"variant_key": "treatment", "variant_value": true}}}
+            """
+        let mixpanel = newFlagsApi(true)
+        identify(mixpanel, "user_123", "acme")
+        loadFlags(mixpanel)
+        _ = mixpanel.flags.getVariantSync("hg-flag", fallback: MixpanelFlagVariant(value: false))
+        waitForAsyncTasks()
+
+        let props = lastEventProperties(mixpanel, "$experiment_started")
+        XCTAssertEqual(props["distinct_id"] as? String, "user_123")
+        XCTAssertEqual(props["$user_id"] as? String, "user_123")
+        XCTAssertEqual(props["$company_id"] as? String, "acme")
+    }
+
     // MARK: - Types and options
 
     func testIdentityInitializerDefaults() {
@@ -722,5 +833,72 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
     func testOptionDefaultsToDisabled() {
         XCTAssertFalse(MixpanelOptions(token: "t").hierarchicalGroups)
         XCTAssertTrue(MixpanelOptions(token: "t", hierarchicalGroups: true).hierarchicalGroups)
+    }
+}
+
+/// Records the requests sent to `host` and answers /flags with `flagsResponse`, so flag tests can
+/// read what was sent without touching the network.
+private class FlagsRecordingURLProtocol: URLProtocol {
+    static let host = "hg-flags-test.mixpanel.com"
+    static var flagsResponse = "{\"flags\": {}}"
+    private static let lock = NSLock()
+    private static var recorded: [(url: URL, body: Data)] = []
+
+    static func reset() {
+        lock.lock()
+        flagsResponse = "{\"flags\": {}}"
+        recorded = []
+        lock.unlock()
+    }
+
+    static func requests() -> [(url: URL, body: Data)] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recorded
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        return request.url?.host == host
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        return request
+    }
+
+    override func startLoading() {
+        guard let url = request.url else { return }
+        FlagsRecordingURLProtocol.lock.lock()
+        FlagsRecordingURLProtocol.recorded.append((url: url, body: readBody()))
+        let body = url.path == "/flags" ? FlagsRecordingURLProtocol.flagsResponse : "1"
+        FlagsRecordingURLProtocol.lock.unlock()
+
+        let response = HTTPURLResponse(
+            url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: nil)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: body.data(using: .utf8)!)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+
+    private func readBody() -> Data {
+        if let body = request.httpBody {
+            return body
+        }
+        guard let stream = request.httpBodyStream else {
+            return Data()
+        }
+        stream.open()
+        defer { stream.close() }
+        var data = Data()
+        var buffer = [UInt8](repeating: 0, count: 4096)
+        while stream.hasBytesAvailable {
+            let read = stream.read(&buffer, maxLength: buffer.count)
+            if read <= 0 {
+                break
+            }
+            data.append(buffer, count: read)
+        }
+        return data
     }
 }

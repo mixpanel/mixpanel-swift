@@ -231,10 +231,6 @@ public protocol MixpanelFlagDelegate: AnyObject {
     var identity: MixpanelIdentity { get }
 }
 
-extension MixpanelFlagDelegate {
-    public var identity: MixpanelIdentity { return MixpanelIdentity(userId: nil) }
-}
-
 /// A protocol defining the public interface for a feature flagging system.
 public protocol MixpanelFlags {
 

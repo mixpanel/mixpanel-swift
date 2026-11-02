@@ -17,6 +17,7 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
     var options: MixpanelOptions
     var distinctId: String
     var anonymousId: String?
+    var identity = MixpanelIdentity(userId: nil)
     var trackedEvents: [(event: String?, properties: Properties?)] = []
     var trackExpectation: XCTestExpectation?
     var getOptionsCallCount = 0

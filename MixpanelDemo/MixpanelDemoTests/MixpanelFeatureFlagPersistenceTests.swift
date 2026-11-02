@@ -29,6 +29,7 @@ private final class PersistenceTestMockDelegate: MixpanelFlagDelegate {
     var options: MixpanelOptions
     var distinctId: String
     var anonymousId: String?
+    var identity = MixpanelIdentity(userId: nil)
     var trackedEvents: [(event: String?, properties: Properties?)] = []
     private let trackQueue = DispatchQueue(label: "persistence.test.mock.track")
 

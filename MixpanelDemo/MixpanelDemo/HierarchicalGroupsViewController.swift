@@ -298,51 +298,51 @@ class HierarchicalGroupsViewController: UIViewController, UITableViewDelegate,
     }
 
     // The same group profile operations, for the company and for the custom team_id group
-    private func groupActions(label: String, groupKey: String, group: @escaping () -> Group)
+    private func groupActions(label: String, groupKey: String, group: @escaping () -> Group?)
         -> [HGAction]
     {
         return [
             HGAction(title: "\(label): Set Property", message: "Group: set \"tier\" on \(groupKey)")
             {
                 print("Setting a \(label) property")
-                group().set(property: "tier", to: "enterprise")
+                group()?.set(property: "tier", to: "enterprise")
             },
             HGAction(
                 title: "\(label): Set Properties (Map)",
                 message: "Group: set properties on \(groupKey)"
             ) {
                 print("Setting multiple \(label) properties")
-                group().set(properties: ["size": 12, "region": "us"])
+                group()?.set(properties: ["size": 12, "region": "us"])
             },
             HGAction(
                 title: "\(label): Set Property Once",
                 message: "Group: setOnce \"created\" on \(groupKey)"
             ) {
                 print("Setting a \(label) property once")
-                group().setOnce(properties: ["created": "2026-10-27"])
+                group()?.setOnce(properties: ["created": "2026-10-27"])
             },
             HGAction(
                 title: "\(label): Union Property", message: "Group: union \"tags\" on \(groupKey)"
             ) {
                 print("Union \(label) property")
-                group().union(key: "tags", values: ["ios"])
+                group()?.union(key: "tags", values: ["ios"])
             },
             HGAction(
                 title: "\(label): Remove Property",
                 message: "Group: remove from \"tags\" on \(groupKey)"
             ) {
                 print("Removing from \(label) property")
-                group().remove(key: "tags", value: "ios")
+                group()?.remove(key: "tags", value: "ios")
             },
             HGAction(
                 title: "\(label): Unset Property", message: "Group: unset \"tier\" on \(groupKey)"
             ) {
                 print("Unsetting a \(label) property")
-                group().unset(property: "tier")
+                group()?.unset(property: "tier")
             },
             HGAction(title: "\(label): Delete Group", message: "Group: delete \(groupKey)") {
                 print("Deleting \(label) group")
-                group().deleteGroup()
+                group()?.deleteGroup()
             },
         ]
     }

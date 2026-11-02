@@ -337,7 +337,7 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
     func testSetCompanyProperty() {
         identify()
         clearSent()
-        mixpanel.getCompany().set(property: "tier", to: "enterprise")
+        mixpanel.getCompany()?.set(property: "tier", to: "enterprise")
 
         let set = onlyGroupsUpdate("$company_id", companyId, "$set") as? InternalProperties ?? [:]
         XCTAssertEqual(Set(set.keys), ["tier"])
@@ -358,7 +358,7 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
     func testSetCompanyProperties() {
         identify()
         clearSent()
-        mixpanel.getCompany().set(properties: ["size": 12, "region": "us"])
+        mixpanel.getCompany()?.set(properties: ["size": 12, "region": "us"])
 
         let set = onlyGroupsUpdate("$company_id", companyId, "$set") as? InternalProperties ?? [:]
         XCTAssertEqual(Set(set.keys), ["size", "region"])
@@ -371,7 +371,7 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
     func testSetOnceCompanyProperty() {
         identify()
         clearSent()
-        mixpanel.getCompany().setOnce(properties: ["created": "2026-10-27"])
+        mixpanel.getCompany()?.setOnce(properties: ["created": "2026-10-27"])
 
         let setOnce =
             onlyGroupsUpdate("$company_id", companyId, "$set_once") as? InternalProperties ?? [:]
@@ -383,7 +383,7 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
     func testUnionCompanyProperty() {
         identify()
         clearSent()
-        mixpanel.getCompany().union(key: "tags", values: ["android"])
+        mixpanel.getCompany()?.union(key: "tags", values: ["android"])
 
         let union = onlyGroupsUpdate("$company_id", companyId, "$union") as? InternalProperties ?? [:]
         XCTAssertEqual(union["tags"] as? [String], ["android"])
@@ -394,7 +394,7 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
     func testRemoveCompanyProperty() {
         identify()
         clearSent()
-        mixpanel.getCompany().remove(key: "tags", value: "android")
+        mixpanel.getCompany()?.remove(key: "tags", value: "android")
 
         let remove = onlyGroupsUpdate("$company_id", companyId, "$remove") as? InternalProperties ?? [:]
         XCTAssertEqual(remove["tags"] as? String, "android")
@@ -405,7 +405,7 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
     func testUnsetCompanyProperty() {
         identify()
         clearSent()
-        mixpanel.getCompany().unset(property: "tier")
+        mixpanel.getCompany()?.unset(property: "tier")
 
         XCTAssertEqual(onlyGroupsUpdate("$company_id", companyId, "$unset") as? [String], ["tier"])
     }
@@ -533,7 +533,7 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
     func testDeleteCompany() {
         identify()
         clearSent()
-        mixpanel.getCompany().deleteGroup()
+        mixpanel.getCompany()?.deleteGroup()
 
         assertDeleteValue(onlyGroupsUpdate("$company_id", companyId, "$delete"))
     }
@@ -719,7 +719,7 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
     // MARK: - Set Company Property Before Identify (Unsupported)
 
     func testSetCompanyPropertyBeforeIdentifyIsUnsupported() {
-        mixpanel.getCompany().set(property: "tier", to: "enterprise")
+        XCTAssertNil(mixpanel.getCompany())
 
         assertNothingSent()
     }

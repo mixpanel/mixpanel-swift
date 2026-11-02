@@ -1797,48 +1797,36 @@ extension MixpanelInstance {
 
        ```swift
        mixpanel.identify(identity: MixpanelIdentity(userId: "user_123", companyId: "acme")) {
-           mixpanel.getCompany().set(property: "tier", to: "enterprise")
+           mixpanel.getCompany()?.set(property: "tier", to: "enterprise")
        }
        ```
 
        Only for projects that use hierarchical groups, enabled with
        `MixpanelOptions.hierarchicalGroups`. On any other project, or before a company is
-       identified, the returned group drops every update with an error log.
+       identified, this returns nil with an error log.
 
        The company is read when this is called, so a group kept across `reset()` or a new identify
        still updates the earlier company. `identify` completes asynchronously, so call this from its
        completion handler, or later, to see a company identified just before.
 
-       - returns: the identified company's `Group`
+       - returns: the identified company's `Group`, or nil when there is no company
        */
-    public func getCompany() -> Group {
+    public func getCompany() -> Group? {
         guard hierarchicalGroups else {
-            return unavailableGroup(
-                reason:
+            MixpanelLogger.error(
+                message:
                     "getCompany() is only for hierarchical groups projects, enabled with "
                     + "hierarchicalGroups: true in MixpanelOptions.")
+            return nil
         }
         guard let companyId = identity.companyId else {
-            return unavailableGroup(
-                reason:
+            MixpanelLogger.error(
+                message:
                     "getCompany() needs a company. Call identify(identity: MixpanelIdentity(userId:companyId:)) "
                     + "first.")
+            return nil
         }
         return getGroup(groupKey: companyIdGroupKey, groupID: companyId)
-    }
-
-    // A Group with nothing to update, which drops every update with the reason
-    private func unavailableGroup(reason: String) -> Group {
-        return Group(
-            apiToken: apiToken,
-            serialQueue: trackingQueue,
-            lock: self.readWriteLock,
-            groupKey: companyIdGroupKey,
-            groupID: "",
-            metadata: sessionMetadata,
-            mixpanelPersistence: mixpanelPersistence,
-            mixpanelInstance: self,
-            unavailableReason: reason)
     }
 
     func removeCachedGroup(groupKey: String, groupID: MixpanelType) {

@@ -654,7 +654,7 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
     func testGetCompanyUpdatesIdentifiedCompany() {
         let mixpanel = newApi(true)
         identify(mixpanel, "user_123", "acme")
-        mixpanel.getCompany().set(property: "tier", to: "enterprise")
+        mixpanel.getCompany()?.set(property: "tier", to: "enterprise")
 
         let groups = self.groups(mixpanel)
         XCTAssertEqual(groups.count, 1)
@@ -666,13 +666,9 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertTrue(mixpanel.getGroup(groupKey: "$company_id", groupID: "acme") === mixpanel.getCompany())
     }
 
-    func testGetCompanyBeforeIdentifyDropsUpdates() {
+    func testGetCompanyBeforeIdentifyIsNil() {
         let mixpanel = newApi(true)
-        let company = mixpanel.getCompany()
-        company.set(property: "tier", to: "enterprise")
-        company.deleteGroup()
-
-        XCTAssertEqual(groups(mixpanel).count, 0)
+        XCTAssertNil(mixpanel.getCompany())
     }
 
     func testGetCompanyIsFixedWhenCalled() {
@@ -680,17 +676,14 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         identify(mixpanel, "user_123", "acme")
         let company = mixpanel.getCompany()
         identify(mixpanel, "user_123", "globex")
-        company.set(property: "tier", to: "enterprise")
+        company?.set(property: "tier", to: "enterprise")
 
         XCTAssertEqual(groups(mixpanel).first?["$group_id"] as? String, "acme")
     }
 
-    func testGetCompanyWhenDisabledDropsUpdates() {
+    func testGetCompanyWhenDisabledIsNil() {
         let mixpanel = newApi(false)
-        mixpanel.getCompany().set(property: "tier", to: "enterprise")
-
-        XCTAssertEqual(groups(mixpanel).count, 0)
-        XCTAssertEqual(people(mixpanel).count, 0)
+        XCTAssertNil(mixpanel.getCompany())
     }
 
     func testGroupUpdatesWithoutCompanyAreDropped() {

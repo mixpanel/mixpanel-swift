@@ -21,8 +21,6 @@ open class Group {
     let metadata: SessionMetadata
     let mixpanelPersistence: MixpanelPersistence
     weak var mixpanelInstance: MixpanelInstance?
-    // Set on a group with nothing to update, from getCompany() when there is no company
-    let unavailableReason: String?
 
     init(
         apiToken: String,
@@ -32,8 +30,7 @@ open class Group {
         groupID: MixpanelType,
         metadata: SessionMetadata,
         mixpanelPersistence: MixpanelPersistence,
-        mixpanelInstance: MixpanelInstance,
-        unavailableReason: String? = nil
+        mixpanelInstance: MixpanelInstance
     ) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
@@ -43,14 +40,9 @@ open class Group {
         self.metadata = metadata
         self.mixpanelPersistence = mixpanelPersistence
         self.mixpanelInstance = mixpanelInstance
-        self.unavailableReason = unavailableReason
     }
 
     func addGroupRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
-        if let unavailableReason = unavailableReason {
-            MixpanelLogger.error(message: "\(unavailableReason) The update was dropped.")
-            return
-        }
         if mixpanelInstance?.hasOptedOutTracking() ?? false {
             return
         }
@@ -184,8 +176,6 @@ open class Group {
        */
     open func deleteGroup() {
         addGroupRecordToQueueWithAction("$delete", properties: [:])
-        if unavailableReason == nil {
-            mixpanelInstance?.removeCachedGroup(groupKey: groupKey, groupID: groupID)
-        }
+        mixpanelInstance?.removeCachedGroup(groupKey: groupKey, groupID: groupID)
     }
 }

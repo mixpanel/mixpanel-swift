@@ -20,6 +20,7 @@ class MixpanelExcludePropertiesTests: MixpanelBaseTests {
             "distinct_id": "abc-123",
             "$device_id": "device-xyz",
             "$user_id": "user-42",
+            "$company_id": "company-7",
             "$had_persisted_distinct_id": true,
             "$insert_id": "insert-1",
             "mp_lib": "swift",

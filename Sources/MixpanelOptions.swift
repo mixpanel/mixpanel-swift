@@ -148,7 +148,8 @@ public class MixpanelOptions {
     /// stripped by ``excludeProperties``, even if a customer lists them. Single source of truth
     /// for both the runtime filter (see `Track.applyExcludeProperties`) and the documentation.
     public static let reservedPropertyKeys: Set<String> = [
-        "token", "time", "distinct_id", "$device_id", "$user_id", "$had_persisted_distinct_id",
+        "token", "time", "distinct_id", "$device_id", "$user_id", "$company_id",
+        "$had_persisted_distinct_id",
     ]
 
     public let token: String
@@ -279,6 +280,28 @@ public class MixpanelOptions {
     ///   properties it captures may change in a future release before general availability.
     public let autocaptureOptions: AutocaptureOptions?
 
+    /// Tracks for a project that uses hierarchical groups. Set this to match the project from the
+    /// first launch; it is not meant to be changed for an existing install. Defaults to `false`,
+    /// which behaves exactly as before.
+    ///
+    /// On a hierarchical groups project Mixpanel builds the user's distinct id from `$company_id`
+    /// and `$user_id`, so the company is part of the user's identity. When enabled:
+    /// - Identify with ``MixpanelInstance/identify(identity:completion:)``. Every event then
+    ///   carries `$company_id` beside `$user_id` and `$device_id`.
+    /// - ``People`` updates are sent to `/groups` as the `$user_id` group profile within the
+    ///   company. `/groups` has no `$add`, `$append` or `$merge`, so increment, append, merge and
+    ///   trackCharge are dropped with an error log.
+    /// - ``Group`` updates carry the current `$company_id`, and are dropped until a company is
+    ///   known.
+    ///
+    /// **Example:**
+    /// ```swift
+    /// let options = MixpanelOptions(token: "YOUR_TOKEN", hierarchicalGroups: true)
+    /// let mixpanel = Mixpanel.initialize(options: options)
+    /// mixpanel.identify(identity: MixpanelIdentity(userId: "user_123", companyId: "acme"))
+    /// ```
+    public let hierarchicalGroups: Bool
+
     public init(
         token: String,
         flushInterval: Double = 60,
@@ -295,7 +318,8 @@ public class MixpanelOptions {
         deviceIdProvider: (() -> String?)? = nil,
         featureFlagOptions: FeatureFlagOptions? = nil,
         excludeProperties: Set<String> = [],
-        autocaptureOptions: AutocaptureOptions? = nil
+        autocaptureOptions: AutocaptureOptions? = nil,
+        hierarchicalGroups: Bool = false
     ) {
         self.token = token
         self.flushInterval = flushInterval
@@ -309,6 +333,7 @@ public class MixpanelOptions {
         self.useGzipCompression = useGzipCompression
         self.deviceIdProvider = deviceIdProvider
         self.excludeProperties = excludeProperties
+        self.hierarchicalGroups = hierarchicalGroups
         #if os(iOS)
         self.autocaptureOptions = autocaptureOptions
         #else

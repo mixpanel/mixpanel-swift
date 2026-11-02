@@ -21,6 +21,8 @@ open class Group {
     let metadata: SessionMetadata
     let mixpanelPersistence: MixpanelPersistence
     weak var mixpanelInstance: MixpanelInstance?
+    // Set on a group with nothing to update, from getCompany() when there is no company
+    let unavailableReason: String?
 
     init(
         apiToken: String,
@@ -30,7 +32,8 @@ open class Group {
         groupID: MixpanelType,
         metadata: SessionMetadata,
         mixpanelPersistence: MixpanelPersistence,
-        mixpanelInstance: MixpanelInstance
+        mixpanelInstance: MixpanelInstance,
+        unavailableReason: String? = nil
     ) {
         self.apiToken = apiToken
         self.serialQueue = serialQueue
@@ -40,15 +43,33 @@ open class Group {
         self.metadata = metadata
         self.mixpanelPersistence = mixpanelPersistence
         self.mixpanelInstance = mixpanelInstance
+        self.unavailableReason = unavailableReason
     }
 
     func addGroupRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
+        if let unavailableReason = unavailableReason {
+            MixpanelLogger.error(message: "\(unavailableReason) The update was dropped.")
+            return
+        }
         if mixpanelInstance?.hasOptedOutTracking() ?? false {
             return
         }
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
 
         serialQueue.async {
+            // Hierarchical groups require $company_id at the top level of every /groups write
+            var companyId: String?
+            if let mixpanelInstance = self.mixpanelInstance, mixpanelInstance.hierarchicalGroups {
+                companyId = mixpanelInstance.identity.companyId
+                if companyId == nil {
+                    MixpanelLogger.error(
+                        message:
+                            "Group profile updates for hierarchical groups projects require a company. Call "
+                            + "identify(identity: MixpanelIdentity(userId:companyId:)) first. The update to "
+                            + "\(self.groupKey)=\(self.groupID) was dropped.")
+                    return
+                }
+            }
             var r = InternalProperties()
             var p = InternalProperties()
             r["$token"] = self.apiToken
@@ -65,6 +86,9 @@ open class Group {
 
             r["$group_key"] = self.groupKey
             r["$group_id"] = self.groupID
+            if let companyId = companyId {
+                r["$company_id"] = companyId
+            }
             self.mixpanelPersistence.saveEntity(r, type: .groups)
         }
 
@@ -160,6 +184,8 @@ open class Group {
        */
     open func deleteGroup() {
         addGroupRecordToQueueWithAction("$delete", properties: [:])
-        mixpanelInstance?.removeCachedGroup(groupKey: groupKey, groupID: groupID)
+        if unavailableReason == nil {
+            mixpanelInstance?.removeCachedGroup(groupKey: groupKey, groupID: groupID)
+        }
     }
 }

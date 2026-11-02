@@ -26,13 +26,15 @@ struct PersistenceConstant {
     static let unIdentifiedFlag = true
 }
 
-struct MixpanelIdentity {
+struct StoredIdentity {
     let distinctID: String
     let peopleDistinctID: String?
     let anonymousId: String?
     let userId: String?
     let alias: String?
     let hadPersistedDistinctId: Bool?
+    // Only set on a hierarchical groups project
+    var companyId: String? = nil
 }
 
 struct MixpanelUserDefaultsKeys {
@@ -45,6 +47,7 @@ struct MixpanelUserDefaultsKeys {
     static let peopleDistinctID = "MPPeopleDistinctID"
     static let anonymousId = "MPAnonymousId"
     static let userID = "MPUserId"
+    static let companyID = "MPCompanyId"
     static let alias = "MPAlias"
     static let hadPersistedDistinctId = "MPHadPersistedDistinctId"
     static let flagsPersistence = "MPFlagsPersistence"
@@ -349,29 +352,30 @@ class MixpanelPersistence {
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.flagsPersistence)")
     }
 
-    static func saveIdentity(_ mixpanelIdentity: MixpanelIdentity, instanceName: String) {
+    static func saveIdentity(_ storedIdentity: StoredIdentity, instanceName: String) {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
         let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
         defaults.set(
-            mixpanelIdentity.distinctID, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.distinctID)")
+            storedIdentity.distinctID, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.distinctID)")
         defaults.set(
-            mixpanelIdentity.peopleDistinctID,
+            storedIdentity.peopleDistinctID,
             forKey: "\(prefix)\(MixpanelUserDefaultsKeys.peopleDistinctID)")
         defaults.set(
-            mixpanelIdentity.anonymousId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.anonymousId)")
-        defaults.set(mixpanelIdentity.userId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)")
-        defaults.set(mixpanelIdentity.alias, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
+            storedIdentity.anonymousId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.anonymousId)")
+        defaults.set(storedIdentity.userId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)")
+        defaults.set(storedIdentity.companyId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.companyID)")
+        defaults.set(storedIdentity.alias, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
         defaults.set(
-            mixpanelIdentity.hadPersistedDistinctId,
+            storedIdentity.hadPersistedDistinctId,
             forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)")
         defaults.synchronize()
     }
 
-    static func loadIdentity(instanceName: String) -> MixpanelIdentity {
+    static func loadIdentity(instanceName: String) -> StoredIdentity {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
-            return MixpanelIdentity.init(
+            return StoredIdentity.init(
                 distinctID: "",
                 peopleDistinctID: nil,
                 anonymousId: nil,
@@ -380,7 +384,7 @@ class MixpanelPersistence {
                 hadPersistedDistinctId: nil)
         }
         let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
-        return MixpanelIdentity.init(
+        return StoredIdentity.init(
             distinctID: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.distinctID)") ?? "",
             peopleDistinctID: defaults.string(
                 forKey: "\(prefix)\(MixpanelUserDefaultsKeys.peopleDistinctID)"),
@@ -388,7 +392,8 @@ class MixpanelPersistence {
             userId: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)"),
             alias: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)"),
             hadPersistedDistinctId: defaults.bool(
-                forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)"))
+                forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)"),
+            companyId: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.companyID)"))
     }
 
     static func deleteMPUserDefaultsData(instanceName: String) {
@@ -400,6 +405,7 @@ class MixpanelPersistence {
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.peopleDistinctID)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.anonymousId)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.companyID)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)")
@@ -439,7 +445,7 @@ class MixpanelPersistence {
             superProperties: superProperties, instanceName: instanceName)
         MixpanelPersistence.saveTimedEvents(timedEvents: timedEvents, instanceName: instanceName)
         MixpanelPersistence.saveIdentity(
-            MixpanelIdentity.init(
+            StoredIdentity.init(
                 distinctID: distinctId,
                 peopleDistinctID: peopleDistinctId,
                 anonymousId: anonymousId,

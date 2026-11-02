@@ -1726,6 +1726,9 @@ extension MixpanelInstance {
        MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
        If the event is being timed, the timer will stop and be added as a property.
 
+       A hierarchical groups project allows one group per group key, so a call with a list
+       group value is dropped with an error log there.
+
        - parameter event:      event name
        - parameter properties: properties dictionary
        - parameter groups:     groups dictionary
@@ -1733,6 +1736,17 @@ extension MixpanelInstance {
     public func trackWithGroups(event: String?, properties: Properties? = nil, groups: Properties?) {
         if hasOptedOutTracking() {
             return
+        }
+
+        if hierarchicalGroups, let groups = groups {
+            // Hierarchical groups read a list as the name of one group, not as membership in each
+            for (groupKey, groupID) in groups where groupID is [MixpanelType] || groupID is NSArray {
+                MixpanelLogger.error(
+                    message:
+                        "trackWithGroups with a list is not supported for hierarchical groups projects, "
+                        + "which allow one \(groupKey) per user. Use one group id per key. The event was dropped.")
+                return
+            }
         }
 
         guard let properties = properties else {

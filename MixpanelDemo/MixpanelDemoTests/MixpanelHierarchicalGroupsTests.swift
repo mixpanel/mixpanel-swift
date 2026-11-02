@@ -652,6 +652,37 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(teams, ["finance", "sales"])
     }
 
+    func testTrackWithGroupsSendsSingleValue() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        mixpanel.trackWithGroups(
+            event: "Viewed Report", properties: ["page": "home"], groups: ["team": "finance"])
+
+        let properties = lastEventProperties(mixpanel, "Viewed Report")
+        XCTAssertEqual(properties["team"] as? String, "finance")
+        XCTAssertEqual(properties["page"] as? String, "home")
+    }
+
+    func testTrackWithGroupsWithListIsDropped() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        mixpanel.trackWithGroups(
+            event: "Viewed Report", properties: ["page": "home"],
+            groups: ["region": "emea", "team": ["finance", "sales"]])
+        mixpanel.trackWithGroups(event: "Viewed Report", properties: nil, groups: ["team": ["finance"]])
+
+        XCTAssertEqual(countEvents(mixpanel, "Viewed Report"), 0)
+    }
+
+    func testDisabledTrackWithGroupsSendsList() {
+        let mixpanel = newApi(false)
+        mixpanel.trackWithGroups(
+            event: "Viewed Report", properties: ["page": "home"], groups: ["team": ["finance", "sales"]])
+
+        let teams = lastEventProperties(mixpanel, "Viewed Report")["team"] as? [String]
+        XCTAssertEqual(teams, ["finance", "sales"])
+    }
+
     // MARK: - Group profiles
 
     func testGroupUpdatesCarryCompany() {

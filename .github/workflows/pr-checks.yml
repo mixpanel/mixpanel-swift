@@ -50,7 +50,6 @@ jobs:
             echo "Invalid examples:"
             echo "  ❌ Added new feature"
             echo "  ❌ Fix bug"
-            echo "  ❌ Updated docs"
             echo ""
             exit 1
           fi

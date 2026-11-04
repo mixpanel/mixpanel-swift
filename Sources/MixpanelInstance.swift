@@ -2249,6 +2249,10 @@ extension MixpanelInstance {
             self.people.saveHierarchicalGroupsRecord(
                 "$unset", properties: ["$properties": [groupKey]], userId: userId, companyId: companyId)
         }
+
+        if MixpanelInstance.isiOSAppExtension() {
+            flush()
+        }
     }
 
     /**

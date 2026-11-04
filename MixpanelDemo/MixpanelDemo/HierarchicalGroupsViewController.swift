@@ -279,8 +279,8 @@ class HierarchicalGroupsViewController: UIViewController, UITableViewDelegate,
                 print("Incrementing a user property")
                 self.mixpanel.people.increment(property: "logins", by: 1)
             },
-            HGAction(title: "Invalid: User Increment (Map)", message: "People: increment properties")
-            { [unowned self] in
+            HGAction(title: "Invalid: User Increment (Map)", message: "People: increment properties") {
+                [unowned self] in
                 print("Incrementing multiple user properties")
                 self.mixpanel.people.increment(properties: ["logins": 1, "sessions": 2])
             },
@@ -302,8 +302,7 @@ class HierarchicalGroupsViewController: UIViewController, UITableViewDelegate,
         -> [HGAction]
     {
         return [
-            HGAction(title: "\(label): Set Property", message: "Group: set \"tier\" on \(groupKey)")
-            {
+            HGAction(title: "\(label): Set Property", message: "Group: set \"tier\" on \(groupKey)") {
                 print("Setting a \(label) property")
                 group()?.set(property: "tier", to: "enterprise")
             },

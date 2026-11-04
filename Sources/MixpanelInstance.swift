@@ -23,7 +23,7 @@ import CoreTelephony
 #endif  // os(iOS)
 
 private let devicePrefix = "$device:"
-private let companyIdGroupKey = "$company_id"
+let companyIdGroupKey = "$company_id"
 
 /// Delegate protocol for updating the Proxy Server API's network behavior.
 public protocol MixpanelProxyServerDelegate: AnyObject {
@@ -2225,6 +2225,9 @@ extension MixpanelInstance {
 
     private func removeHierarchicalGroup(groupKey: String, groupID: MixpanelType) {
         updateSuperProperty { superProperties in
+            // Read the identity now, so an identify called after this cannot move the update to
+            // another user
+            let identity = self.identity
             // A one-item list, stored by an earlier version or before hierarchical groups was
             // enabled, counts as that item.
             var current = superProperties[groupKey]
@@ -2235,7 +2238,16 @@ extension MixpanelInstance {
                 return
             }
             superProperties.removeValue(forKey: groupKey)
-            self.people.unset(properties: [groupKey])
+            guard let userId = identity.userId, let companyId = identity.companyId else {
+                MixpanelLogger.error(
+                    message:
+                        "User profile updates for hierarchical groups projects need a user and a company. "
+                        + "Call identify(identity: MixpanelIdentity(userId:companyId:)) first. The $unset "
+                        + "update was dropped.")
+                return
+            }
+            self.people.saveHierarchicalGroupsRecord(
+                "$unset", properties: ["$properties": [groupKey]], userId: userId, companyId: companyId)
         }
     }
 

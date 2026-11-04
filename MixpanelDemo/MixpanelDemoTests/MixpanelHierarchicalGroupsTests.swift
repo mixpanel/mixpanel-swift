@@ -642,6 +642,19 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertNil(lastEventProperties(mixpanel, "Viewed Report")["team"])
     }
 
+    func testRemoveGroupThenIdentifyClearsThePreviousUser() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        mixpanel.setGroup(groupKey: "team", groupID: "finance")
+        mixpanel.removeGroup(groupKey: "team", groupID: "finance")
+        mixpanel.identify(identity: MixpanelIdentity(userId: "user_456", companyId: "globex"))
+
+        let unset = groups(mixpanel).last
+        XCTAssertEqual(unset?["$unset"] as? [String], ["team"])
+        XCTAssertEqual(unset?["$group_id"] as? String, "user_123")
+        XCTAssertEqual(unset?["$company_id"] as? String, "acme")
+    }
+
     func testDisabledGroupMembershipStaysAList() {
         let mixpanel = newApi(false)
         mixpanel.setGroup(groupKey: "team", groupID: "finance")
@@ -732,6 +745,31 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         company?.set(property: "tier", to: "enterprise")
 
         XCTAssertEqual(groups(mixpanel).first?["$group_id"] as? String, "acme")
+    }
+
+    func testGetCompanyKeepsItsCompanyAfterIdentify() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        let company = mixpanel.getCompany()
+        identify(mixpanel, "user_456", "globex")
+        company?.set(property: "tier", to: "enterprise")
+
+        let message = groups(mixpanel).first
+        XCTAssertEqual(message?["$group_id"] as? String, "acme")
+        XCTAssertEqual(message?["$company_id"] as? String, "acme")
+    }
+
+    func testGetCompanyKeepsItsCompanyAfterReset() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        let company = mixpanel.getCompany()
+        mixpanel.reset()
+        company?.set(property: "tier", to: "enterprise")
+
+        let groups = self.groups(mixpanel)
+        XCTAssertEqual(groups.count, 1)
+        XCTAssertEqual(groups.first?["$group_id"] as? String, "acme")
+        XCTAssertEqual(groups.first?["$company_id"] as? String, "acme")
     }
 
     func testGetCompanyWhenDisabledIsNil() {

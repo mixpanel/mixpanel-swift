@@ -50,9 +50,15 @@ open class Group {
 
         serialQueue.async {
             // Hierarchical groups require $company_id at the top level of every /groups write
-            var companyId: String?
+            var companyId: MixpanelType?
             if let mixpanelInstance = self.mixpanelInstance, mixpanelInstance.hierarchicalGroups {
-                companyId = mixpanelInstance.identity.companyId
+                // A company group is bound to its own company, so a group kept across reset() or a
+                // new identify still updates that company
+                if self.groupKey == companyIdGroupKey {
+                    companyId = self.groupID
+                } else {
+                    companyId = mixpanelInstance.identity.companyId
+                }
                 if companyId == nil {
                     MixpanelLogger.error(
                         message:

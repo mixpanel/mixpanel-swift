@@ -27,9 +27,12 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         super.tearDown()
     }
 
-    private func newApi(_ hierarchicalGroups: Bool) -> MixpanelInstance {
+    private func newApi(_ hierarchicalGroups: Bool, excludeProperties: Set<String> = [])
+        -> MixpanelInstance
+    {
         let options = MixpanelOptions(
-            token: randomId(), flushInterval: 60, hierarchicalGroups: hierarchicalGroups)
+            token: randomId(), flushInterval: 60, excludeProperties: excludeProperties,
+            hierarchicalGroups: hierarchicalGroups)
         let mixpanel = Mixpanel.initialize(options: options)
         // Keep everything queued so the tests can read it
         mixpanel.delegate = self
@@ -915,8 +918,20 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
             "MixpanelIdentity(userId=u, companyId=c)")
     }
 
-    func testCompanyIdIsReserved() {
-        XCTAssertTrue(MixpanelOptions.reservedPropertyKeys.contains("$company_id"))
+    func testCompanyIdIsNeverExcluded() {
+        let mixpanel = newApi(true, excludeProperties: ["$company_id"])
+        identify(mixpanel, "user_123", "acme")
+        mixpanel.track(event: "Viewed Report")
+
+        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["$company_id"] as? String, "acme")
+    }
+
+    func testCompanyIdCanBeExcludedWhenDisabled() {
+        let mixpanel = newApi(false, excludeProperties: ["$company_id"])
+        mixpanel.track(event: "Viewed Report", properties: ["$company_id": "acme"])
+
+        XCTAssertNil(lastEventProperties(mixpanel, "Viewed Report")["$company_id"])
+        XCTAssertFalse(MixpanelOptions.reservedPropertyKeys.contains("$company_id"))
     }
 
     func testOptionDefaultsToDisabled() {

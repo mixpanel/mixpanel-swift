@@ -148,8 +148,7 @@ public class MixpanelOptions {
     /// stripped by ``excludeProperties``, even if a customer lists them. Single source of truth
     /// for both the runtime filter (see `Track.applyExcludeProperties`) and the documentation.
     public static let reservedPropertyKeys: Set<String> = [
-        "token", "time", "distinct_id", "$device_id", "$user_id", "$company_id",
-        "$had_persisted_distinct_id",
+        "token", "time", "distinct_id", "$device_id", "$user_id", "$had_persisted_distinct_id",
     ]
 
     public let token: String
@@ -176,7 +175,8 @@ public class MixpanelOptions {
     /// Matching is **exact and case-sensitive**.
     ///
     /// Keys in ``MixpanelOptions/reservedPropertyKeys`` are never stripped, even if listed —
-    /// they are required for ingestion and identity resolution.
+    /// they are required for ingestion and identity resolution. Neither is `$company_id` when
+    /// ``hierarchicalGroups`` is enabled.
     ///
     /// **Scope:**
     /// - **Events** — applied at the persistence chokepoint, covering super properties, caller

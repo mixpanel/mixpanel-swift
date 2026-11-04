@@ -544,14 +544,19 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
         flushInstance = Flush(serverURL: self.serverURL, useGzipCompression: useGzipCompression)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
-        MixpanelInstance.warnIfStrippingLibProperties(self.options.excludeProperties)
+        // Hierarchical groups ingestion requires $company_id, so it is never stripped there
+        var excludeProperties = self.options.excludeProperties
+        if self.options.hierarchicalGroups {
+            excludeProperties.remove(companyIdGroupKey)
+        }
+        MixpanelInstance.warnIfStrippingLibProperties(excludeProperties)
         trackInstance = Track(
             apiToken: self.apiToken,
             instanceName: self.name,
             lock: self.readWriteLock,
             metadata: sessionMetadata,
             mixpanelPersistence: mixpanelPersistence,
-            excludeProperties: self.options.excludeProperties)
+            excludeProperties: excludeProperties)
         trackInstance.mixpanelInstance = self
         #if os(iOS) && !targetEnvironment(macCatalyst)
         // Extract hostname from serverURL and create reachability
@@ -591,7 +596,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             serialQueue: trackingQueue,
             lock: self.readWriteLock,
             metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence,
-            excludeProperties: self.options.excludeProperties)
+            excludeProperties: excludeProperties)
         people.mixpanelInstance = self
         people.delegate = self
         autocapture = Autocapture()

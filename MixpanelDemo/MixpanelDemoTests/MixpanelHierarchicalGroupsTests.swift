@@ -79,8 +79,6 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         waitForTrackingQueue(mixpanel)
     }
 
-    // Reads the deprecated distinct id without a warning at every call site
-    @available(*, deprecated)
     private func distinctId(_ mixpanel: MixpanelInstance) -> String {
         waitForTrackingQueue(mixpanel)
         return mixpanel.distinctId
@@ -101,7 +99,6 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(distinctId(mixpanel), "$company:acme|$user:user_123")
     }
 
-    @available(*, deprecated)
     func testSettingDistinctIdIsIgnored() {
         let mixpanel = newApi(true)
         identify(mixpanel, "user_123", "acme")
@@ -112,7 +109,6 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(distinctId(mixpanel), "$company:acme|$user:user_123")
     }
 
-    @available(*, deprecated)
     func testDisabledSettingDistinctIdStillApplies() {
         let mixpanel = newApi(false)
         mixpanel.distinctId = "user_456"
@@ -285,14 +281,12 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
 
     // MARK: - distinctId reports the id Mixpanel resolves the user to
 
-    @available(*, deprecated)
     func testDistinctIdIsDeviceBeforeIdentify() {
         let mixpanel = newApi(true)
         XCTAssertEqual(distinctId(mixpanel), "$device:" + mixpanel.anonymousId!)
         XCTAssertEqual(mixpanel.getDistinctId(), distinctId(mixpanel))
     }
 
-    @available(*, deprecated)
     func testDistinctIdCombinesCompanyAndUser() {
         let mixpanel = newApi(true)
         identify(mixpanel, "user_123", "acme")
@@ -307,14 +301,12 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(distinctId(mixpanel), "$company:globex|$user:user_123")
     }
 
-    @available(*, deprecated)
     func testDistinctIdStaysOnDeviceUntilCompanyIsKnown() {
         let mixpanel = newApi(true)
         mixpanel.identify(distinctId: "user_123")
         XCTAssertEqual(distinctId(mixpanel), "$device:" + mixpanel.anonymousId!)
     }
 
-    @available(*, deprecated)
     func testDistinctIdUnchangedWhenDisabled() {
         let mixpanel = newApi(false)
         mixpanel.identify(distinctId: "user_123")
@@ -322,7 +314,6 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(mixpanel.getDistinctId(), "user_123")
     }
 
-    @available(*, deprecated)
     func testResetReturnsToDeviceDistinctId() {
         let mixpanel = newApi(true)
         identify(mixpanel, "user_123", "acme")

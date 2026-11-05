@@ -100,11 +100,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// company is known, Mixpanel ignores the user id and keeps the user under the device, so
     /// this returns the device form. The combined form is Mixpanel's own format, and it cannot be
     /// parsed back when either id contains `|`. Events always send the id passed to `identify`.
-    @available(
-        *, deprecated,
-        message:
-            "Use identity instead. Its user, company and device ids are what every Mixpanel SDK accepts directly, so nothing has to build or parse a combined id."
-    )
+    ///
+    /// Don't use this on a hierarchical groups project, where setting it is a no-op with an error
+    /// log. Prefer ``identity``, whose user, company and device ids every Mixpanel SDK accepts
+    /// directly.
     open var distinctId: String {
         get {
             return resolvedDistinctId()
@@ -681,12 +680,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         return options
     }
 
-    /// Returns the distinct id Mixpanel resolves the current user to. See ``distinctId``.
-    @available(
-        *, deprecated,
-        message:
-            "Use identity instead. Its user, company and device ids are what every Mixpanel SDK accepts directly, so nothing has to build or parse a combined id."
-    )
+    /// Returns the distinct id Mixpanel resolves the current user to. See ``distinctId``. Don't use
+    /// this on a hierarchical groups project; prefer ``identity``.
     public func getDistinctId() -> String {
         return resolvedDistinctId()
     }

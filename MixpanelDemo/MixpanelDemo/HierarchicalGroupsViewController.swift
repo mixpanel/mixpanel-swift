@@ -10,7 +10,7 @@ import UIKit
 
 // Hierarchical groups is an init-time option and instances are cached per token, so this page
 // uses its own project rather than the one AppDelegate initializes.
-let mixpanelHGProjectToken = "0d15128ec05aa2ba0fb3d45185f63a11"
+let mixpanelHGProjectToken = "YOUR_HG_PROJECT_TOKEN"
 
 // Filter the console on "HGDemo" to see each button's header line, followed by the SDK's own
 // log lines for the call and the flush it triggers.

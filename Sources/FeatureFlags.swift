@@ -1610,13 +1610,15 @@ class FeatureFlagManager: MixpanelFlags {
         ]
 
         var payload: [String: Any] = [
-            "distinct_id": distinctId,
             "project_id": projectId,
             "first_time_event_hash": firstTimeEventHash,
         ]
+        // On a hierarchical groups project the user is $user_id and $company_id, so no distinct_id
         if let hierarchicalGroupsIds = hierarchicalGroupsIds {
             payload["$user_id"] = hierarchicalGroupsIds.userId
             payload["$company_id"] = hierarchicalGroupsIds.companyId
+        } else {
+            payload["distinct_id"] = distinctId
         }
 
         guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),

@@ -874,7 +874,7 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
 
         let body = FlagsRecordingURLProtocol.requests().first { $0.url.path == path }?.body ?? Data()
         let expected: NSDictionary = [
-            "distinct_id": "user_123", "project_id": 3, "first_time_event_hash": "abc123",
+            "project_id": 3, "first_time_event_hash": "abc123",
             "$user_id": "user_123", "$company_id": "acme",
         ]
         XCTAssertEqual((try? JSONSerialization.jsonObject(with: body)) as? NSDictionary, expected)

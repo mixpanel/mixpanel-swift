@@ -54,7 +54,7 @@ class Track {
         properties: Properties? = nil,
         timedEvents: InternalProperties,
         superProperties: InternalProperties,
-        mixpanelIdentity: MixpanelIdentity,
+        storedIdentity: StoredIdentity,
         epochInterval: Double
     ) -> InternalProperties {
         var ev = "mp_event"
@@ -81,18 +81,27 @@ class Track {
             shadowTimedEvents.removeValue(forKey: ev)
             p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
         }
-        p["distinct_id"] = mixpanelIdentity.distinctID
-        if mixpanelIdentity.anonymousId != nil {
-            p["$device_id"] = mixpanelIdentity.anonymousId
+        // On a hierarchical groups project the user is $user_id and $company_id, so no distinct_id
+        if storedIdentity.userId == nil || storedIdentity.companyId == nil {
+            p["distinct_id"] = storedIdentity.distinctID
         }
-        if mixpanelIdentity.userId != nil {
-            p["$user_id"] = mixpanelIdentity.userId
+        if storedIdentity.anonymousId != nil {
+            p["$device_id"] = storedIdentity.anonymousId
         }
-        if mixpanelIdentity.hadPersistedDistinctId != nil {
-            p["$had_persisted_distinct_id"] = mixpanelIdentity.hadPersistedDistinctId
+        if storedIdentity.userId != nil {
+            p["$user_id"] = storedIdentity.userId
+        }
+        if storedIdentity.hadPersistedDistinctId != nil {
+            p["$had_persisted_distinct_id"] = storedIdentity.hadPersistedDistinctId
         }
 
         p += superProperties
+        // Set after super properties so a stale registered $company_id can't override the
+        // identified company, while event properties still can. Only a hierarchical groups
+        // project identifies with a company.
+        if let companyId = storedIdentity.companyId {
+            p["$company_id"] = companyId
+        }
         if let properties = properties {
             p += properties
         }

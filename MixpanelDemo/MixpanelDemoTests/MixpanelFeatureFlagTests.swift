@@ -17,6 +17,7 @@ class MockFeatureFlagDelegate: MixpanelFlagDelegate {
     var options: MixpanelOptions
     var distinctId: String
     var anonymousId: String?
+    var identity = MixpanelIdentity(userId: nil)
     var trackedEvents: [(event: String?, properties: Properties?)] = []
     var trackExpectation: XCTestExpectation?
     var getOptionsCallCount = 0
@@ -258,7 +259,10 @@ class MockFeatureFlagManager: FeatureFlagManager {
     }
 
     // Override recordFirstTimeEvent to prevent real network calls and track invocations
-    override func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String) {
+    override func recordFirstTimeEvent(
+        flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String,
+        hierarchicalGroupsIds: (userId: String, companyId: String)? = nil
+    ) {
         recordFirstTimeEventCallCount += 1
         lastRecordedFlagId = flagId
         lastRecordedProjectId = projectId

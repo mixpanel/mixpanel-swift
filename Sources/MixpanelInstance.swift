@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import MixpanelSwiftCommon
 
 #if !os(OSX)
 import UIKit
@@ -22,6 +23,7 @@ import CoreTelephony
 #endif  // os(iOS)
 
 private let devicePrefix = "$device:"
+let companyIdGroupKey = "$company_id"
 
 /// Delegate protocol for updating the Proxy Server API's network behavior.
 public protocol MixpanelProxyServerDelegate: AnyObject {
@@ -48,6 +50,12 @@ public protocol MixpanelDelegate: AnyObject {
 }
 
 public typealias Properties = [String: MixpanelType]
+
+/// Names who events, profile updates and replays belong to: a user, their company on a
+/// hierarchical groups project, and the device. Defined in MixpanelSwiftCommon so other Mixpanel
+/// SDKs, such as Session Replay, share it, and available with `import Mixpanel` alone.
+public typealias MixpanelIdentity = MixpanelSwiftCommon.MixpanelIdentity
+
 typealias InternalProperties = [String: Any]
 typealias Queue = [InternalProperties]
 
@@ -84,14 +92,49 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// The a MixpanelDelegate object that gives control over Mixpanel network activity.
     open weak var delegate: MixpanelDelegate?
 
-    /// distinctId string that uniquely identifies the current user.
-    open var distinctId = ""
+    /// The distinct id Mixpanel resolves the current user to. Before any calls to `identify`,
+    /// this is `$device:` followed by the device id.
+    ///
+    /// On a hierarchical groups project Mixpanel builds the distinct id from the company and the
+    /// user, so once both are known this returns `$company:{companyId}|$user:{userId}`. Until a
+    /// company is known, Mixpanel ignores the user id and keeps the user under the device, so
+    /// this returns the device form. The combined form is Mixpanel's own format, and it cannot be
+    /// parsed back when either id contains `|`. Events always send the id passed to `identify`.
+    ///
+    /// Don't use this on a hierarchical groups project, where setting it is a no-op with an error
+    /// log. Prefer ``identity``, whose user, company and device ids every Mixpanel SDK accepts
+    /// directly.
+    open var distinctId: String {
+        get {
+            return resolvedDistinctId()
+        }
+        set {
+            guard !hierarchicalGroups else {
+                MixpanelLogger.error(
+                    message:
+                        "Setting distinctId is not supported for hierarchical groups projects, which identify a "
+                        + "user by company and user id. Use identify(identity: MixpanelIdentity(userId:companyId:)). "
+                        + "The distinct id was not changed.")
+                return
+            }
+            readWriteLock.write {
+                eventsDistinctId = newValue
+            }
+        }
+    }
+
+    /// The distinct id events are sent with: the id passed to `identify`, or the device form
+    /// before that.
+    var eventsDistinctId = ""
 
     /// anonymousId string that uniquely identifies the device.
     open var anonymousId: String?
 
     /// userId string that identify is called with.
     open var userId: String?
+
+    /// The company identify was called with, on a hierarchical groups project.
+    var companyId: String?
 
     /// hadPersistedDistinctId is a boolean value which specifies that the stored distinct_id
     /// already exists in persistence
@@ -287,7 +330,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var debugDescription: String {
         return "Mixpanel(\n"
             + "    Token: \(apiToken),\n"
-            + "    Distinct Id: \(distinctId)\n"
+            + "    Distinct Id: \(eventsDistinctId)\n"
             + ")"
     }
 
@@ -497,14 +540,19 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
         flushInstance = Flush(serverURL: self.serverURL, useGzipCompression: useGzipCompression)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
-        MixpanelInstance.warnIfStrippingLibProperties(self.options.excludeProperties)
+        // Hierarchical groups ingestion requires $company_id, so it is never stripped there
+        var excludeProperties = self.options.excludeProperties
+        if self.options.hierarchicalGroups {
+            excludeProperties.remove(companyIdGroupKey)
+        }
+        MixpanelInstance.warnIfStrippingLibProperties(excludeProperties)
         trackInstance = Track(
             apiToken: self.apiToken,
             instanceName: self.name,
             lock: self.readWriteLock,
             metadata: sessionMetadata,
             mixpanelPersistence: mixpanelPersistence,
-            excludeProperties: self.options.excludeProperties)
+            excludeProperties: excludeProperties)
         trackInstance.mixpanelInstance = self
         #if os(iOS) && !targetEnvironment(macCatalyst)
         // Extract hostname from serverURL and create reachability
@@ -538,13 +586,13 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         #endif
         flushInstance.delegate = self
-        distinctId = devicePrefix + defaultDeviceId()
+        eventsDistinctId = devicePrefix + defaultDeviceId()
         people = People(
             apiToken: self.apiToken,
             serialQueue: trackingQueue,
             lock: self.readWriteLock,
             metadata: sessionMetadata, mixpanelPersistence: mixpanelPersistence,
-            excludeProperties: self.options.excludeProperties)
+            excludeProperties: excludeProperties)
         people.mixpanelInstance = self
         people.delegate = self
         autocapture = Autocapture()
@@ -629,8 +677,48 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         return options
     }
 
+    /// Returns the distinct id Mixpanel resolves the current user to. See ``distinctId``. Don't use
+    /// this on a hierarchical groups project; prefer ``identity``.
     public func getDistinctId() -> String {
-        return distinctId
+        return resolvedDistinctId()
+    }
+
+    /// Whether this instance tracks for a hierarchical groups project. Fixed for the life of the
+    /// instance.
+    var hierarchicalGroups: Bool {
+        return options.hierarchicalGroups
+    }
+
+    func resolvedDistinctId() -> String {
+        var resolved = ""
+        readWriteLock.read {
+            resolved = eventsDistinctId
+            guard hierarchicalGroups, let userId = userId else {
+                // Anonymous, so already $device:{deviceId}
+                return
+            }
+            if let companyId = companyId {
+                resolved = "$company:\(companyId)|$user:\(userId)"
+            } else if let anonymousId = anonymousId {
+                // Mixpanel ignores a user id without a company while the event carries a device id
+                resolved = devicePrefix + anonymousId
+            }
+        }
+        return resolved
+    }
+
+    /// Who events are currently attributed to: the identified user, their company on a
+    /// hierarchical groups project, and the device id. Pass it to other Mixpanel SDKs, such as
+    /// Session Replay, so their data resolves to the same user.
+    ///
+    /// Before `identify` the user id is nil and only the device id is set. The returned identity
+    /// is a snapshot and does not change after a later `identify` or `reset()`.
+    open var identity: MixpanelIdentity {
+        var snapshot = MixpanelIdentity(userId: nil)
+        readWriteLock.read {
+            snapshot = MixpanelIdentity(userId: userId, companyId: companyId, deviceId: anonymousId)
+        }
+        return snapshot
     }
 
     public func getAnonymousId() -> String? {
@@ -968,12 +1056,111 @@ extension MixpanelInstance {
        a fetch that was in flight at the moment identify was called will fire with `false`
        (so callers don't hang) — they will *not* receive the result of the new identity's fetch.
 
+       Not supported on a hierarchical groups project, which identifies a user by company and user
+       id, so it is logged and ignored there. Use `identify(identity:)` instead.
+
        - parameter distinctId: string that uniquely identifies the current user
        - parameter usePeople: boolean that controls whether or not to set the people distinctId to the event distinctId.
        This should only be set to false if you wish to prevent people profile updates for that user.
        - parameter completion: an optional completion handler for when the identify has completed.
        */
     public func identify(distinctId: String, usePeople: Bool = true, completion: (() -> Void)? = nil) {
+        if hierarchicalGroups {
+            MixpanelLogger.error(
+                message:
+                    "identify(distinctId:) is not supported for hierarchical groups projects, which identify a "
+                    + "user by company and user id. Use identify(identity: MixpanelIdentity(userId:companyId:)). "
+                    + "Nothing was identified.")
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
+            return
+        }
+        identify(distinctId: distinctId, companyId: nil, usePeople: usePeople, completion: completion)
+    }
+
+    /**
+       Associates all future events and `People` updates with the given identity.
+
+       On a project that uses hierarchical groups, enabled with `MixpanelOptions.hierarchicalGroups`,
+       identify with both a user and a company. Mixpanel builds the user's distinct id from
+       `$company_id` and `$user_id`, so the company is part of the user's identity: the same user id
+       in two companies is two users. Every later event carries `$company_id` beside `$user_id` and
+       `$device_id`, and `People` updates go to that company's `$user_id` group profile. Both ids
+       persist across restarts until the next identify or `reset()`.
+
+       ```swift
+       mixpanel.identify(identity: MixpanelIdentity(userId: "user_123", companyId: "acme"))
+       ```
+
+       Calling this with the current user and a different company is an identity change, as switching
+       users is. No `$identify` event is tracked: Mixpanel ties the device to the user from the
+       `$device_id`, `$user_id` and `$company_id` on later events. An identity without both a user id
+       and a company id is logged and ignored.
+
+       On any other project Mixpanel ignores `$company_id`, so an identity that names a company is
+       logged and ignored rather than attributed without it. An identity with a nil or empty user id
+       is also logged and ignored.
+
+       The SDK owns the device id, which stays the same across identifies so earlier anonymous
+       activity follows the user. A `deviceId` on the identity is ignored, with a warning when it
+       differs from `anonymousId`; set the device id with `MixpanelOptions.deviceIdProvider`.
+
+       - parameter identity: the user, and on a hierarchical groups project their company
+       - parameter completion: an optional completion handler for when the identify has completed.
+       */
+    public func identify(identity: MixpanelIdentity, completion: (() -> Void)? = nil) {
+        let finish = {
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
+        }
+        if hasOptedOutTracking() {
+            finish()
+            return
+        }
+        let userId = identity.userId ?? ""
+        let companyId = identity.companyId
+        if hierarchicalGroups {
+            if userId.isEmpty || (companyId ?? "").isEmpty {
+                MixpanelLogger.error(
+                    message:
+                        "Can't identify \(identity): hierarchical groups projects identify a user by "
+                        + "company and user id, so both are required. Nothing was identified.")
+                finish()
+                return
+            }
+        } else {
+            if userId.isEmpty {
+                MixpanelLogger.error(
+                    message: "Can't identify \(identity) without a user id. Nothing was identified.")
+                finish()
+                return
+            }
+            if companyId != nil {
+                MixpanelLogger.error(
+                    message:
+                        "Can't identify \(identity): a company requires hierarchicalGroups: true in "
+                        + "MixpanelOptions. Mixpanel ignores $company_id on other projects, so nothing "
+                        + "was identified.")
+                finish()
+                return
+            }
+        }
+        let currentDeviceId = getAnonymousId()
+        if let deviceId = identity.deviceId, deviceId != currentDeviceId {
+            MixpanelLogger.warn(
+                message:
+                    "Ignoring deviceId \(deviceId) on \(identity). The SDK owns the device id "
+                    + "(\(currentDeviceId ?? "none")) so earlier anonymous events follow the user; set it "
+                    + "with MixpanelOptions.deviceIdProvider.")
+        }
+        identify(distinctId: userId, companyId: companyId, usePeople: true, completion: completion)
+    }
+
+    private func identify(
+        distinctId: String, companyId: String?, usePeople: Bool, completion: (() -> Void)?
+    ) {
         if hasOptedOutTracking() {
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
@@ -987,13 +1174,13 @@ extension MixpanelInstance {
             }
             return
         }
-        trackingQueue.async { [weak self, distinctId, usePeople] in
+        trackingQueue.async { [weak self, distinctId, companyId, usePeople] in
             guard let self = self else { return }
 
             // If there's no anonymousId assigned yet, that means distinctId is stored in the storage. Assigning already stored
             // distinctId as anonymousId on identify and also setting a flag to notify that it might be previously logged in user
             if self.anonymousId == nil {
-                self.anonymousId = self.distinctId
+                self.anonymousId = self.eventsDistinctId
                 self.hadPersistedDistinctId = true
             }
 
@@ -1003,12 +1190,18 @@ extension MixpanelInstance {
                 }
             }
 
-            if distinctId != self.distinctId {
-                let oldDistinctId = self.distinctId
+            let userChanged = distinctId != self.eventsDistinctId
+            // A user in another company is another user, so a new company is an identity change.
+            let companyChanged = self.hierarchicalGroups && companyId != nil && companyId != self.companyId
+            if userChanged || companyChanged {
+                let oldDistinctId = self.eventsDistinctId
                 self.readWriteLock.write {
                     self.alias = nil
-                    self.distinctId = distinctId
+                    self.eventsDistinctId = distinctId
                     self.userId = distinctId
+                    if self.hierarchicalGroups {
+                        self.companyId = companyId
+                    }
                 }
                 // Distinct ID just changed — clear in-memory feature-flag state and the on-disk
                 // cache from the prior identity (and bump the fetch generation so any in-flight
@@ -1018,7 +1211,11 @@ extension MixpanelInstance {
                     flagManager.reset()
                 }
                 self.flags.loadFlags()
-                self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
+                // A hierarchical groups project ties the device to the user from the identity keys on
+                // later events, so it has no $identify
+                if !self.hierarchicalGroups {
+                    self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
+                }
             }
 
             if usePeople {
@@ -1031,13 +1228,14 @@ extension MixpanelInstance {
             }
 
             MixpanelPersistence.saveIdentity(
-                MixpanelIdentity.init(
-                    distinctID: self.distinctId,
+                StoredIdentity.init(
+                    distinctID: self.eventsDistinctId,
                     peopleDistinctID: self.people.distinctId,
                     anonymousId: self.anonymousId,
                     userId: self.userId,
                     alias: self.alias,
-                    hadPersistedDistinctId: self.hadPersistedDistinctId), instanceName: self.name)
+                    hadPersistedDistinctId: self.hadPersistedDistinctId,
+                    companyId: self.companyId), instanceName: self.name)
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
             }
@@ -1070,12 +1268,28 @@ extension MixpanelInstance {
        user identifier(not alias). Default to true for keeping your signup funnels working correctly in most cases.
        - parameter completion: an optional completion handler for when the createAlias has completed.
        This should only be set to false if you wish to prevent people profile updates for that user.
+
+       A hierarchical groups project identifies a user by their company and user id, which an alias
+       of one distinct id to another can't express, so this is dropped with an error log there. Use
+       `identify(identity:)` instead.
        */
     public func createAlias(
         _ alias: String, distinctId: String, usePeople: Bool = true, andIdentify: Bool = true,
         completion: (() -> Void)? = nil
     ) {
         if hasOptedOutTracking() {
+            if let completion = completion {
+                DispatchQueue.main.async(execute: completion)
+            }
+            return
+        }
+
+        if hierarchicalGroups {
+            MixpanelLogger.error(
+                message:
+                    "createAlias is not supported for hierarchical groups projects, which identify a user by "
+                    + "company and user id. Use identify(identity: MixpanelIdentity(userId:companyId:)). "
+                    + "The alias was dropped.")
             if let completion = completion {
                 DispatchQueue.main.async(execute: completion)
             }
@@ -1116,24 +1330,27 @@ extension MixpanelInstance {
                 var userIdSnapshot: String?
                 var aliasSnapshot: String?
                 var hadPersistedDistinctIdSnapshot: Bool?
+                var companyIdSnapshot: String?
 
                 self.readWriteLock.read {
-                    distinctIdSnapshot = self.distinctId
+                    distinctIdSnapshot = self.eventsDistinctId
                     peopleDistinctIDSnapshot = self.people.distinctId
                     anonymousIdSnapshot = self.anonymousId
                     userIdSnapshot = self.userId
                     aliasSnapshot = self.alias
                     hadPersistedDistinctIdSnapshot = self.hadPersistedDistinctId
+                    companyIdSnapshot = self.companyId
                 }
 
                 MixpanelPersistence.saveIdentity(
-                    MixpanelIdentity.init(
+                    StoredIdentity.init(
                         distinctID: distinctIdSnapshot!,
                         peopleDistinctID: peopleDistinctIDSnapshot,
                         anonymousId: anonymousIdSnapshot,
                         userId: userIdSnapshot,
                         alias: aliasSnapshot,
-                        hadPersistedDistinctId: hadPersistedDistinctIdSnapshot), instanceName: self.name)
+                        hadPersistedDistinctId: hadPersistedDistinctIdSnapshot,
+                        companyId: companyIdSnapshot), instanceName: self.name)
             }
 
             let properties = ["distinct_id": distinctId, "alias": alias]
@@ -1172,9 +1389,10 @@ extension MixpanelInstance {
             self.readWriteLock.write {
                 self.timedEvents = InternalProperties()
                 self.anonymousId = self.defaultDeviceId()
-                self.distinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
+                self.eventsDistinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
                 self.hadPersistedDistinctId = true
                 self.userId = nil
+                self.companyId = nil
                 self.superProperties = InternalProperties()
                 self.people.distinctId = nil
                 self.alias = nil
@@ -1222,13 +1440,14 @@ extension MixpanelInstance {
             MixpanelPersistence.saveSuperProperties(
                 superProperties: superProperties, instanceName: self.name)
             MixpanelPersistence.saveIdentity(
-                MixpanelIdentity.init(
-                    distinctID: distinctId,
+                StoredIdentity.init(
+                    distinctID: eventsDistinctId,
                     peopleDistinctID: people.distinctId,
                     anonymousId: anonymousId,
                     userId: userId,
                     alias: alias,
-                    hadPersistedDistinctId: hadPersistedDistinctId), instanceName: self.name)
+                    hadPersistedDistinctId: hadPersistedDistinctId,
+                    companyId: companyId), instanceName: self.name)
         }
     }
 
@@ -1237,20 +1456,23 @@ extension MixpanelInstance {
             optOutStatus = MixpanelPersistence.loadOptOutStatusFlag(instanceName: self.name)
             superProperties = MixpanelPersistence.loadSuperProperties(instanceName: self.name)
             timedEvents = MixpanelPersistence.loadTimedEvents(instanceName: self.name)
-            let mixpanelIdentity = MixpanelPersistence.loadIdentity(instanceName: self.name)
-            (distinctId, people.distinctId, anonymousId, userId, alias, hadPersistedDistinctId) = (
-                mixpanelIdentity.distinctID,
-                mixpanelIdentity.peopleDistinctID,
-                mixpanelIdentity.anonymousId,
-                mixpanelIdentity.userId,
-                mixpanelIdentity.alias,
-                mixpanelIdentity.hadPersistedDistinctId
+            let storedIdentity = MixpanelPersistence.loadIdentity(instanceName: self.name)
+            (eventsDistinctId, people.distinctId, anonymousId, userId, alias, hadPersistedDistinctId) = (
+                storedIdentity.distinctID,
+                storedIdentity.peopleDistinctID,
+                storedIdentity.anonymousId,
+                storedIdentity.userId,
+                storedIdentity.alias,
+                storedIdentity.hadPersistedDistinctId
             )
-            if distinctId.isEmpty {
+            // Only a hierarchical groups project identifies with a company
+            companyId = hierarchicalGroups ? storedIdentity.companyId : nil
+            if eventsDistinctId.isEmpty {
                 anonymousId = defaultDeviceId()
-                distinctId = addPrefixToDeviceId(deviceId: anonymousId)
+                eventsDistinctId = addPrefixToDeviceId(deviceId: anonymousId)
                 hadPersistedDistinctId = true
                 userId = nil
+                companyId = nil
                 return true
             } else {
                 // Check if a deviceIdProvider is set and would return a different value
@@ -1276,13 +1498,14 @@ extension MixpanelInstance {
         if didCreateIdentity {
             self.readWriteLock.read {
                 MixpanelPersistence.saveIdentity(
-                    MixpanelIdentity.init(
-                        distinctID: distinctId,
+                    StoredIdentity.init(
+                        distinctID: eventsDistinctId,
                         peopleDistinctID: people.distinctId,
                         anonymousId: anonymousId,
                         userId: userId,
                         alias: alias,
-                        hadPersistedDistinctId: hadPersistedDistinctId), instanceName: self.name)
+                        hadPersistedDistinctId: hadPersistedDistinctId,
+                        companyId: companyId), instanceName: self.name)
             }
         }
     }
@@ -1470,19 +1693,20 @@ extension MixpanelInstance {
                 shadowSuperProperties = self.superProperties
             }
 
-            let mixpanelIdentity = MixpanelIdentity.init(
-                distinctID: self.distinctId,
+            let storedIdentity = StoredIdentity.init(
+                distinctID: self.eventsDistinctId,
                 peopleDistinctID: nil,
                 anonymousId: self.anonymousId,
                 userId: self.userId,
                 alias: nil,
-                hadPersistedDistinctId: self.hadPersistedDistinctId)
+                hadPersistedDistinctId: self.hadPersistedDistinctId,
+                companyId: self.companyId)
             let timedEventsSnapshot = self.trackInstance.track(
                 event: event,
                 properties: properties,
                 timedEvents: shadowTimedEvents,
                 superProperties: shadowSuperProperties,
-                mixpanelIdentity: mixpanelIdentity,
+                storedIdentity: storedIdentity,
                 epochInterval: epochInterval)
 
             self.readWriteLock.write {
@@ -1504,6 +1728,9 @@ extension MixpanelInstance {
        MixpanelType can be either String, Int, UInt, Double, Float, Bool, [MixpanelType], [String: MixpanelType], Date, URL, or NSNull.
        If the event is being timed, the timer will stop and be added as a property.
 
+       A hierarchical groups project allows one group per group key, so a call with a list
+       group value is dropped with an error log there.
+
        - parameter event:      event name
        - parameter properties: properties dictionary
        - parameter groups:     groups dictionary
@@ -1511,6 +1738,17 @@ extension MixpanelInstance {
     public func trackWithGroups(event: String?, properties: Properties? = nil, groups: Properties?) {
         if hasOptedOutTracking() {
             return
+        }
+
+        if hierarchicalGroups, let groups = groups {
+            // Hierarchical groups read a list as the name of one group, not as membership in each
+            for (groupKey, groupID) in groups where groupID is [MixpanelType] || groupID is NSArray {
+                MixpanelLogger.error(
+                    message:
+                        "trackWithGroups with a list is not supported for hierarchical groups projects, "
+                        + "which allow one \(groupKey) per user. Use one group id per key. The event was dropped.")
+                return
+            }
         }
 
         guard let properties = properties else {
@@ -1574,6 +1812,45 @@ extension MixpanelInstance {
         }
 
         return group
+    }
+
+    /**
+       Returns the identified user's company profile on a hierarchical groups project, as a `Group`
+       to set properties on. This is `getGroup(groupKey: "$company_id", groupID: companyId)` with
+       the company from the last `identify(identity:)`.
+
+       ```swift
+       mixpanel.identify(identity: MixpanelIdentity(userId: "user_123", companyId: "acme")) {
+           mixpanel.getCompany()?.set(property: "tier", to: "enterprise")
+       }
+       ```
+
+       Only for projects that use hierarchical groups, enabled with
+       `MixpanelOptions.hierarchicalGroups`. On any other project, or before a company is
+       identified, this returns nil with an error log.
+
+       The company is read when this is called, so a group kept across `reset()` or a new identify
+       still updates the earlier company. `identify` completes asynchronously, so call this from its
+       completion handler, or later, to see a company identified just before.
+
+       - returns: the identified company's `Group`, or nil when there is no company
+       */
+    public func getCompany() -> Group? {
+        guard hierarchicalGroups else {
+            MixpanelLogger.error(
+                message:
+                    "getCompany() is only for hierarchical groups projects, enabled with "
+                    + "hierarchicalGroups: true in MixpanelOptions.")
+            return nil
+        }
+        guard let companyId = identity.companyId else {
+            MixpanelLogger.error(
+                message:
+                    "getCompany() needs a company. Call identify(identity: MixpanelIdentity(userId:companyId:)) "
+                    + "first.")
+            return nil
+        }
+        return getGroup(groupKey: companyIdGroupKey, groupID: companyId)
     }
 
     func removeCachedGroup(groupKey: String, groupID: MixpanelType) {
@@ -1805,11 +2082,20 @@ extension MixpanelInstance {
     /**
        Convenience method to set a single group the user belongs to.
 
+       On a hierarchical groups project a user belongs to one group per group key, so the group is
+       stored as a single value rather than a list, and an array `groupID` is dropped with an error
+       log.
+
        - parameter groupKey: The property name associated with this group type (must already have been set up).
        - parameter groupID: The group the user belongs to.
        */
     public func setGroup(groupKey: String, groupID: MixpanelType) {
         if hasOptedOutTracking() {
+            return
+        }
+
+        if hierarchicalGroups {
+            setHierarchicalGroup(groupKey: groupKey, groupID: groupID)
             return
         }
 
@@ -1819,11 +2105,19 @@ extension MixpanelInstance {
     /**
        Set the groups this user belongs to.
 
+       A hierarchical groups project allows one group per group key, so this is dropped with an
+       error log there. Use `setGroup(groupKey:groupID:)` instead.
+
        - parameter groupKey: The property name associated with this group type (must already have been set up).
        - parameter groupIDs: The list of groups the user belongs to.
        */
     public func setGroup(groupKey: String, groupIDs: [MixpanelType]) {
         if hasOptedOutTracking() {
+            return
+        }
+
+        if hierarchicalGroups {
+            logSingleGroupOnly(operation: "setGroup with a list", groupKey: groupKey)
             return
         }
 
@@ -1835,11 +2129,19 @@ extension MixpanelInstance {
     /**
        Add a group to this user's membership for a particular group key
 
+       A hierarchical groups project allows one group per group key, so this is dropped with an
+       error log there. Use `setGroup(groupKey:groupID:)` instead.
+
        - parameter groupKey: The property name associated with this group type (must already have been set up).
        - parameter groupID: The new group the user belongs to.
        */
     public func addGroup(groupKey: String, groupID: MixpanelType) {
         if hasOptedOutTracking() {
+            return
+        }
+
+        if hierarchicalGroups {
+            logSingleGroupOnly(operation: "addGroup", groupKey: groupKey)
             return
         }
 
@@ -1868,11 +2170,19 @@ extension MixpanelInstance {
     /**
        Remove a group from this user's membership for a particular group key
 
+       On a hierarchical groups project this clears the group key when the user belongs to
+       `groupID`, and does nothing otherwise.
+
        - parameter groupKey: The property name associated with this group type (must already have been set up).
        - parameter groupID: The group value to remove.
        */
     public func removeGroup(groupKey: String, groupID: MixpanelType) {
         if hasOptedOutTracking() {
+            return
+        }
+
+        if hierarchicalGroups {
+            removeHierarchicalGroup(groupKey: groupKey, groupID: groupID)
             return
         }
 
@@ -1898,6 +2208,55 @@ extension MixpanelInstance {
         }
     }
 
+    private func setHierarchicalGroup(groupKey: String, groupID: MixpanelType) {
+        // Hierarchical groups read a list as the name of one group, not as membership in each
+        if groupID is [MixpanelType] || groupID is NSArray {
+            logSingleGroupOnly(operation: "setGroup with a list", groupKey: groupKey)
+            return
+        }
+        registerSuperProperties([groupKey: groupID])
+        people.set(properties: [groupKey: groupID])
+    }
+
+    private func logSingleGroupOnly(operation: String, groupKey: String) {
+        MixpanelLogger.error(
+            message:
+                "\(operation) is not supported for hierarchical groups projects, which allow one \(groupKey) "
+                + "per user. Use setGroup(groupKey:groupID:). The update was dropped.")
+    }
+
+    private func removeHierarchicalGroup(groupKey: String, groupID: MixpanelType) {
+        updateSuperProperty { superProperties in
+            // Read the identity now, so an identify called after this cannot move the update to
+            // another user
+            let identity = self.identity
+            // A one-item list, stored by an earlier version or before hierarchical groups was
+            // enabled, counts as that item.
+            var current = superProperties[groupKey]
+            if let list = current as? [MixpanelType], list.count == 1 {
+                current = list[0]
+            }
+            guard let value = current as? MixpanelType, value.equals(rhs: groupID) else {
+                return
+            }
+            superProperties.removeValue(forKey: groupKey)
+            guard let userId = identity.userId, let companyId = identity.companyId else {
+                MixpanelLogger.error(
+                    message:
+                        "User profile updates for hierarchical groups projects need a user and a company. "
+                        + "Call identify(identity: MixpanelIdentity(userId:companyId:)) first. The $unset "
+                        + "update was dropped.")
+                return
+            }
+            self.people.saveHierarchicalGroupsRecord(
+                "$unset", properties: ["$properties": [groupKey]], userId: userId, companyId: companyId)
+        }
+
+        if MixpanelInstance.isiOSAppExtension() {
+            flush()
+        }
+    }
+
     /**
        Opt out tracking.
 
@@ -1907,7 +2266,16 @@ extension MixpanelInstance {
     public func optOutTracking() {
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
-            if self.people.distinctId != nil {
+            if self.hierarchicalGroups {
+                // Delete the user profile while the identity is still known. Never delete the
+                // company or team group profiles, which other users share.
+                let identity = self.identity
+                if let userId = identity.userId, let companyId = identity.companyId {
+                    self.people.saveHierarchicalGroupsRecord(
+                        "$delete", properties: [:], userId: userId, companyId: companyId)
+                    self.flush()
+                }
+            } else if self.people.distinctId != nil {
                 self.people.deleteUser()
                 self.people.clearCharges()
                 self.flush()
@@ -1920,8 +2288,9 @@ extension MixpanelInstance {
                 self.alias = nil
                 self.people.distinctId = nil
                 self.userId = nil
+                self.companyId = nil
                 self.anonymousId = self.defaultDeviceId()
-                self.distinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
+                self.eventsDistinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
                 self.hadPersistedDistinctId = true
                 self.superProperties = InternalProperties()
                 MixpanelPersistence.saveTimedEvents(
@@ -1959,11 +2328,53 @@ extension MixpanelInstance {
 
        This method will internally track an opt in event to your project.
 
+       A distinct ID is not supported on a hierarchical groups project, where it is logged and
+       ignored and the user stays opted out. Use `optInTracking(identity:properties:)` instead.
+
        - parameter distinctId: an optional string to use as the distinct ID for events
        - parameter properties: an optional properties dictionary that could be passed to add properties to the opt-in event
        that is sent to Mixpanel
        */
     public func optInTracking(distinctId: String? = nil, properties: Properties? = nil) {
+        if distinctId != nil && hierarchicalGroups {
+            MixpanelLogger.error(
+                message:
+                    "optInTracking(distinctId:) is not supported for hierarchical groups projects, which "
+                    + "identify a user by company and user id. Use optInTracking(identity: "
+                    + "MixpanelIdentity(userId:companyId:)). The user is still opted out.")
+            return
+        }
+        performOptIn(properties: properties) {
+            if let distinctId = distinctId {
+                self.identify(distinctId: distinctId)
+            }
+        }
+    }
+
+    /**
+       Opt in tracking and identify the user.
+
+       Use this method to opt in an already opted out user from tracking and identify them. People
+       updates and track calls will be sent to Mixpanel after using this method.
+
+       This method will internally track an opt in event to your project.
+
+       Opting out clears the user's identity, so on a hierarchical groups project use this to opt
+       back in with the user's company: the opt-in event and every event after it carry the user
+       and company, which `optInTracking(distinctId:properties:)` can't express.
+
+       - parameter identity: the user, and on a hierarchical groups project their company. This
+       calls `identify(identity:)`.
+       - parameter properties: an optional properties dictionary that could be passed to add properties to the opt-in event
+       that is sent to Mixpanel
+       */
+    public func optInTracking(identity: MixpanelIdentity, properties: Properties? = nil) {
+        performOptIn(properties: properties) {
+            self.identify(identity: identity)
+        }
+    }
+
+    private func performOptIn(properties: Properties?, identify: @escaping () -> Void) {
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
             self.readWriteLock.write {
@@ -1972,9 +2383,7 @@ extension MixpanelInstance {
             self.readWriteLock.read {
                 MixpanelPersistence.saveOptOutStatusFlag(value: self.optOutStatus!, instanceName: self.name)
             }
-            if let distinctId = distinctId {
-                self.identify(distinctId: distinctId)
-            }
+            identify()
             self.track(event: "$opt_in", properties: properties)
 
             #if os(iOS) && !targetEnvironment(macCatalyst)

@@ -49,6 +49,25 @@ open class Group {
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
 
         serialQueue.async {
+            // Hierarchical groups require $company_id at the top level of every /groups write
+            var companyId: MixpanelType?
+            if let mixpanelInstance = self.mixpanelInstance, mixpanelInstance.hierarchicalGroups {
+                // A company group is bound to its own company, so a group kept across reset() or a
+                // new identify still updates that company
+                if self.groupKey == companyIdGroupKey {
+                    companyId = self.groupID
+                } else {
+                    companyId = mixpanelInstance.identity.companyId
+                }
+                if companyId == nil {
+                    MixpanelLogger.error(
+                        message:
+                            "Group profile updates for hierarchical groups projects require a company. Call "
+                            + "identify(identity: MixpanelIdentity(userId:companyId:)) first. The update to "
+                            + "\(self.groupKey)=\(self.groupID) was dropped.")
+                    return
+                }
+            }
             var r = InternalProperties()
             var p = InternalProperties()
             r["$token"] = self.apiToken
@@ -65,6 +84,9 @@ open class Group {
 
             r["$group_key"] = self.groupKey
             r["$group_id"] = self.groupID
+            if let companyId = companyId {
+                r["$company_id"] = companyId
+            }
             self.mixpanelPersistence.saveEntity(r, type: .groups)
         }
 

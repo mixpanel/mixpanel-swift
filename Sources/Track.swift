@@ -81,7 +81,10 @@ class Track {
             shadowTimedEvents.removeValue(forKey: ev)
             p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
         }
-        p["distinct_id"] = storedIdentity.distinctID
+        // On a hierarchical groups project the user is $user_id and $company_id, so no distinct_id
+        if storedIdentity.userId == nil || storedIdentity.companyId == nil {
+            p["distinct_id"] = storedIdentity.distinctID
+        }
         if storedIdentity.anonymousId != nil {
             p["$device_id"] = storedIdentity.anonymousId
         }

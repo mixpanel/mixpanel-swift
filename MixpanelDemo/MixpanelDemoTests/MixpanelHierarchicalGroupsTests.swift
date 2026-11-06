@@ -105,7 +105,8 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         mixpanel.distinctId = "user_456"
         mixpanel.track(event: "Viewed Report")
 
-        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["distinct_id"] as? String, "user_123")
+        XCTAssertNil(lastEventProperties(mixpanel, "Viewed Report")["distinct_id"])
+        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["$user_id"] as? String, "user_123")
         XCTAssertEqual(distinctId(mixpanel), "$company:acme|$user:user_123")
     }
 
@@ -293,9 +294,9 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(distinctId(mixpanel), "$company:acme|$user:user_123")
         XCTAssertEqual(mixpanel.getDistinctId(), "$company:acme|$user:user_123")
 
-        // Events still send the stored id; ingestion resolves the user from the identity keys
+        // Events send no distinct_id; ingestion resolves the user from the identity keys
         mixpanel.track(event: "Viewed Report")
-        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["distinct_id"] as? String, "user_123")
+        XCTAssertNil(lastEventProperties(mixpanel, "Viewed Report")["distinct_id"])
 
         identify(mixpanel, "user_123", "globex")
         XCTAssertEqual(distinctId(mixpanel), "$company:globex|$user:user_123")
@@ -891,7 +892,7 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         waitForAsyncTasks()
 
         let props = lastEventProperties(mixpanel, "$experiment_started")
-        XCTAssertEqual(props["distinct_id"] as? String, "user_123")
+        XCTAssertNil(props["distinct_id"])
         XCTAssertEqual(props["$user_id"] as? String, "user_123")
         XCTAssertEqual(props["$company_id"] as? String, "acme")
     }

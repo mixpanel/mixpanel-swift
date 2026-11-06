@@ -134,7 +134,7 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
     private func assertIdentified(
         _ props: InternalProperties, file: StaticString = #filePath, line: UInt = #line
     ) {
-        XCTAssertEqual(props["distinct_id"] as? String, userId, file: file, line: line)
+        XCTAssertNil(props["distinct_id"], file: file, line: line)
         XCTAssertEqual(props["$user_id"] as? String, userId, file: file, line: line)
         XCTAssertEqual(props["$company_id"] as? String, companyId, file: file, line: line)
         XCTAssertEqual(props["$device_id"] as? String, mixpanel.anonymousId, file: file, line: line)

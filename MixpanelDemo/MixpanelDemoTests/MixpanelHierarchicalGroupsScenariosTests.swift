@@ -65,7 +65,7 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
     // Every request queued for each endpoint. Each queue is sent to its own endpoint, so the
     // order is only kept within an endpoint.
     private func sent() -> [Sent] {
-        // Twice, since identify tracks $identify from a block it queues on the tracking queue
+        // Twice, since identify queues a block that can track on the tracking queue
         waitForTrackingQueue(mixpanel)
         waitForTrackingQueue(mixpanel)
         let token = mixpanel.apiToken
@@ -184,12 +184,10 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
     // MARK: - Identify
 
     func testIdentify() {
-        let anonymousDistinctId = deviceDistinctId()
         identify()
 
-        let props = onlyEvent("$identify")
-        assertIdentified(props)
-        XCTAssertEqual(props["$anon_distinct_id"] as? String, anonymousDistinctId)
+        // No $identify: the next event's identity keys tie the device to the user
+        XCTAssertTrue(sent().isEmpty)
     }
 
     // MARK: - Track (Identified)
@@ -636,11 +634,8 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
         clearSent()
         mixpanel.optInTracking(identity: MixpanelIdentity(userId: userId, companyId: companyId))
 
-        // $opt_in and $identify, both carrying the user and company
-        let sent = self.sent()
-        XCTAssertEqual(sent.map { $0.endpoint }, [track, track])
-        XCTAssertEqual(sent.map { $0.eventName }, ["$opt_in", "$identify"])
-        sent.forEach { assertIdentified($0.properties) }
+        // Only $opt_in, carrying the user and company
+        assertIdentified(onlyEvent("$opt_in"))
         XCTAssertFalse(mixpanel.hasOptedOutTracking())
     }
 

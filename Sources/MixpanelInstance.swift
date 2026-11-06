@@ -1096,9 +1096,10 @@ extension MixpanelInstance {
        mixpanel.identify(identity: MixpanelIdentity(userId: "user_123", companyId: "acme"))
        ```
 
-       Calling this with the current user and a different company is an identity change and tracks
-       `$identify`, as switching users does. An identity without both a user id and a company id is
-       logged and ignored.
+       Calling this with the current user and a different company is an identity change, as switching
+       users is. No `$identify` event is tracked: Mixpanel ties the device to the user from the
+       `$device_id`, `$user_id` and `$company_id` on later events. An identity without both a user id
+       and a company id is logged and ignored.
 
        On any other project Mixpanel ignores `$company_id`, so an identity that names a company is
        logged and ignored rather than attributed without it. An identity with a nil or empty user id
@@ -1213,7 +1214,11 @@ extension MixpanelInstance {
                     flagManager.reset()
                 }
                 self.flags.loadFlags()
-                self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
+                // A hierarchical groups project ties the device to the user from the identity keys on
+                // later events, so it has no $identify
+                if !self.hierarchicalGroups {
+                    self.track(event: "$identify", properties: ["$anon_distinct_id": oldDistinctId])
+                }
             }
 
             if usePeople {

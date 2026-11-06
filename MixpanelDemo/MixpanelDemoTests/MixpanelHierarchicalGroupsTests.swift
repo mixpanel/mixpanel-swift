@@ -118,13 +118,17 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["distinct_id"] as? String, "user_456")
     }
 
-    func testIdentifyEventCarriesTheNewCompany() {
+    func testIdentifyTracksNoIdentifyEvent() {
         let mixpanel = newApi(true)
         identify(mixpanel, "user_123", "acme")
+        XCTAssertEqual(countEvents(mixpanel, "$identify"), 0)
 
-        let props = lastEventProperties(mixpanel, "$identify")
+        // The next event carries the identity keys that tie the device to the user
+        mixpanel.track(event: "Viewed Report")
+        let props = lastEventProperties(mixpanel, "Viewed Report")
         XCTAssertEqual(props["$company_id"] as? String, "acme")
         XCTAssertEqual(props["$user_id"] as? String, "user_123")
+        XCTAssertEqual(props["$device_id"] as? String, mixpanel.anonymousId)
     }
 
     func testAnonymousEventsCarryNoCompany() {
@@ -158,11 +162,10 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
     func testCompanyChangeIsAnIdentityChange() {
         let mixpanel = newApi(true)
         identify(mixpanel, "user_123", "acme")
-        identify(mixpanel, "user_123", "acme")
-        XCTAssertEqual(countEvents(mixpanel, "$identify"), 1)
+        XCTAssertEqual(distinctId(mixpanel), "$company:acme|$user:user_123")
 
         identify(mixpanel, "user_123", "globex")
-        XCTAssertEqual(countEvents(mixpanel, "$identify"), 2)
+        XCTAssertEqual(distinctId(mixpanel), "$company:globex|$user:user_123")
 
         mixpanel.track(event: "Viewed Report")
         XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["$company_id"] as? String, "globex")
@@ -189,7 +192,6 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(mixpanel.identity.companyId, "acme")
         mixpanel.track(event: "Viewed Report")
         XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["$company_id"] as? String, "acme")
-        XCTAssertEqual(countEvents(mixpanel, "$identify"), 1)
     }
 
     func testIdentifyWithEmptyCompanyDoesNothing() {
@@ -219,7 +221,6 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
 
         XCTAssertEqual(mixpanel.identity.userId, "user_123")
         XCTAssertEqual(mixpanel.identity.companyId, "acme")
-        XCTAssertEqual(countEvents(mixpanel, "$identify"), 1)
     }
 
     func testInvalidIdentitiesDoNothing() {
@@ -258,7 +259,9 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         // What analytics reports, it accepts back unchanged
         mixpanel.identify(identity: mixpanel.identity)
         waitForTrackingQueue(mixpanel)
-        XCTAssertEqual(countEvents(mixpanel, "$identify"), 1)
+        XCTAssertEqual(
+            mixpanel.identity,
+            MixpanelIdentity(userId: "user_123", companyId: "acme", deviceId: mixpanel.anonymousId))
     }
 
     func testGetIdentityWhenDisabledHasNoCompany() {

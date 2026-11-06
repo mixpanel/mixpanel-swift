@@ -249,7 +249,7 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
 
     func testGetIdentityReportsUserCompanyAndDevice() {
         let mixpanel = newApi(true)
-        XCTAssertEqual(mixpanel.identity, MixpanelIdentity(userId: nil, deviceId: mixpanel.anonymousId))
+        XCTAssertEqual(mixpanel.identity, MixpanelIdentity(userId: nil, companyId: nil, deviceId: mixpanel.anonymousId))
 
         identify(mixpanel, "user_123", "acme")
         XCTAssertEqual(
@@ -269,7 +269,7 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         mixpanel.identify(distinctId: "user_123")
         waitForTrackingQueue(mixpanel)
         XCTAssertEqual(
-            mixpanel.identity, MixpanelIdentity(userId: "user_123", deviceId: mixpanel.anonymousId))
+            mixpanel.identity, MixpanelIdentity(userId: "user_123", companyId: nil, deviceId: mixpanel.anonymousId))
     }
 
     func testCompanyPersistsAcrossRestarts() {

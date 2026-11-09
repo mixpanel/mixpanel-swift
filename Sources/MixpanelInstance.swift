@@ -545,8 +545,11 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
         // Hierarchical groups ingestion requires $company_id, so it is never stripped there
         var excludeProperties = self.options.excludeProperties
-        if self.options.hierarchicalGroups {
-            excludeProperties.remove(companyIdGroupKey)
+        if self.options.hierarchicalGroups, excludeProperties.remove(companyIdGroupKey) != nil {
+            MixpanelLogger.warn(
+                message:
+                    "MixpanelOptions.excludeProperties contains '\(companyIdGroupKey)', which hierarchical "
+                    + "groups projects require on every event and profile update, so it is ignored.")
         }
         MixpanelInstance.warnIfStrippingLibProperties(excludeProperties)
         trackInstance = Track(
@@ -1144,19 +1147,26 @@ extension MixpanelInstance {
     private func identityError(_ identity: MixpanelIdentity) -> String? {
         let userId = identity.userId ?? ""
         let companyId = identity.companyId
+        // A whitespace-only id is as missing as an empty one. Ids are otherwise used as given.
+        let userIdIsBlank = userId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         if hierarchicalGroups {
-            if userId.isEmpty || (companyId ?? "").isEmpty {
+            let companyIdIsBlank = (companyId ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            if userIdIsBlank || companyIdIsBlank {
                 return "Can't identify \(identity): hierarchical groups projects identify a user by "
                     + "company and user id, so both are required."
             }
         } else {
-            if userId.isEmpty {
+            if userIdIsBlank {
                 return "Can't identify \(identity) without a user id."
             }
             if companyId != nil {
                 return "Can't identify \(identity): a company requires hierarchicalGroups: true in "
                     + "MixpanelOptions. Mixpanel ignores $company_id on other projects."
             }
+        }
+        if userId.hasPrefix(devicePrefix) {
+            return "Can't identify \(identity): a user id can't start with \"\(devicePrefix)\", which "
+                + "Mixpanel reserves for device ids."
         }
         return nil
     }
@@ -1224,6 +1234,11 @@ extension MixpanelInstance {
             if usePeople {
                 self.readWriteLock.write {
                     self.people.distinctId = distinctId
+                }
+                // User profile updates made before identify go to the identified user's profile
+                if self.hierarchicalGroups, let companyId = self.companyId {
+                    self.mixpanelPersistence.identifyHierarchicalGroupsPeople(
+                        userId: distinctId, companyId: companyId)
                 }
                 self.mixpanelPersistence.identifyPeople(distinctId: distinctId)
             } else {
@@ -1997,6 +2012,9 @@ extension MixpanelInstance {
        - parameter properties: properties dictionary
        */
     public func registerSuperProperties(_ properties: Properties) {
+        if refusesCompanyIdKey(operation: "registerSuperProperties", keys: properties.keys) {
+            return
+        }
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
             let updatedSuperProperties = self.trackInstance.registerSuperProperties(
@@ -2026,6 +2044,9 @@ extension MixpanelInstance {
         _ properties: Properties,
         defaultValue: MixpanelType? = nil
     ) {
+        if refusesCompanyIdKey(operation: "registerSuperPropertiesOnce", keys: properties.keys) {
+            return
+        }
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
             let updatedSuperProperties = self.trackInstance.registerSuperPropertiesOnce(
@@ -2056,6 +2077,9 @@ extension MixpanelInstance {
        - parameter propertyName: array of property name strings to remove
        */
     public func unregisterSuperProperty(_ propertyName: String) {
+        if refusesCompanyIdKey(operation: "unregisterSuperProperty", keys: [propertyName]) {
+            return
+        }
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
             let updatedSuperProperties = self.trackInstance.unregisterSuperProperty(
@@ -2111,6 +2135,9 @@ extension MixpanelInstance {
         }
 
         if hierarchicalGroups {
+            if refusesCompanyIdKey(operation: "setGroup", keys: [groupKey]) {
+                return
+            }
             setHierarchicalGroup(groupKey: groupKey, groupID: groupID)
             return
         }
@@ -2133,6 +2160,9 @@ extension MixpanelInstance {
         }
 
         if hierarchicalGroups {
+            if refusesCompanyIdKey(operation: "setGroup", keys: [groupKey]) {
+                return
+            }
             logSingleGroupOnly(operation: "setGroup with a list", groupKey: groupKey)
             return
         }
@@ -2157,6 +2187,9 @@ extension MixpanelInstance {
         }
 
         if hierarchicalGroups {
+            if refusesCompanyIdKey(operation: "addGroup", keys: [groupKey]) {
+                return
+            }
             logSingleGroupOnly(operation: "addGroup", groupKey: groupKey)
             return
         }
@@ -2198,6 +2231,9 @@ extension MixpanelInstance {
         }
 
         if hierarchicalGroups {
+            if refusesCompanyIdKey(operation: "removeGroup", keys: [groupKey]) {
+                return
+            }
             removeHierarchicalGroup(groupKey: groupKey, groupID: groupID)
             return
         }
@@ -2234,6 +2270,21 @@ extension MixpanelInstance {
         people.set(properties: [groupKey: groupID])
     }
 
+    /// On a hierarchical groups project `$company_id` is the identified company, so a public call
+    /// that would register, unregister or group by it is refused whole with an error log.
+    private func refusesCompanyIdKey<Keys: Sequence>(operation: String, keys: Keys) -> Bool
+    where Keys.Element == String {
+        guard hierarchicalGroups, keys.contains(companyIdGroupKey) else {
+            return false
+        }
+        MixpanelLogger.error(
+            message:
+                "\(operation) can't change \(companyIdGroupKey) on a hierarchical groups project, where the "
+                + "company is set with identify(identity: MixpanelIdentity(userId:companyId:)). "
+                + "The \(operation) call was dropped.")
+        return true
+    }
+
     private func logSingleGroupOnly(operation: String, groupKey: String) {
         MixpanelLogger.error(
             message:
@@ -2256,16 +2307,9 @@ extension MixpanelInstance {
                 return
             }
             superProperties.removeValue(forKey: groupKey)
-            guard let userId = identity.userId, let companyId = identity.companyId else {
-                MixpanelLogger.error(
-                    message:
-                        "User profile updates for hierarchical groups projects need a user and a company. "
-                        + "Call identify(identity: MixpanelIdentity(userId:companyId:)) first. The $unset "
-                        + "update was dropped.")
-                return
-            }
             self.people.saveHierarchicalGroupsRecord(
-                "$unset", properties: ["$properties": [groupKey]], userId: userId, companyId: companyId)
+                "$unset", properties: ["$properties": [groupKey]], userId: identity.userId,
+                companyId: identity.companyId)
         }
 
         if MixpanelInstance.isiOSAppExtension() {

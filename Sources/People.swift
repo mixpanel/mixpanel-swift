@@ -13,9 +13,10 @@ import Foundation
 ///
 /// On a hierarchical groups project, enabled with `MixpanelOptions.hierarchicalGroups`, the user
 /// profile is the `$user_id` group profile within the user's company, so updates are sent to
-/// `/groups` and need a user and company from `identify(identity:)`. `/groups` supports `$set`,
-/// `$set_once`, `$unset`, `$union`, `$remove` and `$delete`, so increment, append, merge,
-/// trackCharge and clearCharges are dropped with an error log there.
+/// `/groups` for the user and company from `identify(identity:)`. Updates made before then are
+/// queued and sent once a user and company are identified, or discarded by `reset()`. `/groups`
+/// supports `$set`, `$set_once`, `$unset`, `$union`, `$remove` and `$delete`, so increment,
+/// append, merge, trackCharge and clearCharges are dropped with an error log there.
 open class People {
 
     /// controls the $ignore_time property in any subsequent MixpanelPeople operation.
@@ -50,6 +51,9 @@ open class People {
         self.mixpanelPersistence = mixpanelPersistence
         self.excludeProperties = excludeProperties
     }
+
+    /// The group key of a hierarchical groups user profile
+    static let hierarchicalGroupsUserGroupKey = "$user_id"
 
     // /groups has no $add, $append or $merge
     static let hierarchicalGroupsOperations = [
@@ -146,16 +150,8 @@ open class People {
         // Read the identity on the queue, after any identify called before this update
         serialQueue.async { [weak self, action, properties] in
             guard let self = self, let identity = self.mixpanelInstance?.identity else { return }
-            guard let userId = identity.userId, let companyId = identity.companyId else {
-                MixpanelLogger.error(
-                    message:
-                        "User profile updates for hierarchical groups projects need a user and a company. "
-                        + "Call identify(identity: MixpanelIdentity(userId:companyId:)) first. The \(action) "
-                        + "update was dropped.")
-                return
-            }
             self.saveHierarchicalGroupsRecord(
-                action, properties: properties, userId: userId, companyId: companyId,
+                action, properties: properties, userId: identity.userId, companyId: identity.companyId,
                 epochMilliseconds: epochMilliseconds)
         }
 
@@ -166,8 +162,12 @@ open class People {
 
     /// Queues a user profile update for a hierarchical groups project as a `/groups` update to
     /// the user's `$user_id` group profile within their company. Call on the serial queue.
+    ///
+    /// Before a user and company are identified the update is kept with the people updates queued
+    /// before identify, and `identify(identity:)` sends it to the identified user's profile;
+    /// `reset()` discards it.
     func saveHierarchicalGroupsRecord(
-        _ action: String, properties: InternalProperties, userId: String, companyId: String,
+        _ action: String, properties: InternalProperties, userId: String?, companyId: String?,
         epochMilliseconds: Double = round(Date().timeIntervalSince1970 * 1000)
     ) {
         var r = InternalProperties()
@@ -189,7 +189,11 @@ open class People {
             r[action] = p
         }
         metadata.toDict(isEvent: false).forEach { (k, v) in r[k] = v }
-        r["$group_key"] = "$user_id"
+        r["$group_key"] = People.hierarchicalGroupsUserGroupKey
+        guard let userId = userId, let companyId = companyId else {
+            mixpanelPersistence.saveEntity(r, type: .people, flag: PersistenceConstant.unIdentifiedFlag)
+            return
+        }
         r["$group_id"] = userId
         r["$company_id"] = companyId
         mixpanelPersistence.saveEntity(r, type: .groups)

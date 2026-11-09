@@ -150,13 +150,64 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["$company_id"] as? String, "acme")
     }
 
-    func testEventPropertyOverridesCompanyId() {
+    func testEventPropertyCompanyIdIsReplacedByIdentifiedCompany() {
         let mixpanel = newApi(true)
         identify(mixpanel, "user_123", "acme")
-        mixpanel.track(event: "Viewed Report", properties: ["$company_id": "override"])
+        let logs = recordLogs()
+        mixpanel.track(event: "Viewed Report", properties: ["$company_id": "override", "plan": "pro"])
 
-        XCTAssertEqual(
-            lastEventProperties(mixpanel, "Viewed Report")["$company_id"] as? String, "override")
+        let props = lastEventProperties(mixpanel, "Viewed Report")
+        XCTAssertEqual(props["$company_id"] as? String, "acme")
+        XCTAssertEqual(props["plan"] as? String, "pro")
+        XCTAssertTrue(logs.contains(.warning, "Replaced $company_id override on event Viewed Report"))
+    }
+
+    func testEventPropertyWithIdentifiedCompanyIsNotWarned() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        let logs = recordLogs()
+        mixpanel.track(event: "Viewed Report", properties: ["$company_id": "acme"])
+
+        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["$company_id"] as? String, "acme")
+        XCTAssertFalse(logs.contains(.warning, "Replaced $company_id"))
+    }
+
+    func testTrackWithGroupsCompanyIdIsReplacedByIdentifiedCompany() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        let logs = recordLogs()
+        mixpanel.trackWithGroups(
+            event: "Viewed Report", properties: ["plan": "pro"],
+            groups: ["$company_id": "globex", "team": "finance"])
+
+        let props = lastEventProperties(mixpanel, "Viewed Report")
+        XCTAssertEqual(props["$company_id"] as? String, "acme")
+        XCTAssertEqual(props["team"] as? String, "finance")
+        XCTAssertTrue(logs.contains(.warning, "Replaced $company_id globex on event Viewed Report"))
+    }
+
+    func testEventCompanyIdBeforeIdentifyIsRemoved() {
+        let mixpanel = newApi(true)
+        let logs = recordLogs()
+        mixpanel.track(event: "Opened", properties: ["$company_id": "acme", "plan": "pro"])
+        mixpanel.trackWithGroups(event: "Grouped", properties: nil, groups: ["$company_id": "acme"])
+
+        let props = lastEventProperties(mixpanel, "Opened")
+        XCTAssertNil(props["$company_id"])
+        XCTAssertEqual(props["plan"] as? String, "pro")
+        XCTAssertNil(lastEventProperties(mixpanel, "Grouped")["$company_id"])
+        XCTAssertTrue(logs.contains(.warning, "Removed $company_id acme from event Opened"))
+        XCTAssertTrue(logs.contains(.warning, "Removed $company_id acme from event Grouped"))
+    }
+
+    func testDisabledEventCompanyIdIsKept() {
+        let mixpanel = newApi(false)
+        mixpanel.identify(identity: MixpanelIdentity(userId: "user_123"))
+        mixpanel.track(event: "Viewed Report", properties: ["$company_id": "acme"])
+        mixpanel.trackWithGroups(event: "Grouped", properties: nil, groups: ["$company_id": "globex"])
+
+        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["$company_id"] as? String, "acme")
+        XCTAssertEqual(lastEventProperties(mixpanel, "Grouped")["$company_id"] as? String, "globex")
     }
 
     func testCompanyChangeIsAnIdentityChange() {
@@ -221,6 +272,65 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
 
         XCTAssertEqual(mixpanel.identity.userId, "user_123")
         XCTAssertEqual(mixpanel.identity.companyId, "acme")
+    }
+
+    func testDeviceUserIdIsRefused() {
+        for hierarchicalGroups in [true, false] {
+            let mixpanel = newApi(hierarchicalGroups)
+            let anonymous = mixpanel.identity
+            let logs = recordLogs()
+            identify(mixpanel, "$device:abc", hierarchicalGroups ? "acme" : nil)
+
+            XCTAssertEqual(mixpanel.identity, anonymous)
+            XCTAssertNil(mixpanel.identity.userId)
+            XCTAssertTrue(
+                logs.contains(
+                    .error,
+                    "a user id can't start with \"$device:\", which Mixpanel reserves for device ids. "
+                        + "Nothing was identified."))
+
+            mixpanel.optOutTracking()
+            mixpanel.optInTracking(
+                identity: MixpanelIdentity(
+                    userId: "$device:abc", companyId: hierarchicalGroups ? "acme" : nil))
+            waitForTrackingQueue(mixpanel)
+            XCTAssertTrue(mixpanel.hasOptedOutTracking())
+        }
+    }
+
+    func testUserIdContainingDeviceIsAccepted() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user$device:abc", "acme")
+
+        XCTAssertEqual(mixpanel.identity.userId, "user$device:abc")
+    }
+
+    func testWhitespaceIdsAreRefused() {
+        let mixpanel = newApi(true)
+        let anonymous = mixpanel.identity
+        let logs = recordLogs()
+        identify(mixpanel, "  ", "acme")
+        identify(mixpanel, "user_123", " \t\n")
+
+        XCTAssertEqual(mixpanel.identity, anonymous)
+        XCTAssertNil(mixpanel.identity.companyId)
+        XCTAssertEqual(
+            logs.count(.error, "hierarchical groups projects identify a user by company and user id, so both are required."),
+            2)
+
+        let disabled = newApi(false)
+        let disabledAnonymous = disabled.identity
+        identify(disabled, " ")
+        XCTAssertEqual(disabled.identity, disabledAnonymous)
+        XCTAssertTrue(logs.contains(.error, "without a user id."))
+    }
+
+    func testIdsAreNotTrimmed() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, " user_123 ", " acme ")
+
+        XCTAssertEqual(mixpanel.identity.userId, " user_123 ")
+        XCTAssertEqual(mixpanel.identity.companyId, " acme ")
     }
 
     func testInvalidIdentitiesDoNothing() {
@@ -520,25 +630,111 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(groups(mixpanel).count, 0)
     }
 
-    func testPeopleUpdatesBeforeIdentifyAreDropped() {
+    func testPeopleUpdatesBeforeIdentifyAreSentAtIdentify() {
         let mixpanel = newApi(true)
-        mixpanel.people.set(property: "plan", to: "pro")
+        let people = mixpanel.people!
+        people.set(property: "plan", to: "pro")
+        people.setOnce(properties: ["first_seen": "today"])
+        people.union(properties: ["roles": ["admin"]])
+        people.remove(properties: ["roles": "viewer"])
+        people.unset(properties: ["legacy"])
+        people.deleteUser()
 
-        XCTAssertEqual(people(mixpanel).count, 0)
+        // Queued with the people updates made before identify, and never sent from there
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(peopleQueue(token: mixpanel.apiToken).count, 0)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 6)
         XCTAssertEqual(groups(mixpanel).count, 0)
 
-        // Nothing queued anonymously is attributed to a later identify
+        identify(mixpanel, "user_123", "acme")
+        XCTAssertEqual(self.people(mixpanel).count, 0)
+        let groups = self.groups(mixpanel)
+        XCTAssertEqual(groups.count, 6)
+        let operations = ["$set", "$set_once", "$union", "$remove", "$unset", "$delete"]
+        for (i, operation) in operations.enumerated() where i < groups.count {
+            let message = groups[i]
+            XCTAssertNotNil(message[operation], operation)
+            XCTAssertEqual(message["$group_key"] as? String, "$user_id")
+            XCTAssertEqual(message["$group_id"] as? String, "user_123")
+            XCTAssertEqual(message["$company_id"] as? String, "acme")
+            XCTAssertNil(message["$distinct_id"])
+            XCTAssertNil(message["$device_id"])
+            XCTAssertNil(message["$user_id"])
+            XCTAssertNotNil(message["$mp_metadata"])
+        }
+        XCTAssertEqual((groups.first?["$set"] as? InternalProperties)?["plan"] as? String, "pro")
+        XCTAssertEqual(groups.dropFirst(4).first?["$unset"] as? [String], ["legacy"])
+
+        // Sent once, to the first identified user only
+        identify(mixpanel, "user_456", "globex")
+        XCTAssertEqual(self.groups(mixpanel).count, 6)
+    }
+
+    func testPeopleUpdatesBeforeIdentifyKeepTheirOrderAfterLaterUpdates() {
+        let mixpanel = newApi(true)
+        mixpanel.people.set(property: "plan", to: "free")
+        identify(mixpanel, "user_123", "acme")
+        mixpanel.people.set(property: "plan", to: "pro")
+
+        let groups = self.groups(mixpanel)
+        XCTAssertEqual(groups.count, 2)
+        XCTAssertEqual((groups.first?["$set"] as? InternalProperties)?["plan"] as? String, "free")
+        XCTAssertEqual((groups.last?["$set"] as? InternalProperties)?["plan"] as? String, "pro")
+    }
+
+    func testUnsupportedPeopleOperationsBeforeIdentifyAreDropped() {
+        let mixpanel = newApi(true)
+        let people = mixpanel.people!
+        people.increment(property: "logins", by: 1)
+        people.append(properties: ["history": "a"])
+        people.merge(properties: ["settings": ["theme": "dark"]])
+        people.trackCharge(amount: 9.99)
+        people.clearCharges()
+        identify(mixpanel, "user_123", "acme")
+
+        XCTAssertEqual(self.people(mixpanel).count, 0)
+        XCTAssertEqual(groups(mixpanel).count, 0)
+    }
+
+    func testResetDiscardsPeopleUpdatesQueuedBeforeIdentify() {
+        let mixpanel = newApi(true)
+        mixpanel.people.set(property: "plan", to: "pro")
+        mixpanel.reset()
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(people(mixpanel).count, 0)
+
         identify(mixpanel, "user_123", "acme")
         XCTAssertEqual(people(mixpanel).count, 0)
         XCTAssertEqual(groups(mixpanel).count, 0)
     }
 
-    func testPeopleUpdatesWithoutCompanyAreDropped() {
+    func testPeopleUpdatesWithoutCompanyAreQueuedUntilIdentify() {
         let mixpanel = newApi(true)
         mixpanel.identify(distinctId: "user_123")
+        mixpanel.identify(identity: MixpanelIdentity(userId: "user_123"))
         mixpanel.people.set(property: "plan", to: "pro")
+        waitForTrackingQueue(mixpanel)
 
-        XCTAssertEqual(people(mixpanel).count, 0)
+        XCTAssertEqual(peopleQueue(token: mixpanel.apiToken).count, 0)
+        XCTAssertEqual(groups(mixpanel).count, 0)
+
+        identify(mixpanel, "user_123", "acme")
+        let groups = self.groups(mixpanel)
+        XCTAssertEqual(groups.count, 1)
+        XCTAssertEqual(groups.first?["$group_id"] as? String, "user_123")
+        XCTAssertEqual(groups.first?["$company_id"] as? String, "acme")
+    }
+
+    func testDisabledPeopleUpdatesBeforeIdentifyGoToEngage() {
+        let mixpanel = newApi(false)
+        mixpanel.people.set(property: "plan", to: "pro")
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 1)
+
+        identify(mixpanel, "user_123")
+        let people = peopleQueue(token: mixpanel.apiToken)
+        XCTAssertEqual(people.count, 1)
+        XCTAssertEqual(people.first?["$distinct_id"] as? String, "user_123")
         XCTAssertEqual(groups(mixpanel).count, 0)
     }
 
@@ -563,6 +759,107 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(groups.count, 1)
         XCTAssertEqual(groups.first?["$group_key"] as? String, "$user_id")
         XCTAssertEqual((groups.first?["$set"] as? InternalProperties)?["team"] as? String, "finance")
+    }
+
+    func testSetGroupBeforeIdentifyIsSentAtIdentify() {
+        let mixpanel = newApi(true)
+        mixpanel.setGroup(groupKey: "team", groupID: "finance")
+        mixpanel.track(event: "Opened")
+
+        XCTAssertEqual(lastEventProperties(mixpanel, "Opened")["team"] as? String, "finance")
+        XCTAssertEqual(groups(mixpanel).count, 0)
+
+        identify(mixpanel, "user_123", "acme")
+        let groups = self.groups(mixpanel)
+        XCTAssertEqual(groups.count, 1)
+        XCTAssertEqual(groups.first?["$group_key"] as? String, "$user_id")
+        XCTAssertEqual(groups.first?["$group_id"] as? String, "user_123")
+        XCTAssertEqual(groups.first?["$company_id"] as? String, "acme")
+        XCTAssertEqual((groups.first?["$set"] as? InternalProperties)?["team"] as? String, "finance")
+    }
+
+    func testRemoveGroupBeforeIdentifyIsSentAtIdentify() {
+        let mixpanel = newApi(true)
+        mixpanel.setGroup(groupKey: "team", groupID: "finance")
+        mixpanel.removeGroup(groupKey: "team", groupID: "finance")
+        mixpanel.track(event: "Opened")
+
+        XCTAssertNil(lastEventProperties(mixpanel, "Opened")["team"])
+        identify(mixpanel, "user_123", "acme")
+        let groups = self.groups(mixpanel)
+        XCTAssertEqual(groups.count, 2)
+        XCTAssertEqual(groups.last?["$unset"] as? [String], ["team"])
+        XCTAssertEqual(groups.last?["$group_id"] as? String, "user_123")
+        XCTAssertEqual(groups.last?["$company_id"] as? String, "acme")
+    }
+
+    // MARK: - $company_id is set only by identify
+
+    func testSuperPropertyCallsWithCompanyIdAreDropped() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        mixpanel.registerSuperProperties(["plan": "pro"])
+        let logs = recordLogs()
+        mixpanel.registerSuperProperties(["$company_id": "globex", "a": 1])
+        mixpanel.registerSuperPropertiesOnce(["$company_id": "globex", "b": 1])
+        mixpanel.unregisterSuperProperty("$company_id")
+        waitForTrackingQueue(mixpanel)
+
+        let superProperties = mixpanel.currentSuperProperties()
+        XCTAssertEqual(superProperties.count, 1)
+        XCTAssertEqual(superProperties["plan"] as? String, "pro")
+        for operation in ["registerSuperProperties", "registerSuperPropertiesOnce", "unregisterSuperProperty"] {
+            XCTAssertTrue(
+                logs.contains(
+                    .error,
+                    "\(operation) can't change $company_id on a hierarchical groups project, where the company "
+                        + "is set with identify(identity:"),
+                operation)
+        }
+        mixpanel.track(event: "Viewed Report")
+        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["$company_id"] as? String, "acme")
+    }
+
+    func testGroupCallsWithCompanyIdAreDropped() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        let logs = recordLogs()
+        mixpanel.setGroup(groupKey: "$company_id", groupID: "globex")
+        mixpanel.setGroup(groupKey: "$company_id", groupIDs: ["globex"])
+        mixpanel.addGroup(groupKey: "$company_id", groupID: "globex")
+        mixpanel.removeGroup(groupKey: "$company_id", groupID: "acme")
+        waitForTrackingQueue(mixpanel)
+
+        XCTAssertTrue(mixpanel.currentSuperProperties().isEmpty)
+        XCTAssertEqual(groups(mixpanel).count, 0)
+        XCTAssertEqual(people(mixpanel).count, 0)
+        for operation in ["setGroup", "addGroup", "removeGroup"] {
+            XCTAssertTrue(logs.contains(.error, "\(operation) can't change $company_id"), operation)
+        }
+        mixpanel.track(event: "Viewed Report")
+        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["$company_id"] as? String, "acme")
+    }
+
+    func testDisabledCompanyIdSuperPropertyAndGroupStillWork() {
+        let mixpanel = newApi(false)
+        mixpanel.registerSuperProperties(["$company_id": "acme"])
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(mixpanel.currentSuperProperties()["$company_id"] as? String, "acme")
+        mixpanel.unregisterSuperProperty("$company_id")
+        mixpanel.registerSuperPropertiesOnce(["$company_id": "globex"])
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(mixpanel.currentSuperProperties()["$company_id"] as? String, "globex")
+        mixpanel.unregisterSuperProperty("$company_id")
+        mixpanel.setGroup(groupKey: "$company_id", groupID: "acme")
+        waitForTrackingQueue(mixpanel)
+
+        XCTAssertEqual(mixpanel.currentSuperProperties()["$company_id"] as? [String], ["acme"])
+        mixpanel.addGroup(groupKey: "$company_id", groupID: "globex")
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(mixpanel.currentSuperProperties()["$company_id"] as? [String], ["acme", "globex"])
+        mixpanel.removeGroup(groupKey: "$company_id", groupID: "acme")
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(mixpanel.currentSuperProperties()["$company_id"] as? [String], ["globex"])
     }
 
     // MARK: - Custom group membership: one group per key, stored as a single value
@@ -943,6 +1240,22 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["$company_id"] as? String, "acme")
     }
 
+    func testExcludingCompanyIdWarnsOnce() {
+        let logs = recordLogs()
+        let mixpanel = newApi(true, excludeProperties: ["$company_id"])
+        identify(mixpanel, "user_123", "acme")
+        mixpanel.track(event: "Viewed Report")
+        mixpanel.track(event: "Viewed Report")
+        waitForTrackingQueue(mixpanel)
+
+        XCTAssertEqual(
+            logs.count(.warning, "MixpanelOptions.excludeProperties contains '$company_id'"), 1)
+        _ = newApi(false, excludeProperties: ["$company_id"])
+        _ = newApi(true, excludeProperties: ["plan"])
+        XCTAssertEqual(
+            logs.count(.warning, "MixpanelOptions.excludeProperties contains '$company_id'"), 1)
+    }
+
     func testCompanyIdCanBeExcludedWhenDisabled() {
         let mixpanel = newApi(false, excludeProperties: ["$company_id"])
         mixpanel.track(event: "Viewed Report", properties: ["$company_id": "acme"])
@@ -954,6 +1267,67 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
     func testOptionDefaultsToDisabled() {
         XCTAssertFalse(MixpanelOptions(token: "t").hierarchicalGroups)
         XCTAssertTrue(MixpanelOptions(token: "t", hierarchicalGroups: true).hierarchicalGroups)
+    }
+
+    // MARK: - Logs
+
+    /// Records warnings and errors logged from now until the end of the test
+    private func recordLogs() -> RecordingLogging {
+        MixpanelLogger.enableLevel(.warning)
+        MixpanelLogger.enableLevel(.error)
+        RecordingLogging.shared.start()
+        addTeardownBlock {
+            RecordingLogging.shared.stop()
+            MixpanelLogger.disableLevel(.warning)
+            MixpanelLogger.disableLevel(.error)
+        }
+        return RecordingLogging.shared
+    }
+}
+
+/// Keeps the log messages sent while recording. Loggers can't be removed from MixpanelLogger, so
+/// one is added and reused.
+private class RecordingLogging: MixpanelLogging {
+    static let shared: RecordingLogging = {
+        let logging = RecordingLogging()
+        MixpanelLogger.addLogging(logging)
+        return logging
+    }()
+
+    private let lock = NSLock()
+    private var recording = false
+    private var messages: [MixpanelLogMessage] = []
+
+    func start() {
+        lock.lock()
+        recording = true
+        messages = []
+        lock.unlock()
+    }
+
+    func stop() {
+        lock.lock()
+        recording = false
+        messages = []
+        lock.unlock()
+    }
+
+    func addMessage(message: MixpanelLogMessage) {
+        lock.lock()
+        if recording {
+            messages.append(message)
+        }
+        lock.unlock()
+    }
+
+    func count(_ level: MixpanelLogLevel, _ text: String) -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return messages.filter { $0.level == level && $0.text.contains(text) }.count
+    }
+
+    func contains(_ level: MixpanelLogLevel, _ text: String) -> Bool {
+        return count(level, text) > 0
     }
 }
 

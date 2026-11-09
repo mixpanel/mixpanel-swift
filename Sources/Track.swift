@@ -49,6 +49,29 @@ class Track {
         }
     }
 
+    /// On a hierarchical groups project an event's `$company_id` is always the identified company,
+    /// so one passed with the event or its groups is replaced, or removed before a company is
+    /// identified, with a warning.
+    static func applyIdentifiedCompany(
+        _ properties: inout InternalProperties, companyId: String?, callerCompanyId: MixpanelType?,
+        event: String
+    ) {
+        if let companyId = companyId {
+            properties[companyIdGroupKey] = companyId
+            if let callerCompanyId = callerCompanyId, !callerCompanyId.equals(rhs: companyId) {
+                MixpanelLogger.warn(
+                    message:
+                        "Replaced \(companyIdGroupKey) \(callerCompanyId) on event \(event) with the "
+                        + "identified company \(companyId). Set the company with identify(identity:).")
+            }
+        } else if properties.removeValue(forKey: companyIdGroupKey) != nil, let callerCompanyId = callerCompanyId {
+            MixpanelLogger.warn(
+                message:
+                    "Removed \(companyIdGroupKey) \(callerCompanyId) from event \(event): no company is "
+                    + "identified yet. Set the company with identify(identity:).")
+        }
+    }
+
     func track(
         event: String?,
         properties: Properties? = nil,
@@ -96,13 +119,14 @@ class Track {
         }
 
         p += superProperties
-        // Set after super properties so a stale registered $company_id can't override the
-        // identified company, while event properties still can. Only a hierarchical groups
-        // project identifies with a company.
-        if let companyId = storedIdentity.companyId {
-            p["$company_id"] = companyId
-        }
-        if let properties = properties {
+        if mixpanelInstance?.hierarchicalGroups ?? false {
+            if let properties = properties {
+                p += properties
+            }
+            Track.applyIdentifiedCompany(
+                &p, companyId: storedIdentity.companyId, callerCompanyId: properties?[companyIdGroupKey],
+                event: ev)
+        } else if let properties = properties {
             p += properties
         }
 

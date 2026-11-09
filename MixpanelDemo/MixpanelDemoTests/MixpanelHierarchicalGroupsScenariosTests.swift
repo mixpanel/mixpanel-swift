@@ -703,12 +703,18 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
         XCTAssertNil(superProperties()["team_id"])
     }
 
-    // MARK: - Set User Property Before Identify (Unsupported)
+    // MARK: - Set User Property Before Identify
 
-    func testSetUserPropertyBeforeIdentifyIsUnsupported() {
+    // Queued like an /engage update before identify, and sent to the user's profile at identify
+    func testSetUserPropertyBeforeIdentifyIsSentAtIdentify() {
         mixpanel.people.set(property: "plan", to: "enterprise")
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(groupQueue(token: mixpanel.apiToken).count, 0)
+        XCTAssertEqual(peopleQueue(token: mixpanel.apiToken).count, 0)
 
-        assertNothingSent()
+        identify()
+        let set = onlyUserUpdate("$set") as? InternalProperties
+        XCTAssertEqual(set?["plan"] as? String, "enterprise")
     }
 
     // MARK: - Set Company Property Before Identify (Unsupported)

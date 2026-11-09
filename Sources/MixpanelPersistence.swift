@@ -197,6 +197,35 @@ class MixpanelPersistence {
         }
     }
 
+    /// Moves hierarchical groups user profile updates queued before identify to the groups queue,
+    /// as updates to `userId`'s `$user_id` group profile in `companyId`, in the order they were
+    /// made. Other people rows queued before identify are left to `identifyPeople`.
+    func identifyHierarchicalGroupsPeople(userId: String, companyId: String) {
+        let rows = mpdb.readRows(.people, numRows: Int.max, flag: PersistenceConstant.unIdentifiedFlag)
+        var ids: [Int32] = []
+        var updates: [InternalProperties] = []
+        for row in rows {
+            var entity = row
+            guard let id = entity.removeValue(forKey: "id") as? Int32,
+                entity["$group_key"] as? String == People.hierarchicalGroupsUserGroupKey,
+                entity["$group_id"] == nil
+            else {
+                continue
+            }
+            entity["$group_id"] = userId
+            entity["$company_id"] = companyId
+            ids.append(id)
+            updates.append(entity)
+        }
+        // Move them in one transaction so an update is never sent twice or lost
+        guard !ids.isEmpty, mpdb.beginTransaction() else {
+            return
+        }
+        saveEntities(updates, type: .groups)
+        mpdb.deleteRows(.people, ids: ids)
+        mpdb.commitTransaction()
+    }
+
     /// Drops people rows queued before identify. Their target identity was never known, so they
     /// can't be attributed after a reset.
     func removeUnidentifiedPeople() {

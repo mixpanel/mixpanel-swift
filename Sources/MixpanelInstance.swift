@@ -683,7 +683,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// Returns the distinct id Mixpanel resolves the current user to. See ``distinctId``. Don't use
     /// this on a hierarchical groups project; prefer ``identity``.
     public func getDistinctId() -> String {
-        return resolvedDistinctId()
+        return distinctId
     }
 
     /// Whether this instance tracks for a hierarchical groups project. Fixed for the life of the
@@ -1389,9 +1389,11 @@ extension MixpanelInstance {
             }
 
             MixpanelPersistence.deleteMPUserDefaultsData(instanceName: self.name)
+            // Call the deviceIdProvider outside the lock: it may read distinctId, which takes it.
+            let deviceId = self.defaultDeviceId()
             self.readWriteLock.write {
                 self.timedEvents = InternalProperties()
-                self.anonymousId = self.defaultDeviceId()
+                self.anonymousId = deviceId
                 self.eventsDistinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
                 self.hadPersistedDistinctId = true
                 self.userId = nil
@@ -1455,11 +1457,28 @@ extension MixpanelInstance {
     }
 
     func unarchive() {
+        let loadedOptOutStatus = MixpanelPersistence.loadOptOutStatusFlag(instanceName: self.name)
+        let loadedSuperProperties = MixpanelPersistence.loadSuperProperties(instanceName: self.name)
+        let loadedTimedEvents = MixpanelPersistence.loadTimedEvents(instanceName: self.name)
+        let storedIdentity = MixpanelPersistence.loadIdentity(instanceName: self.name)
+        // Call the deviceIdProvider outside the lock: it may read distinctId, which takes it.
+        var newDeviceId: String?
+        var providerValue: String?
+        if storedIdentity.distinctID.isEmpty {
+            newDeviceId = defaultDeviceId()
+        } else if options.deviceIdProvider != nil,
+            let existingId = storedIdentity.anonymousId,
+            !existingId.isEmpty
+        {
+            // Check if a deviceIdProvider is set and would return a different value
+            // than the persisted anonymousId. This helps detect potential identity
+            // discontinuity when adding a provider to an existing app.
+            providerValue = defaultDeviceId()
+        }
         let didCreateIdentity = self.readWriteLock.write {
-            optOutStatus = MixpanelPersistence.loadOptOutStatusFlag(instanceName: self.name)
-            superProperties = MixpanelPersistence.loadSuperProperties(instanceName: self.name)
-            timedEvents = MixpanelPersistence.loadTimedEvents(instanceName: self.name)
-            let storedIdentity = MixpanelPersistence.loadIdentity(instanceName: self.name)
+            optOutStatus = loadedOptOutStatus
+            superProperties = loadedSuperProperties
+            timedEvents = loadedTimedEvents
             (eventsDistinctId, people.distinctId, anonymousId, userId, alias, hadPersistedDistinctId) = (
                 storedIdentity.distinctID,
                 storedIdentity.peopleDistinctID,
@@ -1470,29 +1489,23 @@ extension MixpanelInstance {
             )
             // Only a hierarchical groups project identifies with a company
             companyId = hierarchicalGroups ? storedIdentity.companyId : nil
-            if eventsDistinctId.isEmpty {
-                anonymousId = defaultDeviceId()
+            if let newDeviceId = newDeviceId {
+                anonymousId = newDeviceId
                 eventsDistinctId = addPrefixToDeviceId(deviceId: anonymousId)
                 hadPersistedDistinctId = true
                 userId = nil
                 companyId = nil
                 return true
             } else {
-                // Check if a deviceIdProvider is set and would return a different value
-                // than the persisted anonymousId. This helps detect potential identity
-                // discontinuity when adding a provider to an existing app.
-                if options.deviceIdProvider != nil,
-                    let existingId = anonymousId,
-                    !existingId.isEmpty
+                if let providerValue = providerValue,
+                    let existingId = storedIdentity.anonymousId,
+                    providerValue != existingId
                 {
-                    let providerValue = defaultDeviceId()
-                    if providerValue != existingId {
-                        MixpanelLogger.error(
-                            message:
-                                "deviceIdProvider returned '\(providerValue)' but existing anonymousId is '\(existingId)'. "
-                                + "Using persisted value to preserve identity continuity. "
-                                + "If you intended to change the device ID, call reset() after initialization.")
-                    }
+                    MixpanelLogger.error(
+                        message:
+                            "deviceIdProvider returned '\(providerValue)' but existing anonymousId is '\(existingId)'. "
+                            + "Using persisted value to preserve identity continuity. "
+                            + "If you intended to change the device ID, call reset() after initialization.")
                 }
                 return false
             }
@@ -2283,6 +2296,8 @@ extension MixpanelInstance {
                 self.people.clearCharges()
                 self.flush()
             }
+            // Call the deviceIdProvider outside the lock: it may read distinctId, which takes it.
+            let deviceId = self.defaultDeviceId()
             self.readWriteLock.write { [weak self] in
                 guard let self = self else {
                     return
@@ -2292,7 +2307,7 @@ extension MixpanelInstance {
                 self.people.distinctId = nil
                 self.userId = nil
                 self.companyId = nil
-                self.anonymousId = self.defaultDeviceId()
+                self.anonymousId = deviceId
                 self.eventsDistinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
                 self.hadPersistedDistinctId = true
                 self.superProperties = InternalProperties()

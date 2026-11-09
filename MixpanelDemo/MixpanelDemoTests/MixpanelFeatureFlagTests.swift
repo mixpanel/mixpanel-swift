@@ -12,6 +12,14 @@ import XCTest
 
 // MARK: - Mocks and Helpers (Largely Unchanged)
 
+// Conforms without implementing `identity`, as delegates written before hierarchical groups do.
+private final class IdentitylessFlagDelegate: MixpanelFlagDelegate {
+    func getOptions() -> MixpanelOptions { MixpanelOptions(token: "test") }
+    func getDistinctId() -> String { "legacy_distinct_id" }
+    func getAnonymousId() -> String? { nil }
+    func track(event: String?, properties: Properties?) {}
+}
+
 class MockFeatureFlagDelegate: MixpanelFlagDelegate {
 
     var options: MixpanelOptions
@@ -725,6 +733,12 @@ class FeatureFlagManagerTests: XCTestCase {
     }
 
     // --- State and Configuration Tests ---
+
+    func testDelegateWithoutIdentityDefaultsToNoUser() {
+        let delegate: MixpanelFlagDelegate = IdentitylessFlagDelegate()
+        XCTAssertNil(delegate.identity.userId)
+        XCTAssertNil(delegate.identity.companyId)
+    }
 
     func testAreFeaturesReady_InitialState() {
         XCTAssertFalse(manager.areFlagsReady(), "Features should not be ready initially")

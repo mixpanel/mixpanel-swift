@@ -682,6 +682,38 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual((groups.last?["$set"] as? InternalProperties)?["plan"] as? String, "pro")
     }
 
+    func testPeopleUpdatesBeforeIdentifyMoreThanOnePageAreAllSentInOrder() {
+        let mixpanel = newApi(true)
+        let count = APIConstants.maxBatchSize * 2 + 10
+        var otherRows = 0
+        for i in 0..<count {
+            mixpanel.people.set(property: "n", to: i)
+            // Other people rows queued before identify, between the pages, stay for identifyPeople
+            if i % 25 == 0 {
+                waitForTrackingQueue(mixpanel)
+                mixpanel.mixpanelPersistence.saveEntity(
+                    ["$set": ["other": i]], type: .people, flag: PersistenceConstant.unIdentifiedFlag)
+                otherRows += 1
+            }
+        }
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, count + otherRows)
+
+        identify(mixpanel, "user_123", "acme")
+        let groups = self.groups(mixpanel)
+        XCTAssertEqual(groups.count, count)
+        XCTAssertEqual(
+            groups.map { ($0["$set"] as? InternalProperties)?["n"] as? Int }, (0..<count).map { $0 })
+        XCTAssertTrue(groups.allSatisfy { $0["$group_id"] as? String == "user_123" })
+        XCTAssertTrue(groups.allSatisfy { $0["$company_id"] as? String == "acme" })
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 0)
+        let others = peopleQueue(token: mixpanel.apiToken)
+        XCTAssertEqual(others.count, otherRows)
+        XCTAssertEqual(
+            others.map { ($0["$set"] as? InternalProperties)?["other"] as? Int },
+            stride(from: 0, to: count, by: 25).map { $0 })
+    }
+
     func testUnsupportedPeopleOperationsBeforeIdentifyAreDropped() {
         let mixpanel = newApi(true)
         let people = mixpanel.people!

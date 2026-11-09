@@ -199,31 +199,48 @@ class MixpanelPersistence {
 
     /// Moves hierarchical groups user profile updates queued before identify to the groups queue,
     /// as updates to `userId`'s `$user_id` group profile in `companyId`, in the order they were
-    /// made. Other people rows queued before identify are left to `identifyPeople`.
+    /// made. Other people rows queued before identify are left to `identifyPeople`. Works in pages,
+    /// like `identifyPeople`, so a large queue is never fully in memory.
     func identifyHierarchicalGroupsPeople(userId: String, companyId: String) {
-        let rows = mpdb.readRows(.people, numRows: Int.max, flag: PersistenceConstant.unIdentifiedFlag)
-        var ids: [Int32] = []
-        var updates: [InternalProperties] = []
-        for row in rows {
-            var entity = row
-            guard let id = entity.removeValue(forKey: "id") as? Int32,
-                entity["$group_key"] as? String == People.hierarchicalGroupsUserGroupKey,
-                entity["$group_id"] == nil
-            else {
+        let pageSize = APIConstants.maxBatchSize
+        // Rows left in place stay ahead of the unread ones, so skip past them on the next read
+        var skipped = 0
+        while true {
+            let rows = mpdb.readRows(
+                .people, numRows: pageSize, flag: PersistenceConstant.unIdentifiedFlag, offset: skipped)
+            if rows.isEmpty {
+                return
+            }
+            var ids: [Int32] = []
+            var updates: [InternalProperties] = []
+            for row in rows {
+                var entity = row
+                guard let id = entity.removeValue(forKey: "id") as? Int32,
+                    entity["$group_key"] as? String == People.hierarchicalGroupsUserGroupKey,
+                    entity["$group_id"] == nil
+                else {
+                    skipped += 1
+                    continue
+                }
+                entity["$group_id"] = userId
+                entity["$company_id"] = companyId
+                ids.append(id)
+                updates.append(entity)
+            }
+            if ids.isEmpty {
                 continue
             }
-            entity["$group_id"] = userId
-            entity["$company_id"] = companyId
-            ids.append(id)
-            updates.append(entity)
+            // Move each page in one transaction so an update is never sent twice or lost. Continue
+            // only after a committed page, so a persistent failure can't loop forever.
+            guard mpdb.beginTransaction() else {
+                return
+            }
+            saveEntities(updates, type: .groups)
+            mpdb.deleteRows(.people, ids: ids)
+            guard mpdb.commitTransaction() else {
+                return
+            }
         }
-        // Move them in one transaction so an update is never sent twice or lost
-        guard !ids.isEmpty, mpdb.beginTransaction() else {
-            return
-        }
-        saveEntities(updates, type: .groups)
-        mpdb.deleteRows(.people, ids: ids)
-        mpdb.commitTransaction()
     }
 
     /// Drops people rows queued before identify. Their target identity was never known, so they

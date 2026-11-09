@@ -372,6 +372,28 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(countEvents(mixpanel, "$opt_in"), 0)
     }
 
+    func testOptInWithIdentityWithoutCompanyIsDropped() {
+        let mixpanel = newApi(true)
+        mixpanel.optOutTracking()
+        waitForTrackingQueue(mixpanel)
+        mixpanel.optInTracking(identity: MixpanelIdentity(userId: "user_123"))
+        waitForTrackingQueue(mixpanel)
+
+        XCTAssertTrue(mixpanel.hasOptedOutTracking())
+        XCTAssertEqual(countEvents(mixpanel, "$opt_in"), 0)
+    }
+
+    func testOptInWithCompanyWithoutHierarchicalGroupsIsDropped() {
+        let mixpanel = newApi(false)
+        mixpanel.optOutTracking()
+        waitForTrackingQueue(mixpanel)
+        mixpanel.optInTracking(identity: MixpanelIdentity(userId: "user_123", companyId: "acme"))
+        waitForTrackingQueue(mixpanel)
+
+        XCTAssertTrue(mixpanel.hasOptedOutTracking())
+        XCTAssertEqual(countEvents(mixpanel, "$opt_in"), 0)
+    }
+
     func testOptInWithoutArgumentsStillWorks() {
         let mixpanel = newApi(true)
         mixpanel.optOutTracking()

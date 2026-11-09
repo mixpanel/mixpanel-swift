@@ -1122,34 +1122,13 @@ extension MixpanelInstance {
             finish()
             return
         }
+        if let error = identityError(identity) {
+            MixpanelLogger.error(message: error + " Nothing was identified.")
+            finish()
+            return
+        }
         let userId = identity.userId ?? ""
         let companyId = identity.companyId
-        if hierarchicalGroups {
-            if userId.isEmpty || (companyId ?? "").isEmpty {
-                MixpanelLogger.error(
-                    message:
-                        "Can't identify \(identity): hierarchical groups projects identify a user by "
-                        + "company and user id, so both are required. Nothing was identified.")
-                finish()
-                return
-            }
-        } else {
-            if userId.isEmpty {
-                MixpanelLogger.error(
-                    message: "Can't identify \(identity) without a user id. Nothing was identified.")
-                finish()
-                return
-            }
-            if companyId != nil {
-                MixpanelLogger.error(
-                    message:
-                        "Can't identify \(identity): a company requires hierarchicalGroups: true in "
-                        + "MixpanelOptions. Mixpanel ignores $company_id on other projects, so nothing "
-                        + "was identified.")
-                finish()
-                return
-            }
-        }
         let currentDeviceId = getAnonymousId()
         if let deviceId = identity.deviceId, deviceId != currentDeviceId {
             MixpanelLogger.warn(
@@ -1159,6 +1138,27 @@ extension MixpanelInstance {
                     + "with MixpanelOptions.deviceIdProvider.")
         }
         identify(distinctId: userId, companyId: companyId, usePeople: true, completion: completion)
+    }
+
+    /// Why an identity can't be used on this project, or nil when it can. Callers add what was dropped.
+    private func identityError(_ identity: MixpanelIdentity) -> String? {
+        let userId = identity.userId ?? ""
+        let companyId = identity.companyId
+        if hierarchicalGroups {
+            if userId.isEmpty || (companyId ?? "").isEmpty {
+                return "Can't identify \(identity): hierarchical groups projects identify a user by "
+                    + "company and user id, so both are required."
+            }
+        } else {
+            if userId.isEmpty {
+                return "Can't identify \(identity) without a user id."
+            }
+            if companyId != nil {
+                return "Can't identify \(identity): a company requires hierarchicalGroups: true in "
+                    + "MixpanelOptions. Mixpanel ignores $company_id on other projects."
+            }
+        }
+        return nil
     }
 
     private func identify(
@@ -2367,11 +2367,16 @@ extension MixpanelInstance {
        and company, which `optInTracking(distinctId:properties:)` can't express.
 
        - parameter identity: the user, and on a hierarchical groups project their company. This
-       calls `identify(identity:)`.
+       calls `identify(identity:)`. An identity `identify(identity:)` would refuse is logged, and the
+       user stays opted out.
        - parameter properties: an optional properties dictionary that could be passed to add properties to the opt-in event
        that is sent to Mixpanel
        */
     public func optInTracking(identity: MixpanelIdentity, properties: Properties? = nil) {
+        if let error = identityError(identity) {
+            MixpanelLogger.error(message: error + " The user is still opted out.")
+            return
+        }
         performOptIn(properties: properties) {
             self.identify(identity: identity)
         }

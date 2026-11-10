@@ -426,6 +426,15 @@ class FeatureFlagManager: MixpanelFlags {
         }
     }
 
+    /// The delegate's distinct id. For a MixpanelInstance this skips the warning its `distinctId`
+    /// logs on a hierarchical groups project, since the app didn't ask for it.
+    static func distinctId(of delegate: MixpanelFlagDelegate) -> String {
+        if let instance = delegate as? MixpanelInstance {
+            return instance.resolvedDistinctId()
+        }
+        return delegate.getDistinctId()
+    }
+
     var serverURL: String!
     // Thread safety using ReadWriteLock (consistent with Track, People, MixpanelInstance)
     internal let flagsLock = ReadWriteLock(label: "com.mixpanel.featureflagmanager")
@@ -925,7 +934,7 @@ class FeatureFlagManager: MixpanelFlags {
             return
         }
 
-        let distinctId = delegate.getDistinctId()
+        let distinctId = Self.distinctId(of: delegate)
         let anonymousId = delegate.getAnonymousId()
         let hierarchicalGroupsIds = self.hierarchicalGroupsIds(delegate: delegate, options: options)
         MixpanelLogger.debug(message: "Fetching flags for distinct ID: \(distinctId)")
@@ -1128,7 +1137,7 @@ class FeatureFlagManager: MixpanelFlags {
         // This is a parallel of the active "distinctId changes" paths (identify/reset/optOut)
         // applied to the cross-session case where the change happened while the app was killed.
         let delegate = self.delegate
-        let currentDistinctId = delegate?.getDistinctId() ?? ""
+        let currentDistinctId = delegate.map(Self.distinctId(of:)) ?? ""
         if blob.distinctId != currentDistinctId {
             MixpanelLogger.debug(message: "Persisted flags belong to a different distinct_id; clearing.")
             MixpanelPersistence.deleteFlagsPersistence(instanceName: self.instanceName)
@@ -1574,7 +1583,7 @@ class FeatureFlagManager: MixpanelFlags {
                     return
                 }
 
-                let distinctId = delegate.getDistinctId()
+                let distinctId = Self.distinctId(of: delegate)
                 let hierarchicalGroupsIds = currentOptions.flatMap {
                     self.hierarchicalGroupsIds(delegate: delegate, options: $0)
                 }

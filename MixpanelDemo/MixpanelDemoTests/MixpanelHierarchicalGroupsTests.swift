@@ -421,6 +421,18 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(distinctId(mixpanel), "$device:" + mixpanel.anonymousId!)
     }
 
+    func testDistinctIdWarnsOnlyWhenEnabled() {
+        let hierarchical = newApi(true)
+        let legacy = newApi(false)
+        let logs = recordLogs()
+
+        _ = hierarchical.distinctId
+        _ = hierarchical.getDistinctId()
+        _ = legacy.distinctId
+        _ = legacy.getDistinctId()
+        XCTAssertEqual(logs.count(.warning, "distinctId should not be used"), 2)
+    }
+
     func testDistinctIdUnchangedWhenDisabled() {
         let mixpanel = newApi(false)
         mixpanel.identify(distinctId: "user_123")
@@ -1197,6 +1209,16 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
             "plan": "enterprise",
         ]
         XCTAssertEqual(lastFlagsContext(), expected)
+    }
+
+    func testFlagsRequestsDontWarnAboutDistinctId() {
+        let mixpanel = newFlagsApi(true)
+        let logs = recordLogs()
+        loadFlags(mixpanel)
+        identify(mixpanel, "user_123", "acme")
+        loadFlags(mixpanel)
+
+        XCTAssertEqual(logs.count(.warning, "distinctId should not be used"), 0)
     }
 
     func testFlagsContextBeforeIdentifyIsAnonymous() {

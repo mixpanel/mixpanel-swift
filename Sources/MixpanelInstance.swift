@@ -95,17 +95,18 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     /// The distinct id Mixpanel resolves the current user to. Before any calls to `identify`,
     /// this is `$device:` followed by the device id.
     ///
-    /// On a hierarchical groups project Mixpanel builds the distinct id from the company and the
-    /// user, so once both are known this returns `$company:{companyId}|$user:{userId}`. Until a
-    /// company is known, Mixpanel ignores the user id and keeps the user under the device, so
-    /// this returns the device form. The combined form is Mixpanel's own format, and it cannot be
-    /// parsed back when either id contains `|`. Events always send the id passed to `identify`.
-    ///
-    /// Don't use this on a hierarchical groups project, where setting it is a no-op with an error
-    /// log. Prefer ``identity``, whose user, company and device ids every Mixpanel SDK accepts
-    /// directly.
+    /// This should not be used on a hierarchical groups project, where a user is identified by
+    /// their company and user id: use ``identity`` instead. Reading it logs a warning there and
+    /// returns Mixpanel's best match for the current user, and setting it is a no-op with an error
+    /// log.
     open var distinctId: String {
         get {
+            if hierarchicalGroups {
+                MixpanelLogger.warn(
+                    message:
+                        "distinctId should not be used on a hierarchical groups project, which identifies a "
+                        + "user by company and user id. Use identity instead.")
+            }
             return resolvedDistinctId()
         }
         set {
@@ -683,8 +684,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         return options
     }
 
-    /// Returns the distinct id Mixpanel resolves the current user to. See ``distinctId``. Don't use
-    /// this on a hierarchical groups project; prefer ``identity``.
+    /// Returns the distinct id Mixpanel resolves the current user to. See ``distinctId``. This
+    /// should not be used on a hierarchical groups project, where it logs a warning; use
+    /// ``identity`` instead.
     public func getDistinctId() -> String {
         return distinctId
     }
@@ -695,6 +697,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         return options.hierarchicalGroups
     }
 
+    /// ``distinctId`` without the hierarchical groups warning, for the SDK's own use.
     func resolvedDistinctId() -> String {
         var resolved = ""
         readWriteLock.read {

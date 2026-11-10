@@ -227,6 +227,14 @@ public protocol MixpanelFlagDelegate: AnyObject {
     func getDistinctId() -> String
     func getAnonymousId() -> String?
     func track(event: String?, properties: Properties?)
+    /// The identified user and, on a hierarchical groups project, their company.
+    var identity: MixpanelIdentity { get }
+}
+
+public extension MixpanelFlagDelegate {
+    /// Defaults to no identified user, so conformers written before hierarchical groups still
+    /// compile.
+    var identity: MixpanelIdentity { MixpanelIdentity(userId: nil) }
 }
 
 /// A protocol defining the public interface for a feature flagging system.
@@ -416,6 +424,15 @@ class FeatureFlagManager: MixpanelFlags {
                 }
             }
         }
+    }
+
+    /// The delegate's distinct id. For a MixpanelInstance this skips the warning its `distinctId`
+    /// logs on a hierarchical groups project, since the app didn't ask for it.
+    static func distinctId(of delegate: MixpanelFlagDelegate) -> String {
+        if let instance = delegate as? MixpanelInstance {
+            return instance.resolvedDistinctId()
+        }
+        return delegate.getDistinctId()
     }
 
     var serverURL: String!
@@ -917,15 +934,23 @@ class FeatureFlagManager: MixpanelFlags {
             return
         }
 
-        let distinctId = delegate.getDistinctId()
+        let distinctId = Self.distinctId(of: delegate)
         let anonymousId = delegate.getAnonymousId()
+        let hierarchicalGroupsIds = self.hierarchicalGroupsIds(delegate: delegate, options: options)
         MixpanelLogger.debug(message: "Fetching flags for distinct ID: \(distinctId)")
 
         var context: [String: Any] = [:]
         flagsLock.read {
             context = self.flagContext
         }
-        context["distinct_id"] = distinctId
+        if let hierarchicalGroupsIds = hierarchicalGroupsIds {
+            // On hierarchical groups the user is $user_id and $company_id, so no distinct_id
+            context.removeValue(forKey: "distinct_id")
+            context["$user_id"] = hierarchicalGroupsIds.userId
+            context["$company_id"] = hierarchicalGroupsIds.companyId
+        } else {
+            context["distinct_id"] = distinctId
+        }
         if let anonymousId = anonymousId {
             context["device_id"] = anonymousId
         }
@@ -1112,7 +1137,7 @@ class FeatureFlagManager: MixpanelFlags {
         // This is a parallel of the active "distinctId changes" paths (identify/reset/optOut)
         // applied to the cross-session case where the change happened while the app was killed.
         let delegate = self.delegate
-        let currentDistinctId = delegate?.getDistinctId() ?? ""
+        let currentDistinctId = delegate.map(Self.distinctId(of:)) ?? ""
         if blob.distinctId != currentDistinctId {
             MixpanelLogger.debug(message: "Persisted flags belong to a different distinct_id; clearing.")
             MixpanelPersistence.deleteFlagsPersistence(instanceName: self.instanceName)
@@ -1558,7 +1583,10 @@ class FeatureFlagManager: MixpanelFlags {
                     return
                 }
 
-                let distinctId = delegate.getDistinctId()
+                let distinctId = Self.distinctId(of: delegate)
+                let hierarchicalGroupsIds = currentOptions.flatMap {
+                    self.hierarchicalGroupsIds(delegate: delegate, options: $0)
+                }
 
                 DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                     // Record to backend (fire-and-forget)
@@ -1566,15 +1594,30 @@ class FeatureFlagManager: MixpanelFlags {
                         flagId: pendingEvent.flagId,
                         projectId: pendingEvent.projectId,
                         firstTimeEventHash: pendingEvent.firstTimeEventHash,
-                        distinctId: distinctId
+                        distinctId: hierarchicalGroupsIds?.userId ?? distinctId,
+                        hierarchicalGroupsIds: hierarchicalGroupsIds
                     )
                 }
             }
         }
     }
 
+    /// The user and company ids flag requests carry on a hierarchical groups project, once both
+    /// are identified. Nil otherwise, so the request is unchanged.
+    private func hierarchicalGroupsIds(delegate: MixpanelFlagDelegate, options: MixpanelOptions)
+        -> (userId: String, companyId: String)?
+    {
+        guard options.hierarchicalGroups else { return nil }
+        let identity = delegate.identity
+        guard let userId = identity.userId, let companyId = identity.companyId else { return nil }
+        return (userId, companyId)
+    }
+
     /// Records a first-time event activation to the backend
-    internal func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String) {
+    internal func recordFirstTimeEvent(
+        flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String,
+        hierarchicalGroupsIds: (userId: String, companyId: String)? = nil
+    ) {
         let url = "/flags/\(flagId)/first-time-events"
 
         let queryItems = [
@@ -1582,11 +1625,17 @@ class FeatureFlagManager: MixpanelFlags {
             URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion()),
         ]
 
-        let payload: [String: Any] = [
-            "distinct_id": distinctId,
+        var payload: [String: Any] = [
             "project_id": projectId,
             "first_time_event_hash": firstTimeEventHash,
         ]
+        // On a hierarchical groups project the user is $user_id and $company_id, so no distinct_id
+        if let hierarchicalGroupsIds = hierarchicalGroupsIds {
+            payload["$user_id"] = hierarchicalGroupsIds.userId
+            payload["$company_id"] = hierarchicalGroupsIds.companyId
+        } else {
+            payload["distinct_id"] = distinctId
+        }
 
         guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
             let options = currentOptions

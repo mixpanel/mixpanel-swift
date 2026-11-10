@@ -26,13 +26,15 @@ struct PersistenceConstant {
     static let unIdentifiedFlag = true
 }
 
-struct MixpanelIdentity {
+struct StoredIdentity {
     let distinctID: String
     let peopleDistinctID: String?
     let anonymousId: String?
     let userId: String?
     let alias: String?
     let hadPersistedDistinctId: Bool?
+    // Only set on a hierarchical groups project
+    var companyId: String? = nil
 }
 
 struct MixpanelUserDefaultsKeys {
@@ -45,6 +47,7 @@ struct MixpanelUserDefaultsKeys {
     static let peopleDistinctID = "MPPeopleDistinctID"
     static let anonymousId = "MPAnonymousId"
     static let userID = "MPUserId"
+    static let companyID = "MPCompanyId"
     static let alias = "MPAlias"
     static let hadPersistedDistinctId = "MPHadPersistedDistinctId"
     static let flagsPersistence = "MPFlagsPersistence"
@@ -189,6 +192,52 @@ class MixpanelPersistence {
             // Continue only after a committed page that made real progress. Otherwise the same rows
             // would be read again, looping forever on a persistent write failure.
             guard mpdb.commitTransaction(), updated > 0 else {
+                return
+            }
+        }
+    }
+
+    /// Moves hierarchical groups user profile updates queued before identify to the groups queue,
+    /// as updates to `userId`'s `$user_id` group profile in `companyId`, in the order they were
+    /// made. Other people rows queued before identify are left to `identifyPeople`. Works in pages,
+    /// like `identifyPeople`, so a large queue is never fully in memory.
+    func identifyHierarchicalGroupsPeople(userId: String, companyId: String) {
+        let pageSize = APIConstants.maxBatchSize
+        // Rows left in place stay ahead of the unread ones, so skip past them on the next read
+        var skipped = 0
+        while true {
+            let rows = mpdb.readRows(
+                .people, numRows: pageSize, flag: PersistenceConstant.unIdentifiedFlag, offset: skipped)
+            if rows.isEmpty {
+                return
+            }
+            var ids: [Int32] = []
+            var updates: [InternalProperties] = []
+            for row in rows {
+                var entity = row
+                guard let id = entity.removeValue(forKey: "id") as? Int32,
+                    entity["$group_key"] as? String == People.hierarchicalGroupsUserGroupKey,
+                    entity["$group_id"] == nil
+                else {
+                    skipped += 1
+                    continue
+                }
+                entity["$group_id"] = userId
+                entity["$company_id"] = companyId
+                ids.append(id)
+                updates.append(entity)
+            }
+            if ids.isEmpty {
+                continue
+            }
+            // Move each page in one transaction so an update is never sent twice or lost. Continue
+            // only after a committed page, so a persistent failure can't loop forever.
+            guard mpdb.beginTransaction() else {
+                return
+            }
+            saveEntities(updates, type: .groups)
+            mpdb.deleteRows(.people, ids: ids)
+            guard mpdb.commitTransaction() else {
                 return
             }
         }
@@ -349,29 +398,30 @@ class MixpanelPersistence {
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.flagsPersistence)")
     }
 
-    static func saveIdentity(_ mixpanelIdentity: MixpanelIdentity, instanceName: String) {
+    static func saveIdentity(_ storedIdentity: StoredIdentity, instanceName: String) {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
         }
         let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
         defaults.set(
-            mixpanelIdentity.distinctID, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.distinctID)")
+            storedIdentity.distinctID, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.distinctID)")
         defaults.set(
-            mixpanelIdentity.peopleDistinctID,
+            storedIdentity.peopleDistinctID,
             forKey: "\(prefix)\(MixpanelUserDefaultsKeys.peopleDistinctID)")
         defaults.set(
-            mixpanelIdentity.anonymousId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.anonymousId)")
-        defaults.set(mixpanelIdentity.userId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)")
-        defaults.set(mixpanelIdentity.alias, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
+            storedIdentity.anonymousId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.anonymousId)")
+        defaults.set(storedIdentity.userId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)")
+        defaults.set(storedIdentity.companyId, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.companyID)")
+        defaults.set(storedIdentity.alias, forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
         defaults.set(
-            mixpanelIdentity.hadPersistedDistinctId,
+            storedIdentity.hadPersistedDistinctId,
             forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)")
         defaults.synchronize()
     }
 
-    static func loadIdentity(instanceName: String) -> MixpanelIdentity {
+    static func loadIdentity(instanceName: String) -> StoredIdentity {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
-            return MixpanelIdentity.init(
+            return StoredIdentity.init(
                 distinctID: "",
                 peopleDistinctID: nil,
                 anonymousId: nil,
@@ -380,7 +430,7 @@ class MixpanelPersistence {
                 hadPersistedDistinctId: nil)
         }
         let prefix = "\(MixpanelUserDefaultsKeys.prefix)-\(instanceName)-"
-        return MixpanelIdentity.init(
+        return StoredIdentity.init(
             distinctID: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.distinctID)") ?? "",
             peopleDistinctID: defaults.string(
                 forKey: "\(prefix)\(MixpanelUserDefaultsKeys.peopleDistinctID)"),
@@ -388,7 +438,8 @@ class MixpanelPersistence {
             userId: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)"),
             alias: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)"),
             hadPersistedDistinctId: defaults.bool(
-                forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)"))
+                forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)"),
+            companyId: defaults.string(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.companyID)"))
     }
 
     static func deleteMPUserDefaultsData(instanceName: String) {
@@ -400,6 +451,7 @@ class MixpanelPersistence {
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.peopleDistinctID)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.anonymousId)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)")
+        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.companyID)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)")
@@ -439,7 +491,7 @@ class MixpanelPersistence {
             superProperties: superProperties, instanceName: instanceName)
         MixpanelPersistence.saveTimedEvents(timedEvents: timedEvents, instanceName: instanceName)
         MixpanelPersistence.saveIdentity(
-            MixpanelIdentity.init(
+            StoredIdentity.init(
                 distinctID: distinctId,
                 peopleDistinctID: peopleDistinctId,
                 anonymousId: anonymousId,

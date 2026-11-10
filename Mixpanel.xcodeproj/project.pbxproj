@@ -526,7 +526,7 @@
 			);
 			mainGroup = E11594731CFF1491007F8B4F;
 			packageReferences = (
-				1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */,
+				1651FD802F83B6E30065BB7E /* XCLocalSwiftPackageReference "../mixpanel-swift-common" */,
 			);
 			productRefGroup = E115947E1CFF1491007F8B4F /* Products */;
 			projectDirPath = "";
@@ -1205,36 +1205,32 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/mixpanel/mixpanel-swift-common";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		1651FD802F83B6E30065BB7E /* XCLocalSwiftPackageReference "../mixpanel-swift-common" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../mixpanel-swift-common";
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		1651FD812F83B6E30065BB7E /* MixpanelSwiftCommon */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */;
+			package = 1651FD802F83B6E30065BB7E /* XCLocalSwiftPackageReference "../mixpanel-swift-common" */;
 			productName = MixpanelSwiftCommon;
 		};
 		1651FD842F83B6F10065BB7E /* MixpanelSwiftCommon */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */;
+			package = 1651FD802F83B6E30065BB7E /* XCLocalSwiftPackageReference "../mixpanel-swift-common" */;
 			productName = MixpanelSwiftCommon;
 		};
 		1651FD862F83B6F50065BB7E /* MixpanelSwiftCommon */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */;
+			package = 1651FD802F83B6E30065BB7E /* XCLocalSwiftPackageReference "../mixpanel-swift-common" */;
 			productName = MixpanelSwiftCommon;
 		};
 		1651FD882F83B6F80065BB7E /* MixpanelSwiftCommon */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 1651FD802F83B6E30065BB7E /* XCRemoteSwiftPackageReference "mixpanel-swift-common" */;
+			package = 1651FD802F83B6E30065BB7E /* XCLocalSwiftPackageReference "../mixpanel-swift-common" */;
 			productName = MixpanelSwiftCommon;
 		};
 /* End XCSwiftPackageProductDependency section */

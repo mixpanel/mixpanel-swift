@@ -12,11 +12,20 @@ import XCTest
 
 // MARK: - Mocks and Helpers (Largely Unchanged)
 
+// Conforms without implementing `identity`, as delegates written before hierarchical groups do.
+private final class IdentitylessFlagDelegate: MixpanelFlagDelegate {
+    func getOptions() -> MixpanelOptions { MixpanelOptions(token: "test") }
+    func getDistinctId() -> String { "legacy_distinct_id" }
+    func getAnonymousId() -> String? { nil }
+    func track(event: String?, properties: Properties?) {}
+}
+
 class MockFeatureFlagDelegate: MixpanelFlagDelegate {
 
     var options: MixpanelOptions
     var distinctId: String
     var anonymousId: String?
+    var identity = MixpanelIdentity(userId: nil)
     var trackedEvents: [(event: String?, properties: Properties?)] = []
     var trackExpectation: XCTestExpectation?
     var getOptionsCallCount = 0
@@ -258,7 +267,10 @@ class MockFeatureFlagManager: FeatureFlagManager {
     }
 
     // Override recordFirstTimeEvent to prevent real network calls and track invocations
-    override func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String) {
+    override func recordFirstTimeEvent(
+        flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String,
+        hierarchicalGroupsIds: (userId: String, companyId: String)? = nil
+    ) {
         recordFirstTimeEventCallCount += 1
         lastRecordedFlagId = flagId
         lastRecordedProjectId = projectId
@@ -721,6 +733,12 @@ class FeatureFlagManagerTests: XCTestCase {
     }
 
     // --- State and Configuration Tests ---
+
+    func testDelegateWithoutIdentityDefaultsToNoUser() {
+        let delegate: MixpanelFlagDelegate = IdentitylessFlagDelegate()
+        XCTAssertNil(delegate.identity.userId)
+        XCTAssertNil(delegate.identity.companyId)
+    }
 
     func testAreFeaturesReady_InitialState() {
         XCTAssertFalse(manager.areFlagsReady(), "Features should not be ready initially")

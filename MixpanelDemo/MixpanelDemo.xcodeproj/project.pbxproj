@@ -15,6 +15,8 @@
 		174563BA2DD74E9ABE905B9A /* MixpanelScreenTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3018131FE6FE484786E6788E /* MixpanelScreenTrackingTests.swift */; };
 		1A1B2C3D4E5F60718293A4B0 /* MixpanelFeatureFlagPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B2C3D4E5F60718293A4B1 /* MixpanelFeatureFlagPersistenceTests.swift */; };
 		1A1B2C3D4E5F60718293A4B2 /* MixpanelFeatureFlagPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B2C3D4E5F60718293A4B1 /* MixpanelFeatureFlagPersistenceTests.swift */; };
+		9E1C0A11B2C3D4E5F6A7B801 /* MixpanelHierarchicalGroupsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C0A11B2C3D4E5F6A7B802 /* MixpanelHierarchicalGroupsTests.swift */; };
+		9E1C0A11B2C3D4E5F6A7B803 /* MixpanelHierarchicalGroupsScenariosTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C0A11B2C3D4E5F6A7B804 /* MixpanelHierarchicalGroupsScenariosTests.swift */; };
 		1A1B2C3D4E5F60718293A5B0 /* MixpanelExcludePropertiesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B2C3D4E5F60718293A5B1 /* MixpanelExcludePropertiesTests.swift */; };
 		1A1B2C3D4E5F60718293A5B2 /* MixpanelExcludePropertiesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1B2C3D4E5F60718293A5B1 /* MixpanelExcludePropertiesTests.swift */; };
 		1C4F51DA076AB27BEC78265D /* MixpanelDemoWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D45F7C0AE3ED4B1DF5F0EF /* MixpanelDemoWatchApp.swift */; };
@@ -63,6 +65,7 @@
 		A88996800DA044B4B1886E99 /* MixpanelScreenTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C8D4E5F3A1B2C7D8E9F0A1B /* MixpanelScreenTrackingTests.swift */; };
 		B1AB7B0E940444B7A9B0876A /* MixpanelEventBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA802B4623D45938280B06A /* MixpanelEventBridgeTests.swift */; };
 		B1AD8EC39EFE /* AutocaptureMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1ACFF63A6F0 /* AutocaptureMenuViewController.swift */; };
+		A7C1E0F2B3D4A5B6C7D8E9F1 /* HierarchicalGroupsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C1E0F2B3D4A5B6C7D8E9F0 /* HierarchicalGroupsViewController.swift */; };
 		B6C3E0B03160EF7DDB69AAAB /* SwiftUIAutocaptureTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83EAF4BE599F7053770EA4B /* SwiftUIAutocaptureTestView.swift */; };
 		B984558A6D6A347FB5E78676 /* UIKitAutocaptureTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 531CEA4F4E84AE3A52284BC0 /* UIKitAutocaptureTestViewController.swift */; };
 		C1A2B3C4D5E6F708192A3B4C /* ComplexUIKitStressTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A2B3C4D5E6F708192A3B4C /* ComplexUIKitStressTestViewController.swift */; };
@@ -234,6 +237,8 @@
 		171E4C1B2DB055A900B7CB11 /* MixpanelFeatureFlagTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelFeatureFlagTests.swift; sourceTree = "<group>"; };
 		174205512F15A7210031EEDC /* MixpanelDeviceIdProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelDeviceIdProviderTests.swift; sourceTree = "<group>"; };
 		1A1B2C3D4E5F60718293A4B1 /* MixpanelFeatureFlagPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelFeatureFlagPersistenceTests.swift; sourceTree = "<group>"; };
+		9E1C0A11B2C3D4E5F6A7B802 /* MixpanelHierarchicalGroupsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelHierarchicalGroupsTests.swift; sourceTree = "<group>"; };
+		9E1C0A11B2C3D4E5F6A7B804 /* MixpanelHierarchicalGroupsScenariosTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelHierarchicalGroupsScenariosTests.swift; sourceTree = "<group>"; };
 		1A1B2C3D4E5F60718293A5B1 /* MixpanelExcludePropertiesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelExcludePropertiesTests.swift; sourceTree = "<group>"; };
 		2D5E6F7A8B9C0D1E2F3A4B5C /* MixpanelScreenTrackingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelScreenTrackingTests.swift; sourceTree = "<group>"; };
 		3018131FE6FE484786E6788E /* MixpanelScreenTrackingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MixpanelScreenTrackingTests.swift; sourceTree = "<group>"; };
@@ -295,6 +300,7 @@
 		A83EAF4BE599F7053770EA4B /* SwiftUIAutocaptureTestView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SwiftUIAutocaptureTestView.swift; sourceTree = "<group>"; };
 		B0454269B91B8DAD46D580E9 /* MixpanelAutomaticEventsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MixpanelAutomaticEventsTests.swift; sourceTree = "<group>"; };
 		B1ACFF63A6F0 /* AutocaptureMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocaptureMenuViewController.swift; sourceTree = "<group>"; };
+		A7C1E0F2B3D4A5B6C7D8E9F0 /* HierarchicalGroupsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HierarchicalGroupsViewController.swift; sourceTree = "<group>"; };
 		B34EFF52AF7D4D6BACA89305 /* MixpanelEventBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixpanelEventBridgeTests.swift; sourceTree = "<group>"; };
 		B3F7A2D19E4C06853D1F7B8A /* AutocaptureWalkUpInstrumentedTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutocaptureWalkUpInstrumentedTests.swift; sourceTree = "<group>"; };
 		B8CB35093BFE9323CA6D6A60 /* ContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -581,6 +587,7 @@
 				D2A2B3C4D5E6F708192A3B4C /* ComplexSwiftUIStressTestView.swift */,
 				F1A1B1C1D1E1F101A2B2C2D3 /* SwiftUIWalkUpTestView.swift */,
 				F2A2B2C2D2E2F202A3B3C3D4 /* UIKitWalkUpTestViewController.swift */,
+				A7C1E0F2B3D4A5B6C7D8E9F0 /* HierarchicalGroupsViewController.swift */,
 			);
 			path = MixpanelDemo;
 			sourceTree = "<group>";
@@ -594,6 +601,8 @@
 				171E4C1B2DB055A900B7CB11 /* MixpanelFeatureFlagTests.swift */,
 				1A1B2C3D4E5F60718293A4B1 /* MixpanelFeatureFlagPersistenceTests.swift */,
 				1A1B2C3D4E5F60718293A5B1 /* MixpanelExcludePropertiesTests.swift */,
+				9E1C0A11B2C3D4E5F6A7B802 /* MixpanelHierarchicalGroupsTests.swift */,
+				9E1C0A11B2C3D4E5F6A7B804 /* MixpanelHierarchicalGroupsScenariosTests.swift */,
 				E124061F1D249B2500383635 /* MixpanelBaseTests.swift */,
 				E15FF7EB1D0461130076CDE3 /* MixpanelDemoTests.swift */,
 				E1C61EB91D22F6470056C56C /* MixpanelPeopleTests.swift */,
@@ -1091,6 +1100,7 @@
 				C2A2B3C4D5E6F708192A3B4C /* ComplexSwiftUIStressTestView.swift in Sources */,
 				F1A1B1C1D1E1F101A2B2C2D2 /* SwiftUIWalkUpTestView.swift in Sources */,
 				F2A2B2C2D2E2F202A3B3C3D3 /* UIKitWalkUpTestViewController.swift in Sources */,
+				A7C1E0F2B3D4A5B6C7D8E9F1 /* HierarchicalGroupsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1111,6 +1121,8 @@
 				171E4C1C2DB055BC00B7CB11 /* MixpanelFeatureFlagTests.swift in Sources */,
 				1A1B2C3D4E5F60718293A4B0 /* MixpanelFeatureFlagPersistenceTests.swift in Sources */,
 				1A1B2C3D4E5F60718293A5B0 /* MixpanelExcludePropertiesTests.swift in Sources */,
+				9E1C0A11B2C3D4E5F6A7B801 /* MixpanelHierarchicalGroupsTests.swift in Sources */,
+				9E1C0A11B2C3D4E5F6A7B803 /* MixpanelHierarchicalGroupsScenariosTests.swift in Sources */,
 				174205522F15A7210031EEDC /* MixpanelDeviceIdProviderTests.swift in Sources */,
 				B1AB7B0E940444B7A9B0876A /* MixpanelEventBridgeTests.swift in Sources */,
 				174563BA2DD74E9ABE905B9A /* MixpanelScreenTrackingTests.swift in Sources */,

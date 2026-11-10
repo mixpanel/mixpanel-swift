@@ -10,6 +10,13 @@ import Foundation
 
 /// Access to the Mixpanel People API, available as an accessible variable from
 /// the main Mixpanel instance.
+///
+/// On a hierarchical groups project, enabled with `MixpanelOptions.hierarchicalGroups`, the user
+/// profile is the `$user_id` group profile within the user's company, so updates are sent to
+/// `/groups` for the user and company from `identify(identity:)`. Updates made before then are
+/// queued and sent once a user and company are identified, or discarded by `reset()`. `/groups`
+/// supports `$set`, `$set_once`, `$unset`, `$union`, `$remove` and `$delete`, so increment,
+/// append, merge, trackCharge and clearCharges are dropped with an error log there.
 open class People {
 
     /// controls the $ignore_time property in any subsequent MixpanelPeople operation.
@@ -45,8 +52,20 @@ open class People {
         self.excludeProperties = excludeProperties
     }
 
+    /// The group key of a hierarchical groups user profile
+    static let hierarchicalGroupsUserGroupKey = "$user_id"
+
+    // /groups has no $add, $append or $merge
+    static let hierarchicalGroupsOperations = [
+        "$set", "$set_once", "$unset", "$union", "$remove", "$delete",
+    ]
+
     func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
         if mixpanelInstance?.hasOptedOutTracking() ?? false {
+            return
+        }
+        if mixpanelInstance?.hierarchicalGroups ?? false {
+            addHierarchicalGroupsRecord(action, properties: properties)
             return
         }
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
@@ -112,6 +131,72 @@ open class People {
         if MixpanelInstance.isiOSAppExtension() {
             delegate?.flush(performFullFlush: false, completion: nil)
         }
+    }
+
+    // A hierarchical groups user profile is a group profile keyed by $user_id, so it supports only
+    // what /groups supports.
+    private func addHierarchicalGroupsRecord(_ action: String, properties: InternalProperties) {
+        guard People.hierarchicalGroupsOperations.contains(action) else {
+            MixpanelLogger.error(
+                message:
+                    "\(action) is not supported for hierarchical groups projects, whose user profiles are "
+                    + "group profiles keyed by $user_id. Supported operations are "
+                    + "[\(People.hierarchicalGroupsOperations.joined(separator: ", "))], so increment, append, "
+                    + "merge and trackCharge have no hierarchical groups equivalent. The update was dropped.")
+            return
+        }
+        let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
+
+        // Read the identity on the queue, after any identify called before this update
+        serialQueue.async { [weak self, action, properties] in
+            guard let self = self, let identity = self.mixpanelInstance?.identity else { return }
+            self.saveHierarchicalGroupsRecord(
+                action, properties: properties, userId: identity.userId, companyId: identity.companyId,
+                epochMilliseconds: epochMilliseconds)
+        }
+
+        if MixpanelInstance.isiOSAppExtension() {
+            delegate?.flush(performFullFlush: false, completion: nil)
+        }
+    }
+
+    /// Queues a user profile update for a hierarchical groups project as a `/groups` update to
+    /// the user's `$user_id` group profile within their company. Call on the serial queue.
+    ///
+    /// Before a user and company are identified the update is kept with the people updates queued
+    /// before identify, and `identify(identity:)` sends it to the identified user's profile;
+    /// `reset()` discards it.
+    func saveHierarchicalGroupsRecord(
+        _ action: String, properties: InternalProperties, userId: String?, companyId: String?,
+        epochMilliseconds: Double = round(Date().timeIntervalSince1970 * 1000)
+    ) {
+        var r = InternalProperties()
+        r["$token"] = apiToken
+        r["$time"] = epochMilliseconds
+        if action == "$unset" {
+            r[action] = properties["$properties"]
+        } else {
+            var p = InternalProperties()
+            if action == "$set" || action == "$set_once" {
+                AutomaticProperties.automaticPropertiesLock.read {
+                    p += AutomaticProperties.peopleProperties
+                }
+            }
+            p += properties
+            if action == "$set" || action == "$set_once" {
+                Track.applyExcludeProperties(&p, exclude: excludeProperties)
+            }
+            r[action] = p
+        }
+        metadata.toDict(isEvent: false).forEach { (k, v) in r[k] = v }
+        r["$group_key"] = People.hierarchicalGroupsUserGroupKey
+        guard let userId = userId, let companyId = companyId else {
+            mixpanelPersistence.saveEntity(r, type: .people, flag: PersistenceConstant.unIdentifiedFlag)
+            return
+        }
+        r["$group_id"] = userId
+        r["$company_id"] = companyId
+        mixpanelPersistence.saveEntity(r, type: .groups)
     }
 
     func merge(properties: InternalProperties) {
@@ -276,8 +361,18 @@ open class People {
 
     /**
        Delete current user's revenue history.
+
+       A hierarchical groups project can't trackCharge, so there are no charges to clear and this
+       is dropped with an error log there.
        */
     open func clearCharges() {
+        if mixpanelInstance?.hierarchicalGroups ?? false {
+            MixpanelLogger.error(
+                message:
+                    "clearCharges is not supported for hierarchical groups projects, which can't "
+                    + "trackCharge. The update was dropped.")
+            return
+        }
         set(properties: ["$transactions": [] as [Any]])
     }
 

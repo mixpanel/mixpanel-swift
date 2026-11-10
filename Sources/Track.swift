@@ -49,12 +49,35 @@ class Track {
         }
     }
 
+    /// On a hierarchical groups project an event's `$company_id` is always the identified company,
+    /// so one passed with the event or its groups is replaced, or removed before a company is
+    /// identified, with a warning.
+    static func applyIdentifiedCompany(
+        _ properties: inout InternalProperties, companyId: String?, callerCompanyId: MixpanelType?,
+        event: String
+    ) {
+        if let companyId = companyId {
+            properties[companyIdGroupKey] = companyId
+            if let callerCompanyId = callerCompanyId, !callerCompanyId.equals(rhs: companyId) {
+                MixpanelLogger.warn(
+                    message:
+                        "Replaced \(companyIdGroupKey) \(callerCompanyId) on event \(event) with the "
+                        + "identified company \(companyId). Set the company with identify(identity:).")
+            }
+        } else if properties.removeValue(forKey: companyIdGroupKey) != nil, let callerCompanyId = callerCompanyId {
+            MixpanelLogger.warn(
+                message:
+                    "Removed \(companyIdGroupKey) \(callerCompanyId) from event \(event): no company is "
+                    + "identified yet. Set the company with identify(identity:).")
+        }
+    }
+
     func track(
         event: String?,
         properties: Properties? = nil,
         timedEvents: InternalProperties,
         superProperties: InternalProperties,
-        mixpanelIdentity: MixpanelIdentity,
+        storedIdentity: StoredIdentity,
         epochInterval: Double
     ) -> InternalProperties {
         var ev = "mp_event"
@@ -81,19 +104,29 @@ class Track {
             shadowTimedEvents.removeValue(forKey: ev)
             p["$duration"] = Double(String(format: "%.3f", epochInterval - eventStartTime))
         }
-        p["distinct_id"] = mixpanelIdentity.distinctID
-        if mixpanelIdentity.anonymousId != nil {
-            p["$device_id"] = mixpanelIdentity.anonymousId
+        // On a hierarchical groups project the user is $user_id and $company_id, so no distinct_id
+        if storedIdentity.userId == nil || storedIdentity.companyId == nil {
+            p["distinct_id"] = storedIdentity.distinctID
         }
-        if mixpanelIdentity.userId != nil {
-            p["$user_id"] = mixpanelIdentity.userId
+        if storedIdentity.anonymousId != nil {
+            p["$device_id"] = storedIdentity.anonymousId
         }
-        if mixpanelIdentity.hadPersistedDistinctId != nil {
-            p["$had_persisted_distinct_id"] = mixpanelIdentity.hadPersistedDistinctId
+        if storedIdentity.userId != nil {
+            p["$user_id"] = storedIdentity.userId
+        }
+        if storedIdentity.hadPersistedDistinctId != nil {
+            p["$had_persisted_distinct_id"] = storedIdentity.hadPersistedDistinctId
         }
 
         p += superProperties
-        if let properties = properties {
+        if mixpanelInstance?.hierarchicalGroups ?? false {
+            if let properties = properties {
+                p += properties
+            }
+            Track.applyIdentifiedCompany(
+                &p, companyId: storedIdentity.companyId, callerCompanyId: properties?[companyIdGroupKey],
+                event: ev)
+        } else if let properties = properties {
             p += properties
         }
 

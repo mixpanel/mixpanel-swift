@@ -934,15 +934,16 @@ class FeatureFlagManager: MixpanelFlags {
         flagsLock.read {
             context = self.flagContext
         }
-        // On hierarchical groups the service builds the combined distinct id from $user_id and
-        // $company_id, so send the user id as distinct_id rather than the combined form.
-        context["distinct_id"] = hierarchicalGroupsIds?.userId ?? distinctId
-        if let anonymousId = anonymousId {
-            context["device_id"] = anonymousId
-        }
         if let hierarchicalGroupsIds = hierarchicalGroupsIds {
+            // On hierarchical groups the user is $user_id and $company_id, so no distinct_id
+            context.removeValue(forKey: "distinct_id")
             context["$user_id"] = hierarchicalGroupsIds.userId
             context["$company_id"] = hierarchicalGroupsIds.companyId
+        } else {
+            context["distinct_id"] = distinctId
+        }
+        if let anonymousId = anonymousId {
+            context["device_id"] = anonymousId
         }
 
         guard

@@ -1144,12 +1144,12 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
 
     // MARK: - Feature flags
 
-    private func newFlagsApi(_ hierarchicalGroups: Bool) -> MixpanelInstance {
+    private func newFlagsApi(_ hierarchicalGroups: Bool, context: [String: Any] = [:]) -> MixpanelInstance {
         URLProtocol.registerClass(FlagsRecordingURLProtocol.self)
         let options = MixpanelOptions(
             token: randomId(), flushInterval: 60,
             serverURL: "https://\(FlagsRecordingURLProtocol.host)",
-            featureFlagOptions: FeatureFlagOptions(enabled: true, prefetchFlags: false),
+            featureFlagOptions: FeatureFlagOptions(enabled: true, context: context, prefetchFlags: false),
             hierarchicalGroups: hierarchicalGroups)
         let mixpanel = Mixpanel.initialize(options: options)
         mixpanel.delegate = self
@@ -1182,8 +1182,19 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         loadFlags(mixpanel)
 
         let expected: NSDictionary = [
-            "distinct_id": "user_123", "device_id": mixpanel.anonymousId!,
-            "$user_id": "user_123", "$company_id": "acme",
+            "device_id": mixpanel.anonymousId!, "$user_id": "user_123", "$company_id": "acme",
+        ]
+        XCTAssertEqual(lastFlagsContext(), expected)
+    }
+
+    func testFlagsContextDropsACustomDistinctIdAfterIdentify() {
+        let mixpanel = newFlagsApi(true, context: ["distinct_id": "custom_id", "plan": "enterprise"])
+        identify(mixpanel, "user_123", "acme")
+        loadFlags(mixpanel)
+
+        let expected: NSDictionary = [
+            "device_id": mixpanel.anonymousId!, "$user_id": "user_123", "$company_id": "acme",
+            "plan": "enterprise",
         ]
         XCTAssertEqual(lastFlagsContext(), expected)
     }

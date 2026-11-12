@@ -1064,6 +1064,42 @@ class FeatureFlagManagerTests: XCTestCase {
             experimentName: "feature_string", variantName: "v_str", checkTimingProperties: true, expectedLatency: 150)
     }
 
+    // SDK-448: the OpenFeature provider passes this reserved fallback key; the literal is the
+    // contract mixpanel-swift-openfeature relies on, so it is spelled out here on purpose.
+    func testTracking_OpenFeatureFallbackKey_AddsOpenFeatureProviderProperty() {
+        setupReadyFlags()
+        expectTracking {
+            _ = manager.getVariantSync("feature_int", fallback: MixpanelFlagVariant(key: "$openfeature_provider"))
+        }
+        verifyTrackedEvent(experimentName: "feature_int", variantName: "v_int") { props in
+            XCTAssertEqual(props["$openfeature_provider"] as? Bool, true)
+        }
+    }
+
+    func testTracking_DirectCall_DoesNotAddOpenFeatureProviderProperty() {
+        setupReadyFlags()
+        expectTracking {
+            _ = manager.getVariantSync("feature_int", fallback: defaultFallback)
+        }
+        verifyTrackedEvent(experimentName: "feature_int", variantName: "v_int") { props in
+            XCTAssertNil(props["$openfeature_provider"], "Direct SDK calls must not be tagged")
+        }
+    }
+
+    func testTracking_OpenFeatureFallbackKey_StillReturnsFallbackWhenFlagMissing() {
+        setupReadyFlags()
+        let result = manager.getVariantSync(
+            "missing_feature", fallback: MixpanelFlagVariant(key: "$openfeature_provider"))
+        waitBriefly()
+        XCTAssertEqual(mockDelegate.trackedEvents.count, 0, "No exposure for a missing flag")
+        XCTAssertEqual(result.key, "$openfeature_provider")
+        if case .fallback(let reason) = result.source {
+            XCTAssertEqual(reason, .flagNotFound)
+        } else {
+            XCTFail("Expected a fallback source")
+        }
+    }
+
     func testTracking_DoesNotTrackForFallback_Sync() {
         setupReadyFlags()
         _ = manager.getVariantSync("missing_feature", fallback: MixpanelFlagVariant(key: "fb", value: "v"))

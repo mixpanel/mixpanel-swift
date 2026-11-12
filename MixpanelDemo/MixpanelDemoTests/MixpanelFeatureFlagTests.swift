@@ -1088,7 +1088,8 @@ class FeatureFlagManagerTests: XCTestCase {
 
     func testTracking_OpenFeatureFallbackKey_StillReturnsFallbackWhenFlagMissing() {
         setupReadyFlags()
-        let result = manager.getVariantSync("missing_feature", fallback: MixpanelFlagVariant(key: "$openfeature_provider"))
+        let result = manager.getVariantSync(
+            "missing_feature", fallback: MixpanelFlagVariant(key: "$openfeature_provider"))
         waitBriefly()
         XCTAssertEqual(mockDelegate.trackedEvents.count, 0, "No exposure for a missing flag")
         XCTAssertEqual(result.key, "$openfeature_provider")

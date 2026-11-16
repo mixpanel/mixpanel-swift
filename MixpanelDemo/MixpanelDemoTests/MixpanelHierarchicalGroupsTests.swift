@@ -6,6 +6,7 @@
 import XCTest
 
 @testable import Mixpanel
+@_spi(MixpanelInternal) import MixpanelSwiftCommon
 
 /// Hierarchical groups is fixed by `MixpanelOptions.hierarchicalGroups`. These tests cover what
 /// changes when it is on, and that nothing changes when it is off. They mirror the Android SDK's

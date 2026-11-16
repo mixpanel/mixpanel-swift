@@ -7,7 +7,7 @@
 //
 
 import Foundation
-@_spi(MixpanelInternal) import MixpanelSwiftCommon
+import MixpanelSwiftCommon
 
 #if !os(OSX)
 import UIKit

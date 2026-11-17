@@ -231,10 +231,10 @@ public protocol MixpanelFlagDelegate: AnyObject {
     var identity: MixpanelIdentity { get }
 }
 
-public extension MixpanelFlagDelegate {
+extension MixpanelFlagDelegate {
     /// Defaults to no identified user, so conformers written before hierarchical groups still
     /// compile.
-    var identity: MixpanelIdentity { MixpanelIdentity(userId: nil) }
+    public var identity: MixpanelIdentity { MixpanelIdentity(userId: nil) }
 }
 
 /// A protocol defining the public interface for a feature flagging system.

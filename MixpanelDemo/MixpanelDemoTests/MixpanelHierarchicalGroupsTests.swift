@@ -315,7 +315,8 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(mixpanel.identity, anonymous)
         XCTAssertNil(mixpanel.identity.companyId)
         XCTAssertEqual(
-            logs.count(.error, "hierarchical groups projects identify a user by company and user id, so both are required."),
+            logs.count(
+                .error, "hierarchical groups projects identify a user by company and user id, so both are required."),
             2)
 
         let disabled = newApi(false)

@@ -557,6 +557,30 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertNil(mixpanel.identity.companyId)
     }
 
+    func testOptOutBeforeIdentifyKeepsQueuedPeopleUpdates() {
+        let mixpanel = newApi(true)
+        mixpanel.people.set(property: "plan", to: "pro")
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 1)
+
+        mixpanel.optOutTracking()
+        mixpanel.optInTracking()
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 1)
+        identify(mixpanel, "user_1", "acme")
+
+        // Documents current behaviour, which matches master: opting out doesn't drop people updates
+        // queued before identify (only reset does), so the update made before the opt-out is sent
+        // to the user identified after opting back in.
+        XCTAssertEqual(people(mixpanel).count, 0)
+        let groups = self.groups(mixpanel)
+        XCTAssertEqual(groups.count, 1)
+        XCTAssertEqual((groups.first?["$set"] as? InternalProperties)?["plan"] as? String, "pro")
+        XCTAssertEqual(groups.first?["$group_key"] as? String, "$user_id")
+        XCTAssertEqual(groups.first?["$group_id"] as? String, "user_1")
+        XCTAssertEqual(groups.first?["$company_id"] as? String, "acme")
+    }
+
     // MARK: - Disabled: behaves exactly as before
 
     func testIdentifyWithCompanyIsIgnoredWhenDisabled() {
@@ -1229,6 +1253,44 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         let anonymousId = mixpanel.anonymousId!
         let expected: NSDictionary = ["distinct_id": "$device:\(anonymousId)", "device_id": anonymousId]
         XCTAssertEqual(lastFlagsContext(), expected)
+    }
+
+    func testCompanyChangeResetsAndRefetchesFlags() {
+        FlagsRecordingURLProtocol.flagsResponse = """
+            {"flags": {"hg-flag": {"variant_key": "acme_variant", "variant_value": "acme"}}}
+            """
+        let mixpanel = newFlagsApi(true)
+        identify(mixpanel, "user_1", "acme")
+        loadFlags(mixpanel)
+        XCTAssertEqual(
+            mixpanel.flags.getVariantSync("hg-flag", fallback: MixpanelFlagVariant(value: "none")).key,
+            "acme_variant")
+        waitForAsyncTasks()
+        XCTAssertEqual(countEvents(mixpanel, "$experiment_started"), 1)
+
+        FlagsRecordingURLProtocol.flagsResponse = """
+            {"flags": {"hg-flag": {"variant_key": "globex_variant", "variant_value": "globex"}}}
+            """
+        let requestsBefore = FlagsRecordingURLProtocol.requests().filter { $0.url.path == "/flags" }.count
+        // Same user, new company: an identity change, so flags are reset and fetched again
+        identify(mixpanel, "user_1", "globex")
+        loadFlags(mixpanel)
+
+        let flagsRequests = FlagsRecordingURLProtocol.requests().filter { $0.url.path == "/flags" }
+        XCTAssertGreaterThan(flagsRequests.count, requestsBefore)
+        let expected: NSDictionary = [
+            "device_id": mixpanel.anonymousId!, "$user_id": "user_1", "$company_id": "globex",
+        ]
+        XCTAssertEqual(lastFlagsContext(), expected)
+        XCTAssertEqual(
+            mixpanel.flags.getVariantSync("hg-flag", fallback: MixpanelFlagVariant(value: "none")).key,
+            "globex_variant")
+        waitForAsyncTasks()
+        // The reset cleared the tracked flags, so the same flag is tracked again for the new company
+        XCTAssertEqual(countEvents(mixpanel, "$experiment_started"), 2)
+        let props = lastEventProperties(mixpanel, "$experiment_started")
+        XCTAssertEqual(props["$user_id"] as? String, "user_1")
+        XCTAssertEqual(props["$company_id"] as? String, "globex")
     }
 
     func testDisabledFlagsContextIsUnchanged() {

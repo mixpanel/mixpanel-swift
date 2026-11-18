@@ -45,14 +45,18 @@ open class People {
         self.excludeProperties = excludeProperties
     }
 
-    func addPeopleRecordToQueueWithAction(_ action: String, properties: InternalProperties) {
+    /// Queues a people update. With `onSerialQueue`, the caller is already on `serialQueue` and the
+    /// row is stored before this returns, under the current `distinctId`.
+    func addPeopleRecordToQueueWithAction(
+        _ action: String, properties: InternalProperties, onSerialQueue: Bool = false
+    ) {
         if mixpanelInstance?.hasOptedOutTracking() ?? false {
             return
         }
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
         let ignoreTimeCopy = ignoreTime
 
-        serialQueue.async { [weak self, action, properties] in
+        let saveRecord = { [weak self, action, properties] in
             guard let self = self else { return }
 
             var r = InternalProperties()
@@ -107,6 +111,11 @@ open class People {
                 self.mixpanelPersistence.saveEntity(
                     r, type: .people, flag: PersistenceConstant.unIdentifiedFlag)
             }
+        }
+        if onSerialQueue {
+            saveRecord()
+        } else {
+            serialQueue.async(execute: saveRecord)
         }
 
         if MixpanelInstance.isiOSAppExtension() {

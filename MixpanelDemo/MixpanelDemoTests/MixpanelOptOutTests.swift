@@ -10,6 +10,73 @@ import XCTest
 
 @testable import Mixpanel
 
+/// Records the body of every request sent to `host` and answers it with a success response.
+private class OptOutRecordingURLProtocol: URLProtocol {
+    static let host = "optout-recorder.mixpanel.test"
+    private static let lock = NSLock()
+    private static var recorded: [(path: String, body: String)] = []
+
+    static func reset() {
+        lock.lock()
+        recorded = []
+        lock.unlock()
+    }
+
+    /// Waits up to `timeout` seconds for a request to `path` whose body contains every string.
+    static func waitForBody(path: String, containing parts: [String], timeout: TimeInterval = 10)
+        -> Bool
+    {
+        let deadline = Date(timeIntervalSinceNow: timeout)
+        repeat {
+            if bodies(path: path).contains(where: { body in parts.allSatisfy { body.contains($0) } }) {
+                return true
+            }
+            Thread.sleep(forTimeInterval: 0.05)
+        } while Date() < deadline
+        return false
+    }
+
+    static func bodies(path: String) -> [String] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recorded.filter { $0.path == path }.map { $0.body }
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        return request.url?.host == host
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        return request
+    }
+
+    override func startLoading() {
+        var data = request.httpBody ?? Data()
+        if data.isEmpty, let stream = request.httpBodyStream {
+            stream.open()
+            var buffer = [UInt8](repeating: 0, count: 4096)
+            while stream.hasBytesAvailable {
+                let count = stream.read(&buffer, maxLength: buffer.count)
+                if count <= 0 { break }
+                data.append(buffer, count: count)
+            }
+            stream.close()
+        }
+        OptOutRecordingURLProtocol.lock.lock()
+        OptOutRecordingURLProtocol.recorded.append(
+            (path: request.url?.path ?? "", body: String(data: data, encoding: .utf8) ?? ""))
+        OptOutRecordingURLProtocol.lock.unlock()
+
+        let response = HTTPURLResponse(
+            url: request.url!, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: nil)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data("1".utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+}
+
 class MixpanelOptOutTests: MixpanelBaseTests {
 
     func testHasOptOutTrackingFlagBeingSetProperlyAfterInitializedWithOptedOutYES() {
@@ -274,9 +341,15 @@ class MixpanelOptOutTests: MixpanelBaseTests {
     }
 
     func testOptOutWillSkipFlushPeople() {
+        OptOutRecordingURLProtocol.reset()
+        URLProtocol.registerClass(OptOutRecordingURLProtocol.self)
+        defer {
+            URLProtocol.unregisterClass(OptOutRecordingURLProtocol.self)
+            OptOutRecordingURLProtocol.reset()
+        }
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), trackAutomaticEvents: false, flushInterval: 0,
-            optOutTrackingByDefault: true)
+            optOutTrackingByDefault: true, serverURL: "https://\(OptOutRecordingURLProtocol.host)")
         testMixpanel.optInTracking()
         waitForTrackingQueue(testMixpanel)
         testMixpanel.identify(distinctId: "d1")
@@ -289,14 +362,23 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             peopleQueue(token: testMixpanel.apiToken).count == 1,
             "When opted in, people queue should have been queued")
 
+        // Opting out sends the pending update and the $delete for d1, then nothing else.
         testMixpanel.optOutTracking()
+        XCTAssertTrue(
+            OptOutRecordingURLProtocol.waitForBody(path: "/engage", containing: ["\"$delete\"", "\"d1\""]))
         waitForTrackingQueue(testMixpanel)
+        let sentBeforeFlush = OptOutRecordingURLProtocol.bodies(path: "/engage")
+        XCTAssertTrue(sentBeforeFlush.contains { $0.contains("\"$delete\"") })
 
+        testMixpanel.people.set(property: "p2", to: "after opt-out")
         testMixpanel.flush()
         waitForTrackingQueue(testMixpanel)
+        XCTAssertEqual(
+            OptOutRecordingURLProtocol.bodies(path: "/engage"), sentBeforeFlush,
+            "When opted out, flush should not send people updates")
         XCTAssertTrue(
-            peopleQueue(token: testMixpanel.apiToken).count == 1,
-            "When opted out, people queue should not be flushed")
+            peopleQueue(token: testMixpanel.apiToken).isEmpty,
+            "When opted out, people updates should not be queued")
         removeDBfile(testMixpanel.apiToken)
     }
 
@@ -436,6 +518,150 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             testMixpanel.autocaptureManager!.isStarted,
             "AutocaptureManager should be started after opt-in")
 
+        removeDBfile(token)
+    }
+
+    // MARK: - SDK-306: opt-out must delete the identified user's profile
+
+    func testOptOutSendsDeleteForIdentifiedUser() {
+        OptOutRecordingURLProtocol.reset()
+        URLProtocol.registerClass(OptOutRecordingURLProtocol.self)
+        defer {
+            URLProtocol.unregisterClass(OptOutRecordingURLProtocol.self)
+            OptOutRecordingURLProtocol.reset()
+        }
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 0,
+            serverURL: "https://\(OptOutRecordingURLProtocol.host)")
+        testMixpanel.identify(distinctId: "user-306")
+        testMixpanel.people.set(property: "plan", to: "pro")
+        flushAndWaitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(
+            OptOutRecordingURLProtocol.bodies(path: "/engage").contains { $0.contains("\"$set\"") },
+            "The recorder should see the profile update sent before opting out")
+
+        testMixpanel.optOutTracking()
+        _ = OptOutRecordingURLProtocol.waitForBody(
+            path: "/engage", containing: ["\"$delete\"", "\"user-306\""])
+        waitForTrackingQueue(testMixpanel)
+
+        let deletes = OptOutRecordingURLProtocol.bodies(path: "/engage").filter {
+            $0.contains("\"$delete\"") && $0.contains("\"user-306\"")
+        }
+        XCTAssertEqual(deletes.count, 1, "optOutTracking should send $delete for the identified user")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testOptOutDeleteIsNotReattributedToNextUser() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 0)
+        // Keep every row in the queue so it can be inspected.
+        testMixpanel.delegate = self
+        testMixpanel.identify(distinctId: "user-a")
+        waitForTrackingQueue(testMixpanel)
+        testMixpanel.optOutTracking()
+        waitForTrackingQueue(testMixpanel)
+
+        testMixpanel.optInTracking(distinctId: "user-b")
+        waitForTrackingQueue(testMixpanel)
+
+        let deletesForUserB = peopleQueue(token: testMixpanel.apiToken).filter {
+            $0["$delete"] != nil && $0["$distinct_id"] as? String == "user-b"
+        }
+        XCTAssertTrue(
+            deletesForUserB.isEmpty,
+            "The $delete queued by opting out user-a must never target user-b")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testOptOutRightAfterFlushStillSendsDelete() {
+        OptOutRecordingURLProtocol.reset()
+        URLProtocol.registerClass(OptOutRecordingURLProtocol.self)
+        defer {
+            URLProtocol.unregisterClass(OptOutRecordingURLProtocol.self)
+            OptOutRecordingURLProtocol.reset()
+        }
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 0,
+            serverURL: "https://\(OptOutRecordingURLProtocol.host)")
+        testMixpanel.identify(distinctId: "user-flushing")
+        testMixpanel.track(event: "before opt-out")
+        testMixpanel.people.set(property: "plan", to: "pro")
+        // The flush pass is usually still running when the opt-out block runs.
+        testMixpanel.flush()
+        testMixpanel.optOutTracking()
+        _ = OptOutRecordingURLProtocol.waitForBody(
+            path: "/engage", containing: ["\"$delete\"", "\"user-flushing\""])
+        waitForTrackingQueue(testMixpanel)
+
+        let deletes = OptOutRecordingURLProtocol.bodies(path: "/engage").filter {
+            $0.contains("\"$delete\"") && $0.contains("\"user-flushing\"")
+        }
+        XCTAssertEqual(deletes.count, 1, "optOutTracking during a flush should still send $delete")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testOptInDropsUnidentifiedDeleteFromOlderVersions() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: false, flushInterval: 0,
+            optOutTrackingByDefault: true)
+        testMixpanel.delegate = self
+        waitForTrackingQueue(testMixpanel)
+        // Older SDK versions left the opt-out $delete queued without a distinct id.
+        testMixpanel.mixpanelPersistence.saveEntity(
+            ["$delete": [:] as InternalProperties, "$token": testMixpanel.apiToken],
+            type: .people, flag: PersistenceConstant.unIdentifiedFlag)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: testMixpanel.apiToken).count, 1)
+
+        testMixpanel.optInTracking(distinctId: "user-b")
+        waitForTrackingQueue(testMixpanel)
+
+        XCTAssertTrue(unIdentifiedPeopleQueue(token: testMixpanel.apiToken).isEmpty)
+        XCTAssertFalse(
+            peopleQueue(token: testMixpanel.apiToken).contains { $0["$delete"] != nil },
+            "A stale $delete must not be attached to the user who opts in")
+        removeDBfile(testMixpanel.apiToken)
+    }
+
+    // MARK: - SDK-288: reset() must keep the opt-in/opt-out status across relaunch
+
+    func testResetKeepsOptInStatusAcrossRelaunch() {
+        let token = randomId()
+        var testMixpanel = Mixpanel.initialize(
+            token: token, trackAutomaticEvents: false, optOutTrackingByDefault: true)
+        testMixpanel.optInTracking()
+        testMixpanel.reset()
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertFalse(testMixpanel.hasOptedOutTracking())
+        XCTAssertEqual(MixpanelPersistence.loadOptOutStatusFlag(instanceName: token), false)
+
+        // Simulate an app relaunch.
+        Mixpanel.removeInstance(name: token)
+        testMixpanel = Mixpanel.initialize(
+            token: token, trackAutomaticEvents: false, optOutTrackingByDefault: true)
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertFalse(
+            testMixpanel.hasOptedOutTracking(),
+            "A user who opted in must stay opted in after reset() and a relaunch")
+        removeDBfile(token)
+    }
+
+    func testResetKeepsOptOutStatusAcrossRelaunch() {
+        let token = randomId()
+        var testMixpanel = Mixpanel.initialize(token: token, trackAutomaticEvents: false)
+        testMixpanel.optOutTracking()
+        testMixpanel.reset()
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(testMixpanel.hasOptedOutTracking())
+        XCTAssertEqual(MixpanelPersistence.loadOptOutStatusFlag(instanceName: token), true)
+
+        // Simulate an app relaunch.
+        Mixpanel.removeInstance(name: token)
+        testMixpanel = Mixpanel.initialize(token: token, trackAutomaticEvents: false)
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(
+            testMixpanel.hasOptedOutTracking(),
+            "A user who opted out must stay opted out after reset() and a relaunch")
         removeDBfile(token)
     }
 

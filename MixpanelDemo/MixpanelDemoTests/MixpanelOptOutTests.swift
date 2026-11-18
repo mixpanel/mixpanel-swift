@@ -537,7 +537,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         testMixpanel.people.set(property: "plan", to: "pro")
         flushAndWaitForTrackingQueue(testMixpanel)
         XCTAssertTrue(
-            OptOutRecordingURLProtocol.bodies(path: "/engage").contains { $0.contains("\"$set\"") },
+            OptOutRecordingURLProtocol.waitForBody(path: "/engage", containing: ["\"$set\""]),
             "The recorder should see the profile update sent before opting out")
 
         testMixpanel.optOutTracking()

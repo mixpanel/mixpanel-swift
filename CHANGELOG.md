@@ -1,3 +1,12 @@
+Last tag: 7.0.0
+## [7.1.0](https://github.com/mixpanel/mixpanel-swift/tree/7.1.0) (2026-10-30)
+
+### Features
+
+- 🎉 Autocapture is now generally available — [clicks, rage clicks, and dead clicks](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#click-events) ([#796](https://github.com/mixpanel/mixpanel-swift/pull/796))
+
+[Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/7.0.0...7.1.0)
+
 Last tag: 6.8.0
 ## [7.0.0](https://github.com/mixpanel/mixpanel-swift/tree/7.0.0) (2026-10-08)
 

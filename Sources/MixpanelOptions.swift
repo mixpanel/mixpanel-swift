@@ -275,9 +275,6 @@ public class MixpanelOptions {
     /// **Note:** Autocapture is only available on iOS. It is not supported when the app runs as a
     /// Mac Catalyst build; the options are accepted so shared iOS sources still compile, but no
     /// automatic capture takes place there.
-    ///
-    /// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the
-    ///   properties it captures may change in a future release before general availability.
     public let autocaptureOptions: AutocaptureOptions?
 
     /// Tracks for a project that uses hierarchical groups. Set this to match the project from the

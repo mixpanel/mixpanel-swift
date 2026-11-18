@@ -123,10 +123,6 @@ enum AutocaptureDefaults {
 /// Each event includes the touch coordinates, element identifier, class name, semantic role, and
 /// view hierarchy path. Accessibility labels are never captured: they are localized and can carry
 /// user data.
-///
-/// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the properties
-///   it captures may change in a future release before general availability. Pin your SDK version if
-///   you build reports on autocaptured events.
 public struct ClickOptions {
     /// Whether click capture is enabled. Defaults to `true` when autocapture is enabled.
     public let enabled: Bool
@@ -142,10 +138,6 @@ public struct ClickOptions {
 ///
 /// Rage clicks are detected when a user taps rapidly multiple times in the same area,
 /// indicating frustration with an unresponsive element.
-///
-/// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the properties
-///   it captures may change in a future release before general availability. Pin your SDK version if
-///   you build reports on autocaptured events.
 public struct RageClickOptions {
     /// Whether rage click detection is enabled. Defaults to `true`.
     public let enabled: Bool
@@ -193,10 +185,6 @@ public struct RageClickOptions {
 ///
 /// Dead clicks are detected when a user taps on an interactive element
 /// but no visible UI change occurs, indicating a broken or unresponsive element.
-///
-/// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the properties
-///   it captures may change in a future release before general availability. Pin your SDK version if
-///   you build reports on autocaptured events.
 public struct DeadClickOptions {
     /// Whether dead click detection is enabled. Defaults to `true`.
     public let enabled: Bool
@@ -257,10 +245,6 @@ public struct DeadClickOptions {
 ///
 /// **Platform support:** iOS only. Mac Catalyst builds accept these options so shared iOS sources
 /// keep compiling, but automatic capture never starts there.
-///
-/// - Warning: **Experimental (beta).** Autocapture may contain issues, and its API and the properties
-///   it captures may change in a future release before general availability. Pin your SDK version if
-///   you build reports on autocaptured events.
 public struct AutocaptureOptions {
     /// Configuration for basic click capture.
     public let clickOptions: ClickOptions

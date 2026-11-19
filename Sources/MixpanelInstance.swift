@@ -1935,14 +1935,13 @@ extension MixpanelInstance {
     public func optOutTracking() {
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
-            // Store these rows now, under the current user, because the identity is cleared below.
-            // They are sent by flushPeopleAfterOptOut() once the opt-out flag is set.
+            // Store the $delete now, under the current user, because the identity is cleared below.
+            // It is sent by flushPeopleAfterOptOut() once the opt-out flag is set. It must be the
+            // last people update for this user: a later $set would create the profile again.
             let queuedProfileDelete = self.people.distinctId != nil
             if queuedProfileDelete {
                 self.people.addPeopleRecordToQueueWithAction(
                     "$delete", properties: [:], onSerialQueue: true)
-                self.people.addPeopleRecordToQueueWithAction(
-                    "$set", properties: ["$transactions": [] as [Any]], onSerialQueue: true)
             }
             self.readWriteLock.write { [weak self] in
                 guard let self = self else {

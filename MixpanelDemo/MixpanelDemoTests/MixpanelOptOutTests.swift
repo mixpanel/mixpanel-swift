@@ -42,6 +42,16 @@ private class OptOutRecordingURLProtocol: URLProtocol {
         return recorded.filter { $0.path == path }.map { $0.body }
     }
 
+    /// The people records sent for `distinctId`, in the order they were sent.
+    static func peopleRecords(distinctId: String) -> [[String: Any]] {
+        return bodies(path: "/engage").flatMap { body -> [[String: Any]] in
+            guard let data = body.data(using: .utf8),
+                let records = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]
+            else { return [] }
+            return records.filter { $0["$distinct_id"] as? String == distinctId }
+        }
+    }
+
     override class func canInit(with request: URLRequest) -> Bool {
         return request.url?.host == host
     }
@@ -78,6 +88,26 @@ private class OptOutRecordingURLProtocol: URLProtocol {
 }
 
 class MixpanelOptOutTests: MixpanelBaseTests {
+
+    /// Asserts that a `$delete` was sent for `distinctId` and that it was the last people record
+    /// sent for that user, so no later `$set` creates the profile again.
+    private func assertDeleteIsLastPeopleRecord(
+        distinctId: String, file: StaticString = #filePath, line: UInt = #line
+    ) {
+        let records = OptOutRecordingURLProtocol.peopleRecords(distinctId: distinctId)
+        guard let deleteIndex = records.lastIndex(where: { $0["$delete"] != nil }) else {
+            XCTFail("No $delete was sent for \(distinctId)", file: file, line: line)
+            return
+        }
+        let after = records[records.index(after: deleteIndex)...]
+        XCTAssertTrue(
+            after.isEmpty,
+            "$delete must be the last people record for \(distinctId); sent after it: \(Array(after))",
+            file: file, line: line)
+        XCTAssertFalse(
+            after.contains { $0["$set"] != nil }, "No $set may follow $delete for \(distinctId)",
+            file: file, line: line)
+    }
 
     func testHasOptOutTrackingFlagBeingSetProperlyAfterInitializedWithOptedOutYES() {
         let testMixpanel = Mixpanel.initialize(
@@ -369,6 +399,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         waitForTrackingQueue(testMixpanel)
         let sentBeforeFlush = OptOutRecordingURLProtocol.bodies(path: "/engage")
         XCTAssertTrue(sentBeforeFlush.contains { $0.contains("\"$delete\"") })
+        assertDeleteIsLastPeopleRecord(distinctId: "d1")
 
         testMixpanel.people.set(property: "p2", to: "after opt-out")
         testMixpanel.flush()
@@ -549,6 +580,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             $0.contains("\"$delete\"") && $0.contains("\"user-306\"")
         }
         XCTAssertEqual(deletes.count, 1, "optOutTracking should send $delete for the identified user")
+        assertDeleteIsLastPeopleRecord(distinctId: "user-306")
         removeDBfile(testMixpanel.apiToken)
     }
 
@@ -598,6 +630,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             $0.contains("\"$delete\"") && $0.contains("\"user-flushing\"")
         }
         XCTAssertEqual(deletes.count, 1, "optOutTracking during a flush should still send $delete")
+        assertDeleteIsLastPeopleRecord(distinctId: "user-flushing")
         removeDBfile(testMixpanel.apiToken)
     }
 

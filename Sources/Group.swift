@@ -54,7 +54,7 @@ open class Group {
             if let mixpanelInstance = self.mixpanelInstance, mixpanelInstance.hierarchicalGroups {
                 // A company group is bound to its own company, so a group kept across reset() or a
                 // new identify still updates that company
-                if self.groupKey == companyIdGroupKey {
+                if self.groupKey == companyIdKey {
                     companyId = self.groupID
                 } else {
                     companyId = mixpanelInstance.identity.companyId
@@ -85,7 +85,7 @@ open class Group {
             r["$group_key"] = self.groupKey
             r["$group_id"] = self.groupID
             if let companyId = companyId {
-                r["$company_id"] = companyId
+                r[companyIdKey] = companyId
             }
             self.mixpanelPersistence.saveEntity(r, type: .groups)
         }

@@ -216,14 +216,14 @@ class MixpanelPersistence {
             for row in rows {
                 var entity = row
                 guard let id = entity.removeValue(forKey: "id") as? Int32,
-                    entity["$group_key"] as? String == People.hierarchicalGroupsUserGroupKey,
+                    entity["$group_key"] as? String == userIdKey,
                     entity["$group_id"] == nil
                 else {
                     skipped += 1
                     continue
                 }
                 entity["$group_id"] = userId
-                entity["$company_id"] = companyId
+                entity[companyIdKey] = companyId
                 ids.append(id)
                 updates.append(entity)
             }

@@ -97,8 +97,7 @@ private final class PersistenceTestMockManager: FeatureFlagManager {
 
     // No-op so we don't fire real first-time-event recording requests.
     override func recordFirstTimeEvent(
-        flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String,
-        hierarchicalGroupsIds: (userId: String, companyId: String)? = nil
+        flagId: String, projectId: Int, firstTimeEventHash: String, identity: FlagRequestIdentity
     ) {}
 }
 

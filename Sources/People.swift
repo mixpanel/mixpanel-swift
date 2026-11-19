@@ -52,9 +52,6 @@ open class People {
         self.excludeProperties = excludeProperties
     }
 
-    /// The group key of a hierarchical groups user profile
-    static let hierarchicalGroupsUserGroupKey = "$user_id"
-
     // /groups has no $add, $append or $merge
     static let hierarchicalGroupsOperations = [
         "$set", "$set_once", "$unset", "$union", "$remove", "$delete",
@@ -110,7 +107,7 @@ open class People {
             }
 
             if let userId = self.mixpanelInstance?.userId {
-                r["$user_id"] = userId
+                r[userIdKey] = userId
             }
 
             if let hadPersistedDistinctId = self.mixpanelInstance?.hadPersistedDistinctId {
@@ -189,13 +186,13 @@ open class People {
             r[action] = p
         }
         metadata.toDict(isEvent: false).forEach { (k, v) in r[k] = v }
-        r["$group_key"] = People.hierarchicalGroupsUserGroupKey
+        r["$group_key"] = userIdKey
         guard let userId = userId, let companyId = companyId else {
             mixpanelPersistence.saveEntity(r, type: .people, flag: PersistenceConstant.unIdentifiedFlag)
             return
         }
         r["$group_id"] = userId
-        r["$company_id"] = companyId
+        r[companyIdKey] = companyId
         mixpanelPersistence.saveEntity(r, type: .groups)
     }
 

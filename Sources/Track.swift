@@ -57,17 +57,17 @@ class Track {
         event: String
     ) {
         if let companyId = companyId {
-            properties[companyIdGroupKey] = companyId
+            properties[companyIdKey] = companyId
             if let callerCompanyId = callerCompanyId, !callerCompanyId.equals(rhs: companyId) {
                 MixpanelLogger.warn(
                     message:
-                        "Replaced \(companyIdGroupKey) \(callerCompanyId) on event \(event) with the "
+                        "Replaced \(companyIdKey) \(callerCompanyId) on event \(event) with the "
                         + "identified company \(companyId). Set the company with identify(identity:).")
             }
-        } else if properties.removeValue(forKey: companyIdGroupKey) != nil, let callerCompanyId = callerCompanyId {
+        } else if properties.removeValue(forKey: companyIdKey) != nil, let callerCompanyId = callerCompanyId {
             MixpanelLogger.warn(
                 message:
-                    "Removed \(companyIdGroupKey) \(callerCompanyId) from event \(event): no company is "
+                    "Removed \(companyIdKey) \(callerCompanyId) from event \(event): no company is "
                     + "identified yet. Set the company with identify(identity:).")
         }
     }
@@ -112,7 +112,7 @@ class Track {
             p["$device_id"] = storedIdentity.anonymousId
         }
         if storedIdentity.userId != nil {
-            p["$user_id"] = storedIdentity.userId
+            p[userIdKey] = storedIdentity.userId
         }
         if storedIdentity.hadPersistedDistinctId != nil {
             p["$had_persisted_distinct_id"] = storedIdentity.hadPersistedDistinctId
@@ -124,7 +124,7 @@ class Track {
                 p += properties
             }
             Track.applyIdentifiedCompany(
-                &p, companyId: storedIdentity.companyId, callerCompanyId: properties?[companyIdGroupKey],
+                &p, companyId: storedIdentity.companyId, callerCompanyId: properties?[companyIdKey],
                 event: ev)
         } else if let properties = properties {
             p += properties

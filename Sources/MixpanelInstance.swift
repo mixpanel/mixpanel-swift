@@ -23,7 +23,6 @@ import CoreTelephony
 #endif  // os(iOS)
 
 private let devicePrefix = "$device:"
-let companyIdGroupKey = "$company_id"
 
 /// Delegate protocol for updating the Proxy Server API's network behavior.
 public protocol MixpanelProxyServerDelegate: AnyObject {
@@ -119,14 +118,15 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                 return
             }
             readWriteLock.write {
-                eventsDistinctId = newValue
+                storedDistinctId = newValue
             }
         }
     }
 
-    /// The distinct id events are sent with: the id passed to `identify`, or the device form
-    /// before that.
-    var eventsDistinctId = ""
+    /// The distinct id stored for this instance: the id passed to `identify`, or `$device:`
+    /// followed by the device id before that. On a hierarchical groups project, identified events
+    /// don't send it.
+    var storedDistinctId = ""
 
     /// anonymousId string that uniquely identifies the device.
     open var anonymousId: String?
@@ -331,7 +331,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     open var debugDescription: String {
         return "Mixpanel(\n"
             + "    Token: \(apiToken),\n"
-            + "    Distinct Id: \(eventsDistinctId)\n"
+            + "    Distinct Id: \(storedDistinctId)\n"
             + ")"
     }
 
@@ -541,15 +541,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         readWriteLock = ReadWriteLock(label: "com.mixpanel.globallock")
         flushInstance = Flush(serverURL: self.serverURL, useGzipCompression: useGzipCompression)
         sessionMetadata = SessionMetadata(trackingQueue: trackingQueue)
-        // Hierarchical groups ingestion requires $company_id, so it is never stripped there
-        var excludeProperties = self.options.excludeProperties
-        if self.options.hierarchicalGroups, excludeProperties.remove(companyIdGroupKey) != nil {
-            MixpanelLogger.warn(
-                message:
-                    "MixpanelOptions.excludeProperties contains '\(companyIdGroupKey)', which hierarchical "
-                    + "groups projects require on every event and profile update, so it is ignored.")
-        }
-        MixpanelInstance.warnIfStrippingLibProperties(excludeProperties)
+        let excludeProperties = MixpanelInstance.resolvedExcludeProperties(self.options)
         trackInstance = Track(
             apiToken: self.apiToken,
             instanceName: self.name,
@@ -590,7 +582,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
         #endif
         flushInstance.delegate = self
-        eventsDistinctId = devicePrefix + defaultDeviceId()
+        storedDistinctId = devicePrefix + defaultDeviceId()
         people = People(
             apiToken: self.apiToken,
             serialQueue: trackingQueue,
@@ -698,7 +690,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     func resolvedDistinctId() -> String {
         var resolved = ""
         readWriteLock.read {
-            resolved = eventsDistinctId
+            resolved = storedDistinctId
             guard hierarchicalGroups, let userId = userId else {
                 // Anonymous, so already $device:{deviceId}
                 return
@@ -813,6 +805,20 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
 
     static func isiOSAppExtension() -> Bool {
         return Bundle.main.bundlePath.hasSuffix(".appex")
+    }
+
+    /// The options' excludeProperties, without `$company_id` on a hierarchical groups project,
+    /// whose ingestion requires it. Warns about anything dropped or risky.
+    private static func resolvedExcludeProperties(_ options: MixpanelOptions) -> Set<String> {
+        var excludeProperties = options.excludeProperties
+        if options.hierarchicalGroups, excludeProperties.remove(companyIdKey) != nil {
+            MixpanelLogger.warn(
+                message:
+                    "MixpanelOptions.excludeProperties contains '\(companyIdKey)', which hierarchical "
+                    + "groups projects require on every event and profile update, so it is ignored.")
+        }
+        warnIfStrippingLibProperties(excludeProperties)
+        return excludeProperties
     }
 
     private static func warnIfStrippingLibProperties(_ excludeProperties: Set<String>) {
@@ -1193,7 +1199,7 @@ extension MixpanelInstance {
             // If there's no anonymousId assigned yet, that means distinctId is stored in the storage. Assigning already stored
             // distinctId as anonymousId on identify and also setting a flag to notify that it might be previously logged in user
             if self.anonymousId == nil {
-                self.anonymousId = self.eventsDistinctId
+                self.anonymousId = self.storedDistinctId
                 self.hadPersistedDistinctId = true
             }
 
@@ -1203,14 +1209,14 @@ extension MixpanelInstance {
                 }
             }
 
-            let userChanged = distinctId != self.eventsDistinctId
+            let userChanged = distinctId != self.storedDistinctId
             // A user in another company is another user, so a new company is an identity change.
             let companyChanged = self.hierarchicalGroups && companyId != nil && companyId != self.companyId
             if userChanged || companyChanged {
-                let oldDistinctId = self.eventsDistinctId
+                let oldDistinctId = self.storedDistinctId
                 self.readWriteLock.write {
                     self.alias = nil
-                    self.eventsDistinctId = distinctId
+                    self.storedDistinctId = distinctId
                     self.userId = distinctId
                     if self.hierarchicalGroups {
                         self.companyId = companyId
@@ -1247,7 +1253,7 @@ extension MixpanelInstance {
 
             MixpanelPersistence.saveIdentity(
                 StoredIdentity.init(
-                    distinctID: self.eventsDistinctId,
+                    distinctID: self.storedDistinctId,
                     peopleDistinctID: self.people.distinctId,
                     anonymousId: self.anonymousId,
                     userId: self.userId,
@@ -1351,7 +1357,7 @@ extension MixpanelInstance {
                 var companyIdSnapshot: String?
 
                 self.readWriteLock.read {
-                    distinctIdSnapshot = self.eventsDistinctId
+                    distinctIdSnapshot = self.storedDistinctId
                     peopleDistinctIDSnapshot = self.people.distinctId
                     anonymousIdSnapshot = self.anonymousId
                     userIdSnapshot = self.userId
@@ -1409,7 +1415,7 @@ extension MixpanelInstance {
             self.readWriteLock.write {
                 self.timedEvents = InternalProperties()
                 self.anonymousId = deviceId
-                self.eventsDistinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
+                self.storedDistinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
                 self.hadPersistedDistinctId = true
                 self.userId = nil
                 self.companyId = nil
@@ -1461,7 +1467,7 @@ extension MixpanelInstance {
                 superProperties: superProperties, instanceName: self.name)
             MixpanelPersistence.saveIdentity(
                 StoredIdentity.init(
-                    distinctID: eventsDistinctId,
+                    distinctID: storedDistinctId,
                     peopleDistinctID: people.distinctId,
                     anonymousId: anonymousId,
                     userId: userId,
@@ -1494,7 +1500,7 @@ extension MixpanelInstance {
             optOutStatus = loadedOptOutStatus
             superProperties = loadedSuperProperties
             timedEvents = loadedTimedEvents
-            (eventsDistinctId, people.distinctId, anonymousId, userId, alias, hadPersistedDistinctId) = (
+            (storedDistinctId, people.distinctId, anonymousId, userId, alias, hadPersistedDistinctId) = (
                 storedIdentity.distinctID,
                 storedIdentity.peopleDistinctID,
                 storedIdentity.anonymousId,
@@ -1506,7 +1512,7 @@ extension MixpanelInstance {
             companyId = hierarchicalGroups ? storedIdentity.companyId : nil
             if let newDeviceId = newDeviceId {
                 anonymousId = newDeviceId
-                eventsDistinctId = addPrefixToDeviceId(deviceId: anonymousId)
+                storedDistinctId = addPrefixToDeviceId(deviceId: anonymousId)
                 hadPersistedDistinctId = true
                 userId = nil
                 companyId = nil
@@ -1530,7 +1536,7 @@ extension MixpanelInstance {
             self.readWriteLock.read {
                 MixpanelPersistence.saveIdentity(
                     StoredIdentity.init(
-                        distinctID: eventsDistinctId,
+                        distinctID: storedDistinctId,
                         peopleDistinctID: people.distinctId,
                         anonymousId: anonymousId,
                         userId: userId,
@@ -1725,7 +1731,7 @@ extension MixpanelInstance {
             }
 
             let storedIdentity = StoredIdentity.init(
-                distinctID: self.eventsDistinctId,
+                distinctID: self.storedDistinctId,
                 peopleDistinctID: nil,
                 anonymousId: self.anonymousId,
                 userId: self.userId,
@@ -1881,7 +1887,7 @@ extension MixpanelInstance {
                     + "first.")
             return nil
         }
-        return getGroup(groupKey: companyIdGroupKey, groupID: companyId)
+        return getGroup(groupKey: companyIdKey, groupID: companyId)
     }
 
     func removeCachedGroup(groupKey: String, groupID: MixpanelType) {
@@ -2274,12 +2280,12 @@ extension MixpanelInstance {
     /// that would register, unregister or group by it is refused whole with an error log.
     private func refusesCompanyIdKey<Keys: Sequence>(operation: String, keys: Keys) -> Bool
     where Keys.Element == String {
-        guard hierarchicalGroups, keys.contains(companyIdGroupKey) else {
+        guard hierarchicalGroups, keys.contains(companyIdKey) else {
             return false
         }
         MixpanelLogger.error(
             message:
-                "\(operation) can't change \(companyIdGroupKey) on a hierarchical groups project, where the "
+                "\(operation) can't change \(companyIdKey) on a hierarchical groups project, where the "
                 + "company is set with identify(identity: MixpanelIdentity(userId:companyId:)). "
                 + "The \(operation) call was dropped.")
         return true
@@ -2352,7 +2358,7 @@ extension MixpanelInstance {
                 self.userId = nil
                 self.companyId = nil
                 self.anonymousId = deviceId
-                self.eventsDistinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
+                self.storedDistinctId = self.addPrefixToDeviceId(deviceId: self.anonymousId)
                 self.hadPersistedDistinctId = true
                 self.superProperties = InternalProperties()
                 MixpanelPersistence.saveTimedEvents(

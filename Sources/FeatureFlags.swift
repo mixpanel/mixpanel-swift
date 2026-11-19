@@ -426,6 +426,27 @@ class FeatureFlagManager: MixpanelFlags {
         }
     }
 
+    /// Who a flag request is for, written into its context or payload.
+    enum FlagRequestIdentity {
+        /// A non-hierarchical groups project, or one whose user and company aren't both identified.
+        case distinctId(String)
+        /// A hierarchical groups project with both the user and company identified.
+        case hierarchicalGroups(userId: String, companyId: String)
+
+        /// Writes the identity keys. On hierarchical groups the user is `$user_id` and
+        /// `$company_id`, so any `distinct_id` is removed.
+        func apply(to body: inout [String: Any]) {
+            switch self {
+                case .distinctId(let distinctId):
+                    body["distinct_id"] = distinctId
+                case .hierarchicalGroups(let userId, let companyId):
+                    body.removeValue(forKey: "distinct_id")
+                    body[userIdKey] = userId
+                    body[companyIdKey] = companyId
+            }
+        }
+    }
+
     /// The delegate's distinct id. For a MixpanelInstance this skips the warning its `distinctId`
     /// logs on a hierarchical groups project, since the app didn't ask for it.
     static func distinctId(of delegate: MixpanelFlagDelegate) -> String {
@@ -936,21 +957,15 @@ class FeatureFlagManager: MixpanelFlags {
 
         let distinctId = Self.distinctId(of: delegate)
         let anonymousId = delegate.getAnonymousId()
-        let hierarchicalGroupsIds = self.hierarchicalGroupsIds(delegate: delegate, options: options)
+        let requestIdentity = Self.requestIdentity(
+            delegate: delegate, options: options, distinctId: distinctId)
         MixpanelLogger.debug(message: "Fetching flags for distinct ID: \(distinctId)")
 
         var context: [String: Any] = [:]
         flagsLock.read {
             context = self.flagContext
         }
-        if let hierarchicalGroupsIds = hierarchicalGroupsIds {
-            // On hierarchical groups the user is $user_id and $company_id, so no distinct_id
-            context.removeValue(forKey: "distinct_id")
-            context["$user_id"] = hierarchicalGroupsIds.userId
-            context["$company_id"] = hierarchicalGroupsIds.companyId
-        } else {
-            context["distinct_id"] = distinctId
-        }
+        requestIdentity.apply(to: &context)
         if let anonymousId = anonymousId {
             context["device_id"] = anonymousId
         }
@@ -1583,10 +1598,9 @@ class FeatureFlagManager: MixpanelFlags {
                     return
                 }
 
-                let distinctId = Self.distinctId(of: delegate)
-                let hierarchicalGroupsIds = currentOptions.flatMap {
-                    self.hierarchicalGroupsIds(delegate: delegate, options: $0)
-                }
+                let requestIdentity = Self.requestIdentity(
+                    delegate: delegate, options: currentOptions,
+                    distinctId: Self.distinctId(of: delegate))
 
                 DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                     // Record to backend (fire-and-forget)
@@ -1594,29 +1608,29 @@ class FeatureFlagManager: MixpanelFlags {
                         flagId: pendingEvent.flagId,
                         projectId: pendingEvent.projectId,
                         firstTimeEventHash: pendingEvent.firstTimeEventHash,
-                        distinctId: hierarchicalGroupsIds?.userId ?? distinctId,
-                        hierarchicalGroupsIds: hierarchicalGroupsIds
+                        identity: requestIdentity
                     )
                 }
             }
         }
     }
 
-    /// The user and company ids flag requests carry on a hierarchical groups project, once both
-    /// are identified. Nil otherwise, so the request is unchanged.
-    private func hierarchicalGroupsIds(delegate: MixpanelFlagDelegate, options: MixpanelOptions)
-        -> (userId: String, companyId: String)?
-    {
-        guard options.hierarchicalGroups else { return nil }
-        let identity = delegate.identity
-        guard let userId = identity.userId, let companyId = identity.companyId else { return nil }
-        return (userId, companyId)
+    /// Who a flag request is for: the user and company on a hierarchical groups project once both
+    /// are identified, otherwise the distinct id, so the request is unchanged.
+    static func requestIdentity(
+        delegate: MixpanelFlagDelegate, options: MixpanelOptions?, distinctId: String
+    ) -> FlagRequestIdentity {
+        if options?.hierarchicalGroups == true, let userId = delegate.identity.userId,
+            let companyId = delegate.identity.companyId
+        {
+            return .hierarchicalGroups(userId: userId, companyId: companyId)
+        }
+        return .distinctId(distinctId)
     }
 
     /// Records a first-time event activation to the backend
     internal func recordFirstTimeEvent(
-        flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String,
-        hierarchicalGroupsIds: (userId: String, companyId: String)? = nil
+        flagId: String, projectId: Int, firstTimeEventHash: String, identity: FlagRequestIdentity
     ) {
         let url = "/flags/\(flagId)/first-time-events"
 
@@ -1629,13 +1643,7 @@ class FeatureFlagManager: MixpanelFlags {
             "project_id": projectId,
             "first_time_event_hash": firstTimeEventHash,
         ]
-        // On a hierarchical groups project the user is $user_id and $company_id, so no distinct_id
-        if let hierarchicalGroupsIds = hierarchicalGroupsIds {
-            payload["$user_id"] = hierarchicalGroupsIds.userId
-            payload["$company_id"] = hierarchicalGroupsIds.companyId
-        } else {
-            payload["distinct_id"] = distinctId
-        }
+        identity.apply(to: &payload)
 
         guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
             let options = currentOptions

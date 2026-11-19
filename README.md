@@ -147,6 +147,10 @@ Check out the [Carthage docs](https://github.com/Carthage/Carthage#if-youre-buil
 >   ```ruby
 >   pod 'Mixpanel-swift', :git => 'https://github.com/mixpanel/mixpanel-swift.git', :tag => 'X.Y.Z'
 >   ```
+>   If `pod install` can't find a version of a Mixpanel dependency, such as `MixpanelSwiftCommon`, add that dependency from GitHub the same way:
+>   ```ruby
+>   pod 'MixpanelSwiftCommon', :git => 'https://github.com/mixpanel/mixpanel-swift-common.git', :tag => 'X.Y.Z'
+>   ```
 > - **After November 2027:** CocoaPods support will be removed in a future major version of the SDK.
 
 If your project already uses CocoaPods:

@@ -39,7 +39,7 @@ We'd also love for you to come and work with us! Check out **[Jobs](https://mixp
 
 If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
 
-Check out our [Advanced iOS Swift Guide](https://developer.mixpanel.com/docs/swift) for additional advanced configurations and use cases, like setting up your project with European Union data storage.
+Check out our [Advanced iOS Swift Guide](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift) for additional advanced configurations and use cases, like setting up your project with European Union data storage.
 
 ---
 
@@ -179,7 +179,7 @@ Mixpanel.mainInstance().track(event: "Sign Up", properties: [
    "Opted out of email": true
 ])
 ```
-In addition to event data, you can also send [user profile data](https://developer.mixpanel.com/docs/swift#storing-user-profiles). We recommend this after completing the quickstart guide.
+In addition to event data, you can also send [user profile data](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#storing-user-profiles). We recommend this after completing the quickstart guide.
 
 ## 4. Check for Success
 [Open up Events in Mixpanel](http://mixpanel.com/report/events) to view incoming events. 
@@ -212,7 +212,7 @@ Yes, in Lexicon, you can intercept and drop incoming events or properties. Mixpa
 
 **I have a test user I would like to opt out of tracking. How do I do that?**
 
-Mixpanel’s client-side tracking library contains the [optOutTracking()](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14optOutTrackingyyF) method, which will set the user’s local opt-out state to “true” and will prevent data from being sent from a user’s device. More detailed instructions can be found in the section, [Opting users out of tracking](https://developer.mixpanel.com/docs/swift#opting-users-out-of-tracking).
+Mixpanel’s client-side tracking library contains the [optOutTracking()](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14optOutTrackingyyF) method, which will set the user’s local opt-out state to “true” and will prevent data from being sent from a user’s device. More detailed instructions can be found in the section, [Opting users out of tracking](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#opt-out-of-tracking).
 
 **Why aren't my events showing up?**
 
@@ -236,7 +236,7 @@ Please refer to our [Apple App Developer Privacy Guidance](https://mixpanel.com/
 ## I want to know more!
 
 No worries, here are some links that you will find useful:
-* **[Advanced iOS - Swift Guide](https://developer.mixpanel.com/docs/swift)**
+* **[Advanced iOS - Swift Guide](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift)**
 * **[Sample app](https://github.com/mixpanel/mixpanel-swift/tree/master/MixpanelDemo)**
 * **[Full API Reference](https://mixpanel.github.io/mixpanel-swift)**
 

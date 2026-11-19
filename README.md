@@ -131,7 +131,14 @@ Or add it to the dependencies in your `Package.swift`:
 .package(url: "https://github.com/mixpanel/mixpanel-swift.git", from: "7.0.0")
 ```
 
-### Installation Option 2: CocoaPods (deprecated)
+### Installation Option 2: Carthage
+Mixpanel supports Carthage to package your dependencies as a framework. Include the following dependency in your Cartfile:
+```swift
+github "mixpanel/mixpanel-swift"
+```
+Check out the [Carthage docs](https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos) for more info.
+
+### Installation Option 3: CocoaPods (deprecated)
 > [!WARNING]
 > CocoaPods support is deprecated. Please migrate to Swift Package Manager.
 >
@@ -147,13 +154,6 @@ If your project already uses CocoaPods:
 2. Run `pod install` in your Xcode project directory.
 
 New to CocoaPods? Use [Swift Package Manager](#installation-option-1-swift-package-manager-recommended) instead.
-
-### Installation Option 3: Carthage
-Mixpanel supports Carthage to package your dependencies as a framework. Include the following dependency in your Cartfile:
-```swift
-github "mixpanel/mixpanel-swift"
-```
-Check out the [Carthage docs](https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos) for more info.
 
 ### Supported Platforms
 

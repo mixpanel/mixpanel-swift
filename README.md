@@ -142,9 +142,11 @@ Or add it to the dependencies in your `Package.swift`:
 >   ```
 > - **After November 2027:** CocoaPods support will be removed in a future major release.
 
-1. If this is your first time using CocoaPods, install it with `gem install cocoapods`.
-2. Create a Podfile in your Xcode project directory by running `pod init`, then add `pod 'Mixpanel-swift'` (or the `:git` line above for versions after the trunk freeze).
-3. Run `pod install` in your Xcode project directory and open the generated `.xcworkspace`.
+If your project already uses CocoaPods:
+1. Add `pod 'Mixpanel-swift'` to your Podfile (or the `:git` line above for versions after the trunk freeze).
+2. Run `pod install` in your Xcode project directory.
+
+New to CocoaPods? Use [Swift Package Manager](#installation-option-1-swift-package-manager-recommended) instead.
 
 ### Installation Option 3: Carthage
 Mixpanel supports Carthage to package your dependencies as a framework. Include the following dependency in your Cartfile:

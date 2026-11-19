@@ -140,7 +140,7 @@ Or add it to the dependencies in your `Package.swift`:
 >   ```ruby
 >   pod 'Mixpanel-swift', :git => 'https://github.com/mixpanel/mixpanel-swift.git', :tag => 'X.Y.Z'
 >   ```
-> - **Around December 2027:** CocoaPods support is removed in the next major release.
+> - **After November 2027:** CocoaPods support will be removed in a future major release.
 
 1. If this is your first time using CocoaPods, install it with `gem install cocoapods`.
 2. Create a Podfile in your Xcode project directory by running `pod init`, then add `pod 'Mixpanel-swift'` (or the `:git` line above for versions after the trunk freeze).

@@ -160,7 +160,13 @@ jobs:
           # Use lib lint (not spec lint) because tag doesn't exist yet
           # lib lint validates against local working tree
           PODSPEC="${{ steps.config.outputs.podspec }}"
-          pod lib lint "$PODSPEC" --allow-warnings
+          # Mixpanel dependencies that aren't on CocoaPods trunk are linted from their git tags.
+          ruby scripts/fetch-dependency-podspecs.rb "$PODSPEC" "$RUNNER_TEMP/pod-deps"
+          EXTERNAL=()
+          if compgen -G "$RUNNER_TEMP/pod-deps/*.podspec" > /dev/null; then
+            EXTERNAL=(--external-podspecs="$RUNNER_TEMP/pod-deps/*.podspec")
+          fi
+          pod lib lint "$PODSPEC" --allow-warnings "${EXTERNAL[@]}"
 
       # Validate Carthage compatibility before creating the release tag.
       # This ensures the XCFramework builds successfully for Carthage users.

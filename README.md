@@ -121,16 +121,30 @@ Our master branch and our releases are on Swift 5. If you wish to use our Swift 
 ## 1. Install Mixpanel
 You will need your project token for initializing your library. You can get your project token from [project settings](https://mixpanel.com/settings/project).
 
-### Installation Option 1: Swift Package Manager (v2.8.0+)
-The easiest way to get Mixpanel into your iOS project is to use Swift Package Manager.
+### Installation Option 1: Swift Package Manager (recommended)
+Swift Package Manager is the recommended way to add Mixpanel to your project.
 1. In Xcode, select File > Add Packages...
 2. Enter the package URL for this repository [Mixpanel Swift library](https://github.com/mixpanel/mixpanel-swift).
 
-### Installation Option 2: CocoaPods
-1. If this is your first time using CocoaPods, Install CocoaPods using `gem install cocoapods`. Otherwise, continue to Step 3.
-2. Run `pod setup` to create a local CocoaPods spec mirror.
-3. Create a Podfile in your Xcode project directory by running `pod init` in your terminal, edit the Podfile generated, and add the following line: `pod 'Mixpanel-swift'`.
-4. Run `pod install` in your Xcode project directory. CocoaPods should download and install the Mixpanel library, and create a new Xcode workspace. Open up this workspace in Xcode or typing `open *.xcworkspace` in your terminal.
+Or add it to the dependencies in your `Package.swift`:
+```swift
+.package(url: "https://github.com/mixpanel/mixpanel-swift.git", from: "7.0.0")
+```
+
+### Installation Option 2: CocoaPods (deprecated)
+> [!WARNING]
+> CocoaPods support is deprecated. Please migrate to Swift Package Manager.
+>
+> - **December 2, 2026:** CocoaPods trunk becomes read-only. Versions already on trunk keep installing with `pod 'Mixpanel-swift'`, but new versions are not published there.
+> - **Until removal:** install newer versions straight from GitHub. Replace `X.Y.Z` with the release you want:
+>   ```ruby
+>   pod 'Mixpanel-swift', :git => 'https://github.com/mixpanel/mixpanel-swift.git', :tag => 'X.Y.Z'
+>   ```
+> - **Around December 2027:** CocoaPods support is removed in the next major release.
+
+1. If this is your first time using CocoaPods, install it with `gem install cocoapods`.
+2. Create a Podfile in your Xcode project directory by running `pod init`, then add `pod 'Mixpanel-swift'` (or the `:git` line above for versions after the trunk freeze).
+3. Run `pod install` in your Xcode project directory and open the generated `.xcworkspace`.
 
 ### Installation Option 3: Carthage
 Mixpanel supports Carthage to package your dependencies as a framework. Include the following dependency in your Cartfile:

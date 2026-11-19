@@ -140,14 +140,14 @@ Check out the [Carthage docs](https://github.com/Carthage/Carthage#if-youre-buil
 
 ### Installation Option 3: CocoaPods (deprecated)
 > [!WARNING]
-> CocoaPods support is deprecated. Please migrate to Swift Package Manager.
+> CocoaPods support is deprecated. We recommend migrating to Swift Package Manager.
 >
-> - **December 2, 2026:** CocoaPods trunk becomes read-only. Versions already on trunk keep installing with `pod 'Mixpanel-swift'`, but new versions are not published there.
-> - **Until removal:** install newer versions straight from GitHub. Replace `X.Y.Z` with the release you want:
+> - **December 2, 2026:** CocoaPods trunk becomes read-only. Versions already published there keep installing with `pod 'Mixpanel-swift'`, but new versions are not published to trunk.
+> - **Until removal:** install newer versions directly from GitHub. Replace `X.Y.Z` with the [release](https://github.com/mixpanel/mixpanel-swift/releases) you want:
 >   ```ruby
 >   pod 'Mixpanel-swift', :git => 'https://github.com/mixpanel/mixpanel-swift.git', :tag => 'X.Y.Z'
 >   ```
-> - **After November 2027:** CocoaPods support will be removed in a future major release.
+> - **After November 2027:** CocoaPods support will be removed in a future major version of the SDK.
 
 If your project already uses CocoaPods:
 1. Add `pod 'Mixpanel-swift'` to your Podfile (or the `:git` line above for versions after the trunk freeze).

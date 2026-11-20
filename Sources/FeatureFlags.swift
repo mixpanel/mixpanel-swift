@@ -404,6 +404,12 @@ public protocol MixpanelFlags {
 
 // --- FeatureFlagManager Class ---
 
+/// Reserved fallback key the Mixpanel OpenFeature provider (mixpanel-swift-openfeature) passes to
+/// `getVariantSync`. When present, the `$experiment_started` exposure is tagged with
+/// `$openfeature_provider: true` so OpenFeature exposures can be told apart from direct SDK calls.
+/// Not public API; the provider relies on this exact string (SDK-448).
+let openFeatureProviderFallbackKey = "$openfeature_provider"
+
 class FeatureFlagManager: MixpanelFlags {
 
     weak var delegate: MixpanelFlagDelegate? {
@@ -665,7 +671,8 @@ class FeatureFlagManager: MixpanelFlags {
                     flagName: flagName,
                     variant: foundVariant,
                     timeLastFetched: capturedTimeLastFetched,
-                    fetchLatencyMs: capturedFetchLatencyMs
+                    fetchLatencyMs: capturedFetchLatencyMs,
+                    isOpenFeatureProvider: fallback.key == openFeatureProviderFallbackKey
                 )
             }
             return foundVariant
@@ -1369,7 +1376,8 @@ class FeatureFlagManager: MixpanelFlags {
         flagName: String,
         variant: MixpanelFlagVariant,
         timeLastFetched: Date? = nil,
-        fetchLatencyMs: Int? = nil
+        fetchLatencyMs: Int? = nil,
+        isOpenFeatureProvider: Bool = false
     ) {
         guard let delegate = self.delegate else { return }
 
@@ -1395,6 +1403,9 @@ class FeatureFlagManager: MixpanelFlags {
         }
         if let isQATester = variant.isQATester {
             properties["$is_qa_tester"] = isQATester
+        }
+        if isOpenFeatureProvider {
+            properties["$openfeature_provider"] = true
         }
 
         // Source tracking properties. `$variant_source` is sent for every served variant

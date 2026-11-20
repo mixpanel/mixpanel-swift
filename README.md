@@ -39,7 +39,7 @@ We'd also love for you to come and work with us! Check out **[Jobs](https://mixp
 
 If you are using Objective-C, we recommend using our **[Objective-C Library](https://github.com/mixpanel/mixpanel-iphone)**.
 
-Check out our [Advanced iOS Swift Guide](https://developer.mixpanel.com/docs/swift) for additional advanced configurations and use cases, like setting up your project with European Union data storage.
+Check out our [Advanced iOS Swift Guide](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift) for additional advanced configurations and use cases, like setting up your project with European Union data storage.
 
 ---
 
@@ -121,23 +121,43 @@ Our master branch and our releases are on Swift 5. If you wish to use our Swift 
 ## 1. Install Mixpanel
 You will need your project token for initializing your library. You can get your project token from [project settings](https://mixpanel.com/settings/project).
 
-### Installation Option 1: Swift Package Manager (v2.8.0+)
-The easiest way to get Mixpanel into your iOS project is to use Swift Package Manager.
+### Installation Option 1: Swift Package Manager (recommended)
+Swift Package Manager is the recommended way to add Mixpanel to your project.
 1. In Xcode, select File > Add Packages...
 2. Enter the package URL for this repository [Mixpanel Swift library](https://github.com/mixpanel/mixpanel-swift).
 
-### Installation Option 2: CocoaPods
-1. If this is your first time using CocoaPods, Install CocoaPods using `gem install cocoapods`. Otherwise, continue to Step 3.
-2. Run `pod setup` to create a local CocoaPods spec mirror.
-3. Create a Podfile in your Xcode project directory by running `pod init` in your terminal, edit the Podfile generated, and add the following line: `pod 'Mixpanel-swift'`.
-4. Run `pod install` in your Xcode project directory. CocoaPods should download and install the Mixpanel library, and create a new Xcode workspace. Open up this workspace in Xcode or typing `open *.xcworkspace` in your terminal.
+Or add it to the dependencies in your `Package.swift`:
+```swift
+.package(url: "https://github.com/mixpanel/mixpanel-swift.git", from: "7.0.0")
+```
 
-### Installation Option 3: Carthage
+### Installation Option 2: Carthage
 Mixpanel supports Carthage to package your dependencies as a framework. Include the following dependency in your Cartfile:
 ```swift
 github "mixpanel/mixpanel-swift"
 ```
 Check out the [Carthage docs](https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos) for more info.
+
+### Installation Option 3: CocoaPods (deprecated)
+> [!WARNING]
+> CocoaPods support is deprecated. We recommend migrating to Swift Package Manager.
+>
+> - **December 2, 2026:** CocoaPods trunk becomes read-only. Versions already published there keep installing with `pod 'Mixpanel-swift'`, but new versions are not published to trunk.
+> - **Until removal:** install newer versions directly from GitHub. Replace `X.Y.Z` with the [release](https://github.com/mixpanel/mixpanel-swift/releases) you want:
+>   ```ruby
+>   pod 'Mixpanel-swift', :git => 'https://github.com/mixpanel/mixpanel-swift.git', :tag => 'X.Y.Z'
+>   ```
+>   If `pod install` can't find a version of a Mixpanel dependency, such as `MixpanelSwiftCommon`, add that dependency from GitHub the same way:
+>   ```ruby
+>   pod 'MixpanelSwiftCommon', :git => 'https://github.com/mixpanel/mixpanel-swift-common.git', :tag => 'X.Y.Z'
+>   ```
+> - **After November 2027:** CocoaPods support will be removed in a future major version of the SDK.
+
+If your project already uses CocoaPods:
+1. Add `pod 'Mixpanel-swift'` to your Podfile (or the `:git` line above for versions after the trunk freeze).
+2. Run `pod install` in your Xcode project directory.
+
+New to CocoaPods? Use [Swift Package Manager](#installation-option-1-swift-package-manager-recommended) instead.
 
 ### Supported Platforms
 
@@ -165,7 +185,7 @@ Mixpanel.mainInstance().track(event: "Sign Up", properties: [
    "Opted out of email": true
 ])
 ```
-In addition to event data, you can also send [user profile data](https://developer.mixpanel.com/docs/swift#storing-user-profiles). We recommend this after completing the quickstart guide.
+In addition to event data, you can also send [user profile data](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#storing-user-profiles). We recommend this after completing the quickstart guide.
 
 ## 4. Check for Success
 [Open up Events in Mixpanel](http://mixpanel.com/report/events) to view incoming events. 
@@ -198,7 +218,7 @@ Yes, in Lexicon, you can intercept and drop incoming events or properties. Mixpa
 
 **I have a test user I would like to opt out of tracking. How do I do that?**
 
-Mixpanel’s client-side tracking library contains the [optOutTracking()](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14optOutTrackingyyF) method, which will set the user’s local opt-out state to “true” and will prevent data from being sent from a user’s device. More detailed instructions can be found in the section, [Opting users out of tracking](https://developer.mixpanel.com/docs/swift#opting-users-out-of-tracking).
+Mixpanel’s client-side tracking library contains the [optOutTracking()](https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14optOutTrackingyyF) method, which will set the user’s local opt-out state to “true” and will prevent data from being sent from a user’s device. More detailed instructions can be found in the section, [Opting users out of tracking](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#opt-out-of-tracking).
 
 **Why aren't my events showing up?**
 
@@ -222,7 +242,7 @@ Please refer to our [Apple App Developer Privacy Guidance](https://mixpanel.com/
 ## I want to know more!
 
 No worries, here are some links that you will find useful:
-* **[Advanced iOS - Swift Guide](https://developer.mixpanel.com/docs/swift)**
+* **[Advanced iOS - Swift Guide](https://docs.mixpanel.com/docs/tracking-methods/sdks/swift)**
 * **[Sample app](https://github.com/mixpanel/mixpanel-swift/tree/master/MixpanelDemo)**
 * **[Full API Reference](https://mixpanel.github.io/mixpanel-swift)**
 

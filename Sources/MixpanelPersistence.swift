@@ -391,6 +391,8 @@ class MixpanelPersistence {
                 forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)"))
     }
 
+    /// Clears the identity, super properties, timed events and flag cache stored by `reset()`.
+    /// The opt-out status is not cleared.
     static func deleteMPUserDefaultsData(instanceName: String) {
         guard let defaults = UserDefaults(suiteName: MixpanelUserDefaultsKeys.suiteName) else {
             return
@@ -402,7 +404,6 @@ class MixpanelPersistence {
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.userID)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.alias)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.hadPersistedDistinctId)")
-        defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.optOutStatus)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.timedEvents)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.superProperties)")
         defaults.removeObject(forKey: "\(prefix)\(MixpanelUserDefaultsKeys.flagsPersistence)")

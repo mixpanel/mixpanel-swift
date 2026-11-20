@@ -1064,16 +1064,6 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(groups(mixpanel).count, 1)
     }
 
-    func testRemoveGroupClearsListStoredBeforeHierarchicalGroups() {
-        let mixpanel = newApi(true)
-        identify(mixpanel, "user_123", "acme")
-        mixpanel.registerSuperProperties(["team": ["finance"]])
-        mixpanel.removeGroup(groupKey: "team", groupID: "finance")
-        mixpanel.track(event: "Viewed Report")
-
-        XCTAssertNil(lastEventProperties(mixpanel, "Viewed Report")["team"])
-    }
-
     func testRemoveGroupThenIdentifyClearsThePreviousUser() {
         let mixpanel = newApi(true)
         identify(mixpanel, "user_123", "acme")

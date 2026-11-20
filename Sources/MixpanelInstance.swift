@@ -2303,13 +2303,8 @@ extension MixpanelInstance {
             // Read the identity now, so an identify called after this cannot move the update to
             // another user
             let identity = self.identity
-            // A one-item list, stored by an earlier version or before hierarchical groups was
-            // enabled, counts as that item.
-            var current = superProperties[groupKey]
-            if let list = current as? [MixpanelType], list.count == 1 {
-                current = list[0]
-            }
-            guard let value = current as? MixpanelType, value.equals(rhs: groupID) else {
+            guard let value = superProperties[groupKey] as? MixpanelType, value.equals(rhs: groupID)
+            else {
                 return
             }
             superProperties.removeValue(forKey: groupKey)

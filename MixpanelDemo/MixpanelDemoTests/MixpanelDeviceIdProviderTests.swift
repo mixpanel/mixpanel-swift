@@ -211,6 +211,49 @@ class MixpanelDeviceIdProviderTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
+    /// A provider that reads the instance's distinctId must not deadlock reset() or
+    /// optOutTracking(): the provider runs outside the instance's lock.
+    func testProviderReadingDistinctIdDoesNotDeadlock() {
+        weak var instance: MixpanelInstance?
+        var readDistinctIds: [String] = []
+        let options = MixpanelOptions(
+            token: randomId(),
+            trackAutomaticEvents: false,
+            deviceIdProvider: {
+                if let instance = instance {
+                    readDistinctIds.append(instance.distinctId)
+                }
+                return "reentrant-device-\(readDistinctIds.count)"
+            }
+        )
+
+        let testMixpanel = Mixpanel.initialize(options: options)
+        instance = testMixpanel
+        waitForTrackingQueue(testMixpanel)
+
+        let resetDone = expectation(description: "reset completes")
+        testMixpanel.reset { resetDone.fulfill() }
+        guard XCTWaiter.wait(for: [resetDone], timeout: 10) == .completed else {
+            XCTFail("reset() deadlocked when the deviceIdProvider read distinctId")
+            return
+        }
+        XCTAssertEqual(readDistinctIds.count, 1, "Provider should be called once on reset")
+        XCTAssertEqual(testMixpanel.anonymousId, "reentrant-device-1")
+        XCTAssertEqual(testMixpanel.distinctId, "$device:reentrant-device-1")
+
+        testMixpanel.optOutTracking()
+        let optOutDone = expectation(description: "optOutTracking completes")
+        testMixpanel.trackingQueue.async { optOutDone.fulfill() }
+        guard XCTWaiter.wait(for: [optOutDone], timeout: 10) == .completed else {
+            XCTFail("optOutTracking() deadlocked when the deviceIdProvider read distinctId")
+            return
+        }
+        XCTAssertEqual(readDistinctIds.count, 2, "Provider should be called once on optOutTracking")
+        XCTAssertEqual(testMixpanel.anonymousId, "reentrant-device-2")
+
+        removeDBfile(testMixpanel.apiToken)
+    }
+
     // MARK: - Test Group 4: Migration/Warning Behavior
 
     /// Test 4.1: Verify warning is logged when provider replaces existing ID

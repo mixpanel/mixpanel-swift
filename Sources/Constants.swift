@@ -31,6 +31,12 @@ struct GzipSettings {
     static let gzipHeaderOffset = Int32(16)
 }
 
+/// The user id property, and the group key of the user profile, on a hierarchical groups project.
+let userIdKey = "$user_id"
+/// The company id property, and the group key of the company profile, on a hierarchical groups
+/// project.
+let companyIdKey = "$company_id"
+
 #if !os(OSX) && !os(watchOS) && !os(visionOS)
 extension UIDevice {
     var iPhoneX: Bool {

@@ -227,6 +227,14 @@ public protocol MixpanelFlagDelegate: AnyObject {
     func getDistinctId() -> String
     func getAnonymousId() -> String?
     func track(event: String?, properties: Properties?)
+    /// The identified user and, on a hierarchical groups project, their company.
+    var identity: MixpanelIdentity { get }
+}
+
+extension MixpanelFlagDelegate {
+    /// Defaults to no identified user, so conformers written before hierarchical groups still
+    /// compile.
+    public var identity: MixpanelIdentity { MixpanelIdentity(userId: nil) }
 }
 
 /// A protocol defining the public interface for a feature flagging system.
@@ -422,6 +430,36 @@ class FeatureFlagManager: MixpanelFlags {
                 }
             }
         }
+    }
+
+    /// Who a flag request is for, written into its context or payload.
+    enum FlagRequestIdentity {
+        /// A non-hierarchical groups project, or one whose user and company aren't both identified.
+        case distinctId(String)
+        /// A hierarchical groups project with both the user and company identified.
+        case hierarchicalGroups(userId: String, companyId: String)
+
+        /// Writes the identity keys. On hierarchical groups the user is `$user_id` and
+        /// `$company_id`, so any `distinct_id` is removed.
+        func apply(to body: inout [String: Any]) {
+            switch self {
+                case .distinctId(let distinctId):
+                    body["distinct_id"] = distinctId
+                case .hierarchicalGroups(let userId, let companyId):
+                    body.removeValue(forKey: "distinct_id")
+                    body[userIdKey] = userId
+                    body[companyIdKey] = companyId
+            }
+        }
+    }
+
+    /// The delegate's distinct id. For a MixpanelInstance this skips the warning its `distinctId`
+    /// logs on a hierarchical groups project, since the app didn't ask for it.
+    static func distinctId(of delegate: MixpanelFlagDelegate) -> String {
+        if let instance = delegate as? MixpanelInstance {
+            return instance.resolvedDistinctId()
+        }
+        return delegate.getDistinctId()
     }
 
     var serverURL: String!
@@ -924,15 +962,17 @@ class FeatureFlagManager: MixpanelFlags {
             return
         }
 
-        let distinctId = delegate.getDistinctId()
+        let distinctId = Self.distinctId(of: delegate)
         let anonymousId = delegate.getAnonymousId()
+        let requestIdentity = Self.requestIdentity(
+            delegate: delegate, options: options, distinctId: distinctId)
         MixpanelLogger.debug(message: "Fetching flags for distinct ID: \(distinctId)")
 
         var context: [String: Any] = [:]
         flagsLock.read {
             context = self.flagContext
         }
-        context["distinct_id"] = distinctId
+        requestIdentity.apply(to: &context)
         if let anonymousId = anonymousId {
             context["device_id"] = anonymousId
         }
@@ -1119,7 +1159,7 @@ class FeatureFlagManager: MixpanelFlags {
         // This is a parallel of the active "distinctId changes" paths (identify/reset/optOut)
         // applied to the cross-session case where the change happened while the app was killed.
         let delegate = self.delegate
-        let currentDistinctId = delegate?.getDistinctId() ?? ""
+        let currentDistinctId = delegate.map(Self.distinctId(of:)) ?? ""
         if blob.distinctId != currentDistinctId {
             MixpanelLogger.debug(message: "Persisted flags belong to a different distinct_id; clearing.")
             MixpanelPersistence.deleteFlagsPersistence(instanceName: self.instanceName)
@@ -1569,7 +1609,9 @@ class FeatureFlagManager: MixpanelFlags {
                     return
                 }
 
-                let distinctId = delegate.getDistinctId()
+                let requestIdentity = Self.requestIdentity(
+                    delegate: delegate, options: currentOptions,
+                    distinctId: Self.distinctId(of: delegate))
 
                 DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                     // Record to backend (fire-and-forget)
@@ -1577,15 +1619,30 @@ class FeatureFlagManager: MixpanelFlags {
                         flagId: pendingEvent.flagId,
                         projectId: pendingEvent.projectId,
                         firstTimeEventHash: pendingEvent.firstTimeEventHash,
-                        distinctId: distinctId
+                        identity: requestIdentity
                     )
                 }
             }
         }
     }
 
+    /// Who a flag request is for: the user and company on a hierarchical groups project once both
+    /// are identified, otherwise the distinct id, so the request is unchanged.
+    static func requestIdentity(
+        delegate: MixpanelFlagDelegate, options: MixpanelOptions?, distinctId: String
+    ) -> FlagRequestIdentity {
+        if options?.hierarchicalGroups == true, let userId = delegate.identity.userId,
+            let companyId = delegate.identity.companyId
+        {
+            return .hierarchicalGroups(userId: userId, companyId: companyId)
+        }
+        return .distinctId(distinctId)
+    }
+
     /// Records a first-time event activation to the backend
-    internal func recordFirstTimeEvent(flagId: String, projectId: Int, firstTimeEventHash: String, distinctId: String) {
+    internal func recordFirstTimeEvent(
+        flagId: String, projectId: Int, firstTimeEventHash: String, identity: FlagRequestIdentity
+    ) {
         let url = "/flags/\(flagId)/first-time-events"
 
         let queryItems = [
@@ -1593,11 +1650,11 @@ class FeatureFlagManager: MixpanelFlags {
             URLQueryItem(name: "$lib_version", value: AutomaticProperties.libVersion()),
         ]
 
-        let payload: [String: Any] = [
-            "distinct_id": distinctId,
+        var payload: [String: Any] = [
             "project_id": projectId,
             "first_time_event_hash": firstTimeEventHash,
         ]
+        identity.apply(to: &payload)
 
         guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
             let options = currentOptions

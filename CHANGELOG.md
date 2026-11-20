@@ -5,6 +5,10 @@ Last tag: 7.1.0
 
 - tag OpenFeature exposures with $openfeature_provider (SDK-448) (#799) ([#799](https://github.com/mixpanel/mixpanel-swift/pull/799))
 
+### Chores
+
+- deprecate CocoaPods support in favor of Swift Package Manager (#802) ([#802](https://github.com/mixpanel/mixpanel-swift/pull/802))
+
 [Full Changelog](https://github.com/mixpanel/mixpanel-swift/compare/7.1.0...7.1.1)
 
 Last tag: 7.0.0

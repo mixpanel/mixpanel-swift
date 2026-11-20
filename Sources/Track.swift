@@ -120,6 +120,11 @@ class Track {
 
         p += superProperties
         if mixpanelInstance?.hierarchicalGroups ?? false {
+            // Identified events carry no distinct_id, so not one inherited from super properties
+            // either; the caller's properties may still set it
+            if storedIdentity.userId != nil && storedIdentity.companyId != nil {
+                p.removeValue(forKey: "distinct_id")
+            }
             if let properties = properties {
                 p += properties
             }

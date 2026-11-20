@@ -150,6 +150,52 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["$company_id"] as? String, "acme")
     }
 
+    func testIdentifiedEventsDropSuperPropertyDistinctId() {
+        let mixpanel = newApi(true)
+        mixpanel.registerSuperProperties(["distinct_id": "saved", "plan": "pro"])
+        identify(mixpanel, "user_123", "acme")
+        mixpanel.track(event: "Viewed Report")
+
+        var props = lastEventProperties(mixpanel, "Viewed Report")
+        XCTAssertNil(props["distinct_id"])
+        XCTAssertEqual(props["$user_id"] as? String, "user_123")
+        XCTAssertEqual(props["$company_id"] as? String, "acme")
+        XCTAssertEqual(props["plan"] as? String, "pro")
+
+        identify(mixpanel, "user_123", "globex")
+        mixpanel.track(event: "Opened")
+
+        props = lastEventProperties(mixpanel, "Opened")
+        XCTAssertNil(props["distinct_id"])
+        XCTAssertEqual(props["$company_id"] as? String, "globex")
+    }
+
+    func testIdentifiedEventsKeepCallerDistinctId() {
+        let mixpanel = newApi(true)
+        mixpanel.registerSuperProperties(["distinct_id": "saved"])
+        identify(mixpanel, "user_123", "acme")
+        mixpanel.track(event: "Viewed Report", properties: ["distinct_id": "caller"])
+
+        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["distinct_id"] as? String, "caller")
+    }
+
+    func testAnonymousEventsKeepSuperPropertyDistinctId() {
+        let mixpanel = newApi(true)
+        mixpanel.registerSuperProperties(["distinct_id": "saved"])
+        mixpanel.track(event: "Viewed Report")
+
+        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["distinct_id"] as? String, "saved")
+    }
+
+    func testDisabledSuperPropertyDistinctIdIsUnchanged() {
+        let mixpanel = newApi(false)
+        mixpanel.registerSuperProperties(["distinct_id": "saved"])
+        mixpanel.identify(distinctId: "user_123")
+        mixpanel.track(event: "Viewed Report")
+
+        XCTAssertEqual(lastEventProperties(mixpanel, "Viewed Report")["distinct_id"] as? String, "saved")
+    }
+
     func testEventPropertyCompanyIdIsReplacedByIdentifiedCompany() {
         let mixpanel = newApi(true)
         identify(mixpanel, "user_123", "acme")

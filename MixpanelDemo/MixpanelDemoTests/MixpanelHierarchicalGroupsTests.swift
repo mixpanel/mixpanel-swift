@@ -771,7 +771,7 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         var otherRows = 0
         for i in 0..<count {
             mixpanel.people.set(property: "n", to: i)
-            // Other people rows queued before identify, between the pages, stay for identifyPeople
+            // Rows the move skips, between the pages, stay queued instead of going to /engage
             if i % 25 == 0 {
                 waitForTrackingQueue(mixpanel)
                 mixpanel.mixpanelPersistence.saveEntity(
@@ -789,12 +789,66 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
             groups.map { ($0["$set"] as? InternalProperties)?["n"] as? Int }, (0..<count).map { $0 })
         XCTAssertTrue(groups.allSatisfy { $0["$group_id"] as? String == "user_123" })
         XCTAssertTrue(groups.allSatisfy { $0["$company_id"] as? String == "acme" })
-        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 0)
-        let others = peopleQueue(token: mixpanel.apiToken)
+        XCTAssertEqual(peopleQueue(token: mixpanel.apiToken).count, 0)
+        let others = unIdentifiedPeopleQueue(token: mixpanel.apiToken)
         XCTAssertEqual(others.count, otherRows)
+        XCTAssertTrue(others.allSatisfy { $0["$distinct_id"] == nil })
         XCTAssertEqual(
             others.map { ($0["$set"] as? InternalProperties)?["other"] as? Int },
             stride(from: 0, to: count, by: 25).map { $0 })
+    }
+
+    func testAutomaticSessionTotalsAreSkippedWithoutAnError() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        let logs = recordLogs()
+        mixpanel.increment(property: "$ae_total_app_sessions", by: 1)
+        mixpanel.increment(property: "$ae_total_app_session_length", by: 12.5)
+        waitForTrackingQueue(mixpanel)
+
+        XCTAssertEqual(groups(mixpanel).count, 0)
+        XCTAssertEqual(people(mixpanel).count, 0)
+        XCTAssertFalse(logs.contains(.error, "is not supported for hierarchical groups"))
+    }
+
+    func testAutomaticSessionTotalsUnchangedWhenDisabled() {
+        let mixpanel = newApi(false)
+        mixpanel.identify(distinctId: "user_123")
+        waitForTrackingQueue(mixpanel)
+        mixpanel.increment(property: "$ae_total_app_sessions", by: 1)
+        waitForTrackingQueue(mixpanel)
+
+        let adds = people(mixpanel).compactMap { $0["$add"] as? InternalProperties }
+        XCTAssertEqual(adds.count, 1)
+        XCTAssertEqual(adds.first?["$ae_total_app_sessions"] as? Double, 1)
+    }
+
+    func testIgnoreTimeIsSentOnUserProfileUpdates() {
+        let mixpanel = newApi(true)
+        identify(mixpanel, "user_123", "acme")
+        mixpanel.people.ignoreTime = true
+        mixpanel.people.set(property: "plan", to: "pro")
+        mixpanel.people.ignoreTime = false
+        mixpanel.people.set(property: "seats", to: 5)
+        waitForTrackingQueue(mixpanel)
+
+        let groups = self.groups(mixpanel)
+        XCTAssertEqual(groups.count, 2)
+        XCTAssertEqual(groups[0]["$ignore_time"] as? Int, 1)
+        XCTAssertNil(groups[1]["$ignore_time"])
+    }
+
+    func testIgnoreTimeIsKeptWhenUpdatesBeforeIdentifyMove() {
+        let mixpanel = newApi(true)
+        mixpanel.people.ignoreTime = true
+        mixpanel.people.set(property: "plan", to: "pro")
+        waitForTrackingQueue(mixpanel)
+        identify(mixpanel, "user_123", "acme")
+
+        let groups = self.groups(mixpanel)
+        XCTAssertEqual(groups.count, 1)
+        XCTAssertEqual(groups[0]["$ignore_time"] as? Int, 1)
+        XCTAssertEqual(groups[0]["$group_id"] as? String, "user_123")
     }
 
     func testUnsupportedPeopleOperationsBeforeIdentifyAreDropped() {

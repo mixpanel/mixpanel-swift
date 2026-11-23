@@ -1242,11 +1242,16 @@ extension MixpanelInstance {
                     self.people.distinctId = distinctId
                 }
                 // User profile updates made before identify go to the identified user's profile
-                if self.hierarchicalGroups, let companyId = self.companyId {
-                    self.mixpanelPersistence.identifyHierarchicalGroupsPeople(
-                        userId: distinctId, companyId: companyId)
+                // A row the move leaves behind stays queued rather than going to /engage as a
+                // legacy update
+                if self.hierarchicalGroups {
+                    if let companyId = self.companyId {
+                        self.mixpanelPersistence.identifyHierarchicalGroupsPeople(
+                            userId: distinctId, companyId: companyId)
+                    }
+                } else {
+                    self.mixpanelPersistence.identifyPeople(distinctId: distinctId)
                 }
-                self.mixpanelPersistence.identifyPeople(distinctId: distinctId)
             } else {
                 self.people.distinctId = nil
             }
@@ -2493,6 +2498,11 @@ extension MixpanelInstance {
 
     // MARK: - AEDelegate
     func increment(property: String, by: Double) {
+        // Hierarchical groups user profiles have no $add, so skip the session totals automatic
+        // events keep, rather than log an error at the end of every session
+        if hierarchicalGroups {
+            return
+        }
         people?.increment(property: property, by: by)
     }
 

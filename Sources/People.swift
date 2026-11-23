@@ -143,13 +143,14 @@ open class People {
             return
         }
         let epochMilliseconds = round(Date().timeIntervalSince1970 * 1000)
+        let ignoreTimeCopy = ignoreTime
 
         // Read the identity on the queue, after any identify called before this update
         serialQueue.async { [weak self, action, properties] in
             guard let self = self, let identity = self.mixpanelInstance?.identity else { return }
             self.saveHierarchicalGroupsRecord(
                 action, properties: properties, userId: identity.userId, companyId: identity.companyId,
-                epochMilliseconds: epochMilliseconds)
+                epochMilliseconds: epochMilliseconds, ignoreTime: ignoreTimeCopy)
         }
 
         if MixpanelInstance.isiOSAppExtension() {
@@ -165,11 +166,15 @@ open class People {
     /// `reset()` discards it.
     func saveHierarchicalGroupsRecord(
         _ action: String, properties: InternalProperties, userId: String?, companyId: String?,
-        epochMilliseconds: Double = round(Date().timeIntervalSince1970 * 1000)
+        epochMilliseconds: Double = round(Date().timeIntervalSince1970 * 1000), ignoreTime: Bool = false
     ) {
         var r = InternalProperties()
         r["$token"] = apiToken
         r["$time"] = epochMilliseconds
+        // /groups honors $ignore_time, as /engage does
+        if ignoreTime {
+            r["$ignore_time"] = 1
+        }
         if action == "$unset" {
             r[action] = properties["$properties"]
         } else {

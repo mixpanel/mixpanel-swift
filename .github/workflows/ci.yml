@@ -71,7 +71,14 @@ jobs:
       with:
         xcode-version: '27.0'
     - name: pod lib lint (Xcode 27)
-      run: pod lib lint Mixpanel-swift.podspec --allow-warnings --platforms=ios,tvos,osx,watchos
+      run: |
+        # Mixpanel dependencies that aren't on CocoaPods trunk are linted from their git tags.
+        ruby scripts/fetch-dependency-podspecs.rb Mixpanel-swift.podspec "$RUNNER_TEMP/pod-deps"
+        EXTERNAL=()
+        if compgen -G "$RUNNER_TEMP/pod-deps/*.podspec" > /dev/null; then
+          EXTERNAL=(--external-podspecs="$RUNNER_TEMP/pod-deps/*.podspec")
+        fi
+        pod lib lint Mixpanel-swift.podspec --allow-warnings --platforms=ios,tvos,osx,watchos "${EXTERNAL[@]}"
 
   carthage-build:
     name: carthage build (Xcode 27.0)

@@ -39,10 +39,6 @@ def add_tag():
     subprocess.call('git tag -a v{} -m "version {}"'.format(args.new, args.new), shell=True)
     subprocess.call('git push origin --tags', shell=True)
 
-def pushPod():
-    subprocess.call('sudo gem install cocoapods', shell=True)
-    subprocess.call('pod trunk push Mixpanel-swift.podspec --allow-warnings', shell=True)
-
 def build_Carthage():
     subprocess.call('./scripts/carthage.sh', shell=True)
 
@@ -50,7 +46,6 @@ def main():
     bump_version()
     generate_docs()
     add_tag()
-    pushPod()
     build_Carthage()
     print("Congratulations, done!")
 

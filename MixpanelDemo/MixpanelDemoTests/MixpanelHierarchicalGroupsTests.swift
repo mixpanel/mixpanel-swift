@@ -380,6 +380,35 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertEqual(mixpanel.identity.companyId, " acme ")
     }
 
+    func testIdsContainingPipeAreRefused() {
+        let mixpanel = newApi(true)
+        let anonymous = mixpanel.identity
+        let logs = recordLogs()
+        identify(mixpanel, "user|123", "acme")
+        identify(mixpanel, "user_123", "ac|me")
+
+        XCTAssertEqual(mixpanel.identity, anonymous)
+        XCTAssertNil(mixpanel.identity.companyId)
+        XCTAssertEqual(countEvents(mixpanel, "$identify"), 0)
+        XCTAssertEqual(
+            logs.count(.error, "a user or company id can't contain it. Nothing was identified."), 2)
+
+        mixpanel.optOutTracking()
+        waitForTrackingQueue(mixpanel)
+        mixpanel.optInTracking(identity: MixpanelIdentity(userId: "user|123", companyId: "acme"))
+        waitForTrackingQueue(mixpanel)
+        XCTAssertTrue(mixpanel.hasOptedOutTracking())
+        XCTAssertEqual(countEvents(mixpanel, "$opt_in"), 0)
+        XCTAssertTrue(logs.contains(.error, "a user or company id can't contain it. The user is still opted out."))
+    }
+
+    func testIdsContainingPipeAreAcceptedWhenDisabled() {
+        let mixpanel = newApi(false)
+        identify(mixpanel, "user|123")
+
+        XCTAssertEqual(mixpanel.identity.userId, "user|123")
+    }
+
     func testInvalidIdentitiesDoNothing() {
         let mixpanel = newApi(true)
         let anonymous = mixpanel.identity

@@ -1620,8 +1620,9 @@ class FeatureFlagManager: MixpanelFlags {
     static func requestIdentity(
         delegate: MixpanelFlagDelegate, options: MixpanelOptions?, distinctId: String
     ) -> FlagRequestIdentity {
-        if options?.hierarchicalGroups == true, let userId = delegate.identity.userId,
-            let companyId = delegate.identity.companyId
+        let identity = delegate.identity
+        if options?.hierarchicalGroups == true, let userId = identity.userId,
+            let companyId = identity.companyId
         {
             return .hierarchicalGroups(userId: userId, companyId: companyId)
         }

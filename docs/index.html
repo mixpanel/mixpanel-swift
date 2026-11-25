@@ -16,7 +16,7 @@
     <a title="Mixpanel  Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="index.html">Mixpanel 7.1.0 Docs</a> (73% documented)</p>
+        <p><a href="index.html">Mixpanel 7.1.1 Docs</a> (73% documented)</p>
         <p class="header-right"><a href="https://github.com/mixpanel/mixpanel-swift"><img src="img/gh.png" alt="GitHub"/>View on GitHub</a></p>
         <div class="header-right">
           <form role="search" action="search.json">
@@ -246,7 +246,7 @@ We&rsquo;d also love for you to come and work with us! Check out <strong><a href
 
 <p>If you are using Objective-C, we recommend using our <strong><a href="https://github.com/mixpanel/mixpanel-iphone">Objective-C Library</a></strong>.</p>
 
-<p>Check out our <a href="https://developer.mixpanel.com/docs/swift">Advanced iOS Swift Guide</a> for additional advanced configurations and use cases, like setting up your project with European Union data storage.</p>
+<p>Check out our <a href="https://docs.mixpanel.com/docs/tracking-methods/sdks/swift">Advanced iOS Swift Guide</a> for additional advanced configurations and use cases, like setting up your project with European Union data storage.</p>
 
 <hr>
 <h1 id='sdk-development' class='heading'>SDK Development</h1>
@@ -314,29 +314,53 @@ Run the formatter and re-stage:
 <h2 id='1-install-mixpanel' class='heading'>1. Install Mixpanel</h2>
 
 <p>You will need your project token for initializing your library. You can get your project token from <a href="https://mixpanel.com/settings/project">project settings</a>.</p>
-<h3 id='installation-option-1-swift-package-manager-v2-8-0' class='heading'>Installation Option 1: Swift Package Manager (v2.8.0+)</h3>
+<h3 id='installation-option-1-swift-package-manager-recommended' class='heading'>Installation Option 1: Swift Package Manager (recommended)</h3>
 
-<p>The easiest way to get Mixpanel into your iOS project is to use Swift Package Manager.</p>
+<p>Swift Package Manager is the recommended way to add Mixpanel to your project.</p>
 
 <ol>
 <li>In Xcode, select File &gt; Add Packages&hellip;</li>
 <li>Enter the package URL for this repository <a href="https://github.com/mixpanel/mixpanel-swift">Mixpanel Swift library</a>.</li>
 </ol>
-<h3 id='installation-option-2-cocoapods' class='heading'>Installation Option 2: CocoaPods</h3>
 
-<ol>
-<li>If this is your first time using CocoaPods, Install CocoaPods using <code>gem install cocoapods</code>. Otherwise, continue to Step 3.</li>
-<li>Run <code>pod setup</code> to create a local CocoaPods spec mirror.</li>
-<li>Create a Podfile in your Xcode project directory by running <code>pod init</code> in your terminal, edit the Podfile generated, and add the following line: <code>pod &#39;Mixpanel-swift&#39;</code>.</li>
-<li>Run <code>pod install</code> in your Xcode project directory. CocoaPods should download and install the Mixpanel library, and create a new Xcode workspace. Open up this workspace in Xcode or typing <code>open *.xcworkspace</code> in your terminal.</li>
-</ol>
-<h3 id='installation-option-3-carthage' class='heading'>Installation Option 3: Carthage</h3>
+<p>Or add it to the dependencies in your <code>Package.swift</code>:</p>
+<pre class="highlight swift"><code><span class="o">.</span><span class="nf">package</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/mixpanel/mixpanel-swift.git"</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="s">"7.0.0"</span><span class="p">)</span>
+</code></pre>
+<h3 id='installation-option-2-carthage' class='heading'>Installation Option 2: Carthage</h3>
 
 <p>Mixpanel supports Carthage to package your dependencies as a framework. Include the following dependency in your Cartfile:</p>
 <pre class="highlight swift"><code><span class="n">github</span> <span class="s">"mixpanel/mixpanel-swift"</span>
 </code></pre>
 
 <p>Check out the <a href="https://github.com/Carthage/Carthage#if-youre-building-for-ios-tvos-or-watchos">Carthage docs</a> for more info.</p>
+<h3 id='installation-option-3-cocoapods-deprecated' class='heading'>Installation Option 3: CocoaPods (deprecated)</h3>
+
+<blockquote>
+<p>[!WARNING]
+CocoaPods support is deprecated. We recommend migrating to Swift Package Manager.</p>
+
+<ul>
+<li><strong>December 2, 2026:</strong> CocoaPods trunk becomes read-only. Versions already published there keep installing with <code>pod &#39;Mixpanel-swift&#39;</code>, but new versions are not published to trunk.</li>
+<li><strong>Until removal:</strong> install newer versions directly from GitHub. Replace <code>X.Y.Z</code> with the <a href="https://github.com/mixpanel/mixpanel-swift/releases">release</a> you want:
+<code>ruby
+pod &#39;Mixpanel-swift&#39;, :git =&gt; &#39;https://github.com/mixpanel/mixpanel-swift.git&#39;, :tag =&gt; &#39;X.Y.Z&#39;
+</code>
+If <code>pod install</code> can&rsquo;t find a version of a Mixpanel dependency, such as <code>MixpanelSwiftCommon</code>, add that dependency from GitHub the same way:
+<code>ruby
+pod &#39;MixpanelSwiftCommon&#39;, :git =&gt; &#39;https://github.com/mixpanel/mixpanel-swift-common.git&#39;, :tag =&gt; &#39;X.Y.Z&#39;
+</code></li>
+<li><strong>After November 2027:</strong> CocoaPods support will be removed in a future major version of the SDK.</li>
+</ul>
+</blockquote>
+
+<p>If your project already uses CocoaPods:</p>
+
+<ol>
+<li>Add <code>pod &#39;Mixpanel-swift&#39;</code> to your Podfile (or the <code>:git</code> line above for versions after the trunk freeze).</li>
+<li>Run <code>pod install</code> in your Xcode project directory.</li>
+</ol>
+
+<p>New to CocoaPods? Use <a href="#installation-option-1-swift-package-manager-recommended">Swift Package Manager</a> instead.</p>
 <h3 id='supported-platforms' class='heading'>Supported Platforms</h3>
 
 <p>As of SDK version 7.0.0, the minimum supported versions are iOS 15, tvOS 15, macOS 12 and watchOS 9, matching the minimum deployment target of Xcode 27. Need an older OS? Stay on the 6.x releases (<code>maintenance/6.x</code>) with Xcode 26. We add support for each new Xcode&rsquo;s floor promptly after its release and drop the old floor only when Apple&rsquo;s App Store SDK deadline requires it. 6.x receives security and critical fixes until April 2027.</p>
@@ -363,7 +387,7 @@ Run the formatter and re-stage:
 <span class="p">])</span>
 </code></pre>
 
-<p>In addition to event data, you can also send <a href="https://developer.mixpanel.com/docs/swift#storing-user-profiles">user profile data</a>. We recommend this after completing the quickstart guide.</p>
+<p>In addition to event data, you can also send <a href="https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#storing-user-profiles">user profile data</a>. We recommend this after completing the quickstart guide.</p>
 <h2 id='4-check-for-success' class='heading'>4. Check for Success</h2>
 
 <p><a href="http://mixpanel.com/report/events">Open up Events in Mixpanel</a> to view incoming events. </p>
@@ -395,7 +419,7 @@ Run the formatter and re-stage:
 
 <p><strong>I have a test user I would like to opt out of tracking. How do I do that?</strong></p>
 
-<p>Mixpanel’s client-side tracking library contains the <a href="https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14optOutTrackingyyF">optOutTracking()</a> method, which will set the user’s local opt-out state to “true” and will prevent data from being sent from a user’s device. More detailed instructions can be found in the section, <a href="https://developer.mixpanel.com/docs/swift#opting-users-out-of-tracking">Opting users out of tracking</a>.</p>
+<p>Mixpanel’s client-side tracking library contains the <a href="https://mixpanel.github.io/mixpanel-swift/Classes/MixpanelInstance.html#/s:8Mixpanel0A8InstanceC14optOutTrackingyyF">optOutTracking()</a> method, which will set the user’s local opt-out state to “true” and will prevent data from being sent from a user’s device. More detailed instructions can be found in the section, <a href="https://docs.mixpanel.com/docs/tracking-methods/sdks/swift#opt-out-of-tracking">Opting users out of tracking</a>.</p>
 
 <p><strong>Why aren&rsquo;t my events showing up?</strong></p>
 
@@ -419,7 +443,7 @@ Run the formatter and re-stage:
 <p>No worries, here are some links that you will find useful:</p>
 
 <ul>
-<li><strong><a href="https://developer.mixpanel.com/docs/swift">Advanced iOS - Swift Guide</a></strong></li>
+<li><strong><a href="https://docs.mixpanel.com/docs/tracking-methods/sdks/swift">Advanced iOS - Swift Guide</a></strong></li>
 <li><strong><a href="https://github.com/mixpanel/mixpanel-swift/tree/master/MixpanelDemo">Sample app</a></strong></li>
 <li><strong><a href="https://mixpanel.github.io/mixpanel-swift">Full API Reference</a></strong></li>
 </ul>
@@ -431,7 +455,7 @@ Run the formatter and re-stage:
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-10-30)</p>
+          <p>&copy; 2026 <a class="link" href="http://mixpanel.com" target="_blank" rel="external noopener">Mixpanel</a>. All rights reserved. (Last updated: 2026-11-20)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.5</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

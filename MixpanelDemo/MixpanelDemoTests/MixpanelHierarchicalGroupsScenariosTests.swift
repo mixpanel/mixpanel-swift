@@ -627,6 +627,24 @@ class MixpanelHierarchicalGroupsScenariosTests: MixpanelBaseTests {
         XCTAssertFalse(mixpanel.hasOptedOutTracking())
     }
 
+    // MARK: - Opt Out Discards Updates Queued Before Identify
+
+    // As reset() does: a user profile update queued before identify must not go to whichever
+    // user and company opt in next
+    func testOptOutDiscardsUserPropertiesQueuedBeforeIdentify() {
+        mixpanel.people.set(property: "plan", to: "enterprise")
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 1)
+
+        mixpanel.optOutTracking()
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 0)
+
+        mixpanel.optInTracking(identity: MixpanelIdentity(userId: userId, companyId: companyId))
+        // Only $opt_in; the queued $set is gone
+        assertIdentified(onlyEvent("$opt_in"))
+    }
+
     // MARK: - Opt In With Identity
 
     func testOptInWithIdentity() {

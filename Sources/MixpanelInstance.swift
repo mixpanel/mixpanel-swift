@@ -2337,6 +2337,9 @@ extension MixpanelInstance {
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
             if self.hierarchicalGroups {
+                // As reset() does, drop profile updates queued before identify: they would
+                // otherwise go to whichever user and company identify next.
+                self.mixpanelPersistence.removeUnidentifiedPeople()
                 // Delete the user profile while the identity is still known. Never delete the
                 // company or team group profiles, which other users share.
                 let identity = self.identity

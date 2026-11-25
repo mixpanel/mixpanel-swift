@@ -632,7 +632,7 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         XCTAssertNil(mixpanel.identity.companyId)
     }
 
-    func testOptOutBeforeIdentifyKeepsQueuedPeopleUpdates() {
+    func testOptOutBeforeIdentifyDropsQueuedPeopleUpdates() {
         let mixpanel = newApi(true)
         mixpanel.people.set(property: "plan", to: "pro")
         waitForTrackingQueue(mixpanel)
@@ -641,19 +641,26 @@ class MixpanelHierarchicalGroupsTests: MixpanelBaseTests {
         mixpanel.optOutTracking()
         mixpanel.optInTracking()
         waitForTrackingQueue(mixpanel)
-        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 1)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 0)
         identify(mixpanel, "user_1", "acme")
 
-        // Documents current behaviour, which matches master: opting out doesn't drop people updates
-        // queued before identify (only reset does), so the update made before the opt-out is sent
-        // to the user identified after opting back in.
+        // On hierarchical groups, opting out drops people updates queued before identify, as
+        // reset() does, so nothing from before the opt-out reaches the user identified after it.
         XCTAssertEqual(people(mixpanel).count, 0)
-        let groups = self.groups(mixpanel)
-        XCTAssertEqual(groups.count, 1)
-        XCTAssertEqual((groups.first?["$set"] as? InternalProperties)?["plan"] as? String, "pro")
-        XCTAssertEqual(groups.first?["$group_key"] as? String, "$user_id")
-        XCTAssertEqual(groups.first?["$group_id"] as? String, "user_1")
-        XCTAssertEqual(groups.first?["$company_id"] as? String, "acme")
+        XCTAssertEqual(groups(mixpanel).count, 0)
+    }
+
+    func testOptOutBeforeIdentifyKeepsQueuedPeopleUpdatesWhenDisabled() {
+        let mixpanel = newApi(false)
+        mixpanel.people.set(property: "plan", to: "pro")
+        waitForTrackingQueue(mixpanel)
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 1)
+
+        mixpanel.optOutTracking()
+        mixpanel.optInTracking()
+        waitForTrackingQueue(mixpanel)
+        // Without hierarchical groups, opt-out keeps them, as on master
+        XCTAssertEqual(unIdentifiedPeopleQueue(token: mixpanel.apiToken).count, 1)
     }
 
     // MARK: - Disabled: behaves exactly as before

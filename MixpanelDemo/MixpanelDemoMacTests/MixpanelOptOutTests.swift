@@ -428,7 +428,7 @@ class MixpanelOptOutTests: MixpanelBaseTests {
         removeDBfile(testMixpanel)
     }
 
-    // MARK: - SDK-306
+    // MARK: - SDK-306 / SDK-288
 
     func testOptOutSendsDeleteForIdentifiedUser() {
         OptOutRecordingURLProtocol.reset()
@@ -530,5 +530,45 @@ class MixpanelOptOutTests: MixpanelBaseTests {
             peopleQueue(token: testMixpanel.apiToken).contains { $0["$delete"] != nil },
             "A stale $delete must not be attached to the user who opts in")
         removeDBfile(testMixpanel.apiToken)
+    }
+
+    func testResetKeepsOptInStatusAcrossRelaunch() {
+        let token = randomId()
+        var testMixpanel = Mixpanel.initialize(
+            token: token, optOutTrackingByDefault: true)
+        testMixpanel.optInTracking()
+        testMixpanel.reset()
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertFalse(testMixpanel.hasOptedOutTracking())
+        XCTAssertEqual(MixpanelPersistence.loadOptOutStatusFlag(instanceName: token), false)
+
+        // Simulate an app relaunch.
+        Mixpanel.removeInstance(name: token)
+        testMixpanel = Mixpanel.initialize(
+            token: token, optOutTrackingByDefault: true)
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertFalse(
+            testMixpanel.hasOptedOutTracking(),
+            "A user who opted in must stay opted in after reset() and a relaunch")
+        removeDBfile(token)
+    }
+
+    func testResetKeepsOptOutStatusAcrossRelaunch() {
+        let token = randomId()
+        var testMixpanel = Mixpanel.initialize(token: token)
+        testMixpanel.optOutTracking()
+        testMixpanel.reset()
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(testMixpanel.hasOptedOutTracking())
+        XCTAssertEqual(MixpanelPersistence.loadOptOutStatusFlag(instanceName: token), true)
+
+        // Simulate an app relaunch.
+        Mixpanel.removeInstance(name: token)
+        testMixpanel = Mixpanel.initialize(token: token)
+        waitForTrackingQueue(testMixpanel)
+        XCTAssertTrue(
+            testMixpanel.hasOptedOutTracking(),
+            "A user who opted out must stay opted out after reset() and a relaunch")
+        removeDBfile(token)
     }
 }

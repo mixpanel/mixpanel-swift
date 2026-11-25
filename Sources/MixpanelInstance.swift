@@ -1160,6 +1160,8 @@ extension MixpanelInstance {
        under the identity they were tracked with. People updates queued before `identify()` are
        discarded.
 
+       The opt-in/opt-out status set with `optInTracking()` or `optOutTracking()` is kept.
+
        - parameter completion: an optional completion handler for when the reset has completed.
        */
     public func reset(completion: (() -> Void)? = nil) {

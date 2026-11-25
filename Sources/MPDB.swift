@@ -346,14 +346,16 @@ class MPDB {
         }
     }
 
-    /// Reads up to `numRows` decodable rows. Rows whose data can't be decoded are deleted and the
-    /// read is repeated, so they can't fill a batch and hide the readable rows behind them.
-    func readRows(_ persistenceType: PersistenceType, numRows: Int, flag: Bool = false)
+    /// Reads up to `numRows` decodable rows, after skipping the first `offset` rows. Rows whose
+    /// data can't be decoded are deleted and the read is repeated, so they can't fill a batch and
+    /// hide the readable rows behind them.
+    func readRows(_ persistenceType: PersistenceType, numRows: Int, flag: Bool = false, offset: Int = 0)
         -> [InternalProperties]
     {
         var deletedIds = Set<Int32>()
         while true {
-            let (rows, unreadableIds) = selectRows(persistenceType, numRows: numRows, flag: flag)
+            let (rows, unreadableIds) = selectRows(
+                persistenceType, numRows: numRows, flag: flag, offset: offset)
             // Stop once every row decoded, or if rows already deleted come back, meaning the delete
             // didn't take effect and re-reading would loop forever.
             if unreadableIds.isEmpty || !deletedIds.isDisjoint(with: unreadableIds) {
@@ -369,17 +371,21 @@ class MPDB {
 
     /// One read of up to `numRows` rows. Returns the decoded rows and the ids of rows that have no
     /// data or whose data isn't a JSON object.
-    private func selectRows(_ persistenceType: PersistenceType, numRows: Int, flag: Bool)
+    private func selectRows(_ persistenceType: PersistenceType, numRows: Int, flag: Bool, offset: Int)
         -> (rows: [InternalProperties], unreadableIds: [Int32])
     {
         var rows: [InternalProperties] = []
         var unreadableIds: [Int32] = []
         if let db = connection {
             let tableName = tableNameFor(persistenceType)
-            let selectString = """
+            var selectString = """
                 SELECT id, data FROM \(tableName) WHERE flag = \(flag ? 1 : 0) \
                 ORDER BY time\(numRows == Int.max ? "" : " LIMIT \(numRows)")
                 """
+            // SQLite only accepts OFFSET after a LIMIT
+            if offset > 0 {
+                selectString += numRows == Int.max ? " LIMIT -1 OFFSET \(offset)" : " OFFSET \(offset)"
+            }
             var selectStatement: OpaquePointer?
             var rowsRead: Int = 0
             if sqlite3_prepare_v2(db, selectString, -1, &selectStatement, nil) == SQLITE_OK {

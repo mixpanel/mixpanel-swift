@@ -355,6 +355,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     private var isFlushing = false
     private var hasPendingFlush = false
     private var pendingFlushCompletion: (() -> Void)?
+    private var hasPendingOptOutPeopleFlush = false
 
     var optOutStatus: Bool?
     var useUniqueDistinctId: Bool
@@ -1159,6 +1160,8 @@ extension MixpanelInstance {
        under the identity they were tracked with. People updates queued before `identify()` are
        discarded.
 
+       The opt-in/opt-out status set with `optInTracking()` or `optOutTracking()` is kept.
+
        - parameter completion: an optional completion handler for when the reset has completed.
        */
     public func reset(completion: (() -> Void)? = nil) {
@@ -1358,15 +1361,35 @@ extension MixpanelInstance {
             let pendingCompletion = pendingFlushCompletion
             pendingFlushCompletion = nil
             startFlushPass(completion: pendingCompletion)
+        } else if hasPendingOptOutPeopleFlush {
+            hasPendingOptOutPeopleFlush = false
+            flushPeopleAfterOptOut()
         }
+    }
+
+    /// Sends the people queue once although tracking is opted out, so the `$delete` that
+    /// `optOutTracking()` queued reaches Mixpanel. Events and groups stay queued, as before.
+    /// Must be called on `trackingQueue`.
+    private func flushPeopleAfterOptOut() {
+        if isFlushing {
+            hasPendingOptOutPeopleFlush = true
+            return
+        }
+        if let shouldFlush = delegate?.mixpanelWillFlush(self), !shouldFlush {
+            return
+        }
+        isFlushing = true
+        flushNextBatch([.people], ignoringOptOut: true, completion: nil)
     }
 
     /// Reads one batch of the first remaining type on `trackingQueue`, sends it on `networkQueue`,
     /// then returns to `trackingQueue` to delete what was sent and read the next batch. Deleting
     /// and reading in the same block guarantees a batch is never read twice.
     /// Must be called on `trackingQueue`.
-    private func flushNextBatch(_ types: ArraySlice<FlushType>, completion: (() -> Void)?) {
-        guard let type = types.first, !hasOptedOutTracking() else {
+    private func flushNextBatch(
+        _ types: ArraySlice<FlushType>, ignoringOptOut: Bool = false, completion: (() -> Void)?
+    ) {
+        guard let type = types.first, ignoringOptOut || !hasOptedOutTracking() else {
             finishFlushPass(completion: completion)
             return
         }
@@ -1375,7 +1398,7 @@ extension MixpanelInstance {
             type: persistenceTypeFromFlushType(type), batchSize: batchSize)
         if batch.isEmpty {
             MixpanelLogger.info(message: "No records found for \(type), moving to the next type")
-            flushNextBatch(types.dropFirst(), completion: completion)
+            flushNextBatch(types.dropFirst(), ignoringOptOut: ignoringOptOut, completion: completion)
             return
         }
         let ids: [Int32] = batch.map { ($0["id"] as? Int32) ?? 0 }
@@ -1388,7 +1411,7 @@ extension MixpanelInstance {
                 }
                 return
             }
-            let result = self.sendBatch(batch, type: type)
+            let result = self.sendBatch(batch, type: type, ignoringOptOut: ignoringOptOut)
             self.trackingQueue.async { [weak self] in
                 guard let self = self else {
                     if let completion = completion {
@@ -1401,11 +1424,13 @@ extension MixpanelInstance {
                         self.mixpanelPersistence.removeEntitiesInBatch(
                             type: self.persistenceTypeFromFlushType(type), ids: ids)
                         self.flushNextBatch(
-                            isLastBatch ? types.dropFirst() : types, completion: completion)
+                            isLastBatch ? types.dropFirst() : types, ignoringOptOut: ignoringOptOut,
+                            completion: completion)
                     case .failed:
                         // Keep the rows and try the remaining types, as before.
                         MixpanelLogger.info(message: "Flush failed for \(type), moving to the next type")
-                        self.flushNextBatch(types.dropFirst(), completion: completion)
+                        self.flushNextBatch(
+                            types.dropFirst(), ignoringOptOut: ignoringOptOut, completion: completion)
                     case .notAllowed:
                         self.finishFlushPass(completion: completion)
                 }
@@ -1425,8 +1450,8 @@ extension MixpanelInstance {
     }
 
     /// Must be called on `networkQueue`.
-    func sendBatch(_ batch: Queue, type: FlushType) -> FlushBatchResult {
-        if hasOptedOutTracking() {
+    func sendBatch(_ batch: Queue, type: FlushType, ignoringOptOut: Bool = false) -> FlushBatchResult {
+        if !ignoringOptOut && hasOptedOutTracking() {
             return .notAllowed
         }
         let proxyServerResource = proxyServerDelegate?.mixpanelResourceForProxyServer(name)
@@ -1903,14 +1928,20 @@ extension MixpanelInstance {
 
        This method is used to opt out tracking. This causes all events and people request no longer
        to be sent back to the Mixpanel server.
+
+       If the current user is identified, a `$delete` for their Mixpanel People profile is sent
+       right away. If it cannot be sent, it stays queued until tracking is opted in again.
        */
     public func optOutTracking() {
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
-            if self.people.distinctId != nil {
-                self.people.deleteUser()
-                self.people.clearCharges()
-                self.flush()
+            // Store the $delete now, under the current user, because the identity is cleared below.
+            // It is sent by flushPeopleAfterOptOut() once the opt-out flag is set. It must be the
+            // last people update for this user: a later $set would create the profile again.
+            let queuedProfileDelete = self.people.distinctId != nil
+            if queuedProfileDelete {
+                self.people.addPeopleRecordToQueueWithAction(
+                    "$delete", properties: [:], onSerialQueue: true)
             }
             self.readWriteLock.write { [weak self] in
                 guard let self = self else {
@@ -1933,6 +1964,9 @@ extension MixpanelInstance {
             }
             self.readWriteLock.read {
                 MixpanelPersistence.saveOptOutStatusFlag(value: self.optOutStatus!, instanceName: self.name)
+            }
+            if queuedProfileDelete {
+                self.flushPeopleAfterOptOut()
             }
 
             // Identity just changed (distinctId was regenerated above). Clear in-memory feature
@@ -1966,6 +2000,11 @@ extension MixpanelInstance {
     public func optInTracking(distinctId: String? = nil, properties: Properties? = nil) {
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
+            if self.hasOptedOutTracking() {
+                // Older SDK versions queued the opt-out `$delete` without a distinct id. Drop such
+                // rows so identify() can't attach them to the user who opts in.
+                self.mixpanelPersistence.removeUnidentifiedPeople()
+            }
             self.readWriteLock.write {
                 self.optOutStatus = false
             }

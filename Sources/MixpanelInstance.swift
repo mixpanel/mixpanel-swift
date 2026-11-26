@@ -640,7 +640,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #if !os(OSX) && !os(watchOS)
     private func setupListeners() {
         let notificationCenter = NotificationCenter.default
-        #if os(iOS) && !targetEnvironment(macCatalyst)
+        #if os(iOS) && !targetEnvironment(macCatalyst) && !targetEnvironment(simulator)
         setCurrentRadio()
         // Temporarily remove the ability to monitor the radio change due to a crash issue might relate to the api from Apple
         // https://openradar.appspot.com/46873673

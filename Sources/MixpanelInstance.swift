@@ -1686,9 +1686,15 @@ extension MixpanelInstance {
     public func clearSuperProperties() {
         trackingQueue.async { [weak self] in
             guard let self = self else { return }
-            self.superProperties = self.trackInstance.clearSuperProperties(self.superProperties)
-            MixpanelPersistence.saveSuperProperties(
-                superProperties: self.superProperties, instanceName: self.name)
+            let updatedSuperProperties = self.trackInstance.clearSuperProperties(
+                self.superProperties)
+            self.readWriteLock.write {
+                self.superProperties = updatedSuperProperties
+            }
+            self.readWriteLock.read {
+                MixpanelPersistence.saveSuperProperties(
+                    superProperties: self.superProperties, instanceName: self.name)
+            }
         }
     }
 

@@ -767,8 +767,7 @@ class MixpanelDemoTests: MixpanelBaseTests {
             testMixpanel.registerSuperProperties(["p\(i)": "a value too long for a small string"])
             testMixpanel.clearSuperProperties()
         }
-        // Read super properties on another thread while the tracking queue clears them, as an
-        // app calling currentSuperProperties() or archive() would.
+        // Read super properties on another thread while the tracking queue clears them.
         let reader = DispatchGroup()
         DispatchQueue.global().async(group: reader) {
             for _ in 0..<20000 {

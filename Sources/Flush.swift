@@ -129,7 +129,7 @@ class Flush: AppLifecycle {
         }
 
         #if os(iOS)
-        if !MixpanelInstance.isiOSAppExtension() {
+        if !MixpanelInstance.isiOSAppExtension {
             delegate?.updateNetworkActivityIndicator(true)
         }
         #endif  // os(iOS)
@@ -140,7 +140,7 @@ class Flush: AppLifecycle {
             headers: headers,
             queryItems: queryItems, useGzipCompression: useGzipCompression)
         #if os(iOS)
-        if !MixpanelInstance.isiOSAppExtension() {
+        if !MixpanelInstance.isiOSAppExtension {
             delegate?.updateNetworkActivityIndicator(false)
         }
         #endif  // os(iOS)

@@ -760,6 +760,26 @@ class MixpanelDemoTests: MixpanelBaseTests {
         removeDBfile(testMixpanel.apiToken)
     }
 
+    func testClearSuperPropertiesWhileReadingFromAnotherThread() {
+        let testMixpanel = Mixpanel.initialize(
+            token: randomId(), trackAutomaticEvents: true, flushInterval: 60)
+        for i in 0..<500 {
+            testMixpanel.registerSuperProperties(["p\(i)": "a value too long for a small string"])
+            testMixpanel.clearSuperProperties()
+        }
+        // Read super properties on another thread while the tracking queue clears them.
+        let reader = DispatchGroup()
+        DispatchQueue.global().async(group: reader) {
+            for _ in 0..<20000 {
+                _ = testMixpanel.currentSuperProperties()
+            }
+        }
+        waitForTrackingQueue(testMixpanel)
+        reader.wait()
+        XCTAssertTrue(testMixpanel.currentSuperProperties().isEmpty)
+        removeDBfile(testMixpanel.apiToken)
+    }
+
     func testSettingSuperPropertiesWhenInit() {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), trackAutomaticEvents: true, flushInterval: 60,

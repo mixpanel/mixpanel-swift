@@ -585,7 +585,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         if let autocaptureOpts = self.options.autocaptureOptions, autocaptureOpts.isEnabled {
             if optOutTrackingByDefault || hasOptedOutTracking() {
                 MixpanelLogger.info(message: "Autocapture disabled: tracking is opted out")
-            } else if MixpanelInstance.isiOSAppExtension() {
+            } else if MixpanelInstance.isiOSAppExtension {
                 MixpanelLogger.info(message: "Autocapture disabled in app extension")
             } else {
                 autocaptureManager = AutocaptureManager(
@@ -607,7 +607,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
 
         #if os(iOS) || os(tvOS) || os(visionOS) || os(macOS)
-        if !MixpanelInstance.isiOSAppExtension() && trackAutomaticEvents {
+        if !MixpanelInstance.isiOSAppExtension && trackAutomaticEvents {
             automaticEvents.delegate = self
             // Defer automatic events initialization to the next run loop iteration
             // to avoid interfering with SwiftUI's accent color setup when
@@ -649,7 +649,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         //                                   name: .CTRadioAccessTechnologyDidChange,
         //                                   object: nil)
         #endif  // os(iOS)
-        if !MixpanelInstance.isiOSAppExtension() {
+        if !MixpanelInstance.isiOSAppExtension {
             notificationCenter.addObserver(
                 self,
                 selector: #selector(applicationWillResignActive(_:)),
@@ -717,9 +717,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif
     }
 
-    static func isiOSAppExtension() -> Bool {
-        return Bundle.main.bundlePath.hasSuffix(".appex")
-    }
+    /// Computed once: `Bundle.main.bundlePath` can do I/O, and this is checked on
+    /// the caller's thread (often main) on every track/flush.
+    static let isiOSAppExtension: Bool = Bundle.main.bundlePath.hasSuffix(".appex")
 
     private static func warnIfStrippingLibProperties(_ excludeProperties: Set<String>) {
         if excludeProperties.contains("mp_lib") || excludeProperties.contains("$lib_version") {
@@ -1043,7 +1043,7 @@ extension MixpanelInstance {
             }
         }
 
-        if MixpanelInstance.isiOSAppExtension() {
+        if MixpanelInstance.isiOSAppExtension {
             flush()
         }
     }
@@ -1490,7 +1490,7 @@ extension MixpanelInstance {
             }
         }
 
-        if MixpanelInstance.isiOSAppExtension() {
+        if MixpanelInstance.isiOSAppExtension {
             flush()
         }
     }
@@ -1982,7 +1982,7 @@ extension MixpanelInstance {
             if self.autocaptureManager == nil,
                 let autocaptureOpts = self.options.autocaptureOptions,
                 autocaptureOpts.isEnabled,
-                !MixpanelInstance.isiOSAppExtension()
+                !MixpanelInstance.isiOSAppExtension
             {
                 let manager = AutocaptureManager(
                     options: autocaptureOpts,

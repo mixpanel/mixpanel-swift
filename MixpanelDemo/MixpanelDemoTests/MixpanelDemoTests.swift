@@ -14,6 +14,14 @@ import XCTest
 private let devicePrefix = "$device:"
 class MixpanelDemoTests: MixpanelBaseTests {
 
+    func testIsiOSAppExtensionIsCachedConstant() {
+        // The check must be a stored constant so Bundle.main.bundlePath is read once,
+        // not on every track/flush (mixpanel-swift #641).
+        let isAppExtension: Bool = MixpanelInstance.isiOSAppExtension
+        XCTAssertEqual(isAppExtension, Bundle.main.bundlePath.hasSuffix(".appex"))
+        XCTAssertFalse(isAppExtension, "Test host is an app, not an app extension")
+    }
+
     func test5XXResponse() {
         let testMixpanel = Mixpanel.initialize(
             token: randomId(), trackAutomaticEvents: true, flushInterval: 60)

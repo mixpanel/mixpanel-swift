@@ -68,7 +68,7 @@ open class Group {
             self.mixpanelPersistence.saveEntity(r, type: .groups)
         }
 
-        if MixpanelInstance.isiOSAppExtension() {
+        if MixpanelInstance.isiOSAppExtension {
             delegate?.flush(performFullFlush: false, completion: nil)
         }
     }
